@@ -1,0 +1,6 @@
+bin
+obj
+*.suo
+*.dll
+NUnitTestAdapter.csproj.user
+*.user

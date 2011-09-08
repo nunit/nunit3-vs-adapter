@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Vsix xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
+	<Identifier Id="NUnitTestAdapterInstall..7c53286e-ac4f-485f-915c-5ec5a4c47b0c">
+		<Name>NUnitTestAdapter</Name>
+		<Author>Charlie Poole</Author>
+		<Version>1.0</Version>
+		<Description xml:space="preserve">NUnit adapter for discovery and execution of tests under Visual Studio's Agile Test Window.</Description>
+		<Locale>1033</Locale>
+		<SupportedProducts>
+			<VisualStudio Version="10.0">
+				<Edition>Ultimate</Edition>
+				<Edition>Premium</Edition>
+				<Edition>Pro</Edition>
+			</VisualStudio>
+		</SupportedProducts>
+		<SupportedFrameworkRuntimeEdition MinVersion="2.0" MaxVersion="4.0" />
+	</Identifier>
+	<References />
+	<Content>
+		<MefComponent>|NUnitTestAdapter|</MefComponent>
+	</Content>
+</Vsix>
