@@ -12,7 +12,11 @@ using TestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
+#if DEV10
     public class NUnitEventListenerTests : ITestLog
+#else
+    public class NUnitEventListenerTests : ITestExecutionRecorder
+#endif
     {
         private readonly static string assemblyName = "MyAssembly.dll";
         private readonly static Uri fakeUri = new Uri(NUnitTestExecutor.ExecutorUri);
@@ -96,6 +100,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         private void FakeTestMethod() { }
 
+#if DEV10
         #region ITestLog Members
 
         public void SendTestCaseStart(TestCase testCase)
@@ -115,5 +120,41 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         #endregion
+#else
+        #region ITestExecutionRecorder
+        public bool EnableShutdownAfterTestRun
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public void RecordEnd(TestCase testCase, TestOutcome outcome)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RecordResult(TestResult testResult)
+        {
+            this.callCount++;
+            this.testResult = testResult;
+        }
+
+        public void RecordStart(TestCase testCase)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SendMessage(Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging.TestMessageLevel testMessageLevel, string message)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
+#endif
     }
 }

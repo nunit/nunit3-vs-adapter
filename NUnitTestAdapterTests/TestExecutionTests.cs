@@ -12,7 +12,11 @@ using NUnit.Tests.Assemblies;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
+#if DEV10
     public class TestExecutionTests : ITestLog
+#else
+    public class TestExecutionTests : ITestExecutionRecorder
+#endif
     {
         static readonly string mockAssemblyPath = Path.GetFullPath("mock-assembly.dll");
         static readonly IRunContext context = new MyRunContext();
@@ -91,6 +95,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.Null(testResults.Find(r => r.TestCase.DisplayName == "ExplicitlyRunTest"));
         }
 
+#if DEV10
         #region ITestLog Members
 
         void ITestLog.SendTestCaseStart(TestCase testCase)
@@ -104,6 +109,34 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         #endregion
+#else
+        public bool EnableShutdownAfterTestRun
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public void RecordEnd(TestCase testCase, TestOutcome outcome)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RecordResult(TestResult testResult)
+        {
+            testResults.Add(testResult);
+        }
+
+        public void RecordStart(TestCase testCase)
+        {
+            testCases.Add(testCase);
+        }
+#endif
 
         #region IMessageLogger Members
 
@@ -122,6 +155,28 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             {
                 get { throw new NotImplementedException(); }
             }
+
+#if !DEV10
+            public bool InIsolation
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public bool IsDataCollectionEnabled
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public bool IsImmersive
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public bool KeepAlive
+            {
+                get { throw new NotImplementedException(); }
+            }
+#endif
         }
 
         #endregion
@@ -135,6 +190,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 throw new NotImplementedException();
             }
 
+#if DEV10
             T IRunSettings.GetSettings<T>(string settingsName)
             {
                 throw new NotImplementedException();
@@ -149,6 +205,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             {
                 throw new NotImplementedException();
             }
+#else
+#endif
         }
 
         #endregion

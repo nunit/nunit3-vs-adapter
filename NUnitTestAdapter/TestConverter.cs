@@ -58,7 +58,9 @@ namespace NUnit.VisualStudio.TestAdapter
             
             string filePath = null;
             int lineNumber = 0;
+#if DEV10
             int columnNumber = 0;
+#endif
 
             if (testCase.Source != null)
             {
@@ -72,14 +74,18 @@ namespace NUnit.VisualStudio.TestAdapter
                     {
                         filePath = navigationData.FileName;
                         lineNumber = navigationData.MinLineNumber;
+#if DEV10
                         columnNumber = navigationData.MinColumnNumber;
+#endif
                     }
                 }
             }
 
             testCase.CodeFilePath = filePath;
             testCase.LineNumber = lineNumber;
+#if DEV10
             testCase.ColumnNumber = columnNumber;
+#endif
 
             return testCase;
         }

@@ -33,7 +33,11 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <param name="sources">Sources to be run.</param>
         /// <param name="runContext">Context to use when executing the tests.</param>
         /// <param param name="testLog">Test log to send results and messages through</param>
+#if DEV10
         void ITestExecutor.RunTests(IEnumerable<string> sources, IRunContext runContext, ITestLog testLog)
+#else
+        void ITestExecutor.RunTests(IEnumerable<string> sources, IRunContext runContext, ITestExecutionRecorder testLog)
+#endif
         {
             //var package = new TestPackage("", SanitizeSources(sources));
             //var listener = new NUnitEventListener(testLog, null, null);
@@ -47,7 +51,11 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
+#if DEV10
         void ITestExecutor.RunTests(IEnumerable<TestCase> selectedTests, IRunContext runContext, ITestLog testLog)
+#else
+        void ITestExecutor.RunTests(IEnumerable<TestCase> selectedTests, IRunContext runContext, ITestExecutionRecorder testLog)
+#endif
         {
             var assemblyGroups = selectedTests.GroupBy(tc => tc.Source);
 
@@ -58,7 +66,11 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
+#if DEV10
         private void RunAssembly(string assemblyName, ITestLog testLog, Dictionary<string, TestCase> testCaseMap)
+#else
+        private void RunAssembly(string assemblyName, ITestExecutionRecorder testLog, Dictionary<string, TestCase> testCaseMap)
+#endif
         {
             try
             {

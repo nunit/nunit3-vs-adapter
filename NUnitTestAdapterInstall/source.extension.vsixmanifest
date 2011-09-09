@@ -7,7 +7,7 @@
 		<Description xml:space="preserve">NUnit adapter for discovery and execution of tests under Visual Studio's Agile Test Window.</Description>
 		<Locale>1033</Locale>
 		<SupportedProducts>
-			<VisualStudio Version="10.0">
+			<VisualStudio Version="11.0">
 				<Edition>Ultimate</Edition>
 				<Edition>Premium</Edition>
 				<Edition>Pro</Edition>
@@ -17,6 +17,6 @@
 	</Identifier>
 	<References />
 	<Content>
-		<MefComponent>|NUnitTestAdapter|</MefComponent>
+                <CustomExtension Type="UnitTestExtension">NUnit.VisualStudio.TestAdapter.dll</CustomExtension>
 	</Content>
 </Vsix>
