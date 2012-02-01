@@ -79,17 +79,13 @@ namespace NUnit.VisualStudio.TestAdapter
 
 
                 var listener = new NUnitEventListener(testLog, testCaseMap, assemblyName);
+                var filter = testCaseMap != null
+                    ? new TestRunFilter(testCaseMap.Keys.ToList())
+                    : TestFilter.Empty;
 
                 try
                 {
-                    if (testCaseMap != null)
-                    {
-                        runner.Run(listener, new TestRunFilter(testCaseMap.Keys.ToList()));
-                    }
-                    else
-                    {
-                        runner.Run(listener);
-                    }
+                    runner.Run(listener, filter, false, LoggingThreshold.Off);
                 }
                 catch (NullReferenceException)
                 {

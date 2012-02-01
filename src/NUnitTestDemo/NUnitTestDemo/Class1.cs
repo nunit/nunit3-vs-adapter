@@ -15,6 +15,7 @@ namespace NUnitTestDemo
         public void TwoPlusTwo()
         {
             Assert.That(2 + 2, Is.EqualTo(4));
+            //Assert.Inconclusive("Testing");
         }
 
         [TestCase(2, 2, Result=4)]
