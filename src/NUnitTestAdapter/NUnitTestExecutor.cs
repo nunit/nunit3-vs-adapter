@@ -33,12 +33,10 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <param name="sources">Sources to be run.</param>
         /// <param name="runContext">Context to use when executing the tests.</param>
         /// <param param name="testLog">Test log to send results and messages through</param>
-#if DEV10
-        void ITestExecutor.RunTests(IEnumerable<string> sources, IRunContext runContext, ITestLog testLog)
-#else
         void ITestExecutor.RunTests(IEnumerable<string> sources, IRunContext runContext, ITestExecutionRecorder testLog)
-#endif
         {
+            System.Diagnostics.Debug.WriteLine("RunTests: Called with assembly list");
+
             //var package = new TestPackage("", SanitizeSources(sources));
             //var listener = new NUnitEventListener(testLog, null, null);
 
@@ -51,12 +49,10 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
-#if DEV10
-        void ITestExecutor.RunTests(IEnumerable<TestCase> selectedTests, IRunContext runContext, ITestLog testLog)
-#else
         void ITestExecutor.RunTests(IEnumerable<TestCase> selectedTests, IRunContext runContext, ITestExecutionRecorder testLog)
-#endif
         {
+            System.Diagnostics.Debug.WriteLine("RunTests: Called with list of TestCases");
+
             var assemblyGroups = selectedTests.GroupBy(tc => tc.Source);
 
             foreach (var assemblyGroup in assemblyGroups)
@@ -66,11 +62,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
-#if DEV10
-        private void RunAssembly(string assemblyName, ITestLog testLog, Dictionary<string, TestCase> testCaseMap)
-#else
         private void RunAssembly(string assemblyName, ITestExecutionRecorder testLog, Dictionary<string, TestCase> testCaseMap)
-#endif
         {
             try
             {
@@ -91,6 +83,10 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     // this happens during the run when CancelRun is called.
                 }
+                finally
+                {
+                    runner.Unload();
+                }
             }
             catch (System.BadImageFormatException)
             {
@@ -104,7 +100,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
         void ITestExecutor.Cancel()
         {
-            runner.CancelRun();
+            if (runner != null && runner.Running)
+                runner.CancelRun();
         }
 
         #endregion

@@ -12,11 +12,7 @@ using NUnit.Tests.Assemblies;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
-#if DEV10
-    public class TestExecutionTests : ITestLog
-#else
     public class TestExecutionTests : ITestExecutionRecorder
-#endif
     {
         static readonly string mockAssemblyPath = Path.GetFullPath("mock-assembly.dll");
         static readonly IRunContext context = new MyRunContext();
@@ -95,21 +91,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.Null(testResults.Find(r => r.TestCase.DisplayName == "ExplicitlyRunTest"));
         }
 
-#if DEV10
-        #region ITestLog Members
-
-        void ITestLog.SendTestCaseStart(TestCase testCase)
-        {
-            testCases.Add(testCase);
-        }
-
-        void ITestLog.SendTestResult(TestResult testResult)
-        {
-            testResults.Add(testResult);
-        }
-
-        #endregion
-#else
         public bool EnableShutdownAfterTestRun
         {
             get
@@ -136,7 +117,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             testCases.Add(testCase);
         }
-#endif
 
         #region IMessageLogger Members
 
@@ -156,7 +136,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 get { throw new NotImplementedException(); }
             }
 
-#if !DEV10
             public bool InIsolation
             {
                 get { throw new NotImplementedException(); }
@@ -176,7 +155,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             {
                 get { throw new NotImplementedException(); }
             }
-#endif
         }
 
         #endregion
@@ -190,23 +168,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 throw new NotImplementedException();
             }
 
-#if DEV10
-            T IRunSettings.GetSettings<T>(string settingsName)
-            {
-                throw new NotImplementedException();
-            }
-
-            void IRunSettings.LoadSettingsFile(string path)
-            {
-                throw new NotImplementedException();
-            }
-
-            void IRunSettings.LoadSettingsXml(string settings)
-            {
-                throw new NotImplementedException();
-            }
-#else
-#endif
         }
 
         #endregion

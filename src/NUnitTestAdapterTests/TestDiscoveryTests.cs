@@ -25,11 +25,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             // Load the NUnit mock-assembly.dll once for this test, saving
             // the list of test cases sent to the discovery sink
-#if DEV10
-            ((ITestDiscoverer)new NUnitTestDiscoverer()).GetTests(new[] { mockAssemblyPath }, this, this);
-#else
             ((ITestDiscoverer)new NUnitTestDiscoverer()).DiscoverTests(new[] { mockAssemblyPath }, this, this);
-#endif
         }
 
         [Test]

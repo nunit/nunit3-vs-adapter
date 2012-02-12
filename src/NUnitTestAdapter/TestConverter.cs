@@ -58,9 +58,6 @@ namespace NUnit.VisualStudio.TestAdapter
             
             string filePath = null;
             int lineNumber = 0;
-#if DEV10
-            int columnNumber = 0;
-#endif
 
             if (testCase.Source != null)
             {
@@ -74,18 +71,12 @@ namespace NUnit.VisualStudio.TestAdapter
                     {
                         filePath = navigationData.FileName;
                         lineNumber = navigationData.MinLineNumber;
-#if DEV10
-                        columnNumber = navigationData.MinColumnNumber;
-#endif
                     }
                 }
             }
 
             testCase.CodeFilePath = filePath;
             testCase.LineNumber = lineNumber;
-#if DEV10
-            testCase.ColumnNumber = columnNumber;
-#endif
 
             return testCase;
         }
@@ -105,12 +96,15 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 string stackTrace = StackTraceFilter.Filter(result.StackTrace);
                 ourResult.ErrorStackTrace = stackTrace;
-                var stackFrame = new Internal.Stacktrace(stackTrace).GetTopStackFrame();
-                if (stackFrame != null)
+                if (!string.IsNullOrEmpty(stackTrace))
                 {
-                    ourResult.ErrorFilePath = stackFrame.FileName;
+                    var stackFrame = new Internal.Stacktrace(stackTrace).GetTopStackFrame();
+                    if (stackFrame != null)
+                    {
+                        ourResult.ErrorFilePath = stackFrame.FileName;
 
-                    ourResult.SetPropertyValue(TestResultProperties.ErrorLineNumber, stackFrame.LineNumber);
+                        ourResult.SetPropertyValue(TestResultProperties.ErrorLineNumber, stackFrame.LineNumber);
+                    }
                 }
             }
 

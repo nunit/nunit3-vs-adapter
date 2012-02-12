@@ -20,13 +20,6 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region ITestDiscoverer Members
 
-#if DEV10
-        void ITestDiscoverer.GetTests(IEnumerable<string> sources, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)
-        {
-            DiscoverTests(sources, logger, discoverySink);
-        }
-#endif
-
         public void DiscoverTests(IEnumerable<string> sources, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)
         {
             // Filter out the sources which can have NUnit tests. 
@@ -57,6 +50,7 @@ namespace NUnit.VisualStudio.TestAdapter
             finally
             {
                 testConverter.Dispose();
+                runner.Unload();
             }
         }
 

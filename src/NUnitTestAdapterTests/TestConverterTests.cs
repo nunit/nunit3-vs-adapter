@@ -13,20 +13,20 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 {
     public class TestConverterTests
     {
-        private static readonly string THIS_ASSEMBLY_PATH = Path.GetFullPath("NUnit.VisualStudio.TestAdapter.Tests.dll");
-        private static readonly string THIS_CODE_FILE = Path.GetFullPath(@"..\..\TestConverterTests.cs");
+        private static readonly string THIS_ASSEMBLY_PATH = 
+            Path.GetFullPath("NUnit.VisualStudio.TestAdapter.Tests.dll");
+        private static readonly string THIS_CODE_FILE = 
+            Path.GetFullPath(@"..\..\src\NUnitTestAdapterTests\TestConverterTests.cs");
         
-        // NOTE: If the location of the FakeTestCase method in the file changes,
-        // update the value of FAKE_LINE_NUMBER, FAKE_COLUMN_NUMBER.
-        private static readonly int FAKE_LINE_NUMBER = 28;
-        private static readonly int FAKE_COLUMN_NUMBER = 9;
+        // NOTE: If the location of the FakeTestCase method in the 
+        // file changes, update the value of FAKE_LINE_NUMBER.
+        private static readonly int FAKE_LINE_NUMBER = 29;
 
         private NUnit.Core.ITest fakeNUnitTest;
         private NUnit.Core.TestResult fakeNUnitResult;
 
         private void FakeTestCase()
-        {
-    //  ^----- (FAKE_LINE_NUMBER, FAKE_COLUMN_NUMBER)
+        { // FAKE_LINE_NUMBER should be this line
         }
 
         [SetUp]
@@ -48,9 +48,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             Assert.That(testCase.CodeFilePath, Is.SamePath(THIS_CODE_FILE));
             Assert.That(testCase.LineNumber, Is.EqualTo(FAKE_LINE_NUMBER));
-#if DEV10
-            Assert.That(testCase.ColumnNumber, Is.EqualTo(FAKE_COLUMN_NUMBER));
-#endif
         }
 
         [Test]
@@ -66,9 +63,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             Assert.That(testCase.CodeFilePath, Is.SamePath(THIS_CODE_FILE));
             Assert.That(testCase.LineNumber, Is.EqualTo(FAKE_LINE_NUMBER));
-#if DEV10
-            Assert.That(testCase.ColumnNumber, Is.EqualTo(FAKE_COLUMN_NUMBER));
-#endif
         }
 
 //        [Test]
@@ -83,9 +77,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             Assert.That(testCase.CodeFilePath, Is.EqualTo(THIS_CODE_FILE));
             Assert.That(testCase.LineNumber, Is.EqualTo(FAKE_LINE_NUMBER));
-#if DEV10
-            Assert.That(testCase.ColumnNumber, Is.EqualTo(FAKE_COLUMN_NUMBER));
-#endif
         }
     }
 }
