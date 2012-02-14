@@ -10,8 +10,7 @@ using TestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-    [Serializable]
-    public class NUnitEventListener : EventListener // Public for testing
+    public class NUnitEventListener : MarshalByRefObject, EventListener, IDisposable // Public for testing
     {
         private ITestExecutionRecorder testLog;
         private Dictionary<string, TestCase> map;
@@ -23,7 +22,7 @@ namespace NUnit.VisualStudio.TestAdapter
             this.testLog = testLog;
             this.map = map;
             this.assemblyName = assemblyName;
-            this.testConverter = new TestConverter(map);
+            this.testConverter = new TestConverter(assemblyName, map);
         }
 
         public void RunStarted(string name, int testCount)
@@ -48,15 +47,13 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void TestStarted(TestName testName)
         {
-            TestCase ourCase = testConverter.ConvertTestName(testName, assemblyName);
-            ourCase.Source = assemblyName;
+            TestCase ourCase = testConverter.ConvertTestName(testName);
             this.testLog.RecordStart(ourCase);
         }
 
         public void TestFinished(NUnit.Core.TestResult result)
         {
             TestResult ourResult = testConverter.ConvertTestResult(result);
-            ourResult.TestCase.Source = this.assemblyName;
             this.testLog.RecordResult(ourResult);
         }
 
@@ -66,6 +63,12 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void UnhandledException(Exception exception)
         {
+        }
+
+        public void Dispose()
+        {
+            if (this.testConverter != null)
+                this.testConverter.Dispose();
         }
     }
 }

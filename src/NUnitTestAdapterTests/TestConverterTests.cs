@@ -16,7 +16,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         private static readonly string THIS_ASSEMBLY_PATH = 
             Path.GetFullPath("NUnit.VisualStudio.TestAdapter.Tests.dll");
         private static readonly string THIS_CODE_FILE = 
-            Path.GetFullPath(@"..\..\src\NUnitTestAdapterTests\TestConverterTests.cs");
+            Path.GetFullPath(@"..\..\TestConverterTests.cs");
         
         // NOTE: If the location of the FakeTestCase method in the 
         // file changes, update the value of FAKE_LINE_NUMBER.
@@ -40,7 +40,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void CanMakeTestCaseFromTest()
         {
-            var testCase = new TestConverter().ConvertTestCase(fakeNUnitTest);
+            var testCase = new TestConverter(THIS_ASSEMBLY_PATH).ConvertTestCase(fakeNUnitTest);
 
             Assert.That(testCase.Name, Is.EqualTo("NUnit.VisualStudio.TestAdapter.Tests.TestConverterTests.FakeTestCase"));
             Assert.That(testCase.DisplayName, Is.EqualTo("FakeTestCase"));
@@ -55,7 +55,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             var testName = fakeNUnitTest.TestName;
 
-            var testCase = new TestConverter().ConvertTestName(testName, THIS_ASSEMBLY_PATH);
+            var testCase = new TestConverter(THIS_ASSEMBLY_PATH).ConvertTestName(testName);
 
             Assert.That(testCase.Name, Is.EqualTo("NUnit.VisualStudio.TestAdapter.Tests.TestConverterTests.FakeTestCase"));
             Assert.That(testCase.DisplayName, Is.EqualTo("FakeTestCase"));
@@ -68,7 +68,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 //        [Test]
         public void CanMakeTestResultFromNUnitTestResult()
         {
-            var testResult = new TestConverter().ConvertTestResult(fakeNUnitResult);
+            var testResult = new TestConverter(THIS_ASSEMBLY_PATH).ConvertTestResult(fakeNUnitResult);
             var testCase = testResult.TestCase;
 
             Assert.That(testCase.Name, Is.EqualTo("NUnit.VisualStudio.TestAdapter.Tests.TestConverterTests.FakeTestCase"));

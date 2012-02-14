@@ -13,70 +13,58 @@ namespace NUnit.VisualStudio.TestAdapter
     {
         private Dictionary<string, DiaSession> diaMap = new Dictionary<string, DiaSession>();
         private Dictionary<string, TestCase> testCaseMap;
+        private string sourceAssembly;
 
-        public TestConverter()
+        public TestConverter(string sourceAssembly)
         {
+            this.sourceAssembly = sourceAssembly;
         }
 
-        public TestConverter(Dictionary<string, TestCase> testCaseMap)
+        public TestConverter(string sourceAssembly, Dictionary<string, TestCase> testCaseMap)
+            : this(sourceAssembly)
         {
             this.testCaseMap = testCaseMap;
         }
 
         public TestCase ConvertTestCase(ITest test)
         {
-            return ConvertTestCase(test, null);
-        }
-
-        public TestCase ConvertTestCase(ITest test, string source)
-        {
             if (test.IsSuite)
                 throw new ArgumentException("The argument must be a test case", "test");
-
-            if (source == null)
-                source = test.GetSourceAssembly();
 
             if (testCaseMap != null && testCaseMap.ContainsKey(test.TestName.FullName))
                 return testCaseMap[test.TestName.FullName];
 
-            return MakeTestCase(source, test.TestName);
+            return MakeTestCase(test.TestName);
         }
 
-        public TestCase ConvertTestName(TestName testName, string source)
+        public TestCase ConvertTestName(TestName testName)
         {
             if (testCaseMap != null && testCaseMap.ContainsKey(testName.FullName))
                 return testCaseMap[testName.FullName];
 
-            return MakeTestCase(source, testName);
+            return MakeTestCase(testName);
         }
 
-        private TestCase MakeTestCase(string source, TestName testName)
+        private TestCase MakeTestCase(TestName testName)
         {
             TestCase testCase = new TestCase(testName.FullName, new Uri(NUnitTestExecutor.ExecutorUri));
             testCase.DisplayName = testName.Name;
-            testCase.Source = source;
-            
-            string filePath = null;
-            int lineNumber = 0;
+            testCase.Source = this.sourceAssembly;
+            testCase.CodeFilePath = null;
+            testCase.LineNumber = 0;
 
-            if (testCase.Source != null)
+            var diaSession = GetDiaSession(this.sourceAssembly);
+
+            if (diaSession != null)
             {
-                var diaSession = GetDiaSession(testCase.Source);
+                DiaNavigationData navigationData = diaSession.GetNavigationData(testName.GetClassName(), testName.GetMethodName());
 
-                if (diaSession != null)
+                if (navigationData != null)
                 {
-                    DiaNavigationData navigationData = diaSession.GetNavigationData(testName.GetClassName(), testName.GetMethodName());
-
-                    if (navigationData != null)
-                    {
-                        filePath = navigationData.FileName;
-                        lineNumber = navigationData.MinLineNumber;
-                    }
+                    testCase.CodeFilePath = navigationData.FileName;
+                    testCase.LineNumber = navigationData.MinLineNumber;
                 }
             }
-
-            testCase.CodeFilePath = filePath;
-            testCase.LineNumber = lineNumber;
 
             return testCase;
         }
@@ -102,7 +90,6 @@ namespace NUnit.VisualStudio.TestAdapter
                     if (stackFrame != null)
                     {
                         ourResult.ErrorFilePath = stackFrame.FileName;
-
                         ourResult.SetPropertyValue(TestResultProperties.ErrorLineNumber, stackFrame.LineNumber);
                     }
                 }

@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
@@ -23,7 +24,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <summary>
         /// The current NUnit TestRunner instance
         /// </summary>
-        private TestRunner runner = new MultipleTestDomainRunner();
+        private TestRunner runner;
 
         #region ITestExecutor Members
 
@@ -35,7 +36,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <param param name="testLog">Test log to send results and messages through</param>
         void ITestExecutor.RunTests(IEnumerable<string> sources, IRunContext runContext, ITestExecutionRecorder testLog)
         {
-            System.Diagnostics.Debug.WriteLine("RunTests: Called with assembly list");
+            Trace.WriteLine("RunTests: Called with list of assemblies");
 
             //var package = new TestPackage("", SanitizeSources(sources));
             //var listener = new NUnitEventListener(testLog, null, null);
@@ -51,7 +52,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         void ITestExecutor.RunTests(IEnumerable<TestCase> selectedTests, IRunContext runContext, ITestExecutionRecorder testLog)
         {
-            System.Diagnostics.Debug.WriteLine("RunTests: Called with list of TestCases");
+            Trace.WriteLine("RunTests: Called with List of selected tests");
 
             var assemblyGroups = selectedTests.GroupBy(tc => tc.Source);
 
@@ -64,8 +65,11 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private void RunAssembly(string assemblyName, ITestExecutionRecorder testLog, Dictionary<string, TestCase> testCaseMap)
         {
+            Trace.WriteLine("RunAssembly: " + assemblyName);
+
             try
             {
+                this.runner = new TestDomain();
                 TestPackage package = new TestPackage(assemblyName);
                 runner.Load(package);
 
@@ -85,6 +89,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
                 finally
                 {
+                    listener.Dispose();
                     runner.Unload();
                 }
             }

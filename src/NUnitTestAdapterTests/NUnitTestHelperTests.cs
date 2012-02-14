@@ -46,7 +46,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase("MethodWithParameters(9,11)")]
         public void CanMakeTestCaseFromNUnitTest(string testName)
         {
-            var testConverter = new TestConverter();
+            var testConverter = new TestConverter(mockAssemblyPath);
             var test = GetTest(testName);
             var testCase = testConverter.ConvertTestCase(test);
             Assert.That(testCase.Name, Is.EqualTo(test.TestName.FullName));

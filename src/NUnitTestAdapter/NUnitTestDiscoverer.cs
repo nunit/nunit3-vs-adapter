@@ -23,34 +23,31 @@ namespace NUnit.VisualStudio.TestAdapter
         public void DiscoverTests(IEnumerable<string> sources, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)
         {
             // Filter out the sources which can have NUnit tests. 
-            List<string> testAssemblies = SanitizeSources(sources);
-            if (testAssemblies.Count == 0)
-                return;
-
-            testConverter = new TestConverter();
-
-            TestPackage package = new TestPackage("", testAssemblies);
-
-            TestRunner runner = new MultipleTestDomainRunner();
-
-            try
+            foreach (string sourceAssembly in SanitizeSources(sources))
             {
-                if (runner.Load(package))
+                TestRunner runner = new TestDomain();
+                TestPackage package = new TestPackage(sourceAssembly);
+                this.testConverter = new TestConverter(sourceAssembly);
+
+                try
                 {
-                    foreach (TestNode test in runner.Test.Tests)
+                    if (runner.Load(package))
                     {
-                        SendTestCase(test, discoverySink);
+                        foreach (TestNode test in runner.Test.Tests)
+                        {
+                            SendTestCase(test, discoverySink);
+                        }
                     }
                 }
-            }
-            catch (System.BadImageFormatException)
-            {
-                // we skip the native c++ binaries that we don't support.
-            }
-            finally
-            {
-                testConverter.Dispose();
-                runner.Unload();
+                catch (System.BadImageFormatException)
+                {
+                    // we skip the native c++ binaries that we don't support.
+                }
+                finally
+                {
+                    testConverter.Dispose();
+                    runner.Unload();
+                }
             }
         }
 
