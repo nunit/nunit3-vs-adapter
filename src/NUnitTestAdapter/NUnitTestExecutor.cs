@@ -4,7 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
@@ -38,7 +37,8 @@ namespace NUnit.VisualStudio.TestAdapter
         //void ITestExecutor.RunTests(IEnumerable<string> sources, IRunContext runContext, ITestExecutionRecorder testLog)
         public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
-            Trace.WriteLine("RunTests: Called with list of assemblies");
+            // Ensure any channels registered by other adapters are unregistered
+            CleanUpRegisteredChannels();
 
             //var package = new TestPackage("", SanitizeSources(sources));
             //var listener = new NUnitEventListener(testLog, null, null);
@@ -56,7 +56,8 @@ namespace NUnit.VisualStudio.TestAdapter
         //void ITestExecutor.RunTests(IEnumerable<TestCase> selectedTests, IRunContext runContext, ITestExecutionRecorder testLog)
         public void RunTests(IEnumerable<TestCase> selectedTests, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
-            Trace.WriteLine("RunTests: Called with List of selected tests");
+            // Ensure any channels registered by other adapters are unregistered
+            CleanUpRegisteredChannels();
 
             var assemblyGroups = selectedTests.GroupBy(tc => tc.Source);
 
@@ -71,8 +72,6 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private void RunAssembly(string assemblyName, ITestExecutionRecorder testLog, Dictionary<string, TestCase> testCaseMap)
         {
-            Trace.WriteLine("RunAssembly: " + assemblyName);
-
             try
             {
                 this.runner = new TestDomain();

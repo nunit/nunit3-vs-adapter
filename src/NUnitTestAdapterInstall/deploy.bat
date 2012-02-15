@@ -17,7 +17,6 @@ copy "%TARGETPATH%" "%DEPLOYDIR%" /Y
 copy nunit.core.dll "%DEPLOYDIR%" /Y
 copy nunit.core.interfaces.dll "%DEPLOYDIR%" /Y
 copy nunit.util.dll "%DEPLOYDIR%" /Y
-copy Microsoft.VisualStudio.TestPlatform.ObjectModel.dll "%DEPLOYDIR%" /Y
 copy license.rtf "%DEPLOYDIR%" /Y
 copy nunit_32x32.png "%DEPLOYDIR%" /Y
 copy preview.png "%DEPLOYDIR%" /Y

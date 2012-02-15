@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Channels;
 using NUnit.Util;
 using AssemblyHelper = Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities.AssemblyHelper;
 
@@ -85,6 +86,12 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 return true;
             }
+        }
+
+        public static void CleanUpRegisteredChannels()
+        {
+            foreach (IChannel chan in ChannelServices.RegisteredChannels)
+                ChannelServices.UnregisterChannel(chan);
         }
 
         #endregion
