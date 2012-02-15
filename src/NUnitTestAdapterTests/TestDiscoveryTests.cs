@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Framework;
 
@@ -25,7 +26,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             // Load the NUnit mock-assembly.dll once for this test, saving
             // the list of test cases sent to the discovery sink
-            ((ITestDiscoverer)new NUnitTestDiscoverer()).DiscoverTests(new[] { mockAssemblyPath }, this, this);
+            ((ITestDiscoverer)new NUnitTestDiscoverer()).DiscoverTests(new[] { mockAssemblyPath }, null, this, this);
         }
 
         [Test]
@@ -41,7 +42,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void VerifyTestCaseIsFound(string name, string fullname)
         {
             var testCase = testCases.Find(tc => tc.DisplayName == name);
-            Assert.That(testCase.Name, Is.EqualTo(fullname));
+            Assert.That(testCase.FullyQualifiedName, Is.EqualTo(fullname));
         }
 
         #region IMessageLogger Methods

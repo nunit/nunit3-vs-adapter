@@ -42,7 +42,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             var testCase = new TestConverter(THIS_ASSEMBLY_PATH).ConvertTestCase(fakeNUnitTest);
 
-            Assert.That(testCase.Name, Is.EqualTo("NUnit.VisualStudio.TestAdapter.Tests.TestConverterTests.FakeTestCase"));
+            Assert.That(testCase.FullyQualifiedName, Is.EqualTo("NUnit.VisualStudio.TestAdapter.Tests.TestConverterTests.FakeTestCase"));
             Assert.That(testCase.DisplayName, Is.EqualTo("FakeTestCase"));
             Assert.That(testCase.Source, Is.SamePath(THIS_ASSEMBLY_PATH));
 
@@ -57,7 +57,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             var testCase = new TestConverter(THIS_ASSEMBLY_PATH).ConvertTestName(testName);
 
-            Assert.That(testCase.Name, Is.EqualTo("NUnit.VisualStudio.TestAdapter.Tests.TestConverterTests.FakeTestCase"));
+            Assert.That(testCase.FullyQualifiedName, Is.EqualTo("NUnit.VisualStudio.TestAdapter.Tests.TestConverterTests.FakeTestCase"));
             Assert.That(testCase.DisplayName, Is.EqualTo("FakeTestCase"));
             Assert.That(testCase.Source, Is.SamePath(THIS_ASSEMBLY_PATH));
 
@@ -71,7 +71,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var testResult = new TestConverter(THIS_ASSEMBLY_PATH).ConvertTestResult(fakeNUnitResult);
             var testCase = testResult.TestCase;
 
-            Assert.That(testCase.Name, Is.EqualTo("NUnit.VisualStudio.TestAdapter.Tests.TestConverterTests.FakeTestCase"));
+            Assert.That(testCase.FullyQualifiedName, Is.EqualTo("NUnit.VisualStudio.TestAdapter.Tests.TestConverterTests.FakeTestCase"));
             Assert.That(testCase.DisplayName, Is.EqualTo("FakeTestCase"));
             Assert.That(testCase.Source, Is.SamePath(THIS_ASSEMBLY_PATH));
 

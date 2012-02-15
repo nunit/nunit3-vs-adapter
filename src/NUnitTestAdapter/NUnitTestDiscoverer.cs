@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Core;
 using NUnit.Util;
@@ -20,7 +21,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region ITestDiscoverer Members
 
-        public void DiscoverTests(IEnumerable<string> sources, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)
+        //public void DiscoverTests(IEnumerable<string> sources, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)
+        public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)
         {
             // Filter out the sources which can have NUnit tests. 
             foreach (string sourceAssembly in SanitizeSources(sources))
@@ -66,6 +68,5 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         #endregion
-
     }
 }

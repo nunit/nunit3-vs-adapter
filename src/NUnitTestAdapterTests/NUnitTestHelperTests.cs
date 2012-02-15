@@ -49,7 +49,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var testConverter = new TestConverter(mockAssemblyPath);
             var test = GetTest(testName);
             var testCase = testConverter.ConvertTestCase(test);
-            Assert.That(testCase.Name, Is.EqualTo(test.TestName.FullName));
+            Assert.That(testCase.FullyQualifiedName, Is.EqualTo(test.TestName.FullName));
             Assert.That(testCase.DisplayName, Is.EqualTo(test.TestName.Name));
             Assert.That(testCase.Source, Is.SamePath(mockAssemblyPath));
             Assert.That(testCase.ExecutorUri, Is.EqualTo(new Uri(NUnitTestExecutor.ExecutorUri)));

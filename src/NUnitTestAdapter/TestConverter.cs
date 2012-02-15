@@ -47,9 +47,9 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private TestCase MakeTestCase(TestName testName)
         {
-            TestCase testCase = new TestCase(testName.FullName, new Uri(NUnitTestExecutor.ExecutorUri));
+            TestCase testCase = new TestCase(testName.FullName, new Uri(NUnitTestExecutor.ExecutorUri), this.sourceAssembly);
             testCase.DisplayName = testName.Name;
-            testCase.Source = this.sourceAssembly;
+            //testCase.Source = this.sourceAssembly;
             testCase.CodeFilePath = null;
             testCase.LineNumber = 0;
 
@@ -84,15 +84,15 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 string stackTrace = StackTraceFilter.Filter(result.StackTrace);
                 ourResult.ErrorStackTrace = stackTrace;
-                if (!string.IsNullOrEmpty(stackTrace))
-                {
-                    var stackFrame = new Internal.Stacktrace(stackTrace).GetTopStackFrame();
-                    if (stackFrame != null)
-                    {
-                        ourResult.ErrorFilePath = stackFrame.FileName;
-                        ourResult.SetPropertyValue(TestResultProperties.ErrorLineNumber, stackFrame.LineNumber);
-                    }
-                }
+                //if (!string.IsNullOrEmpty(stackTrace))
+                //{
+                //    var stackFrame = new Internal.Stacktrace(stackTrace).GetTopStackFrame();
+                //    if (stackFrame != null)
+                //    {
+                //       /ourResult.ErrorFilePath = stackFrame.FileName;
+                //        ourResult.SetPropertyValue(TestResultProperties.ErrorLineNumber, stackFrame.LineNumber);
+                //    }
+                //}
             }
 
             return ourResult;

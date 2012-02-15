@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Core;
 using NUnit.Util;
@@ -34,7 +35,8 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <param name="sources">Sources to be run.</param>
         /// <param name="runContext">Context to use when executing the tests.</param>
         /// <param param name="testLog">Test log to send results and messages through</param>
-        void ITestExecutor.RunTests(IEnumerable<string> sources, IRunContext runContext, ITestExecutionRecorder testLog)
+        //void ITestExecutor.RunTests(IEnumerable<string> sources, IRunContext runContext, ITestExecutionRecorder testLog)
+        public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
             Trace.WriteLine("RunTests: Called with list of assemblies");
 
@@ -46,11 +48,13 @@ namespace NUnit.VisualStudio.TestAdapter
 
             foreach (var source in SanitizeSources(sources))
             {
-                RunAssembly(source, testLog, null);
+                //RunAssembly(source, testLog, null);
+                RunAssembly(source, frameworkHandle, null);
             }
         }
 
-        void ITestExecutor.RunTests(IEnumerable<TestCase> selectedTests, IRunContext runContext, ITestExecutionRecorder testLog)
+        //void ITestExecutor.RunTests(IEnumerable<TestCase> selectedTests, IRunContext runContext, ITestExecutionRecorder testLog)
+        public void RunTests(IEnumerable<TestCase> selectedTests, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
             Trace.WriteLine("RunTests: Called with List of selected tests");
 
@@ -58,8 +62,10 @@ namespace NUnit.VisualStudio.TestAdapter
 
             foreach (var assemblyGroup in assemblyGroups)
             {
-                var selectedTestsMap = assemblyGroup.ToDictionary(tc => tc.Name);
-                RunAssembly(assemblyGroup.Key, testLog, selectedTestsMap);
+                //var selectedTestsMap = assemblyGroup.ToDictionary(tc => tc.Name);
+                var selectedTestsMap = assemblyGroup.ToDictionary(tc => tc.DisplayName);
+                //RunAssembly(assemblyGroup.Key, testLog, selectedTestsMap);
+                RunAssembly(assemblyGroup.Key, frameworkHandle, selectedTestsMap);
             }
         }
 

@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.Core;
 using TestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;

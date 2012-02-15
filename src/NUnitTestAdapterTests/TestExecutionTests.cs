@@ -6,13 +6,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Framework;
 using NUnit.Tests.Assemblies;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
-    public class TestExecutionTests : ITestExecutionRecorder
+    //public class TestExecutionTests : ITestExecutionRecorder
+    public class TestExecutionTests : IFrameworkHandle
     {
         static readonly string mockAssemblyPath = Path.GetFullPath("mock-assembly.dll");
         static readonly IRunContext context = new MyRunContext();
@@ -118,6 +120,16 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             testCases.Add(testCase);
         }
 
+        public int LaunchProcessWithDebuggerAttached(string filePath, string workingDirectory, string arguments, IDictionary<string, string> environmentVariables)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RecordAttachments(IList<AttachmentSet> attachmentSets)
+        {
+            throw new NotImplementedException();
+        }
+
         #region IMessageLogger Members
 
         void IMessageLogger.SendMessage(Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging.TestMessageLevel testMessageLevel, string message)
@@ -131,12 +143,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         private class MyRunContext : IRunContext
         {
-            IRunSettings IRunContext.RunSettings
+            public bool InIsolation
             {
                 get { throw new NotImplementedException(); }
             }
 
-            public bool InIsolation
+            public bool IsBeingDebugged
             {
                 get { throw new NotImplementedException(); }
             }
@@ -146,12 +158,22 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 get { throw new NotImplementedException(); }
             }
 
-            public bool IsImmersive
+            public bool KeepAlive
             {
                 get { throw new NotImplementedException(); }
             }
 
-            public bool KeepAlive
+            public ITestCaseFilterExpression TestCaseFilter
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public string TestRunDirectory
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public IRunSettings RunSettings
             {
                 get { throw new NotImplementedException(); }
             }
@@ -198,5 +220,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         #endregion
+
+
     }
 }

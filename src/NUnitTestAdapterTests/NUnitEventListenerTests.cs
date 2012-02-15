@@ -6,13 +6,15 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using NUnit.Framework;
 using NUnit.Core;
 using TestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
-    public class NUnitEventListenerTests : ITestExecutionRecorder
+    //public class NUnitEventListenerTests : ITestExecutionRecorder
+    public class NUnitEventListenerTests : IFrameworkHandle
     {
         private readonly static string assemblyName = "MyAssembly.dll";
         private readonly static Uri fakeUri = new Uri(NUnitTestExecutor.ExecutorUri);
@@ -30,10 +32,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             MethodInfo fakeTestMethod = this.GetType().GetMethod("FakeTestMethod", BindingFlags.Instance | BindingFlags.NonPublic);
             fakeNUnitTest = new NUnitTestMethod(fakeTestMethod);
 
-            fakeTestCase = new TestCase(fakeNUnitTest.TestName.FullName, fakeUri);
+            fakeTestCase = new TestCase(fakeNUnitTest.TestName.FullName, fakeUri, assemblyName);
 
             var map = new Dictionary<string, TestCase>();
-            map.Add(fakeTestCase.Name, fakeTestCase);
+            map.Add(fakeTestCase.FullyQualifiedName, fakeTestCase);
             this.listener = new NUnitEventListener(this, map, assemblyName);
             this.callCount = 0;
         }
@@ -126,6 +128,16 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         public void SendMessage(Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging.TestMessageLevel testMessageLevel, string message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int LaunchProcessWithDebuggerAttached(string filePath, string workingDirectory, string arguments, IDictionary<string, string> environmentVariables)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void RecordAttachments(IList<AttachmentSet> attachmentSets)
         {
             throw new NotImplementedException();
         }
