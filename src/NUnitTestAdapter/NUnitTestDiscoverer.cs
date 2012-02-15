@@ -3,7 +3,6 @@
 // ****************************************************************
 
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Core;
@@ -22,6 +21,9 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void DiscoverTests(IEnumerable<string> sources, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)
         {
+            // Ensure any channels registered by other adapters are unregistered
+            CleanUpRegisteredChannels();
+
             // Filter out the sources which can have NUnit tests. 
             foreach (string sourceAssembly in SanitizeSources(sources))
             {
