@@ -11,9 +11,10 @@ namespace NUnit.VisualStudio.TestAdapter
 {
     public class TestConverter : IDisposable
     {
-        private Dictionary<string, DiaSession> diaMap = new Dictionary<string, DiaSession>();
         private Dictionary<string, TestCase> testCaseMap;
         private string sourceAssembly;
+        private DiaSession diaSession;
+        private bool tryToCreateDiaSession = true;
 
         public TestConverter(string sourceAssembly)
         {
@@ -53,9 +54,28 @@ namespace NUnit.VisualStudio.TestAdapter
             testCase.CodeFilePath = null;
             testCase.LineNumber = 0;
 
-            var diaSession = GetDiaSession(this.sourceAssembly);
+            // NOTE: There is some sort of timing issue involved
+            // in creating the DiaSession. When it is created
+            // in the constructor, an exception is thrown on the
+            // call to GetNavigationData. We don't understand
+            // this, we're just dealing with it.
+            if (tryToCreateDiaSession)
+            {
+                try
+                {
+                    this.diaSession = new DiaSession(sourceAssembly);
+                }
+                catch (Exception)
+                {
+                    // If this isn't a project type supporting DiaSession,
+                    // we just ignore the error. We won't try this again 
+                    // for the project.
+                }
 
-            if (diaSession != null)
+                tryToCreateDiaSession = false;
+            }
+
+            if (this.diaSession != null)
             {
                 DiaNavigationData navigationData = diaSession.GetNavigationData(testName.GetClassName(), testName.GetMethodName());
 
@@ -98,33 +118,10 @@ namespace NUnit.VisualStudio.TestAdapter
             return ourResult;
         }
 
-        private DiaSession GetDiaSession(string source)
-        {
-            DiaSession diaSession = null;
-
-            if (!diaMap.TryGetValue(source, out diaSession))
-            {
-                try
-                {
-                    diaSession = new DiaSession(source);
-                    diaMap.Add(source, diaSession);
-                }
-                catch (COMException)
-                {
-                    diaMap.Add(source, diaSession);
-                }
-            }
-
-            return diaSession;
-        }
-
         public void Dispose()
         {
-            foreach (DiaSession diaSession in diaMap.Values)
-            {
-                if (diaSession != null)
-                    diaSession.Dispose();
-            }
+            if (this.diaSession != null)
+                this.diaSession.Dispose();
         }
     }
 }
