@@ -30,8 +30,8 @@
     <ProjectGuid>{13ACDAEA-BAFE-4496-BC67-501E09A3247C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NUnitTestAdapterInstall</RootNamespace>
-    <AssemblyName>NUnitTestAdapterInstall</AssemblyName>
+    <RootNamespace>NUnitTestAdapter</RootNamespace>
+    <AssemblyName>NUnitTestAdapter</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <GeneratePkgDefFile>false</GeneratePkgDefFile>
     <IncludeAssemblyInVSIXContainer>false</IncludeAssemblyInVSIXContainer>
