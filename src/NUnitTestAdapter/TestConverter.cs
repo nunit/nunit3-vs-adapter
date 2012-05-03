@@ -16,6 +16,8 @@ namespace NUnit.VisualStudio.TestAdapter
         private DiaSession diaSession;
         private bool tryToCreateDiaSession = true;
 
+        #region Constructors
+
         public TestConverter(string sourceAssembly)
         {
             this.sourceAssembly = sourceAssembly;
@@ -26,6 +28,8 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             this.testCaseMap = testCaseMap;
         }
+
+        #endregion
 
         public TestCase ConvertTestCase(ITest test)
         {
@@ -77,7 +81,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             if (this.diaSession != null)
             {
-                DiaNavigationData navigationData = diaSession.GetNavigationData(testName.GetClassName(), testName.GetMethodName());
+                DiaNavigationData navigationData = diaSession.GetNavigationData(GetClassName(testName), GetMethodName(testName));
 
                 if (navigationData != null)
                 {
@@ -94,7 +98,7 @@ namespace NUnit.VisualStudio.TestAdapter
             TestCase ourCase = ConvertTestCase(result.Test);
 
             TestResult ourResult = new TestResult(ourCase);
-            ourResult.Outcome = result.ResultState.ToTestOutcome();
+            ourResult.Outcome = ResultStateToTestOutcome(result.ResultState);
             ourResult.Duration = TimeSpan.FromSeconds(result.Time);
             ourResult.ComputerName = Environment.MachineName;
             if (result.Message != null)
@@ -123,5 +127,59 @@ namespace NUnit.VisualStudio.TestAdapter
             if (this.diaSession != null)
                 this.diaSession.Dispose();
         }
+
+        #region Static Methods
+
+        public static string GetClassName(TestName testName)
+        {
+            var className = testName.FullName;
+            var name = testName.Name;
+
+            if (className.Length > name.Length + 1)
+                className = className.Substring(0, className.Length - name.Length - 1);
+
+            return className;
+        }
+
+        public static string GetMethodName(TestName testName)
+        {
+            var methodName = testName.Name;
+
+            if (methodName.EndsWith(")"))
+            {
+                var lpar = methodName.IndexOf('(');
+                if (lpar > 0)
+                    methodName = methodName.Substring(0, lpar);
+            }
+
+            return methodName;
+        }
+
+        public static TestOutcome ResultStateToTestOutcome(ResultState resultState)
+        {
+            switch (resultState)
+            {
+                case ResultState.Cancelled:
+                    return TestOutcome.None;
+                case ResultState.Error:
+                    return TestOutcome.Failed;
+                case ResultState.Failure:
+                    return TestOutcome.Failed;
+                case ResultState.Ignored:
+                    return TestOutcome.Skipped;
+                case ResultState.Inconclusive:
+                    return TestOutcome.None;
+                case ResultState.NotRunnable:
+                    return TestOutcome.Failed;
+                case ResultState.Skipped:
+                    return TestOutcome.Skipped;
+                case ResultState.Success:
+                    return TestOutcome.Passed;
+            }
+
+            return TestOutcome.None;
+        }
+
+        #endregion
     }
 }

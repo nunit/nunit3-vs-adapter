@@ -12,7 +12,7 @@ using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
-    public class NUnitTestHelperTests
+    public class TestConverterStaticTests
     {
         private static readonly string mockAssemblyPath = Path.GetFullPath("mock-assembly.dll");
 
@@ -55,40 +55,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(testCase.ExecutorUri, Is.EqualTo(new Uri(NUnitTestExecutor.ExecutorUri)));
         }
 
-        //[TestCase("MockTest3")]
-        //[TestCase("MethodWithParameters(9,11)")]
-        //public void CanMakeTestCaseFromNUnitTestSpecifyingAssembly(string testName)
-        //{
-        //    var test = GetTest(testName);
-        //    var testCase = test.ToTestCase("some.assembly.dll");
-        //    Assert.That(testCase.Name, Is.EqualTo(test.TestName.FullName));
-        //    Assert.That(testCase.DisplayName, Is.EqualTo(test.TestName.Name));
-        //    Assert.That(testCase.Source, Is.EqualTo("some.assembly.dll"));
-        //    Assert.That(testCase.ExecutorUri, Is.EqualTo(new Uri(NUnitTestExecutor.ExecutorUri)));
-        //}
-
-        [TestCase("MockTest3", "NUnit.Tests.Assemblies.MockTestFixture")]
-        [TestCase("MethodWithParameters(9,11)", "NUnit.Tests.FixtureWithTestCases")]
-        public void CanGetClassNameForNUnitTest(string name, string className)
-        {
-            var test = GetTest(name);
-            Assert.That(test.GetClassName(), Is.EqualTo(className));
-        }
-
         [TestCase("MockTest3", "NUnit.Tests.Assemblies.MockTestFixture")]
         [TestCase("MethodWithParameters(9,11)", "NUnit.Tests.FixtureWithTestCases")]
         public void CanGetClassNameFromTestName(string name, string className)
         {
             var testName = GetTest(name).TestName;
-            Assert.That(testName.GetClassName(), Is.EqualTo(className));
-        }
-
-        [TestCase("MockTest3", "MockTest3")]
-        [TestCase("MethodWithParameters(9,11)", "MethodWithParameters")]
-        public void CanGetMethodNameForNUnitTest(string name, string methodName)
-        {
-            var test = GetTest(name);
-            Assert.That(test.GetMethodName(), Is.EqualTo(methodName));
+            Assert.That(TestConverter.GetClassName(testName), Is.EqualTo(className));
         }
 
         [TestCase("MockTest3", "MockTest3")]
@@ -96,17 +68,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void CanGetMethodNameFromTestName(string name, string methodName)
         {
             var testName = GetTest(name).TestName;
-            Assert.That(testName.GetMethodName(), Is.EqualTo(methodName));
+            Assert.That(TestConverter.GetMethodName(testName), Is.EqualTo(methodName));
         }
-
-        [TestCase("MockTest3")]
-        [TestCase("MethodWithParameters(9,11)")]
-        public void CanGetSourceAssembly(string testName)
-        {
-            var test = GetTest(testName);
-            Assert.That(test.GetSourceAssembly(), Is.SamePath(mockAssemblyPath));
-        }
-       
+      
         [TestCase(ResultState.Cancelled, Result=TestOutcome.None)]
         [TestCase(ResultState.Error, Result=TestOutcome.Failed)]
         [TestCase(ResultState.Failure, Result=TestOutcome.Failed)]
@@ -117,7 +81,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase(ResultState.Success, Result=TestOutcome.Passed)]
         public TestOutcome CanConvertResultStateToTestOutcome(NUnit.Core.ResultState resultState)
         {
-            return resultState.ToTestOutcome();
+            return TestConverter.ResultStateToTestOutcome(resultState);
         }
     }
 }
