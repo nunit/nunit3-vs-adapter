@@ -64,7 +64,7 @@ namespace NUnit.VisualStudio.TestAdapter
             foreach (var assemblyGroup in assemblyGroups)
             {
                 //var selectedTestsMap = assemblyGroup.ToDictionary(tc => tc.Name);
-                var selectedTestsMap = assemblyGroup.ToDictionary(tc => tc.DisplayName);
+                var selectedTestsMap = assemblyGroup.ToDictionary(tc => tc.FullyQualifiedName);
                 //RunAssembly(assemblyGroup.Key, testLog, selectedTestsMap);
                 RunAssembly(assemblyGroup.Key, frameworkHandle, selectedTestsMap);
             }
