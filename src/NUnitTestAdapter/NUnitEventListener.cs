@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.Core;
 using TestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -60,6 +61,16 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void TestOutput(TestOutput testOutput)
         {
+            string message = testOutput.Text;
+            int length = message.Length;
+            int drop = message.EndsWith(Environment.NewLine)
+                ? Environment.NewLine.Length
+                : message[length - 1] == '\n' || message[length - 1] == '\r'
+                    ? 1
+                    : 0;
+            if (drop > 0)
+                message = message.Substring(0, length - drop);
+            this.testLog.SendMessage(TestMessageLevel.Informational, message);
         }
 
         public void UnhandledException(Exception exception)

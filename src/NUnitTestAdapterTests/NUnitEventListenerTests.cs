@@ -6,15 +6,13 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Framework;
 using NUnit.Core;
-using TestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
-    //public class NUnitEventListenerTests : ITestExecutionRecorder
-    public class NUnitEventListenerTests : IFrameworkHandle
+    public class NUnitEventListenerTests
     {
         private readonly static string assemblyName = "MyAssembly.dll";
         private readonly static Uri fakeUri = new Uri(NUnitTestExecutor.ExecutorUri);
@@ -22,29 +20,28 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         private NUnitEventListener listener;
         private TestCase fakeTestCase;
         private NUnit.Core.ITest fakeNUnitTest;
-
-        private int callCount;
-        private TestResult testResult;
+        private FakeTestExecutionRecorder testLog;
 
         [SetUp]
         public void SetUp()
         {
             MethodInfo fakeTestMethod = this.GetType().GetMethod("FakeTestMethod", BindingFlags.Instance | BindingFlags.NonPublic);
             fakeNUnitTest = new NUnitTestMethod(fakeTestMethod);
-
             fakeTestCase = new TestCase(fakeNUnitTest.TestName.FullName, fakeUri, assemblyName);
+
+            testLog = new FakeTestExecutionRecorder();
 
             var map = new Dictionary<string, TestCase>();
             map.Add(fakeTestCase.FullyQualifiedName, fakeTestCase);
-            this.listener = new NUnitEventListener(this, map, assemblyName);
-            this.callCount = 0;
+
+            this.listener = new NUnitEventListener(testLog, map, assemblyName);
         }
 
         [Test]
-        public void TestFinishedCallsTestLog()
+        public void TestFinished_CallsRecordResult()
         {
             listener.TestFinished(new NUnit.Core.TestResult(fakeNUnitTest));
-            Assert.AreEqual(1, callCount);
+            Assert.AreEqual(1, testLog.RecordResultCalls);
         }
 
         //[Test]
@@ -56,17 +53,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         //}
 
         [Test]
-        public void TestResultHasCorrectTestName()
+        public void TestFinished_ResultHasCorrectTestName()
         {
             listener.TestFinished(new NUnit.Core.TestResult(fakeNUnitTest));
-            Assert.AreEqual(fakeNUnitTest.TestName.FullName, testResult.TestCase.DisplayName);
+            Assert.AreEqual(fakeNUnitTest.TestName.FullName, testLog.LastResult.TestCase.DisplayName);
         }
 
         [Test]
-        public void TestResultHasCorrectComputerName()
+        public void TestFinished_ResultHasCorrectComputerName()
         {
             listener.TestFinished(new NUnit.Core.TestResult(fakeNUnitTest));
-            Assert.AreEqual(Environment.MachineName, testResult.ComputerName);
+            Assert.AreEqual(Environment.MachineName, testLog.LastResult.ComputerName);
         }
 
         [TestCase(ResultState.Success,      TestOutcome.Passed, null)]
@@ -77,70 +74,56 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase(ResultState.NotRunnable,  TestOutcome.Failed,  "No constructor")]
         [TestCase(ResultState.Skipped,      TestOutcome.Skipped, null)]
         [TestCase(ResultState.Ignored,      TestOutcome.Skipped, "my reason")]
-        public void TestResultHasCorrectOutcome(ResultState resultState, TestOutcome outcome, string message)
+        public void TestFinished_ResultHasCorrectOutcome(ResultState resultState, TestOutcome outcome, string message)
         {
             var nunitResult = new NUnit.Core.TestResult(fakeNUnitTest);
             nunitResult.SetResult(resultState, message, null);
             listener.TestFinished(nunitResult);
-            Assert.AreEqual(outcome, testResult.Outcome);
-            Assert.AreEqual(message, testResult.ErrorMessage);
+            Assert.AreEqual(outcome, testLog.LastResult.Outcome);
+            Assert.AreEqual(message, testLog.LastResult.ErrorMessage);
         }
 
         [Test]
-        public void TestResultHasCorrectDuration()
+        public void TestFinished_ResultHasCorrectDuration()
         {
             var nunitResult = new NUnit.Core.TestResult(fakeNUnitTest);
             nunitResult.Success();
             nunitResult.Time = 1.234;
             listener.TestFinished(nunitResult);
-            Assert.AreEqual(TimeSpan.FromSeconds(1.234), testResult.Duration);
+            Assert.AreEqual(TimeSpan.FromSeconds(1.234), testLog.LastResult.Duration);
+        }
+
+        [TestCaseSource("MessageTestSource")]
+        public void TestOutput_CallsSendMessageCorrectly(string nunitMessage, string expectedMessage)
+        {
+            listener.TestOutput(new TestOutput(nunitMessage, TestOutputType.Out));
+            Assert.AreEqual(1, testLog.SendMessageCalls);
+            Assert.AreEqual(TestMessageLevel.Informational, testLog.LastMessageLevel);
+            Assert.AreEqual(expectedMessage, testLog.LastMessage);
         }
 
         private void FakeTestMethod() { }
 
-        #region ITestExecutionRecorder
-        public bool EnableShutdownAfterTestRun
+        private static readonly string NL = Environment.NewLine;
+        private static readonly string MESSAGE = "MESSAGE";
+        private static readonly string LINE1 = "LINE#1";
+        private static readonly string LINE2 = "\tLINE#2";
+        private TestCaseData[] MessageTestSource = 
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
-            set
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        public void RecordEnd(TestCase testCase, TestOutcome outcome)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RecordResult(TestResult testResult)
-        {
-            this.callCount++;
-            this.testResult = testResult;
-        }
-
-        public void RecordStart(TestCase testCase)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SendMessage(Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging.TestMessageLevel testMessageLevel, string message)
-        {
-            throw new NotImplementedException();
-        }
-
-        public int LaunchProcessWithDebuggerAttached(string filePath, string workingDirectory, string arguments, IDictionary<string, string> environmentVariables)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RecordAttachments(IList<AttachmentSet> attachmentSets)
-        {
-            throw new NotImplementedException();
-        }
-        #endregion
+            new TestCaseData(MESSAGE, MESSAGE),
+            new TestCaseData(MESSAGE + NL, MESSAGE),
+            new TestCaseData(MESSAGE + "\r\n", MESSAGE),
+            new TestCaseData(MESSAGE + "\n", MESSAGE),
+            new TestCaseData(MESSAGE + "\r", MESSAGE),
+            new TestCaseData(LINE1 + NL + LINE2, LINE1 + NL + LINE2),
+            new TestCaseData(LINE1 +"\r\n" + LINE2, LINE1 +"\r\n" + LINE2),
+            new TestCaseData(LINE1 +"\n" + LINE2, LINE1 + "\n" + LINE2),
+            new TestCaseData(LINE1 +"\r" + LINE2, LINE1 + "\r" + LINE2),
+            new TestCaseData(LINE1 +"\r\n" + LINE2 + "\r\n", LINE1 +"\r\n" + LINE2),
+            new TestCaseData(MESSAGE + NL + NL, MESSAGE + NL),
+            new TestCaseData(MESSAGE + "\r\n\r\n", MESSAGE + "\r\n"),
+            new TestCaseData(MESSAGE + "\n\n", MESSAGE + "\n"),
+            new TestCaseData(MESSAGE + "\r\r", MESSAGE + "\r"),
+        };
     }
 }

@@ -64,6 +64,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FakeTestExecutionRecorder.cs" />
     <Compile Include="NUnitTestAdapterTests.cs" />
     <Compile Include="TestConverterStaticTests.cs" />
     <Compile Include="TestConverterTests.cs" />

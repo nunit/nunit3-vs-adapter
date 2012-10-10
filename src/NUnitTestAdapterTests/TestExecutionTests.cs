@@ -13,7 +13,6 @@ using NUnit.Tests.Assemblies;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
-    //public class TestExecutionTests : ITestExecutionRecorder
     public class TestExecutionTests : IFrameworkHandle
     {
         static readonly string mockAssemblyPath = Path.GetFullPath("mock-assembly.dll");
