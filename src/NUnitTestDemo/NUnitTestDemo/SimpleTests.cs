@@ -13,6 +13,13 @@ namespace NUnitTestDemo
             Assert.That(2 + 2, Is.EqualTo(4));
         }
 
+        [Test]
+        public void TestSucceeds_Message()
+        {
+            Assert.That(2 + 2, Is.EqualTo(4));
+            Assert.Pass("Simple arithmetic!");
+        }
+
         [Test, ExpectedException(typeof(ApplicationException))]
         public void TestSucceeds_ExpectedException()
         {
