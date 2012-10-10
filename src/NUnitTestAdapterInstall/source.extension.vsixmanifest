@@ -4,9 +4,9 @@
 		<Name>NUnit Test Adapter (Beta 2)</Name>
 		<Author>Charlie Poole</Author>
 		<Version>0.92</Version>
-		<Description xml:space="preserve">NUnit adapter for integrated test execution under the Visual Studio 11 Beta Release. Compatible with NUnit 2.0 through 2.6.</Description>
+		<Description xml:space="preserve">NUnit adapter for integrated test execution under Visual Studio 2012. Compatible with NUnit 2.0 through 2.6.1</Description>
 		<Locale>1033</Locale>
-		<MoreInfoUrl>http://nunit.org/index.php?p=vsTestAdapter&amp;r=2.6</MoreInfoUrl>
+		<MoreInfoUrl>http://nunit.org/index.php?p=vsTestAdapter&amp;r=2.6.1</MoreInfoUrl>
 		<License>license.rtf</License>
 		<!--<GettingStartedGuide>http://nunit.org</GettingStartedGuide>-->
 		<Icon>nunit_32x32.png</Icon>

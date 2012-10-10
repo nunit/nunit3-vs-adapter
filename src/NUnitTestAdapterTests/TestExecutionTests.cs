@@ -55,8 +55,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         TestCaseData[] outcomes = new TestCaseData[] {
             // NOTE: One inconclusive test is reported as None
-            new TestCaseData(TestOutcome.Passed).Returns(MockAssembly.TestsRun - MockAssembly.ErrorsAndFailures - 1),
-            new TestCaseData(TestOutcome.Failed).Returns(MockAssembly.ErrorsAndFailures + MockAssembly.NotRunnable),
+            new TestCaseData(TestOutcome.Passed).Returns(MockAssembly.TestsRun - MockAssembly.Errors - MockAssembly.Failures - 1),
+            new TestCaseData(TestOutcome.Failed).Returns(MockAssembly.Errors + MockAssembly.Failures + MockAssembly.NotRunnable),
             new TestCaseData(TestOutcome.Skipped).Returns(MockAssembly.NotRun - MockAssembly.Explicit - MockAssembly.NotRunnable),
             new TestCaseData(TestOutcome.None).Returns(1),
             new TestCaseData(TestOutcome.NotFound).Returns(0)
