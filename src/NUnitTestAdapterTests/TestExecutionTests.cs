@@ -177,6 +177,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             {
                 get { throw new NotImplementedException(); }
             }
+
+            public ITestCaseFilterExpression GetTestCaseFilter(IEnumerable<string> supportedProperties, Func<string, TestProperty> propertyProvider)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         #endregion
@@ -190,6 +195,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 throw new NotImplementedException();
             }
 
+
+
+            public string SettingsXml
+            {
+                get { throw new NotImplementedException(); }
+            }
         }
 
         #endregion
