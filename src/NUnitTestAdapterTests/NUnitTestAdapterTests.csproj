@@ -64,6 +64,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AsyncTests.cs" />
     <Compile Include="DiaSessionTestData.cs" />
     <Compile Include="DiaSessionTests.cs" />
     <Compile Include="Fakes\FakeFrameworkHandle.cs" />
