@@ -69,5 +69,10 @@ namespace NUnitTestDemo
         {
             throw new Exception("Exception from test case");
         }
+
+        [TestCase(42, TestName="AlternateTestName")]
+        public void TestCaseWithAlternateName(int x)
+        {
+        }
     }
 }

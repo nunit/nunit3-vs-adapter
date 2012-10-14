@@ -11,6 +11,8 @@ using System.IO;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
+    // TODO: Revise these tests so a full map
+    // of the test cases is availble
     public class TestConverterTests
     {
         private static readonly string THIS_ASSEMBLY_PATH = 
@@ -20,10 +22,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         
         // NOTE: If the location of the FakeTestCase method in the 
         // file changes, update the value of FAKE_LINE_NUMBER.
-        private static readonly int FAKE_LINE_NUMBER = 29;
+        private static readonly int FAKE_LINE_NUMBER = 32;
 
         private NUnit.Core.ITest fakeNUnitTest;
         private NUnit.Core.TestResult fakeNUnitResult;
+        private TestConverter testConverter;
 
         private void FakeTestCase()
         {  // FAKE_LINE_NUMBER SHOULD BE THIS LINE
@@ -35,12 +38,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             MethodInfo fakeTestMethod = this.GetType().GetMethod("FakeTestCase", BindingFlags.Instance | BindingFlags.NonPublic);
             fakeNUnitTest = new NUnit.Core.NUnitTestMethod(fakeTestMethod);
             fakeNUnitResult = new NUnit.Core.TestResult(fakeNUnitTest);
+
+            var map = new Dictionary<string, NUnit.Core.TestNode>();
+            map.Add(fakeNUnitTest.TestName.UniqueName, new NUnit.Core.TestNode(fakeNUnitTest));
+
+            testConverter = new TestConverter(THIS_ASSEMBLY_PATH, map);
         }
 
         [Test]
         public void CanMakeTestCaseFromTest()
         {
-            var testCase = new TestConverter(THIS_ASSEMBLY_PATH).ConvertTestCase(fakeNUnitTest);
+            var testCase = testConverter.ConvertTestCase(fakeNUnitTest);
 
             Assert.That(testCase.FullyQualifiedName, Is.EqualTo("NUnit.VisualStudio.TestAdapter.Tests.TestConverterTests.FakeTestCase"));
             Assert.That(testCase.DisplayName, Is.EqualTo("FakeTestCase"));
@@ -55,27 +63,27 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             var testName = fakeNUnitTest.TestName;
 
-            var testCase = new TestConverter(THIS_ASSEMBLY_PATH).ConvertTestName(testName);
+            var testCase = testConverter.MakeTestCase(testName);
 
             Assert.That(testCase.FullyQualifiedName, Is.EqualTo("NUnit.VisualStudio.TestAdapter.Tests.TestConverterTests.FakeTestCase"));
             Assert.That(testCase.DisplayName, Is.EqualTo("FakeTestCase"));
             Assert.That(testCase.Source, Is.SamePath(THIS_ASSEMBLY_PATH));
 
-            Assert.That(testCase.CodeFilePath, Is.SamePath(THIS_CODE_FILE));
-            Assert.That(testCase.LineNumber, Is.EqualTo(FAKE_LINE_NUMBER));
+            Assert.Null(testCase.CodeFilePath);
+            Assert.That(testCase.LineNumber, Is.EqualTo(0));
         }
 
-//        [Test]
+        [Test]
         public void CanMakeTestResultFromNUnitTestResult()
         {
-            var testResult = new TestConverter(THIS_ASSEMBLY_PATH).ConvertTestResult(fakeNUnitResult);
+            var testResult = testConverter.ConvertTestResult(fakeNUnitResult);
             var testCase = testResult.TestCase;
 
             Assert.That(testCase.FullyQualifiedName, Is.EqualTo("NUnit.VisualStudio.TestAdapter.Tests.TestConverterTests.FakeTestCase"));
             Assert.That(testCase.DisplayName, Is.EqualTo("FakeTestCase"));
             Assert.That(testCase.Source, Is.SamePath(THIS_ASSEMBLY_PATH));
 
-            Assert.That(testCase.CodeFilePath, Is.EqualTo(THIS_CODE_FILE));
+            Assert.That(testCase.CodeFilePath, Is.SamePath(THIS_CODE_FILE));
             Assert.That(testCase.LineNumber, Is.EqualTo(FAKE_LINE_NUMBER));
         }
     }

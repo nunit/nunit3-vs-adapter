@@ -20,7 +20,6 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region ITestDiscoverer Members
 
-        //public void DiscoverTests(IEnumerable<string> sources, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)
         {
             // Ensure any channels registered by other adapters are unregistered
@@ -31,12 +30,14 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 TestRunner runner = new TestDomain();
                 TestPackage package = new TestPackage(sourceAssembly);
-                this.testConverter = new TestConverter(sourceAssembly);
 
                 try
                 {
                     if (runner.Load(package))
                     {
+                        var testCaseMap = CreateTestCaseMap(runner.Test as TestNode);
+                        this.testConverter = new TestConverter(sourceAssembly, testCaseMap);
+
                         foreach (TestNode test in runner.Test.Tests)
                         {
                             SendTestCase(test, discoverySink);
@@ -67,6 +68,23 @@ namespace NUnit.VisualStudio.TestAdapter
                 TestCase testCase = testConverter.ConvertTestCase(test);
                 discoverySink.SendTestCase(testCase);
             }
+        }
+
+        private Dictionary<string, NUnit.Core.TestNode> CreateTestCaseMap(TestNode topLevelTest)
+        {
+            var map = new Dictionary<string, NUnit.Core.TestNode>();
+            AddTestCasesToMap(map, topLevelTest);
+
+            return map;
+        }
+
+        private void AddTestCasesToMap(Dictionary<string, NUnit.Core.TestNode> map, TestNode test)
+        {
+            if (test.IsSuite)
+                foreach (TestNode child in test.Tests)
+                    AddTestCasesToMap(map, child);
+            else
+                map.Add(test.TestName.UniqueName, test);
         }
 
         #endregion

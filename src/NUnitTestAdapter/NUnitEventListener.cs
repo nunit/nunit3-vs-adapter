@@ -12,19 +12,23 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
+    /// <summary>
+    /// NUnitEventListener implements the EventListener interface and
+    /// translates each event into a message for the VS test platform.
+    /// </summary>
     public class NUnitEventListener : MarshalByRefObject, EventListener, IDisposable // Public for testing
     {
         private ITestExecutionRecorder testLog;
-        private Dictionary<string, TestCase> map;
         private string assemblyName;
+        private Dictionary<string, NUnit.Core.TestNode> nunitTestCases;
         private TestConverter testConverter;
 
-        public NUnitEventListener(ITestExecutionRecorder testLog, Dictionary<string, TestCase> map, string assemblyName)
+        public NUnitEventListener(ITestExecutionRecorder testLog, Dictionary<string, NUnit.Core.TestNode> nunitTestCases, string assemblyName)
         {
             this.testLog = testLog;
-            this.map = map;
             this.assemblyName = assemblyName;
-            this.testConverter = new TestConverter(assemblyName, map);
+            this.nunitTestCases = nunitTestCases;
+            this.testConverter = new TestConverter(assemblyName, nunitTestCases);
         }
 
         public void RunStarted(string name, int testCount)
@@ -49,8 +53,15 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void TestStarted(TestName testName)
         {
-            TestCase ourCase = testConverter.ConvertTestName(testName);
-            this.testLog.RecordStart(ourCase);
+            string key = testName.UniqueName;
+
+            // Simply ignore any TestName not found
+            if (nunitTestCases.ContainsKey(key))
+            {
+                var nunitTest = nunitTestCases[key];
+                var ourCase = testConverter.ConvertTestCase(nunitTest);
+                this.testLog.RecordStart(ourCase);
+            }
         }
 
         public void TestFinished(NUnit.Core.TestResult result)

@@ -1,87 +1,73 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.Core;
-using System.Runtime.InteropServices;
 using TestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
     public class TestConverter : IDisposable
     {
-        private Dictionary<string, TestCase> testCaseMap;
+        private Dictionary<string, TestCase> vsTestCaseMap;
         private string sourceAssembly;
-        private DiaSession diaSession;
-        private bool tryToCreateDiaSession = true;
+        private Dictionary<string, NUnit.Core.TestNode> nunitTestCases;
 
-        #region Constructors
+        #region Constructor
 
-        public TestConverter(string sourceAssembly)
+        public TestConverter(string sourceAssembly, Dictionary<string, NUnit.Core.TestNode> nunitTestCases)
         {
             this.sourceAssembly = sourceAssembly;
-        }
-
-        public TestConverter(string sourceAssembly, Dictionary<string, TestCase> testCaseMap)
-            : this(sourceAssembly)
-        {
-            this.testCaseMap = testCaseMap;
+            this.vsTestCaseMap = new Dictionary<string, TestCase>();
+            this.nunitTestCases = nunitTestCases;
         }
 
         #endregion
 
-        public TestCase ConvertTestCase(ITest test)
+        #region Public Methods
+
+        /// <summary>
+        /// Converts an NUnit test into a TestCase for Visual Studio,
+        /// using the best method available according to the exact
+        /// type passed and caching results for efficiency.
+        /// </summary>
+        public TestCase ConvertTestCase(NUnit.Core.ITest test)
         {
             if (test.IsSuite)
                 throw new ArgumentException("The argument must be a test case", "test");
 
-            if (testCaseMap != null && testCaseMap.ContainsKey(test.TestName.FullName))
-                return testCaseMap[test.TestName.FullName];
+            // Return cached value if we have one
+            if (vsTestCaseMap.ContainsKey(test.TestName.FullName))
+                return vsTestCaseMap[test.TestName.FullName];
 
-            return MakeTestCase(test.TestName);
+            // See if this is a TestNode - if not, try to
+            // find one in our cache of NUnit TestNodes
+            var testNode = test as TestNode;
+            if (testNode == null && nunitTestCases.ContainsKey(test.TestName.UniqueName))
+                testNode = nunitTestCases[test.TestName.UniqueName];
+
+            // No test node: just build a TestCase without any
+            // navigation data using the TestName
+            if (testNode == null)
+                return MakeTestCase(test.TestName);
+            
+            // Use the TestNode and cache the result
+            var testCase = MakeTestCase(testNode);
+            vsTestCaseMap.Add(test.TestName.FullName, testCase);
+            return testCase;             
         }
 
-        public TestCase ConvertTestName(TestName testName)
+        /// <summary>
+        /// Makes a TestCase from a TestNode, adding
+        /// navigation data if it can be found.
+        /// </summary>
+        public TestCase MakeTestCase(NUnit.Core.TestNode testNode)
         {
-            if (testCaseMap != null && testCaseMap.ContainsKey(testName.FullName))
-                return testCaseMap[testName.FullName];
+            var testCase = MakeTestCase(testNode.TestName);
 
-            return MakeTestCase(testName);
-        }
-
-        private TestCase MakeTestCase(TestName testName)
-        {
-            TestCase testCase = new TestCase(testName.FullName, new Uri(NUnitTestExecutor.ExecutorUri), this.sourceAssembly);
-            testCase.DisplayName = testName.Name;
-            //testCase.Source = this.sourceAssembly;
-            testCase.CodeFilePath = null;
-            testCase.LineNumber = 0;
-
-            // NOTE: There is some sort of timing issue involved
-            // in creating the DiaSession. When it is created
-            // in the constructor, an exception is thrown on the
-            // call to GetNavigationData. We don't understand
-            // this, we're just dealing with it.
-            if (tryToCreateDiaSession)
+            if (this.DiaSession != null)
             {
-                try
-                {
-                    this.diaSession = new DiaSession(sourceAssembly);
-                }
-                catch (Exception)
-                {
-                    // If this isn't a project type supporting DiaSession,
-                    // we just ignore the error. We won't try this again 
-                    // for the project.
-                }
-
-                tryToCreateDiaSession = false;
-            }
-
-            if (this.diaSession != null)
-            {
-                DiaNavigationData navigationData = diaSession.GetNavigationData(GetClassName(testName), GetMethodName(testName));
+                var navigationData = DiaSession.GetNavigationData(testNode.ClassName, testNode.MethodName);
 
                 if (navigationData != null)
                 {
@@ -89,6 +75,19 @@ namespace NUnit.VisualStudio.TestAdapter
                     testCase.LineNumber = navigationData.MinLineNumber;
                 }
             }
+
+            return testCase;
+        }
+
+        /// <summary>
+        /// Makes a TestCase without source info from TestName.
+        /// </summary>
+        public TestCase MakeTestCase(TestName testName)
+        {
+            TestCase testCase = new TestCase(testName.FullName, new Uri(NUnitTestExecutor.ExecutorUri), this.sourceAssembly);
+            testCase.DisplayName = testName.Name;
+            testCase.CodeFilePath = null;
+            testCase.LineNumber = 0;
 
             return testCase;
         }
@@ -124,37 +123,15 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void Dispose()
         {
-            if (this.diaSession != null)
-                this.diaSession.Dispose();
+            if (this._diaSession != null)
+                this._diaSession.Dispose();
         }
 
-        #region Static Methods
+        #endregion
 
-        public static string GetClassName(TestName testName)
-        {
-            var className = testName.FullName;
-            var name = testName.Name;
+        #region Helper Methods
 
-            if (className.Length > name.Length + 1)
-                className = className.Substring(0, className.Length - name.Length - 1);
-
-            return className;
-        }
-
-        public static string GetMethodName(TestName testName)
-        {
-            var methodName = testName.Name;
-
-            if (methodName.EndsWith(")"))
-            {
-                var lpar = methodName.IndexOf('(');
-                if (lpar > 0)
-                    methodName = methodName.Substring(0, lpar);
-            }
-
-            return methodName;
-        }
-
+        // Public for testing
         public static TestOutcome ResultStateToTestOutcome(ResultState resultState)
         {
             switch (resultState)
@@ -178,6 +155,41 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             return TestOutcome.None;
+        }
+
+        #endregion
+
+        #region Private Properties
+
+        // NOTE: There is some sort of timing issue involved
+        // in creating the DiaSession. When it is created
+        // in the constructor, an exception is thrown on the
+        // call to GetNavigationData. We don't understand
+        // this, we're just dealing with it.
+        private DiaSession _diaSession;
+        private bool _tryToCreateDiaSession = true;
+        private DiaSession DiaSession
+        {
+            get
+            {
+                if (_tryToCreateDiaSession)
+                {
+                    try
+                    {
+                        _diaSession = new DiaSession(sourceAssembly);
+                    }
+                    catch (Exception)
+                    {
+                        // If this isn't a project type supporting DiaSession,
+                        // we just ignore the error. We won't try this again 
+                        // for the project.
+                    }
+
+                    _tryToCreateDiaSession = false;
+                }
+
+                return _diaSession;
+            }
         }
 
         #endregion

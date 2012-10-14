@@ -31,8 +31,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             testLog = new FakeTestExecutionRecorder();
 
-            var map = new Dictionary<string, TestCase>();
-            map.Add(fakeTestCase.FullyQualifiedName, fakeTestCase);
+            var map = new Dictionary<string, NUnit.Core.TestNode>();
 
             this.listener = new NUnitEventListener(testLog, map, assemblyName);
         }
@@ -44,19 +43,18 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.AreEqual(1, testLog.RecordResultCalls);
         }
 
-        //[Test]
-        //public void TestFinishedDoesNothingIfNameIsNotInMap()
-        //{
-        //    fakeNUnitTest.TestName.FullName = "This.Is.Not.In.Log";
-        //    listener.TestFinished(new NUnit.Core.TestResult(fakeNUnitTest));
-        //    Assert.AreEqual(0, callCount);
-        //}
-
         [Test]
-        public void TestFinished_ResultHasCorrectTestName()
+        public void TestFinished_ResultHasCorrectDisplayName()
         {
             listener.TestFinished(new NUnit.Core.TestResult(fakeNUnitTest));
-            Assert.AreEqual(fakeNUnitTest.TestName.FullName, testLog.LastResult.TestCase.DisplayName);
+            Assert.AreEqual(fakeNUnitTest.TestName.Name, testLog.LastResult.TestCase.DisplayName);
+        }
+
+        [Test]
+        public void TestFinished_ResultHasCorrectFullName()
+        {
+            listener.TestFinished(new NUnit.Core.TestResult(fakeNUnitTest));
+            Assert.AreEqual(fakeNUnitTest.TestName.FullName, testLog.LastResult.TestCase.FullyQualifiedName);
         }
 
         [Test]
