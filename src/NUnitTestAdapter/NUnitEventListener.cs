@@ -67,6 +67,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public void TestFinished(NUnit.Core.TestResult result)
         {
             TestResult ourResult = testConverter.ConvertTestResult(result);
+            this.testLog.RecordEnd(ourResult.TestCase, ourResult.Outcome);
             this.testLog.RecordResult(ourResult);
         }
 
