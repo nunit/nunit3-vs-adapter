@@ -33,6 +33,12 @@ namespace NUnitTestDemo
         }
 
         [Test]
+        public void TestFails_StringEquality()
+        {
+            Assert.That("Hello" + "World" + "!", Is.EqualTo("Hello World!"));
+        }
+
+        [Test]
         public void TestIsInconclusive()
         {
             Assert.Inconclusive("Testing");
