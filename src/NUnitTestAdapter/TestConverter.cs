@@ -40,8 +40,8 @@ namespace NUnit.VisualStudio.TestAdapter
                 throw new ArgumentException("The argument must be a test case", "test");
 
             // Return cached value if we have one
-            if (vsTestCaseMap.ContainsKey(test.TestName.FullName))
-                return vsTestCaseMap[test.TestName.FullName];
+            if (vsTestCaseMap.ContainsKey(test.TestName.UniqueName))
+                return vsTestCaseMap[test.TestName.UniqueName];
 
             // See if this is a TestNode - if not, try to
             // find one in our cache of NUnit TestNodes
@@ -56,7 +56,7 @@ namespace NUnit.VisualStudio.TestAdapter
             
             // Use the TestNode and cache the result
             var testCase = MakeTestCase(testNode);
-            vsTestCaseMap.Add(test.TestName.FullName, testCase);
+            vsTestCaseMap.Add(test.TestName.UniqueName, testCase);
             return testCase;             
         }
 
@@ -87,7 +87,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         public TestCase MakeTestCase(TestName testName)
         {
-            TestCase testCase = new TestCase(testName.FullName, new Uri(NUnitTestExecutor.ExecutorUri), this.sourceAssembly);
+            TestCase testCase = new TestCase(testName.UniqueName, new Uri(NUnitTestExecutor.ExecutorUri), this.sourceAssembly);
             testCase.DisplayName = testName.Name;
             testCase.CodeFilePath = null;
             testCase.LineNumber = 0;
