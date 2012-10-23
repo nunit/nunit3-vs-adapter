@@ -163,12 +163,12 @@ namespace NUnit.VisualStudio.TestAdapter
         private string GetErrorMessage(NUnit.Core.TestResult result)
         {
             string message = result.Message;
+            string NL = Environment.NewLine;
 
             // If we're running in the IDE, remove any caret line from the message
             // since it will be displayed using a variable font and won't make sense.
             if (message != null && RunningUnderIDE && (result.ResultState == ResultState.Failure || result.ResultState == ResultState.Inconclusive))
             {
-                string NL = Environment.NewLine;
                 string pattern = NL + "  -*\\^" + NL;
                 message = Regex.Replace(message, pattern, NL, RegexOptions.Multiline);
             }
@@ -217,7 +217,11 @@ namespace NUnit.VisualStudio.TestAdapter
             get
             {
                 if (exeName == null)
-                    exeName = Path.GetFileName(AssemblyHelper.GetAssemblyPath(Assembly.GetEntryAssembly()));
+                {
+                    Assembly entryAssembly = Assembly.GetEntryAssembly();
+                    if (entryAssembly != null)
+                        exeName = Path.GetFileName(AssemblyHelper.GetAssemblyPath(entryAssembly));
+                }
                 
                 return exeName == "vstest.executionengine.exe";
             }
