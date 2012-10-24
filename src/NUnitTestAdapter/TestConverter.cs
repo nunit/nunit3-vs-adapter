@@ -16,13 +16,28 @@ namespace NUnit.VisualStudio.TestAdapter
         private string sourceAssembly;
         private Dictionary<string, NUnit.Core.TestNode> nunitTestCases;
 
-        #region Constructor
+        private static readonly PropertyInfo traitsProperty;
+        private static readonly Type traitCollectionType;
+        private static readonly MethodInfo traitCollectionAdd;
+
+        #region Constructors
 
         public TestConverter(string sourceAssembly, Dictionary<string, NUnit.Core.TestNode> nunitTestCases)
         {
             this.sourceAssembly = sourceAssembly;
             this.vsTestCaseMap = new Dictionary<string, TestCase>();
             this.nunitTestCases = nunitTestCases;
+        }
+
+        static TestConverter()
+        {
+            traitsProperty = typeof(TestCase).GetProperty("Traits");
+            if (traitsProperty != null)
+            {
+                traitCollectionType = traitsProperty.PropertyType;
+                if (traitCollectionType != null)
+                    traitCollectionAdd = traitCollectionType.GetMethod("Add", new Type[] {typeof(string), typeof(string)});
+            }
         }
 
         #endregion
@@ -79,7 +94,32 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
             }
 
+            foreach (string key in testNode.Properties.Keys)
+            {
+                object value = testNode.Properties[key];
+                var multipleValues = value as System.Collections.IEnumerable;
+                if (multipleValues != null)
+                    foreach (object item in multipleValues)
+                        AddTrait(testCase, key, item.ToString());
+                else
+                    AddTrait(testCase, key, value.ToString());
+            }
+
             return testCase;
+        }
+
+        private void AddTrait(TestCase testCase, string name, string value)
+        {
+#if false
+                testCase.Traits.Add(new Trait("Category", "Fast"));
+#else
+                if (traitCollectionAdd != null)
+                {
+                    object traitsCollection = traitsProperty.GetValue(testCase, new object[0]);
+                    if (traitsCollection != null)
+                        traitCollectionAdd.Invoke(traitsCollection, new object[] { name, value.ToString() });
+                }
+#endif
         }
 
         /// <summary>

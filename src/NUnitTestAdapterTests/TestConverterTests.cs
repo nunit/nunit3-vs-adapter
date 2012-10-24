@@ -11,8 +11,6 @@ using System.IO;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
-    // TODO: Revise these tests so a full map
-    // of the test cases is availble
     public class TestConverterTests
     {
         private static readonly string THIS_ASSEMBLY_PATH = 
@@ -22,7 +20,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         
         // NOTE: If the location of the FakeTestCase method in the 
         // file changes, update the value of FAKE_LINE_NUMBER.
-        private static readonly int FAKE_LINE_NUMBER = 32;
+        private static readonly int FAKE_LINE_NUMBER = 30;
 
         private NUnit.Core.ITest fakeNUnitTest;
         private NUnit.Core.TestResult fakeNUnitResult;
@@ -46,6 +44,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
+        [Category("TestConverter")]
         public void CanMakeTestCaseFromTest()
         {
             var testCase = testConverter.ConvertTestCase(fakeNUnitTest);
@@ -59,6 +58,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
+        [Category("TestConverter")]
         public void CanMakeTestCaseFromTestName()
         {
             var testName = fakeNUnitTest.TestName;
@@ -74,6 +74,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
+        [Category("TestConverter")]
         public void CanMakeTestResultFromNUnitTestResult()
         {
             var testResult = testConverter.ConvertTestResult(fakeNUnitResult);

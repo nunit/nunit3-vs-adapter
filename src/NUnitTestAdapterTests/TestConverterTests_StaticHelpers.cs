@@ -14,7 +14,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 {
     public class TestConverterTests_StaticHelpers
     {
-        [TestCase(ResultState.Cancelled, Result=TestOutcome.None)]
+        [Category("TestConverter")]
+        [TestCase(ResultState.Cancelled, Result = TestOutcome.None)]
         [TestCase(ResultState.Error, Result=TestOutcome.Failed)]
         [TestCase(ResultState.Failure, Result=TestOutcome.Failed)]
         [TestCase(ResultState.Ignored, Result=TestOutcome.Skipped)]

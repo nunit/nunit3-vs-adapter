@@ -30,11 +30,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
+        [Category("TestDiscovery")]
         public void VerifyTestCaseCount()
         {
             Assert.That(testCases.Count, Is.EqualTo(NUnit.Tests.Assemblies.MockAssembly.Tests));
         }
 
+        [Category("TestDiscovery")]
         [TestCase("MockTest3", @"^\[.*\]NUnit.Tests.Assemblies.MockTestFixture.MockTest3$")]
         [TestCase("MockTest4", @"^\[.*\]NUnit.Tests.Assemblies.MockTestFixture.MockTest4$")]
         [TestCase("ExplicitlyRunTest", @"^\[.*\]NUnit.Tests.Assemblies.MockTestFixture.ExplicitlyRunTest$")]
