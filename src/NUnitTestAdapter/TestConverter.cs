@@ -100,9 +100,20 @@ namespace NUnit.VisualStudio.TestAdapter
             TestCase ourCase = ConvertTestCase(result.Test);
 
             TestResult ourResult = new TestResult(ourCase);
+            ourResult.DisplayName = ourCase.DisplayName;
             ourResult.Outcome = ResultStateToTestOutcome(result.ResultState);
             ourResult.Duration = TimeSpan.FromSeconds(result.Time);
+            // TODO: Remove this when NUnit provides a better duration
+            if (ourResult.Duration == TimeSpan.Zero && (ourResult.Outcome == TestOutcome.Passed || ourResult.Outcome == TestOutcome.Failed))
+                ourResult.Duration = TimeSpan.FromTicks(1);
             ourResult.ComputerName = Environment.MachineName;
+
+            // TODO: Stuff we don't yet set
+            //   StartTime   - not in NUnit result
+            //   EndTime     - not in NUnit result
+            //   Messages    - could we add messages other than the error message? Where would they appear?
+            //   Attachments - don't exist in NUnit
+
             if (result.Message != null)
                 ourResult.ErrorMessage = GetErrorMessage(result);
 
