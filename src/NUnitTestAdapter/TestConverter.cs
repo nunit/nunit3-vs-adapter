@@ -17,8 +17,7 @@ namespace NUnit.VisualStudio.TestAdapter
         private Dictionary<string, NUnit.Core.TestNode> nunitTestCases;
 
         private static readonly PropertyInfo traitsProperty;
-        private static readonly Type traitCollectionType;
-        private static readonly MethodInfo traitCollectionAdd;
+        private static readonly MethodInfo traitsCollectionAdd;
 
         #region Constructors
 
@@ -34,9 +33,9 @@ namespace NUnit.VisualStudio.TestAdapter
             traitsProperty = typeof(TestCase).GetProperty("Traits");
             if (traitsProperty != null)
             {
-                traitCollectionType = traitsProperty.PropertyType;
+                var traitCollectionType = traitsProperty.PropertyType;
                 if (traitCollectionType != null)
-                    traitCollectionAdd = traitCollectionType.GetMethod("Add", new Type[] {typeof(string), typeof(string)});
+                    traitsCollectionAdd = traitCollectionType.GetMethod("Add", new Type[] {typeof(string), typeof(string)});
             }
         }
 
@@ -94,32 +93,29 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
             }
 
-            foreach (string key in testNode.Properties.Keys)
+            if (traitsCollectionAdd != null) // implies traitsProperty is not null either
             {
-                object value = testNode.Properties[key];
-                var multipleValues = value as System.Collections.IEnumerable;
-                if (multipleValues != null)
-                    foreach (object item in multipleValues)
-                        AddTrait(testCase, key, item.ToString());
-                else
-                    AddTrait(testCase, key, value.ToString());
+                object traitsCollection = traitsProperty.GetValue(testCase, new object[0]);
+                if (traitsCollection != null)
+                {
+                    foreach (string propertyName in testNode.Properties.Keys)
+                    {
+                        object propertyValue = testNode.Properties[propertyName];
+
+                        if (propertyName == "_CATEGORIES")
+                        {
+                            var categories = propertyValue as System.Collections.IEnumerable;
+                            if (categories != null)
+                                foreach (string category in categories)
+                                    traitsCollectionAdd.Invoke(traitsCollection, new object[] {"Category", category});
+                        }
+                        else if (propertyName[0] != '_') // internal use only
+                            traitsCollectionAdd.Invoke(traitsCollection, new object[] { propertyName, propertyValue.ToString() });
+                    }
+                }
             }
 
             return testCase;
-        }
-
-        private void AddTrait(TestCase testCase, string name, string value)
-        {
-#if false
-                testCase.Traits.Add(new Trait("Category", "Fast"));
-#else
-                if (traitCollectionAdd != null)
-                {
-                    object traitsCollection = traitsProperty.GetValue(testCase, new object[0]);
-                    if (traitsCollection != null)
-                        traitCollectionAdd.Invoke(traitsCollection, new object[] { name, value.ToString() });
-                }
-#endif
         }
 
         /// <summary>
@@ -140,9 +136,20 @@ namespace NUnit.VisualStudio.TestAdapter
             TestCase ourCase = ConvertTestCase(result.Test);
 
             TestResult ourResult = new TestResult(ourCase);
+            ourResult.DisplayName = ourCase.DisplayName;
             ourResult.Outcome = ResultStateToTestOutcome(result.ResultState);
             ourResult.Duration = TimeSpan.FromSeconds(result.Time);
+            // TODO: Remove this when NUnit provides a better duration
+            if (ourResult.Duration == TimeSpan.Zero && (ourResult.Outcome == TestOutcome.Passed || ourResult.Outcome == TestOutcome.Failed))
+                ourResult.Duration = TimeSpan.FromTicks(1);
             ourResult.ComputerName = Environment.MachineName;
+
+            // TODO: Stuff we don't yet set
+            //   StartTime   - not in NUnit result
+            //   EndTime     - not in NUnit result
+            //   Messages    - could we add messages other than the error message? Where would they appear?
+            //   Attachments - don't exist in NUnit
+
             if (result.Message != null)
                 ourResult.ErrorMessage = GetErrorMessage(result);
 

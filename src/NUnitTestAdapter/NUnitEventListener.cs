@@ -49,6 +49,17 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void SuiteFinished(NUnit.Core.TestResult result)
         {
+            if ((result.IsError || result.IsFailure) &&
+                (result.FailureSite == FailureSite.SetUp || result.FailureSite == FailureSite.TearDown))
+            {
+                testLog.SendMessage(
+                    TestMessageLevel.Error, 
+                    string.Format("{0} failed for test fixture {1}", result.FailureSite, result.FullName));
+                if (result.Message != null)
+                    testLog.SendMessage(TestMessageLevel.Error, result.Message);
+                if (result.StackTrace != null)
+                    testLog.SendMessage(TestMessageLevel.Error, result.StackTrace);
+            }
         }
 
         public void TestStarted(TestName testName)
