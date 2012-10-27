@@ -60,13 +60,7 @@ namespace NUnit.VisualStudio.TestAdapter
             var assemblyGroups = selectedTests.GroupBy(tc => tc.Source);
 
             foreach (var assemblyGroup in assemblyGroups)
-            {
-                var filter = new SimpleNameFilter();
-                foreach (var testCase in assemblyGroup)
-                    filter.Add(testCase.FullyQualifiedName);
-
-                RunAssembly(assemblyGroup.Key, frameworkHandle, filter);
-            }
+                RunAssembly(assemblyGroup.Key, frameworkHandle, MakeTestFilter(assemblyGroup));
         }
 
         void ITestExecutor.Cancel()
@@ -149,6 +143,16 @@ namespace NUnit.VisualStudio.TestAdapter
                     AddTestCasesToMap(map, child);
             else
                 map.Add(test.TestName.UniqueName, test);
+        }
+
+        private TestFilter MakeTestFilter(IEnumerable<TestCase> testCases)
+        {
+            var filter = new NameFilter();
+
+            foreach (TestCase testCase in testCases)
+                filter.Add(TestName.Parse(testCase.FullyQualifiedName));
+
+            return filter;
         }
 
         #endregion
