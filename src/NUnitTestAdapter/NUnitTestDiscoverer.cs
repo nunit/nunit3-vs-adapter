@@ -28,6 +28,9 @@ namespace NUnit.VisualStudio.TestAdapter
             // Filter out the sources which can have NUnit tests. 
             foreach (string sourceAssembly in SanitizeSources(sources))
             {
+#if DEBUG
+                logger.SendMessage(TestMessageLevel.Informational, "Processing " + sourceAssembly);
+#endif
                 TestRunner runner = new TestDomain();
                 TestPackage package = new TestPackage(sourceAssembly);
 
@@ -40,7 +43,16 @@ namespace NUnit.VisualStudio.TestAdapter
 
                         TestNode topNode = runner.Test as TestNode;
                         if (topNode != null)
-                            ProcessTestCases(topNode, discoverySink, logger);
+                        {
+                            int cases = ProcessTestCases(topNode, discoverySink, logger);
+#if DEBUG
+                            logger.SendMessage(TestMessageLevel.Informational, string.Format("Discovered {0} test cases", cases));
+#endif
+                        }
+                    }
+                    else
+                    {
+                        logger.SendMessage(TestMessageLevel.Error, "NUnit failed to load " + sourceAssembly);
                     }
                 }
                 catch (System.BadImageFormatException)
@@ -61,12 +73,14 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
-        private void ProcessTestCases(TestNode test, ITestCaseDiscoverySink discoverySink, IMessageLogger logger)
+        private int ProcessTestCases(TestNode test, ITestCaseDiscoverySink discoverySink, IMessageLogger logger)
         {
+            int cases = 0;
+
             if (test.IsSuite)
             {
                 foreach (TestNode child in test.Tests)
-                    ProcessTestCases(child, discoverySink, logger);
+                    cases += ProcessTestCases(child, discoverySink, logger);
             }
             else
             {
@@ -74,6 +88,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     TestCase testCase = testConverter.ConvertTestCase(test);
                     discoverySink.SendTestCase(testCase);
+                    cases += 1;
                 }
                 catch (System.Exception ex)
                 {
@@ -81,6 +96,8 @@ namespace NUnit.VisualStudio.TestAdapter
                     logger.SendMessage(TestMessageLevel.Error, ex.ToString());   
                 }
             }
+
+            return cases;
         }
 
         private Dictionary<string, NUnit.Core.TestNode> CreateTestCaseMap(TestNode topLevelTest)
