@@ -38,15 +38,20 @@ namespace NUnit.VisualStudio.TestAdapter
                         var testCaseMap = CreateTestCaseMap(runner.Test as TestNode);
                         this.testConverter = new TestConverter(sourceAssembly, testCaseMap);
 
-                        foreach (TestNode test in runner.Test.Tests)
-                        {
-                            SendTestCase(test, discoverySink);
-                        }
+                        TestNode topNode = runner.Test as TestNode;
+                        if (topNode != null)
+                            ProcessTestCases(topNode, discoverySink, logger);
                     }
                 }
                 catch (System.BadImageFormatException)
                 {
                     // we skip the native c++ binaries that we don't support.
+                    logger.SendMessage(TestMessageLevel.Warning, "Assembly not supported: " + sourceAssembly);
+                }
+                catch (System.Exception ex)
+                {
+                    logger.SendMessage(TestMessageLevel.Error, "Exception thrown discovering tests in " + sourceAssembly);
+                    logger.SendMessage(TestMessageLevel.Error, ex.ToString());
                 }
                 finally
                 {
@@ -56,17 +61,25 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
-        private void SendTestCase(TestNode test, ITestCaseDiscoverySink discoverySink)
+        private void ProcessTestCases(TestNode test, ITestCaseDiscoverySink discoverySink, IMessageLogger logger)
         {
             if (test.IsSuite)
             {
                 foreach (TestNode child in test.Tests)
-                    SendTestCase(child, discoverySink);
+                    ProcessTestCases(child, discoverySink, logger);
             }
             else
             {
-                TestCase testCase = testConverter.ConvertTestCase(test);
-                discoverySink.SendTestCase(testCase);
+                try
+                {
+                    TestCase testCase = testConverter.ConvertTestCase(test);
+                    discoverySink.SendTestCase(testCase);
+                }
+                catch (System.Exception ex)
+                {
+                    logger.SendMessage(TestMessageLevel.Error, "Exception converting " + test.TestName.FullName);
+                    logger.SendMessage(TestMessageLevel.Error, ex.ToString());   
+                }
             }
         }
 
