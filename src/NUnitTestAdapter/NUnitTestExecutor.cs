@@ -40,7 +40,7 @@ namespace NUnit.VisualStudio.TestAdapter
             // Ensure any channels registered by other adapters are unregistered
             CleanUpRegisteredChannels();
 
-            foreach (var source in SanitizeSources(sources))
+            foreach (var source in sources)
             {
                 RunAssembly(source, frameworkHandle, TestFilter.Empty);
             }
@@ -81,6 +81,9 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <param name="filter">A test filter controlling what tests are run</param>
         private void RunAssembly(string assemblyName, ITestExecutionRecorder testLog, TestFilter filter)
         {
+            // Set the logger to use for messages
+            SetLogger(testLog);
+
             try
             {
                 this.runner = new TestDomain();
@@ -108,24 +111,18 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
                 else
                 {
-                    testLog.SendMessage(TestMessageLevel.Warning, LoadErrorMessage(assemblyName));
+                    NUnitLoadError(assemblyName);
                 }
             }
             catch (System.BadImageFormatException)
             {
                 // we skip the native c++ binaries that we don't support.
-                testLog.SendMessage(TestMessageLevel.Warning, LoadErrorMessage(assemblyName));
+                AssemblyNotSupportedWarning(assemblyName);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                testLog.SendMessage(TestMessageLevel.Error, LoadErrorMessage(assemblyName));
-                testLog.SendMessage(TestMessageLevel.Error, e.Message);
+                SendErrorMessage("Exception thrown executing tests in " + assemblyName, ex);
             }
-        }
-
-        private string LoadErrorMessage(string assemblyName)
-        {
-            return "Unable to load tests from " + assemblyName;
         }
 
         private Dictionary<string, NUnit.Core.TestNode> CreateTestCaseMap(TestNode topLevelTest)

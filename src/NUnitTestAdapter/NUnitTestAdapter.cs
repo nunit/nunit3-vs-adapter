@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.Remoting.Channels;
 using NUnit.Util;
 using AssemblyHelper = Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities.AssemblyHelper;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -17,6 +18,9 @@ namespace NUnit.VisualStudio.TestAdapter
     /// </summary>
     public abstract class NUnitTestAdapter
     {
+        // The logger currently in use
+        protected IMessageLogger _logger;
+
         #region Constructor
 
         /// <summary>
@@ -35,63 +39,46 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region Helper Methods
 
-        /// <summary>
-        /// Sanitize the parameter sources and discard the ones which cannot have NUnit test cases.  
-        /// </summary>
-        public static List<string> SanitizeSources(IEnumerable<string> sources)
+        protected void SetLogger(IMessageLogger logger)
         {
-            List<string> result = new List<string>();
-
-            foreach (string source in sources)
-            {
-                if (CanHaveNUnitFrameworkReference(source))
-                {
-                    result.Add(source);
-                }
-            }
-
-            return result;
+            _logger = logger;
         }
 
-
-        /// <summary>
-        /// Returns whether the parameter source can have NUnit Framework dll reference
-        /// </summary>
-        public static bool CanHaveNUnitFrameworkReference(string source)
-        {
-            try
-            {
-                string[] referencedAssemblies = AssemblyHelper.GetReferencedAssemblies(source);
-
-                // GetReferencedAssemblies API returns null on error, so this means that we couldnot infer
-                // whether the dll contains NUnit framework dll reference or not which means that it 
-                // can have NUnit test cases.
-                // 
-                if (referencedAssemblies == null)
-                {
-                    return true;
-                }
-
-
-                return referencedAssemblies.Any(
-                                assemblyName =>
-                                   (
-                                    !string.IsNullOrEmpty(assemblyName)
-                                      &&
-                                     assemblyName.StartsWith("NUnit.Framework",
-                                                                    StringComparison.OrdinalIgnoreCase)
-                                   ));
-            }
-            catch (Exception)
-            {
-                return true;
-            }
-        }
-
-        public static void CleanUpRegisteredChannels()
+        protected static void CleanUpRegisteredChannels()
         {
             foreach (IChannel chan in ChannelServices.RegisteredChannels)
                 ChannelServices.UnregisterChannel(chan);
+        }
+
+        protected void AssemblyNotSupportedWarning(string sourceAssembly)
+        {
+            SendWarningMessage("Assembly not supported: " + sourceAssembly);
+        }
+
+        protected void NUnitLoadError(string sourceAssembly)
+        {
+            SendErrorMessage("NUnit failed to load " + sourceAssembly);
+        }
+
+        protected void SendErrorMessage(string message)
+        {
+            _logger.SendMessage(TestMessageLevel.Error, message);
+        }
+
+        protected void SendErrorMessage(string message, Exception ex)
+        {
+            _logger.SendMessage(TestMessageLevel.Error, message);
+            _logger.SendMessage(TestMessageLevel.Error, ex.ToString());
+        }
+
+        protected void SendWarningMessage(string message)
+        {
+            _logger.SendMessage(TestMessageLevel.Warning, message);
+        }
+
+        protected void SendInformationalMessage(string message)
+        {
+            _logger.SendMessage(TestMessageLevel.Informational, message);
         }
 
         #endregion

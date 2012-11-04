@@ -22,14 +22,17 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)
         {
+            // Set the logger to use for messages
+            SetLogger(logger);
+
             // Ensure any channels registered by other adapters are unregistered
             CleanUpRegisteredChannels();
 
             // Filter out the sources which can have NUnit tests. 
-            foreach (string sourceAssembly in SanitizeSources(sources))
+            foreach (string sourceAssembly in sources)
             {
 #if DEBUG
-                logger.SendMessage(TestMessageLevel.Informational, "Processing " + sourceAssembly);
+                SendInformationalMessage("Processing " + sourceAssembly);
 #endif
                 TestRunner runner = new TestDomain();
                 TestPackage package = new TestPackage(sourceAssembly);
@@ -44,26 +47,25 @@ namespace NUnit.VisualStudio.TestAdapter
                         TestNode topNode = runner.Test as TestNode;
                         if (topNode != null)
                         {
-                            int cases = ProcessTestCases(topNode, discoverySink, logger);
+                            int cases = ProcessTestCases(topNode, discoverySink);
 #if DEBUG
-                            logger.SendMessage(TestMessageLevel.Informational, string.Format("Discovered {0} test cases", cases));
+                            SendInformationalMessage(string.Format("Discovered {0} test cases", cases));
 #endif
                         }
                     }
                     else
                     {
-                        logger.SendMessage(TestMessageLevel.Error, "NUnit failed to load " + sourceAssembly);
+                        NUnitLoadError(sourceAssembly);
                     }
                 }
                 catch (System.BadImageFormatException)
                 {
                     // we skip the native c++ binaries that we don't support.
-                    logger.SendMessage(TestMessageLevel.Warning, "Assembly not supported: " + sourceAssembly);
+                    AssemblyNotSupportedWarning(sourceAssembly);
                 }
                 catch (System.Exception ex)
                 {
-                    logger.SendMessage(TestMessageLevel.Error, "Exception thrown discovering tests in " + sourceAssembly);
-                    logger.SendMessage(TestMessageLevel.Error, ex.ToString());
+                    SendErrorMessage("Exception thrown discovering tests in " + sourceAssembly, ex);
                 }
                 finally
                 {
@@ -73,14 +75,14 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
-        private int ProcessTestCases(TestNode test, ITestCaseDiscoverySink discoverySink, IMessageLogger logger)
+        private int ProcessTestCases(TestNode test, ITestCaseDiscoverySink discoverySink)
         {
             int cases = 0;
 
             if (test.IsSuite)
             {
                 foreach (TestNode child in test.Tests)
-                    cases += ProcessTestCases(child, discoverySink, logger);
+                    cases += ProcessTestCases(child, discoverySink);
             }
             else
             {
@@ -92,8 +94,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
                 catch (System.Exception ex)
                 {
-                    logger.SendMessage(TestMessageLevel.Error, "Exception converting " + test.TestName.FullName);
-                    logger.SendMessage(TestMessageLevel.Error, ex.ToString());   
+                    SendErrorMessage("Exception converting " + test.TestName.FullName, ex);
                 }
             }
 
