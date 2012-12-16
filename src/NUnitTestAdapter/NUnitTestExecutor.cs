@@ -29,6 +29,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region ITestExecutor
 
+        private bool isCalledFromTfsBuild;
         /// <summary>
         /// Called by the test platform to run all tests.
         /// </summary>
@@ -39,64 +40,38 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             // Ensure any channels registered by other adapters are unregistered
             CleanUpRegisteredChannels();
-
+            var tfsfilter = new TFSTestFilter(runContext);
+            isCalledFromTfsBuild = tfsfilter.TfsTestCaseFilterExpression != null;
             foreach (var source in sources)
-            {
-                RunAssembly(source, frameworkHandle, TestFilter.Empty);
-            }
+                RunAssembly(source, frameworkHandle, TestFilter.Empty, runContext);
         }
 
-        /// <summary>
-        /// Called by the TestPlatform when selected tests are to be run.
-        /// </summary>
-        /// <param name="selectedTests">The tests to be run</param>
-        /// <param name="runContext">The RunContext</param>
-        /// <param name="frameworkHandle">The FrameworkHandle</param>
-        public void RunTests(IEnumerable<TestCase> selectedTests, IRunContext runContext, IFrameworkHandle frameworkHandle)
+        private void RunAssembly(string assemblyName, ITestExecutionRecorder testLog, TestFilter filter, IRunContext runContext)
         {
-            // Ensure any channels registered by other adapters are unregistered
-            CleanUpRegisteredChannels();
 
-            var assemblyGroups = selectedTests.GroupBy(tc => tc.Source);
-
-            foreach (var assemblyGroup in assemblyGroups)
-                RunAssembly(assemblyGroup.Key, frameworkHandle, MakeTestFilter(assemblyGroup));
-        }
-
-        void ITestExecutor.Cancel()
-        {
-            if (runner != null && runner.Running)
-                runner.CancelRun();
-        }
-
-        #endregion
-
-        #region Private Methods
-
-        /// <summary>
-        /// Runs the tests in an assembly under control of a filter
-        /// </summary>
-        /// <param name="assemblyName">The assembly file name and path</param>
-        /// <param name="testLog">The destination for all messages and events</param>
-        /// <param name="filter">A test filter controlling what tests are run</param>
-        private void RunAssembly(string assemblyName, ITestExecutionRecorder testLog, TestFilter filter)
-        {
-            // Set the logger to use for messages
             SetLogger(testLog);
 
             try
             {
                 this.runner = new TestDomain();
-                TestPackage package = new TestPackage(assemblyName);
-
+                var package = new TestPackage(assemblyName);
+                var testDictionary = new Dictionary<string, TestNode>();
+                var converter = new TestConverter(assemblyName, testDictionary);
                 if (runner.Load(package))
                 {
-                    var testCaseMap = CreateTestCaseMap(runner.Test as TestNode);
 
+                    var testCaseMap = CreateTestCaseMap(runner.Test as TestNode, converter);
+                    testCases = new List<TestCase>();
                     var listener = new NUnitEventListener(testLog, testCaseMap, assemblyName);
 
                     try
                     {
+                        if (isCalledFromTfsBuild)
+                        {
+                            var testfilter = new TFSTestFilter(runContext);
+                            var filteredTestCases = testfilter.CheckFilter(testCases);
+                            filter = MakeTestFilter(filteredTestCases);
+                        }
                         runner.Run(listener, filter, false, LoggingThreshold.Off);
                     }
                     catch (NullReferenceException)
@@ -125,28 +100,61 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
-        private Dictionary<string, NUnit.Core.TestNode> CreateTestCaseMap(TestNode topLevelTest)
+
+        /// <summary>
+        /// Called by the TestPlatform when selected tests are to be run.
+        /// This method is called from Visual Studio when you select a group of tests to run.  It is never called from Tfs Build.
+        /// </summary>
+        /// <param name="selectedTests">The tests to be run</param>
+        /// <param name="runContext">The RunContext</param>
+        /// <param name="frameworkHandle">The FrameworkHandle</param>
+        public void RunTests(IEnumerable<TestCase> selectedTests, IRunContext runContext, IFrameworkHandle frameworkHandle)
+        {
+            // Ensure any channels registered by other adapters are unregistered
+            CleanUpRegisteredChannels();
+            isCalledFromTfsBuild = false;
+            var assemblyGroups = selectedTests.GroupBy(tc => tc.Source);
+
+            foreach (var assemblyGroup in assemblyGroups)
+                RunAssembly(assemblyGroup.Key, frameworkHandle, MakeTestFilter(assemblyGroup), runContext);
+        }
+
+        void ITestExecutor.Cancel()
+        {
+            if (runner != null && runner.Running)
+                runner.CancelRun();
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private Dictionary<string, NUnit.Core.TestNode> CreateTestCaseMap(TestNode topLevelTest, TestConverter converter)
         {
             var map = new Dictionary<string, NUnit.Core.TestNode>();
-            AddTestCasesToMap(map, topLevelTest);
+            AddTestCasesToMap(map, topLevelTest, converter);
 
             return map;
         }
 
-        private void AddTestCasesToMap(Dictionary<string, NUnit.Core.TestNode> map, TestNode test)
+
+        private List<TestCase> testCases;
+        private void AddTestCasesToMap(Dictionary<string, NUnit.Core.TestNode> map, TestNode test, TestConverter converter)
         {
-            if (test.IsSuite)
-                foreach (TestNode child in test.Tests)
-                    AddTestCasesToMap(map, child);
+            if (test.IsSuite) 
+                foreach (TestNode child in test.Tests) AddTestCasesToMap(map, child, converter);
             else
+            {
+                testCases.Add(converter.ConvertTestCase(test));
                 map.Add(test.TestName.UniqueName, test);
+            }
         }
 
-        private TestFilter MakeTestFilter(IEnumerable<TestCase> testCases)
+        private TestFilter MakeTestFilter(IEnumerable<TestCase> ptestCases)
         {
             var filter = new NameFilter();
 
-            foreach (TestCase testCase in testCases)
+            foreach (TestCase testCase in ptestCases)
                 filter.Add(TestName.Parse(testCase.FullyQualifiedName));
 
             return filter;

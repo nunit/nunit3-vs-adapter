@@ -74,6 +74,7 @@
     <Compile Include="NUnitEventListenerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestExecutionTests.cs" />
+    <Compile Include="TestTFSBuild.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NUnitTestAdapter\NUnitTestAdapter.csproj">
