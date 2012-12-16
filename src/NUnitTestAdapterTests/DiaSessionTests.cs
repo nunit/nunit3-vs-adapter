@@ -33,23 +33,27 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             dia.Dispose();
         }
 
-        [TestCase("", "EmptyMethod_OneLine", 8, 8)]
-        [TestCase("", "EmptyMethod_TwoLines", 11, 12)]
-        [TestCase("", "EmptyMethod_ThreeLines", 15, 16)]
-        [TestCase("", "EmptyMethod_LotsOfLines", 19, 22)]
-        [TestCase("", "SimpleMethod_Void_NoArgs", 25, 28)]
-        [TestCase("", "SimpleMethod_Void_OneArg", 31, 34)]
-        [TestCase("", "SimpleMethod_Void_TwoArgs", 37, 40)]
-        [TestCase("", "SimpleMethod_ReturnsInt_NoArgs", 43, 46)]
-        [TestCase("", "SimpleMethod_ReturnsString_OneArg", 49, 51)]
+        [TestCase("", "EmptyMethod_OneLine", 9, 9)]
+        [TestCase("", "EmptyMethod_TwoLines", 12, 13)]
+        [TestCase("", "EmptyMethod_ThreeLines", 16, 17)]
+        [TestCase("", "EmptyMethod_LotsOfLines", 20, 23)]
+        [TestCase("", "SimpleMethod_Void_NoArgs", 26, 29)]
+        [TestCase("", "SimpleMethod_Void_OneArg", 32, 35)]
+        [TestCase("", "SimpleMethod_Void_TwoArgs", 38, 41)]
+        [TestCase("", "SimpleMethod_ReturnsInt_NoArgs", 44, 47)]
+        [TestCase("", "SimpleMethod_ReturnsString_OneArg", 50, 52)]
         // Generic method uses simple name
-        [TestCase("", "GenericMethod_ReturnsString_OneArg", 54, 56)]
-        [TestCase("+NestedClass", "SimpleMethod_Void_NoArgs", 61, 64)]
-        [TestCase("+ParameterizedFixture", "SimpleMethod_ReturnsString_OneArg", 79, 81)]
+        [TestCase("", "GenericMethod_ReturnsString_OneArg", 55, 57)]
+        // TODO: Async requires NUnit change to export MethodInfo
+        [TestCase("", "AsyncMethod_Void", 60, 64, Explicit = true, Reason = "NYI")]
+        [TestCase("", "AsyncMethod_Task", 67, 71, Explicit = true, Reason = "NYI")]
+        [TestCase("", "AsyncMethod_ReturnsInt", 74, 78, Explicit = true, Reason = "NYI")]
+        [TestCase("+NestedClass", "SimpleMethod_Void_NoArgs", 83, 86)]
+        [TestCase("+ParameterizedFixture", "SimpleMethod_ReturnsString_OneArg", 101, 103)]
         // Generic Fixture requires ` plus type arg count
-        [TestCase("+GenericFixture`2", "Matches", 94, 96)]
-        [TestCase("+GenericFixture`2+DoublyNested", "WriteBoth", 110, 112)]
-        [TestCase("+GenericFixture`2+DoublyNested`1", "WriteAllThree", 129, 131)]
+        [TestCase("+GenericFixture`2", "Matches", 116, 118)]
+        [TestCase("+GenericFixture`2+DoublyNested", "WriteBoth", 132, 134)]
+        [TestCase("+GenericFixture`2+DoublyNested`1", "WriteAllThree", 151, 153)]
         public void VerifyNavigationData(string suffix, string methodName, int minLine, int maxLine)
         {
             // We put this here because the Test Window will not
