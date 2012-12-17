@@ -11,6 +11,7 @@ using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
+    [Category("TestDiscovery")]
     public class TestDiscoveryTests : IMessageLogger, ITestCaseDiscoverySink
     {
         static readonly string mockAssemblyPath = Path.GetFullPath("mock-assembly.dll");
@@ -30,16 +31,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
-        [Category("TestDiscovery")]
         public void VerifyTestCaseCount()
         {
             Assert.That(testCases.Count, Is.EqualTo(NUnit.Tests.Assemblies.MockAssembly.Tests));
         }
 
-        [TestCase("MockTest3", @"^\[.*\]NUnit.Tests.Assemblies.MockTestFixture.MockTest3$", Category = "TestDiscovery")]
-        [TestCase("MockTest4", @"^\[.*\]NUnit.Tests.Assemblies.MockTestFixture.MockTest4$", Category = "TestDiscovery")]
-        [TestCase("ExplicitlyRunTest", @"^\[.*\]NUnit.Tests.Assemblies.MockTestFixture.ExplicitlyRunTest$", Category = "TestDiscovery")]
-        [TestCase("MethodWithParameters(9,11)", @"^\[.*\]NUnit.Tests.FixtureWithTestCases.MethodWithParameters\(9,11\)$", Category = "TestDiscovery")]
+        [TestCase("MockTest3", @"^\[.*\]NUnit.Tests.Assemblies.MockTestFixture.MockTest3$")]
+        [TestCase("MockTest4", @"^\[.*\]NUnit.Tests.Assemblies.MockTestFixture.MockTest4$")]
+        [TestCase("ExplicitlyRunTest", @"^\[.*\]NUnit.Tests.Assemblies.MockTestFixture.ExplicitlyRunTest$")]
+        [TestCase("MethodWithParameters(9,11)", @"^\[.*\]NUnit.Tests.FixtureWithTestCases.MethodWithParameters\(9,11\)$")]
         public void VerifyTestCaseIsFound(string name, string pattern)
         {
             var testCase = testCases.Find(tc => tc.DisplayName == name);

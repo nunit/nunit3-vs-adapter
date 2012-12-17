@@ -78,7 +78,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// Makes a TestCase from a TestNode, adding
         /// navigation data if it can be found.
         /// </summary>
-        public TestCase MakeTestCase(NUnit.Core.TestNode testNode)
+        public TestCase MakeTestCase(NUnit.Core.ITest testNode)
         {
             var testCase = MakeTestCase(testNode.TestName);
 
@@ -97,25 +97,31 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 object traitsCollection = traitsProperty.GetValue(testCase, new object[0]);
                 if (traitsCollection != null)
-                {
-                    foreach (string propertyName in testNode.Properties.Keys)
-                    {
-                        object propertyValue = testNode.Properties[propertyName];
-
-                        if (propertyName == "_CATEGORIES")
-                        {
-                            var categories = propertyValue as System.Collections.IEnumerable;
-                            if (categories != null)
-                                foreach (string category in categories)
-                                    traitsCollectionAdd.Invoke(traitsCollection, new object[] {"Category", category});
-                        }
-                        else if (propertyName[0] != '_') // internal use only
-                            traitsCollectionAdd.Invoke(traitsCollection, new object[] { propertyName, propertyValue.ToString() });
-                    }
-                }
+                    AddTraits(testNode, traitsCollection);
             }
 
             return testCase;
+        }
+
+        private static void AddTraits(NUnit.Core.ITest testNode, object traitsCollection)
+        {
+            if (testNode.Parent != null)
+                AddTraits(testNode.Parent, traitsCollection);
+
+            foreach (string propertyName in testNode.Properties.Keys)
+            {
+                object propertyValue = testNode.Properties[propertyName];
+
+                if (propertyName == "_CATEGORIES")
+                {
+                    var categories = propertyValue as System.Collections.IEnumerable;
+                    if (categories != null)
+                        foreach (string category in categories)
+                            traitsCollectionAdd.Invoke(traitsCollection, new object[] { "Category", category });
+                }
+                else if (propertyName[0] != '_') // internal use only
+                    traitsCollectionAdd.Invoke(traitsCollection, new object[] { propertyName, propertyValue.ToString() });
+            }
         }
 
         /// <summary>

@@ -11,6 +11,7 @@ using System.IO;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
+    [Category("TestConverter")]
     public class TestConverterTests
     {
         private static readonly string THIS_ASSEMBLY_PATH = 
@@ -20,9 +21,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         
         // NOTE: If the location of the FakeTestCase method in the 
         // file changes, update the value of FAKE_LINE_NUMBER.
-        private static readonly int FAKE_LINE_NUMBER = 30;
+        private static readonly int FAKE_LINE_NUMBER = 31;
 
-        private NUnit.Core.ITest fakeNUnitTest;
+        private NUnit.Core.TestSuite fakeNUnitFixture;
+        private NUnit.Core.Test fakeNUnitTest;
         private NUnit.Core.TestResult fakeNUnitResult;
         private TestConverter testConverter;
 
@@ -35,16 +37,25 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             MethodInfo fakeTestMethod = this.GetType().GetMethod("FakeTestCase", BindingFlags.Instance | BindingFlags.NonPublic);
             fakeNUnitTest = new NUnit.Core.NUnitTestMethod(fakeTestMethod);
+            fakeNUnitTest.Categories.Add("cat1");
+            fakeNUnitTest.Properties.Add("Priority", "medium");
+
+            fakeNUnitFixture = new NUnit.Core.TestSuite("FakeNUnitFixture");
+            fakeNUnitFixture.Categories.Add("super");
+            fakeNUnitFixture.Add(fakeNUnitTest);
+            Assert.That(fakeNUnitTest.Parent, Is.SameAs(fakeNUnitFixture));
+
             fakeNUnitResult = new NUnit.Core.TestResult(fakeNUnitTest);
 
             var map = new Dictionary<string, NUnit.Core.TestNode>();
-            map.Add(fakeNUnitTest.TestName.UniqueName, new NUnit.Core.TestNode(fakeNUnitTest));
+            var fixtureNode = new NUnit.Core.TestNode(fakeNUnitFixture);
+            var testNode = (NUnit.Core.TestNode)fixtureNode.Tests[0];
+            map.Add(fakeNUnitTest.TestName.UniqueName, testNode);
 
             testConverter = new TestConverter(THIS_ASSEMBLY_PATH, map);
         }
 
         [Test]
-        [Category("TestConverter")]
         public void CanMakeTestCaseFromTest()
         {
             var testCase = testConverter.ConvertTestCase(fakeNUnitTest);
@@ -55,10 +66,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             Assert.That(testCase.CodeFilePath, Is.SamePath(THIS_CODE_FILE));
             Assert.That(testCase.LineNumber, Is.EqualTo(FAKE_LINE_NUMBER));
+
+            var traits = new List<string>();
+            foreach (Trait trait in testCase.Traits)
+                traits.Add(string.Format(trait.Name + ":" + trait.Value));
+            Assert.That(traits, Is.EquivalentTo(new string[] { "Category:super", "Category:cat1", "Priority:medium" }));
         }
 
         [Test]
-        [Category("TestConverter")]
         public void CanMakeTestCaseFromTestName()
         {
             var testName = fakeNUnitTest.TestName;
@@ -74,7 +89,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
-        [Category("TestConverter")]
         public void CanMakeTestResultFromNUnitTestResult()
         {
             var testResult = testConverter.ConvertTestResult(fakeNUnitResult);
@@ -86,6 +100,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             Assert.That(testCase.CodeFilePath, Is.SamePath(THIS_CODE_FILE));
             Assert.That(testCase.LineNumber, Is.EqualTo(FAKE_LINE_NUMBER));
+
+            var traits = new List<string>();
+            foreach (Trait trait in testCase.Traits)
+                traits.Add(string.Format(trait.Name + ":" + trait.Value));
+            Assert.That(traits, Is.EquivalentTo(new string[] { "Category:super", "Category:cat1", "Priority:medium" }));
         }
     }
 }
