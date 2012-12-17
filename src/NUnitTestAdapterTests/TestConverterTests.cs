@@ -21,7 +21,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         
         // NOTE: If the location of the FakeTestCase method in the 
         // file changes, update the value of FAKE_LINE_NUMBER.
-        private static readonly int FAKE_LINE_NUMBER = 31;
+        private static readonly int FAKE_LINE_NUMBER = 32;
 
         private NUnit.Core.TestSuite fakeNUnitFixture;
         private NUnit.Core.Test fakeNUnitTest;
@@ -30,6 +30,19 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         private void FakeTestCase()
         {  // FAKE_LINE_NUMBER SHOULD BE THIS LINE
+        }
+
+        private static PropertyInfo traitsProperty;
+        private static PropertyInfo nameProperty;
+        private static PropertyInfo valueProperty;
+
+        static TestConverterTests()
+        {
+            traitsProperty = typeof(TestCase).GetProperty("Traits");
+
+            var traitType = Type.GetType("Microsoft.VisualStudio.TestPlatform.ObjectModel.Trait,Microsoft.VisualStudio.TestPlatform.ObjectModel");
+            nameProperty = traitType.GetProperty("Name");
+            valueProperty = traitType.GetProperty("Value");
         }
 
         [SetUp]
@@ -60,17 +73,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             var testCase = testConverter.ConvertTestCase(fakeNUnitTest);
 
-            Assert.That(testCase.FullyQualifiedName, Is.StringMatching(@"^\[.*\]NUnit.VisualStudio.TestAdapter.Tests.TestConverterTests.FakeTestCase$"));
-            Assert.That(testCase.DisplayName, Is.EqualTo("FakeTestCase"));
-            Assert.That(testCase.Source, Is.SamePath(THIS_ASSEMBLY_PATH));
+            CheckBasicInfo(testCase);
 
             Assert.That(testCase.CodeFilePath, Is.SamePath(THIS_CODE_FILE));
             Assert.That(testCase.LineNumber, Is.EqualTo(FAKE_LINE_NUMBER));
 
-            var traits = new List<string>();
-            foreach (Trait trait in testCase.Traits)
-                traits.Add(string.Format(trait.Name + ":" + trait.Value));
-            Assert.That(traits, Is.EquivalentTo(new string[] { "Category:super", "Category:cat1", "Priority:medium" }));
+            CheckTraits(testCase);
         }
 
         [Test]
@@ -80,9 +88,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             var testCase = testConverter.MakeTestCase(testName);
 
-            Assert.That(testCase.FullyQualifiedName, Is.StringMatching(@"^\[.*\]NUnit.VisualStudio.TestAdapter.Tests.TestConverterTests.FakeTestCase$"));
-            Assert.That(testCase.DisplayName, Is.EqualTo("FakeTestCase"));
-            Assert.That(testCase.Source, Is.SamePath(THIS_ASSEMBLY_PATH));
+            CheckBasicInfo(testCase);
 
             Assert.Null(testCase.CodeFilePath);
             Assert.That(testCase.LineNumber, Is.EqualTo(0));
@@ -94,17 +100,36 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var testResult = testConverter.ConvertTestResult(fakeNUnitResult);
             var testCase = testResult.TestCase;
 
-            Assert.That(testCase.FullyQualifiedName, Is.StringMatching(@"^\[.*\]NUnit.VisualStudio.TestAdapter.Tests.TestConverterTests.FakeTestCase$"));
-            Assert.That(testCase.DisplayName, Is.EqualTo("FakeTestCase"));
-            Assert.That(testCase.Source, Is.SamePath(THIS_ASSEMBLY_PATH));
+            CheckBasicInfo(testCase);
 
             Assert.That(testCase.CodeFilePath, Is.SamePath(THIS_CODE_FILE));
             Assert.That(testCase.LineNumber, Is.EqualTo(FAKE_LINE_NUMBER));
 
-            var traits = new List<string>();
-            foreach (Trait trait in testCase.Traits)
-                traits.Add(string.Format(trait.Name + ":" + trait.Value));
-            Assert.That(traits, Is.EquivalentTo(new string[] { "Category:super", "Category:cat1", "Priority:medium" }));
+            CheckTraits(testCase);
+        }
+
+        private static void CheckBasicInfo(TestCase testCase)
+        {
+            Assert.That(testCase.FullyQualifiedName, Is.StringMatching(@"^\[.*\]NUnit.VisualStudio.TestAdapter.Tests.TestConverterTests.FakeTestCase$"));
+            Assert.That(testCase.DisplayName, Is.EqualTo("FakeTestCase"));
+            Assert.That(testCase.Source, Is.SamePath(THIS_ASSEMBLY_PATH));
+        }
+
+        private static void CheckTraits(TestCase testCase)
+        {
+            if (traitsProperty != null)
+            {
+                var traitsCollection = traitsProperty.GetValue(testCase, new object[0]) as System.Collections.IEnumerable;
+                var traits = new List<string>();
+
+                foreach (object trait in traitsCollection)
+                {
+                    string name = nameProperty.GetValue(trait) as string;
+                    string value = valueProperty.GetValue(trait) as string;
+                    traits.Add(string.Format(name + ":" + value));
+                }
+                Assert.That(traits, Is.EquivalentTo(new string[] { "Category:super", "Category:cat1", "Priority:medium" }));
+            }
         }
     }
 }
