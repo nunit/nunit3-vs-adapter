@@ -103,6 +103,10 @@ namespace NUnit.VisualStudio.TestAdapter
             return testCase;
         }
 
+        /// <summary>
+        /// Add traits using reflection, since the feature was not present
+        /// in VS2012 RTM but was added in the first update.
+        /// </summary>
         private static void AddTraits(NUnit.Core.ITest testNode, object traitsCollection)
         {
             if (testNode.Parent != null)

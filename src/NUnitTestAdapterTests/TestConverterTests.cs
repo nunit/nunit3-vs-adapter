@@ -41,8 +41,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             traitsProperty = typeof(TestCase).GetProperty("Traits");
 
             var traitType = Type.GetType("Microsoft.VisualStudio.TestPlatform.ObjectModel.Trait,Microsoft.VisualStudio.TestPlatform.ObjectModel");
-            nameProperty = traitType.GetProperty("Name");
-            valueProperty = traitType.GetProperty("Value");
+            if (traitType != null)
+            {
+                nameProperty = traitType.GetProperty("Name");
+                valueProperty = traitType.GetProperty("Value");
+            }
         }
 
         [SetUp]
@@ -115,6 +118,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(testCase.Source, Is.SamePath(THIS_ASSEMBLY_PATH));
         }
 
+        // Check traits using reflection, since the feature was added
+        // in an update to VisualStudio and may not be present.
         private static void CheckTraits(TestCase testCase)
         {
             if (traitsProperty != null)
