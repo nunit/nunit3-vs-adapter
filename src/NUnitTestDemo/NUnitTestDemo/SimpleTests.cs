@@ -10,6 +10,7 @@ namespace NUnitTestDemo
         [Test]
         public void TestSucceeds()
         {
+            Console.WriteLine("Simple test running");
             Assert.That(2 + 2, Is.EqualTo(4));
         }
 
