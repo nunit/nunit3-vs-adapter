@@ -1,67 +1,89 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
     // Contains methods used in testing use of DiaSession
-    class DiaSessionTestData
+    class NavigationTestData
     {
         public void EmptyMethod_OneLine() { } // Line 8
 
         public void EmptyMethod_TwoLines()
-        { // Line 11
-        } // Line 12
+        { // Line 12
+        } // Line 13
 
         public void EmptyMethod_ThreeLines()
-        { // Line 15
-        } // Line 16
+        { // Line 16
+        } // Line 17
 
         public void EmptyMethod_LotsOfLines()
-        { // Line 19
+        { // Line 20
 
 
-        } // Line 22
+        } // Line 23
 
         public void SimpleMethod_Void_NoArgs()
-        { // Line 25
+        { // Line 26
             int answer = 42;
             Console.Write(answer);
-        } // Line 28
+        } // Line 29
 
         public void SimpleMethod_Void_OneArg(int x)
-        { // Line 31
+        { // Line 32
             int answer = x;
             Console.Write(answer);
-        } // Line 34
+        } // Line 35
 
         public void SimpleMethod_Void_TwoArgs(int x, int y)
-        { // Line 37
+        { // Line 38
             int answer = x + y;
             Console.Write(answer);
-        } // Line 40
+        } // Line 41
 
         public int SimpleMethod_ReturnsInt_NoArgs()
-        { // Line 43
+        { // Line 44
             int answer = 42;
             return answer;
-        } // Line 46
+        } // Line 47
 
         public string SimpleMethod_ReturnsString_OneArg(int x)
-        { // Line 49
+        { // Line 50
             return x.ToString();
-        } // Line 51
+        } // Line 52
 
         public string GenericMethod_ReturnsString_OneArg<T>(T x)
-        { // Line 54
+        { // Line 55
             return x.ToString();
-        } // Line 56
+        } // Line 57
+
+        public async void AsyncMethod_Void()
+        { // Line 60
+            int answer = 42;
+            await Task.Delay(0);
+            Console.Write(answer);
+        } // Line 64
+
+        public async Task AsyncMethod_Task()
+        { // Line 67
+            int answer = 42;
+            await Task.Delay(0);
+            Console.Write(answer);
+        } // Line 71
+
+        public async Task<int> AsyncMethod_ReturnsInt()
+        { // Line 74
+            int answer = 42;
+            await Task.Delay(0);
+            return answer;
+        } // Line 78
 
         public class NestedClass
         {
             public void SimpleMethod_Void_NoArgs()
-            { // Line 61
+            { // Line 83
                 int answer = 42;
                 Console.Write(answer);
-            } // Line 64
+            } // Line 86
         }
 
         public class ParameterizedFixture
@@ -76,9 +98,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             }
 
             public string SimpleMethod_ReturnsString_OneArg(int i)
-            { // Line 79
+            { // Line 101
                 return this.s + this.x * i;
-            } // Line 81
+            } // Line 103
         }
 
         public class GenericFixture<T1, T2>
@@ -91,9 +113,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             }
 
             public bool Matches(T2 y)
-            { // Line 94
+            { // Line 116
                 return x.Equals(y);
-            } // Line 96
+            } // Line 118
 
             public class DoublyNested
             {
@@ -107,9 +129,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 }
 
                 public void WriteBoth()
-                { // Line 110
+                { // Line 132
                     Console.Write(x.ToString() + y.ToString());
-                } // Line 112
+                } // Line 134
             }
 
             public class DoublyNested<T3>
@@ -126,9 +148,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 }
 
                 public void WriteAllThree()
-                { // Line 129
+                { // Line 151
                     Console.Write(x.ToString() + y.ToString() + z.ToString());
-                } // Line 131
+                } // Line 153
             }
         }
     }

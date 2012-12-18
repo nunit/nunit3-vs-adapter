@@ -14,6 +14,7 @@ using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
+    [Category("TestExecution")]
     public class TestExecutionTests
     {
         static readonly string mockAssemblyPath = Path.GetFullPath("mock-assembly.dll");
@@ -46,7 +47,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
-        [Category("TestExecution")]
         public void CorrectNumberOfTestCasesWereStarted()
         {
             var eventType = FakeFrameworkHandle.EventType.RecordStart;
@@ -56,7 +56,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
-        [Category("TestExecution")]
         public void CorrectNumberOfTestCasesWereEnded()
         {
             var eventType = FakeFrameworkHandle.EventType.RecordEnd;
@@ -66,7 +65,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
-        [Category("TestExecution")]
         public void CorrectNumberOfResultsWereReceived()
         {
             var eventType = FakeFrameworkHandle.EventType.RecordResult;
@@ -77,11 +75,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         TestCaseData[] outcomes = new TestCaseData[] {
             // NOTE: One inconclusive test is reported as None
-            new TestCaseData(TestOutcome.Passed).Returns(MockAssembly.TestsRun - MockAssembly.Errors - MockAssembly.Failures - 1).SetCategory("TestExecution"),
-            new TestCaseData(TestOutcome.Failed).Returns(MockAssembly.Errors + MockAssembly.Failures + MockAssembly.NotRunnable).SetCategory("TestExecution"),
-            new TestCaseData(TestOutcome.Skipped).Returns(MockAssembly.NotRun - MockAssembly.Explicit - MockAssembly.NotRunnable).SetCategory("TestExecution"),
-            new TestCaseData(TestOutcome.None).Returns(1).SetCategory("TestExecution"),
-            new TestCaseData(TestOutcome.NotFound).Returns(0).SetCategory("TestExecution")
+            new TestCaseData(TestOutcome.Passed).Returns(MockAssembly.TestsRun - MockAssembly.Errors - MockAssembly.Failures - 1),
+            new TestCaseData(TestOutcome.Failed).Returns(MockAssembly.Errors + MockAssembly.Failures + MockAssembly.NotRunnable),
+            new TestCaseData(TestOutcome.Skipped).Returns(MockAssembly.NotRun - MockAssembly.Explicit - MockAssembly.NotRunnable),
+            new TestCaseData(TestOutcome.None).Returns(1),
+            new TestCaseData(TestOutcome.NotFound).Returns(0)
         };
 
         [TestCaseSource("outcomes")]
@@ -94,14 +92,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 .Count;
         }
 
-        [TestCase("MockTest3", TestOutcome.Passed, "Succeeded!", true, Category = "TestExecution")]
-        [TestCase("FailingTest", TestOutcome.Failed, "Intentional failure", true, Category = "TestExecution")]
-        [TestCase("TestWithException", TestOutcome.Failed, "System.ApplicationException : Intentional Exception", true, Category = "TestExecution")]
+        [TestCase("MockTest3", TestOutcome.Passed, "Succeeded!", true)]
+        [TestCase("FailingTest", TestOutcome.Failed, "Intentional failure", true)]
+        [TestCase("TestWithException", TestOutcome.Failed, "System.ApplicationException : Intentional Exception", true)]
         // NOTE: Should Inconclusive be reported as TestOutcome.None?
-        [TestCase("InconclusiveTest", TestOutcome.None, "No valid data", false, Category = "TestExecution")]
-        [TestCase("MockTest4", TestOutcome.Skipped, "ignoring this test method for now", false, Category = "TestExecution")]
+        [TestCase("InconclusiveTest", TestOutcome.None, "No valid data", false)]
+        [TestCase("MockTest4", TestOutcome.Skipped, "ignoring this test method for now", false)]
         // NOTE: Should this be failed?
-        [TestCase("NotRunnableTest", TestOutcome.Failed, "No arguments were provided", false, Category = "TestExecution")]
+        [TestCase("NotRunnableTest", TestOutcome.Failed, "No arguments were provided", false)]
         public void TestResultIsReportedCorrectly(string name, TestOutcome outcome, string message, bool hasStackTrace)
         {
             var testResult = testLog.Events
@@ -117,7 +115,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
-        [Category("TestExecution")]
         public void ExplicitTestDoesNotShowUpInResults()
         {
             Assert.Null(testResults.Find(r => r.TestCase.DisplayName == "ExplicitlyRunTest"));

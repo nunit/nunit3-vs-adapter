@@ -12,16 +12,17 @@ using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
+    [Category("TestConverter")]
     public class TestConverterTests_StaticHelpers
     {
-        [TestCase(ResultState.Cancelled, Result = TestOutcome.None, Category = "TestConverter")]
-        [TestCase(ResultState.Error, Result = TestOutcome.Failed, Category = "TestConverter")]
-        [TestCase(ResultState.Failure, Result = TestOutcome.Failed, Category = "TestConverter")]
-        [TestCase(ResultState.Ignored, Result = TestOutcome.Skipped, Category = "TestConverter")]
-        [TestCase(ResultState.Inconclusive, Result = TestOutcome.None, Category = "TestConverter")]
-        [TestCase(ResultState.NotRunnable, Result = TestOutcome.Failed, Category = "TestConverter")]
-        [TestCase(ResultState.Skipped, Result = TestOutcome.Skipped, Category = "TestConverter")]
-        [TestCase(ResultState.Success, Result = TestOutcome.Passed, Category = "TestConverter")]
+        [TestCase(ResultState.Cancelled, Result = TestOutcome.None)]
+        [TestCase(ResultState.Error, Result = TestOutcome.Failed)]
+        [TestCase(ResultState.Failure, Result = TestOutcome.Failed)]
+        [TestCase(ResultState.Ignored, Result = TestOutcome.Skipped)]
+        [TestCase(ResultState.Inconclusive, Result = TestOutcome.None)]
+        [TestCase(ResultState.NotRunnable, Result = TestOutcome.Failed)]
+        [TestCase(ResultState.Skipped, Result = TestOutcome.Skipped)]
+        [TestCase(ResultState.Success, Result = TestOutcome.Passed)]
         public TestOutcome ResultStateToTestOutcome(NUnit.Core.ResultState resultState)
         {
             return TestConverter.ResultStateToTestOutcome(resultState);
