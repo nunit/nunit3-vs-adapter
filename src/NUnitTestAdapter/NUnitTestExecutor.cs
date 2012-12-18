@@ -61,7 +61,6 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
 
                     var testCaseMap = CreateTestCaseMap(runner.Test as TestNode, converter);
-                    testCases = new List<TestCase>();
                     var listener = new NUnitEventListener(testLog, testCaseMap, assemblyName);
 
                     try
@@ -132,6 +131,7 @@ namespace NUnit.VisualStudio.TestAdapter
         private Dictionary<string, NUnit.Core.TestNode> CreateTestCaseMap(TestNode topLevelTest, TestConverter converter)
         {
             var map = new Dictionary<string, NUnit.Core.TestNode>();
+            testCases = new List<TestCase>();
             AddTestCasesToMap(map, topLevelTest, converter);
 
             return map;

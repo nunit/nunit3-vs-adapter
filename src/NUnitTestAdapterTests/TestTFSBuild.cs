@@ -14,6 +14,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     public class TestFilterTests
     {
         [Test]
+        [Category("TFS")]
         public void PropertyProvider()
         {
             var testfilter = new TFSTestFilter(null);
@@ -23,6 +24,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.NotNull(prop);
         }
         [Test]
+        [Category("TFS")]
         public void TraitProvider()
         {
             var testFilter = new TFSTestFilter(null);
@@ -31,6 +33,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
+        [Category("TFS")]
         public void TraitProviderWithNoCategory()
         {
             var testFilter = new TFSTestFilter(null);
@@ -39,6 +42,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
+        [Category("TFS")]
         public void PropertyValueProviderFqn()
         {
             var tc = new TestCase("Test1", new Uri("executor://xunit.codeplex.com/VsTestRunner"), "xUnit.VSIX");
@@ -48,6 +52,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
+        [Category("TFS")]
         public void PropertyValueProviderCategory()
         {
             var tc = new TestCase("Test1", new Uri("executor://xunit.codeplex.com/VsTestRunner"), "xUnit.VSIX");
@@ -58,6 +63,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
+        [Category("TFS")]
         public void PropertyValueProviderCategoryFail()
         {
             var tc = new TestCase("Test1", new Uri("executor://xunit.codeplex.com/VsTestRunner"), "xUnit.VSIX");
