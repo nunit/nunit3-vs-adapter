@@ -63,8 +63,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncTests.cs" />
-    <Compile Include="DiaSessionTestData.cs" />
-    <Compile Include="DiaSessionTests.cs" />
+    <Compile Include="NavigationTestData.cs" />
+    <Compile Include="NavigationDataTests.cs" />
     <Compile Include="Fakes\FakeFrameworkHandle.cs" />
     <Compile Include="Fakes\FakeRunContext.cs" />
     <Compile Include="Fakes\FakeRunSettings.cs" />

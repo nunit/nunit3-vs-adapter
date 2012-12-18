@@ -82,15 +82,11 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             var testCase = MakeTestCase(testNode.TestName);
 
-            if (this.DiaSession != null)
+            var navigationData = GetNavigationData(testNode.ClassName, testNode.MethodName);
+            if (navigationData != null)
             {
-                var navigationData = DiaSession.GetNavigationData(testNode.ClassName, testNode.MethodName);
-
-                if (navigationData != null)
-                {
-                    testCase.CodeFilePath = navigationData.FileName;
-                    testCase.LineNumber = navigationData.MinLineNumber;
-                }
+                testCase.CodeFilePath = navigationData.FileName;
+                testCase.LineNumber = navigationData.MinLineNumber;
             }
 
             if (traitsCollectionAdd != null) // implies traitsProperty is not null either
@@ -101,31 +97,6 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             return testCase;
-        }
-
-        /// <summary>
-        /// Add traits using reflection, since the feature was not present
-        /// in VS2012 RTM but was added in the first update.
-        /// </summary>
-        private static void AddTraits(NUnit.Core.ITest testNode, object traitsCollection)
-        {
-            if (testNode.Parent != null)
-                AddTraits(testNode.Parent, traitsCollection);
-
-            foreach (string propertyName in testNode.Properties.Keys)
-            {
-                object propertyValue = testNode.Properties[propertyName];
-
-                if (propertyName == "_CATEGORIES")
-                {
-                    var categories = propertyValue as System.Collections.IEnumerable;
-                    if (categories != null)
-                        foreach (string category in categories)
-                            traitsCollectionAdd.Invoke(traitsCollection, new object[] { "Category", category });
-                }
-                else if (propertyName[0] != '_') // internal use only
-                    traitsCollectionAdd.Invoke(traitsCollection, new object[] { propertyName, propertyValue.ToString() });
-            }
         }
 
         /// <summary>
@@ -231,6 +202,63 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             return message;
+        }
+
+        // Public for test purposes
+        public DiaNavigationData GetNavigationData(string className, string methodName)
+        {
+            if (this.DiaSession == null) return null;
+
+            var navData = DiaSession.GetNavigationData(className, methodName);
+
+            if (navData != null && navData.FileName != null) return navData;
+
+            // DiaSession returned null. The rest of this code checks to see 
+            // if this test is an async method, which needs special handling.
+
+            var definingType = Type.GetType(className + "," + Path.GetFileNameWithoutExtension(sourceAssembly));
+            if (definingType == null) return null;
+
+            var method = definingType.GetMethod(methodName);
+            if (method == null) return null;
+            
+            var asyncAttribute = Reflect.GetAttribute(method, "System.Runtime.CompilerServices.AsyncStateMachineAttribute", false);
+            if (asyncAttribute == null) return null;
+
+            PropertyInfo stateMachineTypeProperty = asyncAttribute.GetType().GetProperty("StateMachineType");
+            if (stateMachineTypeProperty == null) return null;
+
+            Type stateMachineType = stateMachineTypeProperty.GetValue(asyncAttribute, new object[0]) as Type;
+            if (stateMachineType == null) return null;
+
+            navData = DiaSession.GetNavigationData(stateMachineType.FullName, "MoveNext");
+
+            return navData;
+        }
+
+        /// <summary>
+        /// Add traits using reflection, since the feature was not present
+        /// in VS2012 RTM but was added in the first update.
+        /// </summary>
+        private static void AddTraits(NUnit.Core.ITest testNode, object traitsCollection)
+        {
+            if (testNode.Parent != null)
+                AddTraits(testNode.Parent, traitsCollection);
+
+            foreach (string propertyName in testNode.Properties.Keys)
+            {
+                object propertyValue = testNode.Properties[propertyName];
+
+                if (propertyName == "_CATEGORIES")
+                {
+                    var categories = propertyValue as System.Collections.IEnumerable;
+                    if (categories != null)
+                        foreach (string category in categories)
+                            traitsCollectionAdd.Invoke(traitsCollection, new object[] { "Category", category });
+                }
+                else if (propertyName[0] != '_') // internal use only
+                    traitsCollectionAdd.Invoke(traitsCollection, new object[] { propertyName, propertyValue.ToString() });
+            }
         }
 
         #endregion
