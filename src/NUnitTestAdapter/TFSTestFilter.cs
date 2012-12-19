@@ -8,9 +8,11 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
+    using System.Collections;
+
     public class TFSTestFilter
     {
-         /// <summary>   
+        /// <summary>   
         /// Supported properties for filtering
 
         ///</summary>
@@ -55,7 +57,8 @@ namespace NUnit.VisualStudio.TestAdapter
         private ITestCaseFilterExpression testCaseFilterExpression;
         public ITestCaseFilterExpression TfsTestCaseFilterExpression
         {
-            get {
+            get
+            {
                 return testCaseFilterExpression ??
                        (testCaseFilterExpression = runContext.GetTestCaseFilter(supportedProperties, PropertyProvider));
             }
@@ -63,7 +66,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public IEnumerable<TestCase> CheckFilter(IEnumerable<TestCase> tests)
         {
 
-           return TfsTestCaseFilterExpression == null ? tests : tests.Where(underTest => !TfsTestCaseFilterExpression.MatchTestCase(underTest, p => PropertyValueProvider(underTest, p)) == false).ToList();
+            return TfsTestCaseFilterExpression == null ? tests : tests.Where(underTest => !TfsTestCaseFilterExpression.MatchTestCase(underTest, p => PropertyValueProvider(underTest, p)) == false).ToList();
         }
 
         /// <summary>    
@@ -86,28 +89,45 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             // Now it may be a trait, so we check the trait collection as well
             var testTrait = TraitProvider(propertyName);
-            return testTrait != null ? traitContains(currentTest, testTrait.Name) : null;
+            if (testTrait != null)
+            {
+                var val = traitContains(currentTest, testTrait.Name);
+                if (val.Length == 0) return null;
+                if (val.Length == 1) // Contains a single string
+                    return val[0];  // return that string
+                return val;  // otherwise return the whole array 
+            }
+            return null;
         }
 
-        static readonly Func<TestCase, string, string> traitContains = TraitContains();
+        static readonly Func<TestCase, string, string[]> traitContains = TraitContains();
 
         /// <summary>
         /// TestCase:  To be checked
         /// traitName: Name of trait to be checked against
         /// </summary>
         /// <returns>Value of trait</returns>
-        private static Func<TestCase, string, string> TraitContains()
+        private static Func<TestCase, string, string[]> TraitContains()
         {
 
             return (testCase, traitName) =>
             {
-                Type testCaseType = typeof(TestCase);
-                PropertyInfo property = testCaseType.GetProperty("Traits");
+                var testCaseType = typeof(TestCase);
+                var property = testCaseType.GetProperty("Traits");
                 if (property == null)
                     return null;
-                var traits = property.GetValue(testCase, null) as IEnumerable<dynamic>;
-                var trait = traits.FirstOrDefault(t => t.Name == traitName);
-                return trait == null ? null : trait.Value;
+                var traits = property.GetValue(testCase, null) as IEnumerable;
+                var values = new List<string>();
+                foreach (var t in traits)
+                {
+                    var name = t.GetType().GetProperty("Name").GetValue(t, null) as string;
+                    if (name == traitName)
+                    {
+                        var value = t.GetType().GetProperty("Value").GetValue(t, null) as string;
+                        values.Add(value);
+                    }
+                }
+                return values.ToArray();
             };
         }
 
@@ -176,5 +196,5 @@ namespace NUnit.VisualStudio.TestAdapter
             Value = value;
         }
     }
-    
+
 }
