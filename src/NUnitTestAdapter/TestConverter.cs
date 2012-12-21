@@ -15,6 +15,7 @@ namespace NUnit.VisualStudio.TestAdapter
         private Dictionary<string, TestCase> vsTestCaseMap;
         private string sourceAssembly;
         private Dictionary<string, NUnit.Core.TestNode> nunitTestCases;
+        private NavigationData navigationData;
 
         #region Constructors
 
@@ -23,6 +24,7 @@ namespace NUnit.VisualStudio.TestAdapter
             this.sourceAssembly = sourceAssembly;
             this.vsTestCaseMap = new Dictionary<string, TestCase>();
             this.nunitTestCases = nunitTestCases;
+            this.navigationData = new NavigationData(sourceAssembly);
         }
 
         #endregion
@@ -68,11 +70,11 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             var testCase = MakeTestCaseFromTestName(nunitTest.TestName);
 
-            var navigationData = GetNavigationData(nunitTest.ClassName, nunitTest.MethodName);
-            if (navigationData != null)
+            var navData = navigationData.For(nunitTest.ClassName, nunitTest.MethodName);
+            if (navData != null)
             {
-                testCase.CodeFilePath = navigationData.FileName;
-                testCase.LineNumber = navigationData.MinLineNumber;
+                testCase.CodeFilePath = navData.FileName;
+                testCase.LineNumber = navData.MinLineNumber;
             }
 
             testCase.AddTraitsFromNUnitTest(nunitTest);
@@ -135,8 +137,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void Dispose()
         {
-            if (this._diaSession != null)
-                this._diaSession.Dispose();
+            if (this.navigationData != null)
+                this.navigationData.Dispose();
         }
 
         #endregion
@@ -185,72 +187,9 @@ namespace NUnit.VisualStudio.TestAdapter
             return message;
         }
 
-        // Public for test purposes
-        public DiaNavigationData GetNavigationData(string className, string methodName)
-        {
-            if (this.DiaSession == null) return null;
-
-            var navData = DiaSession.GetNavigationData(className, methodName);
-
-            if (navData != null && navData.FileName != null) return navData;
-
-            // DiaSession returned null. The rest of this code checks to see 
-            // if this test is an async method, which needs special handling.
-
-            var definingType = Type.GetType(className + "," + Path.GetFileNameWithoutExtension(sourceAssembly));
-            if (definingType == null) return null;
-
-            var method = definingType.GetMethod(methodName);
-            if (method == null) return null;
-            
-            var asyncAttribute = Reflect.GetAttribute(method, "System.Runtime.CompilerServices.AsyncStateMachineAttribute", false);
-            if (asyncAttribute == null) return null;
-
-            PropertyInfo stateMachineTypeProperty = asyncAttribute.GetType().GetProperty("StateMachineType");
-            if (stateMachineTypeProperty == null) return null;
-
-            Type stateMachineType = stateMachineTypeProperty.GetValue(asyncAttribute, new object[0]) as Type;
-            if (stateMachineType == null) return null;
-
-            navData = DiaSession.GetNavigationData(stateMachineType.FullName, "MoveNext");
-
-            return navData;
-        }
-
         #endregion
 
         #region Private Properties
-
-        // NOTE: There is some sort of timing issue involved
-        // in creating the DiaSession. When it is created
-        // in the constructor, an exception is thrown on the
-        // call to GetNavigationData. We don't understand
-        // this, we're just dealing with it.
-        private DiaSession _diaSession;
-        private bool _tryToCreateDiaSession = true;
-        private DiaSession DiaSession
-        {
-            get
-            {
-                if (_tryToCreateDiaSession)
-                {
-                    try
-                    {
-                        _diaSession = new DiaSession(sourceAssembly);
-                    }
-                    catch (Exception)
-                    {
-                        // If this isn't a project type supporting DiaSession,
-                        // we just ignore the error. We won't try this again 
-                        // for the project.
-                    }
-
-                    _tryToCreateDiaSession = false;
-                }
-
-                return _diaSession;
-            }
-        }
 
         private string exeName;
         private bool RunningUnderIDE

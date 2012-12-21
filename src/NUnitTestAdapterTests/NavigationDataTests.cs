@@ -10,20 +10,20 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         private static readonly string THIS_ASSEMBLY_PATH =
             Path.GetFullPath("NUnit.VisualStudio.TestAdapter.Tests.dll");
 
-        TestConverter testConverter;
+        NavigationData navData;
 
         const string prefix = "NUnit.VisualStudio.TestAdapter.Tests.NavigationTestData";
 
         [TestFixtureSetUp]
-        public void InitializeTestConverter()
+        public void InitializeNavigationData()
         {
-            testConverter = new TestConverter(THIS_ASSEMBLY_PATH, null);
+            navData = new NavigationData(THIS_ASSEMBLY_PATH);
         }
 
         [TestFixtureTearDown]
-        public void DisposeTestConverter()
+        public void DisposeNavigationData()
         {
-            testConverter.Dispose();
+            navData.Dispose();
         }
 
         [TestCase("", "EmptyMethod_OneLine", 9, 9)]
@@ -50,11 +50,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             // We put this here because the Test Window will not
             // display a failure occuring in the fixture setup method
-            Assert.NotNull(testConverter, "TestConverter could not be created");
+            Assert.NotNull(navData, "NavigationData could not be created");
 
             // Get the navigation data - ensure names are spelled correctly!
             var className = prefix + suffix;
-            var data = testConverter.GetNavigationData(className, methodName);
+            var data = navData.For(className, methodName);
             Assert.NotNull(data, "Unable to retrieve navigation data");
 
             // Verify the navigation data

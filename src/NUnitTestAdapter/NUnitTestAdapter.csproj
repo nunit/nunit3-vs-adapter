@@ -69,6 +69,7 @@
     <Compile Include="Internal\Stackframe.cs" />
     <Compile Include="Internal\StackframeParser.cs" />
     <Compile Include="Internal\Stacktrace.cs" />
+    <Compile Include="NavigationData.cs" />
     <Compile Include="NUnitEventListener.cs" />
     <Compile Include="NUnitTestAdapter.cs" />
     <Compile Include="NUnitTestDiscoverer.cs" />
@@ -78,7 +79,7 @@
     <Compile Include="TestConverter.cs" />
     <Compile Include="TestRunFilter.cs" />
     <Compile Include="TFSTestFilter.cs" />
-    <Compile Include="Traits.cs" />
+    <Compile Include="TraitsFeature.cs" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
