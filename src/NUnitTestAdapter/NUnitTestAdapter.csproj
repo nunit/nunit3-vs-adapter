@@ -77,6 +77,8 @@
     <Compile Include="StackTraceFilter.cs" />
     <Compile Include="TestConverter.cs" />
     <Compile Include="TestRunFilter.cs" />
+    <Compile Include="TFSTestFilter.cs" />
+    <Compile Include="Traits.cs" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />

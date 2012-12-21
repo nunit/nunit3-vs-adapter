@@ -32,22 +32,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {  // FAKE_LINE_NUMBER SHOULD BE THIS LINE
         }
 
-        private static PropertyInfo traitsProperty;
-        private static PropertyInfo nameProperty;
-        private static PropertyInfo valueProperty;
-
-        static TestConverterTests()
-        {
-            traitsProperty = typeof(TestCase).GetProperty("Traits");
-
-            var traitType = Type.GetType("Microsoft.VisualStudio.TestPlatform.ObjectModel.Trait,Microsoft.VisualStudio.TestPlatform.ObjectModel");
-            if (traitType != null)
-            {
-                nameProperty = traitType.GetProperty("Name");
-                valueProperty = traitType.GetProperty("Value");
-            }
-        }
-
         [SetUp]
         public void SetUp()
         {
@@ -89,7 +73,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             var testName = fakeNUnitTest.TestName;
 
-            var testCase = testConverter.MakeTestCase(testName);
+            var testCase = testConverter.MakeTestCaseFromTestName(testName);
 
             CheckBasicInfo(testCase);
 
@@ -122,18 +106,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         // in an update to VisualStudio and may not be present.
         private static void CheckTraits(TestCase testCase)
         {
-            if (traitsProperty != null)
+            if (TraitsFeature.IsSupported)
             {
-                var traitsCollection = traitsProperty.GetValue(testCase, new object[0]) as System.Collections.IEnumerable;
-                var traits = new List<string>();
+                var traitList = new List<string>();
 
-                foreach (object trait in traitsCollection)
-                {
-                    string name = nameProperty.GetValue(trait) as string;
-                    string value = valueProperty.GetValue(trait) as string;
-                    traits.Add(string.Format(name + ":" + value));
-                }
-                Assert.That(traits, Is.EquivalentTo(new string[] { "Category:super", "Category:cat1", "Priority:medium" }));
+                foreach (NTrait trait in testCase.GetTraits())
+                    traitList.Add(trait.Name + ":" +  trait.Value);
+
+                Assert.That(traitList, Is.EquivalentTo(new string[] { "Category:super", "Category:cat1", "Priority:medium" }));
             }
         }
     }

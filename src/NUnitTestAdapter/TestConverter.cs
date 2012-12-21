@@ -16,9 +16,6 @@ namespace NUnit.VisualStudio.TestAdapter
         private string sourceAssembly;
         private Dictionary<string, NUnit.Core.TestNode> nunitTestCases;
 
-        private static readonly PropertyInfo traitsProperty;
-        private static readonly MethodInfo traitsCollectionAdd;
-
         #region Constructors
 
         public TestConverter(string sourceAssembly, Dictionary<string, NUnit.Core.TestNode> nunitTestCases)
@@ -26,17 +23,6 @@ namespace NUnit.VisualStudio.TestAdapter
             this.sourceAssembly = sourceAssembly;
             this.vsTestCaseMap = new Dictionary<string, TestCase>();
             this.nunitTestCases = nunitTestCases;
-        }
-
-        static TestConverter()
-        {
-            traitsProperty = typeof(TestCase).GetProperty("Traits");
-            if (traitsProperty != null)
-            {
-                var traitCollectionType = traitsProperty.PropertyType;
-                if (traitCollectionType != null)
-                    traitsCollectionAdd = traitCollectionType.GetMethod("Add", new Type[] {typeof(string), typeof(string)});
-            }
         }
 
         #endregion
@@ -66,10 +52,10 @@ namespace NUnit.VisualStudio.TestAdapter
             // No test node: just build a TestCase without any
             // navigation data using the TestName
             if (testNode == null)
-                return MakeTestCase(test.TestName);
+                return MakeTestCaseFromTestName(test.TestName);
             
             // Use the TestNode and cache the result
-            var testCase = MakeTestCase(testNode);
+            var testCase = MakeTestCaseFromNUnitTest(testNode);
             vsTestCaseMap.Add(test.TestName.UniqueName, testCase);
             return testCase;             
         }
@@ -78,23 +64,18 @@ namespace NUnit.VisualStudio.TestAdapter
         /// Makes a TestCase from a TestNode, adding
         /// navigation data if it can be found.
         /// </summary>
-        public TestCase MakeTestCase(NUnit.Core.ITest testNode)
+        public TestCase MakeTestCaseFromNUnitTest(NUnit.Core.ITest nunitTest)
         {
-            var testCase = MakeTestCase(testNode.TestName);
+            var testCase = MakeTestCaseFromTestName(nunitTest.TestName);
 
-            var navigationData = GetNavigationData(testNode.ClassName, testNode.MethodName);
+            var navigationData = GetNavigationData(nunitTest.ClassName, nunitTest.MethodName);
             if (navigationData != null)
             {
                 testCase.CodeFilePath = navigationData.FileName;
                 testCase.LineNumber = navigationData.MinLineNumber;
             }
 
-            if (traitsCollectionAdd != null) // implies traitsProperty is not null either
-            {
-                object traitsCollection = traitsProperty.GetValue(testCase, new object[0]);
-                if (traitsCollection != null)
-                    AddTraits(testNode, traitsCollection);
-            }
+            testCase.AddTraitsFromNUnitTest(nunitTest);
 
             return testCase;
         }
@@ -102,7 +83,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <summary>
         /// Makes a TestCase without source info from TestName.
         /// </summary>
-        public TestCase MakeTestCase(TestName testName)
+        public TestCase MakeTestCaseFromTestName(TestName testName)
         {
             TestCase testCase = new TestCase(testName.UniqueName, new Uri(NUnitTestExecutor.ExecutorUri), this.sourceAssembly);
             testCase.DisplayName = testName.Name;
@@ -234,31 +215,6 @@ namespace NUnit.VisualStudio.TestAdapter
             navData = DiaSession.GetNavigationData(stateMachineType.FullName, "MoveNext");
 
             return navData;
-        }
-
-        /// <summary>
-        /// Add traits using reflection, since the feature was not present
-        /// in VS2012 RTM but was added in the first update.
-        /// </summary>
-        private static void AddTraits(NUnit.Core.ITest testNode, object traitsCollection)
-        {
-            if (testNode.Parent != null)
-                AddTraits(testNode.Parent, traitsCollection);
-
-            foreach (string propertyName in testNode.Properties.Keys)
-            {
-                object propertyValue = testNode.Properties[propertyName];
-
-                if (propertyName == "_CATEGORIES")
-                {
-                    var categories = propertyValue as System.Collections.IEnumerable;
-                    if (categories != null)
-                        foreach (string category in categories)
-                            traitsCollectionAdd.Invoke(traitsCollection, new object[] { "Category", category });
-                }
-                else if (propertyName[0] != '_') // internal use only
-                    traitsCollectionAdd.Invoke(traitsCollection, new object[] { propertyName, propertyValue.ToString() });
-            }
         }
 
         #endregion

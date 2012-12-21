@@ -40,7 +40,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
 
         ITestCaseFilterExpression IRunContext.GetTestCaseFilter(IEnumerable<string> supportedProperties, Func<string, TestProperty> propertyProvider)
         {
-            throw new NotImplementedException();
+            return null;  // as if we don't have a TFS Build, equal to testing from VS 
         }
 
         #endregion
@@ -53,5 +53,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
         }
 
         #endregion
+
+
+        public string SolutionDirectory
+        {
+            get { throw new NotImplementedException(); }
+        }
     }
 }
