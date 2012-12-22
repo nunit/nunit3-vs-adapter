@@ -21,16 +21,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         
         // NOTE: If the location of the FakeTestCase method in the 
         // file changes, update the value of FAKE_LINE_NUMBER.
-        private static readonly int FAKE_LINE_NUMBER = 32;
+        private static readonly int FAKE_LINE_NUMBER = 31;
 
         private NUnit.Core.TestSuite fakeNUnitFixture;
         private NUnit.Core.Test fakeNUnitTest;
         private NUnit.Core.TestResult fakeNUnitResult;
         private TestConverter testConverter;
 
-        private void FakeTestCase()
-        {  // FAKE_LINE_NUMBER SHOULD BE THIS LINE
-        }
+        private void FakeTestCase() { } // FAKE_LINE_NUMBER SHOULD BE THIS LINE
 
         [SetUp]
         public void SetUp()
