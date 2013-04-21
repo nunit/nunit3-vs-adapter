@@ -75,6 +75,9 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region Private Methods
 
+        // List of test cases used during execution
+        private List<TestCase> vsTestCases;
+
         private void RunAssembly(string assemblyName, ITestExecutionRecorder testLog, TestFilter filter, IRunContext runContext)
         {
 
@@ -97,7 +100,7 @@ namespace NUnit.VisualStudio.TestAdapter
                         if (isCalledFromTfsBuild)
                         {
                             var testfilter = new TFSTestFilter(runContext);
-                            var filteredTestCases = testfilter.CheckFilter(testCases);
+                            var filteredTestCases = testfilter.CheckFilter(vsTestCases);
                             filter = MakeTestFilter(filteredTestCases);
                         }
                         runner.Run(listener, filter, false, LoggingThreshold.Off);
@@ -131,23 +134,21 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private Dictionary<string, NUnit.Core.TestNode> CreateTestCaseMap(TestNode topLevelTest, TestConverter converter)
         {
-            var map = new Dictionary<string, NUnit.Core.TestNode>();
-            testCases = new List<TestCase>();
-            AddTestCasesToMap(map, topLevelTest, converter);
+            var nunitTestCaseMap = new Dictionary<string, NUnit.Core.TestNode>();
+            vsTestCases = new List<TestCase>();
+            AddTestCases(nunitTestCaseMap, topLevelTest, converter);
 
-            return map;
+            return nunitTestCaseMap;
         }
 
-
-        private List<TestCase> testCases;
-        private void AddTestCasesToMap(Dictionary<string, NUnit.Core.TestNode> map, TestNode test, TestConverter converter)
+        private void AddTestCases(Dictionary<string, NUnit.Core.TestNode> nunitTestCaseMap, TestNode test, TestConverter converter)
         {
             if (test.IsSuite) 
-                foreach (TestNode child in test.Tests) AddTestCasesToMap(map, child, converter);
+                foreach (TestNode child in test.Tests) AddTestCases(nunitTestCaseMap, child, converter);
             else
             {
-                testCases.Add(converter.ConvertTestCase(test));
-                map.Add(test.TestName.UniqueName, test);
+                vsTestCases.Add(converter.ConvertTestCase(test));
+                nunitTestCaseMap.Add(test.TestName.UniqueName, test);
             }
         }
 

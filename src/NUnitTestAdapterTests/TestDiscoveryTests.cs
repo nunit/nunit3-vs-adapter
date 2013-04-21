@@ -36,14 +36,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(testCases.Count, Is.EqualTo(NUnit.Tests.Assemblies.MockAssembly.Tests));
         }
 
-        [TestCase("MockTest3", @"^\[.*\]NUnit.Tests.Assemblies.MockTestFixture.MockTest3$")]
-        [TestCase("MockTest4", @"^\[.*\]NUnit.Tests.Assemblies.MockTestFixture.MockTest4$")]
-        [TestCase("ExplicitlyRunTest", @"^\[.*\]NUnit.Tests.Assemblies.MockTestFixture.ExplicitlyRunTest$")]
-        [TestCase("MethodWithParameters(9,11)", @"^\[.*\]NUnit.Tests.FixtureWithTestCases.MethodWithParameters\(9,11\)$")]
-        public void VerifyTestCaseIsFound(string name, string pattern)
+        [TestCase("MockTest3", "NUnit.Tests.Assemblies.MockTestFixture.MockTest3")]
+        [TestCase("MockTest4", "NUnit.Tests.Assemblies.MockTestFixture.MockTest4")]
+        [TestCase("ExplicitlyRunTest", "NUnit.Tests.Assemblies.MockTestFixture.ExplicitlyRunTest")]
+        [TestCase("MethodWithParameters(9,11)", "NUnit.Tests.FixtureWithTestCases.MethodWithParameters(9,11)")]
+        public void VerifyTestCaseIsFound(string name, string fullName)
         {
             var testCase = testCases.Find(tc => tc.DisplayName == name);
-            Assert.That(testCase.FullyQualifiedName, Is.StringMatching(pattern));
+            Assert.That(testCase.FullyQualifiedName, Is.EqualTo(fullName));
         }
 
         #region IMessageLogger Methods

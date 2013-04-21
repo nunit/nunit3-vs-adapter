@@ -87,7 +87,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         public TestCase MakeTestCaseFromTestName(TestName testName)
         {
-            TestCase testCase = new TestCase(testName.UniqueName, new Uri(NUnitTestExecutor.ExecutorUri), this.sourceAssembly);
+            TestCase testCase = new TestCase(testName.FullName, new Uri(NUnitTestExecutor.ExecutorUri), this.sourceAssembly);
             testCase.DisplayName = testName.Name;
             testCase.CodeFilePath = null;
             testCase.LineNumber = 0;

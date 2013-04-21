@@ -41,8 +41,8 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     if (runner.Load(package))
                     {
-                        var testCaseMap = CreateTestCaseMap(runner.Test as TestNode);
-                        this.testConverter = new TestConverter(sourceAssembly, testCaseMap);
+                        var nunitTestCaseMap = CreateNUnitTestCaseMap(runner.Test as TestNode);
+                        this.testConverter = new TestConverter(sourceAssembly, nunitTestCaseMap);
 
                         TestNode topNode = runner.Test as TestNode;
                         if (topNode != null)
@@ -101,21 +101,21 @@ namespace NUnit.VisualStudio.TestAdapter
             return cases;
         }
 
-        private Dictionary<string, NUnit.Core.TestNode> CreateTestCaseMap(TestNode topLevelTest)
+        private Dictionary<string, NUnit.Core.TestNode> CreateNUnitTestCaseMap(TestNode topLevelTest)
         {
-            var map = new Dictionary<string, NUnit.Core.TestNode>();
-            AddTestCasesToMap(map, topLevelTest);
+            var nunitTestCaseMap = new Dictionary<string, NUnit.Core.TestNode>();
+            AddTestCasesToNUnitTestCaseMap(nunitTestCaseMap, topLevelTest);
 
-            return map;
+            return nunitTestCaseMap;
         }
 
-        private void AddTestCasesToMap(Dictionary<string, NUnit.Core.TestNode> map, TestNode test)
+        private void AddTestCasesToNUnitTestCaseMap(Dictionary<string, NUnit.Core.TestNode> nunitTestCaseMap, TestNode test)
         {
             if (test.IsSuite)
                 foreach (TestNode child in test.Tests)
-                    AddTestCasesToMap(map, child);
+                    AddTestCasesToNUnitTestCaseMap(nunitTestCaseMap, child);
             else
-                map.Add(test.TestName.UniqueName, test);
+                nunitTestCaseMap.Add(test.TestName.UniqueName, test);
         }
 
         #endregion

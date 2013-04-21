@@ -172,7 +172,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             Assert.NotNull(ourCase, "TestCase not set");
             Assert.That(ourCase.DisplayName, Is.EqualTo(fakeNUnitTest.TestName.Name));
-            Assert.That(ourCase.FullyQualifiedName, Is.EqualTo(fakeNUnitTest.TestName.UniqueName));
+            Assert.That(ourCase.FullyQualifiedName, Is.EqualTo(fakeNUnitTest.TestName.FullName));
             Assert.That(ourCase.Source, Is.EqualTo(THIS_ASSEMBLY_PATH));
             Assert.That(ourCase.CodeFilePath, Is.SamePath(THIS_CODE_FILE));
             Assert.That(ourCase.LineNumber, Is.EqualTo(LINE_NUMBER));

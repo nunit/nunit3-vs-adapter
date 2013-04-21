@@ -95,7 +95,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         private static void CheckBasicInfo(TestCase testCase)
         {
-            Assert.That(testCase.FullyQualifiedName, Is.StringMatching(@"^\[.*\]NUnit.VisualStudio.TestAdapter.Tests.TestConverterTests.FakeTestCase$"));
+            Assert.That(testCase.FullyQualifiedName, Is.EqualTo("NUnit.VisualStudio.TestAdapter.Tests.TestConverterTests.FakeTestCase"));
             Assert.That(testCase.DisplayName, Is.EqualTo("FakeTestCase"));
             Assert.That(testCase.Source, Is.SamePath(THIS_ASSEMBLY_PATH));
         }
