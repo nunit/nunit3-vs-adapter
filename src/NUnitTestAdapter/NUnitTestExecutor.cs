@@ -40,12 +40,23 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <param param name="frameworkHandle">Test log to send results and messages through</param>
         public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
+            Logger = frameworkHandle;
             // Ensure any channels registered by other adapters are unregistered
-            CleanUpRegisteredChannels();
-            var tfsfilter = new TFSTestFilter(runContext);
-            isCalledFromTfsBuild = tfsfilter.TfsTestCaseFilterExpression != null;
-            foreach (var source in sources)
-                RunAssembly(source, frameworkHandle, TestFilter.Empty, runContext);
+            SendInformationalMessage("NUnit executing tests started");
+                
+            try
+            {
+                CleanUpRegisteredChannels();
+                var tfsfilter = new TFSTestFilter(runContext);
+                isCalledFromTfsBuild = tfsfilter.TfsTestCaseFilterExpression != null;
+                SendInformationalMessage("NUnit executing tests started processing");
+                foreach (var source in sources) RunAssembly(source, frameworkHandle, TestFilter.Empty, runContext);
+                SendInformationalMessage("NUnit executing tests finished");
+            }
+            catch (Exception ex)
+            {
+                SendErrorMessage("Exception "+ex);
+            }
         }
 
         /// <summary>
@@ -56,13 +67,16 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <param name="frameworkHandle">The FrameworkHandle</param>
         public void RunTests(IEnumerable<TestCase> selectedTests, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
+            Logger = frameworkHandle;
+            SendInformationalMessage("NUnit executing tests started");
+            
             // Ensure any channels registered by other adapters are unregistered
             CleanUpRegisteredChannels();
             isCalledFromTfsBuild = false;
             var assemblyGroups = selectedTests.GroupBy(tc => tc.Source);
-
             foreach (var assemblyGroup in assemblyGroups)
                 RunAssembly(assemblyGroup.Key, frameworkHandle, MakeTestFilter(assemblyGroup), runContext);
+            SendInformationalMessage("NUnit executing tests finished");
         }
 
         void ITestExecutor.Cancel()
@@ -80,8 +94,6 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private void RunAssembly(string assemblyName, ITestExecutionRecorder testLog, TestFilter filter, IRunContext runContext)
         {
-
-            SetLogger(testLog);
 
             try
             {
@@ -124,6 +136,11 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 // we skip the native c++ binaries that we don't support.
                 AssemblyNotSupportedWarning(assemblyName);
+            }
+            catch (System.IO.FileNotFoundException ex)
+            {
+                // Probably from the GetExportedTypes in NUnit.core, attempting to find an assembly, not a problem if it is not NUnit here
+                DependentAssemblyNotFoundWarning(ex.FileName, assemblyName);
             }
             catch (Exception ex)
             {

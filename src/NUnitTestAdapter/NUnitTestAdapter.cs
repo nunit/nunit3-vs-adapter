@@ -19,7 +19,7 @@ namespace NUnit.VisualStudio.TestAdapter
     public abstract class NUnitTestAdapter
     {
         // The logger currently in use
-        protected IMessageLogger _logger;
+        protected IMessageLogger Logger { get; set; }
 
         #region Constructor
 
@@ -27,7 +27,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// The common constructor initializes NUnit services 
         /// needed to load and run tests.
         /// </summary>
-        public NUnitTestAdapter()
+        protected NUnitTestAdapter()
         {
             ServiceManager.Services.AddService(new DomainManager());
             ServiceManager.Services.AddService(new ProjectService());
@@ -39,11 +39,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region Helper Methods
 
-        protected void SetLogger(IMessageLogger logger)
-        {
-            _logger = logger;
-        }
-
+        
         protected static void CleanUpRegisteredChannels()
         {
             foreach (IChannel chan in ChannelServices.RegisteredChannels)
@@ -55,6 +51,11 @@ namespace NUnit.VisualStudio.TestAdapter
             SendWarningMessage("Assembly not supported: " + sourceAssembly);
         }
 
+        protected void DependentAssemblyNotFoundWarning(string dependentAssembly, string sourceAssembly)
+        {
+            SendWarningMessage("Dependent Assembly "+dependentAssembly+" of " + sourceAssembly + " not found. Can be ignored if not a NUnit project.");
+        }
+
         protected void NUnitLoadError(string sourceAssembly)
         {
             SendErrorMessage("NUnit failed to load " + sourceAssembly);
@@ -62,25 +63,27 @@ namespace NUnit.VisualStudio.TestAdapter
 
         protected void SendErrorMessage(string message)
         {
-            _logger.SendMessage(TestMessageLevel.Error, message);
+            this.Logger.SendMessage(TestMessageLevel.Error, message);
         }
 
         protected void SendErrorMessage(string message, Exception ex)
         {
-            _logger.SendMessage(TestMessageLevel.Error, message);
-            _logger.SendMessage(TestMessageLevel.Error, ex.ToString());
+            this.Logger.SendMessage(TestMessageLevel.Error, message);
+            this.Logger.SendMessage(TestMessageLevel.Error, ex.ToString());
         }
 
         protected void SendWarningMessage(string message)
         {
-            _logger.SendMessage(TestMessageLevel.Warning, message);
+            this.Logger.SendMessage(TestMessageLevel.Warning, message);
         }
 
         protected void SendInformationalMessage(string message)
         {
-            _logger.SendMessage(TestMessageLevel.Informational, message);
+            this.Logger.SendMessage(TestMessageLevel.Informational, message);
         }
 
         #endregion
+
+       
     }
 }

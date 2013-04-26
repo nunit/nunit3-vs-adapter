@@ -23,11 +23,11 @@ namespace NUnit.VisualStudio.TestAdapter
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)
         {
             // Set the logger to use for messages
-            SetLogger(logger);
+            Logger = logger;
 
             // Ensure any channels registered by other adapters are unregistered
             CleanUpRegisteredChannels();
-
+            SendInformationalMessage("NUnit discovering tests");
             // Filter out the sources which can have NUnit tests. 
             foreach (string sourceAssembly in sources)
             {
@@ -63,16 +63,24 @@ namespace NUnit.VisualStudio.TestAdapter
                     // we skip the native c++ binaries that we don't support.
                     AssemblyNotSupportedWarning(sourceAssembly);
                 }
+
+                catch (System.IO.FileNotFoundException ex)
+                {
+                    // Probably from the GetExportedTypes in NUnit.core, attempting to find an assembly, not a problem if it is not NUnit here
+                    DependentAssemblyNotFoundWarning(ex.FileName, sourceAssembly);
+                }
                 catch (System.Exception ex)
                 {
                     SendErrorMessage("Exception thrown discovering tests in " + sourceAssembly, ex);
                 }
                 finally
                 {
-                    testConverter.Dispose();
+                    if (testConverter!=null)
+                        testConverter.Dispose();
                     runner.Unload();
                 }
             }
+            SendInformationalMessage("NUnit finished discovering tests");
         }
 
         private int ProcessTestCases(TestNode test, ITestCaseDiscoverySink discoverySink)
