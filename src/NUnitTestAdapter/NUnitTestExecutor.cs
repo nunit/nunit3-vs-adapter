@@ -37,10 +37,11 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         /// <param name="sources">Sources to be run.</param>
         /// <param name="runContext">Context to use when executing the tests.</param>
-        /// <param param name="frameworkHandle">Test log to send results and messages through</param>
+        /// <param name="frameworkHandle">Test log to send results and messages through</param>
         public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
             Logger = frameworkHandle;
+            frameworkHandle.EnableShutdownAfterTestRun = true;
             // Ensure any channels registered by other adapters are unregistered
             SendInformationalMessage("NUnit executing tests started");
                 
@@ -57,6 +58,7 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 SendErrorMessage("Exception "+ex);
             }
+            
         }
 
         /// <summary>
@@ -68,6 +70,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public void RunTests(IEnumerable<TestCase> selectedTests, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
             Logger = frameworkHandle;
+            frameworkHandle.EnableShutdownAfterTestRun = true;
             SendInformationalMessage("NUnit executing tests started");
             
             // Ensure any channels registered by other adapters are unregistered
@@ -77,6 +80,7 @@ namespace NUnit.VisualStudio.TestAdapter
             foreach (var assemblyGroup in assemblyGroups)
                 RunAssembly(assemblyGroup.Key, frameworkHandle, MakeTestFilter(assemblyGroup), runContext);
             SendInformationalMessage("NUnit executing tests finished");
+            
         }
 
         void ITestExecutor.Cancel()
