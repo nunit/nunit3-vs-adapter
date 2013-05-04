@@ -12,6 +12,8 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
+    using System.Reflection;
+
     /// <summary>
     /// NUnitTestAdapter is the common base for the
     /// NUnit discoverer and executor classes.
@@ -23,6 +25,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region Constructor
 
+        protected string Version { get; private set; }
+
         /// <summary>
         /// The common constructor initializes NUnit services 
         /// needed to load and run tests.
@@ -33,13 +37,19 @@ namespace NUnit.VisualStudio.TestAdapter
             ServiceManager.Services.AddService(new ProjectService());
 
             ServiceManager.Services.InitializeServices();
+            Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         }
 
         #endregion
 
         #region Helper Methods
 
-        
+        protected void Info(string method, string function)
+        {
+            string msg = string.Format("NUnit %0 %1 is %2", Version, method, function);
+            this.SendInformationalMessage(msg);
+        }
+
         protected static void CleanUpRegisteredChannels()
         {
             foreach (IChannel chan in ChannelServices.RegisteredChannels)

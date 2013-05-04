@@ -24,10 +24,10 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             // Set the logger to use for messages
             Logger = logger;
-
+            Info("discovering tests", "started");
+            
             // Ensure any channels registered by other adapters are unregistered
             CleanUpRegisteredChannels();
-            SendInformationalMessage("NUnit discovering tests");
             // Filter out the sources which can have NUnit tests. 
             foreach (string sourceAssembly in sources)
             {
@@ -80,7 +80,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     runner.Unload();
                 }
             }
-            SendInformationalMessage("NUnit finished discovering tests");
+            Info("discovering test","finished");
         }
 
         private int ProcessTestCases(TestNode test, ITestCaseDiscoverySink discoverySink)

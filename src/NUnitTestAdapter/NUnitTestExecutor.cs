@@ -43,20 +43,22 @@ namespace NUnit.VisualStudio.TestAdapter
             Logger = frameworkHandle;
             frameworkHandle.EnableShutdownAfterTestRun = true;
             // Ensure any channels registered by other adapters are unregistered
-            SendInformationalMessage("NUnit executing tests started");
-                
+            Info("executing tests","started");
+
             try
             {
                 CleanUpRegisteredChannels();
                 var tfsfilter = new TFSTestFilter(runContext);
                 isCalledFromTfsBuild = tfsfilter.TfsTestCaseFilterExpression != null;
-                SendInformationalMessage("NUnit executing tests started processing");
                 foreach (var source in sources) RunAssembly(source, frameworkHandle, TestFilter.Empty, runContext);
-                SendInformationalMessage("NUnit executing tests finished");
             }
             catch (Exception ex)
             {
-                SendErrorMessage("Exception "+ex);
+                SendErrorMessage("Exception " + ex);
+            }
+            finally
+            {
+                Info("executing tests", "finished");
             }
             
         }
@@ -71,7 +73,7 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             Logger = frameworkHandle;
             frameworkHandle.EnableShutdownAfterTestRun = true;
-            SendInformationalMessage("NUnit executing tests started");
+            Info("executing tests", "started");
             
             // Ensure any channels registered by other adapters are unregistered
             CleanUpRegisteredChannels();
@@ -79,7 +81,7 @@ namespace NUnit.VisualStudio.TestAdapter
             var assemblyGroups = selectedTests.GroupBy(tc => tc.Source);
             foreach (var assemblyGroup in assemblyGroups)
                 RunAssembly(assemblyGroup.Key, frameworkHandle, MakeTestFilter(assemblyGroup), runContext);
-            SendInformationalMessage("NUnit executing tests finished");
+            Info("executing tests", "finished");
             
         }
 
