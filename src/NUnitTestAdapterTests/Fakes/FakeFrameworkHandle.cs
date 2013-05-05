@@ -58,14 +58,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
 
         bool IFrameworkHandle.EnableShutdownAfterTestRun
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
-            set
-            {
-                throw new NotImplementedException();
-            }
+            get; set; 
         }
 
         int IFrameworkHandle.LaunchProcessWithDebuggerAttached(string filePath, string workingDirectory, string arguments, IDictionary<string, string> environmentVariables)
