@@ -42,7 +42,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     if (runner.Load(package))
                     {
                         var nunitTestCaseMap = CreateNUnitTestCaseMap(runner.Test as TestNode);
-                        this.testConverter = new TestConverter(sourceAssembly, nunitTestCaseMap);
+                        this.testConverter = new TestConverter(sourceAssembly, nunitTestCaseMap,false);  // TFS Doesnt matter here
 
                         TestNode topNode = runner.Test as TestNode;
                         if (topNode != null)

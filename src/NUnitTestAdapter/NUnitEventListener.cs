@@ -23,16 +23,17 @@ namespace NUnit.VisualStudio.TestAdapter
         private Dictionary<string, NUnit.Core.TestNode> nunitTestCases;
         private TestConverter testConverter;
 
-        public NUnitEventListener(ITestExecutionRecorder testLog, Dictionary<string, NUnit.Core.TestNode> nunitTestCases, string assemblyName)
+        public NUnitEventListener(ITestExecutionRecorder testLog, Dictionary<string, NUnit.Core.TestNode> nunitTestCases, string assemblyName, bool isBuildFromTfs)
         {
             this.testLog = testLog;
             this.assemblyName = assemblyName;
             this.nunitTestCases = nunitTestCases;
-            this.testConverter = new TestConverter(assemblyName, nunitTestCases);
+            this.testConverter = new TestConverter(assemblyName, nunitTestCases,isBuildFromTfs);
         }
 
         public void RunStarted(string name, int testCount)
         {
+            testLog.SendMessage(TestMessageLevel.Informational, "Run started: "+name);
         }
 
         public void RunFinished(Exception exception)

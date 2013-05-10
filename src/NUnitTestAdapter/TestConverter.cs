@@ -19,12 +19,14 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region Constructors
 
-        public TestConverter(string sourceAssembly, Dictionary<string, NUnit.Core.TestNode> nunitTestCases)
+        private readonly bool isBuildOnTfs;
+        public TestConverter(string sourceAssembly, Dictionary<string, NUnit.Core.TestNode> nunitTestCases, bool isbuildOnTfs)
         {
             this.sourceAssembly = sourceAssembly;
             this.vsTestCaseMap = new Dictionary<string, TestCase>();
             this.nunitTestCases = nunitTestCases;
             this.navigationData = new NavigationData(sourceAssembly);
+            this.isBuildOnTfs = isbuildOnTfs;
         }
 
         #endregion
@@ -87,10 +89,15 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         public TestCase MakeTestCaseFromTestName(TestName testName)
         {
-            TestCase testCase = new TestCase(testName.FullName, new Uri(NUnitTestExecutor.ExecutorUri), this.sourceAssembly);
-            testCase.DisplayName = testName.Name;
-            testCase.CodeFilePath = null;
-            testCase.LineNumber = 0;
+            var testCase = new TestCase(
+                                     this.isBuildOnTfs ? testName.UniqueName : testName.FullName,
+                                     new Uri(NUnitTestExecutor.ExecutorUri),
+                                     this.sourceAssembly)
+                {
+                    DisplayName = testName.Name,
+                    CodeFilePath = null,
+                    LineNumber = 0
+                };
 
             return testCase;
         }
@@ -99,10 +106,12 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             TestCase ourCase = ConvertTestCase(result.Test);
 
-            TestResult ourResult = new TestResult(ourCase);
-            ourResult.DisplayName = ourCase.DisplayName;
-            ourResult.Outcome = ResultStateToTestOutcome(result.ResultState);
-            ourResult.Duration = TimeSpan.FromSeconds(result.Time);
+            TestResult ourResult = new TestResult(ourCase)
+                {
+                    DisplayName = ourCase.DisplayName,
+                    Outcome = ResultStateToTestOutcome(result.ResultState),
+                    Duration = TimeSpan.FromSeconds(result.Time)
+                };
             // TODO: Remove this when NUnit provides a better duration
             if (ourResult.Duration == TimeSpan.Zero && (ourResult.Outcome == TestOutcome.Passed || ourResult.Outcome == TestOutcome.Failed))
                 ourResult.Duration = TimeSpan.FromTicks(1);

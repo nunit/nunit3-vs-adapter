@@ -50,7 +50,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var testNode = (NUnit.Core.TestNode)fixtureNode.Tests[0];
             map.Add(fakeNUnitTest.TestName.UniqueName, testNode);
 
-            testConverter = new TestConverter(THIS_ASSEMBLY_PATH, map);
+            testConverter = new TestConverter(THIS_ASSEMBLY_PATH, map,false);
         }
 
         [Test]

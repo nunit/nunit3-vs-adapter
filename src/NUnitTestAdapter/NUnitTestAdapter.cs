@@ -92,8 +92,17 @@ namespace NUnit.VisualStudio.TestAdapter
             this.Logger.SendMessage(TestMessageLevel.Informational, message);
         }
 
+        protected void SendDebugMessage(string message)
+        {
+#if DEBUG
+            this.Logger.SendMessage(TestMessageLevel.Informational, message);
+#endif
+        }
+
         #endregion
 
        
     }
+
+    
 }

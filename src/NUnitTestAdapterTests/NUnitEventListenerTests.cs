@@ -44,7 +44,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var map = new Dictionary<string, NUnit.Core.TestNode>();
             map.Add(fakeNUnitTest.TestName.UniqueName, new NUnit.Core.TestNode(fakeNUnitTest));
 
-            this.listener = new NUnitEventListener(testLog, map, THIS_ASSEMBLY_PATH);
+            this.listener = new NUnitEventListener(testLog, map, THIS_ASSEMBLY_PATH,false);
         }
 
         #region TestStarted Tests
