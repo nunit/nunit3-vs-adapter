@@ -11,9 +11,12 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Core;
 using NUnit.Core.Filters;
 using NUnit.Util;
+// #define LAUNCHDEBUGGER
 
 namespace NUnit.VisualStudio.TestAdapter
 {
+    using System.Diagnostics;
+
     [ExtensionUri(NUnitTestExecutor.ExecutorUri)]
     public sealed class NUnitTestExecutor : NUnitTestAdapter, ITestExecutor
     {
@@ -72,6 +75,10 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <param name="frameworkHandle">The FrameworkHandle</param>
         public void RunTests(IEnumerable<TestCase> selectedTests, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
+#if LAUNCHDEBUGGER
+            Debugger.Launch();
+#endif
+            
             Logger = frameworkHandle;
             frameworkHandle.EnableShutdownAfterTestRun = true;
             Info("executing tests", "started");
@@ -104,6 +111,9 @@ namespace NUnit.VisualStudio.TestAdapter
 
             try
             {
+#if LAUNCHDEBUGGER
+            Debugger.Launch();
+#endif
                 this.runner = new TestDomain();
                 var package = new TestPackage(assemblyName);
                 var testDictionary = new Dictionary<string, TestNode>();
@@ -199,13 +209,10 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private TestFilter MakeTestFilter(IEnumerable<TestCase> ptestCases)
         {
-            var filter = new NameFilter();
+            var filter = new SimpleNameFilter();
             foreach (TestCase testCase in ptestCases)
             {
-                var name = TestName.Parse(testCase.FullyQualifiedName);
-                name.RunnerID = 0;
-                this.SendDebugMessage(String.Format("TestCase: {0}  {1} ", name.UniqueName ?? "null", name.FullName ?? "null"));
-                filter.Add(name);
+                filter.Add(testCase.FullyQualifiedName);
             }
             return filter;
         }

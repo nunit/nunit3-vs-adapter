@@ -90,7 +90,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public TestCase MakeTestCaseFromTestName(TestName testName)
         {
             var testCase = new TestCase(
-                                     this.isBuildOnTfs ? testName.UniqueName : testName.FullName,
+                                 /*    this.isBuildOnTfs ? testName.UniqueName :*/ testName.FullName,
                                      new Uri(NUnitTestExecutor.ExecutorUri),
                                      this.sourceAssembly)
                 {

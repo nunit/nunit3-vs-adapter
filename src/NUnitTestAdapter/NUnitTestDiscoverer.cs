@@ -11,6 +11,8 @@ using NUnit.Util;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
+    using System.Diagnostics;
+
     [FileExtension(".dll")]
     [FileExtension(".exe")]
     [DefaultExecutorUri(NUnitTestExecutor.ExecutorUri)]
@@ -96,7 +98,11 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 try
                 {
+#if LAUNCHDEBUGGER
+            Debugger.Launch();
+#endif
                     TestCase testCase = testConverter.ConvertTestCase(test);
+
                     discoverySink.SendTestCase(testCase);
                     cases += 1;
                 }

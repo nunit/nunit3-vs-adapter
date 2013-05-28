@@ -14,6 +14,8 @@ using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
+    using System.Diagnostics;
+
     [Category("TestExecution")]
     public class TestExecutionTests
     {
