@@ -33,7 +33,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             // Sanity check to be sure we have the correct version of mock-assembly.dll
             Assert.That(MockAssembly.Tests, Is.EqualTo(31),
                 "The reference to mock-assembly.dll appears to be the wrong version");
-
             testCases = new List<TestCase>();
             testResults = new List<TestResult>();
             testLog = new FakeFrameworkHandle();

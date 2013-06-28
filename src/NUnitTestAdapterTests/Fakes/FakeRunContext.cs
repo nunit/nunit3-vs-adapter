@@ -30,7 +30,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
 
         bool IRunContext.KeepAlive
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                return true;
+            }
         }
 
         string IRunContext.TestRunDirectory

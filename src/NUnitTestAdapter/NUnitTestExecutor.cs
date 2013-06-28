@@ -80,7 +80,8 @@ namespace NUnit.VisualStudio.TestAdapter
 #endif
             
             Logger = frameworkHandle;
-            frameworkHandle.EnableShutdownAfterTestRun = true;
+            if (runContext.KeepAlive)
+                frameworkHandle.EnableShutdownAfterTestRun = true;
             Info("executing tests", "started");
 
             // Ensure any channels registered by other adapters are unregistered
