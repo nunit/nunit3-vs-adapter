@@ -54,7 +54,13 @@ namespace NUnit.VisualStudio.TestAdapter
                 this.SendDebugMessage("Keepalive:" + runContext.KeepAlive);
                 if (!isCalledFromTfsBuild && runContext.KeepAlive)
                     frameworkHandle.EnableShutdownAfterTestRun = true;
-                foreach (var source in sources) RunAssembly(source, frameworkHandle, TestFilter.Empty, runContext);
+                foreach (var source in sources)
+                {
+                    using (var filter = (isCalledFromTfsBuild) ? new TfsAssemblyFilter(source, runContext) : new AssemblyFilter(source))
+                    {
+                        this.RunAssembly(frameworkHandle, filter);
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -78,7 +84,7 @@ namespace NUnit.VisualStudio.TestAdapter
 #if LAUNCHDEBUGGER
             Debugger.Launch();
 #endif
-            
+
             Logger = frameworkHandle;
             if (runContext.KeepAlive)
                 frameworkHandle.EnableShutdownAfterTestRun = true;
@@ -89,7 +95,13 @@ namespace NUnit.VisualStudio.TestAdapter
             isCalledFromTfsBuild = false;
             var assemblyGroups = selectedTests.GroupBy(tc => tc.Source);
             foreach (var assemblyGroup in assemblyGroups)
-                RunAssembly(assemblyGroup.Key, frameworkHandle, MakeTestFilter(assemblyGroup), runContext);
+            {
+                using (var filter = AssemblyFilter.Create(assemblyGroup.Key, assemblyGroup))
+                {
+                    this.RunAssembly(frameworkHandle, filter);
+                }
+
+            }
             Info("executing tests", "finished");
 
         }
@@ -104,10 +116,9 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region Private Methods
 
-        // List of test cases used during execution
-        private List<TestCase> vsTestCases;
 
-        private void RunAssembly(string assemblyName, ITestExecutionRecorder testLog, TestFilter filter, IRunContext runContext)
+
+        private void RunAssembly(ITestExecutionRecorder testLog, AssemblyFilter filter)
         {
 
             try
@@ -116,43 +127,15 @@ namespace NUnit.VisualStudio.TestAdapter
             Debugger.Launch();
 #endif
                 this.runner = new TestDomain();
-                var package = new TestPackage(assemblyName);
-                var testDictionary = new Dictionary<string, TestNode>();
-                var converter = new TestConverter(assemblyName, testDictionary, isCalledFromTfsBuild);
+                var package = new TestPackage(filter.AssemblyName);
                 if (runner.Load(package))
                 {
-                    #region DEBUG
-#if DEBUG
-                    foreach (ITest test in runner.Test.Tests)
-                    {
-                        this.SendDebugMessage(String.Format("Test:  {0} ", test.TestName.FullName));
-                        foreach (ITest testc in test.Tests)
-                        {
-                            this.SendDebugMessage(String.Format("Test:  {0} ", testc.TestName.FullName));
-                            foreach (ITest testm in testc.Tests)
-                            {
-                                this.SendDebugMessage(String.Format("Test:  {0} {1} ", testm.TestName.FullName, testm.TestName.TestID));
-
-                            }
-                        }
-                    }
-#endif
-                    #endregion
-
-                    var testCaseMap = CreateTestCaseMap(runner.Test as TestNode, converter);
-                    var listener = new NUnitEventListener(testLog, testCaseMap, assemblyName, isCalledFromTfsBuild);
-                    this.SendDebugMessage("TFS Build : " + this.isCalledFromTfsBuild);
+                    filter.AddTestCases(runner.Test as TestNode);
+                    var listener = new NUnitEventListener(testLog, filter);
                     try
                     {
-                        if (isCalledFromTfsBuild)
-                        {
-                            this.SendDebugMessage("TFS Build - setting up filter");
-                            var testfilter = new TFSTestFilter(runContext);
-                            var filteredTestCases = testfilter.CheckFilter(vsTestCases);
-                            filter = MakeTestFilter(filteredTestCases);
-                            this.SendDebugMessage("No of cases found" + vsTestCases.Count() + " after filter = " + filteredTestCases.Count());
-                        }
-                        runner.Run(listener, filter, true, LoggingThreshold.Off);
+                        filter.ProcessTfsFilter();
+                        runner.Run(listener, filter.NUnitFilter, true, LoggingThreshold.Off);
                     }
                     catch (NullReferenceException)
                     {
@@ -161,62 +144,34 @@ namespace NUnit.VisualStudio.TestAdapter
                     }
                     finally
                     {
-                        listener.Dispose();
                         runner.Unload();
                     }
                 }
                 else
                 {
-                    NUnitLoadError(assemblyName);
+                    NUnitLoadError(filter.AssemblyName);
                 }
             }
             catch (System.BadImageFormatException)
             {
                 // we skip the native c++ binaries that we don't support.
-                AssemblyNotSupportedWarning(assemblyName);
+                AssemblyNotSupportedWarning(filter.AssemblyName);
             }
             catch (System.IO.FileNotFoundException ex)
             {
                 // Probably from the GetExportedTypes in NUnit.core, attempting to find an assembly, not a problem if it is not NUnit here
-                DependentAssemblyNotFoundWarning(ex.FileName, assemblyName);
+                DependentAssemblyNotFoundWarning(ex.FileName, filter.AssemblyName);
             }
             catch (Exception ex)
             {
-                SendErrorMessage("Exception thrown executing tests in " + assemblyName, ex);
+                SendErrorMessage("Exception thrown executing tests in " + filter.AssemblyName, ex);
             }
         }
 
 
-        private Dictionary<string, NUnit.Core.TestNode> CreateTestCaseMap(TestNode topLevelTest, TestConverter converter)
-        {
-            var nunitTestCaseMap = new Dictionary<string, NUnit.Core.TestNode>();
-            vsTestCases = new List<TestCase>();
-            AddTestCases(nunitTestCaseMap, topLevelTest, converter);
 
-            return nunitTestCaseMap;
-        }
 
-        private void AddTestCases(Dictionary<string, NUnit.Core.TestNode> nunitTestCaseMap, TestNode test, TestConverter converter)
-        {
-            if (test.IsSuite)
-                foreach (TestNode child in test.Tests) AddTestCases(nunitTestCaseMap, child, converter);
-            else
-            {
-                vsTestCases.Add(converter.ConvertTestCase(test));
-                nunitTestCaseMap.Add(test.TestName.UniqueName, test);
-
-            }
-        }
-
-        private TestFilter MakeTestFilter(IEnumerable<TestCase> ptestCases)
-        {
-            var filter = new SimpleNameFilter();
-            foreach (TestCase testCase in ptestCases)
-            {
-                filter.Add(testCase.FullyQualifiedName);
-            }
-            return filter;
-        }
+        
 
         #endregion
     }

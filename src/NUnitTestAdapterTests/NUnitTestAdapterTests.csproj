@@ -68,6 +68,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssemblyFilterTests.cs" />
     <Compile Include="AsyncTests.cs" />
     <Compile Include="NavigationTestData.cs" />
     <Compile Include="NavigationDataTests.cs" />

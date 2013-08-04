@@ -63,6 +63,14 @@ namespace NUnit.VisualStudio.TestAdapter
                        (testCaseFilterExpression = runContext.GetTestCaseFilter(supportedProperties, PropertyProvider));
             }
         }
+
+        public bool HasTfsFilterValue
+        {
+            get
+            {
+                return TfsTestCaseFilterExpression.TestCaseFilterValue != String.Empty;
+            }
+        }
         public IEnumerable<TestCase> CheckFilter(IEnumerable<TestCase> tests)
         {
 

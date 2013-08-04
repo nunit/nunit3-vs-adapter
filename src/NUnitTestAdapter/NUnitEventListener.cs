@@ -16,19 +16,29 @@ namespace NUnit.VisualStudio.TestAdapter
     /// NUnitEventListener implements the EventListener interface and
     /// translates each event into a message for the VS test platform.
     /// </summary>
-    public class NUnitEventListener : MarshalByRefObject, EventListener, IDisposable // Public for testing
+    public class NUnitEventListener : MarshalByRefObject, EventListener // Public for testing
     {
-        private ITestExecutionRecorder testLog;
-        private string assemblyName;
-        private Dictionary<string, NUnit.Core.TestNode> nunitTestCases;
-        private TestConverter testConverter;
+        private readonly ITestExecutionRecorder testLog;
+        //private string assemblyName;
+        //private readonly Dictionary<string, NUnit.Core.TestNode> nunitTestCases;
+        //private readonly TestConverter testConverter;
+        private AssemblyFilter filter;
 
-        public NUnitEventListener(ITestExecutionRecorder testLog, Dictionary<string, NUnit.Core.TestNode> nunitTestCases, string assemblyName, bool isBuildFromTfs)
+        //public NUnitEventListener(ITestExecutionRecorder testLog, Dictionary<string, NUnit.Core.TestNode> nunitTestCases, string assemblyName, bool isBuildFromTfs)
+        //{
+        //    this.testLog = testLog;
+        //    this.assemblyName = assemblyName;
+        //    this.nunitTestCases = nunitTestCases;
+        //    this.testConverter = new TestConverter(assemblyName, nunitTestCases, isBuildFromTfs);
+        //}
+
+        public NUnitEventListener(ITestExecutionRecorder testLog, AssemblyFilter filter)
         {
             this.testLog = testLog;
-            this.assemblyName = assemblyName;
-            this.nunitTestCases = nunitTestCases;
-            this.testConverter = new TestConverter(assemblyName, nunitTestCases, isBuildFromTfs);
+            this.filter = filter;
+            //this.assemblyName = assemblyName;
+            //this.nunitTestCases = nunitTestCases;
+            //this.testConverter = new TestConverter(assemblyName, nunitTestCases, isBuildFromTfs);
         }
 
         public void RunStarted(string name, int testCount)
@@ -75,10 +85,10 @@ namespace NUnit.VisualStudio.TestAdapter
             string key = testName.UniqueName;
 
             // Simply ignore any TestName not found
-            if (nunitTestCases.ContainsKey(key))
+            if (filter.NUnitTestCaseMap.ContainsKey(key))
             {
-                var nunitTest = nunitTestCases[key];
-                var ourCase = testConverter.ConvertTestCase(nunitTest);
+                var nunitTest = filter.NUnitTestCaseMap[key];
+                var ourCase = filter.TestConverter.ConvertTestCase(nunitTest);
                 this.testLog.RecordStart(ourCase);
                // Output = testName.FullName + "\r";
             }
@@ -87,7 +97,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void TestFinished(NUnit.Core.TestResult result)
         {
-            TestResult ourResult = testConverter.ConvertTestResult(result);
+            TestResult ourResult = filter.TestConverter.ConvertTestResult(result);
             ourResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, Output));
             this.testLog.RecordEnd(ourResult.TestCase, ourResult.Outcome);
             this.testLog.RecordResult(ourResult);
@@ -130,10 +140,10 @@ namespace NUnit.VisualStudio.TestAdapter
         {
         }
 
-        public void Dispose()
-        {
-            if (this.testConverter != null)
-                this.testConverter.Dispose();
-        }
+        //public void Dispose()
+        //{
+        //    if (this.testConverter != null)
+        //        this.testConverter.Dispose();
+        //}
     }
 }
