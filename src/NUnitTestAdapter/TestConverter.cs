@@ -112,6 +112,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     Outcome = ResultStateToTestOutcome(result.ResultState),
                     Duration = TimeSpan.FromSeconds(result.Time)
                 };
+
             // TODO: Remove this when NUnit provides a better duration
             if (ourResult.Duration == TimeSpan.Zero && (ourResult.Outcome == TestOutcome.Passed || ourResult.Outcome == TestOutcome.Failed))
                 ourResult.Duration = TimeSpan.FromTicks(1);

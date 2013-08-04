@@ -28,12 +28,16 @@ namespace NUnit.VisualStudio.TestAdapter
             this.testLog = testLog;
             this.assemblyName = assemblyName;
             this.nunitTestCases = nunitTestCases;
-            this.testConverter = new TestConverter(assemblyName, nunitTestCases,isBuildFromTfs);
+            this.testConverter = new TestConverter(assemblyName, nunitTestCases, isBuildFromTfs);
         }
 
         public void RunStarted(string name, int testCount)
         {
-            testLog.SendMessage(TestMessageLevel.Informational, "Run started: "+name);
+            testLog.SendMessage(TestMessageLevel.Informational, "Run started: " + name);
+            //if (EqtTrace.IsVerboseEnabled)
+            //{
+            //EqtTrace.Verbose("Run started: " + name + " : testcount :" + testCount);
+            //}
         }
 
         public void RunFinished(Exception exception)
@@ -44,8 +48,11 @@ namespace NUnit.VisualStudio.TestAdapter
         {
         }
 
+        public string Output { get; private set; }
+
         public void SuiteStarted(TestName testName)
         {
+
         }
 
         public void SuiteFinished(NUnit.Core.TestResult result)
@@ -54,7 +61,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 (result.FailureSite == FailureSite.SetUp || result.FailureSite == FailureSite.TearDown))
             {
                 testLog.SendMessage(
-                    TestMessageLevel.Error, 
+                    TestMessageLevel.Error,
                     string.Format("{0} failed for test fixture {1}", result.FailureSite, result.FullName));
                 if (result.Message != null)
                     testLog.SendMessage(TestMessageLevel.Error, result.Message);
@@ -73,14 +80,18 @@ namespace NUnit.VisualStudio.TestAdapter
                 var nunitTest = nunitTestCases[key];
                 var ourCase = testConverter.ConvertTestCase(nunitTest);
                 this.testLog.RecordStart(ourCase);
+               // Output = testName.FullName + "\r";
             }
+
         }
 
         public void TestFinished(NUnit.Core.TestResult result)
         {
             TestResult ourResult = testConverter.ConvertTestResult(result);
+            ourResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, Output));
             this.testLog.RecordEnd(ourResult.TestCase, ourResult.Outcome);
             this.testLog.RecordResult(ourResult);
+            Output = "";
         }
 
         public void TestOutput(TestOutput testOutput)
@@ -95,6 +106,24 @@ namespace NUnit.VisualStudio.TestAdapter
             if (drop > 0)
                 message = message.Substring(0, length - drop);
             this.testLog.SendMessage(TestMessageLevel.Informational, message);
+            string type="";
+            // Consider adding this later, as an option.
+            //switch (testOutput.Type)
+            //{
+            //    case TestOutputType.Trace:
+            //        type ="Debug: ";
+            //        break;
+            //    case TestOutputType.Out:
+            //        type ="Console: ";
+            //        break;
+            //    case TestOutputType.Log:
+            //        type="Log: ";
+            //        break;
+            //    case TestOutputType.Error:
+            //        type="Error: ";
+            //        break;
+            //}
+            this.Output += (type+message+'\r');
         }
 
         public void UnhandledException(Exception exception)

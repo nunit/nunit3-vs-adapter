@@ -152,7 +152,7 @@ namespace NUnit.VisualStudio.TestAdapter
                             filter = MakeTestFilter(filteredTestCases);
                             this.SendDebugMessage("No of cases found" + vsTestCases.Count() + " after filter = " + filteredTestCases.Count());
                         }
-                        runner.Run(listener, filter, false, LoggingThreshold.Off);
+                        runner.Run(listener, filter, true, LoggingThreshold.Off);
                     }
                     catch (NullReferenceException)
                     {
