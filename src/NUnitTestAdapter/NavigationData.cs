@@ -6,16 +6,23 @@ using NUnit.Core;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
+    /// <summary>
+    /// The NavigationData class manages the location of navigation data
+    /// for tests. It contains special code for handling async methods.
+    /// </summary>
     public class NavigationData : IDisposable
     {
         private string _sourceAssembly;
         private DiaSession _diaSession;
         private bool _tryToCreateDiaSession = true;
+        private Assembly _loadedAssembly;
+        private bool _tryToLoadAssembly = true;
 
         public NavigationData(string sourceAssembly)
         {
             _sourceAssembly = sourceAssembly;
         }
+
 
         public DiaNavigationData For(string className, string methodName)
         {
@@ -28,7 +35,9 @@ namespace NUnit.VisualStudio.TestAdapter
             // DiaSession returned null. The rest of this code checks to see 
             // if this test is an async method, which needs special handling.
 
-            var definingType = Type.GetType(className + "," + Path.GetFileNameWithoutExtension(_sourceAssembly));
+            if (this.LoadedAssembly == null) return null;
+
+            var definingType = LoadedAssembly.GetType(className);
             if (definingType == null) return null;
 
             var method = definingType.GetMethod(methodName);
@@ -74,6 +83,32 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
 
                 return _diaSession;
+            }
+        }
+
+        // The assembly is only needed here if there async tests
+        // are used. Therefore, we delay loading of the assembly
+        // until it is actually needed.
+        private Assembly LoadedAssembly
+        {
+            get
+            {
+                if (_tryToLoadAssembly)
+                {
+                    try
+                    {
+                        _loadedAssembly = Assembly.LoadFrom(_sourceAssembly);
+                    }
+                    catch
+                    {
+                        // If we can't load it for some reason, we just ignore
+                        // the error and won't try to do it again.
+                    }
+
+                    _tryToLoadAssembly = false;
+                }
+
+                return _loadedAssembly;
             }
         }
 
