@@ -7,15 +7,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Core;
-using NUnit.Core.Filters;
 using NUnit.Util;
 // #define LAUNCHDEBUGGER
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-    using System.Diagnostics;
 
     [ExtensionUri(NUnitTestExecutor.ExecutorUri)]
     public sealed class NUnitTestExecutor : NUnitTestAdapter, ITestExecutor
@@ -51,7 +48,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 CleanUpRegisteredChannels();
                 var tfsfilter = new TFSTestFilter(runContext);
                 isCalledFromTfsBuild = tfsfilter.TfsTestCaseFilterExpression != null;
-                this.SendDebugMessage("Keepalive:" + runContext.KeepAlive);
+                SendDebugMessage("Keepalive:" + runContext.KeepAlive);
                 if (!isCalledFromTfsBuild && runContext.KeepAlive)
                     frameworkHandle.EnableShutdownAfterTestRun = true;
                 foreach (var source in sources)
@@ -140,7 +137,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     catch (NullReferenceException)
                     {
                         // this happens during the run when CancelRun is called.
-                        this.SendDebugMessage("Nullref catched");
+                        SendDebugMessage("Nullref caught");
                     }
                     finally
                     {

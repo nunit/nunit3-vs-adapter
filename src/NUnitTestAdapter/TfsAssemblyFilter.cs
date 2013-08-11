@@ -12,12 +12,11 @@
             : base(assemblyName)
         {
             this.tfsfilter = new TFSTestFilter(runContext);
-            this.IsCalledFromTfs = true;
         }
 
         internal override void ProcessTfsFilter()
         {
-            if (this.IsCalledFromTfs && this.tfsfilter.HasTfsFilterValue)
+            if ( this.tfsfilter.HasTfsFilterValue)
             {
                 var filteredTestCases = this.tfsfilter.CheckFilter(this.VsTestCases);
                 var filter = new SimpleNameFilter();

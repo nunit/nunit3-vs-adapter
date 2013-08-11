@@ -3,11 +3,8 @@
 // ****************************************************************
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Remoting.Channels;
 using NUnit.Util;
-using AssemblyHelper = Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities.AssemblyHelper;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 namespace NUnit.VisualStudio.TestAdapter
@@ -20,16 +17,21 @@ namespace NUnit.VisualStudio.TestAdapter
     /// </summary>
     public abstract class NUnitTestAdapter
     {
+        #region Properties
+
         // The logger currently in use
-        protected IMessageLogger Logger { get; set; }
+        protected static IMessageLogger Logger { get; set; }
+
+        // The adapter version
+        private static string Version { get; set; }
+
+        #endregion
 
         #region Constructor
 
-        protected string Version { get; private set; }
-
         /// <summary>
         /// The common constructor initializes NUnit services 
-        /// needed to load and run tests.
+        /// needed to load and run tests and sets some properties.
         /// </summary>
         protected NUnitTestAdapter()
         {
@@ -37,17 +39,18 @@ namespace NUnit.VisualStudio.TestAdapter
             ServiceManager.Services.AddService(new ProjectService());
 
             ServiceManager.Services.InitializeServices();
+
             Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
         }
 
         #endregion
 
-        #region Helper Methods
+        #region Protected Helper Methods
 
         protected void Info(string method, string function)
         {
             string msg = string.Format("NUnit {0} {1} is {2}", Version, method, function);
-            this.SendInformationalMessage(msg);
+            SendInformationalMessage(msg);
         }
 
         protected static void CleanUpRegisteredChannels()
@@ -71,37 +74,39 @@ namespace NUnit.VisualStudio.TestAdapter
             SendErrorMessage("NUnit failed to load " + sourceAssembly);
         }
 
-        protected void SendErrorMessage(string message)
+        #endregion
+
+        #region Public Static Methods
+
+        public static void SendErrorMessage(string message)
         {
-            this.Logger.SendMessage(TestMessageLevel.Error, message);
+            Logger.SendMessage(TestMessageLevel.Error, message);
         }
 
-        protected void SendErrorMessage(string message, Exception ex)
+        public static void SendErrorMessage(string message, Exception ex)
         {
-            this.Logger.SendMessage(TestMessageLevel.Error, message);
-            this.Logger.SendMessage(TestMessageLevel.Error, ex.ToString());
+            Logger.SendMessage(TestMessageLevel.Error, message);
+            Logger.SendMessage(TestMessageLevel.Error, ex.ToString());
         }
 
-        protected void SendWarningMessage(string message)
+        public static void SendWarningMessage(string message)
         {
-            this.Logger.SendMessage(TestMessageLevel.Warning, message);
+            Logger.SendMessage(TestMessageLevel.Warning, message);
         }
 
-        protected void SendInformationalMessage(string message)
+        public static void SendInformationalMessage(string message)
         {
-            this.Logger.SendMessage(TestMessageLevel.Informational, message);
+            Logger.SendMessage(TestMessageLevel.Informational, message);
         }
 
-        protected void SendDebugMessage(string message)
+        public static void SendDebugMessage(string message)
         {
 #if DEBUG
-            this.Logger.SendMessage(TestMessageLevel.Informational, message);
+            Logger.SendMessage(TestMessageLevel.Informational, message);
 #endif
         }
 
         #endregion
-
-       
     }
 
     

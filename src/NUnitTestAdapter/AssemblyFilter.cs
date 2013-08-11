@@ -39,8 +39,6 @@
         // Map of names to NUnit Test cases
         private readonly Dictionary<string, NUnit.Core.TestNode> nunitTestCaseMap;
 
-        public bool IsCalledFromTfs { get; protected set; }
-
         private TestConverter testConverter;
 
         public TestConverter TestConverter
@@ -49,11 +47,11 @@
             {
                 return this.testConverter
                        ?? (this.testConverter =
-                           new TestConverter(this.AssemblyName, this.testDictionary, this.IsCalledFromTfs));
+                           new TestConverter(this.AssemblyName, new Dictionary<string, TestNode>()));
             }
         }
 
-        private readonly Dictionary<string, TestNode> testDictionary;
+        //private readonly Dictionary<string, TestNode> testDictionary;
 
         public AssemblyFilter(string assemblyName)
         {
@@ -61,8 +59,7 @@
             this.NUnitFilter = TestFilter.Empty;
             this.vsTestCases = new List<TestCase>();
             this.nunitTestCaseMap = new Dictionary<string, NUnit.Core.TestNode>();
-            this.IsCalledFromTfs = false;
-            this.testDictionary = new Dictionary<string, TestNode>();
+            //this.testDictionary = new Dictionary<string, TestNode>();
         }
 
         public AssemblyFilter(string assemblyName, TestFilter filter)

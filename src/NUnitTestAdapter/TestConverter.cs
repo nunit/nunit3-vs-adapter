@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.Core;
 using TestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
@@ -19,14 +18,17 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region Constructors
 
-        private readonly bool isBuildOnTfs;
-        public TestConverter(string sourceAssembly, Dictionary<string, NUnit.Core.TestNode> nunitTestCases, bool isbuildOnTfs)
+        public TestConverter(string sourceAssembly) 
+            : this(sourceAssembly, new Dictionary<string, TestNode>()) 
+        {
+        }
+
+        public TestConverter(string sourceAssembly, Dictionary<string, NUnit.Core.TestNode> nunitTestCases)
         {
             this.sourceAssembly = sourceAssembly;
             this.vsTestCaseMap = new Dictionary<string, TestCase>();
             this.nunitTestCases = nunitTestCases;
             this.navigationData = new NavigationData(sourceAssembly);
-            this.isBuildOnTfs = isbuildOnTfs;
         }
 
         #endregion
@@ -90,7 +92,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public TestCase MakeTestCaseFromTestName(TestName testName)
         {
             var testCase = new TestCase(
-                                 /*    this.isBuildOnTfs ? testName.UniqueName :*/ testName.FullName,
+                                     testName.FullName,
                                      new Uri(NUnitTestExecutor.ExecutorUri),
                                      this.sourceAssembly)
                 {
@@ -131,15 +133,6 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 string stackTrace = StackTraceFilter.Filter(result.StackTrace);
                 ourResult.ErrorStackTrace = stackTrace;
-                //if (!string.IsNullOrEmpty(stackTrace))
-                //{
-                //    var stackFrame = new Internal.Stacktrace(stackTrace).GetTopStackFrame();
-                //    if (stackFrame != null)
-                //    {
-                //       /ourResult.ErrorFilePath = stackFrame.FileName;
-                //        ourResult.SetPropertyValue(TestResultProperties.ErrorLineNumber, stackFrame.LineNumber);
-                //    }
-                //}
             }
 
             return ourResult;

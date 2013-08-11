@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Reflection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.Core;
@@ -75,8 +74,8 @@ namespace NUnit.VisualStudio.TestAdapter
                     catch (Exception)
                     {
                         // If this isn't a project type supporting DiaSession,
-                        // we just ignore the error. We won't try this again 
-                        // for the project.
+                        // we just issue a warning. We won't try this again.
+                        NUnitTestAdapter.SendWarningMessage("Unable to create DiaSession for " + _sourceAssembly + "\r\nNo source location data will be available for this assembly.");
                     }
 
                     _tryToCreateDiaSession = false;
@@ -101,8 +100,9 @@ namespace NUnit.VisualStudio.TestAdapter
                     }
                     catch
                     {
-                        // If we can't load it for some reason, we just ignore
-                        // the error and won't try to do it again.
+                        // If we can't load it for some reason, we issue a warning
+                        // and won't try to do it again for the assembly.
+                        NUnitTestAdapter.SendWarningMessage("Unable to reflect on " + _sourceAssembly + "\r\nSource data will not be available for some of the tests");
                     }
 
                     _tryToLoadAssembly = false;

@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using System.IO;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
@@ -70,22 +69,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
-        public void IsTfsSet()
-        {
-            using (AssemblyFilter target = new TfsAssemblyFilter("test",null))
-            {
-                Assert.That(target.IsCalledFromTfs, Is.True);
-            }
-        }
-
-        [Test]
-        public void IsTfsNotSet()
-        {
-            var target = new AssemblyFilter("test");
-            Assert.That(target.IsCalledFromTfs, Is.False);
-        }
-
-        [Test]
         public void AddsNonFilteredCorrectly()
         {
             var target = new AssemblyFilter("test");
@@ -117,9 +100,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             var target = new TfsAssemblyFilter("test", new FakeRunContext());
             Assert.That(target.NUnitFilter.IsEmpty,Is.True,"NUnitFilter should be empty before processing");
-            Assert.That(target.IsCalledFromTfs,Is.True,"IsCalledFromTfs should be true");
-
-
         }
 
     }

@@ -11,7 +11,6 @@ using NUnit.Util;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-    using System.Diagnostics;
 
     [FileExtension(".dll")]
     [FileExtension(".exe")]
@@ -30,7 +29,7 @@ namespace NUnit.VisualStudio.TestAdapter
             
             // Ensure any channels registered by other adapters are unregistered
             CleanUpRegisteredChannels();
-            // Filter out the sources which can have NUnit tests. 
+
             foreach (string sourceAssembly in sources)
             {
 #if DEBUG
@@ -43,8 +42,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     if (runner.Load(package))
                     {
-                        var nunitTestCaseMap = CreateNUnitTestCaseMap(runner.Test as TestNode);
-                        this.testConverter = new TestConverter(sourceAssembly, nunitTestCaseMap,false);  // TFS Doesnt matter here
+                        this.testConverter = new TestConverter(sourceAssembly);
 
                         TestNode topNode = runner.Test as TestNode;
                         if (topNode != null)
@@ -113,23 +111,6 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             return cases;
-        }
-
-        private Dictionary<string, NUnit.Core.TestNode> CreateNUnitTestCaseMap(TestNode topLevelTest)
-        {
-            var nunitTestCaseMap = new Dictionary<string, NUnit.Core.TestNode>();
-            AddTestCasesToNUnitTestCaseMap(nunitTestCaseMap, topLevelTest);
-
-            return nunitTestCaseMap;
-        }
-
-        private void AddTestCasesToNUnitTestCaseMap(Dictionary<string, NUnit.Core.TestNode> nunitTestCaseMap, TestNode test)
-        {
-            if (test.IsSuite)
-                foreach (TestNode child in test.Tests)
-                    AddTestCasesToNUnitTestCaseMap(nunitTestCaseMap, child);
-            else
-                nunitTestCaseMap.Add(test.TestName.UniqueName, test);
         }
 
         #endregion
