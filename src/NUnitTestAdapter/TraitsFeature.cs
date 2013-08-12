@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using System.Collections.Generic;
+using NUnit.Core;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -43,20 +44,20 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
-        public static void AddTraitsFromNUnitTest(this TestCase testCase, NUnit.Core.ITest nunitTest)
+        public static void AddTraitsFromNUnitTest(this TestCase testCase, ITest nunitTest)
         {
             if (TraitsFeature.IsSupported)
                 AddTraitsFromNUnitTest(nunitTest, traitsProperty.GetValue(testCase, new object[0]));
         }
 
-        private static void AddTraitsFromNUnitTest(NUnit.Core.ITest testNode, object traitsCollection)
+        private static void AddTraitsFromNUnitTest(ITest test, object traitsCollection)
         {
-            if (testNode.Parent != null)
-                AddTraitsFromNUnitTest(testNode.Parent, traitsCollection);
+            if (test.Parent != null)
+                AddTraitsFromNUnitTest(test.Parent, traitsCollection);
 
-            foreach (string propertyName in testNode.Properties.Keys)
+            foreach (string propertyName in test.Properties.Keys)
             {
-                object propertyValue = testNode.Properties[propertyName];
+                object propertyValue = test.Properties[propertyName];
 
                 if (propertyName == "_CATEGORIES")
                 {

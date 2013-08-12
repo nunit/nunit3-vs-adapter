@@ -127,7 +127,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 var package = new TestPackage(filter.AssemblyName);
                 if (runner.Load(package))
                 {
-                    filter.AddTestCases(runner.Test as TestNode);
+                    filter.AddTestCases(runner.Test);
                     var listener = new NUnitEventListener(testLog, filter);
                     try
                     {

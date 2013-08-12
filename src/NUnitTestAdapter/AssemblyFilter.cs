@@ -23,7 +23,7 @@
             }
         }
 
-        public Dictionary<string, TestNode> NUnitTestCaseMap
+        public Dictionary<string, ITest> NUnitTestCaseMap
         {
             get
             {
@@ -37,7 +37,7 @@
         private readonly List<TestCase> vsTestCases;
 
         // Map of names to NUnit Test cases
-        private readonly Dictionary<string, NUnit.Core.TestNode> nunitTestCaseMap;
+        private readonly Dictionary<string, ITest> nunitTestCaseMap;
 
         private TestConverter testConverter;
 
@@ -45,21 +45,16 @@
         {
             get
             {
-                return this.testConverter
-                       ?? (this.testConverter =
-                           new TestConverter(this.AssemblyName, new Dictionary<string, TestNode>()));
+                return this.testConverter ?? (this.testConverter = new TestConverter(this.AssemblyName));
             }
         }
-
-        //private readonly Dictionary<string, TestNode> testDictionary;
 
         public AssemblyFilter(string assemblyName)
         {
             this.AssemblyName = assemblyName;
             this.NUnitFilter = TestFilter.Empty;
             this.vsTestCases = new List<TestCase>();
-            this.nunitTestCaseMap = new Dictionary<string, NUnit.Core.TestNode>();
-            //this.testDictionary = new Dictionary<string, TestNode>();
+            this.nunitTestCaseMap = new Dictionary<string, ITest>();
         }
 
         public AssemblyFilter(string assemblyName, TestFilter filter)
@@ -68,10 +63,10 @@
             this.NUnitFilter = filter;
         }
         
-        public void AddTestCases(TestNode test)
+        public void AddTestCases(ITest test)
         {
             if (test.IsSuite)
-                foreach (TestNode child in test.Tests) this.AddTestCases(child);
+                foreach (ITest child in test.Tests) this.AddTestCases(child);
             else
             {
                 this.vsTestCases.Add(this.TestConverter.ConvertTestCase(test));

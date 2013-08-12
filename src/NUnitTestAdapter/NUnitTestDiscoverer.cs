@@ -44,14 +44,10 @@ namespace NUnit.VisualStudio.TestAdapter
                     {
                         this.testConverter = new TestConverter(sourceAssembly);
 
-                        TestNode topNode = runner.Test as TestNode;
-                        if (topNode != null)
-                        {
-                            int cases = ProcessTestCases(topNode, discoverySink);
+                        int cases = ProcessTestCases(runner.Test, discoverySink);
 #if DEBUG
-                            SendInformationalMessage(string.Format("Discovered {0} test cases", cases));
+                        SendInformationalMessage(string.Format("Discovered {0} test cases", cases));
 #endif
-                        }
                     }
                     else
                     {
@@ -83,13 +79,13 @@ namespace NUnit.VisualStudio.TestAdapter
             Info("discovering test","finished");
         }
 
-        private int ProcessTestCases(TestNode test, ITestCaseDiscoverySink discoverySink)
+        private int ProcessTestCases(ITest test, ITestCaseDiscoverySink discoverySink)
         {
             int cases = 0;
 
             if (test.IsSuite)
             {
-                foreach (TestNode child in test.Tests)
+                foreach (ITest child in test.Tests)
                     cases += ProcessTestCases(child, discoverySink);
             }
             else

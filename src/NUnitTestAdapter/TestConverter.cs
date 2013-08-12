@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.Core;
-using TestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
-using System.Reflection;
-using System.IO;
-using System.Text.RegularExpressions;
+
+using NUnitTestResult = NUnit.Core.TestResult;
+using VSTestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -13,21 +15,14 @@ namespace NUnit.VisualStudio.TestAdapter
     {
         private Dictionary<string, TestCase> vsTestCaseMap;
         private string sourceAssembly;
-        private Dictionary<string, NUnit.Core.TestNode> nunitTestCases;
         private NavigationData navigationData;
 
         #region Constructors
 
-        public TestConverter(string sourceAssembly) 
-            : this(sourceAssembly, new Dictionary<string, TestNode>()) 
-        {
-        }
-
-        public TestConverter(string sourceAssembly, Dictionary<string, NUnit.Core.TestNode> nunitTestCases)
+        public TestConverter(string sourceAssembly)
         {
             this.sourceAssembly = sourceAssembly;
             this.vsTestCaseMap = new Dictionary<string, TestCase>();
-            this.nunitTestCases = nunitTestCases;
             this.navigationData = new NavigationData(sourceAssembly);
         }
 
@@ -40,7 +35,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// using the best method available according to the exact
         /// type passed and caching results for efficiency.
         /// </summary>
-        public TestCase ConvertTestCase(NUnit.Core.ITest test)
+        public TestCase ConvertTestCase(ITest test)
         {
             if (test.IsSuite)
                 throw new ArgumentException("The argument must be a test case", "test");
@@ -48,67 +43,21 @@ namespace NUnit.VisualStudio.TestAdapter
             // Return cached value if we have one
             if (vsTestCaseMap.ContainsKey(test.TestName.UniqueName))
                 return vsTestCaseMap[test.TestName.UniqueName];
-
-            // See if this is a TestNode - if not, try to
-            // find one in our cache of NUnit TestNodes
-            var testNode = test as TestNode;
-            if (testNode == null && nunitTestCases.ContainsKey(test.TestName.UniqueName))
-                testNode = nunitTestCases[test.TestName.UniqueName];
-
-            // No test node: just build a TestCase without any
-            // navigation data using the TestName
-            if (testNode == null)
-                return MakeTestCaseFromTestName(test.TestName);
-            
-            // Use the TestNode and cache the result
-            var testCase = MakeTestCaseFromNUnitTest(testNode);
+           
+            // Convert to VS TestCase and cache the result
+            var testCase = MakeTestCaseFromNUnitTest(test);
             vsTestCaseMap.Add(test.TestName.UniqueName, testCase);
             return testCase;             
         }
 
-        /// <summary>
-        /// Makes a TestCase from a TestNode, adding
-        /// navigation data if it can be found.
-        /// </summary>
-        public TestCase MakeTestCaseFromNUnitTest(NUnit.Core.ITest nunitTest)
+        public VSTestResult ConvertTestResult(NUnitTestResult result)
         {
-            var testCase = MakeTestCaseFromTestName(nunitTest.TestName);
+            if (!vsTestCaseMap.ContainsKey(result.Test.TestName.UniqueName))
+                throw new InvalidOperationException("Trying to convert a TestResult whose Test is not in the cache");
 
-            var navData = navigationData.For(nunitTest.ClassName, nunitTest.MethodName);
-            if (navData != null)
-            {
-                testCase.CodeFilePath = navData.FileName;
-                testCase.LineNumber = navData.MinLineNumber;
-            }
+            TestCase ourCase = vsTestCaseMap[result.Test.TestName.UniqueName];
 
-            testCase.AddTraitsFromNUnitTest(nunitTest);
-
-            return testCase;
-        }
-
-        /// <summary>
-        /// Makes a TestCase without source info from TestName.
-        /// </summary>
-        public TestCase MakeTestCaseFromTestName(TestName testName)
-        {
-            var testCase = new TestCase(
-                                     testName.FullName,
-                                     new Uri(NUnitTestExecutor.ExecutorUri),
-                                     this.sourceAssembly)
-                {
-                    DisplayName = testName.Name,
-                    CodeFilePath = null,
-                    LineNumber = 0
-                };
-
-            return testCase;
-        }
-
-        public TestResult ConvertTestResult(NUnit.Core.TestResult result)
-        {
-            TestCase ourCase = ConvertTestCase(result.Test);
-
-            TestResult ourResult = new TestResult(ourCase)
+            VSTestResult ourResult = new VSTestResult(ourCase)
                 {
                     DisplayName = ourCase.DisplayName,
                     Outcome = ResultStateToTestOutcome(result.ResultState),
@@ -148,6 +97,35 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region Helper Methods
 
+        /// <summary>
+        /// Makes a TestCase from an NUnit test, adding
+        /// navigation data if it can be found.
+        /// </summary>
+        private TestCase MakeTestCaseFromNUnitTest(ITest nunitTest)
+        {
+            //var testCase = MakeTestCaseFromTestName(nunitTest.TestName);
+            var testCase = new TestCase(
+                                     nunitTest.TestName.FullName,
+                                     new Uri(NUnitTestExecutor.ExecutorUri),
+                                     this.sourceAssembly)
+            {
+                DisplayName = nunitTest.TestName.Name,
+                CodeFilePath = null,
+                LineNumber = 0
+            };
+
+            var navData = navigationData.For(nunitTest.ClassName, nunitTest.MethodName);
+            if (navData != null)
+            {
+                testCase.CodeFilePath = navData.FileName;
+                testCase.LineNumber = navData.MinLineNumber;
+            }
+
+            testCase.AddTraitsFromNUnitTest(nunitTest);
+
+            return testCase;
+        }
+
         // Public for testing
         public static TestOutcome ResultStateToTestOutcome(ResultState resultState)
         {
@@ -174,7 +152,7 @@ namespace NUnit.VisualStudio.TestAdapter
             return TestOutcome.None;
         }
 
-        private string GetErrorMessage(NUnit.Core.TestResult result)
+        private string GetErrorMessage(NUnitTestResult result)
         {
             string message = result.Message;
             string NL = Environment.NewLine;

@@ -37,18 +37,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
         }
 
-        private TestNode fakeTest1;
+        private ITest fakeTest1;
 
-        private TestNode fakeTest2;
+        private ITest fakeTest2;
+
         [SetUp]
         public void SetUp()
         {
             MethodInfo fakeTestMethod1 = this.GetType().GetMethod("FakeTestMethod1", BindingFlags.Instance | BindingFlags.NonPublic);
-            var fakeNUnitTest1 = new NUnitTestMethod(fakeTestMethod1);
-            this.fakeTest1 = new TestNode(fakeNUnitTest1);
+            this.fakeTest1 = new NUnitTestMethod(fakeTestMethod1);
             MethodInfo fakeTestMethod2 = this.GetType().GetMethod("FakeTestMethod2", BindingFlags.Instance | BindingFlags.NonPublic);
-            var fakeNUnitTest2 = new NUnitTestMethod(fakeTestMethod2);
-            this.fakeTest2 = new TestNode(fakeNUnitTest2);
+            this.fakeTest2 = new NUnitTestMethod(fakeTestMethod2);
        }
 
 

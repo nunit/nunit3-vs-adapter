@@ -8,8 +8,12 @@ using System.IO;
 using System.Reflection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using NUnit.Core;
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
+
+using VSTestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
+using NUnitTestResult = NUnit.Core.TestResult;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
@@ -20,11 +24,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Path.GetFullPath("NUnit.VisualStudio.TestAdapter.Tests.dll");
         private static readonly string THIS_CODE_FILE =
             Path.GetFullPath(@"..\..\NUnitEventListenerTests.cs");
-        private static readonly int LINE_NUMBER = 24; // Must be number of the following line
+
+        private static readonly int LINE_NUMBER = 29; // Must be number of the following line
         private void FakeTestMethod() { }
 
-        private NUnit.Core.ITest fakeNUnitTest;
-        private NUnit.Core.TestResult fakeNUnitResult;
+        private ITest fakeNUnitTest;
+        private NUnitTestResult fakeNUnitResult;
 
         private NUnitEventListener listener;
         private FakeFrameworkHandle testLog;
@@ -34,16 +39,16 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void SetUp()
         {
             MethodInfo fakeTestMethod = this.GetType().GetMethod("FakeTestMethod", BindingFlags.Instance | BindingFlags.NonPublic);
-            fakeNUnitTest = new NUnit.Core.NUnitTestMethod(fakeTestMethod);
+            fakeNUnitTest = new NUnitTestMethod(fakeTestMethod);
 
-            fakeNUnitResult = new NUnit.Core.TestResult(fakeNUnitTest);
-            fakeNUnitResult.SetResult(NUnit.Core.ResultState.Success, "It passed!", null);
+            fakeNUnitResult = new NUnitTestResult(fakeNUnitTest);
+            fakeNUnitResult.SetResult(ResultState.Success, "It passed!", null);
             fakeNUnitResult.Time = 1.234;
 
             testLog = new FakeFrameworkHandle();
 
             filter = new AssemblyFilter(THIS_ASSEMBLY_PATH);
-            filter.AddTestCases(new NUnit.Core.TestNode(fakeNUnitTest));
+            filter.AddTestCases(fakeNUnitTest);
             
             this.listener = new NUnitEventListener(testLog, filter);
         }
@@ -104,15 +109,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             VerifyTestResult(testLog.Events[1].TestResult);
         }
 
-        [TestCase(NUnit.Core.ResultState.Success, TestOutcome.Passed, null)]
-        [TestCase(NUnit.Core.ResultState.Failure, TestOutcome.Failed, "My failure message")]
-        [TestCase(NUnit.Core.ResultState.Error, TestOutcome.Failed, "Error!")]
-        [TestCase(NUnit.Core.ResultState.Cancelled, TestOutcome.None, null)]
-        [TestCase(NUnit.Core.ResultState.Inconclusive, TestOutcome.None, null)]
-        [TestCase(NUnit.Core.ResultState.NotRunnable, TestOutcome.Failed, "No constructor")]
-        [TestCase(NUnit.Core.ResultState.Skipped, TestOutcome.Skipped, null)]
-        [TestCase(NUnit.Core.ResultState.Ignored, TestOutcome.Skipped, "my reason")]
-        public void TestFinished_OutcomesAreCorrectlyTranslated(NUnit.Core.ResultState resultState, TestOutcome outcome, string message)
+        [TestCase(ResultState.Success, TestOutcome.Passed, null)]
+        [TestCase(ResultState.Failure, TestOutcome.Failed, "My failure message")]
+        [TestCase(ResultState.Error, TestOutcome.Failed, "Error!")]
+        [TestCase(ResultState.Cancelled, TestOutcome.None, null)]
+        [TestCase(ResultState.Inconclusive, TestOutcome.None, null)]
+        [TestCase(ResultState.NotRunnable, TestOutcome.Failed, "No constructor")]
+        [TestCase(ResultState.Skipped, TestOutcome.Skipped, null)]
+        [TestCase(ResultState.Ignored, TestOutcome.Skipped, "my reason")]
+        public void TestFinished_OutcomesAreCorrectlyTranslated(ResultState resultState, TestOutcome outcome, string message)
         {
             fakeNUnitResult.SetResult(resultState, message, null);
             listener.TestFinished(fakeNUnitResult);
@@ -136,7 +141,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCaseSource("MessageTestSource")]
         public void TestOutput_CallsSendMessageCorrectly(string nunitMessage, string expectedMessage)
         {
-            listener.TestOutput(new NUnit.Core.TestOutput(nunitMessage, NUnit.Core.TestOutputType.Out));
+            listener.TestOutput(new TestOutput(nunitMessage, TestOutputType.Out));
             Assert.AreEqual(1, testLog.Events.Count);
 
             Assert.AreEqual(TestMessageLevel.Informational, testLog.Events[0].Message.Level);
@@ -179,7 +184,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(ourCase.LineNumber, Is.EqualTo(LINE_NUMBER));
         }
 
-        private void VerifyTestResult(TestResult ourResult)
+        private void VerifyTestResult(VSTestResult ourResult)
         {
             Assert.NotNull(ourResult, "TestResult not set");
             VerifyTestCase(ourResult.TestCase);

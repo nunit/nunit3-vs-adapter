@@ -80,30 +80,38 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public static void SendErrorMessage(string message)
         {
-            Logger.SendMessage(TestMessageLevel.Error, message);
+            SendMessage(TestMessageLevel.Error, message);
         }
 
         public static void SendErrorMessage(string message, Exception ex)
         {
-            Logger.SendMessage(TestMessageLevel.Error, message);
-            Logger.SendMessage(TestMessageLevel.Error, ex.ToString());
+            SendMessage(TestMessageLevel.Error, message);
+            SendMessage(TestMessageLevel.Error, ex.ToString());
         }
 
         public static void SendWarningMessage(string message)
         {
-            Logger.SendMessage(TestMessageLevel.Warning, message);
+            SendMessage(TestMessageLevel.Warning, message);
         }
 
         public static void SendInformationalMessage(string message)
         {
-            Logger.SendMessage(TestMessageLevel.Informational, message);
+            SendMessage(TestMessageLevel.Informational, message);
         }
 
         public static void SendDebugMessage(string message)
         {
 #if DEBUG
-            Logger.SendMessage(TestMessageLevel.Informational, message);
+            SendMessage(TestMessageLevel.Informational, message);
 #endif
+        }
+
+        private static void SendMessage(TestMessageLevel level, string message)
+        {
+            // Some of our tests may arrive here without the
+            // Logger having been initialized
+            if (Logger != null)
+                Logger.SendMessage(level, message);
         }
 
         #endregion
