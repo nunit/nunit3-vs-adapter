@@ -89,8 +89,17 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void Dispose()
         {
-            if (this.navigationData != null)
-                this.navigationData.Dispose();
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (this.navigationData != null) this.navigationData.Dispose();
+            }
+            navigationData = null;
         }
 
         #endregion

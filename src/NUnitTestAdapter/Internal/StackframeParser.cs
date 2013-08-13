@@ -15,8 +15,8 @@ namespace NUnit.VisualStudio.TestAdapter.Internal
 {
 	internal class StackFrameParser
 	{
-		private Regex frameWithFileInfoRegex;
-		private Regex frameWithoutFileInfoRegex;
+		private readonly Regex frameWithFileInfoRegex;
+		private readonly Regex frameWithoutFileInfoRegex;
 
 		public static StackFrameParser CreateStackFrameParser()
 		{

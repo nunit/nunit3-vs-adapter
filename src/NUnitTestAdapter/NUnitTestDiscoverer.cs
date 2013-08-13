@@ -11,11 +11,12 @@ using NUnit.Util;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
+    using System;
 
     [FileExtension(".dll")]
     [FileExtension(".exe")]
     [DefaultExecutorUri(NUnitTestExecutor.ExecutorUri)]
-    public sealed class NUnitTestDiscoverer : NUnitTestAdapter, ITestDiscoverer
+    public sealed class NUnitTestDiscoverer : NUnitTestAdapter, ITestDiscoverer, IDisposable
     {
         private TestConverter testConverter;
 
@@ -110,5 +111,20 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         #endregion
+
+        public void Dispose()
+        {
+            this.Dispose(true);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (testConverter!=null)
+                    testConverter.Dispose();
+            }
+            testConverter = null;
+        }
     }
 }

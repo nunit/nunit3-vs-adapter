@@ -15,7 +15,7 @@ namespace NUnit.VisualStudio.TestAdapter.Internal
 {
 	internal class Stacktrace
 	{
-		private List<StackFrame> stackFrames;
+		private readonly List<StackFrame> stackFrames;
 
 		public Stacktrace(string stackTrace)
 		{
@@ -25,7 +25,7 @@ namespace NUnit.VisualStudio.TestAdapter.Internal
 
 			var lines = stackTrace.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
 
-			this.stackFrames = lines.Select(line => stackFrameParser.GetStackFrame(line)).Where(stackFrame => stackFrame != null).ToList();
+			this.stackFrames = lines.Select(stackFrameParser.GetStackFrame).Where(stackFrame => stackFrame != null).ToList();
 		}
 
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]

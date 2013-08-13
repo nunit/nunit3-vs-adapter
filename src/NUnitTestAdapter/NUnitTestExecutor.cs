@@ -15,7 +15,7 @@ namespace NUnit.VisualStudio.TestAdapter
 {
 
     [ExtensionUri(NUnitTestExecutor.ExecutorUri)]
-    public sealed class NUnitTestExecutor : NUnitTestAdapter, ITestExecutor
+    public sealed class NUnitTestExecutor : NUnitTestAdapter, ITestExecutor, IDisposable
     {
         ///<summary>
         /// The Uri used to identify the NUnitExecutor
@@ -73,10 +73,10 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <summary>
         /// Called by the VisualStudio IDE when selected tests are to be run. Never called from TFS Build.
         /// </summary>
-        /// <param name="selectedTests">The tests to be run</param>
+        /// <param name="tests">The tests to be run</param>
         /// <param name="runContext">The RunContext</param>
         /// <param name="frameworkHandle">The FrameworkHandle</param>
-        public void RunTests(IEnumerable<TestCase> selectedTests, IRunContext runContext, IFrameworkHandle frameworkHandle)
+        public void RunTests(IEnumerable<TestCase> tests, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
 #if LAUNCHDEBUGGER
             Debugger.Launch();
@@ -90,7 +90,7 @@ namespace NUnit.VisualStudio.TestAdapter
             // Ensure any channels registered by other adapters are unregistered
             CleanUpRegisteredChannels();
             isCalledFromTfsBuild = false;
-            var assemblyGroups = selectedTests.GroupBy(tc => tc.Source);
+            var assemblyGroups = tests.GroupBy(tc => tc.Source);
             foreach (var assemblyGroup in assemblyGroups)
             {
                 using (var filter = AssemblyFilter.Create(assemblyGroup.Key, assemblyGroup))
@@ -168,8 +168,25 @@ namespace NUnit.VisualStudio.TestAdapter
 
 
 
-        
+
 
         #endregion
+
+        public void Dispose()
+        {
+            this.Dispose(true);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (runner != null)
+                {
+                    runner.Dispose();
+                }
+            }
+            runner = null;
+        }
     }
 }

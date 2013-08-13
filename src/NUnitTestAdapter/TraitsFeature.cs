@@ -8,10 +8,10 @@ namespace NUnit.VisualStudio.TestAdapter
 {
     public static class TraitsFeature
     {
-        private static PropertyInfo traitsProperty;
-        private static MethodInfo traitsCollectionAdd;
-        private static PropertyInfo nameProperty;
-        private static PropertyInfo valueProperty;
+        private static readonly PropertyInfo traitsProperty;
+        private static readonly MethodInfo traitsCollectionAdd;
+        private static readonly PropertyInfo nameProperty;
+        private static readonly PropertyInfo valueProperty;
 
         static TraitsFeature()
         {
@@ -46,7 +46,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public static void AddTraitsFromNUnitTest(this TestCase testCase, ITest nunitTest)
         {
-            if (TraitsFeature.IsSupported)
+            if (IsSupported)
                 AddTraitsFromNUnitTest(nunitTest, traitsProperty.GetValue(testCase, new object[0]));
         }
 
@@ -75,7 +75,7 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             var traits = new List<NTrait>();
 
-            if (TraitsFeature.IsSupported)
+            if (IsSupported)
             {
                 var traitsCollection = traitsProperty.GetValue(testCase, new object[0]) as IEnumerable<object>;
 

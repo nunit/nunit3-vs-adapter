@@ -112,10 +112,20 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_diaSession != null)
+                    _diaSession.Dispose();
+            }
+            _diaSession = null;
+        }
+
         public void Dispose()
         {
-            if (_diaSession != null)
-                _diaSession.Dispose();
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

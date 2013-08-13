@@ -49,7 +49,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         protected void Info(string method, string function)
         {
-            string msg = string.Format("NUnit {0} {1} is {2}", Version, method, function);
+            var msg = string.Format("NUnit {0} {1} is {2}", Version, method, function);
             SendInformationalMessage(msg);
         }
 
