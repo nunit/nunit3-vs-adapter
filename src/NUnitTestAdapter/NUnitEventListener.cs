@@ -18,35 +18,17 @@ namespace NUnit.VisualStudio.TestAdapter
     public class NUnitEventListener : MarshalByRefObject, EventListener // Public for testing
     {
         private readonly ITestExecutionRecorder testLog;
-        //private string assemblyName;
-        //private readonly Dictionary<string, NUnit.Core.TestNode> nunitTestCases;
-        //private readonly TestConverter testConverter;
-        private AssemblyFilter filter;
+        private readonly TestConverter testConverter;
 
-        //public NUnitEventListener(ITestExecutionRecorder testLog, Dictionary<string, NUnit.Core.TestNode> nunitTestCases, string assemblyName, bool isBuildFromTfs)
-        //{
-        //    this.testLog = testLog;
-        //    this.assemblyName = assemblyName;
-        //    this.nunitTestCases = nunitTestCases;
-        //    this.testConverter = new TestConverter(assemblyName, nunitTestCases, isBuildFromTfs);
-        //}
-
-        public NUnitEventListener(ITestExecutionRecorder testLog, AssemblyFilter filter)
+        public NUnitEventListener(ITestExecutionRecorder testLog, TestConverter testConverter)
         {
             this.testLog = testLog;
-            this.filter = filter;
-            //this.assemblyName = assemblyName;
-            //this.nunitTestCases = nunitTestCases;
-            //this.testConverter = new TestConverter(assemblyName, nunitTestCases, isBuildFromTfs);
+            this.testConverter = testConverter;
         }
 
         public void RunStarted(string name, int testCount)
         {
             testLog.SendMessage(TestMessageLevel.Informational, "Run started: " + name);
-            //if (EqtTrace.IsVerboseEnabled)
-            //{
-            //EqtTrace.Verbose("Run started: " + name + " : testcount :" + testCount);
-            //}
         }
 
         public void RunFinished(Exception exception)
@@ -81,13 +63,11 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void TestStarted(TestName testName)
         {
-            string key = testName.UniqueName;
+            TestCase ourCase = testConverter.GetCachedTestCase(testName.UniqueName);
 
-            // Simply ignore any TestName not found
-            if (filter.NUnitTestCaseMap.ContainsKey(key))
+            // Simply ignore any TestName not found in the cache
+            if (ourCase != null)
             {
-                var nunitTest = filter.NUnitTestCaseMap[key];
-                var ourCase = filter.TestConverter.ConvertTestCase(nunitTest);
                 this.testLog.RecordStart(ourCase);
                // Output = testName.FullName + "\r";
             }
@@ -96,7 +76,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void TestFinished(NUnit.Core.TestResult result)
         {
-            TestResult ourResult = filter.TestConverter.ConvertTestResult(result);
+            TestResult ourResult = testConverter.ConvertTestResult(result);
             ourResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, Output));
             this.testLog.RecordEnd(ourResult.TestCase, ourResult.Outcome);
             this.testLog.RecordResult(ourResult);
@@ -138,11 +118,5 @@ namespace NUnit.VisualStudio.TestAdapter
         public void UnhandledException(Exception exception)
         {
         }
-
-        //public void Dispose()
-        //{
-        //    if (this.testConverter != null)
-        //        this.testConverter.Dispose();
-        //}
     }
 }

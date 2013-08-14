@@ -13,17 +13,21 @@ namespace NUnit.VisualStudio.TestAdapter
 {
     public class TestConverter : IDisposable
     {
+        private TestLogger logger;
         private Dictionary<string, TestCase> vsTestCaseMap;
         private string sourceAssembly;
-        private NavigationData navigationData;
+        private Assembly loadedAssembly;
+        private bool tryToLoadAssembly = true;
+        private DiaSession diaSession;
+        private bool tryToCreateDiaSession = true;
 
         #region Constructors
 
-        public TestConverter(string sourceAssembly)
+        public TestConverter(TestLogger logger, string sourceAssembly)
         {
+            this.logger = logger;
             this.sourceAssembly = sourceAssembly;
             this.vsTestCaseMap = new Dictionary<string, TestCase>();
-            this.navigationData = new NavigationData(sourceAssembly);
         }
 
         #endregion
@@ -50,12 +54,19 @@ namespace NUnit.VisualStudio.TestAdapter
             return testCase;             
         }
 
+        public TestCase GetCachedTestCase(string key)
+        {
+            if (vsTestCaseMap.ContainsKey(key))
+                return vsTestCaseMap[key];
+
+            logger.SendErrorMessage("Test " + key + " not found in cache");
+            return null;
+        }
+
         public VSTestResult ConvertTestResult(NUnitTestResult result)
         {
-            if (!vsTestCaseMap.ContainsKey(result.Test.TestName.UniqueName))
-                throw new InvalidOperationException("Trying to convert a TestResult whose Test is not in the cache");
-
-            TestCase ourCase = vsTestCaseMap[result.Test.TestName.UniqueName];
+            TestCase ourCase = GetCachedTestCase(result.Test.TestName.UniqueName);
+            if (ourCase == null) return null;
 
             VSTestResult ourResult = new VSTestResult(ourCase)
                 {
@@ -97,9 +108,9 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             if (disposing)
             {
-                if (this.navigationData != null) this.navigationData.Dispose();
+                if (this.diaSession != null) this.diaSession.Dispose();
             }
-            navigationData = null;
+            diaSession = null;
         }
 
         #endregion
@@ -123,7 +134,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 LineNumber = 0
             };
 
-            var navData = navigationData.For(nunitTest.ClassName, nunitTest.MethodName);
+            var navData = GetNavigationData(nunitTest.ClassName, nunitTest.MethodName);
             if (navData != null)
             {
                 testCase.CodeFilePath = navData.FileName;
@@ -133,6 +144,40 @@ namespace NUnit.VisualStudio.TestAdapter
             testCase.AddTraitsFromNUnitTest(nunitTest);
 
             return testCase;
+        }
+
+        // public for testing
+        public DiaNavigationData GetNavigationData(string className, string methodName)
+        {
+            if (this.DiaSession == null) return null;
+
+            var navData = DiaSession.GetNavigationData(className, methodName);
+
+            if (navData != null && navData.FileName != null) return navData;
+
+            // DiaSession returned null. The rest of this code checks to see 
+            // if this test is an async method, which needs special handling.
+
+            if (this.LoadedAssembly == null) return null;
+
+            var definingType = LoadedAssembly.GetType(className);
+            if (definingType == null) return null;
+
+            var method = definingType.GetMethod(methodName);
+            if (method == null) return null;
+
+            var asyncAttribute = Reflect.GetAttribute(method, "System.Runtime.CompilerServices.AsyncStateMachineAttribute", false);
+            if (asyncAttribute == null) return null;
+
+            PropertyInfo stateMachineTypeProperty = asyncAttribute.GetType().GetProperty("StateMachineType");
+            if (stateMachineTypeProperty == null) return null;
+
+            Type stateMachineType = stateMachineTypeProperty.GetValue(asyncAttribute, new object[0]) as Type;
+            if (stateMachineType == null) return null;
+
+            navData = DiaSession.GetNavigationData(stateMachineType.FullName, "MoveNext");
+
+            return navData;
         }
 
         // Public for testing
@@ -194,6 +239,62 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
                 
                 return exeName == "vstest.executionengine.exe";
+            }
+        }
+
+        // NOTE: There is some sort of timing issue involved
+        // in creating the DiaSession. When it is created
+        // in the constructor, an exception is thrown on the
+        // call to GetNavigationData. We don't understand
+        // this, we're just dealing with it.
+        private DiaSession DiaSession
+        {
+            get
+            {
+                if (tryToCreateDiaSession)
+                {
+                    try
+                    {
+                        diaSession = new DiaSession(sourceAssembly);
+                    }
+                    catch (Exception)
+                    {
+                        // If this isn't a project type supporting DiaSession,
+                        // we just issue a warning. We won't try this again.
+                        logger.SendWarningMessage("Unable to create DiaSession for " + sourceAssembly + "\r\nNo source location data will be available for this assembly.");
+                    }
+
+                    tryToCreateDiaSession = false;
+                }
+
+                return diaSession;
+            }
+        }
+
+        // The assembly is only needed here if there async tests
+        // are used. Therefore, we delay loading of the assembly
+        // until it is actually needed.
+        private Assembly LoadedAssembly
+        {
+            get
+            {
+                if (tryToLoadAssembly)
+                {
+                    try
+                    {
+                        loadedAssembly = Assembly.LoadFrom(sourceAssembly);
+                    }
+                    catch
+                    {
+                        // If we can't load it for some reason, we issue a warning
+                        // and won't try to do it again for the assembly.
+                        logger.SendWarningMessage("Unable to reflect on " + sourceAssembly + "\r\nSource data will not be available for some of the tests");
+                    }
+
+                    tryToLoadAssembly = false;
+                }
+
+                return loadedAssembly;
             }
         }
 

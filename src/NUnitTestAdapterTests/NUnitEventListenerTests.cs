@@ -33,8 +33,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         private NUnitEventListener listener;
         private FakeFrameworkHandle testLog;
+        private TestConverter testConverter;
 
-        private AssemblyFilter filter;
         [SetUp]
         public void SetUp()
         {
@@ -47,10 +47,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             testLog = new FakeFrameworkHandle();
 
-            filter = new AssemblyFilter(THIS_ASSEMBLY_PATH);
-            filter.AddTestCases(fakeNUnitTest);
+            testConverter = new TestConverter(new TestLogger(), THIS_ASSEMBLY_PATH);
+
+            testConverter.ConvertTestCase(fakeNUnitTest);
+            Assert.NotNull(testConverter.GetCachedTestCase(fakeNUnitTest.TestName.UniqueName));
             
-            this.listener = new NUnitEventListener(testLog, filter);
+            this.listener = new NUnitEventListener(testLog, testConverter);
         }
 
         #region TestStarted Tests

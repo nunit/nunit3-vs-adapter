@@ -8,7 +8,6 @@ using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using NUnit.Core;
-using NUnit.Util;
 // #define LAUNCHDEBUGGER
 
 namespace NUnit.VisualStudio.TestAdapter
@@ -22,14 +21,11 @@ namespace NUnit.VisualStudio.TestAdapter
         ///</summary>
         public const string ExecutorUri = "executor://NUnitTestExecutor";
 
-        /// <summary>
-        /// The current NUnit TestRunner instance
-        /// </summary>
-        private TestRunner runner;
+        // The currently executing assembly runner
+        private AssemblyRunner currentRunner;
 
         #region ITestExecutor
 
-        private bool isCalledFromTfsBuild;
         /// <summary>
         /// Called by the Visual Studio IDE to run all tests. Also called by TFS Build
         /// to run either all or selected tests. In the latter case, a filter is provided
@@ -40,28 +36,32 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <param name="frameworkHandle">Test log to send results and messages through</param>
         public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
-            Logger = frameworkHandle;
+            testLog.Initialize(frameworkHandle);
             Info("executing tests", "started");
+
             try
             {
                 // Ensure any channels registered by other adapters are unregistered
                 CleanUpRegisteredChannels();
+
                 var tfsfilter = new TFSTestFilter(runContext);
-                isCalledFromTfsBuild = tfsfilter.TfsTestCaseFilterExpression != null;
-                SendDebugMessage("Keepalive:" + runContext.KeepAlive);
-                if (!isCalledFromTfsBuild && runContext.KeepAlive)
+                testLog.SendDebugMessage("Keepalive:" + runContext.KeepAlive);
+                if (!tfsfilter.HasTfsFilterValue && runContext.KeepAlive)
                     frameworkHandle.EnableShutdownAfterTestRun = true;
+
                 foreach (var source in sources)
                 {
-                    using (var filter = (isCalledFromTfsBuild) ? new TfsAssemblyFilter(source, runContext) : new AssemblyFilter(source))
+                    using (currentRunner = new AssemblyRunner(testLog, source, runContext))
                     {
-                        this.RunAssembly(frameworkHandle, filter);
+                        currentRunner.RunAssembly(frameworkHandle);
                     }
+
+                    currentRunner = null;
                 }
             }
             catch (Exception ex)
             {
-                SendErrorMessage("Exception " + ex);
+                testLog.SendErrorMessage("Exception " + ex);
             }
             finally
             {
@@ -82,93 +82,34 @@ namespace NUnit.VisualStudio.TestAdapter
             Debugger.Launch();
 #endif
 
-            Logger = frameworkHandle;
+            testLog.Initialize(frameworkHandle);
             if (runContext.KeepAlive)
                 frameworkHandle.EnableShutdownAfterTestRun = true;
             Info("executing tests", "started");
 
             // Ensure any channels registered by other adapters are unregistered
             CleanUpRegisteredChannels();
-            isCalledFromTfsBuild = false;
+
             var assemblyGroups = tests.GroupBy(tc => tc.Source);
             foreach (var assemblyGroup in assemblyGroups)
             {
-                using (var filter = AssemblyFilter.Create(assemblyGroup.Key, assemblyGroup))
+                using (currentRunner = new AssemblyRunner(testLog, assemblyGroup.Key, assemblyGroup))
                 {
-                    this.RunAssembly(frameworkHandle, filter);
+                    currentRunner.RunAssembly(frameworkHandle);
                 }
 
+                currentRunner = null;
             }
+
             Info("executing tests", "finished");
 
         }
 
         void ITestExecutor.Cancel()
         {
-            if (runner != null && runner.Running)
-                runner.CancelRun();
+            if (currentRunner != null)
+                currentRunner.CancelRun();
         }
-
-        #endregion
-
-        #region Private Methods
-
-
-
-        private void RunAssembly(ITestExecutionRecorder testLog, AssemblyFilter filter)
-        {
-
-            try
-            {
-#if LAUNCHDEBUGGER
-            Debugger.Launch();
-#endif
-                this.runner = new TestDomain();
-                var package = new TestPackage(filter.AssemblyName);
-                if (runner.Load(package))
-                {
-                    filter.AddTestCases(runner.Test);
-                    var listener = new NUnitEventListener(testLog, filter);
-                    try
-                    {
-                        filter.ProcessTfsFilter();
-                        runner.Run(listener, filter.NUnitFilter, true, LoggingThreshold.Off);
-                    }
-                    catch (NullReferenceException)
-                    {
-                        // this happens during the run when CancelRun is called.
-                        SendDebugMessage("Nullref caught");
-                    }
-                    finally
-                    {
-                        runner.Unload();
-                    }
-                }
-                else
-                {
-                    NUnitLoadError(filter.AssemblyName);
-                }
-            }
-            catch (System.BadImageFormatException)
-            {
-                // we skip the native c++ binaries that we don't support.
-                AssemblyNotSupportedWarning(filter.AssemblyName);
-            }
-            catch (System.IO.FileNotFoundException ex)
-            {
-                // Probably from the GetExportedTypes in NUnit.core, attempting to find an assembly, not a problem if it is not NUnit here
-                DependentAssemblyNotFoundWarning(ex.FileName, filter.AssemblyName);
-            }
-            catch (Exception ex)
-            {
-                SendErrorMessage("Exception thrown executing tests in " + filter.AssemblyName, ex);
-            }
-        }
-
-
-
-
-
 
         #endregion
 
@@ -181,12 +122,12 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             if (disposing)
             {
-                if (runner != null)
+                if (currentRunner != null)
                 {
-                    runner.Dispose();
+                    currentRunner.Dispose();
                 }
             }
-            runner = null;
+            currentRunner = null;
         }
     }
 }

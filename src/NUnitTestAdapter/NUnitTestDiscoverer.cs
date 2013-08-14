@@ -22,10 +22,9 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region ITestDiscoverer Members
 
-        public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)
+        public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger messageLogger, ITestCaseDiscoverySink discoverySink)
         {
-            // Set the logger to use for messages
-            Logger = logger;
+            testLog.Initialize(messageLogger);
             Info("discovering tests", "started");
             
             // Ensure any channels registered by other adapters are unregistered
@@ -33,9 +32,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
             foreach (string sourceAssembly in sources)
             {
-#if DEBUG
-                SendInformationalMessage("Processing " + sourceAssembly);
-#endif
+                testLog.SendDebugMessage("Processing " + sourceAssembly);
+
                 TestRunner runner = new TestDomain();
                 TestPackage package = new TestPackage(sourceAssembly);
 
@@ -43,40 +41,38 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     if (runner.Load(package))
                     {
-                        this.testConverter = new TestConverter(sourceAssembly);
+                        this.testConverter = new TestConverter(testLog, sourceAssembly);
 
                         int cases = ProcessTestCases(runner.Test, discoverySink);
-#if DEBUG
-                        SendInformationalMessage(string.Format("Discovered {0} test cases", cases));
-#endif
+
+                        testLog.SendDebugMessage(string.Format("Discovered {0} test cases", cases));
                     }
                     else
                     {
-                        NUnitLoadError(sourceAssembly);
+                        testLog.NUnitLoadError(sourceAssembly);
                     }
                 }
                 catch (System.BadImageFormatException)
                 {
                     // we skip the native c++ binaries that we don't support.
-                    AssemblyNotSupportedWarning(sourceAssembly);
+                    testLog.AssemblyNotSupportedWarning(sourceAssembly);
                 }
 
                 catch (System.IO.FileNotFoundException ex)
                 {
                     // Probably from the GetExportedTypes in NUnit.core, attempting to find an assembly, not a problem if it is not NUnit here
-                    DependentAssemblyNotFoundWarning(ex.FileName, sourceAssembly);
+                    testLog.DependentAssemblyNotFoundWarning(ex.FileName, sourceAssembly);
                 }
                 catch (System.Exception ex)
                 {
-                    SendErrorMessage("Exception thrown discovering tests in " + sourceAssembly, ex);
+                    testLog.SendErrorMessage("Exception thrown discovering tests in " + sourceAssembly, ex);
                 }
                 finally
                 {
-                    if (testConverter!=null)
-                        testConverter.Dispose();
                     runner.Unload();
                 }
             }
+
             Info("discovering test","finished");
         }
 
@@ -103,7 +99,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
                 catch (System.Exception ex)
                 {
-                    SendErrorMessage("Exception converting " + test.TestName.FullName, ex);
+                    testLog.SendErrorMessage("Exception converting " + test.TestName.FullName, ex);
                 }
             }
 

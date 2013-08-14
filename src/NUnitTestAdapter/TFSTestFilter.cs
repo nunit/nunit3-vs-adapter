@@ -1,4 +1,8 @@
-﻿using System;
+﻿// ****************************************************************
+// Copyright (c) 2013 NUnit Software. All rights reserved.
+// ****************************************************************
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -68,7 +72,7 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             get
             {
-                return TfsTestCaseFilterExpression.TestCaseFilterValue != String.Empty;
+                return TfsTestCaseFilterExpression != null && TfsTestCaseFilterExpression.TestCaseFilterValue != String.Empty;
             }
         }
         public IEnumerable<TestCase> CheckFilter(IEnumerable<TestCase> tests)

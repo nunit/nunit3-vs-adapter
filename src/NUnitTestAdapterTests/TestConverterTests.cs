@@ -2,6 +2,7 @@
 // Copyright (c) 2011 NUnit Software. All rights reserved.
 // ****************************************************************
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -25,7 +26,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         
         // NOTE: If the location of the FakeTestCase method in the 
         // file changes, update the value of FAKE_LINE_NUMBER.
-        private static readonly int FAKE_LINE_NUMBER = 29;
+        private static readonly int FAKE_LINE_NUMBER = 30;
         private void FakeTestCase() { } // FAKE_LINE_NUMBER SHOULD BE THIS LINE
 
         private ITest fakeNUnitTest;
@@ -48,7 +49,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var fixtureNode = new TestNode(nunitFixture);
             fakeNUnitTest = (ITest)fixtureNode.Tests[0];
 
-            testConverter = new TestConverter(THIS_ASSEMBLY_PATH);
+            testConverter = new TestConverter(new TestLogger(), THIS_ASSEMBLY_PATH);
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            testConverter.Dispose();
         }
 
         [Test]
@@ -56,12 +63,24 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             var testCase = testConverter.ConvertTestCase(fakeNUnitTest);
 
-            CheckBasicInfo(testCase);
+            CheckTestCase(testCase);
+        }
 
-            Assert.That(testCase.CodeFilePath, Is.SamePath(THIS_CODE_FILE));
-            Assert.That(testCase.LineNumber, Is.EqualTo(FAKE_LINE_NUMBER));
+        [Test]
+        public void ConvertedTestCaseIsCached()
+        {
+            testConverter.ConvertTestCase(fakeNUnitTest);
+            var testCase = testConverter.GetCachedTestCase(fakeNUnitTest.TestName.UniqueName);
 
-            CheckTraits(testCase);
+            CheckTestCase(testCase);
+        }
+
+        [Test]
+        public void CannotMakeTestResultWhenTestCaseIsNotInCache()
+        {
+            var nunitResult = new NUnitTestResult(fakeNUnitTest);
+            var testResult = testConverter.ConvertTestResult(nunitResult);
+            Assert.Null(testResult);
         }
 
         [Test]
@@ -71,30 +90,32 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var cachedTestCase = testConverter.ConvertTestCase(fakeNUnitTest);
 
             var nunitResult = new NUnitTestResult(fakeNUnitTest);
+            nunitResult.SetResult(ResultState.Success, "It passed!", null);
+            nunitResult.Time = 1.234;
+            
             var testResult = testConverter.ConvertTestResult(nunitResult);
             var testCase = testResult.TestCase;
 
             Assert.That(testCase, Is.SameAs(cachedTestCase));
 
-            CheckBasicInfo(testCase);
+            CheckTestCase(testCase);
 
-            Assert.That(testCase.CodeFilePath, Is.SamePath(THIS_CODE_FILE));
-            Assert.That(testCase.LineNumber, Is.EqualTo(FAKE_LINE_NUMBER));
-
-            CheckTraits(testCase);
+            Assert.That(testResult.Outcome, Is.EqualTo(TestOutcome.Passed));
+            Assert.That(testResult.ErrorMessage, Is.EqualTo("It passed!"));
+            Assert.That(testResult.Duration, Is.EqualTo(TimeSpan.FromSeconds(1.234)));
         }
 
-        private static void CheckBasicInfo(TestCase testCase)
+        private static void CheckTestCase(TestCase testCase)
         {
             Assert.That(testCase.FullyQualifiedName, Is.EqualTo("NUnit.VisualStudio.TestAdapter.Tests.TestConverterTests.FakeTestCase"));
             Assert.That(testCase.DisplayName, Is.EqualTo("FakeTestCase"));
             Assert.That(testCase.Source, Is.SamePath(THIS_ASSEMBLY_PATH));
-        }
 
-        // Check traits using reflection, since the feature was added
-        // in an update to VisualStudio and may not be present.
-        private static void CheckTraits(TestCase testCase)
-        {
+            Assert.That(testCase.CodeFilePath, Is.SamePath(THIS_CODE_FILE));
+            Assert.That(testCase.LineNumber, Is.EqualTo(FAKE_LINE_NUMBER));
+
+            // Check traits using reflection, since the feature was added
+            // in an update to VisualStudio and may not be present.
             if (TraitsFeature.IsSupported)
             {
                 var traitList = new List<string>();

@@ -1,4 +1,8 @@
-﻿using System;
+﻿// ****************************************************************
+// Copyright (c) 2013 NUnit Software. All rights reserved.
+// ****************************************************************
+
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
