@@ -51,7 +51,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
                 foreach (var source in sources)
                 {
-                    using (currentRunner = new AssemblyRunner(testLog, source, runContext))
+                    using (currentRunner = new AssemblyRunner(testLog, source, tfsfilter))
                     {
                         currentRunner.RunAssembly(frameworkHandle);
                     }

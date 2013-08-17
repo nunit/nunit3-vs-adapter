@@ -47,10 +47,9 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         // This constructor is used when the executor is called with a list of assemblies
-        public AssemblyRunner(TestLogger logger, string assemblyName, IRunContext runContext)
+        public AssemblyRunner(TestLogger logger, string assemblyName, TFSTestFilter tfsFilter)
             : this(logger, assemblyName)
         {
-            TFSTestFilter tfsFilter = new TFSTestFilter(runContext);
             if (tfsFilter.HasTfsFilterValue)
             {
                 var filteredTestCases = tfsFilter.CheckFilter(this.LoadedTestCases);
