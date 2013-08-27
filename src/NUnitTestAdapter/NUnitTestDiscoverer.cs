@@ -26,7 +26,7 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             testLog.Initialize(messageLogger);
             Info("discovering tests", "started");
-            
+
             // Ensure any channels registered by other adapters are unregistered
             CleanUpRegisteredChannels();
 
@@ -41,11 +41,13 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     if (runner.Load(package))
                     {
-                        this.testConverter = new TestConverter(testLog, sourceAssembly);
+                        using (this.testConverter = new TestConverter(testLog, sourceAssembly))
+                        {
 
-                        int cases = ProcessTestCases(runner.Test, discoverySink);
+                            int cases = ProcessTestCases(runner.Test, discoverySink);
 
-                        testLog.SendDebugMessage(string.Format("Discovered {0} test cases", cases));
+                            testLog.SendDebugMessage(string.Format("Discovered {0} test cases", cases));
+                        }
                     }
                     else
                     {
@@ -69,11 +71,12 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
                 finally
                 {
+                    Dispose();
                     runner.Unload();
                 }
             }
 
-            Info("discovering test","finished");
+            Info("discovering test", "finished");
         }
 
         private int ProcessTestCases(ITest test, ITestCaseDiscoverySink discoverySink)
@@ -117,7 +120,7 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             if (disposing)
             {
-                if (testConverter!=null)
+                if (testConverter != null)
                     testConverter.Dispose();
             }
             testConverter = null;
