@@ -16,10 +16,9 @@ namespace NUnit.VisualStudio.TestAdapter
     [FileExtension(".dll")]
     [FileExtension(".exe")]
     [DefaultExecutorUri(NUnitTestExecutor.ExecutorUri)]
-    public sealed class NUnitTestDiscoverer : NUnitTestAdapter, ITestDiscoverer, IDisposable
+    public sealed class NUnitTestDiscoverer : NUnitTestAdapter, ITestDiscoverer
     {
-        private TestConverter testConverter;
-
+        
         #region ITestDiscoverer Members
 
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger messageLogger, ITestCaseDiscoverySink discoverySink)
@@ -36,19 +35,15 @@ namespace NUnit.VisualStudio.TestAdapter
 
                 TestRunner runner = new TestDomain();
                 TestPackage package = new TestPackage(sourceAssembly);
-
+                TestConverter testConverter = null;
                 try
                 {
                     if (runner.Load(package))
                     {
-                        using (this.testConverter = new TestConverter(testLog, sourceAssembly))
-                        {
-
-                            int cases = ProcessTestCases(runner.Test, discoverySink);
-
-                            testLog.SendDebugMessage(string.Format("Discovered {0} test cases", cases));
+                        testConverter  = new TestConverter(testLog, sourceAssembly);
+                        int cases = ProcessTestCases(runner.Test, discoverySink, testConverter);
+                        testLog.SendDebugMessage(string.Format("Discovered {0} test cases", cases));
                         }
-                    }
                     else
                     {
                         testLog.NUnitLoadError(sourceAssembly);
@@ -71,7 +66,9 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
                 finally
                 {
-                    Dispose();
+                    if (testConverter != null)
+                        testConverter.Dispose();
+                    testConverter = null;
                     runner.Unload();
                 }
             }
@@ -79,14 +76,14 @@ namespace NUnit.VisualStudio.TestAdapter
             Info("discovering test", "finished");
         }
 
-        private int ProcessTestCases(ITest test, ITestCaseDiscoverySink discoverySink)
+        private int ProcessTestCases(ITest test, ITestCaseDiscoverySink discoverySink, TestConverter testConverter)
         {
             int cases = 0;
 
             if (test.IsSuite)
             {
                 foreach (ITest child in test.Tests)
-                    cases += ProcessTestCases(child, discoverySink);
+                    cases += ProcessTestCases(child, discoverySink,testConverter);
             }
             else
             {
@@ -111,19 +108,6 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #endregion
 
-        public void Dispose()
-        {
-            this.Dispose(true);
-        }
 
-        private void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                if (testConverter != null)
-                    testConverter.Dispose();
-            }
-            testConverter = null;
-        }
     }
 }
