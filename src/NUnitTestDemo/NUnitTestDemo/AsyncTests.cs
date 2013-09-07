@@ -54,7 +54,7 @@ namespace NUnitTestDemo
 		}
 
 		[Test]
-		public async Task AsycTaskTestThrowsException()
+		public async Task AsyncTaskTestThrowsException()
 		{
 			await ThrowException();
 

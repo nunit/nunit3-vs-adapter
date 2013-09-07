@@ -1,3 +1,7 @@
+// ****************************************************************
+// Copyright (c) 2011-2013 NUnit Software. All rights reserved.
+// ****************************************************************
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,10 +20,7 @@ namespace NUnit.VisualStudio.TestAdapter
         private TestLogger logger;
         private Dictionary<string, TestCase> vsTestCaseMap;
         private string sourceAssembly;
-        private Assembly loadedAssembly;
-        private bool tryToLoadAssembly = true;
-        private DiaSession diaSession;
-        private bool tryToCreateDiaSession = true;
+        private AppDomain asyncMethodHelperDomain;
 
         #region Constructors
 
@@ -109,8 +110,10 @@ namespace NUnit.VisualStudio.TestAdapter
             if (disposing)
             {
                 if (this.diaSession != null) this.diaSession.Dispose();
+                if (this.asyncMethodHelperDomain != null) AppDomain.Unload(this.asyncMethodHelperDomain);
             }
             diaSession = null;
+            asyncMethodHelperDomain = null;
         }
 
         #endregion
@@ -155,27 +158,16 @@ namespace NUnit.VisualStudio.TestAdapter
 
             if (navData != null && navData.FileName != null) return navData;
 
-            // DiaSession returned null. The rest of this code checks to see 
-            // if this test is an async method, which needs special handling.
+            // DiaSession returned null, see if it's an async method. 
+            if (AsyncMethodHelper != null)
+            {
+                string stateMachineClassName = AsyncMethodHelper.GetClassNameForAsyncMethod(className, methodName);
+                if (stateMachineClassName != null)
+                    navData = diaSession.GetNavigationData(stateMachineClassName, "MoveNext");
+            }
 
-            if (this.LoadedAssembly == null) return null;
-
-            var definingType = LoadedAssembly.GetType(className);
-            if (definingType == null) return null;
-
-            var method = definingType.GetMethod(methodName);
-            if (method == null) return null;
-
-            var asyncAttribute = Reflect.GetAttribute(method, "System.Runtime.CompilerServices.AsyncStateMachineAttribute", false);
-            if (asyncAttribute == null) return null;
-
-            PropertyInfo stateMachineTypeProperty = asyncAttribute.GetType().GetProperty("StateMachineType");
-            if (stateMachineTypeProperty == null) return null;
-
-            Type stateMachineType = stateMachineTypeProperty.GetValue(asyncAttribute, new object[0]) as Type;
-            if (stateMachineType == null) return null;
-
-            navData = DiaSession.GetNavigationData(stateMachineType.FullName, "MoveNext");
+            if (navData == null || navData.FileName == null)
+                logger.SendWarningMessage(string.Format("No source data found for {0}.{1}", className, methodName));
 
             return navData;
         }
@@ -222,6 +214,35 @@ namespace NUnit.VisualStudio.TestAdapter
             return message;
         }
 
+        private AsyncMethodHelper TryCreateHelper(string sourceAssembly)
+        {
+            var setup = new AppDomainSetup();
+            
+            var thisAssembly = Assembly.GetExecutingAssembly();
+            setup.ApplicationBase = AssemblyHelper.GetDirectoryName(thisAssembly);
+
+            var evidence = AppDomain.CurrentDomain.Evidence;
+            this.asyncMethodHelperDomain = AppDomain.CreateDomain("AsyncMethodHelper", evidence, setup);
+
+            try
+            {
+                var helper = this.asyncMethodHelperDomain.CreateInstanceAndUnwrap(
+                    thisAssembly.FullName,
+                    "NUnit.VisualStudio.TestAdapter.AsyncMethodHelper") as AsyncMethodHelper;
+                helper.LoadAssembly(sourceAssembly);
+                return helper as AsyncMethodHelper;
+            }
+            catch(Exception ex)
+            {
+                // If we can't load it for some reason, we issue a warning
+                // and won't try to do it again for the assembly.
+                logger.SendWarningMessage("Unable to reflect on " + sourceAssembly + "\r\nSource data will not be available for some of the tests");
+                logger.SendWarningMessage(ex.ToString());
+                return null;
+            }
+        }
+
+
         #endregion
 
         #region Private Properties
@@ -247,6 +268,8 @@ namespace NUnit.VisualStudio.TestAdapter
         // in the constructor, an exception is thrown on the
         // call to GetNavigationData. We don't understand
         // this, we're just dealing with it.
+        private DiaSession diaSession;
+        private bool tryToCreateDiaSession = true;
         private DiaSession DiaSession
         {
             get
@@ -271,30 +294,19 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
-        // The assembly is only needed here if there async tests
-        // are used. Therefore, we delay loading of the assembly
-        // until it is actually needed.
-        private Assembly LoadedAssembly
+        private AsyncMethodHelper asyncMethodHelper;
+        bool tryToCreateHelper = true;
+        private AsyncMethodHelper AsyncMethodHelper
         {
             get
             {
-                if (tryToLoadAssembly)
+                if (tryToCreateHelper)
                 {
-                    try
-                    {
-                        loadedAssembly = Assembly.LoadFrom(sourceAssembly);
-                    }
-                    catch
-                    {
-                        // If we can't load it for some reason, we issue a warning
-                        // and won't try to do it again for the assembly.
-                        logger.SendWarningMessage("Unable to reflect on " + sourceAssembly + "\r\nSource data will not be available for some of the tests");
-                    }
-
-                    tryToLoadAssembly = false;
+                    tryToCreateHelper = false;
+                    asyncMethodHelper = TryCreateHelper(sourceAssembly);
                 }
 
-                return loadedAssembly;
+                return asyncMethodHelper;
             }
         }
 
