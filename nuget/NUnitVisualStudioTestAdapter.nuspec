@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>NUnitTestAdapter</id>
-        <version>0.96.0</version>
+        <version>${package.version}</version>
         <title>NUnit Test Adapter for VS2012 and VS2013</title>
         <authors>NUnit Software</authors>
         <owners>NUnit Software</owners>
@@ -21,10 +21,10 @@ Includes fix to profiling tests, bug 1189268</releaseNotes>
         <tags>test visualstudio testadapter</tags>
     </metadata>
     <files>
-        <file src="lib\nunit.core.dll" target="lib\nunit.core.dll" />
-        <file src="lib\nunit.core.interfaces.dll" target="lib\nunit.core.interfaces.dll" />
-        <file src="lib\nunit.util.dll" target="lib\nunit.util.dll" />
-        <file src="lib\NUnit.VisualStudio.TestAdapter.dll" target="lib\NUnit.VisualStudio.TestAdapter.dll" />
-        <file src="tools\install.ps1" target="tools\install.ps1" />
+        <file src="${project.lib.dir}\nunit.core.dll" target="lib\nunit.core.dll" />
+        <file src="${project.lib.dir}\nunit.core.interfaces.dll" target="lib\nunit.core.interfaces.dll" />
+        <file src="${project.lib.dir}\nunit.util.dll" target="lib\nunit.util.dll" />
+        <file src="${package.working.dir}\NUnit.VisualStudio.TestAdapter.dll" target="lib\NUnit.VisualStudio.TestAdapter.dll" />
+        <file src="${project.nuget.dir}\install.ps1" target="tools\install.ps1" />
     </files>
 </package>
