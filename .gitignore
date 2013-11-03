@@ -8,3 +8,4 @@ TestResults
 *.mdf
 /Backup
 /UpgradeLog.htm
+packages/
