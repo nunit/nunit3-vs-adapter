@@ -6,3 +6,5 @@ TestResults
 *.user
 *.ldf
 *.mdf
+/Backup
+/UpgradeLog.htm
