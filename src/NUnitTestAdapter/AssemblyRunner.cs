@@ -2,6 +2,9 @@
 // Copyright (c) 2013 NUnit Software. All rights reserved.
 // ****************************************************************
 
+using System.Linq;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+
 namespace NUnit.VisualStudio.TestAdapter
 {
     using System;
@@ -46,15 +49,13 @@ namespace NUnit.VisualStudio.TestAdapter
             this.nunitFilter = MakeTestFilter(selectedTestCases);
         }
 
+        private readonly ITfsTestFilter TfsFilter;
+
         // This constructor is used when the executor is called with a list of assemblies
-        public AssemblyRunner(TestLogger logger, string assemblyName, TFSTestFilter tfsFilter)
+        public AssemblyRunner(TestLogger logger, string assemblyName, ITfsTestFilter tfsFilter)
             : this(logger, assemblyName)
         {
-            if (tfsFilter.HasTfsFilterValue)
-            {
-                var filteredTestCases = tfsFilter.CheckFilter(this.LoadedTestCases);
-                this.nunitFilter = MakeTestFilter(filteredTestCases);
-            }
+            TfsFilter = tfsFilter;
         }
 
         private static SimpleNameFilter MakeTestFilter(IEnumerable<TestCase> ptestCases)
@@ -156,9 +157,14 @@ namespace NUnit.VisualStudio.TestAdapter
 
             if (!runner.Load(package))
                 return false;
-
+            logger.SendMessage(TestMessageLevel.Informational,string.Format("Loading tests from {0}",package.FullName));
             AddTestCases(runner.Test);
-
+            if (TfsFilter==null || !TfsFilter.HasTfsFilterValue) 
+                return true;
+            var filteredTestCases = TfsFilter.CheckFilter(this.LoadedTestCases);
+            var ptestCases = filteredTestCases as TestCase[] ?? filteredTestCases.ToArray();
+            logger.SendMessage(TestMessageLevel.Informational, string.Format("TFS Filter detected: LoadedTestCases {0}, Filterered Test Cases {1}", LoadedTestCases.Count, ptestCases.Count()));
+            this.nunitFilter = MakeTestFilter(ptestCases);
             return true;
         }
 
