@@ -99,7 +99,7 @@ namespace NUnit.VisualStudio.TestAdapter
             try
             {
 #if LAUNCHDEBUGGER
-            Debugger.Launch();
+            System.Diagnostics.Debugger.Launch();
 #endif
                 if (TryLoadAssembly())
                 {
