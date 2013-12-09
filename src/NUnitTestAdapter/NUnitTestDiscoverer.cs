@@ -3,6 +3,7 @@
 // ****************************************************************
 
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
@@ -59,6 +60,11 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     // Probably from the GetExportedTypes in NUnit.core, attempting to find an assembly, not a problem if it is not NUnit here
                     testLog.DependentAssemblyNotFoundWarning(ex.FileName, sourceAssembly);
+                }
+                catch (FileLoadException ex)
+                {
+                    // Attempts to load an invalid assembly, or an assembly with missing dependencies
+                    testLog.LoadingAssemblyFailedWarning(ex.FileName, sourceAssembly);
                 }
                 catch (System.Exception ex)
                 {

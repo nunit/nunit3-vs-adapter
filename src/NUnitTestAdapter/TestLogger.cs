@@ -39,6 +39,11 @@ namespace NUnit.VisualStudio.TestAdapter
             SendWarningMessage("Dependent Assembly " + dependentAssembly + " of " + sourceAssembly + " not found. Can be ignored if not a NUnit project.");
         }
 
+        public void LoadingAssemblyFailedWarning(string dependentAssembly, string sourceAssembly)
+        {
+            SendWarningMessage("Assembly " + dependentAssembly + " loaded through " + sourceAssembly + " failed. Assembly is ignored. Correct deployment of dependencies if this is an error.");
+        }
+
         public void NUnitLoadError(string sourceAssembly)
         {
             SendErrorMessage("NUnit failed to load " + sourceAssembly);
