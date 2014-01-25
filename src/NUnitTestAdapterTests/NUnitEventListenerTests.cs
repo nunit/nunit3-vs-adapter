@@ -3,7 +3,6 @@
 // ****************************************************************
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -19,13 +18,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 {
     public class NUnitEventListenerTests
     {
-        private readonly static Uri EXECUTOR_URI = new Uri(NUnitTestExecutor.ExecutorUri);
-        private static readonly string THIS_ASSEMBLY_PATH =
+        private static readonly string ThisAssemblyPath =
             Path.GetFullPath("NUnit.VisualStudio.TestAdapter.Tests.dll");
-        private static readonly string THIS_CODE_FILE =
+        private static readonly string ThisCodeFile =
             Path.GetFullPath(@"..\..\NUnitEventListenerTests.cs");
 
-        private static readonly int LINE_NUMBER = 29; // Must be number of the following line
+        private const int LineNumber = 28; // Must be number of the following line
+// ReSharper disable once UnusedMember.Local
         private void FakeTestMethod() { }
 
         private ITest fakeNUnitTest;
@@ -38,7 +37,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [SetUp]
         public void SetUp()
         {
-            MethodInfo fakeTestMethod = this.GetType().GetMethod("FakeTestMethod", BindingFlags.Instance | BindingFlags.NonPublic);
+            MethodInfo fakeTestMethod = GetType().GetMethod("FakeTestMethod", BindingFlags.Instance | BindingFlags.NonPublic);
             fakeNUnitTest = new NUnitTestMethod(fakeTestMethod);
 
             fakeNUnitResult = new NUnitTestResult(fakeNUnitTest);
@@ -47,12 +46,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             testLog = new FakeFrameworkHandle();
 
-            testConverter = new TestConverter(new TestLogger(), THIS_ASSEMBLY_PATH);
+            testConverter = new TestConverter(new TestLogger(), ThisAssemblyPath);
 
             testConverter.ConvertTestCase(fakeNUnitTest);
             Assert.NotNull(testConverter.GetCachedTestCase(fakeNUnitTest.TestName.UniqueName));
             
-            this.listener = new NUnitEventListener(testLog, testConverter);
+            listener = new NUnitEventListener(testLog, testConverter);
         }
 
         #region TestStarted Tests
@@ -140,7 +139,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         #region TestOutput Tests
 
-        [TestCaseSource("MessageTestSource")]
+        [TestCaseSource("messageTestSource")]
         public void TestOutput_CallsSendMessageCorrectly(string nunitMessage, string expectedMessage)
         {
             listener.TestOutput(new TestOutput(nunitMessage, TestOutputType.Out));
@@ -150,26 +149,27 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.AreEqual(expectedMessage, testLog.Events[0].Message.Text);
         }
 
-        private static readonly string NL = Environment.NewLine;
-        private static readonly string MESSAGE = "MESSAGE";
-        private static readonly string LINE1 = "LINE#1";
-        private static readonly string LINE2 = "\tLINE#2";
-        private TestCaseData[] MessageTestSource = 
+        private static readonly string Nl = Environment.NewLine;
+        private const string Message = "MESSAGE";
+        private const string Line1 = "LINE#1";
+        private const string Line2 = "\tLINE#2";
+
+        private readonly TestCaseData[] messageTestSource = 
         {
-            new TestCaseData(MESSAGE, MESSAGE),
-            new TestCaseData(MESSAGE + NL, MESSAGE),
-            new TestCaseData(MESSAGE + "\r\n", MESSAGE),
-            new TestCaseData(MESSAGE + "\n", MESSAGE),
-            new TestCaseData(MESSAGE + "\r", MESSAGE),
-            new TestCaseData(LINE1 + NL + LINE2, LINE1 + NL + LINE2),
-            new TestCaseData(LINE1 +"\r\n" + LINE2, LINE1 +"\r\n" + LINE2),
-            new TestCaseData(LINE1 +"\n" + LINE2, LINE1 + "\n" + LINE2),
-            new TestCaseData(LINE1 +"\r" + LINE2, LINE1 + "\r" + LINE2),
-            new TestCaseData(LINE1 +"\r\n" + LINE2 + "\r\n", LINE1 +"\r\n" + LINE2),
-            new TestCaseData(MESSAGE + NL + NL, MESSAGE + NL),
-            new TestCaseData(MESSAGE + "\r\n\r\n", MESSAGE + "\r\n"),
-            new TestCaseData(MESSAGE + "\n\n", MESSAGE + "\n"),
-            new TestCaseData(MESSAGE + "\r\r", MESSAGE + "\r"),
+            new TestCaseData(Message, Message),
+            new TestCaseData(Message + Nl, Message),
+            new TestCaseData(Message + "\r\n", Message),
+            new TestCaseData(Message + "\n", Message),
+            new TestCaseData(Message + "\r", Message),
+            new TestCaseData(Line1 + Nl + Line2, Line1 + Nl + Line2),
+            new TestCaseData(Line1 +"\r\n" + Line2, Line1 +"\r\n" + Line2),
+            new TestCaseData(Line1 +"\n" + Line2, Line1 + "\n" + Line2),
+            new TestCaseData(Line1 +"\r" + Line2, Line1 + "\r" + Line2),
+            new TestCaseData(Line1 +"\r\n" + Line2 + "\r\n", Line1 +"\r\n" + Line2),
+            new TestCaseData(Message + Nl + Nl, Message + Nl),
+            new TestCaseData(Message + "\r\n\r\n", Message + "\r\n"),
+            new TestCaseData(Message + "\n\n", Message + "\n"),
+            new TestCaseData(Message + "\r\r", Message + "\r")
         };
 
         #endregion
@@ -181,9 +181,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.NotNull(ourCase, "TestCase not set");
             Assert.That(ourCase.DisplayName, Is.EqualTo(fakeNUnitTest.TestName.Name));
             Assert.That(ourCase.FullyQualifiedName, Is.EqualTo(fakeNUnitTest.TestName.FullName));
-            Assert.That(ourCase.Source, Is.EqualTo(THIS_ASSEMBLY_PATH));
-            Assert.That(ourCase.CodeFilePath, Is.SamePath(THIS_CODE_FILE));
-            Assert.That(ourCase.LineNumber, Is.EqualTo(LINE_NUMBER));
+            Assert.That(ourCase.Source, Is.EqualTo(ThisAssemblyPath));
+            Assert.That(ourCase.CodeFilePath, Is.SamePath(ThisCodeFile));
+            Assert.That(ourCase.LineNumber, Is.EqualTo(LineNumber));
         }
 
         private void VerifyTestResult(VSTestResult ourResult)

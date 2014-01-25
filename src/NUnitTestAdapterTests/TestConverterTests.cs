@@ -3,8 +3,8 @@
 // ****************************************************************
 
 using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -19,14 +19,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     [Category("TestConverter")]
     public class TestConverterTests
     {
-        private static readonly string THIS_ASSEMBLY_PATH = 
+        private static readonly string ThisAssemblyPath = 
             Path.GetFullPath("NUnit.VisualStudio.TestAdapter.Tests.dll");
-        private static readonly string THIS_CODE_FILE = 
+        private static readonly string ThisCodeFile = 
             Path.GetFullPath(@"..\..\TestConverterTests.cs");
         
         // NOTE: If the location of the FakeTestCase method in the 
         // file changes, update the value of FAKE_LINE_NUMBER.
-        private static readonly int FAKE_LINE_NUMBER = 30;
+        private const int FakeLineNumber = 31;
+// ReSharper disable once UnusedMember.Local
         private void FakeTestCase() { } // FAKE_LINE_NUMBER SHOULD BE THIS LINE
 
         private ITest fakeNUnitTest;
@@ -35,7 +36,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [SetUp]
         public void SetUp()
         {
-            MethodInfo fakeTestMethod = this.GetType().GetMethod("FakeTestCase", BindingFlags.Instance | BindingFlags.NonPublic);
+            MethodInfo fakeTestMethod = GetType().GetMethod("FakeTestCase", BindingFlags.Instance | BindingFlags.NonPublic);
             var nunitTest = new NUnitTestMethod(fakeTestMethod);
             nunitTest.Categories.Add("cat1");
             nunitTest.Properties.Add("Priority", "medium");
@@ -49,7 +50,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var fixtureNode = new TestNode(nunitFixture);
             fakeNUnitTest = (ITest)fixtureNode.Tests[0];
 
-            testConverter = new TestConverter(new TestLogger(), THIS_ASSEMBLY_PATH);
+            testConverter = new TestConverter(new TestLogger(), ThisAssemblyPath);
         }
 
         [TearDown]
@@ -109,21 +110,18 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             Assert.That(testCase.FullyQualifiedName, Is.EqualTo("NUnit.VisualStudio.TestAdapter.Tests.TestConverterTests.FakeTestCase"));
             Assert.That(testCase.DisplayName, Is.EqualTo("FakeTestCase"));
-            Assert.That(testCase.Source, Is.SamePath(THIS_ASSEMBLY_PATH));
+            Assert.That(testCase.Source, Is.SamePath(ThisAssemblyPath));
 
-            Assert.That(testCase.CodeFilePath, Is.SamePath(THIS_CODE_FILE));
-            Assert.That(testCase.LineNumber, Is.EqualTo(FAKE_LINE_NUMBER));
+            Assert.That(testCase.CodeFilePath, Is.SamePath(ThisCodeFile));
+            Assert.That(testCase.LineNumber, Is.EqualTo(FakeLineNumber));
 
             // Check traits using reflection, since the feature was added
             // in an update to VisualStudio and may not be present.
             if (TraitsFeature.IsSupported)
             {
-                var traitList = new List<string>();
+                var traitList = testCase.GetTraits().Select(trait => trait.Name + ":" + trait.Value).ToList();
 
-                foreach (NTrait trait in testCase.GetTraits())
-                    traitList.Add(trait.Name + ":" +  trait.Value);
-
-                Assert.That(traitList, Is.EquivalentTo(new string[] { "Category:super", "Category:cat1", "Priority:medium" }));
+                Assert.That(traitList, Is.EquivalentTo(new[] { "Category:super", "Category:cat1", "Priority:medium" }));
             }
         }
     }

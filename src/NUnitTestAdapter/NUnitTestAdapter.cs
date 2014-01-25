@@ -15,10 +15,10 @@ namespace NUnit.VisualStudio.TestAdapter
     public abstract class NUnitTestAdapter
     {
         // Our logger used to display messages
-        protected TestLogger testLog = new TestLogger();
+        protected TestLogger TestLog = new TestLogger();
 
         // The adapter version
-        private string adapterVersion;
+        private readonly string adapterVersion;
 
         #region Constructor
 
@@ -43,7 +43,7 @@ namespace NUnit.VisualStudio.TestAdapter
         protected void Info(string method, string function)
         {
             var msg = string.Format("NUnit {0} {1} is {2}", adapterVersion, method, function);
-            testLog.SendInformationalMessage(msg);
+            TestLog.SendInformationalMessage(msg);
         }
 
         protected static void CleanUpRegisteredChannels()

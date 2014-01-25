@@ -23,7 +23,7 @@ namespace NUnit.VisualStudio.TestAdapter.Internal
 			string wordAt = null;
 			string wordsInLine = null;
 
-			MethodInfo info = typeof(Environment).GetMethod("GetResourceString", BindingFlags.NonPublic | BindingFlags.Static, null, new Type[] { typeof(string) }, null);
+			MethodInfo info = typeof(Environment).GetMethod("GetResourceString", BindingFlags.NonPublic | BindingFlags.Static, null, new[] { typeof(string) }, null);
 			if (info != null)
 			{
 				wordAt = (string)info.Invoke(null, new object[] { "Word_At" });
@@ -36,19 +36,19 @@ namespace NUnit.VisualStudio.TestAdapter.Internal
 		private StackFrameParser(string wordAtFormat, string wordsInLineFormat)
 		{
 			string methodName = string.Format(CultureInfo.InvariantCulture, @"(\s*({0})) (?<methodName>[^\\]+)", wordAtFormat);
-			this.frameWithoutFileInfoRegex = new Regex("^" + methodName + "$");
+			frameWithoutFileInfoRegex = new Regex("^" + methodName + "$");
 
 			string wordsInLine = string.Format(CultureInfo.InvariantCulture, wordsInLineFormat, "(?<fileName>.+)", @"(?<lineNumber>\d+)");
 
 			string pattern = methodName + " " + wordsInLine;
-			this.frameWithFileInfoRegex = new Regex("^" + pattern + "$");
+			frameWithFileInfoRegex = new Regex("^" + pattern + "$");
 		}
 
 		public StackFrame GetStackFrame(string line)
 		{
 			ValidateArg.NotNullOrEmpty(line, "line");
 
-			Match match = this.frameWithFileInfoRegex.Match(line);
+			Match match = frameWithFileInfoRegex.Match(line);
 			if (match.Success)
 			{
 				string methodName = match.Groups["methodName"].Value;
@@ -63,7 +63,7 @@ namespace NUnit.VisualStudio.TestAdapter.Internal
 				return new StackFrame(methodName, fileName, lineNumber);
 			}
 
-			match = this.frameWithoutFileInfoRegex.Match(line);
+			match = frameWithoutFileInfoRegex.Match(line);
 			if (match.Success)
 			{
 				string methodName = match.Groups["methodName"].Value;
