@@ -18,7 +18,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         static readonly List<TestCase> testCases = new List<TestCase>();
 
-        [TestFixtureSetUp]
+        private static ITestDiscoverer nunittestDiscoverer;
+
+        [SetUp]
         public void LoadMockassembly()
         {
             // Sanity check to be sure we have the correct version of mock-assembly.dll
@@ -27,7 +29,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             // Load the NUnit mock-assembly.dll once for this test, saving
             // the list of test cases sent to the discovery sink
-            ((ITestDiscoverer)new NUnitTestDiscoverer()).DiscoverTests(new[] { mockAssemblyPath }, null, this, this);
+            nunittestDiscoverer = ((ITestDiscoverer)new NUnitTestDiscoverer());
+            nunittestDiscoverer.DiscoverTests(new[] { mockAssemblyPath }, null, this, this);
         }
 
         [Test]

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
@@ -55,13 +56,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             await ThrowException();
         }
 
-        [TestCase(Result = 1)]
+        [TestCase(ExpectedResult = TestOutcome.Passed)]
         public async Task<int> TaskTTestCaseWithResultCheckSuccess()
         {
             return await ReturnOne();
         }
 
-        [TestCase(Result = 2), ExpectedException(typeof(AssertionException))]
+        [TestCase(ExpectedResult=TestOutcome.Failed), ExpectedException(typeof(AssertionException))]
         public async Task<int> TaskTTestCaseWithResultCheckFailure()
         {
             return await ReturnOne();
