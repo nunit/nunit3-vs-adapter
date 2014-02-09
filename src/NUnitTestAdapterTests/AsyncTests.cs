@@ -56,7 +56,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             await ThrowException();
         }
 
-        [TestCase(ExpectedResult = TestOutcome.Passed)]
+        [TestCase(ExpectedResult = 1 )]
         public async Task<int> TaskTTestCaseWithResultCheckSuccess()
         {
             return await ReturnOne();
