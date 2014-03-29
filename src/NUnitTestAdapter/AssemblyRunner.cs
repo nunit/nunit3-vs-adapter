@@ -154,6 +154,7 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             var package = new TestPackage(assemblyName);
             package.Settings["ShadowCopyFiles"] = false;
+            logger.SendDebugMessage("ShadowCopyFiles is set to :" + package.Settings["ShadowCopyFiles"]);
             if (!runner.Load(package))
                 return false;
 
