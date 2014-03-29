@@ -153,7 +153,7 @@ namespace NUnit.VisualStudio.TestAdapter
         private bool TryLoadAssembly()
         {
             var package = new TestPackage(assemblyName);
-
+            package.Settings["ShadowCopyFiles"] = false;
             if (!runner.Load(package))
                 return false;
 
