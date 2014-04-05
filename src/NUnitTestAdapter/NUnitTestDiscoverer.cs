@@ -36,6 +36,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
                 TestRunner runner = new TestDomain();
                 TestPackage package = new TestPackage(sourceAssembly);
+                package.Settings["ShadowCopyFiles"] = false;
                 TestConverter testConverter = null;
                 try
                 {

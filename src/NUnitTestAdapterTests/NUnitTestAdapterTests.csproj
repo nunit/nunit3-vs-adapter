@@ -68,6 +68,7 @@
   <ItemGroup>
     <Compile Include="AssemblyRunnerTests.cs" />
     <Compile Include="AsyncTests.cs" />
+    <Compile Include="ExperimentalTests.cs" />
     <Compile Include="NavigationTestData.cs" />
     <Compile Include="NavigationDataTests.cs" />
     <Compile Include="Fakes\FakeFrameworkHandle.cs" />
