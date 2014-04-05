@@ -22,6 +22,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         private List<TestResult> testResults;
         private FakeFrameworkHandle testLog;
         private static ITestExecutor executor;
+        ResultSummary Summary { get;  set; }    
 
 
         [TestFixtureSetUp]
@@ -37,8 +38,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             // Load the NUnit mock-assembly.dll once for this test, saving
             // the list of test cases sent to the discovery sink
             executor = ((ITestExecutor) new NUnitTestExecutor());
-            executor.RunTests(new[] { mockAssemblyPath }, context, testLog);
-            this.summary = new ResultSummary(testResults);
+            executor.RunTests(new[] { MockAssemblyPath }, Context, testLog);
+            this.Summary = new ResultSummary(testResults);
         }
 
         [Test]
