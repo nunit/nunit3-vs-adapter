@@ -10,26 +10,26 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void PropertyProvider()
         {
-            var testfilter = new TFSTestFilter(null);
-            var prop = TFSTestFilter.PropertyProvider("Priority");
+            var testfilter = new TfsTestFilter(null);
+            var prop = TfsTestFilter.PropertyProvider("Priority");
             Assert.NotNull(prop);
-            prop = TFSTestFilter.PropertyProvider("TestCategory");
+            prop = TfsTestFilter.PropertyProvider("TestCategory");
             Assert.NotNull(prop);
         }
 
         [Test]
         public void TraitProvider()
         {
-            var testFilter = new TFSTestFilter(null);
-            var trait = TFSTestFilter.TraitProvider("TestCategory");
+            var testFilter = new TfsTestFilter(null);
+            var trait = TfsTestFilter.TraitProvider("TestCategory");
             Assert.NotNull(trait);
         }
 
         [Test]
         public void TraitProviderWithNoCategory()
         {
-            var testFilter = new TFSTestFilter(null);
-            var trait = TFSTestFilter.TraitProvider("JustKidding");
+            var testFilter = new TfsTestFilter(null);
+            var trait = TfsTestFilter.TraitProvider("JustKidding");
             Assert.Null(trait);
         }
 
@@ -37,8 +37,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void PropertyValueProviderFqn()
         {
             var tc = new TestCase("Test1", new Uri("executor://NUnitTestExecutor"), "NUnit.VSIX");
-            var testFilter = new TFSTestFilter(null);
-            var obj = TFSTestFilter.PropertyValueProvider(tc, "FullyQualifiedName");
+            var testFilter = new TfsTestFilter(null);
+            var obj = TfsTestFilter.PropertyValueProvider(tc, "FullyQualifiedName");
             Assert.AreSame("Test1", obj);
         }
 
@@ -49,8 +49,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             var tc = new TestCase("Test1", new Uri("executor://NUnitTestExecutor"), "NUnit.VSIX");
             tc.AddTrait("Category", "CI");
-            var testFilter = new TFSTestFilter(null);
-            var obj = TFSTestFilter.PropertyValueProvider(tc, "TestCategory");
+            var testFilter = new TfsTestFilter(null);
+            var obj = TfsTestFilter.PropertyValueProvider(tc, "TestCategory");
             Assert.AreSame("CI", obj);
         }
 
@@ -60,8 +60,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             CheckTraitsSupported();
 
             var tc = new TestCase("Test1", new Uri("executor://NUnitTestExecutor"), "NUnit.VSIX");
-            var testFilter = new TFSTestFilter(null);
-            var obj = TFSTestFilter.PropertyValueProvider(tc, "TestCategory");
+            var testFilter = new TfsTestFilter(null);
+            var obj = TfsTestFilter.PropertyValueProvider(tc, "TestCategory");
             Assert.IsNull(obj);
         }
 
@@ -73,8 +73,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var tc = new TestCase("Test1", new Uri("executor://NUnitTestExecutor"), "NUnit.VSIX");
             tc.AddTrait("Category", "CI");
             tc.AddTrait("Category", "MyOwn");
-            var testFilter = new TFSTestFilter(null);
-            var obj = TFSTestFilter.PropertyValueProvider(tc, "TestCategory") as string[];
+            var testFilter = new TfsTestFilter(null);
+            var obj = TfsTestFilter.PropertyValueProvider(tc, "TestCategory") as string[];
             Assert.IsNotNull(obj);
             Assert.AreEqual(obj.Length,2);
             Assert.AreSame("CI", obj[0]);
@@ -86,8 +86,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             var tc = new TestCase("Test1", new Uri("executor://NUnitTestExecutor"), "NUnit.VSIX");
             tc.AddTrait("Category", "CI");
-            var testFilter = new TFSTestFilter(null);
-            var obj = TFSTestFilter.PropertyValueProvider(tc, "Garbage");
+            var testFilter = new TfsTestFilter(null);
+            var obj = TfsTestFilter.PropertyValueProvider(tc, "Garbage");
             Assert.Null(obj);
         }
 

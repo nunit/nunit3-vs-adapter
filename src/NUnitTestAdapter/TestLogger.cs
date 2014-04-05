@@ -3,9 +3,6 @@
 // ****************************************************************
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
@@ -24,9 +21,9 @@ namespace NUnit.VisualStudio.TestAdapter
     {
         private IMessageLogger messageLogger;
 
-        public void Initialize(IMessageLogger messageLogger)
+        public void Initialize(IMessageLogger messageLoggerParam)
         {
-            this.messageLogger = messageLogger;
+            messageLogger = messageLoggerParam;
         }
 
         public void AssemblyNotSupportedWarning(string sourceAssembly)

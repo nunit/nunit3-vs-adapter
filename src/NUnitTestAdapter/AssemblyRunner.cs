@@ -13,22 +13,22 @@ namespace NUnit.VisualStudio.TestAdapter
     using Microsoft.VisualStudio.TestPlatform.ObjectModel;
     using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
-    using NUnit.Core;
-    using NUnit.Core.Filters;
-    using NUnit.Util;
+    using Core;
+    using Core.Filters;
+    using Util;
 
     /// <summary>
     /// The AssemblyRunner class executes tests in a single assembly
     /// </summary>
     public class AssemblyRunner : IDisposable
     {
-        private TestRunner runner = new TestDomain();
-        private TestLogger logger;
-        private string assemblyName;
+        private readonly TestRunner runner = new TestDomain();
+        private readonly TestLogger logger;
+        private readonly string assemblyName;
 
         private TestFilter nunitFilter;
-        private List<TestCase> loadedTestCases;
-        private TestConverter testConverter;
+        private readonly List<TestCase> loadedTestCases;
+        private readonly TestConverter testConverter;
 
         #region Constructors
 
@@ -37,26 +37,26 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             this.logger = logger;
             this.assemblyName = assemblyName;
-            this.testConverter = new TestConverter(logger, assemblyName);
-            this.loadedTestCases = new List<TestCase>();
-            this.nunitFilter = TestFilter.Empty;
+            testConverter = new TestConverter(logger, assemblyName);
+            loadedTestCases = new List<TestCase>();
+            nunitFilter = TestFilter.Empty;
         }
 
         // This constructor is used when the executor is called with a list of test cases
         public AssemblyRunner(TestLogger logger, string assemblyName, IEnumerable<TestCase> selectedTestCases)
             : this(logger, assemblyName)
         {
-            this.nunitFilter = MakeTestFilter(selectedTestCases);
+            nunitFilter = MakeTestFilter(selectedTestCases);
         }
 
-        private readonly ITfsTestFilter TfsFilter;
+        private readonly ITfsTestFilter tfsFilter;
 
         // This constructor is used when the executor is called with a list of assemblies
         public AssemblyRunner(TestLogger logger, string assemblyName, ITfsTestFilter tfsFilter)
             : this(logger, assemblyName)
         {
-            TfsFilter = tfsFilter;
-            }
+            this.tfsFilter = tfsFilter;
+        }
 
         private static SimpleNameFilter MakeTestFilter(IEnumerable<TestCase> ptestCases)
         {
@@ -103,7 +103,7 @@ namespace NUnit.VisualStudio.TestAdapter
 #endif
                 if (TryLoadAssembly())
                 {
-                    var listener = new NUnitEventListener(testLog, this.TestConverter);
+                    var listener = new NUnitEventListener(testLog, TestConverter);
 
                     try
                     {
@@ -124,7 +124,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     logger.NUnitLoadError(assemblyName);
                 }
             }
-            catch (System.BadImageFormatException)
+            catch (BadImageFormatException)
             {
                 // we skip the native c++ binaries that we don't support.
                 logger.AssemblyNotSupportedWarning(assemblyName);
@@ -142,8 +142,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void CancelRun()
         {
-            if (this.runner != null && this.runner.Running)
-                this.runner.CancelRun();
+            if (runner != null && runner.Running)
+                runner.CancelRun();
         }
 
         // Try to load the assembly and, if successful, populate
@@ -160,12 +160,12 @@ namespace NUnit.VisualStudio.TestAdapter
                 return false;
             logger.SendMessage(TestMessageLevel.Informational,string.Format("Loading tests from {0}",package.FullName));
             AddTestCases(runner.Test);
-            if (TfsFilter==null || !TfsFilter.HasTfsFilterValue) 
+            if (tfsFilter==null || !tfsFilter.HasTfsFilterValue) 
                 return true;
-            var filteredTestCases = TfsFilter.CheckFilter(this.LoadedTestCases);
+            var filteredTestCases = tfsFilter.CheckFilter(LoadedTestCases);
             var ptestCases = filteredTestCases as TestCase[] ?? filteredTestCases.ToArray();
             logger.SendMessage(TestMessageLevel.Informational, string.Format("TFS Filter detected: LoadedTestCases {0}, Filterered Test Cases {1}", LoadedTestCases.Count, ptestCases.Count()));
-            this.nunitFilter = MakeTestFilter(ptestCases);
+            nunitFilter = MakeTestFilter(ptestCases);
             return true;
         }
 
@@ -174,38 +174,38 @@ namespace NUnit.VisualStudio.TestAdapter
         public void AddTestCases(ITest test)
         {
             if (test.IsSuite)
-                foreach (ITest child in test.Tests) this.AddTestCases(child);
+                foreach (ITest child in test.Tests) AddTestCases(child);
             else
-                this.LoadedTestCases.Add(this.TestConverter.ConvertTestCase(test));
+                LoadedTestCases.Add(TestConverter.ConvertTestCase(test));
         }
 
         #endregion
 
         #region IDisposable
-        private bool _Disposed;
+        private bool disposed;
 
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!this._Disposed)
+            if (!disposed)
             {
                 if (disposing)
                 {
-                    if (this.TestConverter != null)
-                        this.TestConverter.Dispose();
+                    if (TestConverter != null)
+                        TestConverter.Dispose();
                 }
             }
-            this._Disposed = true;
+            disposed = true;
         }
 
         ~AssemblyRunner()
         {
-            this.Dispose(false);
+            Dispose(false);
         }
         #endregion
     }

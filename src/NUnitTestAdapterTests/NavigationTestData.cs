@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Threading.Tasks;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
@@ -23,32 +24,34 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         } // minLineRelease = maxLineDebug = maxLineRelease = 23
 
         public void SimpleMethod_Void_NoArgs()
-        { // minLineDebug = 26
-            int answer = 42; // minLineRelease = 27
+        {
+            // minLineDebug = 26
+            const int answer = 42; // minLineRelease = 27
             Console.Write(answer);
         } // maxLineDebug = maxLineRelease = 29
 
         public void SimpleMethod_Void_OneArg(int x)
         { // minLineDebug = 32
-            int answer = x; // minLineRelease = 33
+            var answer = x; // minLineRelease = 33
             Console.Write(answer);
         } // maxLineDebug = maxLineRelease = 35
 
         public void SimpleMethod_Void_TwoArgs(int x, int y)
         { // minLineDebug = 38
-            int answer = x + y; // minLineRelease = 39
+            var answer = x + y; // minLineRelease = 39
             Console.Write(answer);
         } // maxLineDebug = maxLineRelease = 41
 
         public int SimpleMethod_ReturnsInt_NoArgs()
-        { // minLineDebug = 44
-            int answer = 42; // minLineRelease = 45
+        {
+            // minLineDebug = 44
+            const int answer = 42; // minLineRelease = 45
             return answer; // maxLineRelease = 46
         } // maxLineDebug = 47
 
         public string SimpleMethod_ReturnsString_OneArg(int x)
         { // minLineDebug = 50
-            return x.ToString(); // minLineRelease = maxLineRelease = 51
+            return x.ToString(CultureInfo.InvariantCulture); // minLineRelease = maxLineRelease = 51
         } // maxLineDebug = 52
 
         public string GenericMethod_ReturnsString_OneArg<T>(T x)
@@ -58,21 +61,21 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         public async void AsyncMethod_Void()
         { // minLineDebug = 60
-            int answer = 42; // minLineRelease = 61
+            const int answer = 42; // minLineRelease = 61
             await Task.Delay(0);
             Console.Write(answer);
         } // maxLineDebug = maxLineRelease = 64
 
         public async Task AsyncMethod_Task()
         { // minLineDebug = 67
-            int answer = 42; // minLineRelease = 68
+            const int answer = 42; // minLineRelease = 68
             await Task.Delay(0);
             Console.Write(answer);
         } // maxLineDebug = maxLineRelease = 71
 
         public async Task<int> AsyncMethod_ReturnsInt()
         { // minLineDebug = 74
-            int answer = 42; // minLineRelease = 75
+            const int answer = 42; // minLineRelease = 75
             await Task.Delay(0);
             return answer;
         } // maxLineDebug = maxLineRelease = 78
@@ -80,16 +83,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public class NestedClass
         {
             public void SimpleMethod_Void_NoArgs()
-            { // minLineDebug = 83
-                int answer = 42; // minLineRelease = 84
+            {
+                // minLineDebug = 83
+                const int answer = 42; // minLineRelease = 84
                 Console.Write(answer);
             } // maxLineDebug = maxLineRelease = 86
         }
 
         public class ParameterizedFixture
         {
-            private double x;
-            private string s;
+            private readonly double x;
+            private readonly string s;
 
             public ParameterizedFixture(double x, string s) 
             {
@@ -99,13 +103,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             public string SimpleMethod_ReturnsString_OneArg(int i)
             { // minLineDebug = 101
-                return this.s + this.x * i; // minLineRelease = maxLineRelease = 102
+                return s + x * i; // minLineRelease = maxLineRelease = 102
             } // maxLineDebug = 103
         }
 
         public class GenericFixture<T1, T2>
         {
-            private T1 x;
+            private readonly T1 x;
 
             public GenericFixture(T1 x) 
             {
@@ -119,37 +123,37 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             public class DoublyNested
             {
-                public T1 x;
-                public T2 y;
+                public T1 X;
+                public T2 Y;
 
                 public DoublyNested(T1 x, T2 y)
                 {
-                    this.x = x;
-                    this.y = y;
+                    X = x;
+                    Y = y;
                 }
 
                 public void WriteBoth()
                 { // minLineDebug = 132
-                    Console.Write(x.ToString() + y.ToString()); // minLineRelease = 133
+                    Console.Write(X + Y.ToString()); // minLineRelease = 133
                 } // maxLineDebug = maxLineRelease = 134
             }
 
             public class DoublyNested<T3>
             {
-                public T1 x;
-                public T2 y;
-                public T3 z;
+                public T1 X;
+                public T2 Y;
+                public T3 Z;
 
                 public DoublyNested(T1 x, T2 y, T3 z)
                 {
-                    this.x = x;
-                    this.y = y;
-                    this.z = z;
+                    X = x;
+                    Y = y;
+                    Z = z;
                 }
 
                 public void WriteAllThree()
                 { // minLineDebug = 151
-                    Console.Write(x.ToString() + y.ToString() + z.ToString()); // minLineRelease = 152
+                    Console.Write(X + Y.ToString() + Z); // minLineRelease = 152
                 } // maxLineDebug = maxLineRelease = 153
             }
         }

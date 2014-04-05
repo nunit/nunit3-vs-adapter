@@ -72,7 +72,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
 
         void ITestExecutionRecorder.RecordStart(TestCase testCase)
         {
-            Events.Add(new Event() 
+            Events.Add(new Event
             {
                 EventType = EventType.RecordStart,
                 TestCase = testCase
@@ -81,7 +81,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
 
         void ITestExecutionRecorder.RecordResult(TestResult testResult)
         {
-            Events.Add(new Event() 
+            Events.Add(new Event
             { 
                 EventType = EventType.RecordResult, 
                 TestResult = testResult 
@@ -90,7 +90,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
 
         void ITestExecutionRecorder.RecordEnd(TestCase testCase, TestOutcome outcome)
         {
-            Events.Add(new Event()
+            Events.Add(new Event
             {
                 EventType = EventType.RecordEnd,
                 TestCase = testCase,
@@ -109,13 +109,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
 
         void IMessageLogger.SendMessage(TestMessageLevel testMessageLevel, string message)
         {
-            TextMessage textMessage = new TextMessage()
+            var textMessage = new TextMessage
             {
                 Level = testMessageLevel,
                 Text = message
             };
 
-            Events.Add(new Event()
+            Events.Add(new Event
             {
                 EventType = EventType.SendMessage,
                 Message = textMessage

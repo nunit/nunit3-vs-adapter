@@ -1,23 +1,21 @@
 ﻿using System.IO;
-using System.Reflection;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
     public class NavigationDataTests
     {
-        private static readonly string THIS_ASSEMBLY_PATH =
+        private static readonly string ThisAssemblyPath =
             Path.GetFullPath("NUnit.VisualStudio.TestAdapter.Tests.dll");
 
         TestConverter testConverter;
 
-        const string prefix = "NUnit.VisualStudio.TestAdapter.Tests.NavigationTestData";
+        const string Prefix = "NUnit.VisualStudio.TestAdapter.Tests.NavigationTestData";
 
         [SetUp]
         public void SetUp()
         {
-            testConverter = new TestConverter(new TestLogger(), THIS_ASSEMBLY_PATH);
+            testConverter = new TestConverter(new TestLogger(), ThisAssemblyPath);
         }
 
         [TearDown]
@@ -49,7 +47,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void VerifyNavigationData(string suffix, string methodName, int minLineDebug, int minLineRelease, int maxLineRelease, int maxLineDebug)
         {
             // Get the navigation data - ensure names are spelled correctly!
-            var className = prefix + suffix;
+            var className = Prefix + suffix;
             var data = testConverter.GetNavigationData(className, methodName);
             Assert.NotNull(data, "Unable to retrieve navigation data");
 

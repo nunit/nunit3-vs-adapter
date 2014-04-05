@@ -3,9 +3,10 @@
 // ****************************************************************
 
 using System;
+using System.Linq;
 using System.Reflection;
 
-namespace NUnit.VisualStudio.TestAdapter
+namespace NUnit.VisualStudio.TestAdapter.Internal
 {
     public class AsyncMethodHelper : MarshalByRefObject
     {
@@ -32,18 +33,13 @@ namespace NUnit.VisualStudio.TestAdapter
             PropertyInfo stateMachineTypeProperty = asyncAttribute.GetType().GetProperty("StateMachineType");
             if (stateMachineTypeProperty == null) return null;
 
-            Type asyncStateMachineType = stateMachineTypeProperty.GetValue(asyncAttribute, new object[0]) as Type;
-            if (asyncStateMachineType == null) return null;
-            
-            return asyncStateMachineType.FullName;
+            var asyncStateMachineType = stateMachineTypeProperty.GetValue(asyncAttribute, new object[0]) as Type;
+            return asyncStateMachineType == null ? null : asyncStateMachineType.FullName;
         }
 
         private Attribute GetAsyncStateMachineAttribute(MethodInfo method)
         {
-            foreach (Attribute attribute in method.GetCustomAttributes(false) )
-                if (attribute.GetType().FullName == "System.Runtime.CompilerServices.AsyncStateMachineAttribute")
-                    return attribute;
-            return null;
+            return method.GetCustomAttributes(false).Cast<Attribute>().FirstOrDefault(attribute => attribute.GetType().FullName == "System.Runtime.CompilerServices.AsyncStateMachineAttribute");
         }
 
         public override object InitializeLifetimeService()

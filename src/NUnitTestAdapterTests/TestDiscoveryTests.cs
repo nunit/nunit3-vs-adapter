@@ -14,9 +14,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     [Category("TestDiscovery")]
     public class TestDiscoveryTests : IMessageLogger, ITestCaseDiscoverySink
     {
-        static readonly string mockAssemblyPath = Path.GetFullPath("mock-assembly.dll");
+        static readonly string MockAssemblyPath = Path.GetFullPath("mock-assembly.dll");
 
-        static readonly List<TestCase> testCases = new List<TestCase>();
+        static readonly List<TestCase> TestCases = new List<TestCase>();
 
         private static ITestDiscoverer nunittestDiscoverer;
 
@@ -36,7 +36,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void VerifyTestCaseCount()
         {
-            Assert.That(testCases.Count, Is.EqualTo(NUnit.Tests.Assemblies.MockAssembly.Tests));
+            Assert.That(TestCases.Count, Is.EqualTo(NUnit.Tests.Assemblies.MockAssembly.Tests));
         }
 
         [TestCase("MockTest3", "NUnit.Tests.Assemblies.MockTestFixture.MockTest3")]
@@ -45,7 +45,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase("MethodWithParameters(9,11)", "NUnit.Tests.FixtureWithTestCases.MethodWithParameters(9,11)")]
         public void VerifyTestCaseIsFound(string name, string fullName)
         {
-            var testCase = testCases.Find(tc => tc.DisplayName == name);
+            var testCase = TestCases.Find(tc => tc.DisplayName == name);
             Assert.That(testCase.FullyQualifiedName, Is.EqualTo(fullName));
         }
 
@@ -61,7 +61,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         void ITestCaseDiscoverySink.SendTestCase(TestCase discoveredTest)
         {
-            testCases.Add(discoveredTest);
+            TestCases.Add(discoveredTest);
         }
 
         #endregion

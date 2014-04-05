@@ -4,8 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using NUnit.Core;
 
 namespace NUnit.VisualStudio.TestAdapter
@@ -19,7 +17,7 @@ namespace NUnit.VisualStudio.TestAdapter
     [Serializable]
     class TestRunFilter : TestFilter
     {
-        private List<string> map;
+        private readonly List<string> map;
 
         public TestRunFilter(List<string> map)
         {

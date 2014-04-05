@@ -2,29 +2,24 @@
 // Copyright (c) 2012 NUnit Software. All rights reserved.
 // ****************************************************************
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Framework;
 using NUnit.Tests.Assemblies;
 using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
-    using System.Diagnostics;
 
     [Category("TestExecution")]
     public class TestExecutionTests
     {
-        static readonly string mockAssemblyPath = Path.GetFullPath("mock-assembly.dll");
-        static readonly IRunContext context = new FakeRunContext();
+        static readonly string MockAssemblyPath = Path.GetFullPath("mock-assembly.dll");
+        static readonly IRunContext Context = new FakeRunContext();
 
-        private List<TestCase> testCases;
         private List<TestResult> testResults;
-        private ResultSummary summary;
         private FakeFrameworkHandle testLog;
         private static ITestExecutor executor;
 
@@ -35,7 +30,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             // Sanity check to be sure we have the correct version of mock-assembly.dll
             Assert.That(MockAssembly.Tests, Is.EqualTo(31),
                 "The reference to mock-assembly.dll appears to be the wrong version");
-            testCases = new List<TestCase>();
+            new List<TestCase>();
             testResults = new List<TestResult>();
             testLog = new FakeFrameworkHandle();
 
@@ -49,7 +44,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void CorrectNumberOfTestCasesWereStarted()
         {
-            var eventType = FakeFrameworkHandle.EventType.RecordStart;
+            const FakeFrameworkHandle.EventType eventType = FakeFrameworkHandle.EventType.RecordStart;
             Assert.That(
                 testLog.Events.FindAll(e => e.EventType == eventType).Count,
                 Is.EqualTo(MockAssembly.ResultCount));
@@ -58,7 +53,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void CorrectNumberOfTestCasesWereEnded()
         {
-            var eventType = FakeFrameworkHandle.EventType.RecordEnd;
+            const FakeFrameworkHandle.EventType eventType = FakeFrameworkHandle.EventType.RecordEnd;
             Assert.That(
                 testLog.Events.FindAll(e => e.EventType == eventType).Count,
                 Is.EqualTo(MockAssembly.ResultCount));
@@ -67,13 +62,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void CorrectNumberOfResultsWereReceived()
         {
-            var eventType = FakeFrameworkHandle.EventType.RecordResult;
+            const FakeFrameworkHandle.EventType eventType = FakeFrameworkHandle.EventType.RecordResult;
             Assert.That(
                 testLog.Events.FindAll(e => e.EventType == eventType).Count,
                 Is.EqualTo(MockAssembly.ResultCount));
         }
 
-        TestCaseData[] outcomes = new TestCaseData[] {
+        readonly TestCaseData[] outcomes =
+        {
             // NOTE: One inconclusive test is reported as None
             new TestCaseData(TestOutcome.Passed).Returns(MockAssembly.TestsRun - MockAssembly.Errors - MockAssembly.Failures - 1),
             new TestCaseData(TestOutcome.Failed).Returns(MockAssembly.Errors + MockAssembly.Failures + MockAssembly.NotRunnable),
@@ -124,11 +120,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         private class ResultSummary
         {
-            private Dictionary<TestOutcome, int> summary;
+            private readonly Dictionary<TestOutcome, int> summary;
 
-            public ResultSummary(List<TestResult> results)
+            public ResultSummary(IEnumerable<TestResult> results)
             {
-                this.summary = new Dictionary<TestOutcome, int>();
+                summary = new Dictionary<TestOutcome, int>();
                 
                 foreach(TestResult result in results)
                 {
@@ -137,7 +133,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 }
             }
 
-            public int GetCount(TestOutcome outcome)
+            private int GetCount(TestOutcome outcome)
             {
                 return summary.ContainsKey(outcome)
                     ? summary[outcome]

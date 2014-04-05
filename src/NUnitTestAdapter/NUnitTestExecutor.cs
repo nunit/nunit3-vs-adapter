@@ -13,7 +13,7 @@ using NUnit.Core;
 namespace NUnit.VisualStudio.TestAdapter
 {
 
-    [ExtensionUri(NUnitTestExecutor.ExecutorUri)]
+    [ExtensionUri(ExecutorUri)]
     public sealed class NUnitTestExecutor : NUnitTestAdapter, ITestExecutor, IDisposable
     {
         ///<summary>
@@ -36,7 +36,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <param name="frameworkHandle">Test log to send results and messages through</param>
         public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
-            testLog.Initialize(frameworkHandle);
+            TestLog.Initialize(frameworkHandle);
             Info("executing tests", "started");
 
             try
@@ -44,14 +44,14 @@ namespace NUnit.VisualStudio.TestAdapter
                 // Ensure any channels registered by other adapters are unregistered
                 CleanUpRegisteredChannels();
 
-                var tfsfilter = new TFSTestFilter(runContext);
-                testLog.SendDebugMessage("Keepalive:" + runContext.KeepAlive);
+                var tfsfilter = new TfsTestFilter(runContext);
+                TestLog.SendDebugMessage("Keepalive:" + runContext.KeepAlive);
                 if (!tfsfilter.HasTfsFilterValue && runContext.KeepAlive)
                     frameworkHandle.EnableShutdownAfterTestRun = true;
 
                 foreach (var source in sources)
                 {
-                    using (currentRunner = new AssemblyRunner(testLog, source, tfsfilter))
+                    using (currentRunner = new AssemblyRunner(TestLog, source, tfsfilter))
                     {
                         currentRunner.RunAssembly(frameworkHandle);
                     }
@@ -61,7 +61,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             catch (Exception ex)
             {
-                testLog.SendErrorMessage("Exception " + ex);
+                TestLog.SendErrorMessage("Exception " + ex);
             }
             finally
             {
@@ -82,7 +82,7 @@ namespace NUnit.VisualStudio.TestAdapter
             Debugger.Launch();
 #endif
 
-            testLog.Initialize(frameworkHandle);
+            TestLog.Initialize(frameworkHandle);
             if (runContext.KeepAlive)
                 frameworkHandle.EnableShutdownAfterTestRun = true;
             Info("executing tests", "started");
@@ -93,7 +93,7 @@ namespace NUnit.VisualStudio.TestAdapter
             var assemblyGroups = tests.GroupBy(tc => tc.Source);
             foreach (var assemblyGroup in assemblyGroups)
             {
-                using (currentRunner = new AssemblyRunner(testLog, assemblyGroup.Key, assemblyGroup))
+                using (currentRunner = new AssemblyRunner(TestLog, assemblyGroup.Key, assemblyGroup))
                 {
                     currentRunner.RunAssembly(frameworkHandle);
                 }
@@ -115,7 +115,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
         }
 
         private void Dispose(bool disposing)

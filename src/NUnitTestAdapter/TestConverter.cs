@@ -9,7 +9,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.Core;
-
+using NUnit.VisualStudio.TestAdapter.Internal;
 using NUnitTestResult = NUnit.Core.TestResult;
 using VSTestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
 
@@ -17,9 +17,9 @@ namespace NUnit.VisualStudio.TestAdapter
 {
     public class TestConverter : IDisposable
     {
-        private TestLogger logger;
-        private Dictionary<string, TestCase> vsTestCaseMap;
-        private string sourceAssembly;
+        private readonly TestLogger logger;
+        private readonly Dictionary<string, TestCase> vsTestCaseMap;
+        private readonly string sourceAssembly;
         private AppDomain asyncMethodHelperDomain;
 
         #region Constructors
