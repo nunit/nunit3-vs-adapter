@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Moq;
 using NUnit.Framework;
 
 
@@ -87,5 +88,28 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(runner.NUnitFilter.IsEmpty, Is.False, "NUnitfilter should not be empty, we have added testcases");
             Assert.That(runner.LoadedTestCases.Count, Is.EqualTo(2), "We should have had 2 converted MS test cases here");
         }
+
+        //[Test]
+        //public void HandleTfsFilterCorrectlyWhenFilterIsEmpty()
+        //{
+        //    var tfsfilter = new Mock<ITfsTestFilter>();
+        //    tfsfilter.Setup(f => f.HasTfsFilterValue).Returns(false);
+        //    var runner = new AssemblyRunner(new TestLogger(), "test", tfsfilter.Object);
+        //    runner.AddTestCases(fakeTest1);
+        //    runner.AddTestCases(fakeTest2);
+
+        //    Assert.That(runner.NUnitFilter.IsEmpty, Is.False, "NUnitfilter should not be empty, we have added testcases");
+        //    Assert.That(runner.LoadedTestCases.Count, Is.EqualTo(2), "We should have had 2 converted MS test cases here");
+        //}
+        //[Test]
+        //public void HandleTfsFilterCorrectlyWhenNoFilter()
+        //{
+        //    var runner = new AssemblyRunner(new TestLogger(), "test", (TFSTestFilter)null);
+        //    runner.AddTestCases(fakeTest1);
+        //    runner.AddTestCases(fakeTest2);
+
+        //    Assert.That(runner.NUnitFilter.IsEmpty, Is.False, "NUnitfilter should not be empty, we have added testcases");
+        //    Assert.That(runner.LoadedTestCases.Count, Is.EqualTo(2), "We should have had 2 converted MS test cases here");
+        //}
     }
 }

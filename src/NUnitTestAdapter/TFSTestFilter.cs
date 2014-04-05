@@ -14,7 +14,14 @@ namespace NUnit.VisualStudio.TestAdapter
 {
     using System.Collections;
 
-    public class TFSTestFilter
+    public interface ITfsTestFilter
+    {
+        ITestCaseFilterExpression TfsTestCaseFilterExpression { get; }
+        bool HasTfsFilterValue { get; }
+        IEnumerable<TestCase> CheckFilter(IEnumerable<TestCase> tests);
+    }
+
+    public class TFSTestFilter : ITfsTestFilter
     {
         /// <summary>   
         /// Supported properties for filtering
