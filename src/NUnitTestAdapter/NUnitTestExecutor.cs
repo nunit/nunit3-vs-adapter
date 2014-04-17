@@ -46,9 +46,12 @@ namespace NUnit.VisualStudio.TestAdapter
 
                 var tfsfilter = new TfsTestFilter(runContext);
                 TestLog.SendDebugMessage("Keepalive:" + runContext.KeepAlive);
-                if (!tfsfilter.HasTfsFilterValue && runContext.KeepAlive)
-                    frameworkHandle.EnableShutdownAfterTestRun = true;
-
+                var enableShutdown = (UseVsKeepEngineRunning) ? !runContext.KeepAlive : true;
+                if (!tfsfilter.HasTfsFilterValue)
+                {
+                    frameworkHandle.EnableShutdownAfterTestRun = enableShutdown;
+                }
+                
                 foreach (var source in sources)
                 {
                     using (currentRunner = new AssemblyRunner(TestLog, source, tfsfilter))
@@ -83,8 +86,9 @@ namespace NUnit.VisualStudio.TestAdapter
 #endif
 
             TestLog.Initialize(frameworkHandle);
-            if (runContext.KeepAlive)
-                frameworkHandle.EnableShutdownAfterTestRun = true;
+            var enableShutdown = (UseVsKeepEngineRunning) ? !runContext.KeepAlive : true;
+            frameworkHandle.EnableShutdownAfterTestRun = enableShutdown;
+            Debug("executing tests", "EnableShutdown set to " +enableShutdown);
             Info("executing tests", "started");
 
             // Ensure any channels registered by other adapters are unregistered

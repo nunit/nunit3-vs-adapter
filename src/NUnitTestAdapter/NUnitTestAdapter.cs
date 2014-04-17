@@ -20,6 +20,9 @@ namespace NUnit.VisualStudio.TestAdapter
         // The adapter version
         private readonly string adapterVersion;
 
+        RegistryCurrentUser Registry { get; set; }
+        protected bool UseVsKeepEngineRunning { get; private set; }
+
         #region Constructor
 
         /// <summary>
@@ -34,6 +37,8 @@ namespace NUnit.VisualStudio.TestAdapter
             ServiceManager.Services.InitializeServices();
 
             adapterVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            Registry = RegistryCurrentUser.CreateRegistryCurrentUser(@"Software\nunit.org\VSAdapter");
+            UseVsKeepEngineRunning = Registry.Exist && (Registry.Read<int>("UseVsKeepEngineRunning")==1);
         }
 
         #endregion
@@ -44,6 +49,14 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             var msg = string.Format("NUnit {0} {1} is {2}", adapterVersion, method, function);
             TestLog.SendInformationalMessage(msg);
+        }
+
+        protected void Debug(string method, string function)
+        {
+#if DEBUG
+            var msg = string.Format("NUnit {0} {1} is {2}", adapterVersion, method, function);
+            TestLog.SendDebugMessage(msg);
+#endif
         }
 
         protected static void CleanUpRegisteredChannels()
