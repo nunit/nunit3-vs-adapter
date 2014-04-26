@@ -26,6 +26,10 @@ namespace NUnit.VisualStudio.TestAdapter
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger messageLogger, ITestCaseDiscoverySink discoverySink)
         {
             TestLog.Initialize(messageLogger);
+            if (RegistryFailure)
+            {
+                TestLog.SendErrorMessage(ErrorMsg);
+            }
             Info("discovering tests", "started");
 
             // Ensure any channels registered by other adapters are unregistered

@@ -2,6 +2,7 @@
 // Copyright (c) 2011 NUnit Software. All rights reserved.
 // ****************************************************************
 
+using System;
 using System.Reflection;
 using System.Runtime.Remoting.Channels;
 using NUnit.Util;
@@ -24,6 +25,13 @@ namespace NUnit.VisualStudio.TestAdapter
 
         protected int Verbosity { get; private set; }
 
+
+        protected bool RegistryFailure { get; set; }
+        protected string ErrorMsg
+        {
+            get; set;
+        }
+
         #region Constructor
 
         /// <summary>
@@ -36,14 +44,23 @@ namespace NUnit.VisualStudio.TestAdapter
             ServiceManager.Services.AddService(new ProjectService());
 
             ServiceManager.Services.InitializeServices();
-
+            Verbosity = 0;
+            RegistryFailure = false;
             adapterVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            var registry = RegistryCurrentUser.OpenRegistryCurrentUser(@"Software\nunit.org\VSAdapter");
-            UseVsKeepEngineRunning = registry.Exist && (registry.Read<int>("UseVsKeepEngineRunning")==1);
-            UseShallowCopy = registry.Exist && (registry.Read<int>("UseShallowCopy") == 1);
-            Verbosity = (registry.Exist) ? registry.Read<int>("Verbosity") : 0;
-            TestLog =  new TestLogger(Verbosity);
+            try
+            {
+                var registry = RegistryCurrentUser.OpenRegistryCurrentUser(@"Software\nunit.org\VSAdapter");
+                UseVsKeepEngineRunning = registry.Exist && (registry.Read<int>("UseVsKeepEngineRunning") == 1);
+                UseShallowCopy = registry.Exist && (registry.Read<int>("UseShallowCopy") == 1);
+                Verbosity = (registry.Exist) ? registry.Read<int>("Verbosity") : 0;
+            }
+            catch (Exception e)
+            {
+                RegistryFailure = true;
+                ErrorMsg = e.ToString();
+            }
 
+            TestLog = new TestLogger(Verbosity);
         }
 
         #endregion

@@ -3,7 +3,7 @@
   <Identifier Id="NUnitTestAdapterInstall..7c53286e-ac4f-485f-915c-5ec5a4c47b0c">
     <Name>NUnit Test Adapter</Name>
     <Author>Charlie Poole</Author>
-    <Version>1.0.0.100</Version>
+    <Version>1.0.0.102</Version>
     <Description xml:space="preserve">NUnit adapter for integrated test execution under Visual Studio 2012 (all updates),and Visual Studio 2013 (all updates). Compatible with NUnit 2.0 through 2.6.3.</Description>
     <Locale>1033</Locale>
     <MoreInfoUrl>http://nunit.org/index.php?p=vsTestAdapter&amp;r=2.6.3</MoreInfoUrl>

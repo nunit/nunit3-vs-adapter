@@ -25,6 +25,8 @@ namespace NUnit.VisualStudio.TestAdapter
             if (key == null)
                 return default(T);
             var o = key.GetValue(property);
+            if (o == null)
+                return default(T);
             return (T)o;
         }
 
