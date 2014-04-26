@@ -64,7 +64,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             catch (Exception ex)
             {
-                TestLog.SendErrorMessage("Exception " + ex);
+                TestLog.SendErrorMessage("Exception thrown executing tests", ex);
             }
             finally
             {

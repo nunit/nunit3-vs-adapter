@@ -54,7 +54,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private static RegistryCurrentUser currentUser;
 
-        public static RegistryCurrentUser CreateRegistryCurrentUser(string key)
+        public static RegistryCurrentUser OpenRegistryCurrentUser(string key)
         {
             return currentUser ?? (currentUser = new RegistryCurrentUser(key));
         }

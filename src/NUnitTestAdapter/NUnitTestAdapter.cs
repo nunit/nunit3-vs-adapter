@@ -15,13 +15,14 @@ namespace NUnit.VisualStudio.TestAdapter
     public abstract class NUnitTestAdapter
     {
         // Our logger used to display messages
-        protected TestLogger TestLog = new TestLogger();
-
+        protected TestLogger TestLog;
         // The adapter version
         private readonly string adapterVersion;
 
-        RegistryCurrentUser Registry { get; set; }
         protected bool UseVsKeepEngineRunning { get; private set; }
+        protected bool UseShallowCopy { get; private set; }
+
+        protected int Verbosity { get; private set; }
 
         #region Constructor
 
@@ -37,8 +38,12 @@ namespace NUnit.VisualStudio.TestAdapter
             ServiceManager.Services.InitializeServices();
 
             adapterVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            Registry = RegistryCurrentUser.CreateRegistryCurrentUser(@"Software\nunit.org\VSAdapter");
-            UseVsKeepEngineRunning = Registry.Exist && (Registry.Read<int>("UseVsKeepEngineRunning")==1);
+            var registry = RegistryCurrentUser.OpenRegistryCurrentUser(@"Software\nunit.org\VSAdapter");
+            UseVsKeepEngineRunning = registry.Exist && (registry.Read<int>("UseVsKeepEngineRunning")==1);
+            UseShallowCopy = registry.Exist && (registry.Read<int>("UseShallowCopy") == 1);
+            Verbosity = (registry.Exist) ? registry.Read<int>("Verbosity") : 0;
+            TestLog =  new TestLogger(Verbosity);
+
         }
 
         #endregion

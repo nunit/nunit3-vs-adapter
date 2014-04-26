@@ -21,6 +21,18 @@ namespace NUnit.VisualStudio.TestAdapter
     {
         private IMessageLogger messageLogger;
 
+        int Verbosity { get; set; }
+
+        public TestLogger()
+        {
+            Verbosity = 0;
+        }
+
+        public TestLogger(int verbosity)
+        {
+            Verbosity = verbosity;
+        }
+
         public void Initialize(IMessageLogger messageLoggerParam)
         {
             messageLogger = messageLoggerParam;
@@ -53,8 +65,18 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void SendErrorMessage(string message, Exception ex)
         {
-            SendMessage(TestMessageLevel.Error, message);
-            SendMessage(TestMessageLevel.Error, ex.ToString());
+            
+            switch (Verbosity)
+            {
+                case 0:
+                    var type = ex.GetType();
+                    SendErrorMessage(string.Format("Exception {0}, {1}",type, message));
+                    break;
+                default:
+                    SendMessage(TestMessageLevel.Error, message);
+                    SendErrorMessage(ex.ToString());
+                    break;
+            }
         }
 
         public void SendWarningMessage(string message)
