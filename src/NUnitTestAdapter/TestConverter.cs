@@ -228,7 +228,7 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 var helper = this.asyncMethodHelperDomain.CreateInstanceAndUnwrap(
                     thisAssembly.FullName,
-                    "NUnit.VisualStudio.TestAdapter.AsyncMethodHelper") as AsyncMethodHelper;
+                    "NUnit.VisualStudio.TestAdapter.Internal.AsyncMethodHelper") as AsyncMethodHelper;
                 helper.LoadAssembly(sourceAssembly);
                 return helper as AsyncMethodHelper;
             }
