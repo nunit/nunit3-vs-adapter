@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Globalization;
 using System.Threading.Tasks;
-
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
     // Contains methods used in testing use of DiaSession.
@@ -22,10 +21,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
 
         } // minLineRelease = maxLineDebug = maxLineRelease = 23
-
+        
         public void SimpleMethod_Void_NoArgs()
-        {
-            // minLineDebug = 26
+        {// minLineDebug = 26
             const int answer = 42; // minLineRelease = 27
             Console.Write(answer);
         } // maxLineDebug = maxLineRelease = 29
@@ -43,8 +41,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         } // maxLineDebug = maxLineRelease = 41
 
         public int SimpleMethod_ReturnsInt_NoArgs()
-        {
-            // minLineDebug = 44
+        {// minLineDebug = 44
             const int answer = 42; // minLineRelease = 45
             return answer; // maxLineRelease = 46
         } // maxLineDebug = 47
@@ -83,8 +80,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public class NestedClass
         {
             public void SimpleMethod_Void_NoArgs()
-            {
-                // minLineDebug = 83
+            {// minLineDebug = 83
                 const int answer = 42; // minLineRelease = 84
                 Console.Write(answer);
             } // maxLineDebug = maxLineRelease = 86
