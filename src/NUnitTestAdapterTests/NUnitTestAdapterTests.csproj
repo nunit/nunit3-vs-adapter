@@ -78,6 +78,7 @@
     <Compile Include="Fakes\FakeFrameworkHandle.cs" />
     <Compile Include="Fakes\FakeRunContext.cs" />
     <Compile Include="Fakes\FakeRunSettings.cs" />
+    <Compile Include="RegistryTests.cs" />
     <Compile Include="TestConverterTests_StaticHelpers.cs" />
     <Compile Include="TestConverterTests.cs" />
     <Compile Include="TestDiscoveryTests.cs" />

@@ -236,8 +236,7 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 // If we can't load it for some reason, we issue a warning
                 // and won't try to do it again for the assembly.
-                logger.SendWarningMessage("Unable to reflect on " + sourceAssembly + "\r\nSource data will not be available for some of the tests");
-                logger.SendWarningMessage(ex.ToString());
+                logger.SendWarningMessage("Unable to reflect on " + sourceAssembly + "\r\nSource data will not be available for some of the tests",ex);
                 return null;
             }
         }

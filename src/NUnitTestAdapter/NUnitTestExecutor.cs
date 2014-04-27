@@ -37,6 +37,10 @@ namespace NUnit.VisualStudio.TestAdapter
         public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
             TestLog.Initialize(frameworkHandle);
+            if (RegistryFailure)
+            {
+                TestLog.SendErrorMessage(ErrorMsg);
+            }
             Info("executing tests", "started");
 
             try
@@ -64,7 +68,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             catch (Exception ex)
             {
-                TestLog.SendErrorMessage("Exception " + ex);
+                TestLog.SendErrorMessage("Exception thrown executing tests", ex);
             }
             finally
             {
@@ -86,6 +90,10 @@ namespace NUnit.VisualStudio.TestAdapter
 #endif
 
             TestLog.Initialize(frameworkHandle);
+            if (RegistryFailure)
+            {
+                TestLog.SendErrorMessage(ErrorMsg);
+            }
             var enableShutdown = (UseVsKeepEngineRunning) ? !runContext.KeepAlive : true;
             frameworkHandle.EnableShutdownAfterTestRun = enableShutdown;
             Debug("executing tests", "EnableShutdown set to " +enableShutdown);

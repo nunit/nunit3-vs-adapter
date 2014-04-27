@@ -2,6 +2,7 @@
 // Copyright (c) 2011 NUnit Software. All rights reserved.
 // ****************************************************************
 
+using System;
 using System.Reflection;
 using System.Runtime.Remoting.Channels;
 using NUnit.Util;
@@ -15,13 +16,21 @@ namespace NUnit.VisualStudio.TestAdapter
     public abstract class NUnitTestAdapter
     {
         // Our logger used to display messages
-        protected TestLogger TestLog = new TestLogger();
-
+        protected TestLogger TestLog;
         // The adapter version
         private readonly string adapterVersion;
 
-        RegistryCurrentUser Registry { get; set; }
         protected bool UseVsKeepEngineRunning { get; private set; }
+        protected bool UseShallowCopy { get; private set; }
+
+        protected int Verbosity { get; private set; }
+
+
+        protected bool RegistryFailure { get; set; }
+        protected string ErrorMsg
+        {
+            get; set;
+        }
 
         #region Constructor
 
@@ -35,10 +44,23 @@ namespace NUnit.VisualStudio.TestAdapter
             ServiceManager.Services.AddService(new ProjectService());
 
             ServiceManager.Services.InitializeServices();
-
+            Verbosity = 0;
+            RegistryFailure = false;
             adapterVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            Registry = RegistryCurrentUser.CreateRegistryCurrentUser(@"Software\nunit.org\VSAdapter");
-            UseVsKeepEngineRunning = Registry.Exist && (Registry.Read<int>("UseVsKeepEngineRunning")==1);
+            try
+            {
+                var registry = RegistryCurrentUser.OpenRegistryCurrentUser(@"Software\nunit.org\VSAdapter");
+                UseVsKeepEngineRunning = registry.Exist && (registry.Read<int>("UseVsKeepEngineRunning") == 1);
+                UseShallowCopy = registry.Exist && (registry.Read<int>("UseShallowCopy") == 1);
+                Verbosity = (registry.Exist) ? registry.Read<int>("Verbosity") : 0;
+            }
+            catch (Exception e)
+            {
+                RegistryFailure = true;
+                ErrorMsg = e.ToString();
+            }
+
+            TestLog = new TestLogger(Verbosity);
         }
 
         #endregion

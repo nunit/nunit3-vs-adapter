@@ -20,12 +20,16 @@ namespace NUnit.VisualStudio.TestAdapter
     [DefaultExecutorUri(NUnitTestExecutor.ExecutorUri)]
     public sealed class NUnitTestDiscoverer : NUnitTestAdapter, ITestDiscoverer
     {
-        
+
         #region ITestDiscoverer Members
 
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger messageLogger, ITestCaseDiscoverySink discoverySink)
         {
             TestLog.Initialize(messageLogger);
+            if (RegistryFailure)
+            {
+                TestLog.SendErrorMessage(ErrorMsg);
+            }
             Info("discovering tests", "started");
 
             // Ensure any channels registered by other adapters are unregistered
@@ -37,16 +41,16 @@ namespace NUnit.VisualStudio.TestAdapter
 
                 TestRunner runner = new TestDomain();
                 TestPackage package = new TestPackage(sourceAssembly);
-                package.Settings["ShadowCopyFiles"] = false;
+                package.Settings["ShadowCopyFiles"] = UseShallowCopy;
                 TestConverter testConverter = null;
                 try
                 {
                     if (runner.Load(package))
                     {
-                        testConverter  = new TestConverter(TestLog, sourceAssembly);
+                        testConverter = new TestConverter(TestLog, sourceAssembly);
                         int cases = ProcessTestCases(runner.Test, discoverySink, testConverter);
                         TestLog.SendDebugMessage(string.Format("Discovered {0} test cases", cases));
-                        }
+                    }
                     else
                     {
                         TestLog.NUnitLoadError(sourceAssembly);
@@ -70,6 +74,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
                 catch (Exception ex)
                 {
+
                     TestLog.SendErrorMessage("Exception thrown discovering tests in " + sourceAssembly, ex);
                 }
                 finally

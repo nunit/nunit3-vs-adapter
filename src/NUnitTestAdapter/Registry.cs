@@ -25,6 +25,8 @@ namespace NUnit.VisualStudio.TestAdapter
             if (key == null)
                 return default(T);
             var o = key.GetValue(property);
+            if (o == null)
+                return default(T);
             return (T)o;
         }
 
@@ -54,7 +56,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private static RegistryCurrentUser currentUser;
 
-        public static RegistryCurrentUser CreateRegistryCurrentUser(string key)
+        public static RegistryCurrentUser OpenRegistryCurrentUser(string key)
         {
             return currentUser ?? (currentUser = new RegistryCurrentUser(key));
         }
