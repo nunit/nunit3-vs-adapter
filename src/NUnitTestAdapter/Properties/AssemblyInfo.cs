@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("NUnit Software")]
 [assembly: AssemblyProduct("NUnit.VisualStudio.TestAdapter")]
-[assembly: AssemblyCopyright("Copyright 2011-2013, NUnit Software")]
+[assembly: AssemblyCopyright("Copyright 2011-2014, NUnit Software")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: CLSCompliant(false)]
@@ -21,5 +21,5 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 [assembly: Guid("c0aad5e4-b486-49bc-b3e8-31e01be6fefe")]
-[assembly: AssemblyVersion("1.0.0.44")]
-[assembly: AssemblyFileVersion("1.0.0.44")]
+[assembly: AssemblyVersion("1.1.0.0")]
+[assembly: AssemblyFileVersion("1.1.0.0")]

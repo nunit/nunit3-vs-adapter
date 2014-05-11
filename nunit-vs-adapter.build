@@ -7,7 +7,7 @@
 
 
     <!-- Set version number for package -->
-    <property name="package.version" value="1.0"/>
+    <property name="package.version" value="1.1"/>
 
     <!-- Define package name, including version -->
     <property name="package.base.name" value="NUnitVisualStudioTestAdapter"/>
