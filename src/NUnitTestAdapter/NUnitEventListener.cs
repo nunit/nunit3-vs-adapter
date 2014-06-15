@@ -94,7 +94,8 @@ namespace NUnit.VisualStudio.TestAdapter
                     : 0;
             if (drop > 0)
                 message = message.Substring(0, length - drop);
-            this.testLog.SendMessage(TestMessageLevel.Informational, message);
+            if (!string.IsNullOrEmpty(message))
+                testLog.SendMessage(TestMessageLevel.Informational, message);
             string type="";
             // Consider adding this later, as an option.
             //switch (testOutput.Type)
