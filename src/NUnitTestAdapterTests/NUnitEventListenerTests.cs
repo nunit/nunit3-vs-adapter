@@ -13,6 +13,7 @@ using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
 using VSTestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
 using NUnitTestResult = NUnit.Core.TestResult;
+using System.Runtime.Remoting;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
@@ -23,7 +24,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         private static readonly string ThisCodeFile =
             Path.GetFullPath(@"..\..\NUnitEventListenerTests.cs");
 
-        private const int LineNumber = 28; // Must be number of the following line
+        private const int LineNumber = 29; // Must be number of the following line
 // ReSharper disable once UnusedMember.Local
         private void FakeTestMethod() { }
 
@@ -172,6 +173,23 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             new TestCaseData(Message + "\r\r", Message + "\r")
         };
 
+        #endregion
+
+        #region Listener Lifetime Tests
+        [Test]
+        public void Listener_LeaseLifetimeWillNotExpire()
+        {
+            testLog = new FakeFrameworkHandle();
+            testConverter = new TestConverter(new TestLogger(), ThisAssemblyPath);
+            MarshalByRefObject localInstance = (MarshalByRefObject)Activator.CreateInstance(typeof(NUnitEventListener), testLog, testConverter);
+
+            RemotingServices.Marshal(localInstance);
+
+            var lifetime = ((MarshalByRefObject)localInstance).GetLifetimeService();
+            
+            // A null lifetime (as opposed to an ILease) means the object has an infinite lifetime
+            Assert.IsNull(lifetime);
+        }
         #endregion
 
         #region Helper Methods
