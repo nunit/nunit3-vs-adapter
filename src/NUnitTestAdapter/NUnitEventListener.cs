@@ -8,9 +8,6 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.Core;
 using TestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
-// TODO: remove and sort
-using System.Runtime.Remoting.Lifetime;
-using System.Diagnostics;
 using System.Runtime.Remoting;
 
 namespace NUnit.VisualStudio.TestAdapter
