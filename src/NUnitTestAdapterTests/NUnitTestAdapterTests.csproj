@@ -38,7 +38,7 @@
   <ItemGroup>
     <Reference Include="Microsoft.VisualStudio.TestPlatform.ObjectModel">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(MSBuildProgramFiles32)Microsoft Visual Studio 12.0\Common7\IDE\CommonExtensions\Microsoft\TestWindow\Microsoft.VisualStudio.TestPlatform.ObjectModel.dll</HintPath>
+      <HintPath>$(MSBuildProgramFiles32)\Microsoft Visual Studio 12.0\Common7\IDE\CommonExtensions\Microsoft\TestWindow\Microsoft.VisualStudio.TestPlatform.ObjectModel.dll</HintPath>
     </Reference>
     <Reference Include="mock-assembly, Version=2.6.2.12296, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
