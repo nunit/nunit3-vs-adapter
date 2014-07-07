@@ -16,6 +16,7 @@ namespace NUnit.VisualStudio.TestAdapter
     using Core;
     using Core.Filters;
     using Util;
+    using System.Runtime.Remoting;
 
     /// <summary>
     /// The AssemblyRunner class executes tests in a single assembly
@@ -103,20 +104,21 @@ namespace NUnit.VisualStudio.TestAdapter
 #endif
                 if (TryLoadAssembly())
                 {
-                    var listener = new NUnitEventListener(testLog, TestConverter);
-
-                    try
+                    using (NUnitEventListener listener = new NUnitEventListener(testLog, TestConverter))
                     {
-                        runner.Run(listener, NUnitFilter, true, LoggingThreshold.Off);
-                    }
-                    catch (NullReferenceException)
-                    {
-                        // this happens during the run when CancelRun is called.
-                        logger.SendDebugMessage("Nullref caught");
-                    }
-                    finally
-                    {
-                        runner.Unload();
+                        try
+                        {
+                            runner.Run(listener, NUnitFilter, true, LoggingThreshold.Off);
+                        }
+                        catch (NullReferenceException)
+                        {
+                            // this happens during the run when CancelRun is called.
+                            logger.SendDebugMessage("Nullref caught");
+                        }
+                        finally
+                        {
+                            runner.Unload();
+                        }
                     }
                 }
                 else

@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.Core;
 using TestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using System.Runtime.Remoting;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -15,10 +16,19 @@ namespace NUnit.VisualStudio.TestAdapter
     /// NUnitEventListener implements the EventListener interface and
     /// translates each event into a message for the VS test platform.
     /// </summary>
-    public class NUnitEventListener : MarshalByRefObject, EventListener // Public for testing
+    public class NUnitEventListener : MarshalByRefObject, EventListener, IDisposable // Public for testing
     {
         private readonly ITestExecutionRecorder testLog;
         private readonly TestConverter testConverter;
+
+        public override object InitializeLifetimeService()
+        {
+            // Give the listener an infinite lease lifetime by returning null
+            // http://msdn.microsoft.com/en-us/magazine/cc300474.aspx#edupdate
+            // This also means RemotingServices.Disconnect() must be called to prevent memory leaks
+            // http://nbevans.wordpress.com/2011/04/17/memory-leaks-with-an-infinite-lifetime-instance-of-marshalbyrefobject/
+            return null;
+        }
 
         public NUnitEventListener(ITestExecutionRecorder testLog, TestConverter testConverter)
         {
@@ -69,7 +79,7 @@ namespace NUnit.VisualStudio.TestAdapter
             if (ourCase != null)
             {
                 this.testLog.RecordStart(ourCase);
-               // Output = testName.FullName + "\r";
+                // Output = testName.FullName + "\r";
             }
 
         }
@@ -120,5 +130,32 @@ namespace NUnit.VisualStudio.TestAdapter
         public void UnhandledException(Exception exception)
         {
         }
+
+        #region IDisposable
+        private bool disposed;
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    RemotingServices.Disconnect(this);
+                }
+            }
+            disposed = true;
+        }
+
+        ~NUnitEventListener()
+        {
+            Dispose(false);
+        }
+        #endregion
     }
 }
