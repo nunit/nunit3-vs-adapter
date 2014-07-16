@@ -3,6 +3,7 @@
 // ****************************************************************
 
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -58,7 +59,13 @@ namespace NUnit.VisualStudio.TestAdapter
                 
                 foreach (var source in sources)
                 {
-                    using (currentRunner = new AssemblyRunner(TestLog, source, tfsfilter))
+                    string sourceAssembly = source;
+
+                    if (!Path.IsPathRooted(sourceAssembly))
+                    {
+                        sourceAssembly = Path.Combine(Environment.CurrentDirectory, sourceAssembly);
+                    }
+                    using (currentRunner = new AssemblyRunner(TestLog, sourceAssembly, tfsfilter))
                     {
                         currentRunner.RunAssembly(frameworkHandle);
                     }
