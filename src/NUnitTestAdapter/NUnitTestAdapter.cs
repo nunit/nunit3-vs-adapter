@@ -50,9 +50,9 @@ namespace NUnit.VisualStudio.TestAdapter
             try
             {
                 var registry = RegistryCurrentUser.OpenRegistryCurrentUser(@"Software\nunit.org\VSAdapter");
-                UseVsKeepEngineRunning = registry.Exist && (registry.Read<int>("UseVsKeepEngineRunning") == 1);
-                UseShallowCopy = registry.Exist && (registry.Read<int>("UseShallowCopy") == 1);
-                Verbosity = (registry.Exist) ? registry.Read<int>("Verbosity") : 0;
+                UseVsKeepEngineRunning = registry.Exist("UseVsKeepEngineRunning") && (registry.Read<int>("UseVsKeepEngineRunning") == 1);
+                UseShallowCopy = registry.Exist("UseShallowCopy") && (registry.Read<int>("UseShallowCopy") == 1);
+                Verbosity = (registry.Exist("Verbosity")) ? registry.Read<int>("Verbosity") : 0;
             }
             catch (Exception e)
             {

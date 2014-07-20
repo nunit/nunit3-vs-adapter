@@ -10,46 +10,41 @@ namespace NUnit.VisualStudio.TestAdapter
     {
 
         private string SubKeyName { get; set; }
-        protected RegistryKey BaseKey { get; private set; }
+        protected string BaseKey { get; private set; }
 
-        protected RegistryBase(RegistryHive basekey, string subkeyname)
+        protected RegistryBase(string basekey, string subkeyname)
         {
-            
-            BaseKey = RegistryKey.OpenBaseKey(basekey, RegistryView.Default);
+
+            BaseKey = basekey; // RegistryKey.OpenBaseKey(basekey, RegistryView.Default);
             SubKeyName = subkeyname;
         }
 
         public T Read<T>(string property)
         {
-            var key = BaseKey.OpenSubKey(SubKeyName);
-            if (key == null)
+            var result = Registry.GetValue(BaseKey + SubKeyName, property, null);
+            if (result == null)
                 return default(T);
-            var o = key.GetValue(property);
-            if (o == null)
-                return default(T);
-            return (T)o;
+            var value = (T)result;
+            return value;
         }
 
-        public bool Exist
+        public bool Exist(string property)
         {
-            get
-            {
-                return BaseKey.OpenSubKey(SubKeyName) != null;
-            }
+            var value = Registry.GetValue(BaseKey + SubKeyName, property,null);
+            return value != null;
+
         }
 
         public void Write<T>(string property, T val)
         {
-            var key = BaseKey.OpenSubKey(SubKeyName, true) ?? BaseKey.CreateSubKey(SubKeyName);
-            key.SetValue(property, val);
-            key.Close();
+            Registry.SetValue(BaseKey+SubKeyName,property, val);
         }
     }
 
     public class RegistryCurrentUser : RegistryBase
     {
         public RegistryCurrentUser(string subkeyname)
-            : base(RegistryHive.CurrentUser, subkeyname)
+            : base(@"HKEY_CURRENT_USER\", subkeyname)
         {
 
         }
