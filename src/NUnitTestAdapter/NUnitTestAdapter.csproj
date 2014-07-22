@@ -52,6 +52,7 @@
     <Reference Include="Microsoft.VisualStudio.TestPlatform.ObjectModel">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(MSBuildProgramFiles32)\Microsoft Visual Studio 12.0\Common7\IDE\CommonExtensions\Microsoft\TestWindow\Microsoft.VisualStudio.TestPlatform.ObjectModel.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="nunit.core">
       <SpecificVersion>False</SpecificVersion>
