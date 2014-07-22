@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
+    [Explicit]
     [TestFixture]
     [Category("LongRunning")]
     class IssueNo24Tests

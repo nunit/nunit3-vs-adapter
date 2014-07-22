@@ -54,7 +54,8 @@ namespace NUnit.VisualStudio.TestAdapter
                 var enableShutdown = (UseVsKeepEngineRunning) ? !runContext.KeepAlive : true;
                 if (!tfsfilter.HasTfsFilterValue)
                 {
-                    frameworkHandle.EnableShutdownAfterTestRun = enableShutdown;
+                    if (!(enableShutdown && !runContext.KeepAlive))  // Otherwise causes exception when run as commandline, illegal to enableshutdown when Keepalive is false, might be only VS2012
+                        frameworkHandle.EnableShutdownAfterTestRun = enableShutdown;
                 }
                 
                 foreach (var source in sources)
