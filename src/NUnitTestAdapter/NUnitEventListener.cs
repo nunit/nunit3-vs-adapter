@@ -104,8 +104,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     : 0;
             if (drop > 0)
                 message = message.Substring(0, length - drop);
-            message = message.Trim();
-            if (!string.IsNullOrEmpty(message))
+            if (!string.IsNullOrEmpty(message.Trim()))
                 testLog.SendMessage(TestMessageLevel.Informational, message);
             string type="";
             // Consider adding this later, as an option.
