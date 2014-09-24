@@ -21,7 +21,7 @@ namespace NUnit.VisualStudio.TestAdapter
         private readonly string adapterVersion;
 
         protected bool UseVsKeepEngineRunning { get; private set; }
-        protected bool UseShallowCopy { get; private set; }
+        protected bool ShadowCopy { get; private set; }
 
         protected int Verbosity { get; private set; }
 
@@ -51,7 +51,7 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 var registry = RegistryCurrentUser.OpenRegistryCurrentUser(@"Software\nunit.org\VSAdapter");
                 UseVsKeepEngineRunning = registry.Exist("UseVsKeepEngineRunning") && (registry.Read<int>("UseVsKeepEngineRunning") == 1);
-                UseShallowCopy = registry.Exist("UseShallowCopy") && (registry.Read<int>("UseShallowCopy") == 1);
+                ShadowCopy = registry.Exist("ShadowCopy") && (registry.Read<int>("ShadowCopy") == 1);
                 Verbosity = (registry.Exist("Verbosity")) ? registry.Read<int>("Verbosity") : 0;
             }
             catch (Exception e)

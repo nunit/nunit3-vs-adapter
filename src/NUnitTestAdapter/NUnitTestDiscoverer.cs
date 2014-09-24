@@ -41,7 +41,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
                 TestRunner runner = new TestDomain();
                 TestPackage package = new TestPackage(sourceAssembly);
-                package.Settings["ShadowCopyFiles"] = UseShallowCopy;
+                package.Settings["ShadowCopyFiles"] = ShadowCopy;
                 TestConverter testConverter = null;
                 try
                 {
