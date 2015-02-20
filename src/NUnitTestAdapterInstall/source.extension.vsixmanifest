@@ -28,7 +28,7 @@
         <Edition>Pro</Edition>
       </VisualStudio>
     </SupportedProducts>
-    <SupportedFrameworkRuntimeEdition MinVersion="4.5" MaxVersion="4.5" />
+    <SupportedFrameworkRuntimeEdition MinVersion="4.5" />
     <AllUsers>false</AllUsers>
   </Identifier>
   <References />
