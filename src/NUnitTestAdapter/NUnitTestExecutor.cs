@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using NUnit.Core;
+//using NUnit.Core;
 // #define LAUNCHDEBUGGER
 
 namespace NUnit.VisualStudio.TestAdapter
@@ -23,7 +23,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public const string ExecutorUri = "executor://NUnitTestExecutor";
 
         // The currently executing assembly runner
-        private AssemblyRunner currentRunner;
+        //private AssemblyRunner currentRunner;
 
         #region ITestExecutor
 
@@ -49,14 +49,14 @@ namespace NUnit.VisualStudio.TestAdapter
                 // Ensure any channels registered by other adapters are unregistered
                 CleanUpRegisteredChannels();
 
-                var tfsfilter = new TfsTestFilter(runContext);
-                TestLog.SendDebugMessage("Keepalive:" + runContext.KeepAlive);
-                var enableShutdown = (UseVsKeepEngineRunning) ? !runContext.KeepAlive : true;
-                if (!tfsfilter.HasTfsFilterValue)
-                {
-                    if (!(enableShutdown && !runContext.KeepAlive))  // Otherwise causes exception when run as commandline, illegal to enableshutdown when Keepalive is false, might be only VS2012
-                        frameworkHandle.EnableShutdownAfterTestRun = enableShutdown;
-                }
+                //var tfsfilter = new TfsTestFilter(runContext);
+                //TestLog.SendDebugMessage("Keepalive:" + runContext.KeepAlive);
+                //var enableShutdown = (UseVsKeepEngineRunning) ? !runContext.KeepAlive : true;
+                //if (!tfsfilter.HasTfsFilterValue)
+                //{
+                //    if (!(enableShutdown && !runContext.KeepAlive))  // Otherwise causes exception when run as commandline, illegal to enableshutdown when Keepalive is false, might be only VS2012
+                //        frameworkHandle.EnableShutdownAfterTestRun = enableShutdown;
+                //}
                 
                 foreach (var source in sources)
                 {
@@ -66,12 +66,15 @@ namespace NUnit.VisualStudio.TestAdapter
                     {
                         sourceAssembly = Path.Combine(Environment.CurrentDirectory, sourceAssembly);
                     }
-                    using (currentRunner = new AssemblyRunner(TestLog, sourceAssembly, tfsfilter))
-                    {
-                        currentRunner.RunAssembly(frameworkHandle);
-                    }
 
-                    currentRunner = null;
+                    TestLog.SendInformationalMessage("Running all tests in " + sourceAssembly);
+
+                    //using (currentRunner = new AssemblyRunner(TestLog, sourceAssembly, tfsfilter))
+                    //{
+                    //    currentRunner.RunAssembly(frameworkHandle);
+                    //}
+
+                    //currentRunner = null;
                 }
             }
             catch (Exception ex)
@@ -113,12 +116,14 @@ namespace NUnit.VisualStudio.TestAdapter
             var assemblyGroups = tests.GroupBy(tc => tc.Source);
             foreach (var assemblyGroup in assemblyGroups)
             {
-                using (currentRunner = new AssemblyRunner(TestLog, assemblyGroup.Key, assemblyGroup))
-                {
-                    currentRunner.RunAssembly(frameworkHandle);
-                }
+                TestLog.SendInformationalMessage("Running selected tests in " + assemblyGroup.Key);
 
-                currentRunner = null;
+            //    using (currentRunner = new AssemblyRunner(TestLog, assemblyGroup.Key, assemblyGroup))
+            //    {
+            //        currentRunner.RunAssembly(frameworkHandle);
+            //    }
+
+            //    currentRunner = null;
             }
 
             Info("executing tests", "finished");
@@ -127,8 +132,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
         void ITestExecutor.Cancel()
         {
-            if (currentRunner != null)
-                currentRunner.CancelRun();
+            //if (currentRunner != null)
+            //    currentRunner.CancelRun();
         }
 
         #endregion
@@ -140,14 +145,14 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                if (currentRunner != null)
-                {
-                    currentRunner.Dispose();
-                }
-            }
-            currentRunner = null;
+            //if (disposing)
+            //{
+            //    if (currentRunner != null)
+            //    {
+            //        currentRunner.Dispose();
+            //    }
+            //}
+            //currentRunner = null;
         }
     }
 }

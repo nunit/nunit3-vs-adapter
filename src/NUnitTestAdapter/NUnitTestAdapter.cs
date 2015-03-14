@@ -5,7 +5,7 @@
 using System;
 using System.Reflection;
 using System.Runtime.Remoting.Channels;
-using NUnit.Util;
+//using NUnit.Util;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -40,10 +40,10 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         protected NUnitTestAdapter()
         {
-            ServiceManager.Services.AddService(new DomainManager());
-            ServiceManager.Services.AddService(new ProjectService());
+            //ServiceManager.Services.AddService(new DomainManager());
+            //ServiceManager.Services.AddService(new ProjectService());
 
-            ServiceManager.Services.InitializeServices();
+            //ServiceManager.Services.InitializeServices();
             Verbosity = 0;
             RegistryFailure = false;
             adapterVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
@@ -69,14 +69,14 @@ namespace NUnit.VisualStudio.TestAdapter
 
         protected void Info(string method, string function)
         {
-            var msg = string.Format("NUnit {0} {1} is {2}", adapterVersion, method, function);
+            var msg = string.Format("NUnit Adapter {0} {1} is {2}", adapterVersion, method, function);
             TestLog.SendInformationalMessage(msg);
         }
 
         protected void Debug(string method, string function)
         {
 #if DEBUG
-            var msg = string.Format("NUnit {0} {1} is {2}", adapterVersion, method, function);
+            var msg = string.Format("NUnit Adapter {0} {1} is {2}", adapterVersion, method, function);
             TestLog.SendDebugMessage(msg);
 #endif
         }
