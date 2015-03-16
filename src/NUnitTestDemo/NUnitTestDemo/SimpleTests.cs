@@ -21,12 +21,6 @@ namespace NUnitTestDemo
             Assert.Pass("Simple arithmetic!");
         }
 
-        [Test, ExpectedException(typeof(ApplicationException))]
-        public void TestSucceeds_ExpectedException()
-        {
-            throw new ApplicationException("Expected");
-        }
-
         [Test]
         public void TestFails()
         {
@@ -60,6 +54,32 @@ namespace NUnitTestDemo
         public void TestThrowsException()
         {
             throw new Exception("Deliberate exception thrown");
+        }
+
+        [Test]
+        [Property("Priority", "High")]
+        public void TestWithProperty()
+        {
+        }
+
+        [Test]
+        [Property("Priority", "Low")]
+        [Property("Action", "Ignore")]
+        public void TestWithTwoProperties()
+        {
+        }
+
+        [Test]
+        [Category("Slow")]
+        public void TestWithCategory()
+        {
+        }
+
+        [Test]
+        [Category("Slow")]
+        [Category("Data")]
+        public void TestWithTwoCategories()
+        {
         }
     }
 }

@@ -15,18 +15,12 @@ namespace NUnitTestDemo
             Assert.That(a + b, Is.EqualTo(sum));
         }
 
-        [TestCase(2, 2, Result = 4)]
-        [TestCase(0, 5, Result = 5)]
-        [TestCase(31, 11, Result = 42)]
+        [TestCase(2, 2, ExpectedResult = 4)]
+        [TestCase(0, 5, ExpectedResult = 5)]
+        [TestCase(31, 11, ExpectedResult = 42)]
         public int TestCaseSucceeds_Result(int a, int b)
         {
             return a + b;
-        }
-
-        [TestCase(31, 11, ExpectedException=typeof(Exception))]
-        public void TestCaseSucceeds_ExpectedException(int a, int b)
-        {
-            throw new Exception("Expected");
         }
 
         [TestCase(31, 11, 99)]
@@ -35,7 +29,7 @@ namespace NUnitTestDemo
             Assert.That(a + b, Is.EqualTo(sum));
         }
 
-        [TestCase(31, 11, Result = 99)]
+        [TestCase(31, 11, ExpectedResult = 99)]
         public int TestCaseFails_Result(int a, int b)
         {
             return a + b;
@@ -53,7 +47,7 @@ namespace NUnitTestDemo
         {
         }
 
-        [TestCase(31, 11, Ignore = true, Reason = "Ignoring this")]
+        [TestCase(31, 11, Ignore = "Ignoring this")]
         public void TestCaseIsIgnored_Property(int a, int b)
         {
         }

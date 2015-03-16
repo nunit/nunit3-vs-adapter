@@ -56,16 +56,29 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NUnit\AssemblyHelper.cs" />
+    <Compile Include="NUnit\CallbackHandler.cs" />
+    <Compile Include="NUnit\IFrameworkDriver.cs" />
     <Compile Include="Internal\AsyncMethodHelper.cs" />
     <Compile Include="Internal\Stackframe.cs" />
     <Compile Include="Internal\StackframeParser.cs" />
     <Compile Include="Internal\Stacktrace.cs" />
+    <Compile Include="NUnit\ITestEventListener.cs" />
+    <Compile Include="NUnit\NUnit3FrameworkDriver.cs" />
     <Compile Include="NUnitTestAdapter.cs" />
     <Compile Include="NUnitTestDiscoverer.cs" />
     <Compile Include="NUnitTestExecutor.cs" />
+    <Compile Include="NUnit\RunTestsCallbackHandler.cs" />
+    <Compile Include="NUnit\TestFilter.cs" />
+    <Compile Include="TestConverter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TraitsFeature.cs" />
+    <Compile Include="XmlHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Registry.cs" />
     <Compile Include="StackTraceFilter.cs" />

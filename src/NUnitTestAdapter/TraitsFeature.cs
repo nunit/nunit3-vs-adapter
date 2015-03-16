@@ -1,13 +1,13 @@
 ﻿// ****************************************************************
-// Copyright (c) 2013 NUnit Software. All rights reserved.
+// Copyright (c) 2013-2015 NUnit Software. All rights reserved.
 // ****************************************************************
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using NUnit.Core;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -49,29 +49,23 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
-        public static void AddTraitsFromNUnitTest(this TestCase testCase, ITest nunitTest)
+        public static void AddTraitsFromTestNode(this TestCase testCase, XmlNode testNode)
         {
             if (IsSupported)
-                AddTraitsFromNUnitTest(nunitTest, TraitsProperty.GetValue(testCase, new object[0]));
+                AddTraitsFromTestNode(testNode, TraitsProperty.GetValue(testCase, new object[0]));
         }
 
-        private static void AddTraitsFromNUnitTest(ITest test, object traitsCollection)
+        private static void AddTraitsFromTestNode(XmlNode test, object traitsCollection)
         {
-            if (test.Parent != null)
-                AddTraitsFromNUnitTest(test.Parent, traitsCollection);
+            if (test.ParentNode != null)
+                AddTraitsFromTestNode(test.ParentNode, traitsCollection);
 
-            foreach (string propertyName in test.Properties.Keys)
+            foreach (XmlNode propertyNode in test.SelectNodes("properties/property"))
             {
-                object propertyValue = test.Properties[propertyName];
+                string propertyName = propertyNode.GetAttribute("name");
+                object propertyValue = propertyNode.GetAttribute("value");
 
-                if (propertyName == "_CATEGORIES")
-                {
-                    var categories = propertyValue as System.Collections.IEnumerable;
-                    if (categories != null)
-                        foreach (string category in categories)
-                            TraitsCollectionAdd.Invoke(traitsCollection, new object[] { "Category", category });
-                }
-                else if (propertyName[0] != '_') // internal use only
+                if (propertyName[0] != '_') // internal use only
                     TraitsCollectionAdd.Invoke(traitsCollection, new object[] { propertyName, propertyValue.ToString() });
             }
         }

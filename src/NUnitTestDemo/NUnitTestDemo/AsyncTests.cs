@@ -31,12 +31,6 @@ namespace NUnitTestDemo
 			Assert.Fail("Should never get here");
 		}
 
-		[Test, ExpectedException(typeof(InvalidOperationException))]
-		public async void AsyncVoidTestSucceeds_ExpectedException()
-		{
-			await ThrowException();
-		}
-
 		[Test]
 		public async Task AsyncTaskTestSucceeds()
 		{
@@ -61,25 +55,19 @@ namespace NUnitTestDemo
 			Assert.Fail("Should never get here");
 		}
 
-		[Test, ExpectedException(typeof(InvalidOperationException))]
-		public async Task AsyncTaskTestSucceeds_ExpectedException()
-		{
-			await ThrowException();
-		}
-
-		[TestCase(Result = 1)]
+		[TestCase(ExpectedResult = 1)]
 		public async Task<int> AsyncTaskWithResultSucceeds()
 		{
 			return await ReturnOne();
 		}
 
-		[TestCase(Result = 2)]
+		[TestCase(ExpectedResult = 2)]
 		public async Task<int> AsyncTaskWithResultFails()
 		{
 			return await ReturnOne();
 		}
 
-		[TestCase(Result = 0)]
+        [TestCase(ExpectedResult = 0)]
 		public async Task<int> AsyncTaskWithResultThrowsException()
 		{
 			return await ThrowException();

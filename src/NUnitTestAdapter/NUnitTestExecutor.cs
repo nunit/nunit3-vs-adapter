@@ -1,5 +1,5 @@
 ﻿// ****************************************************************
-// Copyright (c) 2011 NUnit Software. All rights reserved.
+// Copyright (c) 2011-2015 NUnit Software. All rights reserved.
 // ****************************************************************
 
 using System;
@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-//using NUnit.Core;
 // #define LAUNCHDEBUGGER
 
 namespace NUnit.VisualStudio.TestAdapter

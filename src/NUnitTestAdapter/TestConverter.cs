@@ -1,5 +1,5 @@
 // ****************************************************************
-// Copyright (c) 2011-2013 NUnit Software. All rights reserved.
+// Copyright (c) 2011-2015 NUnit Software. All rights reserved.
 // ****************************************************************
 
 using System;
@@ -7,10 +7,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using NUnit.Core;
+using NUnit.Engine.Internal;
 using NUnit.VisualStudio.TestAdapter.Internal;
-using NUnitTestResult = NUnit.Core.TestResult;
 using VSTestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
 
 namespace NUnit.VisualStudio.TestAdapter
@@ -40,64 +40,65 @@ namespace NUnit.VisualStudio.TestAdapter
         /// using the best method available according to the exact
         /// type passed and caching results for efficiency.
         /// </summary>
-        public TestCase ConvertTestCase(ITest test)
+        public TestCase ConvertTestCase(XmlNode testNode)
         {
-            if (test.IsSuite)
+            if (testNode.Name != "test-case")
                 throw new ArgumentException("The argument must be a test case", "test");
 
             // Return cached value if we have one
-            if (vsTestCaseMap.ContainsKey(test.TestName.UniqueName))
-                return vsTestCaseMap[test.TestName.UniqueName];
+            string id = testNode.GetAttribute("id");
+            if (vsTestCaseMap.ContainsKey(id))
+                return vsTestCaseMap[id];
            
             // Convert to VS TestCase and cache the result
-            var testCase = MakeTestCaseFromNUnitTest(test);
-            vsTestCaseMap.Add(test.TestName.UniqueName, testCase);
+            var testCase = MakeTestCaseFromXmlNode(testNode);
+            vsTestCaseMap.Add(id, testCase);
             return testCase;             
         }
 
-        public TestCase GetCachedTestCase(string key)
+        public TestCase GetCachedTestCase(string id)
         {
-            if (vsTestCaseMap.ContainsKey(key))
-                return vsTestCaseMap[key];
+            if (vsTestCaseMap.ContainsKey(id))
+                return vsTestCaseMap[id];
 
-            logger.SendErrorMessage("Test " + key + " not found in cache");
+            logger.SendErrorMessage("Test " + id + " not found in cache");
             return null;
         }
 
-        public VSTestResult ConvertTestResult(NUnitTestResult result)
-        {
-            TestCase ourCase = GetCachedTestCase(result.Test.TestName.UniqueName);
-            if (ourCase == null) return null;
+        //public VSTestResult ConvertTestResult(NUnitTestResult result)
+        //{
+        //    TestCase ourCase = GetCachedTestCase(result.Test.TestName.UniqueName);
+        //    if (ourCase == null) return null;
 
-            VSTestResult ourResult = new VSTestResult(ourCase)
-                {
-                    DisplayName = ourCase.DisplayName,
-                    Outcome = ResultStateToTestOutcome(result.ResultState),
-                    Duration = TimeSpan.FromSeconds(result.Time)
-                };
+        //    VSTestResult ourResult = new VSTestResult(ourCase)
+        //        {
+        //            DisplayName = ourCase.DisplayName,
+        //            Outcome = ResultStateToTestOutcome(result.ResultState),
+        //            Duration = TimeSpan.FromSeconds(result.Time)
+        //        };
 
-            // TODO: Remove this when NUnit provides a better duration
-            if (ourResult.Duration == TimeSpan.Zero && (ourResult.Outcome == TestOutcome.Passed || ourResult.Outcome == TestOutcome.Failed))
-                ourResult.Duration = TimeSpan.FromTicks(1);
-            ourResult.ComputerName = Environment.MachineName;
+        //    // TODO: Remove this when NUnit provides a better duration
+        //    if (ourResult.Duration == TimeSpan.Zero && (ourResult.Outcome == TestOutcome.Passed || ourResult.Outcome == TestOutcome.Failed))
+        //        ourResult.Duration = TimeSpan.FromTicks(1);
+        //    ourResult.ComputerName = Environment.MachineName;
 
-            // TODO: Stuff we don't yet set
-            //   StartTime   - not in NUnit result
-            //   EndTime     - not in NUnit result
-            //   Messages    - could we add messages other than the error message? Where would they appear?
-            //   Attachments - don't exist in NUnit
+        //    // TODO: Stuff we don't yet set
+        //    //   StartTime   - not in NUnit result
+        //    //   EndTime     - not in NUnit result
+        //    //   Messages    - could we add messages other than the error message? Where would they appear?
+        //    //   Attachments - don't exist in NUnit
 
-            if (result.Message != null)
-                ourResult.ErrorMessage = GetErrorMessage(result);
+        //    if (result.Message != null)
+        //        ourResult.ErrorMessage = GetErrorMessage(result);
 
-            if (!string.IsNullOrEmpty(result.StackTrace))
-            {
-                string stackTrace = StackTraceFilter.Filter(result.StackTrace);
-                ourResult.ErrorStackTrace = stackTrace;
-            }
+        //    if (!string.IsNullOrEmpty(result.StackTrace))
+        //    {
+        //        string stackTrace = StackTraceFilter.Filter(result.StackTrace);
+        //        ourResult.ErrorStackTrace = stackTrace;
+        //    }
 
-            return ourResult;
-        }
+        //    return ourResult;
+        //}
 
         public void Dispose()
         {
@@ -124,29 +125,60 @@ namespace NUnit.VisualStudio.TestAdapter
         /// Makes a TestCase from an NUnit test, adding
         /// navigation data if it can be found.
         /// </summary>
-        private TestCase MakeTestCaseFromNUnitTest(ITest nunitTest)
+        private TestCase MakeTestCaseFromXmlNode(XmlNode testNode)
         {
-            //var testCase = MakeTestCaseFromTestName(nunitTest.TestName);
             var testCase = new TestCase(
-                                     nunitTest.TestName.FullName,
+                                     testNode.GetAttribute("fullname"),
                                      new Uri(NUnitTestExecutor.ExecutorUri),
                                      this.sourceAssembly)
             {
-                DisplayName = nunitTest.TestName.Name,
+                DisplayName = testNode.GetAttribute("name"),
                 CodeFilePath = null,
                 LineNumber = 0
             };
 
-            var navData = GetNavigationData(nunitTest.ClassName, nunitTest.MethodName);
+            var navData = GetNavigationData(GetClassName(testNode), GetMethodName(testNode));
             if (navData != null)
             {
                 testCase.CodeFilePath = navData.FileName;
                 testCase.LineNumber = navData.MinLineNumber;
             }
 
-            testCase.AddTraitsFromNUnitTest(nunitTest);
+            testCase.AddTraitsFromTestNode(testNode);
 
             return testCase;
+        }
+
+        private static string GetClassName(XmlNode node)
+        {
+            var className = node.GetAttribute("fullname");
+            var name = node.GetAttribute("name");
+
+            if (className.Length > name.Length + 1 && className.EndsWith(name))
+                className = className.Substring(0, className.Length - name.Length - 1);
+
+            if (className.EndsWith(">"))
+            {
+                var lbrack = className.IndexOf('<');
+                if (lbrack > 0)
+                    className = className.Substring(0, lbrack) + "`1"; // TODO: Actually count args
+            }
+
+            return className;
+        }
+
+        private static string GetMethodName(XmlNode node)
+        {
+            var methodName = node.GetAttribute("name");
+
+            if (methodName.EndsWith(")"))
+            {
+                var lpar = methodName.IndexOf('(');
+                if (lpar > 0)
+                    methodName = methodName.Substring(0, lpar);
+            }
+
+            return methodName;
         }
 
         // public for testing
@@ -158,7 +190,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             if (navData != null && navData.FileName != null) return navData;
 
-            // DiaSession returned null, see if it's an async method. 
+            // DiaSession.GetNavigationData returned null, see if it's an async method. 
             if (AsyncMethodHelper != null)
             {
                 string stateMachineClassName = AsyncMethodHelper.GetClassNameForAsyncMethod(className, methodName);
@@ -173,51 +205,51 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         // Public for testing
-        public static TestOutcome ResultStateToTestOutcome(ResultState resultState)
-        {
-            switch (resultState)
-            {
-                case ResultState.Cancelled:
-                    return TestOutcome.None;
-                case ResultState.Error:
-                    return TestOutcome.Failed;
-                case ResultState.Failure:
-                    return TestOutcome.Failed;
-                case ResultState.Ignored:
-                    return TestOutcome.Skipped;
-                case ResultState.Inconclusive:
-                    return TestOutcome.None;
-                case ResultState.NotRunnable:
-                    return TestOutcome.Failed;
-                case ResultState.Skipped:
-                    return TestOutcome.Skipped;
-                case ResultState.Success:
-                    return TestOutcome.Passed;
-            }
+        //public static TestOutcome ResultStateToTestOutcome(ResultState resultState)
+        //{
+        //    switch (resultState)
+        //    {
+        //        case ResultState.Cancelled:
+        //            return TestOutcome.None;
+        //        case ResultState.Error:
+        //            return TestOutcome.Failed;
+        //        case ResultState.Failure:
+        //            return TestOutcome.Failed;
+        //        case ResultState.Ignored:
+        //            return TestOutcome.Skipped;
+        //        case ResultState.Inconclusive:
+        //            return TestOutcome.None;
+        //        case ResultState.NotRunnable:
+        //            return TestOutcome.Failed;
+        //        case ResultState.Skipped:
+        //            return TestOutcome.Skipped;
+        //        case ResultState.Success:
+        //            return TestOutcome.Passed;
+        //    }
 
-            return TestOutcome.None;
-        }
+        //    return TestOutcome.None;
+        //}
 
-        private string GetErrorMessage(NUnitTestResult result)
-        {
-            string message = result.Message;
-            string NL = Environment.NewLine;
+        //private string GetErrorMessage(NUnitTestResult result)
+        //{
+        //    string message = result.Message;
+        //    string NL = Environment.NewLine;
 
-            // If we're running in the IDE, remove any caret line from the message
-            // since it will be displayed using a variable font and won't make sense.
-            if (message != null && RunningUnderIDE && (result.ResultState == ResultState.Failure || result.ResultState == ResultState.Inconclusive))
-            {
-                string pattern = NL + "  -*\\^" + NL;
-                message = Regex.Replace(message, pattern, NL, RegexOptions.Multiline);
-            }
+        //    // If we're running in the IDE, remove any caret line from the message
+        //    // since it will be displayed using a variable font and won't make sense.
+        //    if (message != null && RunningUnderIDE && (result.ResultState == ResultState.Failure || result.ResultState == ResultState.Inconclusive))
+        //    {
+        //        string pattern = NL + "  -*\\^" + NL;
+        //        message = Regex.Replace(message, pattern, NL, RegexOptions.Multiline);
+        //    }
 
-            return message;
-        }
+        //    return message;
+        //}
 
         private AsyncMethodHelper TryCreateHelper(string sourceAssembly)
         {
             var setup = new AppDomainSetup();
-            
+
             var thisAssembly = Assembly.GetExecutingAssembly();
             setup.ApplicationBase = AssemblyHelper.GetDirectoryName(thisAssembly);
 
@@ -232,11 +264,11 @@ namespace NUnit.VisualStudio.TestAdapter
                 helper.LoadAssembly(sourceAssembly);
                 return helper as AsyncMethodHelper;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // If we can't load it for some reason, we issue a warning
                 // and won't try to do it again for the assembly.
-                logger.SendWarningMessage("Unable to reflect on " + sourceAssembly + "\r\nSource data will not be available for some of the tests",ex);
+                logger.SendWarningMessage("Unable to reflect on " + sourceAssembly + "\r\nSource data will not be available for some of the tests", ex);
                 return null;
             }
         }
@@ -246,21 +278,21 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region Private Properties
 
-        private string exeName;
-        private bool RunningUnderIDE
-        {
-            get
-            {
-                if (exeName == null)
-                {
-                    Assembly entryAssembly = Assembly.GetEntryAssembly();
-                    if (entryAssembly != null)
-                        exeName = Path.GetFileName(AssemblyHelper.GetAssemblyPath(entryAssembly));
-                }
+        //private string exeName;
+        //private bool RunningUnderIDE
+        //{
+        //    get
+        //    {
+        //        if (exeName == null)
+        //        {
+        //            Assembly entryAssembly = Assembly.GetEntryAssembly();
+        //            if (entryAssembly != null)
+        //                exeName = Path.GetFileName(AssemblyHelper.GetAssemblyPath(entryAssembly));
+        //        }
                 
-                return exeName == "vstest.executionengine.exe";
-            }
-        }
+        //        return exeName == "vstest.executionengine.exe";
+        //    }
+        //}
 
         // NOTE: There is some sort of timing issue involved
         // in creating the DiaSession. When it is created
@@ -279,11 +311,12 @@ namespace NUnit.VisualStudio.TestAdapter
                     {
                         diaSession = new DiaSession(sourceAssembly);
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
                         // If this isn't a project type supporting DiaSession,
                         // we just issue a warning. We won't try this again.
                         logger.SendWarningMessage("Unable to create DiaSession for " + sourceAssembly + "\r\nNo source location data will be available for this assembly.");
+                        logger.SendDebugMessage(ex.Message);
                     }
 
                     tryToCreateDiaSession = false;
