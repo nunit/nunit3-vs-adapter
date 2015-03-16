@@ -60,6 +60,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssemblyRunner.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="NUnitEventListener.cs" />
     <Compile Include="NUnit\AssemblyHelper.cs" />
     <Compile Include="NUnit\CallbackHandler.cs" />
     <Compile Include="NUnit\IFrameworkDriver.cs" />
@@ -74,7 +78,11 @@
     <Compile Include="NUnitTestExecutor.cs" />
     <Compile Include="NUnit\RunTestsCallbackHandler.cs" />
     <Compile Include="NUnit\TestFilter.cs" />
+    <Compile Include="TestFilterBuilder.cs" />
     <Compile Include="TestConverter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TFSTestFilter.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TraitsFeature.cs" />

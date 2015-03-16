@@ -1,32 +1,31 @@
 ﻿// ****************************************************************
-// Copyright (c) 2013 NUnit Software. All rights reserved.
+// Copyright (c) 2013-2015 NUnit Software. All rights reserved.
 // ****************************************************************
 
+//#define LAUNCHDEBUGGER
+
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Xml;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using NUnit.Engine;
+using NUnit.Engine.Drivers;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-    using System;
-    using System.Collections.Generic;
-
-    using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-    using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-
-    using Core;
-    using Core.Filters;
-    using Util;
-    using System.Runtime.Remoting;
-
     /// <summary>
     /// The AssemblyRunner class executes tests in a single assembly
     /// </summary>
     public class AssemblyRunner : IDisposable
     {
-        private readonly TestRunner runner = new TestDomain();
         private readonly TestLogger logger;
         private readonly string assemblyName;
 
+        private NUnit3FrameworkDriver driver;
         private TestFilter nunitFilter;
         private readonly List<TestCase> loadedTestCases;
         private readonly TestConverter testConverter;
@@ -59,14 +58,14 @@ namespace NUnit.VisualStudio.TestAdapter
             this.tfsFilter = tfsFilter;
         }
 
-        private static SimpleNameFilter MakeTestFilter(IEnumerable<TestCase> ptestCases)
+        private static TestFilter MakeTestFilter(IEnumerable<TestCase> ptestCases)
         {
-            var filter = new SimpleNameFilter();
+            var builder = new TestFilterBuilder();
             foreach (TestCase testCase in ptestCases)
             {
-                filter.Add(testCase.FullyQualifiedName);
+                builder.Tests.Add(testCase.FullyQualifiedName);
             }
-            return filter;
+            return builder.GetFilter();
         }
 
         #endregion
@@ -108,16 +107,12 @@ namespace NUnit.VisualStudio.TestAdapter
                     {
                         try
                         {
-                            runner.Run(listener, NUnitFilter, true, LoggingThreshold.Off);
+                            driver.Run(listener, NUnitFilter);
                         }
                         catch (NullReferenceException)
                         {
                             // this happens during the run when CancelRun is called.
                             logger.SendDebugMessage("Nullref caught");
-                        }
-                        finally
-                        {
-                            runner.Unload();
                         }
                     }
                 }
@@ -144,9 +139,9 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void CancelRun()
         {
-            if (runner != null && runner.Running)
-                runner.CancelRun();
-        }
+            if (driver != null)
+                driver.StopRun(true);
+       }
 
         // Try to load the assembly and, if successful, populate
         // the list of all loaded assemblies. As a side effect
@@ -155,30 +150,36 @@ namespace NUnit.VisualStudio.TestAdapter
         // future calls to convert a test case may now use the cache.
         private bool TryLoadAssembly()
         {
-            var package = new TestPackage(assemblyName);
-            package.Settings["ShadowCopyFiles"] = false;
-            logger.SendDebugMessage("ShadowCopyFiles is set to :" + package.Settings["ShadowCopyFiles"]);
-            if (!runner.Load(package))
+            driver = GetDriver(assemblyName);
+            XmlNode loadResult = XmlHelper.CreateXmlNode(driver.Load());
+            if (loadResult.GetAttribute("runstate") != "Runnable")
                 return false;
-            logger.SendMessage(TestMessageLevel.Informational,string.Format("Loading tests from {0}",package.FullName));
-            AddTestCases(runner.Test);
+
+            logger.SendMessage(TestMessageLevel.Informational,string.Format("Loading tests from {0}",assemblyName));
+            foreach (XmlNode testNode in XmlHelper.CreateXmlNode(driver.Explore(TestFilter.Empty)).SelectNodes("//test-case"))
+                LoadedTestCases.Add(TestConverter.ConvertTestCase(testNode));
+
             if (tfsFilter==null || !tfsFilter.HasTfsFilterValue) 
                 return true;
             var filteredTestCases = tfsFilter.CheckFilter(LoadedTestCases);
             var ptestCases = filteredTestCases as TestCase[] ?? filteredTestCases.ToArray();
             logger.SendMessage(TestMessageLevel.Informational, string.Format("TFS Filter detected: LoadedTestCases {0}, Filterered Test Cases {1}", LoadedTestCases.Count, ptestCases.Count()));
             nunitFilter = MakeTestFilter(ptestCases);
+
             return true;
         }
 
-        // This method is public for testing purposes.
-        // TODO: Test by actually loading an assembly and make it private
-        public void AddTestCases(ITest test)
+        private NUnit3FrameworkDriver GetDriver(string sourceAssembly)
         {
-            if (test.IsSuite)
-                foreach (ITest child in test.Tests) AddTestCases(child);
-            else
-                LoadedTestCases.Add(TestConverter.ConvertTestCase(test));
+            var setup = new AppDomainSetup();
+            setup.ApplicationBase = Path.GetDirectoryName(sourceAssembly);
+            var domain = AppDomain.CreateDomain("testDomain", null, setup);
+
+            var settings = new Dictionary<string, object>();
+            //settings["ShadowCopyFiles"] = ShadowCopy;
+
+            var driver = new NUnit3FrameworkDriver(domain, sourceAssembly, settings);
+            return driver;
         }
 
         #endregion

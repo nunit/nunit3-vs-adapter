@@ -65,40 +65,41 @@ namespace NUnit.VisualStudio.TestAdapter
             return null;
         }
 
-        //public VSTestResult ConvertTestResult(NUnitTestResult result)
-        //{
-        //    TestCase ourCase = GetCachedTestCase(result.Test.TestName.UniqueName);
-        //    if (ourCase == null) return null;
+        public VSTestResult ConvertTestResult(XmlNode resultNode)
+        {
+            TestCase ourCase = GetCachedTestCase(resultNode.GetAttribute("id"));
+            if (ourCase == null) return null;
 
-        //    VSTestResult ourResult = new VSTestResult(ourCase)
-        //        {
-        //            DisplayName = ourCase.DisplayName,
-        //            Outcome = ResultStateToTestOutcome(result.ResultState),
-        //            Duration = TimeSpan.FromSeconds(result.Time)
-        //        };
+            VSTestResult ourResult = new VSTestResult(ourCase)
+                {
+                    DisplayName = ourCase.DisplayName,
+                    Outcome = GetTestOutcome(resultNode),
+                    Duration = TimeSpan.FromSeconds(resultNode.GetAttribute("duration", 0.0))
+                };
 
-        //    // TODO: Remove this when NUnit provides a better duration
-        //    if (ourResult.Duration == TimeSpan.Zero && (ourResult.Outcome == TestOutcome.Passed || ourResult.Outcome == TestOutcome.Failed))
-        //        ourResult.Duration = TimeSpan.FromTicks(1);
-        //    ourResult.ComputerName = Environment.MachineName;
+            // TODO: Remove this when NUnit provides a better duration
+            if (ourResult.Duration == TimeSpan.Zero && (ourResult.Outcome == TestOutcome.Passed || ourResult.Outcome == TestOutcome.Failed))
+                ourResult.Duration = TimeSpan.FromTicks(1);
+            ourResult.ComputerName = Environment.MachineName;
 
-        //    // TODO: Stuff we don't yet set
-        //    //   StartTime   - not in NUnit result
-        //    //   EndTime     - not in NUnit result
-        //    //   Messages    - could we add messages other than the error message? Where would they appear?
-        //    //   Attachments - don't exist in NUnit
+            // TODO: Stuff we don't yet set
+            //   StartTime   - not in NUnit result
+            //   EndTime     - not in NUnit result
+            //   Messages    - could we add messages other than the error message? Where would they appear?
+            //   Attachments - don't exist in NUnit
 
-        //    if (result.Message != null)
-        //        ourResult.ErrorMessage = GetErrorMessage(result);
+            ourResult.ErrorMessage = GetErrorMessage(resultNode);
 
-        //    if (!string.IsNullOrEmpty(result.StackTrace))
-        //    {
-        //        string stackTrace = StackTraceFilter.Filter(result.StackTrace);
-        //        ourResult.ErrorStackTrace = stackTrace;
-        //    }
+            XmlNode stackTraceNode = resultNode.SelectSingleNode("failure/stack-trace");
+            if (stackTraceNode != null)
+                ourResult.ErrorStackTrace = stackTraceNode.InnerText;
 
-        //    return ourResult;
-        //}
+            XmlNode outputNode = resultNode.SelectSingleNode("output");
+            if (outputNode != null)
+                ourResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, outputNode.InnerText));
+
+            return ourResult;
+        }
 
         public void Dispose()
         {
@@ -205,46 +206,49 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         // Public for testing
-        //public static TestOutcome ResultStateToTestOutcome(ResultState resultState)
-        //{
-        //    switch (resultState)
-        //    {
-        //        case ResultState.Cancelled:
-        //            return TestOutcome.None;
-        //        case ResultState.Error:
-        //            return TestOutcome.Failed;
-        //        case ResultState.Failure:
-        //            return TestOutcome.Failed;
-        //        case ResultState.Ignored:
-        //            return TestOutcome.Skipped;
-        //        case ResultState.Inconclusive:
-        //            return TestOutcome.None;
-        //        case ResultState.NotRunnable:
-        //            return TestOutcome.Failed;
-        //        case ResultState.Skipped:
-        //            return TestOutcome.Skipped;
-        //        case ResultState.Success:
-        //            return TestOutcome.Passed;
-        //    }
+        public static TestOutcome GetTestOutcome(XmlNode resultNode)
+        {
+            switch (resultNode.GetAttribute("result"))
+            {
+                case "Passed":
+                    return TestOutcome.Passed;
+                case "Failed":
+                    return TestOutcome.Failed;
+                case "Skipped":
+                    return TestOutcome.Skipped;
+                default:
+                    return TestOutcome.None;
+            }
+        }
 
-        //    return TestOutcome.None;
-        //}
+        private static readonly string NL = Environment.NewLine;
 
-        //private string GetErrorMessage(NUnitTestResult result)
-        //{
-        //    string message = result.Message;
-        //    string NL = Environment.NewLine;
+        private string GetErrorMessage(XmlNode resultNode)
+        {
+            XmlNode messageNode = resultNode.SelectSingleNode("failure/message");
+            if (messageNode != null)
+            {
+                string message = messageNode.InnerText;
 
-        //    // If we're running in the IDE, remove any caret line from the message
-        //    // since it will be displayed using a variable font and won't make sense.
-        //    if (message != null && RunningUnderIDE && (result.ResultState == ResultState.Failure || result.ResultState == ResultState.Inconclusive))
-        //    {
-        //        string pattern = NL + "  -*\\^" + NL;
-        //        message = Regex.Replace(message, pattern, NL, RegexOptions.Multiline);
-        //    }
+                // If we're running in the IDE, remove any caret line from the message
+                // since it will be displayed using a variable font and won't make sense.
+                if (!string.IsNullOrEmpty(message) && RunningUnderIDE)
+                {
+                    string pattern = NL + "  -*\\^" + NL;
+                    message = Regex.Replace(message, pattern, NL, RegexOptions.Multiline);
+                }
 
-        //    return message;
-        //}
+                return message;
+            }
+            else
+            {
+                XmlNode reasonNode = resultNode.SelectSingleNode("reason/message");
+                if (reasonNode != null)
+                    return reasonNode.InnerText;
+            }
+
+            return null;
+        }
 
         private AsyncMethodHelper TryCreateHelper(string sourceAssembly)
         {
@@ -278,21 +282,21 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region Private Properties
 
-        //private string exeName;
-        //private bool RunningUnderIDE
-        //{
-        //    get
-        //    {
-        //        if (exeName == null)
-        //        {
-        //            Assembly entryAssembly = Assembly.GetEntryAssembly();
-        //            if (entryAssembly != null)
-        //                exeName = Path.GetFileName(AssemblyHelper.GetAssemblyPath(entryAssembly));
-        //        }
-                
-        //        return exeName == "vstest.executionengine.exe";
-        //    }
-        //}
+        private string exeName;
+        private bool RunningUnderIDE
+        {
+            get
+            {
+                if (exeName == null)
+                {
+                    Assembly entryAssembly = Assembly.GetEntryAssembly();
+                    if (entryAssembly != null)
+                        exeName = Path.GetFileName(AssemblyHelper.GetAssemblyPath(entryAssembly));
+                }
+
+                return exeName == "vstest.executionengine.exe";
+            }
+        }
 
         // NOTE: There is some sort of timing issue involved
         // in creating the DiaSession. When it is created
