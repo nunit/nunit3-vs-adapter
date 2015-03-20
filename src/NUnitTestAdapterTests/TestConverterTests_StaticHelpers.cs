@@ -1,9 +1,9 @@
 ﻿// ****************************************************************
-// Copyright (c) 2011 NUnit Software. All rights reserved.
+// Copyright (c) 2011-2015 NUnit Software. All rights reserved.
 // ****************************************************************
 
+using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using NUnit.Core;
 using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
@@ -11,17 +11,18 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     [Category("TestConverter")]
     public class TestConverterTestsStaticHelpers
     {
-        [TestCase(ResultState.Cancelled, Result = TestOutcome.None)]
-        [TestCase(ResultState.Error, Result = TestOutcome.Failed)]
-        [TestCase(ResultState.Failure, Result = TestOutcome.Failed)]
-        [TestCase(ResultState.Ignored, Result = TestOutcome.Skipped)]
-        [TestCase(ResultState.Inconclusive, Result = TestOutcome.None)]
-        [TestCase(ResultState.NotRunnable, Result = TestOutcome.Failed)]
-        [TestCase(ResultState.Skipped, Result = TestOutcome.Skipped)]
-        [TestCase(ResultState.Success, Result = TestOutcome.Passed)]
-        public TestOutcome ResultStateToTestOutcome(ResultState resultState)
+        [TestCase("<test-case result='Failed' label='Cancelled'/>", ExpectedResult = TestOutcome.Failed)]
+        [TestCase("<test-case result='Failed' label='Error'/>", ExpectedResult = TestOutcome.Failed)]
+        [TestCase("<test-case result='Failed'/>", ExpectedResult = TestOutcome.Failed)]
+        [TestCase("<test-case result='Skipped' label='Ignored'/>", ExpectedResult = TestOutcome.Skipped)]
+        [TestCase("<test-case result='Inconclusive'/>", ExpectedResult = TestOutcome.None)]
+        [TestCase("<test-case result='Failed' label='NotRunnable'/>", ExpectedResult = TestOutcome.Failed)]
+        [TestCase("<test-case result='Skipped'/>", ExpectedResult = TestOutcome.Skipped)]
+        [TestCase("<test-case result='Passed'/>", ExpectedResult = TestOutcome.Passed)]
+        public TestOutcome ResultStateToTestOutcome(string result)
         {
-            return TestConverter.ResultStateToTestOutcome(resultState);
+            var resultNode = XmlHelper.CreateXmlNode(result);
+            return TestConverter.GetTestOutcome(resultNode);
         }
     }
 }

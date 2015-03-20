@@ -48,14 +48,14 @@ namespace NUnit.VisualStudio.TestAdapter
                 // Ensure any channels registered by other adapters are unregistered
                 CleanUpRegisteredChannels();
 
-                //var tfsfilter = new TfsTestFilter(runContext);
+                var tfsfilter = new TfsTestFilter(runContext);
                 TestLog.SendDebugMessage("Keepalive:" + runContext.KeepAlive);
                 var enableShutdown = (UseVsKeepEngineRunning) ? !runContext.KeepAlive : true;
-                //if (!tfsfilter.HasTfsFilterValue)
-                //{
-                //    if (!(enableShutdown && !runContext.KeepAlive))  // Otherwise causes exception when run as commandline, illegal to enableshutdown when Keepalive is false, might be only VS2012
-                //        frameworkHandle.EnableShutdownAfterTestRun = enableShutdown;
-                //}
+                if (!tfsfilter.HasTfsFilterValue)
+                {
+                    if (!(enableShutdown && !runContext.KeepAlive))  // Otherwise causes exception when run as commandline, illegal to enableshutdown when Keepalive is false, might be only VS2012
+                        frameworkHandle.EnableShutdownAfterTestRun = enableShutdown;
+                }
                 
                 foreach (var source in sources)
                 {
@@ -66,7 +66,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
                     TestLog.SendInformationalMessage("Running all tests in " + sourceAssembly);
 
-                    using (currentRunner = new AssemblyRunner(TestLog, sourceAssembly))//, tfsfilter))
+                    using (currentRunner = new AssemblyRunner(TestLog, sourceAssembly, tfsfilter))
                     {
                         currentRunner.RunAssembly(frameworkHandle);
                     }

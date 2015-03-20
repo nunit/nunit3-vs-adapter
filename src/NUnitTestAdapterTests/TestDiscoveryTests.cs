@@ -1,5 +1,5 @@
 ﻿// ****************************************************************
-// Copyright (c) 2011 NUnit Software. All rights reserved.
+// Copyright (c) 2011-2015 NUnit Software. All rights reserved.
 // ****************************************************************
 
 using System.Collections.Generic;
@@ -14,17 +14,18 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     [Category("TestDiscovery")]
     public class TestDiscoveryTests : IMessageLogger, ITestCaseDiscoverySink
     {
-        static readonly string MockAssemblyPath = Path.GetFullPath("mock-assembly.dll");
+        static readonly string MockAssemblyPath = 
+            Path.Combine(TestContext.CurrentContext.TestDirectory, "mock-assembly.dll");
 
         static readonly List<TestCase> TestCases = new List<TestCase>();
 
         private static ITestDiscoverer nunittestDiscoverer;
 
-        [SetUp]
+        [OneTimeSetUp]
         public void LoadMockassembly()
         {
             // Sanity check to be sure we have the correct version of mock-assembly.dll
-            Assert.That(NUnit.Tests.Assemblies.MockAssembly.Tests, Is.EqualTo(31),
+            Assert.That(NUnit.Tests.Assemblies.MockAssembly.Tests, Is.EqualTo(35),
                 "The reference to mock-assembly.dll appears to be the wrong version");
 
             // Load the NUnit mock-assembly.dll once for this test, saving

@@ -11,14 +11,14 @@ namespace NUnitTestDemo.SetUpFixture
         public static int SetUpCount;
         public static int TearDownCount;
 
-        [SetUp]
+        [OneTimeSetUp]
         public void BeforeTests()
         {
             Assert.That(SetUpCount, Is.EqualTo(0));
             SetUpCount++;
         }
 
-        [TearDown]
+        [OneTimeTearDown]
         public void AfterTests()
         {
             Assert.That(TearDownCount, Is.EqualTo(0));

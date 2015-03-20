@@ -71,22 +71,25 @@ namespace NUnit.VisualStudio.TestAdapter
             if (ourCase == null) return null;
 
             VSTestResult ourResult = new VSTestResult(ourCase)
-                {
-                    DisplayName = ourCase.DisplayName,
-                    Outcome = GetTestOutcome(resultNode),
-                    Duration = TimeSpan.FromSeconds(resultNode.GetAttribute("duration", 0.0))
-                };
+            {
+                DisplayName = ourCase.DisplayName,
+                Outcome = GetTestOutcome(resultNode),
+                Duration = TimeSpan.FromSeconds(resultNode.GetAttribute("duration", 0.0))
+            };
+
+            var startTime = resultNode.GetAttribute("start-time");
+            if (startTime != null)
+                ourResult.StartTime = DateTimeOffset.Parse(startTime);
+
+            var endTime = resultNode.GetAttribute("end-time");
+            if (endTime != null)
+                ourResult.EndTime = DateTimeOffset.Parse(endTime);
 
             // TODO: Remove this when NUnit provides a better duration
             if (ourResult.Duration == TimeSpan.Zero && (ourResult.Outcome == TestOutcome.Passed || ourResult.Outcome == TestOutcome.Failed))
                 ourResult.Duration = TimeSpan.FromTicks(1);
-            ourResult.ComputerName = Environment.MachineName;
 
-            // TODO: Stuff we don't yet set
-            //   StartTime   - not in NUnit result
-            //   EndTime     - not in NUnit result
-            //   Messages    - could we add messages other than the error message? Where would they appear?
-            //   Attachments - don't exist in NUnit
+            ourResult.ComputerName = Environment.MachineName;
 
             ourResult.ErrorMessage = GetErrorMessage(resultNode);
 
@@ -152,6 +155,9 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private static string GetClassName(XmlNode node)
         {
+#if true
+            return node.GetAttribute("classname");
+#else
             var className = node.GetAttribute("fullname");
             var name = node.GetAttribute("name");
 
@@ -166,10 +172,14 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             return className;
+#endif
         }
 
         private static string GetMethodName(XmlNode node)
         {
+#if true
+            return node.GetAttribute("methodname");
+#else
             var methodName = node.GetAttribute("name");
 
             if (methodName.EndsWith(")"))
@@ -180,6 +190,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             return methodName;
+#endif
         }
 
         // public for testing

@@ -1,56 +1,32 @@
 // ****************************************************************
-// Copyright (c) 2011 NUnit Software. All rights reserved.
+// Copyright (c) 2011-2015 NUnit Software. All rights reserved.
 // ****************************************************************
 
 using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Xml;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
-using NUnit.Core;
 using NUnit.Framework;
-
-using NUnitTestResult = NUnit.Core.TestResult;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
+    using Fakes;
+
     [Category("TestConverter")]
     public class TestConverterTests
     {
-        private static readonly string ThisAssemblyPath = 
-            Path.GetFullPath("NUnit.VisualStudio.TestAdapter.Tests.dll");
-        private static readonly string ThisCodeFile = 
-            Path.GetFullPath(@"..\..\TestConverterTests.cs");
-        
-        // NOTE: If the location of the FakeTestCase method in the 
-        // file changes, update the value of FAKE_LINE_NUMBER.
-        private const int FakeLineNumber = 31;
-// ReSharper disable once UnusedMember.Local
-        private void FakeTestCase() { } // FAKE_LINE_NUMBER SHOULD BE THIS LINE
-
-        private ITest fakeNUnitTest;
+        private XmlNode fakeTestNode;
         private TestConverter testConverter;
 
         [SetUp]
         public void SetUp()
         {
-            MethodInfo fakeTestMethod = GetType().GetMethod("FakeTestCase", BindingFlags.Instance | BindingFlags.NonPublic);
-            var nunitTest = new NUnitTestMethod(fakeTestMethod);
-            nunitTest.Categories.Add("cat1");
-            nunitTest.Properties.Add("Priority", "medium");
-
-            var nunitFixture = new TestSuite("FakeNUnitFixture");
-            nunitFixture.Categories.Add("super");
-            nunitFixture.Add(nunitTest);
-
-            Assert.That(nunitTest.Parent, Is.SameAs(nunitFixture));
-
-            var fixtureNode = new TestNode(nunitFixture);
-            fakeNUnitTest = (ITest)fixtureNode.Tests[0];
-
-            testConverter = new TestConverter(new TestLogger(), ThisAssemblyPath);
+            fakeTestNode = FakeTestData.GetTestNode();
+            testConverter = new TestConverter(new TestLogger(), FakeTestData.AssemblyPath);
         }
 
         [TearDown]
@@ -62,7 +38,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void CanMakeTestCaseFromTest()
         {
-            var testCase = testConverter.ConvertTestCase(fakeNUnitTest);
+            var testCase = testConverter.ConvertTestCase(fakeTestNode);
 
             CheckTestCase(testCase);
         }
@@ -70,8 +46,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void ConvertedTestCaseIsCached()
         {
-            testConverter.ConvertTestCase(fakeNUnitTest);
-            var testCase = testConverter.GetCachedTestCase(fakeNUnitTest.TestName.UniqueName);
+            testConverter.ConvertTestCase(fakeTestNode);
+            var testCase = testConverter.GetCachedTestCase("123");
 
             CheckTestCase(testCase);
         }
@@ -79,8 +55,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void CannotMakeTestResultWhenTestCaseIsNotInCache()
         {
-            var nunitResult = new NUnitTestResult(fakeNUnitTest);
-            var testResult = testConverter.ConvertTestResult(nunitResult);
+            var fakeResultNode = FakeTestData.GetResultNode();
+            var testResult = testConverter.ConvertTestResult(fakeResultNode);
             Assert.Null(testResult);
         }
 
@@ -88,13 +64,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void CanMakeTestResultFromNUnitTestResult()
         {
             // This should put the TestCase in the cache
-            var cachedTestCase = testConverter.ConvertTestCase(fakeNUnitTest);
+            var cachedTestCase = testConverter.ConvertTestCase(fakeTestNode);
+            var fakeResultNode = FakeTestData.GetResultNode();
 
-            var nunitResult = new NUnitTestResult(fakeNUnitTest);
-            nunitResult.SetResult(ResultState.Success, "It passed!", null);
-            nunitResult.Time = 1.234;
-            
-            var testResult = testConverter.ConvertTestResult(nunitResult);
+            var testResult = testConverter.ConvertTestResult(fakeResultNode);
             var testCase = testResult.TestCase;
 
             Assert.That(testCase, Is.SameAs(cachedTestCase));
@@ -106,14 +79,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(testResult.Duration, Is.EqualTo(TimeSpan.FromSeconds(1.234)));
         }
 
-        private static void CheckTestCase(TestCase testCase)
+        private void CheckTestCase(TestCase testCase)
         {
-            Assert.That(testCase.FullyQualifiedName, Is.EqualTo("NUnit.VisualStudio.TestAdapter.Tests.TestConverterTests.FakeTestCase"));
-            Assert.That(testCase.DisplayName, Is.EqualTo("FakeTestCase"));
-            Assert.That(testCase.Source, Is.SamePath(ThisAssemblyPath));
+            Assert.That(testCase.FullyQualifiedName, Is.EqualTo(FakeTestData.FullyQualifiedName));
+            Assert.That(testCase.DisplayName, Is.EqualTo(FakeTestData.DisplayName));
+            Assert.That(testCase.Source, Is.SamePath(FakeTestData.AssemblyPath));
 
-            Assert.That(testCase.CodeFilePath, Is.SamePath(ThisCodeFile));
-            Assert.That(testCase.LineNumber, Is.EqualTo(FakeLineNumber));
+            Assert.That(testCase.CodeFilePath, Is.SamePath(FakeTestData.CodeFile));
+            Assert.That(testCase.LineNumber, Is.EqualTo(FakeTestData.LineNumber));
 
             // Check traits using reflection, since the feature was added
             // in an update to VisualStudio and may not be present.

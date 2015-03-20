@@ -5,9 +5,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 {
     public class NavigationDataTests
     {
-        private static readonly string ThisAssemblyPath =
-            Path.GetFullPath("NUnit.VisualStudio.TestAdapter.Tests.dll");
-
         TestConverter testConverter;
 
         const string Prefix = "NUnit.VisualStudio.TestAdapter.Tests.NavigationTestData";
@@ -15,7 +12,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [SetUp]
         public void SetUp()
         {
-            testConverter = new TestConverter(new TestLogger(), ThisAssemblyPath);
+            
+            testConverter = new TestConverter(
+                new TestLogger(), 
+                Path.Combine(TestContext.CurrentContext.TestDirectory, "NUnit.VisualStudio.TestAdapter.Tests.dll"));
         }
 
         [TearDown]
@@ -65,7 +65,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             //   Max line: Last code line if that line is an 
             //             unconditional return statement, otherwise
             //             the closing curly brace.
-            Assert.That(data.FileName, Is.StringEnding("NavigationTestData.cs"));
+            Assert.That(data.FileName, Does.EndWith("NavigationTestData.cs"));
 #if DEBUG
             Assert.That(data.MinLineNumber, Is.EqualTo(minLineDebug));
             Assert.That(data.MaxLineNumber, Is.EqualTo(maxLineDebug));

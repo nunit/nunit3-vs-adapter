@@ -9,7 +9,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     [SetUpFixture]
     public class Init
     {
-        [SetUp]
+        [OneTimeSetUp]
         public void SetUp()
         {
             // Try to ensure that the test registry entry is present
