@@ -75,9 +75,7 @@
     <Compile Include="NUnitTestAdapter.cs" />
     <Compile Include="NUnitTestDiscoverer.cs" />
     <Compile Include="NUnitTestExecutor.cs" />
-    <Compile Include="NUnit\RunTestsCallbackHandler.cs" />
     <Compile Include="NUnit\TestFilter.cs" />
-    <Compile Include="TestFilterBuilder.cs" />
     <Compile Include="TestConverter.cs">
       <SubType>Code</SubType>
     </Compile>

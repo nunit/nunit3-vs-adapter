@@ -3,7 +3,7 @@
     <metadata>
         <id>NUnitTestAdapter.WithFramework</id>
         <version>${package.version}</version>
-        <title>NUnit TestAdapter including NUnit 2.6.3 framework</title>
+        <title>NUnit TestAdapter including NUnit 3.0 framework</title>
         <authors>NUnit Software</authors>
         <owners>NUnit Software</owners>
         <licenseUrl>http://visualstudiogallery.msdn.microsoft.com/site/6ab922d0-21c0-4f06-ab5f-4ecd1fe7175d/eula?licenseType=None</licenseUrl>
@@ -13,17 +13,14 @@
         <description>A package including the NUnit test frameworks and the Visual Studio 2012/13 test adapter.  With this package you don't need to install the VSIX adapter package, and you don't need to upload the adapter to your TFS server.
 Note that this package also contains the NUnit framework.  
 The package works with Visual Studio 2012 from RTM, and all Updates, and with Visual Studio 2013 RTM, tested to Update 2 RC.</description>
-        <releaseNotes>Updated to NUnit 2.6.3,  Misc bug fixes</releaseNotes>
+        <releaseNotes>This release works with NUnit 3.0 only.</releaseNotes>
         <copyright>NUnit Software</copyright>
         <language>en-US</language>
-        <tags>test visualstudio testadapter</tags>
+        <tags>test visualstudio testadapter nunit nunit3</tags>
     </metadata>
     <files>
-        <file src="${project.lib.dir}\nunit.core.dll" target="lib\nunit.core.dll" />
-        <file src="${project.lib.dir}\nunit.core.interfaces.dll" target="lib\nunit.core.interfaces.dll" />
         <file src="${project.lib.dir}\nunit.framework.dll" target="lib\nunit.framework.dll" />
         <file src="${project.lib.dir}\nunit.framework.xml" target="lib\nunit.framework.xml" />
-        <file src="${project.lib.dir}\nunit.util.dll" target="lib\nunit.util.dll" />
         <file src="${package.working.dir}\NUnit.VisualStudio.TestAdapter.dll" target="lib\NUnit.VisualStudio.TestAdapter.dll" />
         <file src="${project.nuget.dir}\install.ps1" target="tools\install.ps1" />
     </files>

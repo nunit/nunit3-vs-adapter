@@ -7,7 +7,7 @@
 
 
     <!-- Set version number for package -->
-    <property name="package.version" value="1.2"/>
+    <property name="package.version" value="3.0"/>
 
     <!-- Define package name, including version -->
     <property name="package.base.name" value="NUnitVisualStudioTestAdapter"/>
@@ -54,9 +54,6 @@
 		<copy todir="${package.working.dir}">
 			<fileset basedir="${install.release.dir}">
 				<include name="NUnit.VisualStudio.TestAdapter.dll"/>
-				<include name="nunit.util.dll"/>
-				<include name="nunit.core.dll"/>
-				<include name="nunit.core.interfaces.dll"/>
 			</fileset>
 		</copy>
 

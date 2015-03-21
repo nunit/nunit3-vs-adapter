@@ -14,15 +14,12 @@
 Note that this package ONLY contains the adapter, not the NUnit framework.  You must also get the framework, or use the NUnitTestAdapter.WithFramework nuget package.
 You only need one such package for a solution. 
 The package works with Visual Studio 2012 from RTM, and with Update 1 and higher, and with Visual Studio 2013 from RTM, and tested up to Update 2 RC.</description>
-        <releaseNotes>Updated to NUnit 2.6.3,  Misc bug fixes</releaseNotes>
+        <releaseNotes>This release works with NUnit 3.0 only.</releaseNotes>
         <copyright>NUnit Software</copyright>
         <language>en-US</language>
-        <tags>test visualstudio testadapter</tags>
+        <tags>test visualstudio testadapter nunit nunit3</tags>
     </metadata>
     <files>
-        <file src="${project.lib.dir}\nunit.core.dll" target="lib\nunit.core.dll" />
-        <file src="${project.lib.dir}\nunit.core.interfaces.dll" target="lib\nunit.core.interfaces.dll" />
-        <file src="${project.lib.dir}\nunit.util.dll" target="lib\nunit.util.dll" />
         <file src="${package.working.dir}\NUnit.VisualStudio.TestAdapter.dll" target="lib\NUnit.VisualStudio.TestAdapter.dll" />
         <file src="${project.nuget.dir}\install.ps1" target="tools\install.ps1" />
     </files>

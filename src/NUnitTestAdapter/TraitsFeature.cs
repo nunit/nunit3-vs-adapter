@@ -63,10 +63,13 @@ namespace NUnit.VisualStudio.TestAdapter
             foreach (XmlNode propertyNode in test.SelectNodes("properties/property"))
             {
                 string propertyName = propertyNode.GetAttribute("name");
-                object propertyValue = propertyNode.GetAttribute("value");
+                string propertyValue = propertyNode.GetAttribute("value");
 
-                if (propertyName[0] != '_') // internal use only
-                    TraitsCollectionAdd.Invoke(traitsCollection, new object[] { propertyName, propertyValue.ToString() });
+                // Property names starting with '_' are for internal use only
+                if (!string.IsNullOrEmpty(propertyName) && propertyName[0] != '_' && !string.IsNullOrEmpty(propertyValue))
+                {
+                    TraitsCollectionAdd.Invoke(traitsCollection, new object[] { propertyName, propertyValue });
+                }
             }
         }
 

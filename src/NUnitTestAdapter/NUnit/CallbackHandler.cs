@@ -28,11 +28,24 @@ namespace NUnit.Engine
 {
     public class CallbackHandler : MarshalByRefObject, ICallbackEventHandler
     {
+        private ITestEventListener _listener;
+
+        #region Constructors
+
+        public CallbackHandler() : this(null) { }
+
+        public CallbackHandler(ITestEventListener listener)
+        {
+            _listener = listener ?? new NullListener();
+        }
+
+        #endregion
+
+        #region Properties
+
         public string Result { get; private set; }
 
-        public virtual void ReportProgress(string report)
-        {
-        }
+        #endregion
 
         #region MarshalByRefObject Overrides
 
@@ -53,7 +66,18 @@ namespace NUnit.Engine
         public void RaiseCallbackEvent(string eventArgument)
         {
             Result = eventArgument;
-            ReportProgress(eventArgument);
+            _listener.OnTestEvent(eventArgument);
+        }
+
+        #endregion
+
+        #region Nested NullListener class
+
+        class NullListener : ITestEventListener
+        {
+            public void OnTestEvent(string report)
+            {
+            }
         }
 
         #endregion

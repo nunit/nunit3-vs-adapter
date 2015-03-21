@@ -100,7 +100,7 @@ namespace NUnit.Engine.Drivers
         /// <returns>An Xml string representing the result</returns>
         public string Run(ITestEventListener listener, TestFilter filter)
         {
-            CallbackHandler handler = new RunTestsCallbackHandler(listener);
+            CallbackHandler handler = new CallbackHandler(listener);
 
             //log.Info("Running {0} - see separate log file", Path.GetFileName(_testAssemblyPath));
             CreateObject(RUN_ACTION, _frameworkController, filter.Text, handler);

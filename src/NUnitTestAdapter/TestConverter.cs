@@ -41,7 +41,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         public TestCase ConvertTestCase(XmlNode testNode)
         {
-            if (testNode.Name != "test-case")
+            if (testNode == null || testNode.Name != "test-case")
                 throw new ArgumentException("The argument must be a test case", "test");
 
             // Return cached value if we have one
@@ -140,7 +140,9 @@ namespace NUnit.VisualStudio.TestAdapter
                 LineNumber = 0
             };
 
-            var navData = GetNavigationData(GetClassName(testNode), GetMethodName(testNode));
+            var className = testNode.GetAttribute("classname");
+            var methodName = testNode.GetAttribute("methodname");
+            var navData = GetNavigationData(className, methodName);
             if (navData != null)
             {
                 testCase.CodeFilePath = navData.FileName;
@@ -150,46 +152,6 @@ namespace NUnit.VisualStudio.TestAdapter
             testCase.AddTraitsFromTestNode(testNode);
 
             return testCase;
-        }
-
-        private static string GetClassName(XmlNode node)
-        {
-#if true
-            return node.GetAttribute("classname");
-#else
-            var className = node.GetAttribute("fullname");
-            var name = node.GetAttribute("name");
-
-            if (className.Length > name.Length + 1 && className.EndsWith(name))
-                className = className.Substring(0, className.Length - name.Length - 1);
-
-            if (className.EndsWith(">"))
-            {
-                var lbrack = className.IndexOf('<');
-                if (lbrack > 0)
-                    className = className.Substring(0, lbrack) + "`1"; // TODO: Actually count args
-            }
-
-            return className;
-#endif
-        }
-
-        private static string GetMethodName(XmlNode node)
-        {
-#if true
-            return node.GetAttribute("methodname");
-#else
-            var methodName = node.GetAttribute("name");
-
-            if (methodName.EndsWith(")"))
-            {
-                var lpar = methodName.IndexOf('(');
-                if (lpar > 0)
-                    methodName = methodName.Substring(0, lpar);
-            }
-
-            return methodName;
-#endif
         }
 
         // public for testing

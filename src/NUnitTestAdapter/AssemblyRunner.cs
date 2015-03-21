@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
@@ -58,14 +59,16 @@ namespace NUnit.VisualStudio.TestAdapter
             this.tfsFilter = tfsFilter;
         }
 
-        private static TestFilter MakeTestFilter(IEnumerable<TestCase> ptestCases)
+        private static TestFilter MakeTestFilter(IEnumerable<TestCase> testCases)
         {
-            var builder = new TestFilterBuilder();
-            foreach (TestCase testCase in ptestCases)
-            {
-                builder.Tests.Add(testCase.FullyQualifiedName);
-            }
-            return builder.GetFilter();
+            var testFilter = new StringBuilder("<filter><tests>");
+
+            foreach (TestCase testCase in testCases)
+                testFilter.AppendFormat("<test>{0}</test>", testCase.FullyQualifiedName.Replace("<", "&lt;").Replace(">", "&gt;"));
+
+            testFilter.Append("</tests></filter>");
+
+            return new TestFilter(testFilter.ToString());
         }
 
         #endregion
@@ -162,9 +165,9 @@ namespace NUnit.VisualStudio.TestAdapter
             if (tfsFilter==null || !tfsFilter.HasTfsFilterValue) 
                 return true;
             var filteredTestCases = tfsFilter.CheckFilter(LoadedTestCases);
-            var ptestCases = filteredTestCases as TestCase[] ?? filteredTestCases.ToArray();
-            logger.SendMessage(TestMessageLevel.Informational, string.Format("TFS Filter detected: LoadedTestCases {0}, Filterered Test Cases {1}", LoadedTestCases.Count, ptestCases.Count()));
-            nunitFilter = MakeTestFilter(ptestCases);
+            var testCases = filteredTestCases as TestCase[] ?? filteredTestCases.ToArray();
+            logger.SendMessage(TestMessageLevel.Informational, string.Format("TFS Filter detected: LoadedTestCases {0}, Filterered Test Cases {1}", LoadedTestCases.Count, testCases.Count()));
+            nunitFilter = MakeTestFilter(testCases);
 
             return true;
         }
