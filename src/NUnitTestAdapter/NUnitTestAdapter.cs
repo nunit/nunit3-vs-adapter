@@ -3,6 +3,7 @@
 // ****************************************************************
 
 using System;
+using System.IO;
 using System.Reflection;
 using System.Runtime.Remoting.Channels;
 
@@ -52,6 +53,27 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             TestLog = new TestLogger(Verbosity);
+        }
+
+        #endregion
+
+        #region Properties
+
+        private static string exeName;
+        public static bool IsRunningUnderIDE
+        {
+            get
+            {
+                if (exeName == null)
+                {
+                    Assembly entryAssembly = Assembly.GetEntryAssembly();
+                    if (entryAssembly != null)
+                        exeName = entryAssembly.Location;
+
+                }
+
+                return exeName == "vstest.executionengine.exe" || exeName == "vstest.discoveryengine.exe";
+            }
         }
 
         #endregion

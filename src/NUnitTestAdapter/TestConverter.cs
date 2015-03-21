@@ -9,7 +9,6 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using NUnit.Engine.Internal;
 using NUnit.VisualStudio.TestAdapter.Internal;
 using VSTestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
 
@@ -243,7 +242,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
                 // If we're running in the IDE, remove any caret line from the message
                 // since it will be displayed using a variable font and won't make sense.
-                if (!string.IsNullOrEmpty(message) && RunningUnderIDE)
+                if (!string.IsNullOrEmpty(message) && NUnitTestAdapter.IsRunningUnderIDE)
                 {
                     string pattern = NL + "  -*\\^" + NL;
                     message = Regex.Replace(message, pattern, NL, RegexOptions.Multiline);
@@ -266,7 +265,7 @@ namespace NUnit.VisualStudio.TestAdapter
             var setup = new AppDomainSetup();
 
             var thisAssembly = Assembly.GetExecutingAssembly();
-            setup.ApplicationBase = AssemblyHelper.GetDirectoryName(thisAssembly);
+            setup.ApplicationBase = Path.GetDirectoryName(sourceAssembly);
 
             var evidence = AppDomain.CurrentDomain.Evidence;
             this.asyncMethodHelperDomain = AppDomain.CreateDomain("AsyncMethodHelper", evidence, setup);
@@ -292,22 +291,6 @@ namespace NUnit.VisualStudio.TestAdapter
         #endregion
 
         #region Private Properties
-
-        private string exeName;
-        private bool RunningUnderIDE
-        {
-            get
-            {
-                if (exeName == null)
-                {
-                    Assembly entryAssembly = Assembly.GetEntryAssembly();
-                    if (entryAssembly != null)
-                        exeName = Path.GetFileName(AssemblyHelper.GetAssemblyPath(entryAssembly));
-                }
-
-                return exeName == "vstest.executionengine.exe";
-            }
-        }
 
         // NOTE: There is some sort of timing issue involved
         // in creating the DiaSession. When it is created

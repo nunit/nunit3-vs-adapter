@@ -64,7 +64,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="NUnitEventListener.cs" />
-    <Compile Include="NUnit\AssemblyHelper.cs" />
     <Compile Include="NUnit\CallbackHandler.cs" />
     <Compile Include="NUnit\IFrameworkDriver.cs" />
     <Compile Include="Internal\AsyncMethodHelper.cs" />
