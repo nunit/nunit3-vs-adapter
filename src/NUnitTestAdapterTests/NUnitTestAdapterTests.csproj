@@ -88,12 +88,6 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NUnitTestAdapter\NUnitTestAdapter.csproj">
-      <Project>{8a85e26a-c706-48b1-bc36-06ebde3efd25}</Project>
-      <Name>NUnitTestAdapter</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>

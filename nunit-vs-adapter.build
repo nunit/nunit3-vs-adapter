@@ -33,7 +33,7 @@
     <target name="test" description="Test the adapter (NYI)"/>
 
     <target name="package" desciption="Package the adapter"
-		depends="package-vsix,package-zip,package-nuget-1,package-nuget-2"/>
+		depends="package-vsix,package-zip,package-nuget-1"/>
 
 	<target name="package-vsix">
 		
@@ -70,16 +70,16 @@
 
 	<target name="package-nuget-1">
 
-		<property name="nuget.package.name" value="NUnitVisualStudioTestAdapter"/>
-		<property name="nuget.internal.id" value="NUnitTestAdapter"/>
+		<property name="nuget.package.name" value="NUnit3VisualStudioTestAdapter"/>
+		<property name="nuget.internal.id" value="NUnit3TestAdapter"/>
 		<call target="create-nuget-package"/>
 
 	</target>
 
 	<target name="package-nuget-2">
 
-		<property name="nuget.package.name" value="NUnitVisualStudioTestAdapterAndFramework"/>
-		<property name="nuget.internal.id" value="NUnitTestAdapter.WithFramework"/>
+		<property name="nuget.package.name" value="NUnit3VisualStudioTestAdapterAndFramework"/>
+		<property name="nuget.internal.id" value="NUnit3TestAdapter.WithFramework"/>
 		<call target="create-nuget-package"/>
 
 	</target>
