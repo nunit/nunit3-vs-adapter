@@ -22,7 +22,7 @@ The package works with Visual Studio 2012 from RTM, and with Update 1 and higher
         <tags>test visualstudio testadapter nunit nunit3</tags>
     </metadata>
     <files>
-        <file src="${package.working.dir}\NUnit.VisualStudio.TestAdapter.dll" target="lib\NUnit.VisualStudio.TestAdapter.dll" />
+        <file src="${package.working.dir}\NUnit3TestAdapter.dll" target="lib\NUnit3TestAdapter.dll" />
         <file src="${project.nuget.dir}\install.ps1" target="tools\install.ps1" />
     </files>
 </package>
