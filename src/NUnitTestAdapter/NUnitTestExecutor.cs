@@ -1,5 +1,5 @@
 ﻿// ****************************************************************
-// Copyright (c) 2011 NUnit Software. All rights reserved.
+// Copyright (c) 2011-2015 NUnit Software. All rights reserved.
 // ****************************************************************
 
 using System;
@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using NUnit.Core;
 // #define LAUNCHDEBUGGER
 
 namespace NUnit.VisualStudio.TestAdapter
@@ -38,10 +37,10 @@ namespace NUnit.VisualStudio.TestAdapter
         public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
             TestLog.Initialize(frameworkHandle);
+
             if (RegistryFailure)
-            {
                 TestLog.SendErrorMessage(ErrorMsg);
-            }
+
             Info("executing tests", "started");
 
             try
@@ -63,9 +62,10 @@ namespace NUnit.VisualStudio.TestAdapter
                     string sourceAssembly = source;
 
                     if (!Path.IsPathRooted(sourceAssembly))
-                    {
                         sourceAssembly = Path.Combine(Environment.CurrentDirectory, sourceAssembly);
-                    }
+
+                    TestLog.SendInformationalMessage("Running all tests in " + sourceAssembly);
+
                     using (currentRunner = new AssemblyRunner(TestLog, sourceAssembly, tfsfilter))
                     {
                         currentRunner.RunAssembly(frameworkHandle);
@@ -99,9 +99,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
             TestLog.Initialize(frameworkHandle);
             if (RegistryFailure)
-            {
                 TestLog.SendErrorMessage(ErrorMsg);
-            }
+
             var enableShutdown = (UseVsKeepEngineRunning) ? !runContext.KeepAlive : true;
             frameworkHandle.EnableShutdownAfterTestRun = enableShutdown;
             Debug("executing tests", "EnableShutdown set to " +enableShutdown);
@@ -113,6 +112,8 @@ namespace NUnit.VisualStudio.TestAdapter
             var assemblyGroups = tests.GroupBy(tc => tc.Source);
             foreach (var assemblyGroup in assemblyGroups)
             {
+                TestLog.SendInformationalMessage("Running selected tests in " + assemblyGroup.Key);
+
                 using (currentRunner = new AssemblyRunner(TestLog, assemblyGroup.Key, assemblyGroup))
                 {
                     currentRunner.RunAssembly(frameworkHandle);

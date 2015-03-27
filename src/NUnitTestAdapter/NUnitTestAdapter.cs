@@ -1,11 +1,11 @@
 ﻿// ****************************************************************
-// Copyright (c) 2011 NUnit Software. All rights reserved.
+// Copyright (c) 2011-2015 NUnit Software. All rights reserved.
 // ****************************************************************
 
 using System;
+using System.IO;
 using System.Reflection;
 using System.Runtime.Remoting.Channels;
-using NUnit.Util;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -27,23 +27,15 @@ namespace NUnit.VisualStudio.TestAdapter
 
 
         protected bool RegistryFailure { get; set; }
-        protected string ErrorMsg
-        {
-            get; set;
-        }
+        protected string ErrorMsg { get; set; }
 
         #region Constructor
 
         /// <summary>
-        /// The common constructor initializes NUnit services 
-        /// needed to load and run tests and sets some properties.
+        /// The common constructor sets required properties. 
         /// </summary>
         protected NUnitTestAdapter()
         {
-            ServiceManager.Services.AddService(new DomainManager());
-            ServiceManager.Services.AddService(new ProjectService());
-
-            ServiceManager.Services.InitializeServices();
             Verbosity = 0;
             RegistryFailure = false;
             adapterVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
@@ -65,18 +57,39 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #endregion
 
+        #region Properties
+
+        private static string exeName;
+        public static bool IsRunningUnderIDE
+        {
+            get
+            {
+                if (exeName == null)
+                {
+                    Assembly entryAssembly = Assembly.GetEntryAssembly();
+                    if (entryAssembly != null)
+                        exeName = entryAssembly.Location;
+
+                }
+
+                return exeName == "vstest.executionengine.exe" || exeName == "vstest.discoveryengine.exe";
+            }
+        }
+
+        #endregion
+
         #region Protected Helper Methods
 
         protected void Info(string method, string function)
         {
-            var msg = string.Format("NUnit {0} {1} is {2}", adapterVersion, method, function);
+            var msg = string.Format("NUnit Adapter {0} {1} is {2}", adapterVersion, method, function);
             TestLog.SendInformationalMessage(msg);
         }
 
         protected void Debug(string method, string function)
         {
 #if DEBUG
-            var msg = string.Format("NUnit {0} {1} is {2}", adapterVersion, method, function);
+            var msg = string.Format("NUnit Adapter {0} {1} is {2}", adapterVersion, method, function);
             TestLog.SendDebugMessage(msg);
 #endif
         }

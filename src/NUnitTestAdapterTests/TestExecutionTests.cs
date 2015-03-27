@@ -1,13 +1,16 @@
 ﻿// ****************************************************************
-// Copyright (c) 2012 NUnit Software. All rights reserved.
+// Copyright (c) 2012-2015 NUnit Software. All rights reserved.
 // ****************************************************************
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using NUnit.Framework;
+using NUnit.Tests;
 using NUnit.Tests.Assemblies;
+using NUnit.Tests.Singletons;
 using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
@@ -16,7 +19,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     [Category("TestExecution")]
     public class TestExecutionTests
     {
-        static readonly string MockAssemblyPath = Path.GetFullPath("mock-assembly.dll");
+        // This constant compensates for the fact that that no
+        // events are sent for such tests.
+        private static readonly int TestsUnderBadOrIgnoredFixtures = BadFixture.Tests + IgnoredFixture.Tests;
+
+        private string MockAssemblyPath; 
         static readonly IRunContext Context = new FakeRunContext();
 
         private List<TestResult> testResults;
@@ -25,11 +32,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         ResultSummary Summary { get;  set; }    
 
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void LoadMockassembly()
         {
+            MockAssemblyPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "mock-assembly.dll");
+
             // Sanity check to be sure we have the correct version of mock-assembly.dll
-            Assert.That(MockAssembly.Tests, Is.EqualTo(31),
+            Assert.That(MockAssembly.Tests, Is.EqualTo(35),
                 "The reference to mock-assembly.dll appears to be the wrong version");
             new List<TestCase>();
             testResults = new List<TestResult>();
@@ -43,12 +52,29 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
+        public void DumpEvents()
+        {
+            foreach (var ev in testLog.Events)
+            {
+                TestContext.Write(ev.EventType + ": ");
+                if (ev.TestResult != null)
+                    TestContext.WriteLine("{0} {1}", ev.TestResult.TestCase.FullyQualifiedName, ev.TestResult.Outcome);
+                else if (ev.TestCase != null)
+                    TestContext.WriteLine(ev.TestCase.FullyQualifiedName);
+                else if (ev.Message.Text != null)
+                    TestContext.WriteLine(ev.Message.Text);
+                else
+                    TestContext.WriteLine();
+            }
+        }
+
+        [Test]
         public void CorrectNumberOfTestCasesWereStarted()
         {
             const FakeFrameworkHandle.EventType eventType = FakeFrameworkHandle.EventType.RecordStart;
             Assert.That(
                 testLog.Events.FindAll(e => e.EventType == eventType).Count,
-                Is.EqualTo(MockAssembly.ResultCount));
+                Is.EqualTo(MockAssembly.ResultCount - TestsUnderBadOrIgnoredFixtures));
         }
 
         [Test]
@@ -57,7 +83,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             const FakeFrameworkHandle.EventType eventType = FakeFrameworkHandle.EventType.RecordEnd;
             Assert.That(
                 testLog.Events.FindAll(e => e.EventType == eventType).Count,
-                Is.EqualTo(MockAssembly.ResultCount));
+                Is.EqualTo(MockAssembly.ResultCount - TestsUnderBadOrIgnoredFixtures));
         }
 
         [Test]
@@ -66,15 +92,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             const FakeFrameworkHandle.EventType eventType = FakeFrameworkHandle.EventType.RecordResult;
             Assert.That(
                 testLog.Events.FindAll(e => e.EventType == eventType).Count,
-                Is.EqualTo(MockAssembly.ResultCount));
+                Is.EqualTo(MockAssembly.ResultCount - TestsUnderBadOrIgnoredFixtures));
         }
 
         readonly TestCaseData[] outcomes =
         {
             // NOTE: One inconclusive test is reported as None
-            new TestCaseData(TestOutcome.Passed).Returns(MockAssembly.TestsRun - MockAssembly.Errors - MockAssembly.Failures - 1),
-            new TestCaseData(TestOutcome.Failed).Returns(MockAssembly.Errors + MockAssembly.Failures + MockAssembly.NotRunnable),
-            new TestCaseData(TestOutcome.Skipped).Returns(MockAssembly.NotRun - MockAssembly.Explicit - MockAssembly.NotRunnable),
+            new TestCaseData(TestOutcome.Passed).Returns(MockAssembly.Success),
+            new TestCaseData(TestOutcome.Failed).Returns(MockAssembly.ErrorsAndFailures - BadFixture.Tests),
+            new TestCaseData(TestOutcome.Skipped).Returns(MockAssembly.Ignored - IgnoredFixture.Tests),
             new TestCaseData(TestOutcome.None).Returns(1),
             new TestCaseData(TestOutcome.NotFound).Returns(0)
         };
@@ -89,9 +115,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 .Count;
         }
 
-        [TestCase("MockTest3", TestOutcome.Passed, "Succeeded!", true)]
+        [TestCase("MockTest3", TestOutcome.Passed, "Succeeded!", false)]
         [TestCase("FailingTest", TestOutcome.Failed, "Intentional failure", true)]
-        [TestCase("TestWithException", TestOutcome.Failed, "System.ApplicationException : Intentional Exception", true)]
+        [TestCase("TestWithException", TestOutcome.Failed, "System.Exception : Intentional Exception", true)]
         // NOTE: Should Inconclusive be reported as TestOutcome.None?
         [TestCase("InconclusiveTest", TestOutcome.None, "No valid data", false)]
         [TestCase("MockTest4", TestOutcome.Skipped, "ignoring this test method for now", false)]

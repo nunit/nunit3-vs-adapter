@@ -1,14 +1,15 @@
 ﻿// ****************************************************************
-// Copyright (c) 2011 NUnit Software. All rights reserved.
+// Copyright (c) 2011-2015 NUnit Software. All rights reserved.
 // ****************************************************************
 
 using System;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using NUnit.Core;
-using TestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using System.Runtime.Remoting;
+using System.Xml;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using NUnit.Engine;
+using TestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -16,7 +17,7 @@ namespace NUnit.VisualStudio.TestAdapter
     /// NUnitEventListener implements the EventListener interface and
     /// translates each event into a message for the VS test platform.
     /// </summary>
-    public class NUnitEventListener : MarshalByRefObject, EventListener, IDisposable // Public for testing
+    public class NUnitEventListener : MarshalByRefObject, ITestEventListener, IDisposable // Public for testing
     {
         private readonly ITestExecutionRecorder testLog;
         private readonly TestConverter testConverter;
@@ -36,99 +37,28 @@ namespace NUnit.VisualStudio.TestAdapter
             this.testConverter = testConverter;
         }
 
-        public void RunStarted(string name, int testCount)
+        #region ITestEventListener
+
+        public void OnTestEvent(string report)
         {
-            testLog.SendMessage(TestMessageLevel.Informational, "Run started: " + name);
-        }
-
-        public void RunFinished(Exception exception)
-        {
-        }
-
-        public void RunFinished(NUnit.Core.TestResult result)
-        {
-        }
-
-        public string Output { get; private set; }
-
-        public void SuiteStarted(TestName testName)
-        {
-
-        }
-
-        public void SuiteFinished(NUnit.Core.TestResult result)
-        {
-            if ((result.IsError || result.IsFailure) &&
-                (result.FailureSite == FailureSite.SetUp || result.FailureSite == FailureSite.TearDown))
+            var node = XmlHelper.CreateXmlNode(report);
+            switch (node.Name)
             {
-                testLog.SendMessage(
-                    TestMessageLevel.Error,
-                    string.Format("{0} failed for test fixture {1}", result.FailureSite, result.FullName));
-                if (result.Message != null)
-                    testLog.SendMessage(TestMessageLevel.Error, result.Message);
-                if (result.StackTrace != null)
-                    testLog.SendMessage(TestMessageLevel.Error, result.StackTrace);
+                case "start-test":
+                    TestStarted(node);
+                    break;
+
+                case "test-case":
+                    TestFinished(node);
+                    break;
+
+                case "test-suite":
+                    SuiteFinished(node);
+                    break;
             }
         }
 
-        public void TestStarted(TestName testName)
-        {
-            TestCase ourCase = testConverter.GetCachedTestCase(testName.UniqueName);
-
-            // Simply ignore any TestName not found in the cache
-            if (ourCase != null)
-            {
-                this.testLog.RecordStart(ourCase);
-                // Output = testName.FullName + "\r";
-            }
-
-        }
-
-        public void TestFinished(NUnit.Core.TestResult result)
-        {
-            TestResult ourResult = testConverter.ConvertTestResult(result);
-            ourResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, Output));
-            this.testLog.RecordEnd(ourResult.TestCase, ourResult.Outcome);
-            this.testLog.RecordResult(ourResult);
-            Output = "";
-        }
-
-        public void TestOutput(TestOutput testOutput)
-        {
-            string message = testOutput.Text;
-            int length = message.Length;
-            int drop = message.EndsWith(Environment.NewLine)
-                ? Environment.NewLine.Length
-                : message[length - 1] == '\n' || message[length - 1] == '\r'
-                    ? 1
-                    : 0;
-            if (drop > 0)
-                message = message.Substring(0, length - drop);
-            if (!string.IsNullOrEmpty(message.Trim()))
-                testLog.SendMessage(TestMessageLevel.Informational, message);
-            string type="";
-            // Consider adding this later, as an option.
-            //switch (testOutput.Type)
-            //{
-            //    case TestOutputType.Trace:
-            //        type ="Debug: ";
-            //        break;
-            //    case TestOutputType.Out:
-            //        type ="Console: ";
-            //        break;
-            //    case TestOutputType.Log:
-            //        type="Log: ";
-            //        break;
-            //    case TestOutputType.Error:
-            //        type="Error: ";
-            //        break;
-            //}
-            this.Output += (type+message+'\r');
-        }
-
-        public void UnhandledException(Exception exception)
-        {
-        }
+        #endregion
 
         #region IDisposable
         private bool disposed;
@@ -156,5 +86,43 @@ namespace NUnit.VisualStudio.TestAdapter
             Dispose(false);
         }
         #endregion
+
+        public void TestStarted(XmlNode testNode)
+        {
+            TestCase ourCase = testConverter.GetCachedTestCase(testNode.GetAttribute("id"));
+
+            // Simply ignore any TestCase not found in the cache
+            if (ourCase != null)
+                testLog.RecordStart(ourCase);
+        }
+
+        public void TestFinished(XmlNode resultNode)
+        {
+            TestResult ourResult = testConverter.ConvertTestResult(resultNode);
+            this.testLog.RecordEnd(ourResult.TestCase, ourResult.Outcome);
+            this.testLog.RecordResult(ourResult);
+        }
+
+        public void SuiteFinished(XmlNode resultNode)
+        {
+            if (resultNode.GetAttribute("result") == "Failed")
+            {
+                var site = resultNode.GetAttribute("site");
+                if (site == "SetUp" || site == "TearDown")
+                {
+                    testLog.SendMessage(
+                        TestMessageLevel.Error,
+                        string.Format("{0} failed for test fixture {1}", site, resultNode.GetAttribute("fullname")));
+
+                    var messageNode = resultNode.SelectSingleNode("failure/messge");
+                    if (messageNode != null)
+                        testLog.SendMessage(TestMessageLevel.Error, messageNode.InnerText);
+
+                    var stackNode = resultNode.SelectSingleNode("failure/stack-trace");
+                    if (stackNode != null)
+                        testLog.SendMessage(TestMessageLevel.Error, stackNode.InnerText);
+                }
+            }
+        }
     }
 }

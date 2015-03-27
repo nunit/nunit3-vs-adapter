@@ -5,9 +5,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 {
     public class NavigationDataTests
     {
-        private static readonly string ThisAssemblyPath =
-            Path.GetFullPath("NUnit.VisualStudio.TestAdapter.Tests.dll");
-
         TestConverter testConverter;
 
         const string Prefix = "NUnit.VisualStudio.TestAdapter.Tests.NavigationTestData";
@@ -15,7 +12,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [SetUp]
         public void SetUp()
         {
-            testConverter = new TestConverter(new TestLogger(), ThisAssemblyPath);
+            
+            testConverter = new TestConverter(
+                new TestLogger(), 
+                Path.Combine(TestContext.CurrentContext.TestDirectory, "NUnit.VisualStudio.TestAdapter.Tests.dll"));
         }
 
         [TearDown]
@@ -28,17 +28,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase("", "EmptyMethod_TwoLines", 12, 13, 13, 13)]
         [TestCase("", "EmptyMethod_ThreeLines", 16, 17, 17, 17)]
         [TestCase("", "EmptyMethod_LotsOfLines", 20, 23, 23, 23)]
-        [TestCase("", "SimpleMethod_Void_NoArgs", 26, 27, 29, 29)]
+        [TestCase("", "SimpleMethod_Void_NoArgs", 26, 28, 29, 29)]
         [TestCase("", "SimpleMethod_Void_OneArg", 32, 33, 35, 35)]
         [TestCase("", "SimpleMethod_Void_TwoArgs", 38, 39, 41, 41)]
-        [TestCase("", "SimpleMethod_ReturnsInt_NoArgs", 44, 45, 46, 47)]
+        [TestCase("", "SimpleMethod_ReturnsInt_NoArgs", 44, 46, 46, 47)]
         [TestCase("", "SimpleMethod_ReturnsString_OneArg", 50, 51, 51, 52)]
         // Generic method uses simple name
         [TestCase("", "GenericMethod_ReturnsString_OneArg", 55, 56, 56, 57)]
-        [TestCase("", "AsyncMethod_Void", 60, 61, 64, 64)]
-        [TestCase("", "AsyncMethod_Task", 67, 68, 71, 71)]
-        [TestCase("", "AsyncMethod_ReturnsInt", 74, 75, 78, 78)]
-        [TestCase("+NestedClass", "SimpleMethod_Void_NoArgs", 83, 84, 86, 86)]
+        [TestCase("", "AsyncMethod_Void", 60, 62, 64, 64)]
+        [TestCase("", "AsyncMethod_Task", 67, 69, 71, 71)]
+        [TestCase("", "AsyncMethod_ReturnsInt", 74, 76, 78, 78)]
+        [TestCase("+NestedClass", "SimpleMethod_Void_NoArgs", 83, 85, 86, 86)]
         [TestCase("+ParameterizedFixture", "SimpleMethod_ReturnsString_OneArg", 101, 102, 102, 103)]
         // Generic Fixture requires ` plus type arg count
         [TestCase("+GenericFixture`2", "Matches", 116, 117, 117, 118)]
@@ -65,7 +65,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             //   Max line: Last code line if that line is an 
             //             unconditional return statement, otherwise
             //             the closing curly brace.
-            Assert.That(data.FileName, Is.StringEnding("NavigationTestData.cs"));
+            Assert.That(data.FileName, Does.EndWith("NavigationTestData.cs"));
 #if DEBUG
             Assert.That(data.MinLineNumber, Is.EqualTo(minLineDebug));
             Assert.That(data.MaxLineNumber, Is.EqualTo(maxLineDebug));
