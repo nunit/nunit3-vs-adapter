@@ -1,7 +1,9 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NUnitTestDemo", "NUnitTestDemo\NUnitTestDemo.csproj", "{03C3F9EC-FB25-46C0-8F0D-17A0C6E60E9F}"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NUnit3TestDemo", "NUnitTestDemo\NUnit3TestDemo.csproj", "{03C3F9EC-FB25-46C0-8F0D-17A0C6E60E9F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

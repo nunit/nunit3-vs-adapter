@@ -7,7 +7,7 @@
 
 
     <!-- Set version number for package -->
-    <property name="package.version" value="3.0"/>
+    <property name="package.version" value="3.0.0-beta-1"/>
 
     <!-- Define package name, including version -->
     <property name="package.base.name" value="NUnitVisualStudioTestAdapter"/>
@@ -51,6 +51,8 @@
 		<mkdir dir="${package.working.dir}"/>
 
 		<!-- Copy binaries to the working directory for zipping. -->
+    <!-- Note that this requires the install project to have -->
+    <!-- a reference to each binary we want to include.      -->
 		<copy todir="${package.working.dir}">
 			<fileset basedir="${install.release.dir}">
 				<include name="NUnit.VisualStudio.TestAdapter.dll"/>
