@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NUnit.VisualStudio.TestAdapter</RootNamespace>
-    <AssemblyName>NUnit3.VisualStudio.TestAdapter</AssemblyName>
+    <AssemblyName>NUnit3TestAdapter</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>
