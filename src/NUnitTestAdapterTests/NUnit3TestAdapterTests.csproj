@@ -40,8 +40,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(MSBuildProgramFiles32)\Microsoft Visual Studio 12.0\Common7\IDE\CommonExtensions\Microsoft\TestWindow\Microsoft.VisualStudio.TestPlatform.ObjectModel.dll</HintPath>
     </Reference>
-    <Reference Include="mock-assembly, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="mock-assembly">
       <HintPath>..\mock-assembly\bin\Release\mock-assembly.dll</HintPath>
     </Reference>
     <Reference Include="Moq">

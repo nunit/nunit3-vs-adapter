@@ -24,8 +24,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         
         public void SimpleMethod_Void_NoArgs()
         {// minLineDebug = 26
-            const int answer = 42; // minLineRelease = 27
-            Console.Write(answer);
+            const int answer = 42;
+            Console.Write(answer); // minLineRelease = 28
         } // maxLineDebug = maxLineRelease = 29
 
         public void SimpleMethod_Void_OneArg(int x)
@@ -42,8 +42,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         public int SimpleMethod_ReturnsInt_NoArgs()
         {// minLineDebug = 44
-            const int answer = 42; // minLineRelease = 45
-            return answer; // maxLineRelease = 46
+            const int answer = 42;
+            return answer; // minLineRelease = maxLineRelease = 46
         } // maxLineDebug = 47
 
         public string SimpleMethod_ReturnsString_OneArg(int x)
@@ -58,22 +58,22 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         public async void AsyncMethod_Void()
         { // minLineDebug = 60
-            const int answer = 42; // minLineRelease = 61
-            await Task.Delay(0);
+            const int answer = 42;
+            await Task.Delay(0); // minLineRelease = 62
             Console.Write(answer);
         } // maxLineDebug = maxLineRelease = 64
 
         public async Task AsyncMethod_Task()
         { // minLineDebug = 67
-            const int answer = 42; // minLineRelease = 68
-            await Task.Delay(0);
+            const int answer = 42;
+            await Task.Delay(0); // minLineRelease = 69
             Console.Write(answer);
         } // maxLineDebug = maxLineRelease = 71
 
         public async Task<int> AsyncMethod_ReturnsInt()
         { // minLineDebug = 74
-            const int answer = 42; // minLineRelease = 75
-            await Task.Delay(0);
+            const int answer = 42;
+            await Task.Delay(0); // minLinerelease = 76
             return answer;
         } // maxLineDebug = maxLineRelease = 78
 
@@ -81,8 +81,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             public void SimpleMethod_Void_NoArgs()
             {// minLineDebug = 83
-                const int answer = 42; // minLineRelease = 84
-                Console.Write(answer);
+                const int answer = 42;
+                Console.Write(answer); // minLineRelease = 85
             } // maxLineDebug = maxLineRelease = 86
         }
 
