@@ -46,7 +46,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             // Load the NUnit mock-assembly.dll once for this test, saving
             // the list of test cases sent to the discovery sink
-            executor = ((ITestExecutor) new NUnitTestExecutor());
+            executor = ((ITestExecutor) new NUnit3TestExecutor());
             executor.RunTests(new[] { MockAssemblyPath }, Context, testLog);
             this.Summary = new ResultSummary(testResults);
         }
