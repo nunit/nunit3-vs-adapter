@@ -20,7 +20,7 @@ namespace NUnit.VisualStudio.TestAdapter
 {
     [FileExtension(".dll")]
     [FileExtension(".exe")]
-    [DefaultExecutorUri(NUnitTestExecutor.ExecutorUri)]
+    [DefaultExecutorUri(NUnit3TestExecutor.ExecutorUri)]
     public sealed class NUnitTestDiscoverer : NUnitTestAdapter, ITestDiscoverer
     {
         private static readonly Version VERSION_3_0 = new Version(3, 0);

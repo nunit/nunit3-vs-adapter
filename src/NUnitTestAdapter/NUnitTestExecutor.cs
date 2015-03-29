@@ -15,7 +15,7 @@ namespace NUnit.VisualStudio.TestAdapter
 {
 
     [ExtensionUri(ExecutorUri)]
-    public sealed class NUnitTestExecutor : NUnitTestAdapter, ITestExecutor, IDisposable
+    public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDisposable
     {
         ///<summary>
         /// The Uri used to identify the NUnitExecutor
