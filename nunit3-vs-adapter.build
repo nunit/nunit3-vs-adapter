@@ -55,7 +55,7 @@
     <!-- a reference to each binary we want to include.      -->
 		<copy todir="${package.working.dir}">
 			<fileset basedir="${install.release.dir}">
-				<include name="NUnit.VisualStudio.TestAdapter.dll"/>
+				<include name="NUnit3TestAdapter.dll"/>
 			</fileset>
 		</copy>
 

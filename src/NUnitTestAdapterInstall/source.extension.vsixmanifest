@@ -33,6 +33,6 @@
   </Identifier>
   <References />
   <Content>
-    <CustomExtension Type="UnitTestExtension">NUnit.VisualStudio.TestAdapter.dll</CustomExtension>
+    <CustomExtension Type="UnitTestExtension">NUnit3TestAdapter.dll</CustomExtension>
   </Content>
 </Vsix>
