@@ -1,25 +1,26 @@
 ﻿// ****************************************************************
 // Copyright (c) 2011-2015 NUnit Software. All rights reserved.
 // ****************************************************************
-
+//#define LAUNCHDEBUGGER
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-// #define LAUNCHDEBUGGER
+
 
 namespace NUnit.VisualStudio.TestAdapter
 {
 
     [ExtensionUri(ExecutorUri)]
-    public sealed class NUnitTestExecutor : NUnitTestAdapter, ITestExecutor, IDisposable
+    public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDisposable
     {
         ///<summary>
         /// The Uri used to identify the NUnitExecutor
         ///</summary>
-        public const string ExecutorUri = "executor://NUnitTestExecutor";
+        public const string ExecutorUri = "executor://NUnit3TestExecutor";
 
         // The currently executing assembly runner
         private AssemblyRunner currentRunner;
@@ -36,6 +37,9 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <param name="frameworkHandle">Test log to send results and messages through</param>
         public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
+#if LAUNCHDEBUGGER
+            Debugger.Launch();
+#endif
             TestLog.Initialize(frameworkHandle);
 
             if (RegistryFailure)

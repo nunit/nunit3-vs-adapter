@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Xml;
@@ -19,7 +20,7 @@ namespace NUnit.VisualStudio.TestAdapter
 {
     [FileExtension(".dll")]
     [FileExtension(".exe")]
-    [DefaultExecutorUri(NUnitTestExecutor.ExecutorUri)]
+    [DefaultExecutorUri(NUnit3TestExecutor.ExecutorUri)]
     public sealed class NUnitTestDiscoverer : NUnitTestAdapter, ITestDiscoverer
     {
         private static readonly Version VERSION_3_0 = new Version(3, 0);
@@ -28,6 +29,9 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger messageLogger, ITestCaseDiscoverySink discoverySink)
         {
+#if LAUNCHDEBUGGER
+            Debugger.Launch();
+#endif
             TestLog.Initialize(messageLogger);
 
             if (RegistryFailure)

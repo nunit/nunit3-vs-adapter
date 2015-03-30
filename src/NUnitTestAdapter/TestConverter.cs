@@ -132,7 +132,7 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             var testCase = new TestCase(
                                      testNode.GetAttribute("fullname"),
-                                     new Uri(NUnitTestExecutor.ExecutorUri),
+                                     new Uri(NUnit3TestExecutor.ExecutorUri),
                                      this.sourceAssembly)
             {
                 DisplayName = testNode.GetAttribute("name"),
