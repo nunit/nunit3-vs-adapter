@@ -7,11 +7,11 @@ using System.Reflection;
 using System.Resources;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("NUnit.VisualStudio.TestAdapter")]
+[assembly: AssemblyTitle("NUnit3TestAdapter")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("NUnit Software")]
-[assembly: AssemblyProduct("NUnit.VisualStudio.TestAdapter")]
+[assembly: AssemblyProduct("NUnit3TestAdapter")]
 [assembly: AssemblyCopyright("Copyright 2011-2015, NUnit Software")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
