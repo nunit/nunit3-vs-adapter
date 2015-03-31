@@ -73,8 +73,8 @@
     <Compile Include="NUnit\ITestEventListener.cs" />
     <Compile Include="NUnit\NUnit3FrameworkDriver.cs" />
     <Compile Include="NUnitTestAdapter.cs" />
-    <Compile Include="NUnitTestDiscoverer.cs" />
-    <Compile Include="NUnitTestExecutor.cs" />
+    <Compile Include="NUnit3TestDiscoverer.cs" />
+    <Compile Include="NUnit3TestExecutor.cs" />
     <Compile Include="NUnit\TestFilter.cs" />
     <Compile Include="TestConverter.cs">
       <SubType>Code</SubType>
