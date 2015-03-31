@@ -97,14 +97,14 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region Public Methods
 
-        public void RunAssembly(IFrameworkHandle testLog)
+        public void RunAssembly(IFrameworkHandle testLog, bool shadowCopy)
         {
             try
             {
 #if LAUNCHDEBUGGER
             System.Diagnostics.Debugger.Launch();
 #endif
-                if (TryLoadAssembly())
+                if (TryLoadAssembly(shadowCopy))
                 {
                     using (NUnitEventListener listener = new NUnitEventListener(testLog, TestConverter))
                     {
@@ -151,9 +151,9 @@ namespace NUnit.VisualStudio.TestAdapter
         // of calling TestConverter.ConvertTestCase, the converter's
         // cache of all test cases is populated as well. All
         // future calls to convert a test case may now use the cache.
-        private bool TryLoadAssembly()
+        private bool TryLoadAssembly(bool shadowCopy)
         {
-            driver = GetDriver(assemblyName);
+            driver = GetDriver(assemblyName, shadowCopy);
             XmlNode loadResult = XmlHelper.CreateXmlNode(driver.Load());
             if (loadResult.GetAttribute("runstate") != "Runnable")
                 return false;
@@ -172,14 +172,14 @@ namespace NUnit.VisualStudio.TestAdapter
             return true;
         }
 
-        private NUnit3FrameworkDriver GetDriver(string sourceAssembly)
+        private NUnit3FrameworkDriver GetDriver(string sourceAssembly, bool shadowCopy)
         {
             var setup = new AppDomainSetup();
             setup.ApplicationBase = Path.GetDirectoryName(sourceAssembly);
             var domain = AppDomain.CreateDomain("testDomain", null, setup);
 
             var settings = new Dictionary<string, object>();
-            //settings["ShadowCopyFiles"] = ShadowCopy;
+            settings["ShadowCopyFiles"] = shadowCopy;
 
             var driver = new NUnit3FrameworkDriver(domain, sourceAssembly, settings);
             return driver;
