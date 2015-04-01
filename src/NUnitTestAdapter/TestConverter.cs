@@ -227,16 +227,16 @@ namespace NUnit.VisualStudio.TestAdapter
             var setup = new AppDomainSetup();
 
             var thisAssembly = Assembly.GetExecutingAssembly();
-            setup.ApplicationBase = Path.GetDirectoryName(sourceAssembly);
+            setup.ApplicationBase = Path.GetDirectoryName(thisAssembly.ManifestModule.FullyQualifiedName);
 
-            var evidence = AppDomain.CurrentDomain.Evidence;
-            this.asyncMethodHelperDomain = AppDomain.CreateDomain("AsyncMethodHelper", evidence, setup);
+            //var evidence = AppDomain.CurrentDomain.Evidence;
+            this.asyncMethodHelperDomain = AppDomain.CreateDomain("AsyncMethodHelper", null, setup);
 
             try
             {
                 var helper = this.asyncMethodHelperDomain.CreateInstanceAndUnwrap(
                     thisAssembly.FullName,
-                    "NUnit.VisualStudio.TestAdapter.Internal.AsyncMethodHelper") as AsyncMethodHelper;
+                    typeof(AsyncMethodHelper).FullName) as AsyncMethodHelper;
                 helper.LoadAssembly(sourceAssembly);
                 return helper as AsyncMethodHelper;
             }
@@ -244,7 +244,7 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 // If we can't load it for some reason, we issue a warning
                 // and won't try to do it again for the assembly.
-                logger.SendWarningMessage("Unable to reflect on " + sourceAssembly + "\r\nSource data will not be available for some of the tests", ex);
+                logger.SendWarningMessage("Unable to create AsyncMethodHelper\r\nSource data will not be available for some of the tests", ex);
                 return null;
             }
         }
