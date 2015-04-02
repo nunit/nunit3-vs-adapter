@@ -83,6 +83,13 @@ namespace NUnit.Engine.Drivers
             return handler.Result;
         }
 
+        public void Unload()
+        {
+            // TODO: This should probably be done externally or the driver modified to create the domain
+            if (_testDomain != null)
+                AppDomain.Unload(_testDomain);
+        }
+
         public int CountTestCases(TestFilter filter)
         {
             CallbackHandler handler = new CallbackHandler();

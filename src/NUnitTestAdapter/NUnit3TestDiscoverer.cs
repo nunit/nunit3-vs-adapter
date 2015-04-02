@@ -49,13 +49,15 @@ namespace NUnit.VisualStudio.TestAdapter
                 if (IsNUnit3TestAssembly(sourceAssembly))
                 {
                     TestConverter testConverter = null;
+                    NUnit3FrameworkDriver frameworkDriver = null;
+
                     try
                     {
-                        var driver = GetDriver(sourceAssembly);
-                        XmlNode loadResult = XmlHelper.CreateXmlNode(driver.Load());
+                        frameworkDriver = GetDriver(sourceAssembly);
+                        XmlNode loadResult = XmlHelper.CreateXmlNode(frameworkDriver.Load());
                         if (loadResult.GetAttribute("runstate") == "Runnable")
                         {
-                            XmlNode topNode = XmlHelper.CreateXmlNode(driver.Explore(TestFilter.Empty));
+                            XmlNode topNode = XmlHelper.CreateXmlNode(frameworkDriver.Explore(TestFilter.Empty));
 
                             testConverter = new TestConverter(TestLog, sourceAssembly);
                             int cases = ProcessTestCases(topNode, discoverySink,testConverter);
@@ -90,6 +92,9 @@ namespace NUnit.VisualStudio.TestAdapter
                     {
                         if (testConverter != null)
                             testConverter.Dispose();
+
+                        if (frameworkDriver != null)
+                            frameworkDriver.Unload();
                     }
                 }
             }
