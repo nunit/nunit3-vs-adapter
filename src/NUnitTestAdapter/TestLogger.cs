@@ -86,17 +86,20 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void SendWarningMessage(string message,Exception ex)
         {
+            string fmt = "Exception {0}, {1}";
+            var type = ex.GetType();
+
             switch (Verbosity)
             {
                 case 0:
-                    var type = ex.GetType();
-                    SendMessage(TestMessageLevel.Warning,string.Format("Exception {0}, {1}", type, message));
+                    SendMessage(TestMessageLevel.Warning, string.Format(fmt, type, ex.Message));
                     break;
+
                 default:
-                    SendMessage(TestMessageLevel.Warning, message);
-                    SendMessage(TestMessageLevel.Warning,ex.ToString());
+                    SendMessage(TestMessageLevel.Warning, string.Format(fmt, type, ex.ToString()));
                     break;
             }
+
             SendMessage(TestMessageLevel.Warning, message);
         }
 

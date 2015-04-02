@@ -21,13 +21,14 @@ namespace NUnit.VisualStudio.TestAdapter
         private readonly string adapterVersion;
 
         protected bool UseVsKeepEngineRunning { get; private set; }
+
         protected bool ShadowCopy { get; private set; }
 
         protected int Verbosity { get; private set; }
 
+        protected bool RegistryFailure { get; private set; }
 
-        protected bool RegistryFailure { get; set; }
-        protected string ErrorMsg { get; set; }
+        protected string ErrorMsg { get; private set; }
 
         #region Constructor
 

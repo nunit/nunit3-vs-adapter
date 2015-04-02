@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
-        <id>NUnitTestAdapter.WithFramework</id>
+        <id>NUnit3TestAdapter.WithFramework</id>
         <version>${package.version}</version>
         <title>NUnit TestAdapter including NUnit 3.0 framework</title>
         <authors>NUnit Software</authors>
@@ -22,7 +22,7 @@ The package works with Visual Studio 2012 from RTM, and all Updates, and with Vi
     <files>
         <file src="${project.base.dir}\src\NUnitTestAdapterTests\bin\Release\nunit.framework.dll" target="lib\nunit.framework.dll" />
         <file src="${project.base.dir}\src\NUnitTestAdapterTests\bin\Release\nunit.framework.xml" target="lib\nunit.framework.xml" />
-        <file src="${package.working.dir}\NUnit.VisualStudio.TestAdapter.dll" target="lib\NUnit.VisualStudio.TestAdapter.dll" />
+        <file src="${package.working.dir}\NUnit3TestAdapter.dll" target="lib\NUnit3TestAdapter.dll" />
         <file src="${project.nuget.dir}\install.ps1" target="tools\install.ps1" />
     </files>
 </package>

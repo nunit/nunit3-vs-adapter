@@ -10,7 +10,7 @@
     <property name="package.version" value="3.0.0-beta-1"/>
 
     <!-- Define package name, including version -->
-    <property name="package.base.name" value="NUnitVisualStudioTestAdapter"/>
+    <property name="package.base.name" value="NUnit3TestAdapter"/>
     <property name="package.name" value="${package.base.name}-${package.version}"/>
 
     <!-- Define various directories used -->
@@ -38,7 +38,7 @@
 	<target name="package-vsix">
 		
 		<!-- Copy the vsix package, built by Visual Studio. -->
-		<property name="source.vsix.file" value="NUnitTestAdapter.vsix"/>
+		<property name="source.vsix.file" value="NUnit3TestAdapter.vsix"/>
 		<property name="target.vsix.file" value="${package.name}.vsix"/>
 		<copy file="${path::combine(install.release.dir, source.vsix.file)}"
 		tofile="${path::combine(project.package.dir, target.vsix.file)}"/>

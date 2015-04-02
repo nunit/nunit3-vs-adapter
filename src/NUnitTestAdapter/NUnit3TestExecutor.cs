@@ -72,7 +72,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
                     using (currentRunner = new AssemblyRunner(TestLog, sourceAssembly, tfsfilter))
                     {
-                        currentRunner.RunAssembly(frameworkHandle);
+                        currentRunner.RunAssembly(frameworkHandle, ShadowCopy);
                     }
 
                     currentRunner = null;
@@ -120,7 +120,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
                 using (currentRunner = new AssemblyRunner(TestLog, assemblyGroup.Key, assemblyGroup))
                 {
-                    currentRunner.RunAssembly(frameworkHandle);
+                    currentRunner.RunAssembly(frameworkHandle, ShadowCopy);
                 }
 
                 currentRunner = null;
