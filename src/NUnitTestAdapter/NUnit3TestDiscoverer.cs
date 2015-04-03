@@ -46,56 +46,60 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 TestLog.SendDebugMessage("Processing " + sourceAssembly);
 
-                if (IsNUnit3TestAssembly(sourceAssembly))
+                TestConverter testConverter = null;
+                NUnit3FrameworkDriver frameworkDriver = null;
+
+                try
                 {
-                    TestConverter testConverter = null;
-                    NUnit3FrameworkDriver frameworkDriver = null;
+                    frameworkDriver = GetDriver(sourceAssembly);
+                    XmlNode loadResult = XmlHelper.CreateXmlNode(frameworkDriver.Load());
+                    if (loadResult.GetAttribute("runstate") == "Runnable")
+                    {
+                        XmlNode topNode = XmlHelper.CreateXmlNode(frameworkDriver.Explore(TestFilter.Empty));
 
-                    try
-                    {
-                        frameworkDriver = GetDriver(sourceAssembly);
-                        XmlNode loadResult = XmlHelper.CreateXmlNode(frameworkDriver.Load());
-                        if (loadResult.GetAttribute("runstate") == "Runnable")
-                        {
-                            XmlNode topNode = XmlHelper.CreateXmlNode(frameworkDriver.Explore(TestFilter.Empty));
-
-                            testConverter = new TestConverter(TestLog, sourceAssembly);
-                            int cases = ProcessTestCases(topNode, discoverySink,testConverter);
-                            TestLog.SendDebugMessage(string.Format("Discovered {0} test cases", cases));
-                        }
-                        else
-                        {
-                            TestLog.NUnitLoadError(sourceAssembly);
-                        }
+                        testConverter = new TestConverter(TestLog, sourceAssembly);
+                        int cases = ProcessTestCases(topNode, discoverySink, testConverter);
+                        TestLog.SendDebugMessage(string.Format("Discovered {0} test cases", cases));
                     }
-                    catch (BadImageFormatException)
+                    else
                     {
-                        // we skip the native c++ binaries that we don't support.
-                        TestLog.AssemblyNotSupportedWarning(sourceAssembly);
+                        TestLog.NUnitLoadError(sourceAssembly);
                     }
-                    catch (FileNotFoundException ex)
-                    {
-                        // Probably from the GetExportedTypes in NUnit.core, attempting to find an assembly, not a problem if it is not NUnit here
-                        TestLog.DependentAssemblyNotFoundWarning(ex.FileName, sourceAssembly);
-                    }
-                    catch (FileLoadException ex)
-                    {
-                        // Attempts to load an invalid assembly, or an assembly with missing dependencies
-                        TestLog.LoadingAssemblyFailedWarning(ex.FileName, sourceAssembly);
-                    }
-                    catch (Exception ex)
-                    {
-
+                }
+                catch (BadImageFormatException)
+                {
+                    // we skip the native c++ binaries that we don't support.
+                    TestLog.AssemblyNotSupportedWarning(sourceAssembly);
+                }
+                catch (FileNotFoundException ex)
+                {
+                    // Either the NUnit framework was not referenced by the test assembly
+                    // or some other error occured. Not a problem if not an NUnit assembly.
+                    TestLog.DependentAssemblyNotFoundWarning(ex.FileName, sourceAssembly);
+                }
+                catch (FileLoadException ex)
+                {
+                    // Attempts to load an invalid assembly, or an assembly with missing dependencies
+                    TestLog.LoadingAssemblyFailedWarning(ex.FileName, sourceAssembly);
+                }
+                catch (TypeLoadException ex)
+                {
+                    if (ex.TypeName == NUnit3FrameworkDriver.CONTROLLER_TYPE)
+                        TestLog.SendWarningMessage("   Skipping NUnit 2.x test assembly");
+                    else
                         TestLog.SendErrorMessage("Exception thrown discovering tests in " + sourceAssembly, ex);
-                    }
-                    finally
-                    {
-                        if (testConverter != null)
-                            testConverter.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    TestLog.SendErrorMessage("Exception thrown discovering tests in " + sourceAssembly, ex);
+                }
+                finally
+                {
+                    if (testConverter != null)
+                        testConverter.Dispose();
 
-                        if (frameworkDriver != null)
-                            frameworkDriver.Unload();
-                    }
+                    if (frameworkDriver != null)
+                        frameworkDriver.Unload();
                 }
             }
 
@@ -105,26 +109,6 @@ namespace NUnit.VisualStudio.TestAdapter
         #endregion
 
         #region Helper Methods
-
-        private bool IsNUnit3TestAssembly(string sourceAssembly)
-        {
-            var assembly = Assembly.ReflectionOnlyLoadFrom(sourceAssembly);
-
-            foreach (var refAssembly in assembly.GetReferencedAssemblies())
-            {
-                if (refAssembly.Name == "nunit.framework")
-                {
-                    if (refAssembly.Version >= VERSION_3_0)
-                        return true;
-
-                    TestLog.SendDebugMessage("   Skipping NUnit 2.x assembly");
-                    return false;
-                }
-            }
-
-            TestLog.SendDebugMessage("   Skipping non-NUnit assembly");
-            return false;
-        }
 
         private NUnit3FrameworkDriver GetDriver(string sourceAssembly)
         {

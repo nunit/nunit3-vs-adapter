@@ -229,7 +229,6 @@ namespace NUnit.VisualStudio.TestAdapter
             var thisAssembly = Assembly.GetExecutingAssembly();
             setup.ApplicationBase = Path.GetDirectoryName(thisAssembly.ManifestModule.FullyQualifiedName);
 
-            //var evidence = AppDomain.CurrentDomain.Evidence;
             this.asyncMethodHelperDomain = AppDomain.CreateDomain("AsyncMethodHelper", null, setup);
 
             try
