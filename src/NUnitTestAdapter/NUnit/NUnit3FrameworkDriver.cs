@@ -40,7 +40,7 @@ namespace NUnit.Engine.Drivers
     {
         private const string NUNIT_FRAMEWORK = "nunit.framework";
 
-        private static readonly string CONTROLLER_TYPE = "NUnit.Framework.Api.FrameworkController";
+        public static readonly string CONTROLLER_TYPE = "NUnit.Framework.Api.FrameworkController";
         private static readonly string LOAD_ACTION = CONTROLLER_TYPE + "+LoadTestsAction";
         private static readonly string EXPLORE_ACTION = CONTROLLER_TYPE + "+ExploreTestsAction";
         private static readonly string COUNT_ACTION = CONTROLLER_TYPE + "+CountTestsAction";
@@ -144,12 +144,7 @@ namespace NUnit.Engine.Drivers
         private object CreateObject(string typeName, params object[] args)
         {
             return _testDomain.CreateInstanceAndUnwrap(
-                _frameworkAssemblyName, typeName, false, 0,
-#if !NET_4_0
-                null, args, null, null, null );
-#else
-                null, args, null, null );
-#endif
+                _frameworkAssemblyName, typeName, false, 0, null, args, null, null, null );
         }
 
         #endregion
