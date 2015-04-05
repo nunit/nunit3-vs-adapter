@@ -23,40 +23,40 @@ namespace NUnit.VisualStudio.TestAdapter
     /// </summary>
     public class AssemblyRunner : IDisposable
     {
-        private readonly TestLogger logger;
-        private readonly string assemblyName;
+        private readonly TestLogger _logger;
+        private readonly string _assemblyName;
 
-        private NUnit3FrameworkDriver driver;
-        private TestFilter nunitFilter;
-        private readonly List<TestCase> loadedTestCases;
-        private readonly TestConverter testConverter;
+        private NUnit3FrameworkDriver _frameworkDriver;
+        private TestFilter _nunitFilter;
+        private readonly List<TestCase> _loadedTestCases;
+        private readonly TestConverter _testConverter;
 
         #region Constructors
 
         // This constructor is called by the others and is used directly for testing
         public AssemblyRunner(TestLogger logger, string assemblyName)
         {
-            this.logger = logger;
-            this.assemblyName = assemblyName;
-            testConverter = new TestConverter(logger, assemblyName);
-            loadedTestCases = new List<TestCase>();
-            nunitFilter = TestFilter.Empty;
+            _logger = logger;
+            _assemblyName = assemblyName;
+            _testConverter = new TestConverter(logger, assemblyName);
+            _loadedTestCases = new List<TestCase>();
+            _nunitFilter = TestFilter.Empty;
         }
 
         // This constructor is used when the executor is called with a list of test cases
         public AssemblyRunner(TestLogger logger, string assemblyName, IEnumerable<TestCase> selectedTestCases)
             : this(logger, assemblyName)
         {
-            nunitFilter = MakeTestFilter(selectedTestCases);
+            _nunitFilter = MakeTestFilter(selectedTestCases);
         }
 
-        private readonly ITfsTestFilter tfsFilter;
+        private readonly ITfsTestFilter _tfsFilter;
 
         // This constructor is used when the executor is called with a list of assemblies
         public AssemblyRunner(TestLogger logger, string assemblyName, ITfsTestFilter tfsFilter)
             : this(logger, assemblyName)
         {
-            this.tfsFilter = tfsFilter;
+            _tfsFilter = tfsFilter;
         }
 
         private static TestFilter MakeTestFilter(IEnumerable<TestCase> testCases)
@@ -78,19 +78,7 @@ namespace NUnit.VisualStudio.TestAdapter
         // TODO: Revise tests and remove
         public TestFilter NUnitFilter 
         {
-            get { return nunitFilter; }
-        }
-
-        // TODO: Revise tests and remove
-        public IList<TestCase> LoadedTestCases 
-        {
-            get { return loadedTestCases; }
-        }
-
-        // TODO: Revise tests and remove
-        public TestConverter TestConverter
-        { 
-            get { return testConverter; }
+            get { return _nunitFilter; }
         }
 
         #endregion
@@ -106,44 +94,48 @@ namespace NUnit.VisualStudio.TestAdapter
 #endif
                 if (TryLoadAssembly(shadowCopy))
                 {
-                    using (NUnitEventListener listener = new NUnitEventListener(testLog, TestConverter))
+                    using (NUnitEventListener listener = new NUnitEventListener(testLog, _testConverter))
                     {
                         try
                         {
-                            driver.Run(listener, NUnitFilter);
+                            _frameworkDriver.Run(listener, NUnitFilter);
                         }
                         catch (NullReferenceException)
                         {
                             // this happens during the run when CancelRun is called.
-                            logger.SendDebugMessage("Nullref caught");
+                            _logger.SendDebugMessage("Nullref caught");
                         }
                     }
                 }
                 else
                 {
-                    logger.NUnitLoadError(assemblyName);
+                    _logger.NUnitLoadError(_assemblyName);
                 }
             }
             catch (BadImageFormatException)
             {
                 // we skip the native c++ binaries that we don't support.
-                logger.AssemblyNotSupportedWarning(assemblyName);
+                _logger.AssemblyNotSupportedWarning(_assemblyName);
             }
             catch (System.IO.FileNotFoundException ex)
             {
                 // Probably from the GetExportedTypes in NUnit.core, attempting to find an assembly, not a problem if it is not NUnit here
-                logger.DependentAssemblyNotFoundWarning(ex.FileName, assemblyName);
+                _logger.DependentAssemblyNotFoundWarning(ex.FileName, _assemblyName);
             }
             catch (Exception ex)
             {
-                logger.SendErrorMessage("Exception thrown executing tests in " + assemblyName, ex);
+                _logger.SendErrorMessage("Exception thrown executing tests in " + _assemblyName, ex);
+            }
+            finally
+            {
+                _frameworkDriver.Unload();
             }
         }
 
         public void CancelRun()
         {
-            if (driver != null)
-                driver.StopRun(true);
+            if (_frameworkDriver != null)
+                _frameworkDriver.StopRun(true);
        }
 
         // Try to load the assembly and, if successful, populate
@@ -153,21 +145,21 @@ namespace NUnit.VisualStudio.TestAdapter
         // future calls to convert a test case may now use the cache.
         private bool TryLoadAssembly(bool shadowCopy)
         {
-            driver = GetDriver(assemblyName, shadowCopy);
-            XmlNode loadResult = XmlHelper.CreateXmlNode(driver.Load());
+            _frameworkDriver = GetDriver(_assemblyName, shadowCopy);
+            XmlNode loadResult = XmlHelper.CreateXmlNode(_frameworkDriver.Load());
             if (loadResult.GetAttribute("runstate") != "Runnable")
                 return false;
 
-            logger.SendMessage(TestMessageLevel.Informational,string.Format("Loading tests from {0}",assemblyName));
-            foreach (XmlNode testNode in XmlHelper.CreateXmlNode(driver.Explore(TestFilter.Empty)).SelectNodes("//test-case"))
-                LoadedTestCases.Add(TestConverter.ConvertTestCase(testNode));
+            _logger.SendMessage(TestMessageLevel.Informational,string.Format("Loading tests from {0}",_assemblyName));
+            foreach (XmlNode testNode in XmlHelper.CreateXmlNode(_frameworkDriver.Explore(TestFilter.Empty)).SelectNodes("//test-case"))
+                _loadedTestCases.Add(_testConverter.ConvertTestCase(testNode));
 
-            if (tfsFilter==null || !tfsFilter.HasTfsFilterValue) 
+            if (_tfsFilter==null || !_tfsFilter.HasTfsFilterValue) 
                 return true;
-            var filteredTestCases = tfsFilter.CheckFilter(LoadedTestCases);
+            var filteredTestCases = _tfsFilter.CheckFilter(_loadedTestCases);
             var testCases = filteredTestCases as TestCase[] ?? filteredTestCases.ToArray();
-            logger.SendMessage(TestMessageLevel.Informational, string.Format("TFS Filter detected: LoadedTestCases {0}, Filterered Test Cases {1}", LoadedTestCases.Count, testCases.Count()));
-            nunitFilter = MakeTestFilter(testCases);
+            _logger.SendMessage(TestMessageLevel.Informational, string.Format("TFS Filter detected: LoadedTestCases {0}, Filterered Test Cases {1}", _loadedTestCases.Count, testCases.Count()));
+            _nunitFilter = MakeTestFilter(testCases);
 
             return true;
         }
@@ -202,8 +194,8 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 if (disposing)
                 {
-                    if (TestConverter != null)
-                        TestConverter.Dispose();
+                    if (_testConverter != null)
+                        _testConverter.Dispose();
                 }
             }
             disposed = true;
