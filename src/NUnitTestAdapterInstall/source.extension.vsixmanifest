@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Vsix xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2010">
-  <Identifier Id="NUnit3TestAdapter..DD956069-EF7E-4E44-9934-33C4E4F3A793">
+  <Identifier Id="NUnit.NUnit3TestAdapter">
     <Name>NUnit3 Test Adapter</Name>
     <Author>Charlie Poole</Author>
     <Version>3.0.0.0</Version>
