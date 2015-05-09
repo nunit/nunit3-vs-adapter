@@ -6,12 +6,12 @@ using NUnit.Framework;
 namespace NUnitTestDemo
 {
     [TestFixture]
-    public class TestFixtureSetUpTests
+    public class OneTimeSetUpTests
     {
         int SetUpCount;
         int TearDownCount;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void BeforeTests()
         {
             Assert.That(SetUpCount, Is.EqualTo(0));
@@ -19,7 +19,7 @@ namespace NUnitTestDemo
             SetUpCount++;
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void AfterTests()
         {
             Assert.That(SetUpCount, Is.EqualTo(1), "Unexpected error");
