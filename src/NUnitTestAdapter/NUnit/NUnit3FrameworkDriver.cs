@@ -22,12 +22,8 @@
 // ***********************************************************************
 
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Collections.Generic;
-using System.Web.UI;
-using System.Xml;
-//using NUnit.Engine.Internal;
 using NUnit.Engine.Extensibility;
 
 namespace NUnit.Engine.Drivers
@@ -39,8 +35,9 @@ namespace NUnit.Engine.Drivers
     public class NUnit3FrameworkDriver : IFrameworkDriver
     {
         private const string NUNIT_FRAMEWORK = "nunit.framework";
+        private const string LOAD_MESSAGE = "Method called without calling Load first";
 
-        public static readonly string CONTROLLER_TYPE = "NUnit.Framework.Api.FrameworkController";
+        private static readonly string CONTROLLER_TYPE = "NUnit.Framework.Api.FrameworkController";
         private static readonly string LOAD_ACTION = CONTROLLER_TYPE + "+LoadTestsAction";
         private static readonly string EXPLORE_ACTION = CONTROLLER_TYPE + "+ExploreTestsAction";
         private static readonly string COUNT_ACTION = CONTROLLER_TYPE + "+CountTestsAction";
@@ -50,31 +47,34 @@ namespace NUnit.Engine.Drivers
         //static ILogger log = InternalTrace.GetLogger("NUnitFrameworkDriver");
 
         AppDomain _testDomain;
-        string _testAssemblyPath;
-        string _frameworkAssemblyName;
+        //string _testAssemblyPath;
 
         object _frameworkController;
 
-        public NUnit3FrameworkDriver(AppDomain testDomain, string testAssemblyPath, IDictionary<string, object> settings)
-            : this(testDomain, NUNIT_FRAMEWORK, testAssemblyPath, settings) { }
-
-        public NUnit3FrameworkDriver(AppDomain testDomain, string frameworkAssemblyName, string testAssemblyPath, IDictionary<string, object> settings)
+        /// <summary>
+        /// Construct an NUnit3FrameworkDriver
+        /// </summary>
+        /// <param name="testDomain">The AppDomain in which to create the FrameworkController</param>
+        public NUnit3FrameworkDriver(AppDomain testDomain)
         {
-            if (!File.Exists(testAssemblyPath))
-                throw new ArgumentException("Framework driver constructor called with a file name that doesn't exist.", "testAssemblyPath");
-
             _testDomain = testDomain;
-            _testAssemblyPath = testAssemblyPath;
-            _frameworkAssemblyName = frameworkAssemblyName;
-            _frameworkController = CreateObject(CONTROLLER_TYPE, testAssemblyPath, (System.Collections.IDictionary)settings);
         }
+
+        public string ID { get; set; }
 
         /// <summary>
         /// Loads the tests in an assembly.
         /// </summary>
         /// <returns>An Xml string representing the loaded test</returns>
-        public string Load()
+        public string Load(string testAssemblyPath, IDictionary<string, object> settings)
         {
+            if (!File.Exists(testAssemblyPath))
+                throw new ArgumentException("Framework driver constructor called with a file name that doesn't exist.", "testAssemblyPath");
+
+            var idPrefix = string.IsNullOrEmpty(ID) ? "" : ID + "-";
+            _testAssemblyPath = testAssemblyPath;
+            _frameworkController = CreateObject(CONTROLLER_TYPE, testAssemblyPath, idPrefix, (System.Collections.IDictionary)settings);
+
             CallbackHandler handler = new CallbackHandler();
 
             //log.Info("Loading {0} - see separate log file", Path.GetFileName(_testAssemblyPath));
@@ -83,15 +83,10 @@ namespace NUnit.Engine.Drivers
             return handler.Result;
         }
 
-        public void Unload()
-        {
-            // TODO: This should probably be done externally or the driver modified to create the domain
-            if (_testDomain != null)
-                AppDomain.Unload(_testDomain);
-        }
-
         public int CountTestCases(TestFilter filter)
         {
+            CheckLoadWasCalled();
+
             CallbackHandler handler = new CallbackHandler();
 
             CreateObject(COUNT_ACTION, _frameworkController, filter.Text, handler);
@@ -107,6 +102,8 @@ namespace NUnit.Engine.Drivers
         /// <returns>An Xml string representing the result</returns>
         public string Run(ITestEventListener listener, TestFilter filter)
         {
+            CheckLoadWasCalled();
+
             CallbackHandler handler = new CallbackHandler(listener);
 
             //log.Info("Running {0} - see separate log file", Path.GetFileName(_testAssemblyPath));
@@ -131,6 +128,8 @@ namespace NUnit.Engine.Drivers
         /// <returns>An Xml string representing the tests</returns>
         public string Explore(TestFilter filter)
         {
+            CheckLoadWasCalled();
+
             CallbackHandler handler = new CallbackHandler();
 
             //log.Info("Exploring {0} - see separate log file", Path.GetFileName(_testAssemblyPath));
@@ -141,10 +140,17 @@ namespace NUnit.Engine.Drivers
 
         #region Helper Methods
 
+        private void CheckLoadWasCalled()
+        {
+            if (_frameworkController == null)
+                throw new InvalidOperationException(LOAD_MESSAGE);
+        }
+
         private object CreateObject(string typeName, params object[] args)
         {
             return _testDomain.CreateInstanceAndUnwrap(
-                _frameworkAssemblyName, typeName, false, 0, null, args, null, null, null );
+                NUNIT_FRAMEWORK, typeName, false, 0,
+                null, args, null, null, null );
         }
 
         #endregion

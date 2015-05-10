@@ -126,10 +126,6 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 _logger.SendErrorMessage("Exception thrown executing tests in " + _assemblyName, ex);
             }
-            finally
-            {
-                _frameworkDriver.Unload();
-            }
         }
 
         public void CancelRun()
@@ -146,7 +142,7 @@ namespace NUnit.VisualStudio.TestAdapter
         private bool TryLoadAssembly(bool shadowCopy)
         {
             _frameworkDriver = GetDriver(_assemblyName, shadowCopy);
-            XmlNode loadResult = XmlHelper.CreateXmlNode(_frameworkDriver.Load());
+            XmlNode loadResult = XmlHelper.CreateXmlNode(_frameworkDriver.Load(_assemblyName, new Dictionary<string, object>()));
             if (loadResult.GetAttribute("runstate") != "Runnable")
                 return false;
 
@@ -173,7 +169,7 @@ namespace NUnit.VisualStudio.TestAdapter
             var settings = new Dictionary<string, object>();
             settings["ShadowCopyFiles"] = shadowCopy;
 
-            var driver = new NUnit3FrameworkDriver(domain, sourceAssembly, settings);
+            var driver = new NUnit3FrameworkDriver(domain);
             return driver;
         }
 
