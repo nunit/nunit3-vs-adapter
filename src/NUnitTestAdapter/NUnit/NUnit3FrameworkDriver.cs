@@ -47,7 +47,7 @@ namespace NUnit.Engine.Drivers
         //static ILogger log = InternalTrace.GetLogger("NUnitFrameworkDriver");
 
         AppDomain _testDomain;
-        string _testAssemblyPath;
+        //string _testAssemblyPath;
 
         object _frameworkController;
 
@@ -150,11 +150,7 @@ namespace NUnit.Engine.Drivers
         {
             return _testDomain.CreateInstanceAndUnwrap(
                 NUNIT_FRAMEWORK, typeName, false, 0,
-#if !NET_4_0
                 null, args, null, null, null );
-#else
-                null, args, null, null );
-#endif
         }
 
         #endregion
