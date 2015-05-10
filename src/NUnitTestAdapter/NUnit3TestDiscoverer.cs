@@ -52,7 +52,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 try
                 {
                     frameworkDriver = GetDriver(sourceAssembly);
-                    XmlNode loadResult = XmlHelper.CreateXmlNode(frameworkDriver.Load());
+                    XmlNode loadResult = XmlHelper.CreateXmlNode(frameworkDriver.Load(sourceAssembly, new Dictionary<string, object>()));
                     if (loadResult.GetAttribute("runstate") == "Runnable")
                     {
                         XmlNode topNode = XmlHelper.CreateXmlNode(frameworkDriver.Explore(TestFilter.Empty));
@@ -84,7 +84,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
                 catch (TypeLoadException ex)
                 {
-                    if (ex.TypeName == NUnit3FrameworkDriver.CONTROLLER_TYPE)
+                    if (ex.TypeName == "NUnit.Framework.Api.FrameworkController")
                         TestLog.SendWarningMessage("   Skipping NUnit 2.x test assembly");
                     else
                         TestLog.SendErrorMessage("Exception thrown discovering tests in " + sourceAssembly, ex);
@@ -97,9 +97,6 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     if (testConverter != null)
                         testConverter.Dispose();
-
-                    if (frameworkDriver != null)
-                        frameworkDriver.Unload();
                 }
             }
 
@@ -119,7 +116,7 @@ namespace NUnit.VisualStudio.TestAdapter
             var settings = new Dictionary<string, object>();
             settings["ShadowCopyFiles"] = ShadowCopy;
 
-            var driver = new NUnit3FrameworkDriver(domain, sourceAssembly, settings);
+            var driver = new NUnit3FrameworkDriver(domain);
             return driver;
         }
 
