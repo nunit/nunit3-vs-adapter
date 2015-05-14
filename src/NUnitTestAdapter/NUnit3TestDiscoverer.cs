@@ -8,13 +8,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Engine;
-using NUnit.Engine.Drivers;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -23,8 +21,6 @@ namespace NUnit.VisualStudio.TestAdapter
     [DefaultExecutorUri(NUnit3TestExecutor.ExecutorUri)]
     public sealed class NUnit3TestDiscoverer : NUnitTestAdapter, ITestDiscoverer
     {
-        private static readonly Version VERSION_3_0 = new Version(3, 0);
-
         #region ITestDiscoverer Members
 
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger messageLogger, ITestCaseDiscoverySink discoverySink)
@@ -32,10 +28,7 @@ namespace NUnit.VisualStudio.TestAdapter
 #if LAUNCHDEBUGGER
             Debugger.Launch();
 #endif
-            TestLog.Initialize(messageLogger);
-
-            if (RegistryFailure)
-                TestLog.SendErrorMessage(ErrorMsg);
+            Initialize(messageLogger);
 
             Info("discovering tests", "started");
 
@@ -46,20 +39,25 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 TestLog.SendDebugMessage("Processing " + sourceAssembly);
 
-                TestConverter testConverter = null;
-                NUnit3FrameworkDriver frameworkDriver = null;
+                ITestRunner runner = GetRunnerFor(sourceAssembly);
 
                 try
                 {
-                    frameworkDriver = GetDriver(sourceAssembly);
-                    XmlNode loadResult = XmlHelper.CreateXmlNode(frameworkDriver.Load(sourceAssembly, new Dictionary<string, object>()));
+                    XmlNode loadResult = runner.Load();
+
+                    // Currently, this will always be the case but it might change
+                    if (loadResult.Name == "test-run")
+                        loadResult = loadResult.FirstChild;
+
                     if (loadResult.GetAttribute("runstate") == "Runnable")
                     {
-                        XmlNode topNode = XmlHelper.CreateXmlNode(frameworkDriver.Explore(TestFilter.Empty));
+                        XmlNode topNode = runner.Explore(TestFilter.Empty);
 
-                        testConverter = new TestConverter(TestLog, sourceAssembly);
-                        int cases = ProcessTestCases(topNode, discoverySink, testConverter);
-                        TestLog.SendDebugMessage(string.Format("Discovered {0} test cases", cases));
+                        using (var testConverter = new TestConverter(TestLog, sourceAssembly))
+                        {
+                            int cases = ProcessTestCases(topNode, discoverySink, testConverter);
+                            TestLog.SendDebugMessage(string.Format("Discovered {0} test cases", cases));
+                        }
                     }
                     else
                     {
@@ -93,11 +91,6 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     TestLog.SendErrorMessage("Exception thrown discovering tests in " + sourceAssembly, ex);
                 }
-                finally
-                {
-                    if (testConverter != null)
-                        testConverter.Dispose();
-                }
             }
 
             Info("discovering test", "finished");
@@ -106,19 +99,6 @@ namespace NUnit.VisualStudio.TestAdapter
         #endregion
 
         #region Helper Methods
-
-        private NUnit3FrameworkDriver GetDriver(string sourceAssembly)
-        {
-            var setup = new AppDomainSetup();
-            setup.ApplicationBase = Path.GetDirectoryName(sourceAssembly);
-            var domain = AppDomain.CreateDomain("testDomain", null, setup);
-
-            var settings = new Dictionary<string, object>();
-            settings["ShadowCopyFiles"] = ShadowCopy;
-
-            var driver = new NUnit3FrameworkDriver(domain);
-            return driver;
-        }
 
         private int ProcessTestCases(XmlNode topNode, ITestCaseDiscoverySink discoverySink, TestConverter testConverter)
         {

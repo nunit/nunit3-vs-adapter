@@ -54,28 +54,24 @@
       <HintPath>$(MSBuildProgramFiles32)\Microsoft Visual Studio 11.0\Common7\IDE\CommonExtensions\Microsoft\TestWindow\Microsoft.VisualStudio.TestPlatform.ObjectModel.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="nunit.core.engine, Version=3.0.5608.17824, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\NUnit.Core.Engine.3.0.0-beta-2-dbg\lib\nunit.core.engine.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssemblyRunner.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="NUnitEventListener.cs" />
-    <Compile Include="NUnit\CallbackHandler.cs" />
-    <Compile Include="NUnit\IFrameworkDriver.cs" />
     <Compile Include="Internal\AsyncMethodHelper.cs" />
     <Compile Include="Internal\Stackframe.cs" />
     <Compile Include="Internal\StackframeParser.cs" />
     <Compile Include="Internal\Stacktrace.cs" />
-    <Compile Include="NUnit\ITestEventListener.cs" />
-    <Compile Include="NUnit\NUnit3FrameworkDriver.cs" />
     <Compile Include="NUnitTestAdapter.cs" />
     <Compile Include="NUnit3TestDiscoverer.cs" />
     <Compile Include="NUnit3TestExecutor.cs" />
-    <Compile Include="NUnit\TestFilter.cs" />
     <Compile Include="TestConverter.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -94,7 +90,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="NUnitAdapter.snk" />
+    <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

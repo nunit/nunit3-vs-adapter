@@ -27,7 +27,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void SetUp()
         {
             testLog = new FakeFrameworkHandle();
-            testConverter = new TestConverter(new TestLogger(), FakeTestData.AssemblyPath);
+            testConverter = new TestConverter(new TestLogger(new MessageLoggerStub(), 0), FakeTestData.AssemblyPath);
             fakeTestNode = FakeTestData.GetTestNode();
 
             // Ensure that the converted testcase is cached
@@ -125,7 +125,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void Listener_LeaseLifetimeWillNotExpire()
         {
             testLog = new FakeFrameworkHandle();
-            testConverter = new TestConverter(new TestLogger(), FakeTestData.AssemblyPath);
+            testConverter = new TestConverter(new TestLogger(new MessageLoggerStub(), 0), FakeTestData.AssemblyPath);
             MarshalByRefObject localInstance = (MarshalByRefObject)Activator.CreateInstance(typeof(NUnitEventListener), testLog, testConverter);
 
             RemotingServices.Marshal(localInstance);

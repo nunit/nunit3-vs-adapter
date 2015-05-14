@@ -3,6 +3,8 @@ using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
+    using Fakes;
+
     public class NavigationDataTests
     {
         TestConverter testConverter;
@@ -14,7 +16,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             
             testConverter = new TestConverter(
-                new TestLogger(), 
+                new TestLogger( new MessageLoggerStub(), 0), 
                 Path.Combine(TestContext.CurrentContext.TestDirectory, "NUnit.VisualStudio.TestAdapter.Tests.dll"));
         }
 

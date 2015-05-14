@@ -11,6 +11,8 @@ using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
+    // TODO: Convert tests of the old AssemblyRunner as needed
+    // to tests of NUnit3TestExecutor.
     [TestFixture]
     public class AssemblyRunnerTests
     {
@@ -61,28 +63,28 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         //}
 
 
-        [Test]
-        public void VerifyConstruction1()
-        {
-            var runner = new AssemblyRunner(new TestLogger(), "test");
-            Assert.That(runner.NUnitFilter.Xml.ChildNodes.Count, Is.EqualTo(0));
-        }
+        //[Test]
+        //public void VerifyConstruction1()
+        //{
+        //    var runner = new AssemblyRunner(new TestLogger(), "test");
+        //    Assert.That(runner.NUnitFilter.Xml.ChildNodes.Count, Is.EqualTo(0));
+        //}
 
-        [Test]
-        public void VerifyConstruction2()
-        {
-            var t1 = new TestCase("Test1", ExecutorUri, "test");
-            var t2 = new TestCase("Test2", ExecutorUri, "test");
-            var cases = new List<TestCase> { t1, t2 };
-            var runner = new AssemblyRunner(new TestLogger(), "test", cases);
-            var tests = runner.NUnitFilter.Xml.SelectNodes("tests/test");
+        //[Test]
+        //public void VerifyConstruction2()
+        //{
+        //    var t1 = new TestCase("Test1", ExecutorUri, "test");
+        //    var t2 = new TestCase("Test2", ExecutorUri, "test");
+        //    var cases = new List<TestCase> { t1, t2 };
+        //    var runner = new AssemblyRunner(new TestLogger(), "test", cases);
+        //    var tests = runner.NUnitFilter.Xml.SelectNodes("tests/test");
 
-            var names = new List<string>();
-            foreach (XmlNode testNode in tests)
-                names.Add(testNode.InnerText);
+        //    var names = new List<string>();
+        //    foreach (XmlNode testNode in tests)
+        //        names.Add(testNode.InnerText);
 
-            Assert.That(names, Is.EquivalentTo(new string[] { "Test1", "Test2" }));
-        }
+        //    Assert.That(names, Is.EquivalentTo(new string[] { "Test1", "Test2" }));
+        //}
 
         // TODO: Instead of using AddTestCases, we should be loading an actual assembly
 
