@@ -18,6 +18,9 @@ The package works with Visual Studio 2012 from RTM, and all Updates, and with Vi
         <copyright>NUnit Software</copyright>
         <language>en-US</language>
         <tags>test visualstudio testadapter nunit nunit3</tags>
+        <dependencies>
+            <dependency id="NUnit.Core.Engine" version="[3.0.0-beta-2]" />
+        </dependencies>
     </metadata>
     <files>
         <file src="${project.base.dir}\src\NUnitTestAdapterTests\bin\Release\nunit.framework.dll" target="lib\nunit.framework.dll" />

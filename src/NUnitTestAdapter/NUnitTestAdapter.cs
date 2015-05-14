@@ -74,8 +74,8 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             catch (Exception e)
             {
+                messageLogger.SendMessage(TestMessageLevel.Error, "Unable to access registry. Default settings will be used");
                 messageLogger.SendMessage(TestMessageLevel.Error, e.ToString());
-                // TODO: Shouldn't we rethrow here?
             }
 
             TestEngine = new TestEngine();
