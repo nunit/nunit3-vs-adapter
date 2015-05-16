@@ -101,6 +101,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+    <None Include="packages.config" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
@@ -132,6 +133,12 @@
       <Project>{8a85e26a-c706-48b1-bc36-06ebde3efd25}</Project>
       <Name>NUnit3TestAdapter</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="nunit.core.engine, Version=3.0.5610.33198, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\NUnit.Core.Engine.3.0.0-beta-2\lib\nunit.core.engine.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

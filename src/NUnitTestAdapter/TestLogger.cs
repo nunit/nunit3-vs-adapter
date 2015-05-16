@@ -19,23 +19,14 @@ namespace NUnit.VisualStudio.TestAdapter
     /// </summary>
     public class TestLogger : IMessageLogger
     {
-        private IMessageLogger messageLogger;
+        private IMessageLogger _messageLogger;
 
-        int Verbosity { get; set; }
+        private int _verbosity;
 
-        public TestLogger()
+        public TestLogger(IMessageLogger messageLogger, int verbosity)
         {
-            Verbosity = 0;
-        }
-
-        public TestLogger(int verbosity)
-        {
-            Verbosity = verbosity;
-        }
-
-        public void Initialize(IMessageLogger messageLoggerParam)
-        {
-            messageLogger = messageLoggerParam;
+            _messageLogger = messageLogger;
+            _verbosity = verbosity;
         }
 
         public void AssemblyNotSupportedWarning(string sourceAssembly)
@@ -66,7 +57,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public void SendErrorMessage(string message, Exception ex)
         {
             
-            switch (Verbosity)
+            switch (_verbosity)
             {
                 case 0:
                     var type = ex.GetType();
@@ -89,7 +80,7 @@ namespace NUnit.VisualStudio.TestAdapter
             string fmt = "Exception {0}, {1}";
             var type = ex.GetType();
 
-            switch (Verbosity)
+            switch (_verbosity)
             {
                 case 0:
                     SendMessage(TestMessageLevel.Warning, string.Format(fmt, type, ex.Message));
@@ -117,8 +108,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void SendMessage(TestMessageLevel testMessageLevel, string message)
         {
-            if (messageLogger != null)
-                messageLogger.SendMessage(testMessageLevel, message);
+            if (_messageLogger != null)
+                _messageLogger.SendMessage(testMessageLevel, message);
         }
     }
 }

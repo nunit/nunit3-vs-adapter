@@ -43,10 +43,11 @@
     <Reference Include="mock-assembly">
       <HintPath>..\mock-assembly\bin\Release\mock-assembly.dll</HintPath>
     </Reference>
-    <Reference Include="Moq">
-      <HintPath>..\..\packages\Moq.4.1.1309.1617\lib\net40\Moq.dll</HintPath>
+    <Reference Include="nunit.core.engine, Version=3.0.5610.33198, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\NUnit.Core.Engine.3.0.0-beta-2\lib\nunit.core.engine.dll</HintPath>
     </Reference>
-    <Reference Include="nunit.framework, Version=3.0.5607.22015, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+    <Reference Include="nunit.framework, Version=3.0.5610.33194, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\NUnit.3.0.0-beta-2\lib\net45\nunit.framework.dll</HintPath>
     </Reference>
@@ -63,6 +64,7 @@
     <Compile Include="AsyncTests.cs" />
     <Compile Include="ExperimentalTests.cs" />
     <Compile Include="Fakes\FakeTestData.cs" />
+    <Compile Include="Fakes\MessageLoggerStub.cs" />
     <Compile Include="IssueNo24Tests.cs" />
     <Compile Include="Fakes\FakeFrameworkHandle.cs" />
     <Compile Include="Fakes\FakeRunContext.cs" />

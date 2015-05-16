@@ -7,7 +7,7 @@
 
 
     <!-- Set version number for package -->
-    <property name="package.version" value="3.0.0-ctp-1"/>
+    <property name="package.version" value="3.0.0-ctp-2"/>
 
     <!-- Define package name, including version -->
     <property name="package.base.name" value="NUnit3TestAdapter"/>
@@ -33,7 +33,7 @@
     <target name="test" description="Test the adapter (NYI)"/>
 
     <target name="package" desciption="Package the adapter"
-		depends="package-vsix,package-zip,package-nuget-1"/>
+		depends="package-vsix,package-zip,package-nuget"/>
 
 	<target name="package-vsix">
 		
@@ -56,6 +56,7 @@
 		<copy todir="${package.working.dir}">
 			<fileset basedir="${install.release.dir}">
 				<include name="NUnit3.TestAdapter.dll"/>
+        <include name="nunit.core.engine.dll"/>
 			</fileset>
 		</copy>
 
@@ -70,18 +71,10 @@
 
 	</target>
 
-	<target name="package-nuget-1">
+	<target name="package-nuget">
 
 		<property name="nuget.package.name" value="NUnit3VisualStudioTestAdapter"/>
 		<property name="nuget.internal.id" value="NUnit3TestAdapter"/>
-		<call target="create-nuget-package"/>
-
-	</target>
-
-	<target name="package-nuget-2">
-
-		<property name="nuget.package.name" value="NUnit3VisualStudioTestAdapterAndFramework"/>
-		<property name="nuget.internal.id" value="NUnit3TestAdapter.WithFramework"/>
 		<call target="create-nuget-package"/>
 
 	</target>
