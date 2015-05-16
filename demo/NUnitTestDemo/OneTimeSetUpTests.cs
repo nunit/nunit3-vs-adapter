@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace NUnitTestDemo
 {
-    [TestFixture]
+    [TestFixture, ExpectPass]
     public class OneTimeSetUpTests
     {
         int SetUpCount;

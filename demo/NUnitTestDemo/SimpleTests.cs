@@ -7,75 +7,75 @@ namespace NUnitTestDemo
 {
     public class SimpleTests
     {
-        [Test]
+        [Test, ExpectPass]
         public void TestSucceeds()
         {
             Console.WriteLine("Simple test running");
             Assert.That(2 + 2, Is.EqualTo(4));
         }
 
-        [Test]
+        [Test, ExpectPass]
         public void TestSucceeds_Message()
         {
             Assert.That(2 + 2, Is.EqualTo(4));
             Assert.Pass("Simple arithmetic!");
         }
 
-        [Test]
+        [Test, ExpectFailure]
         public void TestFails()
         {
             Assert.That(2 + 2, Is.EqualTo(5));
         }
 
-        [Test]
+        [Test, ExpectFailure]
         public void TestFails_StringEquality()
         {
             Assert.That("Hello" + "World" + "!", Is.EqualTo("Hello World!"));
         }
 
-        [Test]
+        [Test, ExpectInconclusive]
         public void TestIsInconclusive()
         {
             Assert.Inconclusive("Testing");
         }
 
-        [Test, Ignore("Ignoring this test deliberately")]
+        [Test, Ignore("Ignoring this test deliberately"), ExpectIgnore]
         public void TestIsIgnored_Attribute()
         {
         }
 
-        [Test]
+        [Test, ExpectIgnore]
         public void TestIsIgnored_Assert()
         {
             Assert.Ignore("Ignoring this test deliberately");
         }
 
-        [Test]
+        [Test, ExpectError]
         public void TestThrowsException()
         {
             throw new Exception("Deliberate exception thrown");
         }
 
-        [Test]
+        [Test, ExpectPass]
         [Property("Priority", "High")]
         public void TestWithProperty()
         {
         }
 
-        [Test]
+        [Test, ExpectPass]
         [Property("Priority", "Low")]
         [Property("Action", "Ignore")]
         public void TestWithTwoProperties()
         {
         }
 
-        [Test]
+        [Test, ExpectPass]
         [Category("Slow")]
         public void TestWithCategory()
         {
         }
 
-        [Test]
+        [Test, ExpectPass]
         [Category("Slow")]
         [Category("Data")]
         public void TestWithTwoCategories()
