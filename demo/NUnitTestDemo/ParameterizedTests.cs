@@ -7,7 +7,7 @@ namespace NUnitTestDemo
 {
     public class ParameterizedTests
     {
-        [Should("Pass")]
+        [ExpectPass]
         [TestCase(2, 2, 4)]
         [TestCase(0, 5, 5)]
         [TestCase(31, 11, 42)]
@@ -16,7 +16,7 @@ namespace NUnitTestDemo
             Assert.That(a + b, Is.EqualTo(sum));
         }
 
-        [Should("Pass")]
+        [ExpectPass]
         [TestCase(2, 2, ExpectedResult = 4)]
         [TestCase(0, 5, ExpectedResult = 5)]
         [TestCase(31, 11, ExpectedResult = 42)]
@@ -25,49 +25,49 @@ namespace NUnitTestDemo
             return a + b;
         }
 
-        [Should("Fail")]
+        [ExpectFailure]
         [TestCase(31, 11, 99)]
         public void TestCaseFails(int a, int b, int sum)
         {
             Assert.That(a + b, Is.EqualTo(sum));
         }
 
-        [TestCase(31, 11, ExpectedResult = 99), Should("Fail")]
+        [TestCase(31, 11, ExpectedResult = 99), ExpectFailure]
         public int TestCaseFails_Result(int a, int b)
         {
             return a + b;
         }
 
-        [TestCase(31, 11), Should("Inconclusive")]
+        [TestCase(31, 11), ExpectInconclusive]
         public void TestCaseIsInconclusive(int a, int b)
         {
             Assert.Inconclusive("Inconclusive test case");
         }
 
-        [Ignore("Ignored test"), Should("Ignore")]
+        [Ignore("Ignored test"), ExpectIgnore]
         [TestCase(31, 11)]
         public void TestCaseIsIgnored_Attribute(int a, int b)
         {
         }
 
-        [TestCase(31, 11, Ignore = "Ignoring this"), Should("Ignore")]
+        [TestCase(31, 11, Ignore = "Ignoring this"), ExpectIgnore]
         public void TestCaseIsIgnored_Property(int a, int b)
         {
         }
 
-        [TestCase(31, 11), Should("Ignore")]
+        [TestCase(31, 11), ExpectIgnore]
         public void TestCaseIsIgnored_Assert(int a, int b)
         {
             Assert.Ignore("Ignoring this test case");
         }
 
-        [TestCase(31, 11), Should("Error")]
+        [TestCase(31, 11), ExpectError]
         public void TestCaseThrowsException(int a, int b)
         {
             throw new Exception("Exception from test case");
         }
 
-        [TestCase(42, TestName="AlternateTestName"), Should("Pass")]
+        [TestCase(42, TestName="AlternateTestName"), ExpectPass]
         public void TestCaseWithAlternateName(int x)
         {
         }

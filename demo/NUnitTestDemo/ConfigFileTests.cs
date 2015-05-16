@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace NUnitTestDemo
 {
-    [Should("Pass")]
+    [ExpectPass]
     public class ConfigFileTests
     {
         [Test]

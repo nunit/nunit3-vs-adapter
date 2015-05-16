@@ -7,75 +7,75 @@ namespace NUnitTestDemo
 {
     public class SimpleTests
     {
-        [Test, Should("Pass")]
+        [Test, ExpectPass]
         public void TestSucceeds()
         {
             Console.WriteLine("Simple test running");
             Assert.That(2 + 2, Is.EqualTo(4));
         }
 
-        [Test, Should("Pass")]
+        [Test, ExpectPass]
         public void TestSucceeds_Message()
         {
             Assert.That(2 + 2, Is.EqualTo(4));
             Assert.Pass("Simple arithmetic!");
         }
 
-        [Test, Should("Fail")]
+        [Test, ExpectFailure]
         public void TestFails()
         {
             Assert.That(2 + 2, Is.EqualTo(5));
         }
 
-        [Test, Should("Fail")]
+        [Test, ExpectFailure]
         public void TestFails_StringEquality()
         {
             Assert.That("Hello" + "World" + "!", Is.EqualTo("Hello World!"));
         }
 
-        [Test, Should("Inconclusive")]
+        [Test, ExpectInconclusive]
         public void TestIsInconclusive()
         {
             Assert.Inconclusive("Testing");
         }
 
-        [Test, Ignore("Ignoring this test deliberately"), Should("Ignore")]
+        [Test, Ignore("Ignoring this test deliberately"), ExpectIgnore]
         public void TestIsIgnored_Attribute()
         {
         }
 
-        [Test, Should("Ignore")]
+        [Test, ExpectIgnore]
         public void TestIsIgnored_Assert()
         {
             Assert.Ignore("Ignoring this test deliberately");
         }
 
-        [Test, Should("Error")]
+        [Test, ExpectError]
         public void TestThrowsException()
         {
             throw new Exception("Deliberate exception thrown");
         }
 
-        [Test, Should("Pass")]
+        [Test, ExpectPass]
         [Property("Priority", "High")]
         public void TestWithProperty()
         {
         }
 
-        [Test, Should("Pass")]
+        [Test, ExpectPass]
         [Property("Priority", "Low")]
         [Property("Action", "Ignore")]
         public void TestWithTwoProperties()
         {
         }
 
-        [Test, Should("Pass")]
+        [Test, ExpectPass]
         [Category("Slow")]
         public void TestWithCategory()
         {
         }
 
-        [Test, Should("Pass")]
+        [Test, ExpectPass]
         [Category("Slow")]
         [Category("Data")]
         public void TestWithTwoCategories()

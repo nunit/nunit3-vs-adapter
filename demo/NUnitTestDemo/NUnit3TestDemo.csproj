@@ -48,7 +48,7 @@
   <ItemGroup>
     <Compile Include="AsyncTests.cs" />
     <Compile Include="ConfigFileTests.cs" />
-    <Compile Include="ShouldAttribute.cs" />
+    <Compile Include="ExpetedOutcomeAttributes.cs" />
     <Compile Include="GenericTests.cs" />
     <Compile Include="TextOutputTests.cs" />
     <Compile Include="ParameterizedTests.cs" />
