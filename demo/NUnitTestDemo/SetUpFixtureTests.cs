@@ -26,7 +26,7 @@ namespace NUnitTestDemo.SetUpFixture
         }
     }
 
-    [TestFixture]
+    [TestFixture, Should("Pass")]
     public class TestFixture1
     {
         [Test]
@@ -37,7 +37,7 @@ namespace NUnitTestDemo.SetUpFixture
         }
     }
 
-    [TestFixture]
+    [TestFixture, Should("Pass")]
     public class TestFixture2
     {
         [Test]

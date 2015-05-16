@@ -6,6 +6,7 @@ using System.Diagnostics;
 
 namespace NUnitTestDemo
 {
+    [Should("Pass")]
     public class TextOutputTests
     {
         [Test]

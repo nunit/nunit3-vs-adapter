@@ -41,24 +41,28 @@
       <HintPath>..\packages\NUnit.3.0.0-beta-2\lib\net45\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncTests.cs" />
+    <Compile Include="ConfigFileTests.cs" />
+    <Compile Include="ShouldAttribute.cs" />
     <Compile Include="GenericTests.cs" />
     <Compile Include="TextOutputTests.cs" />
     <Compile Include="ParameterizedTests.cs" />
     <Compile Include="SetUpFixtureTests.cs" />
     <Compile Include="SimpleTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TestFixtureSetUpTests.cs" />
+    <Compile Include="OneTimeSetUpTests.cs" />
     <Compile Include="Theories.cs" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -9,10 +9,11 @@ namespace NUnitTestDemo
     [TestFixture(typeof(int))]
     public class GenericTests<T>
     {
-        [Test]
+        [Test, Should("Pass")]
         public void TestIt() { }
     }
 
+    [Should("Pass")]
     [TestFixture(typeof(ArrayList))]
     [TestFixture(typeof(List<int>))]
     public class GenericTests_IList<TList> where TList : IList, new()
