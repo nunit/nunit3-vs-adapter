@@ -8,10 +8,10 @@ using System.Xml;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-    [Serializable]
+   // [Serializable]
     internal class EngineWrapper : MarshalByRefObject, ITestEngine
     {
-        [NonSerialized]
+       // [NonSerialized]
         private ITestEngine _engine = new TestEngine();
 
         public InternalTraceLevel InternalTraceLevel
@@ -48,10 +48,10 @@ namespace NUnit.VisualStudio.TestAdapter
         }
     }
 
-    [Serializable]
+   // [Serializable]
     public class RunnerWrapper : MarshalByRefObject, ITestRunner
     {
-        [NonSerialized]
+       // [NonSerialized]
         private ITestRunner _runner;
 
         public RunnerWrapper(ITestRunner runner)
