@@ -51,7 +51,7 @@
   <ItemGroup>
     <Reference Include="Microsoft.VisualStudio.TestPlatform.ObjectModel">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(MSBuildProgramFiles32)\Microsoft Visual Studio 11.0\Common7\IDE\CommonExtensions\Microsoft\TestWindow\Microsoft.VisualStudio.TestPlatform.ObjectModel.dll</HintPath>
+      <HintPath>$(MSBuildProgramFiles32)\Microsoft Visual Studio 12.0\Common7\IDE\CommonExtensions\Microsoft\TestWindow\Microsoft.VisualStudio.TestPlatform.ObjectModel.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="nunit.core.engine, Version=3.0.5610.33198, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
@@ -73,6 +73,7 @@
     <Compile Include="NUnitTestAdapter.cs" />
     <Compile Include="NUnit3TestDiscoverer.cs" />
     <Compile Include="NUnit3TestExecutor.cs" />
+    <Compile Include="RunnerWrapper.cs" />
     <Compile Include="TestConverter.cs">
       <SubType>Code</SubType>
     </Compile>
