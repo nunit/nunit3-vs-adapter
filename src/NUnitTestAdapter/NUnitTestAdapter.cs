@@ -28,7 +28,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region Properties
 
-        protected TestEngine TestEngine { get; private set; }
+        protected ITestEngine TestEngine { get; private set; }
 
         // Our logger used to display messages
         protected TestLogger TestLog { get; private set; }
@@ -48,7 +48,10 @@ namespace NUnit.VisualStudio.TestAdapter
 
                 }
 
-                return exeName == "vstest.executionengine.exe" || exeName == "vstest.discoveryengine.exe";
+                return exeName != null && (
+                       exeName.Contains("vstest.executionengine") ||
+                       exeName.Contains("vstest.discoveryengine") ||
+                       exeName.Contains("TE.ProcessHost"));
             }
         }
 
@@ -78,17 +81,17 @@ namespace NUnit.VisualStudio.TestAdapter
                 messageLogger.SendMessage(TestMessageLevel.Error, e.ToString());
             }
 
-            TestEngine = new TestEngine();
+            TestEngine = CreateTestEngine();
             TestLog = new TestLogger(messageLogger, _verbosity);
         }
 
-        protected ITestRunner GetRunnerFor(string assemblyName)
+        protected RunnerWrapper GetRunnerFor(string assemblyName)
         {
             var package = new TestPackage(assemblyName);
             if (_shadowCopy)
                 package.Settings["ShadowCopyFiles"] = "true";
 
-            return TestEngine.GetRunner(package);
+            return TestEngine.GetRunner(package) as RunnerWrapper;
         }
 
         protected void Info(string method, string function)
@@ -109,6 +112,34 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             foreach (IChannel chan in ChannelServices.RegisteredChannels)
                 ChannelServices.UnregisterChannel(chan);
+        }
+
+        private AppDomain _engineDomain;
+
+        protected ITestEngine CreateTestEngine()
+        {
+            var setup = new AppDomainSetup
+            {
+                ApplicationBase = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
+            };
+            var evidence = AppDomain.CurrentDomain.Evidence;
+            _engineDomain = AppDomain.CreateDomain("EngineDomain", evidence, setup);
+            var engine = _engineDomain.CreateInstanceAndUnwrap(typeof(EngineWrapper).Assembly.FullName, typeof(EngineWrapper).FullName);
+            return engine as ITestEngine;
+        }
+
+        protected void Unload()
+        {
+            if (TestEngine != null)
+            {
+                TestEngine.Dispose();
+                TestEngine = null;
+            }
+            if (_engineDomain != null)
+            {
+                AppDomain.Unload(_engineDomain);
+                _engineDomain = null;
+            }
         }
 
         #endregion

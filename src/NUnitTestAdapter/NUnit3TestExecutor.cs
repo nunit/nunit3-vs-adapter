@@ -31,7 +31,7 @@ namespace NUnit.VisualStudio.TestAdapter
         private TfsTestFilter _tfsFilter;
 
         // Fields related to the currently executing assembly
-        private ITestRunner _testRunner;
+        private RunnerWrapper _testRunner;
         private TestFilter _nunitFilter = TestFilter.Empty;
 
         #region ITestExecutor Implementation
@@ -80,6 +80,7 @@ namespace NUnit.VisualStudio.TestAdapter
             finally
             {
                 Info("executing tests", "finished");
+                Unload();
             }
 
         }
@@ -113,7 +114,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             Info("executing tests", "finished");
-
+            Unload();
         }
 
         void ITestExecutor.Cancel()
@@ -157,7 +158,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             try
             {
-                var loadResult = _testRunner.Explore(TestFilter.Empty);
+                var loadResult = _testRunner.ExploreInternal(TestFilter.Empty).ToXml();
 
                 if (loadResult.Name == "test-run")
                     loadResult = loadResult.FirstChild;
@@ -189,7 +190,7 @@ namespace NUnit.VisualStudio.TestAdapter
                         {
                             try
                             {
-                                _testRunner.Run(listener, _nunitFilter);
+                                _testRunner.RunInternal(listener, _nunitFilter);
                             }
                             catch (NullReferenceException)
                             {
@@ -216,6 +217,8 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 TestLog.SendErrorMessage("Exception thrown executing tests in " + assemblyName, ex);
             }
+            _testRunner.Dispose();
+            Unload();
         }
 
         private static TestFilter MakeTestFilter(IEnumerable<TestCase> testCases)
