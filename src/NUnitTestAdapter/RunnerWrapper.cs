@@ -4,7 +4,7 @@ using NUnit.Engine;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-    public class RunnerWrapper : MarshalByRefObject // , ITestRunner
+    public class RunnerWrapper : MarshalByRefObject 
     {
       
         private readonly ITestRunner _runner;
