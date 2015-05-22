@@ -52,6 +52,15 @@ namespace NUnit.VisualStudio.TestAdapter
             return doc.FirstChild;
         }
 
+        public static XmlNode ToXml(this string xml)
+        {
+            var doc = new XmlDocument();
+            var fragment = doc.CreateDocumentFragment();
+            fragment.InnerXml = xml;
+            doc.AppendChild(fragment);
+            return doc.FirstChild;
+        }
+
         /// <summary>
         /// Adds an attribute with a specified name and value to an existing XmlNode.
         /// </summary>
@@ -121,7 +130,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             return attr == null
                 ? defaultValue
-                : int.Parse(attr.Value, System.Globalization.CultureInfo.InvariantCulture);
+                : Int32.Parse(attr.Value, CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -137,7 +146,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             return attr == null
                 ? defaultValue
-                : double.Parse(attr.Value, System.Globalization.CultureInfo.InvariantCulture);
+                : Double.Parse(attr.Value, CultureInfo.InvariantCulture);
         }
 
         /// <summary>

@@ -28,7 +28,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region Properties
 
-        protected ITestEngine TestEngine { get; private set; }
+        protected EngineWrapper TestEngine { get; private set; }
 
         // Our logger used to display messages
         protected TestLogger TestLog { get; private set; }
@@ -116,7 +116,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private AppDomain _engineDomain;
 
-        protected ITestEngine CreateTestEngine()
+        protected internal EngineWrapper CreateTestEngine()
         {
             var setup = new AppDomainSetup
             {
@@ -125,7 +125,7 @@ namespace NUnit.VisualStudio.TestAdapter
             var evidence = AppDomain.CurrentDomain.Evidence;
             _engineDomain = AppDomain.CreateDomain("EngineDomain", evidence, setup);
             var engine = _engineDomain.CreateInstanceAndUnwrap(typeof(EngineWrapper).Assembly.FullName, typeof(EngineWrapper).FullName);
-            return engine as ITestEngine;
+            return engine as EngineWrapper;
         }
 
         protected void Unload()
