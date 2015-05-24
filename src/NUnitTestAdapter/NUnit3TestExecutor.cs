@@ -61,7 +61,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     if (!(enableShutdown && !runContext.KeepAlive))  // Otherwise causes exception when run as commandline, illegal to enableshutdown when Keepalive is false, might be only VS2012
                         frameworkHandle.EnableShutdownAfterTestRun = enableShutdown;
                 }
-                
+
                 foreach (var source in sources)
                 {
                     var assemblyName = source;
@@ -100,7 +100,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             var enableShutdown = (UseVsKeepEngineRunning) ? !runContext.KeepAlive : true;
             frameworkHandle.EnableShutdownAfterTestRun = enableShutdown;
-            Debug("executing tests", "EnableShutdown set to " +enableShutdown);
+            Debug("executing tests", "EnableShutdown set to " + enableShutdown);
 
             var assemblyGroups = tests.GroupBy(tc => tc.Source);
             foreach (var assemblyGroup in assemblyGroups)
@@ -218,7 +218,6 @@ namespace NUnit.VisualStudio.TestAdapter
                 TestLog.SendErrorMessage("Exception thrown executing tests in " + assemblyName, ex);
             }
             _testRunner.Dispose();
-            Unload();
         }
 
         private static TestFilter MakeTestFilter(IEnumerable<TestCase> testCases)
