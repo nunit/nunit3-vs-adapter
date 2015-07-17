@@ -3,6 +3,7 @@
 // ****************************************************************
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Remoting.Channels;
@@ -88,8 +89,18 @@ namespace NUnit.VisualStudio.TestAdapter
         protected RunnerWrapper GetRunnerFor(string assemblyName)
         {
             var package = new TestPackage(assemblyName);
+
             if (_shadowCopy)
+            {
                 package.Settings["ShadowCopyFiles"] = "true";
+                TestLog.SendDebugMessage("    Setting ShadowCopyFiles to true");
+            }
+
+            if (Debugger.IsAttached)
+            {
+                package.Settings["NumberOfTestWorkers"] = 0;
+                TestLog.SendDebugMessage("    Setting NumberOfTestWorkers to zero");
+            }
 
             return TestEngine.GetRunner(package) as RunnerWrapper;
         }

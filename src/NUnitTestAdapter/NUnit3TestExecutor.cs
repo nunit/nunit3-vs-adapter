@@ -47,7 +47,8 @@ namespace NUnit.VisualStudio.TestAdapter
         public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
 #if LAUNCHDEBUGGER
-            Debugger.Launch();
+            if (!Debugger.IsAttached)
+                Debugger.Launch();
 #endif
             Initialize(frameworkHandle);
 
@@ -94,7 +95,8 @@ namespace NUnit.VisualStudio.TestAdapter
         public void RunTests(IEnumerable<TestCase> tests, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
 #if LAUNCHDEBUGGER
-            Debugger.Launch();
+            if (!Debugger.IsAttached)
+                Debugger.Launch();
 #endif
             Initialize(frameworkHandle);
 
@@ -106,7 +108,10 @@ namespace NUnit.VisualStudio.TestAdapter
             foreach (var assemblyGroup in assemblyGroups)
             {
                 var assemblyName = assemblyGroup.Key;
-                TestLog.SendInformationalMessage("Running selected tests in " + assemblyName);
+                if (Debugger.IsAttached)
+                    TestLog.SendInformationalMessage("Debugging selected tests in " + assemblyName);
+                else
+                    TestLog.SendInformationalMessage("Running selected tests in " + assemblyName);
 
                 _nunitFilter = MakeTestFilter(assemblyGroup);
 
@@ -152,7 +157,8 @@ namespace NUnit.VisualStudio.TestAdapter
         private void RunAssembly(string assemblyName, IFrameworkHandle frameworkHandle)
         {
 #if LAUNCHDEBUGGER
-            System.Diagnostics.Debugger.Launch();
+            if (!Debugger.IsAttached)
+                Debugger.Launch();
 #endif
             _testRunner = GetRunnerFor(assemblyName);
 

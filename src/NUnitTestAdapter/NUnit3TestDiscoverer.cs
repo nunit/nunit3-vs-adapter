@@ -26,7 +26,8 @@ namespace NUnit.VisualStudio.TestAdapter
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger messageLogger, ITestCaseDiscoverySink discoverySink)
         {
 #if LAUNCHDEBUGGER
-            Debugger.Launch();
+            if (!Debugger.IsAttached)
+                Debugger.Launch();
 #endif
             Initialize(messageLogger);
 
@@ -127,7 +128,8 @@ namespace NUnit.VisualStudio.TestAdapter
                 try
                 {
 #if LAUNCHDEBUGGER
-                    Debugger.Launch();
+                    if (!Debugger.IsAttached)
+                        Debugger.Launch();
 #endif
                     TestCase testCase = testConverter.ConvertTestCase(testNode);
                     discoverySink.SendTestCase(testCase);
