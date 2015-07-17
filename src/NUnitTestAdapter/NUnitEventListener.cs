@@ -105,16 +105,19 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void SuiteFinished(XmlNode resultNode)
         {
-            if (resultNode.GetAttribute("result") == "Failed")
+            var result = resultNode.GetAttribute("result");
+            var label = resultNode.GetAttribute("label");
+            var site = resultNode.GetAttribute("site");
+
+            if (result == "Failed")
             {
-                var site = resultNode.GetAttribute("site");
                 if (site == "SetUp" || site == "TearDown")
                 {
                     testLog.SendMessage(
                         TestMessageLevel.Error,
                         string.Format("{0} failed for test fixture {1}", site, resultNode.GetAttribute("fullname")));
 
-                    var messageNode = resultNode.SelectSingleNode("failure/messge");
+                    var messageNode = resultNode.SelectSingleNode("failure/message");
                     if (messageNode != null)
                         testLog.SendMessage(TestMessageLevel.Error, messageNode.InnerText);
 

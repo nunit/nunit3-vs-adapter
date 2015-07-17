@@ -23,6 +23,11 @@ namespace NUnitTestDemo
         public ExpectIgnoreAttribute() : base("Expect", "Ignore") { }
     }
 
+    public class ExpectSkipAttribute : PropertyAttribute
+    {
+        public ExpectSkipAttribute() : base("Expect", "Skipped") { }
+    }
+
     public class ExpectErrorAttribute : PropertyAttribute
     {
         public ExpectErrorAttribute() : base("Expect", "Error") { }
