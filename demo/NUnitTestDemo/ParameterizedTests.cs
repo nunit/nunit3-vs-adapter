@@ -61,6 +61,17 @@ namespace NUnitTestDemo
             Assert.Ignore("Ignoring this test case");
         }
 
+        [TestCase(31, 11, ExcludePlatform="NET"), ExpectSkip]
+        public void TestCaseIsSkipped_Property(int a, int b)
+        {
+        }
+
+        [Platform(Exclude = "NET"), ExpectSkip]
+        [TestCase(31, 11)]
+        public void TestCaseIsSkipped_Attribute(int a, int b)
+        {
+        }
+
         [TestCase(31, 11), ExpectError]
         public void TestCaseThrowsException(int a, int b)
         {

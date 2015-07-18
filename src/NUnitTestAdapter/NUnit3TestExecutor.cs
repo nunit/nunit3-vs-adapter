@@ -173,6 +173,8 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     TestLog.SendInformationalMessage(string.Format("Loading tests from {0}", assemblyName));
 
+                    var nunitTestCases = loadResult.SelectNodes("//test-case");
+
                     using (var testConverter = new TestConverter(TestLog, assemblyName))
                     {
                         var loadedTestCases = new List<TestCase>();
@@ -180,7 +182,7 @@ namespace NUnit.VisualStudio.TestAdapter
                         // As a side effect of calling TestConverter.ConvertTestCase, 
                         // the converter's cache of all test cases is populated as well. 
                         // All future calls to convert a test case may now use the cache.
-                        foreach (XmlNode testNode in loadResult.SelectNodes("//test-case"))
+                        foreach (XmlNode testNode in nunitTestCases)
                             loadedTestCases.Add(testConverter.ConvertTestCase(testNode));
 
                         // If we have a TFS Filter, convert it to an nunit filter
@@ -204,6 +206,8 @@ namespace NUnit.VisualStudio.TestAdapter
                                 TestLog.SendDebugMessage("Nullref caught");
                             }
                         }
+
+                        new NonEventTestProcessor(frameworkHandle, testConverter).ProcessTests(loadResult);
                     }
                 }
                 else
@@ -236,6 +240,64 @@ namespace NUnit.VisualStudio.TestAdapter
             testFilter.Append("</tests></filter>");
 
             return new TestFilter(testFilter.ToString());
+        }
+
+        #endregion
+
+        #region Nested NonEventTestProcessor Class
+
+        // This class implements an adhoc fix necessitated by the fact that NUnit 
+        // does not send events for tests that are not executed either due to the
+        // presence of an attribute that changes the runstate or to an error that
+        // makes the test NonRunnable. Consequently, no result is ever reported
+        // to VS for such tests by the NUnitEventListener.
+        //
+        // To make up for this, we go through the tests and create pseudo-results 
+        // for each one that is identified as not producing an event.
+        //
+        // TODO: Remove this after NUnit is modified to send events for all test cases
+        class NonEventTestProcessor
+        {
+            private IFrameworkHandle _frameworkHandle;
+            private TestConverter _testConverter;
+
+            public NonEventTestProcessor(IFrameworkHandle frameworkHandle, TestConverter testConverter)
+            {
+                _frameworkHandle = frameworkHandle;
+                _testConverter = testConverter;
+            }
+
+            public void ProcessTests(XmlNode node)
+            {
+                string name = node.Name;
+                string runstate = node.GetAttribute("runstate");
+
+                if (name == "test-suite" || name == "test-run")
+                {
+                    if (runstate == "Ignored" || runstate=="Skipped")
+                        ReportTestCases(node, TestOutcome.Skipped);
+                    else // Keep descending
+                        foreach (XmlNode childNode in node.ChildNodes)
+                            ProcessTests(childNode);
+                }
+            }
+
+            private void ReportTestCases(XmlNode node, TestOutcome outcome)
+            {
+                foreach (XmlNode childNode in node.ChildNodes)
+                {
+                    if (childNode.Name == "test-case")
+                    {
+                        var result = new TestResult(_testConverter.ConvertTestCase(childNode));
+                        result.Outcome = outcome;
+                        _frameworkHandle.RecordResult(result);
+                    }
+                    else if (childNode.Name == "test-suite" || childNode.Name == "test-run")
+                    {
+                        ReportTestCases(childNode, outcome);
+                    }
+                }
+            }
         }
 
         #endregion

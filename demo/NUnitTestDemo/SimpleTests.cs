@@ -50,6 +50,12 @@ namespace NUnitTestDemo
             Assert.Ignore("Ignoring this test deliberately");
         }
 
+        // Since we only run under .NET, test is always excluded
+        [Test, ExpectSkip, Platform("Exclude=\"NET\"")]
+        public void TestIsSkipped_Platform()
+        {
+        }
+
         [Test, ExpectError]
         public void TestThrowsException()
         {
