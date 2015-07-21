@@ -92,15 +92,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             const FakeFrameworkHandle.EventType eventType = FakeFrameworkHandle.EventType.RecordResult;
             Assert.That(
                 testLog.Events.FindAll(e => e.EventType == eventType).Count,
-                Is.EqualTo(MockAssembly.ResultCount - TestsUnderBadOrIgnoredFixtures));
+                Is.EqualTo(MockAssembly.ResultCount - BadFixture.Tests));
         }
 
-        readonly TestCaseData[] outcomes =
+        static readonly TestCaseData[] outcomes =
         {
             // NOTE: One inconclusive test is reported as None
             new TestCaseData(TestOutcome.Passed).Returns(MockAssembly.Success),
             new TestCaseData(TestOutcome.Failed).Returns(MockAssembly.ErrorsAndFailures - BadFixture.Tests),
-            new TestCaseData(TestOutcome.Skipped).Returns(MockAssembly.Ignored - IgnoredFixture.Tests),
+            new TestCaseData(TestOutcome.Skipped).Returns(MockAssembly.Ignored),
             new TestCaseData(TestOutcome.None).Returns(1),
             new TestCaseData(TestOutcome.NotFound).Returns(0)
         };
