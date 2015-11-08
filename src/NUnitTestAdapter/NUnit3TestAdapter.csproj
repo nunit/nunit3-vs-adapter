@@ -66,7 +66,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EngineWrapper.cs" />
     <Compile Include="NUnitEventListener.cs" />
     <Compile Include="Internal\AsyncMethodHelper.cs" />
     <Compile Include="Internal\Stackframe.cs" />
@@ -75,7 +74,6 @@
     <Compile Include="NUnitTestAdapter.cs" />
     <Compile Include="NUnit3TestDiscoverer.cs" />
     <Compile Include="NUnit3TestExecutor.cs" />
-    <Compile Include="RunnerWrapper.cs" />
     <Compile Include="TestConverter.cs">
       <SubType>Code</SubType>
     </Compile>

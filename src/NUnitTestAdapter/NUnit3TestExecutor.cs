@@ -31,7 +31,7 @@ namespace NUnit.VisualStudio.TestAdapter
         private TfsTestFilter _tfsFilter;
 
         // Fields related to the currently executing assembly
-        private RunnerWrapper _testRunner;
+        private ITestRunner _testRunner;
         private TestFilter _nunitFilter = TestFilter.Empty;
 
         #region ITestExecutor Implementation
@@ -164,7 +164,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             try
             {
-                var loadResult = _testRunner.ExploreInternal(TestFilter.Empty).ToXml();
+                var loadResult = _testRunner.Explore(TestFilter.Empty);
 
                 if (loadResult.Name == "test-run")
                     loadResult = loadResult.FirstChild;
@@ -198,7 +198,7 @@ namespace NUnit.VisualStudio.TestAdapter
                         {
                             try
                             {
-                                _testRunner.RunInternal(listener, _nunitFilter);
+                                _testRunner.Run(listener, _nunitFilter);
                             }
                             catch (NullReferenceException)
                             {
