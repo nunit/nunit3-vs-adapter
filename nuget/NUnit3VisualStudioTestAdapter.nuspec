@@ -23,7 +23,10 @@ The package works with Visual Studio 2012 from RTM, and with Update 1 and higher
     </metadata>
     <files>
         <file src="${package.working.dir}\NUnit3.TestAdapter.dll" target="lib\NUnit3.TestAdapter.dll" />
-        <file src="${package.working.dir}\nunit.core.engine.dll" target="lib\nunit.core.engine.dll" />
+        <file src="${package.working.dir}\nunit.engine.dll" target="lib\nunit.engine.dll" />
+        <file src="${package.working.dir}\nunit.engine.api.dll" target="lib\nunit.engine.api.dll" />
+        <file src="${package.working.dir}\Mono.Cecil.dll" target="lib\Mono.Cecil.dll" />
+        <file src="${package.working.dir}\ignore.addins" target="lib\ignore.addins" />
         <file src="${project.nuget.dir}\install.ps1" target="tools\install.ps1" />
     </files>
 </package>

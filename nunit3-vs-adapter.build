@@ -7,7 +7,7 @@
 
 
     <!-- Set version number for package -->
-    <property name="package.version" value="3.0.4-ctp-4"/>
+    <property name="package.version" value="3.0.5-ctp-5"/>
 
     <!-- Define package name, including version -->
     <property name="package.base.name" value="NUnit3TestAdapter"/>
@@ -56,8 +56,11 @@
 		<copy todir="${package.working.dir}">
 			<fileset basedir="${install.release.dir}">
 				<include name="NUnit3.TestAdapter.dll"/>
-        <include name="nunit.core.engine.dll"/>
-			</fileset>
+        <include name="nunit.engine.dll"/>
+        <include name="nunit.engine.api.dll"/>
+        <include name="Mono.Cecil.dll"/>
+        <include name="ignore.addins"/>
+      </fileset>
 		</copy>
 
 		<!-- Create the zip package -->

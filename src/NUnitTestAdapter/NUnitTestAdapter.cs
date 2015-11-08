@@ -102,6 +102,10 @@ namespace NUnit.VisualStudio.TestAdapter
                 TestLog.SendDebugMessage("    Setting NumberOfTestWorkers to zero");
             }
 
+            // Lastest version defaults to a separate process
+            package.Settings["ProcessModel"] = "InProcess";
+            package.Settings["DomainUsage"] = "Single";
+
             return TestEngine.GetRunner(package) as RunnerWrapper;
         }
 
