@@ -7,28 +7,12 @@ namespace NUnitTestDemo
 {
 	public class AsyncTests
 	{
-		[Test, ExpectPass]
-		public async void AsyncVoidTestSucceeds()
-		{
-			var result = await ReturnOne();
-
-			Assert.AreEqual(1, result);
-		}
-
-		[Test, ExpectFailure]
-		public async void AsyncVoidTestFails()
-		{
-			var result = await ReturnOne();
-
-			Assert.AreEqual(2, result);
-		}
-
 		[Test, ExpectError]
-		public async void AsyncVoidTestThrowsException()
+		public async void AsyncVoidTestIsInvalid()
 		{
-			await ThrowException();
+            var result = await ReturnOne();
 
-			Assert.Fail("Should never get here");
+            Assert.AreEqual(1, result);
 		}
 
 		[Test, ExpectPass]
