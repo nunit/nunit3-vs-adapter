@@ -40,14 +40,14 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 TestLog.SendDebugMessage("Processing " + sourceAssembly);
 
-                RunnerWrapper runner = null;
+                ITestRunner runner = null;
 
                 try
                 {
                     runner = GetRunnerFor(sourceAssembly);
                     try
                     {
-                        XmlNode loadResult = runner.LoadInternal().ToXml();
+                        XmlNode loadResult = runner.Load();
 
                         // Currently, this will always be the case but it might change
                         if (loadResult.Name == "test-run")
@@ -55,7 +55,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
                         if (loadResult.GetAttribute("runstate") == "Runnable")
                         {
-                            XmlNode topNode = runner.ExploreInternal(TestFilter.Empty).ToXml();
+                            XmlNode topNode = runner.Explore(TestFilter.Empty);
 
                             using (var testConverter = new TestConverter(TestLog, sourceAssembly))
                             {

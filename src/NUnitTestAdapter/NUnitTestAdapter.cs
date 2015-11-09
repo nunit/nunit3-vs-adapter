@@ -29,7 +29,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region Properties
 
-        protected EngineWrapper TestEngine { get; private set; }
+        protected ITestEngine TestEngine { get; private set; }
 
         // Our logger used to display messages
         protected TestLogger TestLog { get; private set; }
@@ -82,11 +82,11 @@ namespace NUnit.VisualStudio.TestAdapter
                 messageLogger.SendMessage(TestMessageLevel.Error, e.ToString());
             }
 
-            TestEngine = CreateTestEngine();
+            TestEngine = new TestEngine();
             TestLog = new TestLogger(messageLogger, _verbosity);
         }
 
-        protected RunnerWrapper GetRunnerFor(string assemblyName)
+        protected ITestRunner GetRunnerFor(string assemblyName)
         {
             var package = new TestPackage(assemblyName);
 
@@ -106,7 +106,7 @@ namespace NUnit.VisualStudio.TestAdapter
             package.Settings["ProcessModel"] = "InProcess";
             package.Settings["DomainUsage"] = "Single";
 
-            return TestEngine.GetRunner(package) as RunnerWrapper;
+            return TestEngine.GetRunner(package);
         }
 
         protected void Info(string method, string function)
@@ -130,18 +130,6 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         private AppDomain _engineDomain;
-
-        protected internal EngineWrapper CreateTestEngine()
-        {
-            var setup = new AppDomainSetup
-            {
-                ApplicationBase = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
-            };
-            var evidence = AppDomain.CurrentDomain.Evidence;
-            _engineDomain = AppDomain.CreateDomain("EngineDomain", evidence, setup);
-            var engine = _engineDomain.CreateInstanceAndUnwrap(typeof(EngineWrapper).Assembly.FullName, typeof(EngineWrapper).FullName);
-            return engine as EngineWrapper;
-        }
 
         protected void Unload()
         {
