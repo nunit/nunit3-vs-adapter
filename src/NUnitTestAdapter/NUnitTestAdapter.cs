@@ -2,6 +2,8 @@
 // Copyright (c) 2011-2015 NUnit Software. All rights reserved.
 // ****************************************************************
 
+//#define VERBOSE
+
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -18,16 +20,16 @@ namespace NUnit.VisualStudio.TestAdapter
     /// </summary>
     public abstract class NUnitTestAdapter
     {
+        #region Properties
+
         // The adapter version
-        private string _adapterVersion;
+        private string AdapterVersion { get; set; }
 
         // Verbosity in effect for message logging
-        private int _verbosity;
+        private int Verbosity { get; set; }
 
         // True if files should be shadow-copied
-        private bool _shadowCopy;
-
-        #region Properties
+        private bool ShadowCopy { get; set; }
 
         protected ITestEngine TestEngine { get; private set; }
 
@@ -66,15 +68,19 @@ namespace NUnit.VisualStudio.TestAdapter
         // each Discover or Execute method must call this method.
         protected virtual void Initialize(IMessageLogger messageLogger)
         {
-            _verbosity = 0; // In case we throw below
-            _adapterVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            Verbosity = 0; // In case we throw below
+            AdapterVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
             try
             {
                 var registry = RegistryCurrentUser.OpenRegistryCurrentUser(@"Software\nunit.org\VSAdapter");
                 UseVsKeepEngineRunning = registry.Exist("UseVsKeepEngineRunning") && (registry.Read<int>("UseVsKeepEngineRunning") == 1);
-                _shadowCopy = registry.Exist("ShadowCopy") && (registry.Read<int>("ShadowCopy") == 1);
-                _verbosity = (registry.Exist("Verbosity")) ? registry.Read<int>("Verbosity") : 0;
+                ShadowCopy = registry.Exist("ShadowCopy") && (registry.Read<int>("ShadowCopy") == 1);
+#if DEBUG && VERBOSE
+                Verbosity = 1;
+#else
+                Verbosity = (registry.Exist("Verbosity")) ? registry.Read<int>("Verbosity") : 0;
+#endif
             }
             catch (Exception e)
             {
@@ -83,14 +89,14 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             TestEngine = new TestEngine();
-            TestLog = new TestLogger(messageLogger, _verbosity);
+            TestLog = new TestLogger(messageLogger, Verbosity);
         }
 
         protected ITestRunner GetRunnerFor(string assemblyName)
         {
             var package = new TestPackage(assemblyName);
 
-            if (_shadowCopy)
+            if (ShadowCopy)
             {
                 package.Settings["ShadowCopyFiles"] = "true";
                 TestLog.SendDebugMessage("    Setting ShadowCopyFiles to true");
@@ -111,14 +117,14 @@ namespace NUnit.VisualStudio.TestAdapter
 
         protected void Info(string method, string function)
         {
-            var msg = string.Format("NUnit Adapter {0} {1} is {2}", _adapterVersion, method, function);
+            var msg = string.Format("NUnit Adapter {0} {1} is {2}", AdapterVersion, method, function);
             TestLog.SendInformationalMessage(msg);
         }
 
         protected void Debug(string method, string function)
         {
 #if DEBUG
-            var msg = string.Format("NUnit Adapter {0} {1} is {2}", _adapterVersion, method, function);
+            var msg = string.Format("NUnit Adapter {0} {1} is {2}", AdapterVersion, method, function);
             TestLog.SendDebugMessage(msg);
 #endif
         }

@@ -19,14 +19,16 @@ namespace NUnit.VisualStudio.TestAdapter
     /// </summary>
     public class TestLogger : IMessageLogger
     {
-        private IMessageLogger _messageLogger;
+        private const string EXCEPTION_FORMAT = "Exception {0}, {1}";
 
-        private int _verbosity;
+        private IMessageLogger MessageLogger { get; set; }
+
+        private int Verbosity { get; set; }
 
         public TestLogger(IMessageLogger messageLogger, int verbosity)
         {
-            _messageLogger = messageLogger;
-            _verbosity = verbosity;
+            MessageLogger = messageLogger;
+            Verbosity = verbosity;
         }
 
         public void AssemblyNotSupportedWarning(string sourceAssembly)
@@ -56,15 +58,15 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void SendErrorMessage(string message, Exception ex)
         {
-            
-            switch (_verbosity)
+            switch (Verbosity)
             {
                 case 0:
-                    var type = ex.GetType();
-                    SendErrorMessage(string.Format("Exception {0}, {1}",type, message));
+                    Type type = ex.GetType();
+                    SendErrorMessage(string.Format(EXCEPTION_FORMAT, type, message));
+                    SendErrorMessage(ex.Message);
                     break;
                 default:
-                    SendMessage(TestMessageLevel.Error, message);
+                    SendErrorMessage(message);
                     SendErrorMessage(ex.ToString());
                     break;
             }
@@ -77,17 +79,17 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void SendWarningMessage(string message,Exception ex)
         {
-            string fmt = "Exception {0}, {1}";
-            var type = ex.GetType();
-
-            switch (_verbosity)
+            switch (Verbosity)
             {
                 case 0:
-                    SendMessage(TestMessageLevel.Warning, string.Format(fmt, type, ex.Message));
+                    var type = ex.GetType();
+                    SendWarningMessage(string.Format(EXCEPTION_FORMAT, type, message));
+                    SendWarningMessage(ex.Message);
                     break;
 
                 default:
-                    SendMessage(TestMessageLevel.Warning, string.Format(fmt, type, ex.ToString()));
+                    SendWarningMessage(message);
+                    SendWarningMessage(ex.ToString());
                     break;
             }
 
@@ -108,8 +110,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void SendMessage(TestMessageLevel testMessageLevel, string message)
         {
-            if (_messageLogger != null)
-                _messageLogger.SendMessage(testMessageLevel, message);
+            if (MessageLogger != null)
+                MessageLogger.SendMessage(testMessageLevel, message);
         }
     }
 }

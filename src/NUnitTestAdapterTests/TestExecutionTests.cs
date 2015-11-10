@@ -19,10 +19,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     [Category("TestExecution")]
     public class TestExecutionTests
     {
-        // This constant compensates for the fact that that no
-        // events are sent for such tests.
-        private static readonly int TestsUnderBadOrIgnoredFixtures = BadFixture.Tests + IgnoredFixture.Tests;
-
         private string MockAssemblyPath; 
         static readonly IRunContext Context = new FakeRunContext();
 
@@ -38,7 +34,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             MockAssemblyPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "mock-assembly.dll");
 
             // Sanity check to be sure we have the correct version of mock-assembly.dll
-            Assert.That(MockAssembly.Tests, Is.EqualTo(35),
+            Assert.That(MockAssembly.Tests, Is.EqualTo(31),
                 "The reference to mock-assembly.dll appears to be the wrong version");
             new List<TestCase>();
             testResults = new List<TestResult>();
@@ -72,9 +68,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void CorrectNumberOfTestCasesWereStarted()
         {
             const FakeFrameworkHandle.EventType eventType = FakeFrameworkHandle.EventType.RecordStart;
+            foreach (var ev in testLog.Events.FindAll(e => e.EventType == eventType))
+                Console.WriteLine(ev.TestCase.DisplayName);
             Assert.That(
                 testLog.Events.FindAll(e => e.EventType == eventType).Count,
-                Is.EqualTo(MockAssembly.ResultCount - TestsUnderBadOrIgnoredFixtures));
+                Is.EqualTo(MockAssembly.ResultCount - BadFixture.Tests - IgnoredFixture.Tests - ExplicitFixture.Tests));
         }
 
         [Test]
@@ -83,7 +81,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             const FakeFrameworkHandle.EventType eventType = FakeFrameworkHandle.EventType.RecordEnd;
             Assert.That(
                 testLog.Events.FindAll(e => e.EventType == eventType).Count,
-                Is.EqualTo(MockAssembly.ResultCount - TestsUnderBadOrIgnoredFixtures));
+                Is.EqualTo(MockAssembly.ResultCount));
         }
 
         [Test]
@@ -92,15 +90,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             const FakeFrameworkHandle.EventType eventType = FakeFrameworkHandle.EventType.RecordResult;
             Assert.That(
                 testLog.Events.FindAll(e => e.EventType == eventType).Count,
-                Is.EqualTo(MockAssembly.ResultCount - BadFixture.Tests));
+                Is.EqualTo(MockAssembly.ResultCount));
         }
 
         static readonly TestCaseData[] outcomes =
         {
             // NOTE: One inconclusive test is reported as None
             new TestCaseData(TestOutcome.Passed).Returns(MockAssembly.Success),
-            new TestCaseData(TestOutcome.Failed).Returns(MockAssembly.ErrorsAndFailures - BadFixture.Tests),
-            new TestCaseData(TestOutcome.Skipped).Returns(MockAssembly.Ignored),
+            new TestCaseData(TestOutcome.Failed).Returns(MockAssembly.ErrorsAndFailures),
+            new TestCaseData(TestOutcome.Skipped).Returns(MockAssembly.Ignored + MockAssembly.Explicit),
             new TestCaseData(TestOutcome.None).Returns(1),
             new TestCaseData(TestOutcome.NotFound).Returns(0)
         };

@@ -40,18 +40,15 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(MSBuildProgramFiles32)\Microsoft Visual Studio 11.0\Common7\IDE\CommonExtensions\Microsoft\TestWindow\Microsoft.VisualStudio.TestPlatform.ObjectModel.dll</HintPath>
     </Reference>
-    <Reference Include="mock-assembly">
-      <HintPath>..\mock-assembly\bin\Release\mock-assembly.dll</HintPath>
-    </Reference>
     <Reference Include="nunit.engine">
       <HintPath>..\..\lib\nunit.engine.dll</HintPath>
     </Reference>
     <Reference Include="nunit.engine.api">
       <HintPath>..\..\lib\nunit.engine.api.dll</HintPath>
     </Reference>
-    <Reference Include="nunit.framework, Version=3.0.5674.19278, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+    <Reference Include="nunit.framework, Version=3.0.5790.16288, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\NUnit.3.0.0-beta-3\lib\net45\nunit.framework.dll</HintPath>
+      <HintPath>..\..\packages\NUnit.3.0.0-rc-2\lib\net45\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -98,6 +95,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\mock-assembly\mock-assembly.csproj">
+      <Project>{2e368281-3ba8-4050-b05e-0e0e43f8f446}</Project>
+      <Name>mock-assembly</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NUnitTestAdapter\NUnit3TestAdapter.csproj">
       <Project>{8a85e26a-c706-48b1-bc36-06ebde3efd25}</Project>
       <Name>NUnit3TestAdapter</Name>
