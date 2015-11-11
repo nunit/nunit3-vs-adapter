@@ -9,6 +9,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -76,6 +77,8 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             catch (Exception ex)
             {
+                if (ex is TargetInvocationException)
+                    ex = ex.InnerException;
                 TestLog.SendErrorMessage("Exception thrown executing tests", ex);
             }
             finally
@@ -223,21 +226,31 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             catch (Exception ex)
             {
+                if (ex is TargetInvocationException)
+                    ex = ex.InnerException;
                 TestLog.SendErrorMessage("Exception thrown executing tests in " + assemblyName, ex);
             }
             _testRunner.Dispose();
         }
 
-        private static TestFilter MakeTestFilter(IEnumerable<TestCase> testCases)
+        private TestFilter MakeTestFilter(IEnumerable<TestCase> testCases)
         {
-            var testFilter = new StringBuilder("<filter><tests>");
+            ITestFilterService filterService = TestEngine.Services.GetService<ITestFilterService>();
+            if (filterService == null)
+                throw new NUnitEngineException("TestFilterService is not available. Engine in use is incorrect version.");
+
+            ITestFilterBuilder filterBuilder = filterService.GetTestFilterBuilder();
 
             foreach (TestCase testCase in testCases)
-                testFilter.AppendFormat("<test>{0}</test>", testCase.FullyQualifiedName.Replace("<", "&lt;").Replace(">", "&gt;"));
+            {
+                string testName = testCase.FullyQualifiedName
+                    .Replace("<", "&lt;")
+                    .Replace(">", "&gt;")
+                    .Replace("&", "&amp;");
+                filterBuilder.AddTest(testName);
+            }
 
-            testFilter.Append("</tests></filter>");
-
-            return new TestFilter(testFilter.ToString());
+            return filterBuilder.GetFilter();
         }
 
         #endregion
