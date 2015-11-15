@@ -18,8 +18,10 @@ build/
 # Ignore output folder named package
 package/
 
-# Ignore Cake files since they are restored automatically
-tools/Cake
+# tools are downloaded automatically
+tools/
+# This is what controls the download
+!tools/packages.config
 
 # Enable "build/" folder in the NuGet Packages folder since NuGet packages use it for MSBuild targets
 !packages/*/build/
