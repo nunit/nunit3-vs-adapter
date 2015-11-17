@@ -7,7 +7,7 @@
 
 
     <!-- Set version number for package -->
-    <property name="package.version" value="3.0.7-ctp-7"/>
+    <property name="package.version" value="3.0.7-ctp-7b"/>
 
     <!-- Define package name, including version -->
     <property name="package.base.name" value="NUnit3TestAdapter"/>
