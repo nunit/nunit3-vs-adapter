@@ -105,6 +105,7 @@
       <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
@@ -141,15 +142,15 @@
   <ItemGroup>
     <Reference Include="Mono.Cecil, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\NUnit.Engine.3.0.0\lib\Mono.Cecil.dll</HintPath>
+      <HintPath>..\..\packages\NUnit.Engine.3.0.1\lib\Mono.Cecil.dll</HintPath>
     </Reference>
-    <Reference Include="nunit.engine, Version=3.0.5797.27553, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+    <Reference Include="nunit.engine, Version=3.0.5812.30399, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\NUnit.Engine.3.0.0\lib\nunit.engine.dll</HintPath>
+      <HintPath>..\..\packages\NUnit.Engine.3.0.1\lib\nunit.engine.dll</HintPath>
     </Reference>
     <Reference Include="nunit.engine.api, Version=3.0.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\NUnit.Engine.3.0.0\lib\nunit.engine.api.dll</HintPath>
+      <HintPath>..\..\packages\NUnit.Engine.3.0.1\lib\nunit.engine.api.dll</HintPath>
     </Reference>
   </ItemGroup>
   <PropertyGroup>
