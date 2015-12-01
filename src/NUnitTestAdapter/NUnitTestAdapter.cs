@@ -4,6 +4,9 @@
 
 //#define VERBOSE
 
+extern alias ENG;
+using TestEngine = ENG::NUnit.Engine.TestEngine;
+
 using System;
 using System.Diagnostics;
 using System.IO;
