@@ -82,5 +82,10 @@ namespace NUnitTestDemo
         public void TestCaseWithAlternateName(int x)
         {
         }
+
+        [TestCase(42, TestName="NameWithSpecialChar->Here")]
+        public void TestCaseWithSpecialCharInName(int x)
+        {
+        }
     }
 }

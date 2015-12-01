@@ -242,13 +242,7 @@ namespace NUnit.VisualStudio.TestAdapter
             ITestFilterBuilder filterBuilder = filterService.GetTestFilterBuilder();
 
             foreach (TestCase testCase in testCases)
-            {
-                string testName = testCase.FullyQualifiedName
-                    .Replace("<", "&lt;")
-                    .Replace(">", "&gt;")
-                    .Replace("&", "&amp;");
-                filterBuilder.AddTest(testName);
-            }
+                filterBuilder.AddTest(testCase.FullyQualifiedName);
 
             return filterBuilder.GetFilter();
         }
