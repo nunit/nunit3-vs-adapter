@@ -10,13 +10,13 @@
     <ToolsOptionsCategory name="Environment">
       <ToolsOptionsSubCategory name="TaskList">
         <PropertyValue name="CommentTokens" ArrayType="VT_VARIANT" ArrayElementCount="4">
-          <PropertyValue name="0">TODO:2</PropertyValue>
-          <PropertyValue name="1">HACK:2</PropertyValue>
+          <PropertyValue name="0">HACK:2</PropertyValue>
+          <PropertyValue name="1">TODO:2</PropertyValue>
           <PropertyValue name="2">UNDONE:2</PropertyValue>
           <PropertyValue name="3">UnresolvedMergeConflict:3</PropertyValue>
         </PropertyValue>
-        <PropertyValue name="ConfirmTaskDeletion">true</PropertyValue>
-        <PropertyValue name="DontShowFilePaths">true</PropertyValue>
+        <PropertyValue name="ConfirmTaskDeletion">false</PropertyValue>
+        <PropertyValue name="DontShowFilePaths">false</PropertyValue>
         <PropertyValue name="WarnOnAddingHiddenItem">false</PropertyValue>
       </ToolsOptionsSubCategory>
     </ToolsOptionsCategory>
@@ -24,6 +24,11 @@
       <ToolsOptionsSubCategory name="CSharp-Specific">
         <PropertyValue name="AutoComment">1</PropertyValue>
         <PropertyValue name="BringUpOnIdentifier">1</PropertyValue>
+        <PropertyValue name="ClosedFileDiagnostics">1</PropertyValue>
+        <PropertyValue name="DisplayLineSeparators">0</PropertyValue>
+        <PropertyValue name="EnableHighlightRelatedKeywords">1</PropertyValue>
+        <PropertyValue name="ExtractMethod_AllowMovingDeclaration">0</PropertyValue>
+        <PropertyValue name="ExtractMethod_DoNotPutOutOrRefOnStruct">1</PropertyValue>
         <PropertyValue name="Formatting_TriggerOnBlockCompletion">1</PropertyValue>
         <PropertyValue name="Formatting_TriggerOnPaste">1</PropertyValue>
         <PropertyValue name="Formatting_TriggerOnStatementCompletion">1</PropertyValue>
@@ -35,6 +40,7 @@
         <PropertyValue name="Indent_UnindentLabels">2</PropertyValue>
         <PropertyValue name="InsertNewlineOnEnterWithWholeWord">0</PropertyValue>
         <PropertyValue name="NewLines_AnonymousTypeInitializer_EachMember">1</PropertyValue>
+        <PropertyValue name="NewLines_Braces_Accessor">1</PropertyValue>
         <PropertyValue name="NewLines_Braces_AnonymousMethod">1</PropertyValue>
         <PropertyValue name="NewLines_Braces_AnonymousTypeInitializer">1</PropertyValue>
         <PropertyValue name="NewLines_Braces_CollectionInitializer">0</PropertyValue>
@@ -42,12 +48,14 @@
         <PropertyValue name="NewLines_Braces_LambdaExpressionBody">1</PropertyValue>
         <PropertyValue name="NewLines_Braces_Method">1</PropertyValue>
         <PropertyValue name="NewLines_Braces_ObjectInitializer">1</PropertyValue>
+        <PropertyValue name="NewLines_Braces_Property">1</PropertyValue>
         <PropertyValue name="NewLines_Braces_Type">1</PropertyValue>
         <PropertyValue name="NewLines_Keywords_Catch">1</PropertyValue>
         <PropertyValue name="NewLines_Keywords_Else">1</PropertyValue>
         <PropertyValue name="NewLines_Keywords_Finally">1</PropertyValue>
         <PropertyValue name="NewLines_ObjectInitializer_EachMember">1</PropertyValue>
         <PropertyValue name="NewLines_QueryExpression_EachClause">1</PropertyValue>
+        <PropertyValue name="RenameTrackingPreview">1</PropertyValue>
         <PropertyValue name="ShowKeywords">1</PropertyValue>
         <PropertyValue name="ShowSnippets">1</PropertyValue>
         <PropertyValue name="SortUsings_PlaceSystemFirst">1</PropertyValue>
@@ -74,6 +82,11 @@
         <PropertyValue name="Space_WithinMethodDeclarationParentheses">0</PropertyValue>
         <PropertyValue name="Space_WithinOtherParentheses">0</PropertyValue>
         <PropertyValue name="Space_WithinSquares">0</PropertyValue>
+        <PropertyValue name="Style_PreferIntrinsicPredefinedTypeKeywordInDeclaration">1</PropertyValue>
+        <PropertyValue name="Style_PreferIntrinsicPredefinedTypeKeywordInMemberAccess">1</PropertyValue>
+        <PropertyValue name="Style_QualifyMemberAccessWithThisOrMe">0</PropertyValue>
+        <PropertyValue name="Style_UseVarWhenDeclaringLocals">1</PropertyValue>
+        <PropertyValue name="WarnOnBuildErrors">1</PropertyValue>
         <PropertyValue name="Wrapping_IgnoreSpacesAroundBinaryOperators">0</PropertyValue>
         <PropertyValue name="Wrapping_IgnoreSpacesAroundVariableDeclaration">0</PropertyValue>
         <PropertyValue name="Wrapping_KeepStatementsOnSingleLine">1</PropertyValue>
