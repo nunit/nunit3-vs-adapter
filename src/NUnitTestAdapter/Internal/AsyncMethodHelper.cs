@@ -24,7 +24,7 @@ namespace NUnit.VisualStudio.TestAdapter.Internal
             var definingType = targetAssembly.GetType(className);
             if (definingType == null) return null;
 
-            var method = definingType.GetMethod(methodName);
+            var method = definingType.GetMethods().Where(o => o.Name == methodName).OrderBy(o => o.GetParameters().Length).FirstOrDefault();
             if (method == null) return null;
 
             var asyncAttribute = GetAsyncStateMachineAttribute(method);
