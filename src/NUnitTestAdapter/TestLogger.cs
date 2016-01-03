@@ -48,7 +48,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void NUnitLoadError(string sourceAssembly)
         {
-            SendErrorMessage("NUnit failed to load " + sourceAssembly);
+            SendInformationalMessage("NUnit failed to load " + sourceAssembly);
         }
 
         public void SendErrorMessage(string message)
