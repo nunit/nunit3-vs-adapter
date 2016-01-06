@@ -67,7 +67,7 @@ namespace NUnit.VisualStudio.TestAdapter
                         {
                             var msgNode = loadResult.SelectSingleNode("properties/property[@name='_SKIPREASON']");
                             if (msgNode != null && msgNode.GetAttribute("value").Contains("contains no tests"))
-                                TestLog.SendWarningMessage("Assembly contains no NUnit 3.0 tests: " + sourceAssembly);
+                                TestLog.SendInformationalMessage("Assembly contains no NUnit 3.0 tests: " + sourceAssembly);
                             else
                                 TestLog.NUnitLoadError(sourceAssembly);
                         }
