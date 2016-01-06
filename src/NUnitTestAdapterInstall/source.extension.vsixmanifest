@@ -3,7 +3,7 @@
   <Identifier Id="NUnit.NUnit3TestAdapter">
     <Name>NUnit3 Test Adapter</Name>
     <Author>Charlie Poole</Author>
-    <Version>3.0.8.0</Version>
+    <Version>3.0.8.1</Version>
     <Description xml:space="preserve">NUnit 3.0 adapter for integrated test execution under Visual Studio 2012 (all updates), Visual Studio 2013 (all updates), and the Visual Studio 2015 Preview and CTPs. Compatible with NUnit 3.0.
     
     NOTE: This package replaces the earlier CTP-7 release, which mistakenly carried an internal version of 3.0.6.</Description>
