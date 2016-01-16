@@ -67,4 +67,38 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         #endregion
     }
+
+    [Category("TestDiscovery")]
+    public class EmptyAssemblyDiscoveryTests : IMessageLogger, ITestCaseDiscoverySink
+    {
+        static readonly string EmptyAssemblyPath = 
+            Path.Combine(TestContext.CurrentContext.TestDirectory, "empty-assembly.dll");
+
+        private static ITestDiscoverer nunittestDiscoverer;
+
+        [Test]
+        public void VerifyLoading()
+        {
+            // Load the NUnit empty-assembly.dll once for this test
+            nunittestDiscoverer = ((ITestDiscoverer)new NUnit3TestDiscoverer());
+            nunittestDiscoverer.DiscoverTests(new[] { EmptyAssemblyPath}, null, this, this);
+        }
+
+        #region IMessageLogger Methods
+
+        void IMessageLogger.SendMessage(TestMessageLevel testMessageLevel, string message)
+        {
+            Assert.That(message, Does.Not.Contain("failed to load"));
+        }
+
+        #endregion
+
+        #region ITestCaseDiscoverySink Methods
+
+        void ITestCaseDiscoverySink.SendTestCase(TestCase discoveredTest)
+        {
+        }
+
+        #endregion
+    }
 }
