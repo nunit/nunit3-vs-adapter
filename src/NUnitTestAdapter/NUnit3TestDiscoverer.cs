@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
@@ -66,7 +67,7 @@ namespace NUnit.VisualStudio.TestAdapter
                         else
                         {
                             var msgNode = loadResult.SelectSingleNode("properties/property[@name='_SKIPREASON']");
-                            if (msgNode != null && msgNode.GetAttribute("value").Contains("contains no tests"))
+                            if (msgNode != null && (new[] { "contains no tests", "Has no TestFixtures" }).Any(msgNode.GetAttribute("value").Contains))
                                 TestLog.SendInformationalMessage("Assembly contains no NUnit 3.0 tests: " + sourceAssembly);
                             else
                                 TestLog.NUnitLoadError(sourceAssembly);
