@@ -93,6 +93,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\empty-assembly\empty-assembly.csproj">
+      <Project>{679eebe1-0870-4f1a-a07a-742d0ac8a550}</Project>
+      <Name>empty-assembly</Name>
+    </ProjectReference>
     <ProjectReference Include="..\mock-assembly\mock-assembly.csproj">
       <Project>{2e368281-3ba8-4050-b05e-0e0e43f8f446}</Project>
       <Name>mock-assembly</Name>
