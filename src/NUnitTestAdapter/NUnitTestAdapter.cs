@@ -4,8 +4,11 @@
 
 //#define VERBOSE
 
+// We use an alias so that we don't accidentally make
+// references to engine internals, except for creating
+// the engine object in the Initialize method.
 extern alias ENG;
-using TestEngine = ENG::NUnit.Engine.TestEngine;
+using TestEngineClass = ENG::NUnit.Engine.TestEngine;
 
 using System;
 using System.Diagnostics;
@@ -91,7 +94,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 messageLogger.SendMessage(TestMessageLevel.Error, e.ToString());
             }
 
-            TestEngine = new TestEngine();
+            TestEngine = new TestEngineClass();
             TestLog = new TestLogger(messageLogger, Verbosity);
         }
 
