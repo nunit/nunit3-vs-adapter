@@ -10,7 +10,7 @@ var configuration = Argument("configuration", "Debug");
 //////////////////////////////////////////////////////////////////////
 
 // Versioning
-var packageVersion = "3.0.0-ctp-7";
+var packageVersion = "3.0.0-ctp-9";
 
 // Top level directories
 //var baseDir = Directory(".");
@@ -31,7 +31,7 @@ var mockOutput = Directory("./src/mock-assembly/bin") + Directory(configuration)
 
 Setup(() =>
 {
-    Information("Building version {0} of Nunit.Xamarin.", packageVersion);
+    Information("Building version {0} of the NUnit 3 VS Test Adapter.", packageVersion);
 });
 
 //////////////////////////////////////////////////////////////////////
@@ -66,16 +66,6 @@ Task("Build")
 //            .WithProperty("TreatWarningsAsErrors", "true")
             .SetVerbosity(Verbosity.Minimal)
             .SetNodeReuse(false)
-        );
-    }
-    else
-    {
-        // Use XBuild
-        XBuild("./NUnit3TestAdapter.sln", new XBuildSettings()
-            .SetConfiguration(configuration)
-            .WithTarget("AnyCPU")
-//            .WithProperty("TreatWarningsAsErrors", "true")
-            .SetVerbosity(Verbosity.Minimal)
         );
     }
 });
