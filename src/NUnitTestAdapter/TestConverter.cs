@@ -140,7 +140,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 LineNumber = 0
             };
 
-            var className = testNode.GetAttribute("classname");
+            var className = testNode.GetAttribute("declaringclassname") ?? testNode.GetAttribute("classname");
             var methodName = testNode.GetAttribute("methodname");
             var navData = GetNavigationData(className, methodName);
             if (navData != null)
