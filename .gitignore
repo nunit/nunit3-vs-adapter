@@ -18,6 +18,9 @@ build/
 # Ignore output folder named package
 package/
 
+# Ignore Cake files since they are restored automatically
+tools/Cake
+
 # Enable "build/" folder in the NuGet Packages folder since NuGet packages use it for MSBuild targets
 !packages/*/build/
 # Disable NuGet packages folder
