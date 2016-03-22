@@ -85,8 +85,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(testCase.DisplayName, Is.EqualTo(FakeTestData.DisplayName));
             Assert.That(testCase.Source, Is.SamePath(FakeTestData.AssemblyPath));
 
-            Assert.That(testCase.CodeFilePath, Is.SamePath(FakeTestData.CodeFile));
-            Assert.That(testCase.LineNumber, Is.EqualTo(FakeTestData.LineNumber));
+            if (testCase.CodeFilePath != null) // Unavailable if not running under VS
+            {
+                Assert.That(testCase.CodeFilePath, Is.SamePath(FakeTestData.CodeFile));
+                Assert.That(testCase.LineNumber, Is.EqualTo(FakeTestData.LineNumber));
+            }
 
             // Check traits using reflection, since the feature was added
             // in an update to VisualStudio and may not be present.

@@ -5,6 +5,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 {
     using Fakes;
 
+    [Category("Navigation")]
     public class NavigationDataTests
     {
         TestConverter testConverter;

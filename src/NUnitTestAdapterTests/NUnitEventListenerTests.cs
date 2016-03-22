@@ -145,8 +145,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(ourCase.DisplayName, Is.EqualTo(FakeTestData.DisplayName));
             Assert.That(ourCase.FullyQualifiedName, Is.EqualTo(FakeTestData.FullyQualifiedName));
             Assert.That(ourCase.Source, Is.EqualTo(FakeTestData.AssemblyPath));
-            Assert.That(ourCase.CodeFilePath, Is.SamePath(FakeTestData.CodeFile));
-            Assert.That(ourCase.LineNumber, Is.EqualTo(FakeTestData.LineNumber));
+            if (ourCase.CodeFilePath != null) // Unavailable if not running under VS
+            {
+                Assert.That(ourCase.CodeFilePath, Is.SamePath(FakeTestData.CodeFile));
+                Assert.That(ourCase.LineNumber, Is.EqualTo(FakeTestData.LineNumber));
+            }
         }
 
         private void VerifyTestResult(VSTestResult ourResult)
