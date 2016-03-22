@@ -118,6 +118,9 @@ namespace NUnit.VisualStudio.TestAdapter
             package.Settings["ProcessModel"] = "InProcess";
             package.Settings["DomainUsage"] = "Single";
 
+            // Set the work directory to the assembly location
+            package.Settings["WorkDirectory"] = Path.GetDirectoryName(assemblyName);
+
             return TestEngine.GetRunner(package);
         }
 
