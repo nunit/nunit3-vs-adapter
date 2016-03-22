@@ -9,4 +9,8 @@ foreach ($reference in $project.Object.References)
             $reference.CopyLocal = $false;
         }
     }
+	if ($asms -contains $reference.Name + ".exe")
+	{
+		$reference.Remove();
+	}
 }
