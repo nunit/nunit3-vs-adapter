@@ -86,6 +86,7 @@
     <Compile Include="NUnitTestAdapter.cs" />
     <Compile Include="NUnit3TestDiscoverer.cs" />
     <Compile Include="NUnit3TestExecutor.cs" />
+    <Compile Include="PackageSettings.cs" />
     <Compile Include="TestConverter.cs">
       <SubType>Code</SubType>
     </Compile>
