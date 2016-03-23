@@ -16,6 +16,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.Remoting.Channels;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using NUnit.Common;
 using NUnit.Engine;
 
 namespace NUnit.VisualStudio.TestAdapter
@@ -104,22 +105,22 @@ namespace NUnit.VisualStudio.TestAdapter
 
             if (ShadowCopy)
             {
-                package.Settings["ShadowCopyFiles"] = "true";
+                package.Settings[PackageSettings.ShadowCopyFiles] = "true";
                 TestLog.SendDebugMessage("    Setting ShadowCopyFiles to true");
             }
 
             if (Debugger.IsAttached)
             {
-                package.Settings["NumberOfTestWorkers"] = 0;
+                package.Settings[PackageSettings.NumberOfTestWorkers] = 0;
                 TestLog.SendDebugMessage("    Setting NumberOfTestWorkers to zero");
             }
 
             // Lastest version defaults to a separate process
-            package.Settings["ProcessModel"] = "InProcess";
-            package.Settings["DomainUsage"] = "Single";
+            package.Settings[PackageSettings.ProcessModel] = "InProcess";
+            package.Settings[PackageSettings.DomainUsage] = "Single";
 
             // Set the work directory to the assembly location
-            package.Settings["WorkDirectory"] = Path.GetDirectoryName(assemblyName);
+            package.Settings[PackageSettings.WorkDirectory] = Path.GetDirectoryName(assemblyName);
 
             return TestEngine.GetRunner(package);
         }
