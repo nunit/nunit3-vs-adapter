@@ -72,6 +72,12 @@ namespace NUnitTestDemo
         {
         }
 
+        [Explicit, ExpectSkip]
+        [TestCase(31, 11)]
+        public void TestCaseIsExplicit(int a, int b)
+        {
+        }
+
         [TestCase(31, 11), ExpectError]
         public void TestCaseThrowsException(int a, int b)
         {

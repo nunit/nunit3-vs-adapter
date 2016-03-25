@@ -56,6 +56,11 @@ namespace NUnitTestDemo
         {
         }
 
+        [Test, ExpectSkip, Explicit]
+        public void TestIsExplicit()
+        {
+        }
+
         [Test, ExpectError]
         public void TestThrowsException()
         {
