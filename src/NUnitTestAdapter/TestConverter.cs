@@ -187,7 +187,9 @@ namespace NUnit.VisualStudio.TestAdapter
                 case "Failed":
                     return TestOutcome.Failed;
                 case "Skipped":
-                    return TestOutcome.Skipped;
+                    return resultNode.GetAttribute("label")=="Ignored"
+                        ? TestOutcome.Skipped
+                        : TestOutcome.None;
                 default:
                     return TestOutcome.None;
             }

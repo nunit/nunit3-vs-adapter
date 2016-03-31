@@ -17,7 +17,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase("<test-case result='Skipped' label='Ignored'/>", ExpectedResult = TestOutcome.Skipped)]
         [TestCase("<test-case result='Inconclusive'/>", ExpectedResult = TestOutcome.None)]
         [TestCase("<test-case result='Failed' label='NotRunnable'/>", ExpectedResult = TestOutcome.Failed)]
-        [TestCase("<test-case result='Skipped'/>", ExpectedResult = TestOutcome.Skipped)]
+        [TestCase("<test-case result='Skipped'/>", ExpectedResult = TestOutcome.None)]
         [TestCase("<test-case result='Passed'/>", ExpectedResult = TestOutcome.Passed)]
         public TestOutcome ResultStateToTestOutcome(string result)
         {
