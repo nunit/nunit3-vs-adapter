@@ -122,7 +122,16 @@ namespace NUnit.VisualStudio.TestAdapter
             // Set the work directory to the assembly location
             package.Settings[PackageSettings.WorkDirectory] = Path.GetDirectoryName(assemblyName);
 
-            return TestEngine.GetRunner(package);
+            try
+            {
+                return TestEngine.GetRunner(package);
+            }
+            catch(Exception ex)
+            {
+                TestLog.SendErrorMessage("Error: Unable to get runner for this assembly. Check installation, including any extensions.");
+                TestLog.SendErrorMessage(ex.GetType().Name + ": " + ex.Message);
+                throw;
+            }
         }
 
         protected void Info(string method, string function)
@@ -145,19 +154,12 @@ namespace NUnit.VisualStudio.TestAdapter
                 ChannelServices.UnregisterChannel(chan);
         }
 
-        private AppDomain _engineDomain;
-
         protected void Unload()
         {
             if (TestEngine != null)
             {
                 TestEngine.Dispose();
                 TestEngine = null;
-            }
-            if (_engineDomain != null)
-            {
-                AppDomain.Unload(_engineDomain);
-                _engineDomain = null;
             }
         }
 

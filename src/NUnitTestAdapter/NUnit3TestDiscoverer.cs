@@ -43,76 +43,69 @@ namespace NUnit.VisualStudio.TestAdapter
 
                 ITestRunner runner = null;
 
+                runner = GetRunnerFor(sourceAssembly);
+
                 try
                 {
-                    runner = GetRunnerFor(sourceAssembly);
-                    try
+                    XmlNode loadResult = runner.Load();
+
+                    // Currently, this will always be the case but it might change
+                    if (loadResult.Name == "test-run")
+                        loadResult = loadResult.FirstChild;
+
+                    if (loadResult.GetAttribute("runstate") == "Runnable")
                     {
-                        XmlNode loadResult = runner.Load();
+                        XmlNode topNode = runner.Explore(TestFilter.Empty);
 
-                        // Currently, this will always be the case but it might change
-                        if (loadResult.Name == "test-run")
-                            loadResult = loadResult.FirstChild;
-
-                        if (loadResult.GetAttribute("runstate") == "Runnable")
+                        using (var testConverter = new TestConverter(TestLog, sourceAssembly))
                         {
-                            XmlNode topNode = runner.Explore(TestFilter.Empty);
-
-                            using (var testConverter = new TestConverter(TestLog, sourceAssembly))
-                            {
-                                int cases = ProcessTestCases(topNode, discoverySink, testConverter);
-                                TestLog.SendDebugMessage(string.Format("Discovered {0} test cases", cases));
-                            }
-                        }
-                        else
-                        {
-                            var msgNode = loadResult.SelectSingleNode("properties/property[@name='_SKIPREASON']");
-                            if (msgNode != null && (new[] { "contains no tests", "Has no TestFixtures" }).Any(msgNode.GetAttribute("value").Contains))
-                                TestLog.SendInformationalMessage("Assembly contains no NUnit 3.0 tests: " + sourceAssembly);
-                            else
-                                TestLog.NUnitLoadError(sourceAssembly);
+                            int cases = ProcessTestCases(topNode, discoverySink, testConverter);
+                            TestLog.SendDebugMessage(string.Format("Discovered {0} test cases", cases));
                         }
                     }
-                    catch (BadImageFormatException)
+                    else
                     {
-                        // we skip the native c++ binaries that we don't support.
-                        TestLog.AssemblyNotSupportedWarning(sourceAssembly);
-                    }
-                    catch (FileNotFoundException ex)
-                    {
-                        // Either the NUnit framework was not referenced by the test assembly
-                        // or some other error occured. Not a problem if not an NUnit assembly.
-                        TestLog.DependentAssemblyNotFoundWarning(ex.FileName, sourceAssembly);
-                    }
-                    catch (FileLoadException ex)
-                    {
-                        // Attempts to load an invalid assembly, or an assembly with missing dependencies
-                        TestLog.LoadingAssemblyFailedWarning(ex.FileName, sourceAssembly);
-                    }
-                    catch (TypeLoadException ex)
-                    {
-                        if (ex.TypeName == "NUnit.Framework.Api.FrameworkController")
-                            TestLog.SendWarningMessage("   Skipping NUnit 2.x test assembly");
+                        var msgNode = loadResult.SelectSingleNode("properties/property[@name='_SKIPREASON']");
+                        if (msgNode != null && (new[] { "contains no tests", "Has no TestFixtures" }).Any(msgNode.GetAttribute("value").Contains))
+                            TestLog.SendInformationalMessage("Assembly contains no NUnit 3.0 tests: " + sourceAssembly);
                         else
-                            TestLog.SendErrorMessage("Exception thrown discovering tests in " + sourceAssembly, ex);
+                            TestLog.NUnitLoadError(sourceAssembly);
                     }
-                    catch (Exception ex)
-                    {
+                }
+                catch (BadImageFormatException)
+                {
+                    // we skip the native c++ binaries that we don't support.
+                    TestLog.AssemblyNotSupportedWarning(sourceAssembly);
+                }
+                catch (FileNotFoundException ex)
+                {
+                    // Either the NUnit framework was not referenced by the test assembly
+                    // or some other error occured. Not a problem if not an NUnit assembly.
+                    TestLog.DependentAssemblyNotFoundWarning(ex.FileName, sourceAssembly);
+                }
+                catch (FileLoadException ex)
+                {
+                    // Attempts to load an invalid assembly, or an assembly with missing dependencies
+                    TestLog.LoadingAssemblyFailedWarning(ex.FileName, sourceAssembly);
+                }
+                catch (TypeLoadException ex)
+                {
+                    if (ex.TypeName == "NUnit.Framework.Api.FrameworkController")
+                        TestLog.SendWarningMessage("   Skipping NUnit 2.x test assembly");
+                    else
                         TestLog.SendErrorMessage("Exception thrown discovering tests in " + sourceAssembly, ex);
-                    }
-                    finally
-                    {
-                        if (runner.IsTestRunning)
-                            runner.StopRun(true);
-                    }
+                }
+                catch (Exception ex)
+                {
+                    TestLog.SendErrorMessage("Exception thrown discovering tests in " + sourceAssembly, ex);
                 }
                 finally
                 {
-                    if (runner != null)
-                    {
-                        runner.Unload();
-                        runner.Dispose();
-                    }
+                    if (runner.IsTestRunning)
+                        runner.StopRun(true);
+
+                    runner.Unload();
+                    runner.Dispose();
                 }
             }
 
