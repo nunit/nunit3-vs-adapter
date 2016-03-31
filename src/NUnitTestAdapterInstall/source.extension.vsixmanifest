@@ -8,7 +8,7 @@
     
     NOTE: This package replaces the earlier CTP-7 release, which mistakenly carried an internal version of 3.0.6.</Description>
     <Locale>1033</Locale>
-    <MoreInfoUrl>http://nunit.org/index.php?p=vsTestAdapter&amp;r=3.0</MoreInfoUrl>
+    <MoreInfoUrl>https://github.com/nunit/docs/wiki/NUnit-VS-Adapter</MoreInfoUrl>
     <License>license.rtf</License>
     <!--<GettingStartedGuide>http://nunit.org</GettingStartedGuide>-->
     <Icon>nunit3_32x32.png</Icon>
