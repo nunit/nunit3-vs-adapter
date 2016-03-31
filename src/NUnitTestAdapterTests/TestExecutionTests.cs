@@ -98,8 +98,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             // NOTE: One inconclusive test is reported as None
             new TestCaseData(TestOutcome.Passed).Returns(MockAssembly.Success),
             new TestCaseData(TestOutcome.Failed).Returns(MockAssembly.ErrorsAndFailures),
-            new TestCaseData(TestOutcome.Skipped).Returns(MockAssembly.Ignored + MockAssembly.Explicit),
-            new TestCaseData(TestOutcome.None).Returns(1),
+            new TestCaseData(TestOutcome.Skipped).Returns(MockAssembly.Ignored),
+            new TestCaseData(TestOutcome.None).Returns(MockAssembly.Explicit + 1),
             new TestCaseData(TestOutcome.NotFound).Returns(0)
         };
 

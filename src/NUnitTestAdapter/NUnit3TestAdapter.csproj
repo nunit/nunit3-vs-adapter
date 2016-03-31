@@ -59,10 +59,6 @@
       <HintPath>..\..\packages\Microsoft.VisualStudio.TestPlatform.ObjectModel.0.0.3\lib\net35\Microsoft.VisualStudio.TestPlatform.ObjectModel.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Mono.Cecil, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\NUnit.Engine.3.0.1\lib\Mono.Cecil.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="nunit.engine, Version=3.0.5813.39036, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <HintPath>..\..\packages\NUnit.Engine.3.0.1\lib\nunit.engine.dll</HintPath>
       <Private>True</Private>
