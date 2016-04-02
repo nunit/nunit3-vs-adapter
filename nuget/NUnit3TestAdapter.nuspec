@@ -15,8 +15,8 @@
         
 Note that this package ONLY contains the adapter, not the NUnit framework.  You must also get the framework. You only need one such package for a solution. 
 
-The package works with Visual Studio 2012 from RTM, and with Update 1 and higher, and with Visual Studio 2013 from RTM and all updates, Visual Studio 2015, tested up to RC.</description>
-        <releaseNotes>This release works with NUnit 3.0 only. Prepared for VS 2015 RTM.  Updated for NUnit 3 beta 3.</releaseNotes>
+The package works with Visual Studio 2012, 2013 and 2015.</description>
+        <releaseNotes>This release works with NUnit 3.0 and higher only.</releaseNotes>
         <copyright>NUnit Software</copyright>
         <language>en-US</language>
         <tags>test visualstudio testadapter nunit nunit3</tags>

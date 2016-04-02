@@ -7,7 +7,7 @@
 
 
     <!-- Set version number for package -->
-    <property name="package.version" value="3.0.8-ctp-8"/>
+    <property name="package.version" value="3.0.9-ctp-9"/>
 
     <!-- Define package name, including version -->
     <property name="package.base.name" value="NUnit3TestAdapter"/>
@@ -76,7 +76,7 @@
 
 	<target name="package-nuget">
 
-		<property name="nuget.package.name" value="NUnit3VisualStudioTestAdapter"/>
+		<property name="nuget.package.name" value="NUnit3TestAdapter"/>
 		<property name="nuget.internal.id" value="NUnit3TestAdapter"/>
 		<call target="create-nuget-package"/>
 
