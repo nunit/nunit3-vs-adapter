@@ -137,6 +137,7 @@
     <ProjectReference Include="..\NUnitTestAdapter\NUnit3TestAdapter.csproj">
       <Project>{8a85e26a-c706-48b1-bc36-06ebde3efd25}</Project>
       <Name>NUnit3TestAdapter</Name>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup</IncludeOutputGroupsInVSIX>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
