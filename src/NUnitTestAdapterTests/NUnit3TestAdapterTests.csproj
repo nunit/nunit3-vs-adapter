@@ -65,9 +65,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdapterSettingsTests.cs" />
     <Compile Include="AssemblyRunnerTests.cs" />
     <Compile Include="AsyncTests.cs" />
     <Compile Include="ExperimentalTests.cs" />
+    <Compile Include="Fakes\FakeDiscoveryContext.cs" />
     <Compile Include="Fakes\FakeTestData.cs" />
     <Compile Include="Fakes\MessageLoggerStub.cs" />
     <Compile Include="IssueNo24Tests.cs" />

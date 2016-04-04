@@ -30,7 +30,7 @@ namespace NUnit.VisualStudio.TestAdapter
             if (!Debugger.IsAttached)
                 Debugger.Launch();
 #endif
-            Initialize(messageLogger);
+            Initialize(discoveryContext, messageLogger);
 
             Info("discovering tests", "started");
 

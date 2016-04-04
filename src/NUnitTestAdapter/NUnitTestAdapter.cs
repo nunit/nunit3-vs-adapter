@@ -15,6 +15,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Remoting.Channels;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Common;
 using NUnit.Engine;
@@ -27,7 +28,31 @@ namespace NUnit.VisualStudio.TestAdapter
     /// </summary>
     public abstract class NUnitTestAdapter
     {
+        #region Constants
+
+        ///<summary>
+        /// The Uri used to identify the NUnitExecutor
+        ///</summary>
+        public const string ExecutorUri = "executor://NUnit3TestExecutor";
+
+        public const string SettingsName = "NUnitAdapterSettings";
+
+        #endregion
+
+        #region Constructor
+
+        public NUnitTestAdapter()
+        {
+            Verbosity = 0;
+            AdapterVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            Settings = new AdapterSettings();
+        }
+
+        #endregion
+
         #region Properties
+
+        public AdapterSettings Settings { get; private set; }
 
         // The adapter version
         private string AdapterVersion { get; set; }
@@ -73,11 +98,13 @@ namespace NUnit.VisualStudio.TestAdapter
         // We don't have any info to initialize it until one of the
         // ITestDiscovery or ITestExecutor methods is called. The
         // each Discover or Execute method must call this method.
-        protected virtual void Initialize(IMessageLogger messageLogger)
+        protected virtual void Initialize(IDiscoveryContext context, IMessageLogger messageLogger)
         {
-            Verbosity = 0; // In case we throw below
-            AdapterVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            Settings.Load(context);
 
+            //var settingsProvider = runSettings.GetSettings(SettingsName) as NUnitAdapterSettingsProvider;
+            //var settings = settingsProvider != null ? settingsProvider.Settings : new NUnitAdapterSettings(); 
+            
             try
             {
                 var registry = RegistryCurrentUser.OpenRegistryCurrentUser(@"Software\nunit.org\VSAdapter");

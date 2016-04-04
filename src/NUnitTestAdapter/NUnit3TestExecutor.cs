@@ -23,11 +23,6 @@ namespace NUnit.VisualStudio.TestAdapter
     [ExtensionUri(ExecutorUri)]
     public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDisposable
     {
-        ///<summary>
-        /// The Uri used to identify the NUnitExecutor
-        ///</summary>
-        public const string ExecutorUri = "executor://NUnit3TestExecutor";
-
         // TFS Filter in effect - may be empty
         private TfsTestFilter _tfsFilter;
 
@@ -51,7 +46,7 @@ namespace NUnit.VisualStudio.TestAdapter
             if (!Debugger.IsAttached)
                 Debugger.Launch();
 #endif
-            Initialize(frameworkHandle);
+            Initialize(runContext, frameworkHandle);
 
             try
             {
@@ -101,7 +96,7 @@ namespace NUnit.VisualStudio.TestAdapter
             if (!Debugger.IsAttached)
                 Debugger.Launch();
 #endif
-            Initialize(frameworkHandle);
+            Initialize(runContext, frameworkHandle);
 
             var enableShutdown = (UseVsKeepEngineRunning) ? !runContext.KeepAlive : true;
             frameworkHandle.EnableShutdownAfterTestRun = enableShutdown;
@@ -147,9 +142,9 @@ namespace NUnit.VisualStudio.TestAdapter
         // The TestExecutor is constructed using the default constructor.
         // We don't have any info to initialize it until one of the
         // ITestExecutor methods is called.
-        protected override void Initialize(IMessageLogger messageLogger)
+        protected override void Initialize(IDiscoveryContext context, IMessageLogger messageLogger)
         {
-            base.Initialize(messageLogger);
+            base.Initialize(context, messageLogger);
 
             Info("executing tests", "started");
 
