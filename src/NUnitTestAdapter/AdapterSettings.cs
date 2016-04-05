@@ -12,61 +12,47 @@ namespace NUnit.VisualStudio.TestAdapter
 {
     public class AdapterSettings
     {
-        private XmlNode _runConfiguration;
-        private XmlNode _testRunParameters;
-        private XmlNode _nunitAdapter;
+        #region Properties - General
 
-        #region Properties
+        public string MaxCpuCount { get; private set; }
 
-        public string MaxCpuCount
-        {
-            get { return GetInnerText(_runConfiguration, "MaxCpuCount"); }
-        }
+        public string ResultsDirectory { get; private set; }
 
-        public string ResultsDirectory
-        {
-            get { return GetInnerText(_runConfiguration, "ResultsDirectory"); }
-        }
+        public string TargetPlatform { get; private set; }
 
-        public string TargetPlatform
-        {
-            get { return GetInnerText(_runConfiguration, "TargetPlatform"); }
-        }
+        public string TargetFrameworkVersion { get; private set; }
 
-        public string TargetFrameworkVersion
-        {
-            get { return GetInnerText(_runConfiguration, "TargetFrameworkVersion"); }
-        }
+        public string TestAdapterPaths { get; private set; }
 
-        public string TestAdapterPaths
-        {
-            get { return GetInnerText(_runConfiguration, "TestAdapterPaths"); }
-        }
+        #endregion
 
-        private Dictionary<string, string> _testProperties;
-        public IDictionary<string, string> TestProperties
-        {
-            get
-            {
-                if (_testProperties == null)
-                {
-                    _testProperties = new Dictionary<string, string>();
+        #region Properties - TestRunParameters
 
-                    if (_testRunParameters != null)
-                    {
-                        foreach (XmlNode node in _testRunParameters.SelectNodes("Property"))
-                        {
-                            var key = node.GetAttribute("name");
-                            var value = node.GetAttribute("value");
-                            if (key != null && value != null)
-                                _testProperties.Add(key, value);
-                        }
-                    }
-                }
+        public IDictionary<string, string> TestProperties { get; private set; }
 
-                return _testProperties;
-            }
-        }
+        #endregion
+
+        #region Properties - NUnit Specific
+
+        public string InternalTraceLevel { get; private set; }
+
+        public string WorkDirectory { get; private set; }
+
+        public int DefaultTimeout { get; private set; }
+
+        public int NumberOfTestWorkers { get; private set; }
+
+        public bool ShadowCopyFiles { get; private set; }
+
+        public int Verbosity { get; private set; }
+
+        public bool UseVsKeepEngineRunning { get; private set; }
+
+        public string BasePath { get; private set; }
+
+        public string PrivateBinPath { get; private set; }
+
+        public int RandomSeed { get; private set; }
 
         #endregion
 
@@ -89,9 +75,50 @@ namespace NUnit.VisualStudio.TestAdapter
 
             var doc = new XmlDocument();
             doc.LoadXml(settingsXml);
-            _runConfiguration = doc.SelectSingleNode("RunSettings/RunConfiguration");
-            _testRunParameters = doc.SelectSingleNode("RunSettings/TestRunParameters");
-            _nunitAdapter = doc.SelectSingleNode("RunSettings/NUnit");
+
+            var runConfiguration = doc.SelectSingleNode("RunSettings/RunConfiguration");
+            MaxCpuCount = GetInnerText(runConfiguration, "MaxCpuCount");
+            ResultsDirectory = GetInnerText(runConfiguration, "ResultsDirectory");
+            TargetPlatform = GetInnerText(runConfiguration, "TargetPlatform");
+            TargetFrameworkVersion = GetInnerText(runConfiguration, "TargetFrameworkVersion");
+            TestAdapterPaths = GetInnerText(runConfiguration, "TestAdapterPaths");
+
+            TestProperties = new Dictionary<string, string>();
+            foreach (XmlNode node in doc.SelectNodes("RunSettings/TestRunParameters/Parameter"))
+            {
+                var key = node.GetAttribute("name");
+                var value = node.GetAttribute("value");
+                if (key != null && value != null)
+                    TestProperties.Add(key, value);
+            }
+
+            var nunitNode = doc.SelectSingleNode("RunSettings/NUnit");
+            InternalTraceLevel = GetInnerText(nunitNode, "InternalTraceLevel");
+            WorkDirectory = GetInnerText(nunitNode, "WorkDirectory");
+            DefaultTimeout = GetInnerTextAsInt(nunitNode, "DefaultTimeout", 0);
+            NumberOfTestWorkers = GetInnerTextAsInt(nunitNode, "NumberOfTestWorkers", -1); 
+            ShadowCopyFiles = GetInnerTextAsBool(nunitNode, "ShadowCopyFiles");
+            Verbosity = GetInnerTextAsInt(nunitNode, "Verbosity", 0);
+            UseVsKeepEngineRunning = GetInnerTextAsBool(nunitNode, "UseVsKeepEngineRunning");
+            BasePath = GetInnerText(nunitNode, "BasePath");
+            PrivateBinPath = GetInnerText(nunitNode, "PrivateBinPath");
+            RandomSeed = GetInnerTextAsInt(nunitNode, "RandomSeed", -1);
+            
+#if SUPPORT_REGISTRY_SETTINGS
+            // Legacy (CTP) registry settings override defaults
+            var registry = RegistryCurrentUser.OpenRegistryCurrentUser(@"Software\nunit.org\VSAdapter");
+            if (registry.Exist("ShadowCopy") && (registry.Read<int>("ShadowCopy") == 1))
+                ShadowCopyFiles = true;
+            if (registry.Exist("Verbosity"))
+                Verbosity = registry.Read<int>("Verbosity");
+            if (registry.Exist("UseVsKeepEngineRunning") && (registry.Read<int>("UseVsKeepEngineRunning") == 1)
+                UseVsKeepEngineRunning = true;
+#endif
+
+#if DEBUG && VERBOSE
+            // Force Verbosity to 1 under Debug
+            Verbosity = 1;
+#endif
         }
 
         #endregion
@@ -108,6 +135,28 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             return null;
+        }
+
+        private int GetInnerTextAsInt(XmlNode startNode, string xpath, int defaultValue)
+        {
+            string temp = GetInnerText(startNode, xpath);
+
+            int result;
+            if (!string.IsNullOrEmpty(temp) && int.TryParse(temp, out result))
+                    return result;
+
+            return defaultValue;
+        }
+
+        private bool GetInnerTextAsBool(XmlNode startNode, string xpath)
+        {
+            string temp = GetInnerText(startNode, xpath);
+
+            bool result;
+            if (!String.IsNullOrEmpty(temp) && bool.TryParse(temp, out result))
+                return result;
+
+            return false;
         }
 
         #endregion

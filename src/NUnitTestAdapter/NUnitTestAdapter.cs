@@ -43,7 +43,6 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public NUnitTestAdapter()
         {
-            Verbosity = 0;
             AdapterVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             Settings = new AdapterSettings();
         }
@@ -57,20 +56,13 @@ namespace NUnit.VisualStudio.TestAdapter
         // The adapter version
         private string AdapterVersion { get; set; }
 
-        // Verbosity in effect for message logging
-        private int Verbosity { get; set; }
-
-        // True if files should be shadow-copied
-        private bool ShadowCopy { get; set; }
-
         protected ITestEngine TestEngine { get; private set; }
 
         // Our logger used to display messages
         protected TestLogger TestLog { get; private set; }
 
-        protected bool UseVsKeepEngineRunning { get; private set; }
-
         private static string exeName;
+
         public static bool IsRunningUnderIDE
         {
             get
@@ -100,54 +92,23 @@ namespace NUnit.VisualStudio.TestAdapter
         // each Discover or Execute method must call this method.
         protected virtual void Initialize(IDiscoveryContext context, IMessageLogger messageLogger)
         {
-            Settings.Load(context);
-
-            //var settingsProvider = runSettings.GetSettings(SettingsName) as NUnitAdapterSettingsProvider;
-            //var settings = settingsProvider != null ? settingsProvider.Settings : new NUnitAdapterSettings(); 
-            
             try
             {
-                var registry = RegistryCurrentUser.OpenRegistryCurrentUser(@"Software\nunit.org\VSAdapter");
-                UseVsKeepEngineRunning = registry.Exist("UseVsKeepEngineRunning") && (registry.Read<int>("UseVsKeepEngineRunning") == 1);
-                ShadowCopy = registry.Exist("ShadowCopy") && (registry.Read<int>("ShadowCopy") == 1);
-#if DEBUG && VERBOSE
-                Verbosity = 1;
-#else
-                Verbosity = (registry.Exist("Verbosity")) ? registry.Read<int>("Verbosity") : 0;
-#endif
+                Settings.Load(context);
             }
             catch (Exception e)
             {
-                messageLogger.SendMessage(TestMessageLevel.Error, "Unable to access registry. Default settings will be used");
+                messageLogger.SendMessage(TestMessageLevel.Error, "Error initializing RunSettings. Default settings will be used");
                 messageLogger.SendMessage(TestMessageLevel.Error, e.ToString());
             }
 
             TestEngine = new TestEngineClass();
-            TestLog = new TestLogger(messageLogger, Verbosity);
+            TestLog = new TestLogger(messageLogger, Settings.Verbosity);
         }
 
         protected ITestRunner GetRunnerFor(string assemblyName)
         {
-            var package = new TestPackage(assemblyName);
-
-            if (ShadowCopy)
-            {
-                package.Settings[PackageSettings.ShadowCopyFiles] = "true";
-                TestLog.SendDebugMessage("    Setting ShadowCopyFiles to true");
-            }
-
-            if (Debugger.IsAttached)
-            {
-                package.Settings[PackageSettings.NumberOfTestWorkers] = 0;
-                TestLog.SendDebugMessage("    Setting NumberOfTestWorkers to zero");
-            }
-
-            // Lastest version defaults to a separate process
-            package.Settings[PackageSettings.ProcessModel] = "InProcess";
-            package.Settings[PackageSettings.DomainUsage] = "Single";
-
-            // Set the work directory to the assembly location
-            package.Settings[PackageSettings.WorkDirectory] = Path.GetDirectoryName(assemblyName);
+            var package = CreateTestPackage(assemblyName);
 
             try
             {
@@ -159,6 +120,53 @@ namespace NUnit.VisualStudio.TestAdapter
                 TestLog.SendErrorMessage(ex.GetType().Name + ": " + ex.Message);
                 throw;
             }
+        }
+
+        private TestPackage CreateTestPackage(string assemblyName)
+        {
+            var package = new TestPackage(assemblyName);
+
+            if (Settings.ShadowCopyFiles)
+            {
+                package.Settings[PackageSettings.ShadowCopyFiles] = "true";
+                TestLog.SendDebugMessage("    Setting ShadowCopyFiles to true");
+            }
+
+            if (Debugger.IsAttached)
+            {
+                package.Settings[PackageSettings.NumberOfTestWorkers] = 0;
+                TestLog.SendDebugMessage("    Setting NumberOfTestWorkers to zero for Debugging");
+            }
+            else
+            {
+                int workers = Settings.NumberOfTestWorkers;
+                if (workers >= 0)
+                    package.Settings[PackageSettings.NumberOfTestWorkers] = workers;
+            }
+
+            int timeout = Settings.DefaultTimeout;
+            if (timeout > 0)
+                package.Settings[PackageSettings.DefaultTimeout] = timeout;
+
+            if (Settings.InternalTraceLevel != null)
+                package.Settings[PackageSettings.InternalTraceLevel] = Settings.InternalTraceLevel;
+
+            if (Settings.BasePath != null)
+                package.Settings[PackageSettings.BasePath] = Settings.BasePath;
+
+            if (Settings.PrivateBinPath != null)
+                package.Settings[PackageSettings.PrivateBinPath] = Settings.PrivateBinPath;
+
+            if (Settings.RandomSeed != -1)
+                package.Settings[PackageSettings.RandomSeed] = Settings.RandomSeed;
+
+            // Always run one assembly at a time in process in it's own domain
+            package.Settings[PackageSettings.ProcessModel] = "InProcess";
+            package.Settings[PackageSettings.DomainUsage] = "Single";
+
+            // Set the work directory to the assembly location unless a setting is provided
+            package.Settings[PackageSettings.WorkDirectory] = Settings.WorkDirectory ?? Path.GetDirectoryName(assemblyName);
+            return package;
         }
 
         protected void Info(string method, string function)

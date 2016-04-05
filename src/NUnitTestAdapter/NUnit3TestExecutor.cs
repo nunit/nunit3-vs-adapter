@@ -52,7 +52,7 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 _tfsFilter = new TfsTestFilter(runContext);
                 TestLog.SendDebugMessage("Keepalive:" + runContext.KeepAlive);
-                var enableShutdown = (UseVsKeepEngineRunning) ? !runContext.KeepAlive : true;
+                var enableShutdown = (Settings.UseVsKeepEngineRunning) ? !runContext.KeepAlive : true;
                 if (!_tfsFilter.HasTfsFilterValue)
                 {
                     if (!(enableShutdown && !runContext.KeepAlive))  // Otherwise causes exception when run as commandline, illegal to enableshutdown when Keepalive is false, might be only VS2012
@@ -98,7 +98,7 @@ namespace NUnit.VisualStudio.TestAdapter
 #endif
             Initialize(runContext, frameworkHandle);
 
-            var enableShutdown = (UseVsKeepEngineRunning) ? !runContext.KeepAlive : true;
+            var enableShutdown = (Settings.UseVsKeepEngineRunning) ? !runContext.KeepAlive : true;
             frameworkHandle.EnableShutdownAfterTestRun = enableShutdown;
             Debug("executing tests", "EnableShutdown set to " + enableShutdown);
 
