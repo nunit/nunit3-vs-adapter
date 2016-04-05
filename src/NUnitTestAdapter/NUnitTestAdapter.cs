@@ -165,7 +165,13 @@ namespace NUnit.VisualStudio.TestAdapter
             package.Settings[PackageSettings.DomainUsage] = "Single";
 
             // Set the work directory to the assembly location unless a setting is provided
-            package.Settings[PackageSettings.WorkDirectory] = Settings.WorkDirectory ?? Path.GetDirectoryName(assemblyName);
+            var workDir = Settings.WorkDirectory;
+            if (workDir == null)
+                workDir = Path.GetDirectoryName(assemblyName);
+            else if (!Path.IsPathRooted(workDir))
+                workDir = Path.Combine(Path.GetDirectoryName(assemblyName), workDir);
+            package.Settings[PackageSettings.WorkDirectory] = workDir;
+
             return package;
         }
 

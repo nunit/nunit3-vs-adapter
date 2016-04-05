@@ -31,5 +31,14 @@ namespace NUnitTestDemo
             Trace.Write("This is Trace line 3");
         }
 
+        [Test, Description("Displays various settings for verification")]
+        public void DisplayTestSettings()
+        {
+            Console.WriteLine("CurrentDirectory={0}", Environment.CurrentDirectory);
+            Console.WriteLine("BasePath={0}", AppDomain.CurrentDomain.BaseDirectory);
+            Console.WriteLine("PrivateBinPath={0}", AppDomain.CurrentDomain.SetupInformation.PrivateBinPath);
+            Console.WriteLine("WorkDirectory={0}", TestContext.CurrentContext.WorkDirectory);
+            Console.WriteLine("DefaultTimeout={0}", NUnit.Framework.Internal.TestExecutionContext.CurrentContext.TestCaseTimeout);
+        }
     }
 }

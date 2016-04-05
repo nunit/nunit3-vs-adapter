@@ -22,5 +22,11 @@
   </TestRunParameters>
 
   <!-- Adapter Specific sections -->
+  <NUnit>
+    <BasePath>D:\Dev\NUnit\nunit3-vs-adapter\demo\NUnitTestDemo\bin\Release</BasePath>
+    <PrivateBinPath>extras;more.extras</PrivateBinPath>
+    <DefaultTimeout>5000</DefaultTimeout>
+    <WorkDirectory>work</WorkDirectory>
+  </NUnit>
 
 </RunSettings>
