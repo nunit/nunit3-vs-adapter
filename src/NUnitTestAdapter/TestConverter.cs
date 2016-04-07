@@ -60,7 +60,7 @@ namespace NUnit.VisualStudio.TestAdapter
             if (vsTestCaseMap.ContainsKey(id))
                 return vsTestCaseMap[id];
 
-            logger.SendErrorMessage("Test " + id + " not found in cache");
+            logger.Error("Test " + id + " not found in cache");
             return null;
         }
 
@@ -172,7 +172,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             if (navData == null || navData.FileName == null)
-                logger.SendWarningMessage(string.Format("No source data found for {0}.{1}", className, methodName));
+                logger.Warning(string.Format("No source data found for {0}.{1}", className, methodName));
 
             return navData;
         }
@@ -245,7 +245,7 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 // If we can't load it for some reason, we issue a warning
                 // and won't try to do it again for the assembly.
-                logger.SendWarningMessage("Unable to create AsyncMethodHelper\r\nSource data will not be available for some of the tests", ex);
+                logger.Warning("Unable to create AsyncMethodHelper\r\nSource data will not be available for some of the tests", ex);
                 return null;
             }
         }
@@ -276,8 +276,8 @@ namespace NUnit.VisualStudio.TestAdapter
                     {
                         // If this isn't a project type supporting DiaSession,
                         // we just issue a warning. We won't try this again.
-                        logger.SendWarningMessage("Unable to create DiaSession for " + sourceAssembly + "\r\nNo source location data will be available for this assembly.");
-                        logger.SendDebugMessage(ex.Message);
+                        logger.Warning("Unable to create DiaSession for " + sourceAssembly + "\r\nNo source location data will be available for this assembly.");
+                        logger.Debug(ex.Message);
                     }
 
                     tryToCreateDiaSession = false;

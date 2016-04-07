@@ -19,8 +19,8 @@ namespace NUnit.VisualStudio.TestAdapter
     /// </summary>
     public class NUnitEventListener : MarshalByRefObject, ITestEventListener, IDisposable // Public for testing
     {
-        private readonly ITestExecutionRecorder testLog;
-        private readonly TestConverter testConverter;
+        private readonly ITestExecutionRecorder _recorder;
+        private readonly TestConverter _testConverter;
 
         public override object InitializeLifetimeService()
         {
@@ -31,10 +31,10 @@ namespace NUnit.VisualStudio.TestAdapter
             return null;
         }
 
-        public NUnitEventListener(ITestExecutionRecorder testLog, TestConverter testConverter)
+        public NUnitEventListener(ITestExecutionRecorder recorder, TestConverter testConverter)
         {
-            this.testLog = testLog;
-            this.testConverter = testConverter;
+            _recorder = recorder;
+            _testConverter = testConverter;
         }
 
         #region ITestEventListener
@@ -89,18 +89,18 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void TestStarted(XmlNode testNode)
         {
-            TestCase ourCase = testConverter.GetCachedTestCase(testNode.GetAttribute("id"));
+            TestCase ourCase = _testConverter.GetCachedTestCase(testNode.GetAttribute("id"));
 
             // Simply ignore any TestCase not found in the cache
             if (ourCase != null)
-                testLog.RecordStart(ourCase);
+                _recorder.RecordStart(ourCase);
         }
 
         public void TestFinished(XmlNode resultNode)
         {
-            TestResult ourResult = testConverter.ConvertTestResult(resultNode);
-            this.testLog.RecordEnd(ourResult.TestCase, ourResult.Outcome);
-            this.testLog.RecordResult(ourResult);
+            TestResult ourResult = _testConverter.ConvertTestResult(resultNode);
+            _recorder.RecordEnd(ourResult.TestCase, ourResult.Outcome);
+            _recorder.RecordResult(ourResult);
         }
 
         public void SuiteFinished(XmlNode resultNode)
@@ -113,17 +113,17 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 if (site == "SetUp" || site == "TearDown")
                 {
-                    testLog.SendMessage(
+                    _recorder.SendMessage(
                         TestMessageLevel.Error,
                         string.Format("{0} failed for test fixture {1}", site, resultNode.GetAttribute("fullname")));
 
                     var messageNode = resultNode.SelectSingleNode("failure/message");
                     if (messageNode != null)
-                        testLog.SendMessage(TestMessageLevel.Error, messageNode.InnerText);
+                        _recorder.SendMessage(TestMessageLevel.Error, messageNode.InnerText);
 
                     var stackNode = resultNode.SelectSingleNode("failure/stack-trace");
                     if (stackNode != null)
-                        testLog.SendMessage(TestMessageLevel.Error, stackNode.InnerText);
+                        _recorder.SendMessage(TestMessageLevel.Error, stackNode.InnerText);
                 }
             }
         }

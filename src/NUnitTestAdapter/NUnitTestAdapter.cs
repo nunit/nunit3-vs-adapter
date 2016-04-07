@@ -54,7 +54,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public AdapterSettings Settings { get; private set; }
 
         // The adapter version
-        private string AdapterVersion { get; set; }
+        protected string AdapterVersion { get; set; }
 
         protected ITestEngine TestEngine { get; private set; }
 
@@ -90,20 +90,20 @@ namespace NUnit.VisualStudio.TestAdapter
         // We don't have any info to initialize it until one of the
         // ITestDiscovery or ITestExecutor methods is called. The
         // each Discover or Execute method must call this method.
-        protected virtual void Initialize(IDiscoveryContext context, IMessageLogger messageLogger)
+        protected void Initialize(IDiscoveryContext context, IMessageLogger messageLogger)
         {
+            TestEngine = new TestEngineClass();
+            TestLog = new TestLogger(messageLogger, Settings.Verbosity);
+
             try
             {
                 Settings.Load(context);
             }
             catch (Exception e)
             {
-                messageLogger.SendMessage(TestMessageLevel.Error, "Error initializing RunSettings. Default settings will be used");
-                messageLogger.SendMessage(TestMessageLevel.Error, e.ToString());
+                TestLog.Error("Error initializing RunSettings. Default settings will be used");
+                TestLog.Error(e.ToString());
             }
-
-            TestEngine = new TestEngineClass();
-            TestLog = new TestLogger(messageLogger, Settings.Verbosity);
         }
 
         protected ITestRunner GetRunnerFor(string assemblyName)
@@ -116,8 +116,8 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             catch(Exception ex)
             {
-                TestLog.SendErrorMessage("Error: Unable to get runner for this assembly. Check installation, including any extensions.");
-                TestLog.SendErrorMessage(ex.GetType().Name + ": " + ex.Message);
+                TestLog.Error("Error: Unable to get runner for this assembly. Check installation, including any extensions.");
+                TestLog.Error(ex.GetType().Name + ": " + ex.Message);
                 throw;
             }
         }
@@ -129,13 +129,13 @@ namespace NUnit.VisualStudio.TestAdapter
             if (Settings.ShadowCopyFiles)
             {
                 package.Settings[PackageSettings.ShadowCopyFiles] = "true";
-                TestLog.SendDebugMessage("    Setting ShadowCopyFiles to true");
+                TestLog.Debug("    Setting ShadowCopyFiles to true");
             }
 
             if (Debugger.IsAttached)
             {
                 package.Settings[PackageSettings.NumberOfTestWorkers] = 0;
-                TestLog.SendDebugMessage("    Setting NumberOfTestWorkers to zero for Debugging");
+                TestLog.Debug("    Setting NumberOfTestWorkers to zero for Debugging");
             }
             else
             {
@@ -173,20 +173,6 @@ namespace NUnit.VisualStudio.TestAdapter
             package.Settings[PackageSettings.WorkDirectory] = workDir;
 
             return package;
-        }
-
-        protected void Info(string method, string function)
-        {
-            var msg = string.Format("NUnit Adapter {0} {1} is {2}", AdapterVersion, method, function);
-            TestLog.SendInformationalMessage(msg);
-        }
-
-        protected void Debug(string method, string function)
-        {
-#if DEBUG
-            var msg = string.Format("NUnit Adapter {0} {1} is {2}", AdapterVersion, method, function);
-            TestLog.SendDebugMessage(msg);
-#endif
         }
 
         protected static void CleanUpRegisteredChannels()

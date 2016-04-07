@@ -15,7 +15,9 @@ namespace NUnit.VisualStudio.TestAdapter
     public interface ITfsTestFilter
     {
         ITestCaseFilterExpression TfsTestCaseFilterExpression { get; }
-        bool HasTfsFilterValue { get; }
+
+        bool IsEmpty { get; }
+
         IEnumerable<TestCase> CheckFilter(IEnumerable<TestCase> tests);
     }
 
@@ -73,13 +75,11 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
-        public bool HasTfsFilterValue
+        public bool IsEmpty
         {
-            get
-            {
-                return TfsTestCaseFilterExpression != null && TfsTestCaseFilterExpression.TestCaseFilterValue != String.Empty;
-            }
+            get { return TfsTestCaseFilterExpression == null || TfsTestCaseFilterExpression.TestCaseFilterValue == string.Empty; }
         }
+
         public IEnumerable<TestCase> CheckFilter(IEnumerable<TestCase> tests)
         {
 
