@@ -31,82 +31,78 @@ namespace NUnit.VisualStudio.TestAdapter
             Verbosity = verbosity;
         }
 
-        public void AssemblyNotSupportedWarning(string sourceAssembly)
-        {
-            SendWarningMessage("Assembly not supported: " + sourceAssembly);
-        }
+        #region Error Messages
 
-        public void DependentAssemblyNotFoundWarning(string dependentAssembly, string sourceAssembly)
-        {
-            SendWarningMessage("Dependent Assembly " + dependentAssembly + " of " + sourceAssembly + " not found. Can be ignored if not a NUnit project.");
-        }
-
-        public void LoadingAssemblyFailedWarning(string dependentAssembly, string sourceAssembly)
-        {
-            SendWarningMessage("Assembly " + dependentAssembly + " loaded through " + sourceAssembly + " failed. Assembly is ignored. Correct deployment of dependencies if this is an error.");
-        }
-
-        public void NUnitLoadError(string sourceAssembly)
-        {
-            SendInformationalMessage("NUnit failed to load " + sourceAssembly);
-        }
-
-        public void SendErrorMessage(string message)
+        public void Error(string message)
         {
             SendMessage(TestMessageLevel.Error, message);
         }
 
-        public void SendErrorMessage(string message, Exception ex)
+        public void Error(string message, Exception ex)
         {
             switch (Verbosity)
             {
                 case 0:
                     Type type = ex.GetType();
-                    SendErrorMessage(string.Format(EXCEPTION_FORMAT, type, message));
-                    SendErrorMessage(ex.Message);
+                    Error(string.Format(EXCEPTION_FORMAT, type, message));
+                    Error(ex.Message);
                     break;
                 default:
-                    SendErrorMessage(message);
-                    SendErrorMessage(ex.ToString());
+                    Error(message);
+                    Error(ex.ToString());
                     break;
             }
         }
 
-        public void SendWarningMessage(string message)
+        #endregion
+
+        #region Warning Messages
+
+        public void Warning(string message)
         {
             SendMessage(TestMessageLevel.Warning, message);
         }
 
-        public void SendWarningMessage(string message,Exception ex)
+        public void Warning(string message,Exception ex)
         {
             switch (Verbosity)
             {
                 case 0:
                     var type = ex.GetType();
-                    SendWarningMessage(string.Format(EXCEPTION_FORMAT, type, message));
-                    SendWarningMessage(ex.Message);
+                    Warning(string.Format(EXCEPTION_FORMAT, type, message));
+                    Warning(ex.Message);
                     break;
 
                 default:
-                    SendWarningMessage(message);
-                    SendWarningMessage(ex.ToString());
+                    Warning(message);
+                    Warning(ex.ToString());
                     break;
             }
 
             SendMessage(TestMessageLevel.Warning, message);
         }
 
-        public void SendInformationalMessage(string message)
+        #endregion
+
+        #region Information Messages
+
+        public void Info(string message)
         {
             SendMessage(TestMessageLevel.Informational, message);
         }
 
-        public void SendDebugMessage(string message)
+        #endregion
+
+        #region Debug Messages
+
+        public void Debug(string message)
         {
 #if DEBUG
             SendMessage(TestMessageLevel.Informational, message);
 #endif
         }
+
+        #endregion
 
         public void SendMessage(TestMessageLevel testMessageLevel, string message)
         {

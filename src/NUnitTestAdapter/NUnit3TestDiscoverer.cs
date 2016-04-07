@@ -32,14 +32,14 @@ namespace NUnit.VisualStudio.TestAdapter
 #endif
             Initialize(discoveryContext, messageLogger);
 
-            Info("discovering tests", "started");
+            TestLog.Info(string.Format("NUnit Adapter {0}: Test discovery starting", AdapterVersion));
 
             // Ensure any channels registered by other adapters are unregistered
             CleanUpRegisteredChannels();
 
             foreach (string sourceAssembly in sources)
             {
-                TestLog.SendDebugMessage("Processing " + sourceAssembly);
+                TestLog.Debug("Processing " + sourceAssembly);
 
                 ITestRunner runner = null;
 
@@ -60,44 +60,44 @@ namespace NUnit.VisualStudio.TestAdapter
                         using (var testConverter = new TestConverter(TestLog, sourceAssembly))
                         {
                             int cases = ProcessTestCases(topNode, discoverySink, testConverter);
-                            TestLog.SendDebugMessage(string.Format("Discovered {0} test cases", cases));
+                            TestLog.Debug(string.Format("Discovered {0} test cases", cases));
                         }
                     }
                     else
                     {
                         var msgNode = loadResult.SelectSingleNode("properties/property[@name='_SKIPREASON']");
                         if (msgNode != null && (new[] { "contains no tests", "Has no TestFixtures" }).Any(msgNode.GetAttribute("value").Contains))
-                            TestLog.SendInformationalMessage("Assembly contains no NUnit 3.0 tests: " + sourceAssembly);
+                            TestLog.Info("Assembly contains no NUnit 3.0 tests: " + sourceAssembly);
                         else
-                            TestLog.NUnitLoadError(sourceAssembly);
+                            TestLog.Info("NUnit failed to load " + sourceAssembly);
                     }
                 }
                 catch (BadImageFormatException)
                 {
                     // we skip the native c++ binaries that we don't support.
-                    TestLog.AssemblyNotSupportedWarning(sourceAssembly);
+                    TestLog.Warning("Assembly not supported: " + sourceAssembly);
                 }
                 catch (FileNotFoundException ex)
                 {
                     // Either the NUnit framework was not referenced by the test assembly
                     // or some other error occured. Not a problem if not an NUnit assembly.
-                    TestLog.DependentAssemblyNotFoundWarning(ex.FileName, sourceAssembly);
+                    TestLog.Warning("Dependent Assembly " + ex.FileName + " of " + sourceAssembly + " not found. Can be ignored if not a NUnit project.");
                 }
                 catch (FileLoadException ex)
                 {
                     // Attempts to load an invalid assembly, or an assembly with missing dependencies
-                    TestLog.LoadingAssemblyFailedWarning(ex.FileName, sourceAssembly);
+                    TestLog.Warning("Assembly " + ex.FileName + " loaded through " + sourceAssembly + " failed. Assembly is ignored. Correct deployment of dependencies if this is an error.");
                 }
                 catch (TypeLoadException ex)
                 {
                     if (ex.TypeName == "NUnit.Framework.Api.FrameworkController")
-                        TestLog.SendWarningMessage("   Skipping NUnit 2.x test assembly");
+                        TestLog.Warning("   Skipping NUnit 2.x test assembly");
                     else
-                        TestLog.SendErrorMessage("Exception thrown discovering tests in " + sourceAssembly, ex);
+                        TestLog.Error("Exception thrown discovering tests in " + sourceAssembly, ex);
                 }
                 catch (Exception ex)
                 {
-                    TestLog.SendErrorMessage("Exception thrown discovering tests in " + sourceAssembly, ex);
+                    TestLog.Error("Exception thrown discovering tests in " + sourceAssembly, ex);
                 }
                 finally
                 {
@@ -109,7 +109,8 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
             }
 
-            Info("discovering test", "finished");
+            TestLog.Info(string.Format("NUnit Adapter {0}: Test discovery complete", AdapterVersion));
+
             Unload();
         }
 
@@ -135,7 +136,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
                 catch (Exception ex)
                 {
-                    TestLog.SendErrorMessage("Exception converting " + testNode.GetAttribute("fullname"), ex);
+                    TestLog.Error("Exception converting " + testNode.GetAttribute("fullname"), ex);
                 }
             }
 
