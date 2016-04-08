@@ -33,7 +33,13 @@ namespace NUnit.VisualStudio.TestAdapter
         public IRunContext RunContext { get; private set; }
         public IFrameworkHandle FrameworkHandle { get; private set; }
         private TfsTestFilter TfsFilter { get; set; }
-        private NUnitTestFilterBuilder FilterBuilder { get; set; }
+
+        // NOTE: an earlier version of this code had a FilterBuilder
+        // property. This seemed to make sense, because we instantiate
+        // it in two different places. However, the existence of an
+        // NUnitTestFilterBuilder, containing a reference to an engine 
+        // service caused our second-level tests of the test executor
+        // to throw an exception. So if you consider doing this, beware!
 
         #endregion
 
@@ -105,7 +111,8 @@ namespace NUnit.VisualStudio.TestAdapter
                 else
                     TestLog.Info("Running selected tests in " + assemblyName);
 
-                var filter = FilterBuilder.MakeTestFilter(assemblyGroup);
+                var filterBuilder = new NUnitTestFilterBuilder(TestEngine.Services.GetService<ITestFilterService>());
+                var filter = filterBuilder.MakeTestFilter(assemblyGroup);
 
                 RunAssembly(assemblyName, filter);
             }
@@ -142,7 +149,6 @@ namespace NUnit.VisualStudio.TestAdapter
             RunContext = runContext;
             FrameworkHandle = frameworkHandle;
             TfsFilter = new TfsTestFilter(runContext);
-            FilterBuilder = new NUnitTestFilterBuilder(TestEngine.Services.GetService<ITestFilterService>());
 
             // Ensure any channels registered by other adapters are unregistered
             CleanUpRegisteredChannels();
@@ -200,7 +206,8 @@ namespace NUnit.VisualStudio.TestAdapter
                         if (TfsFilter != null && !TfsFilter.IsEmpty)
                         {
                             // NOTE This overwrites filter used in call
-                            filter = FilterBuilder.ConvertTfsFilterToNUnitFilter(TfsFilter, loadedTestCases);
+                            var filterBuilder = new NUnitTestFilterBuilder(TestEngine.Services.GetService<ITestFilterService>());
+                            filter = filterBuilder.ConvertTfsFilterToNUnitFilter(TfsFilter, loadedTestCases);
                         }
 
                         using (var listener = new NUnitEventListener(FrameworkHandle, testConverter))
