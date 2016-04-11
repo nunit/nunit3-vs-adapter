@@ -40,7 +40,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void DefaultSettings()
         {
             _settings.Load("<RunSettings/>");
-            Assert.Null(_settings.MaxCpuCount);
+            Assert.That(_settings.MaxCpuCount, Is.EqualTo(-1));
             Assert.Null(_settings.ResultsDirectory);
             Assert.Null(_settings.TargetFrameworkVersion);
             Assert.Null(_settings.TargetPlatform);
@@ -69,7 +69,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void MaxCpuCountSetting()
         {
             _settings.Load("<RunSettings><RunConfiguration><MaxCpuCount>42</MaxCpuCount></RunConfiguration></RunSettings>");
-            Assert.That(_settings.MaxCpuCount, Is.EqualTo("42"));
+            Assert.That(_settings.MaxCpuCount, Is.EqualTo(42));
         }
 
         [Test]

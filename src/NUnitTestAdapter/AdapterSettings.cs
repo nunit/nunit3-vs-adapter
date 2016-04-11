@@ -14,7 +14,7 @@ namespace NUnit.VisualStudio.TestAdapter
     {
         #region Properties - General
 
-        public string MaxCpuCount { get; private set; }
+        public int MaxCpuCount { get; private set; }
 
         public string ResultsDirectory { get; private set; }
 
@@ -73,11 +73,13 @@ namespace NUnit.VisualStudio.TestAdapter
             if (settingsXml == string.Empty)
                 throw new ArgumentException("settingsXml", "Load called with empty XML string");
 
+            // Visual Studio already gives a good error message if the .runsettings
+            // file is poorly formed, so we don't need to do anything more.
             var doc = new XmlDocument();
             doc.LoadXml(settingsXml);
 
             var runConfiguration = doc.SelectSingleNode("RunSettings/RunConfiguration");
-            MaxCpuCount = GetInnerText(runConfiguration, "MaxCpuCount");
+            MaxCpuCount = GetInnerTextAsInt(runConfiguration, "MaxCpuCount", -1);
             ResultsDirectory = GetInnerText(runConfiguration, "ResultsDirectory");
             TargetPlatform = GetInnerText(runConfiguration, "TargetPlatform");
             TargetFrameworkVersion = GetInnerText(runConfiguration, "TargetFrameworkVersion");
@@ -93,7 +95,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             var nunitNode = doc.SelectSingleNode("RunSettings/NUnit");
-            InternalTraceLevel = GetInnerText(nunitNode, "InternalTraceLevel");
+            InternalTraceLevel = GetInnerText(nunitNode, "InternalTraceLevel", "Off", "Error", "Warning", "Info", "Verbose", "Debug");
             WorkDirectory = GetInnerText(nunitNode, "WorkDirectory");
             DefaultTimeout = GetInnerTextAsInt(nunitNode, "DefaultTimeout", 0);
             NumberOfTestWorkers = GetInnerTextAsInt(nunitNode, "NumberOfTestWorkers", -1); 
@@ -125,13 +127,27 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region Helper Methods
 
-        private string GetInnerText(XmlNode startNode, string xpath)
+        private string GetInnerText(XmlNode startNode, string xpath, params string[] validValues)
         {
             if (startNode != null)
             {
                 var targetNode = startNode.SelectSingleNode(xpath);
                 if (targetNode != null)
-                    return targetNode.InnerText;
+                {
+                    string val = targetNode.InnerText;
+
+                    if (validValues != null && validValues.Length > 0)
+                    {
+                        foreach (string valid in validValues)
+                            if (string.Compare(valid, val, StringComparison.OrdinalIgnoreCase) == 0)
+                                return valid;
+
+                        throw new ArgumentException(string.Format(
+                            "Invalid value {0} passed for element {1}.", val, xpath));
+                    }
+
+                    return val;
+                }
             }
 
             return null;
@@ -141,22 +157,20 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             string temp = GetInnerText(startNode, xpath);
 
-            int result;
-            if (!string.IsNullOrEmpty(temp) && int.TryParse(temp, out result))
-                    return result;
+            if (string.IsNullOrEmpty(temp))
+                return defaultValue;
 
-            return defaultValue;
+            return int.Parse(temp);
         }
 
         private bool GetInnerTextAsBool(XmlNode startNode, string xpath)
         {
             string temp = GetInnerText(startNode, xpath);
 
-            bool result;
-            if (!String.IsNullOrEmpty(temp) && bool.TryParse(temp, out result))
-                return result;
+            if (string.IsNullOrEmpty(temp))
+                return false;
 
-            return false;
+            return bool.Parse(temp);
         }
 
         #endregion

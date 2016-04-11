@@ -170,6 +170,8 @@ namespace NUnit.VisualStudio.TestAdapter
                 workDir = Path.GetDirectoryName(assemblyName);
             else if (!Path.IsPathRooted(workDir))
                 workDir = Path.Combine(Path.GetDirectoryName(assemblyName), workDir);
+            if (!Directory.Exists(workDir))
+                Directory.CreateDirectory(workDir);
             package.Settings[PackageSettings.WorkDirectory] = workDir;
 
             return package;

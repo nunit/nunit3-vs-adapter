@@ -27,6 +27,7 @@
     <PrivateBinPath>extras;more.extras</PrivateBinPath>
     <DefaultTimeout>5000</DefaultTimeout>
     <WorkDirectory>work</WorkDirectory>
+    <InternalTraceLevel>Info</InternalTraceLevel>
   </NUnit>
 
 </RunSettings>
