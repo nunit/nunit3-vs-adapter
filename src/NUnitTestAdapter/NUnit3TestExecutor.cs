@@ -210,6 +210,12 @@ namespace NUnit.VisualStudio.TestAdapter
                             filter = filterBuilder.ConvertTfsFilterToNUnitFilter(TfsFilter, loadedTestCases);
                         }
 
+                        if (filter == NUnitTestFilterBuilder.NoTestsFound)
+                        {
+                            TestLog.Info("Skipping assembly - no matching test cases found");
+                            return;
+                        }
+
                         using (var listener = new NUnitEventListener(FrameworkHandle, testConverter))
                         {
                             try
