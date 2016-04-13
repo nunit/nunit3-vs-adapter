@@ -2,6 +2,7 @@
 // Copyright (c) 2011-2015 NUnit Software. All rights reserved.
 // ****************************************************************
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -11,8 +12,10 @@ using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
+    using Fakes;
+
     [Category("TestDiscovery")]
-    public class TestDiscoveryTests : IMessageLogger, ITestCaseDiscoverySink
+    public class TestDiscoveryTests : ITestCaseDiscoverySink
     {
         static readonly string MockAssemblyPath = 
             Path.Combine(TestContext.CurrentContext.TestDirectory, "mock-assembly.dll");
@@ -31,7 +34,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             // Load the NUnit mock-assembly.dll once for this test, saving
             // the list of test cases sent to the discovery sink
             nunittestDiscoverer = ((ITestDiscoverer)new NUnit3TestDiscoverer());
-            nunittestDiscoverer.DiscoverTests(new[] { MockAssemblyPath}, null, this, this);
+            nunittestDiscoverer.DiscoverTests(
+                new[] { MockAssemblyPath}, 
+                new FakeDiscoveryContext(), 
+                new MessageLoggerStub(), 
+                this);
         }
 
         [Test]
@@ -50,14 +57,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(testCase.FullyQualifiedName, Is.EqualTo(fullName));
         }
 
-        #region IMessageLogger Methods
-
-        void IMessageLogger.SendMessage(TestMessageLevel testMessageLevel, string message)
-        {
-        }
-
-        #endregion
-
         #region ITestCaseDiscoverySink Methods
 
         void ITestCaseDiscoverySink.SendTestCase(TestCase discoveredTest)
@@ -69,7 +68,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     }
 
     [Category("TestDiscovery")]
-    public class EmptyAssemblyDiscoveryTests : IMessageLogger, ITestCaseDiscoverySink
+    public class EmptyAssemblyDiscoveryTests : ITestCaseDiscoverySink
     {
         static readonly string EmptyAssemblyPath = 
             Path.Combine(TestContext.CurrentContext.TestDirectory, "empty-assembly.dll");
@@ -81,19 +80,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             // Load the NUnit empty-assembly.dll once for this test
             nunittestDiscoverer = ((ITestDiscoverer)new NUnit3TestDiscoverer());
-            nunittestDiscoverer.DiscoverTests(new[] { EmptyAssemblyPath}, null, this, this);
+            nunittestDiscoverer.DiscoverTests(
+                new[] { EmptyAssemblyPath}, 
+                new FakeDiscoveryContext(), 
+                new MessageLoggerStub(), 
+                this);
         }
 
-        #region IMessageLogger Methods
-
-        void IMessageLogger.SendMessage(TestMessageLevel testMessageLevel, string message)
-        {
-            Assert.That(message, Does.Not.Contain("failed to load"));
-        }
-
-        #endregion
-
-        #region ITestCaseDiscoverySink Methods
+         #region ITestCaseDiscoverySink Methods
 
         void ITestCaseDiscoverySink.SendTestCase(TestCase discoveredTest)
         {

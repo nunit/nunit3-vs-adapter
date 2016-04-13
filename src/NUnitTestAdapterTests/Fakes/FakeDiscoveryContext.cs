@@ -3,20 +3,21 @@
 // ****************************************************************
 
 using System;
+using System.Collections.Generic;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
 {
-    class FakeRunSettings : IRunSettings
+    class FakeDiscoveryContext : IDiscoveryContext
     {
-        ISettingsProvider IRunSettings.GetSettings(string settingsName)
+        #region IDiscoveryContextMembers
+
+        IRunSettings IDiscoveryContext.RunSettings
         {
-            throw new NotImplementedException();
+            get { return new FakeRunSettings(); }
         }
 
-        public string SettingsXml
-        {
-            get { return "<RunSettings/>"; }
-        }
+        #endregion
     }
 }

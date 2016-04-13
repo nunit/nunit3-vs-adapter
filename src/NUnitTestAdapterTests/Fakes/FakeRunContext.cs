@@ -9,7 +9,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
 {
-    class FakeRunContext : IRunContext
+    class FakeRunContext : FakeDiscoveryContext, IRunContext
     {
         #region IRunContext Members
 
@@ -47,16 +47,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
         }
 
         #endregion
-
-        #region IDiscoveryContextMembers
-
-        IRunSettings IDiscoveryContext.RunSettings
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        #endregion
-
 
         public string SolutionDirectory
         {
