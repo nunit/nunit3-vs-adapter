@@ -23,12 +23,25 @@ namespace NUnit.VisualStudio.TestAdapter
     [ExtensionUri(ExecutorUri)]
     public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDisposable
     {
-        // TFS Filter in effect - may be empty
-        private TfsTestFilter _tfsFilter;
 
         // Fields related to the currently executing assembly
-        private ITestRunner _testRunner;
-        private TestFilter _nunitFilter = TestFilter.Empty;
+        private ITestRunner _activeRunner;
+
+        #region Properties
+
+        // Properties set when either of the RunTests methods is called
+        public IRunContext RunContext { get; private set; }
+        public IFrameworkHandle FrameworkHandle { get; private set; }
+        private TfsTestFilter TfsFilter { get; set; }
+
+        // NOTE: an earlier version of this code had a FilterBuilder
+        // property. This seemed to make sense, because we instantiate
+        // it in two different places. However, the existence of an
+        // NUnitTestFilterBuilder, containing a reference to an engine 
+        // service caused our second-level tests of the test executor
+        // to throw an exception. So if you consider doing this, beware!
+
+        #endregion
 
         #region ITestExecutor Implementation
 
@@ -50,35 +63,26 @@ namespace NUnit.VisualStudio.TestAdapter
 
             try
             {
-                _tfsFilter = new TfsTestFilter(runContext);
-                TestLog.SendDebugMessage("Keepalive:" + runContext.KeepAlive);
-                var enableShutdown = (Settings.UseVsKeepEngineRunning) ? !runContext.KeepAlive : true;
-                if (!_tfsFilter.HasTfsFilterValue)
-                {
-                    if (!(enableShutdown && !runContext.KeepAlive))  // Otherwise causes exception when run as commandline, illegal to enableshutdown when Keepalive is false, might be only VS2012
-                        frameworkHandle.EnableShutdownAfterTestRun = enableShutdown;
-                }
-
                 foreach (var source in sources)
                 {
                     var assemblyName = source;
                     if (!Path.IsPathRooted(assemblyName))
                         assemblyName = Path.Combine(Environment.CurrentDirectory, assemblyName);
 
-                    TestLog.SendInformationalMessage("Running all tests in " + assemblyName);
+                    TestLog.Info("Running all tests in " + assemblyName);
 
-                    RunAssembly(assemblyName, frameworkHandle);
+                    RunAssembly(assemblyName, TestFilter.Empty);
                 }
             }
             catch (Exception ex)
             {
                 if (ex is TargetInvocationException)
                     ex = ex.InnerException;
-                TestLog.SendErrorMessage("Exception thrown executing tests", ex);
+                TestLog.Error("Exception thrown executing tests", ex);
             }
             finally
             {
-                Info("executing tests", "finished");
+                TestLog.Info(string.Format("NUnit Adapter {0}: Test execution complete", AdapterVersion));
                 Unload();
             }
 
@@ -98,32 +102,29 @@ namespace NUnit.VisualStudio.TestAdapter
 #endif
             Initialize(runContext, frameworkHandle);
 
-            var enableShutdown = (Settings.UseVsKeepEngineRunning) ? !runContext.KeepAlive : true;
-            frameworkHandle.EnableShutdownAfterTestRun = enableShutdown;
-            Debug("executing tests", "EnableShutdown set to " + enableShutdown);
-
             var assemblyGroups = tests.GroupBy(tc => tc.Source);
             foreach (var assemblyGroup in assemblyGroups)
             {
                 var assemblyName = assemblyGroup.Key;
                 if (Debugger.IsAttached)
-                    TestLog.SendInformationalMessage("Debugging selected tests in " + assemblyName);
+                    TestLog.Info("Debugging selected tests in " + assemblyName);
                 else
-                    TestLog.SendInformationalMessage("Running selected tests in " + assemblyName);
+                    TestLog.Info("Running selected tests in " + assemblyName);
 
-                _nunitFilter = MakeTestFilter(assemblyGroup);
+                var filterBuilder = new NUnitTestFilterBuilder(TestEngine.Services.GetService<ITestFilterService>());
+                var filter = filterBuilder.MakeTestFilter(assemblyGroup);
 
-                RunAssembly(assemblyName, frameworkHandle);
+                RunAssembly(assemblyName, filter);
             }
 
-            Info("executing tests", "finished");
+            TestLog.Info(string.Format("NUnit Adapter {0}: Test execution complete", AdapterVersion));
             Unload();
         }
 
         void ITestExecutor.Cancel()
         {
-            if (_testRunner != null)
-                _testRunner.StopRun(true);
+            if (_activeRunner != null)
+                _activeRunner.StopRun(true);
         }
 
         #endregion
@@ -139,37 +140,55 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region Helper Methods
 
-        // The TestExecutor is constructed using the default constructor.
-        // We don't have any info to initialize it until one of the
-        // ITestExecutor methods is called.
-        protected override void Initialize(IDiscoveryContext context, IMessageLogger messageLogger)
+        public void Initialize(IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
-            base.Initialize(context, messageLogger);
+            base.Initialize(runContext, frameworkHandle);
 
-            Info("executing tests", "started");
+            TestLog.Info(string.Format("NUnit Adapter {0}: Test execution started", AdapterVersion));
+
+            RunContext = runContext;
+            FrameworkHandle = frameworkHandle;
+            TfsFilter = new TfsTestFilter(runContext);
 
             // Ensure any channels registered by other adapters are unregistered
             CleanUpRegisteredChannels();
+
+            TestLog.Debug("Keepalive: " + runContext.KeepAlive);
+            TestLog.Debug("UseVsKeepEngineRunning: " + Settings.UseVsKeepEngineRunning);
+
+            bool enableShutdown = true;
+            if (Settings.UseVsKeepEngineRunning )
+            {
+                enableShutdown = !runContext.KeepAlive;
+            }
+
+            if (TfsFilter.IsEmpty)
+            {
+                if (!(enableShutdown && !runContext.KeepAlive))  // Otherwise causes exception when run as commandline, illegal to enableshutdown when Keepalive is false, might be only VS2012
+                    frameworkHandle.EnableShutdownAfterTestRun = enableShutdown;
+            }
+
+            TestLog.Debug("EnableShutdown: " + enableShutdown.ToString());
         }
 
-        private void RunAssembly(string assemblyName, IFrameworkHandle frameworkHandle)
+        private void RunAssembly(string assemblyName, TestFilter filter)
         {
 #if LAUNCHDEBUGGER
             if (!Debugger.IsAttached)
                 Debugger.Launch();
 #endif
-            _testRunner = GetRunnerFor(assemblyName);
+            _activeRunner = GetRunnerFor(assemblyName);
 
             try
             {
-                var loadResult = _testRunner.Explore(TestFilter.Empty);
+                var loadResult = _activeRunner.Explore(TestFilter.Empty);
 
                 if (loadResult.Name == "test-run")
                     loadResult = loadResult.FirstChild;
 
                 if (loadResult.GetAttribute("runstate") == "Runnable")
                 {
-                    TestLog.SendInformationalMessage(string.Format("Loading tests from {0}", assemblyName));
+                    TestLog.Info(string.Format("Loading tests from {0}", assemblyName));
 
                     var nunitTestCases = loadResult.SelectNodes("//test-case");
 
@@ -184,62 +203,49 @@ namespace NUnit.VisualStudio.TestAdapter
                             loadedTestCases.Add(testConverter.ConvertTestCase(testNode));
 
                         // If we have a TFS Filter, convert it to an nunit filter
-                        if (_tfsFilter != null && _tfsFilter.HasTfsFilterValue)
+                        if (TfsFilter != null && !TfsFilter.IsEmpty)
                         {
-                            var filteredTestCases = _tfsFilter.CheckFilter(loadedTestCases);
-                            var testCases = filteredTestCases as TestCase[] ?? filteredTestCases.ToArray();
-                            TestLog.SendInformationalMessage(string.Format("TFS Filter detected: LoadedTestCases {0}, Filterered Test Cases {1}", loadedTestCases.Count, testCases.Count()));
-                            _nunitFilter = MakeTestFilter(testCases);
+                            // NOTE This overwrites filter used in call
+                            var filterBuilder = new NUnitTestFilterBuilder(TestEngine.Services.GetService<ITestFilterService>());
+                            filter = filterBuilder.ConvertTfsFilterToNUnitFilter(TfsFilter, loadedTestCases);
                         }
 
-                        using (var listener = new NUnitEventListener(frameworkHandle, testConverter))
+                        using (var listener = new NUnitEventListener(FrameworkHandle, testConverter))
                         {
                             try
                             {
-                                _testRunner.Run(listener, _nunitFilter);
+                                _activeRunner.Run(listener, filter);
                             }
                             catch (NullReferenceException)
                             {
                                 // this happens during the run when CancelRun is called.
-                                TestLog.SendDebugMessage("Nullref caught");
+                                TestLog.Debug("Nullref caught");
                             }
                         }
                     }
                 }
                 else
-                    TestLog.NUnitLoadError(assemblyName);
+                    TestLog.Info("NUnit failed to load " + assemblyName);
             }
             catch (BadImageFormatException)
             {
                 // we skip the native c++ binaries that we don't support.
-                TestLog.AssemblyNotSupportedWarning(assemblyName);
+                TestLog.Warning("Assembly not supported: " + assemblyName);
             }
             catch (System.IO.FileNotFoundException ex)
             {
                 // Probably from the GetExportedTypes in NUnit.core, attempting to find an assembly, not a problem if it is not NUnit here
-                TestLog.DependentAssemblyNotFoundWarning(ex.FileName, assemblyName);
+                TestLog.Warning("Dependent Assembly " + ex.FileName + " of " + assemblyName + " not found. Can be ignored if not a NUnit project.");
             }
             catch (Exception ex)
             {
                 if (ex is TargetInvocationException)
                     ex = ex.InnerException;
-                TestLog.SendErrorMessage("Exception thrown executing tests in " + assemblyName, ex);
+                TestLog.Error("Exception thrown executing tests in " + assemblyName, ex);
             }
-            _testRunner.Dispose();
-        }
 
-        private TestFilter MakeTestFilter(IEnumerable<TestCase> testCases)
-        {
-            ITestFilterService filterService = TestEngine.Services.GetService<ITestFilterService>();
-            if (filterService == null)
-                throw new NUnitEngineException("TestFilterService is not available. Engine in use is incorrect version.");
-
-            ITestFilterBuilder filterBuilder = filterService.GetTestFilterBuilder();
-
-            foreach (TestCase testCase in testCases)
-                filterBuilder.AddTest(testCase.FullyQualifiedName);
-
-            return filterBuilder.GetFilter();
+            _activeRunner.Dispose();
+            _activeRunner = null;
         }
 
         #endregion
