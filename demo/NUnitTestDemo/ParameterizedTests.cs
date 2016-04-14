@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 using NUnit.Framework;
+using NUnit.Framework.Internal;
+using NUnit.Framework.Interfaces;
 
 namespace NUnitTestDemo
 {
@@ -93,5 +95,22 @@ namespace NUnitTestDemo
         public void TestCaseWithSpecialCharInName(int x)
         {
         }
+
+#if false // Test for issue #144
+        [MyTestCase]
+        public void TestCaseWithBadTestBuilder(string baz)
+        {
+            Assert.That(baz, Is.EqualTo("baz"));
+        }
+
+        [AttributeUsage(AttributeTargets.Method, AllowMultiple=true, Inherited=false)]
+        class MyTestCaseAttribute : Attribute, ITestBuilder
+        {
+            public IEnumerable<TestMethod> BuildFrom(IMethodInfo method, Test suite)
+            {
+                throw new InvalidOperationException("This is intentionally broken");
+            }
+        }
+#endif
     }
 }
