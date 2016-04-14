@@ -11,6 +11,8 @@ namespace NUnit.VisualStudio.TestAdapter
     {
         private ITestFilterService _filterService;
 
+        public static readonly TestFilter NoTestsFound = new TestFilter("<notestsfound/>");
+
         public NUnitTestFilterBuilder(ITestFilterService filterService)
         {
             if (filterService == null)
@@ -29,6 +31,9 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public TestFilter MakeTestFilter(IEnumerable<TestCase> testCases)
         {
+            if (testCases.Count() == 0)
+                return NoTestsFound;
+
             ITestFilterBuilder filterBuilder = _filterService.GetTestFilterBuilder();
 
             foreach (TestCase testCase in testCases)
