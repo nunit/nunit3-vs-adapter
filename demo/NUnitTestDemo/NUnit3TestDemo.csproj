@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ApartmentTests.cs" />
     <Compile Include="AsyncTests.cs" />
     <Compile Include="ConfigFileTests.cs" />
     <Compile Include="ExpectedOutcomeAttributes.cs" />
