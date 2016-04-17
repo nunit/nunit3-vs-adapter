@@ -3,7 +3,7 @@
   <Identifier Id="NUnit.NUnit3TestAdapter">
     <Name>NUnit3 Test Adapter</Name>
     <Author>Charlie Poole</Author>
-    <Version>3.0.9</Version>
+    <Version>3.0.10</Version>
     <Description xml:space="preserve">NUnit 3.0 adapter for integrated test execution under Visual Studio 2012, 2013 and 2015. Compatible with NUnit 3.0 and 3.2.</Description>
     <Locale>1033</Locale>
     <MoreInfoUrl>https://github.com/nunit/docs/wiki/NUnit-VS-Adapter</MoreInfoUrl>
