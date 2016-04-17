@@ -188,8 +188,6 @@ namespace NUnit.VisualStudio.TestAdapter
 
                 if (loadResult.GetAttribute("runstate") == "Runnable")
                 {
-                    TestLog.Info(string.Format("Loading tests from {0}", assemblyName));
-
                     var nunitTestCases = loadResult.SelectNodes("//test-case");
 
                     using (var testConverter = new TestConverter(TestLog, assemblyName))
@@ -201,6 +199,8 @@ namespace NUnit.VisualStudio.TestAdapter
                         // All future calls to convert a test case may now use the cache.
                         foreach (XmlNode testNode in nunitTestCases)
                             loadedTestCases.Add(testConverter.ConvertTestCase(testNode));
+
+                        TestLog.Info(string.Format("NUnit3TestExecutor converted {0} of {1} NUnit test cases", loadedTestCases.Count, nunitTestCases.Count));
 
                         // If we have a TFS Filter, convert it to an nunit filter
                         if (TfsFilter != null && !TfsFilter.IsEmpty)

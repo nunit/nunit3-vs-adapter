@@ -42,19 +42,29 @@ namespace NUnit.VisualStudio.TestAdapter
         public void OnTestEvent(string report)
         {
             var node = XmlHelper.CreateXmlNode(report);
-            switch (node.Name)
+
+            try
             {
-                case "start-test":
-                    TestStarted(node);
-                    break;
+                switch (node.Name)
+                {
+                    case "start-test":
+                        TestStarted(node);
+                        break;
 
-                case "test-case":
-                    TestFinished(node);
-                    break;
+                    case "test-case":
+                        TestFinished(node);
+                        break;
 
-                case "test-suite":
-                    SuiteFinished(node);
-                    break;
+                    case "test-suite":
+                        SuiteFinished(node);
+                        break;
+                }
+            }
+            catch(Exception ex)
+            {
+                _recorder.SendMessage(TestMessageLevel.Error,
+                    string.Format("Error processing {0} event for {1}", node.Name, node.GetAttribute("fullname")));
+                _recorder.SendMessage(TestMessageLevel.Error, ex.ToString());
             }
         }
 
@@ -99,6 +109,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public void TestFinished(XmlNode resultNode)
         {
             TestResult ourResult = _testConverter.ConvertTestResult(resultNode);
+
             _recorder.RecordEnd(ourResult.TestCase, ourResult.Outcome);
             _recorder.RecordResult(ourResult);
         }
