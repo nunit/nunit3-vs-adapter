@@ -28,7 +28,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void LoadMockassembly()
         {
             // Sanity check to be sure we have the correct version of mock-assembly.dll
-            Assert.That(NUnit.Tests.Assemblies.MockAssembly.Tests, Is.EqualTo(31),
+            Assert.That(NUnit.Tests.Assemblies.MockAssembly.Tests, Is.EqualTo(32),
                 "The reference to mock-assembly.dll appears to be the wrong version");
 
             // Load the NUnit mock-assembly.dll once for this test, saving
