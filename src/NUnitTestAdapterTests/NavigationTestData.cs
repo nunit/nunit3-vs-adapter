@@ -153,5 +153,16 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 } // maxLineDebug = maxLineRelease = 153
             }
         }
-    }
+
+        public abstract class BaseClass
+        {
+            public void EmptyMethod_ThreeLines()
+            { // minLineDebug = 160
+            } // minLineRelease = maxLineDebug = maxLineRelease = 161
+        }
+
+        public class DerivedClass : BaseClass
+        {
+        }
+}
 }
