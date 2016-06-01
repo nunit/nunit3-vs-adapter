@@ -27,6 +27,11 @@
         <Edition>Premium</Edition>
         <Edition>Pro</Edition>
       </VisualStudio>
+      <VisualStudio Version="15.0">
+        <Edition>Ultimate</Edition>
+        <Edition>Premium</Edition>
+        <Edition>Pro</Edition>
+      </VisualStudio>
     </SupportedProducts>
     <SupportedFrameworkRuntimeEdition MinVersion="4.5" />
     <AllUsers>false</AllUsers>
