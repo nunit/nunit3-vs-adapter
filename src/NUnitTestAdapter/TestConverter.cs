@@ -159,14 +159,24 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             if (this.DiaSession == null) return null;
 
+            // First try using the class and method names provided directly
             var navData = DiaSession.GetNavigationData(className, methodName);
 
             if (navData != null && navData.FileName != null) return navData;
 
-            // DiaSession.GetNavigationData returned null, see if it's an async method. 
-            if (AsyncMethodHelper != null)
+            // We only use NavigationDataHelper if the normal call to DiaSession fails
+            // because it causes creation of a separate AppDomain for reflection.
+            if (NavigationDataHelper != null)
             {
-                string stateMachineClassName = AsyncMethodHelper.GetClassNameForAsyncMethod(className, methodName);
+                string definingClassName = NavigationDataHelper.GetDefiningClassName(className, methodName);
+                if (definingClassName != className)
+                {
+                    navData = DiaSession.GetNavigationData(definingClassName, methodName);
+                    if (navData != null && navData.FileName != null)
+                        return navData;
+                }
+
+                string stateMachineClassName = NavigationDataHelper.GetClassNameForAsyncMethod(className, methodName);
                 if (stateMachineClassName != null)
                     navData = diaSession.GetNavigationData(stateMachineClassName, "MoveNext");
             }
@@ -224,22 +234,22 @@ namespace NUnit.VisualStudio.TestAdapter
             return null;
         }
 
-        private AsyncMethodHelper TryCreateHelper(string sourceAssembly)
+        private NavigationDataHelper TryCreateHelper(string sourceAssembly)
         {
             var setup = new AppDomainSetup();
 
             var thisAssembly = Assembly.GetExecutingAssembly();
             setup.ApplicationBase = Path.GetDirectoryName(thisAssembly.ManifestModule.FullyQualifiedName);
 
-            this.asyncMethodHelperDomain = AppDomain.CreateDomain("AsyncMethodHelper", null, setup);
+            this.asyncMethodHelperDomain = AppDomain.CreateDomain("NavigationHelperDomain", null, setup);
 
             try
             {
                 var helper = this.asyncMethodHelperDomain.CreateInstanceAndUnwrap(
                     thisAssembly.FullName,
-                    typeof(AsyncMethodHelper).FullName) as AsyncMethodHelper;
+                    typeof(NavigationDataHelper).FullName) as NavigationDataHelper;
                 helper.LoadAssembly(sourceAssembly);
-                return helper as AsyncMethodHelper;
+                return helper as NavigationDataHelper;
             }
             catch (Exception ex)
             {
@@ -287,9 +297,9 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
-        private AsyncMethodHelper asyncMethodHelper;
+        private NavigationDataHelper asyncMethodHelper;
         bool tryToCreateHelper = true;
-        private AsyncMethodHelper AsyncMethodHelper
+        private NavigationDataHelper NavigationDataHelper
         {
             get
             {

@@ -8,13 +8,27 @@ using System.Reflection;
 
 namespace NUnit.VisualStudio.TestAdapter.Internal
 {
-    public class AsyncMethodHelper : MarshalByRefObject
+    public class NavigationDataHelper : MarshalByRefObject
     {
         Assembly targetAssembly;
 
         public void LoadAssembly(string assemblyName)
         {
             targetAssembly = Assembly.LoadFrom(assemblyName);
+        }
+
+        public string GetDefiningClassName(string className, string methodName)
+        {
+            var type = targetAssembly.GetType(className);
+
+            if (type != null)
+            {
+                var method = type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                if (method != null)
+                    return method.DeclaringType.FullName;
+            }
+
+            return className;
         }
 
         public string GetClassNameForAsyncMethod(string className, string methodName)
