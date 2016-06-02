@@ -21,7 +21,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
 
         } // minLineRelease = maxLineDebug = maxLineRelease = 23
-        
+
         public void SimpleMethod_Void_NoArgs()
         {// minLineDebug = 26
             const int answer = 42;
@@ -91,7 +91,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             private readonly double x;
             private readonly string s;
 
-            public ParameterizedFixture(double x, string s) 
+            public ParameterizedFixture(double x, string s)
             {
                 this.x = x;
                 this.s = s;
@@ -107,7 +107,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             private readonly T1 x;
 
-            public GenericFixture(T1 x) 
+            public GenericFixture(T1 x)
             {
                 this.x = x;
             }
@@ -152,6 +152,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                     Console.Write(X + Y.ToString() + Z); // minLineRelease = 152
                 } // maxLineDebug = maxLineRelease = 153
             }
+        }
+
+        public abstract class BaseClass
+        {
+            public void EmptyMethod_ThreeLines()
+            { // minLineDebug = 160
+            } // maxLineDebug = minLineRelease = maxLineRelease = 161
+        }
+
+        public class DerivedClass : BaseClass
+        {
         }
     }
 }

@@ -51,6 +51,7 @@
     <Compile Include="ConfigFileTests.cs" />
     <Compile Include="ExpectedOutcomeAttributes.cs" />
     <Compile Include="GenericTests.cs" />
+    <Compile Include="InheritedTestTests.cs" />
     <Compile Include="TextOutputTests.cs" />
     <Compile Include="ParameterizedTests.cs" />
     <Compile Include="SetUpFixtureTests.cs" />

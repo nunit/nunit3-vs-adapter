@@ -76,7 +76,7 @@
   <ItemGroup>
     <Compile Include="AdapterSettings.cs" />
     <Compile Include="NUnitEventListener.cs" />
-    <Compile Include="Internal\AsyncMethodHelper.cs" />
+    <Compile Include="Internal\NavigationDataHelper.cs" />
     <Compile Include="Internal\Stackframe.cs" />
     <Compile Include="Internal\StackframeParser.cs" />
     <Compile Include="Internal\Stacktrace.cs" />
