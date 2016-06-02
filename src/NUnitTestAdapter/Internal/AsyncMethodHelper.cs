@@ -10,23 +10,8 @@ namespace NUnit.VisualStudio.TestAdapter.Internal
 {
     public class AsyncMethodHelper : MarshalByRefObject
     {
-        Assembly targetAssembly;
-
-        public void LoadAssembly(string assemblyName)
+        public string GetClassNameForAsyncMethod(MethodInfo method)
         {
-            targetAssembly = Assembly.LoadFrom(assemblyName);
-        }
-
-        public string GetClassNameForAsyncMethod(string className, string methodName)
-        {
-            if (targetAssembly == null) return null;
-
-            var definingType = targetAssembly.GetType(className);
-            if (definingType == null) return null;
-
-            var method = definingType.GetMethods().Where(o => o.Name == methodName).OrderBy(o => o.GetParameters().Length).FirstOrDefault();
-            if (method == null) return null;
-
             var asyncAttribute = GetAsyncStateMachineAttribute(method);
             if (asyncAttribute == null) return null;
 

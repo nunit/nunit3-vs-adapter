@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml;
@@ -157,16 +158,22 @@ namespace NUnit.VisualStudio.TestAdapter
         // public for testing
         public DiaNavigationData GetNavigationData(string className, string methodName)
         {
-            if (this.DiaSession == null) return null;
+            if (this.DiaSession == null || TargetAssembly == null) return null;
 
-            var navData = DiaSession.GetNavigationData(className, methodName);
+            var definingType = TargetAssembly.GetType(className);
+            if (definingType == null) return null;
+
+            var method = definingType.GetMethods().Where(o => o.Name == methodName).OrderBy(o => o.GetParameters().Length).FirstOrDefault();
+            if (method == null) return null;
+
+            var navData = DiaSession.GetNavigationData(method.DeclaringType.FullName, methodName);
 
             if (navData != null && navData.FileName != null) return navData;
 
             // DiaSession.GetNavigationData returned null, see if it's an async method. 
             if (AsyncMethodHelper != null)
             {
-                string stateMachineClassName = AsyncMethodHelper.GetClassNameForAsyncMethod(className, methodName);
+                string stateMachineClassName = AsyncMethodHelper.GetClassNameForAsyncMethod(method);
                 if (stateMachineClassName != null)
                     navData = diaSession.GetNavigationData(stateMachineClassName, "MoveNext");
             }
@@ -238,7 +245,6 @@ namespace NUnit.VisualStudio.TestAdapter
                 var helper = this.asyncMethodHelperDomain.CreateInstanceAndUnwrap(
                     thisAssembly.FullName,
                     typeof(AsyncMethodHelper).FullName) as AsyncMethodHelper;
-                helper.LoadAssembly(sourceAssembly);
                 return helper as AsyncMethodHelper;
             }
             catch (Exception ex)
@@ -300,6 +306,22 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
 
                 return asyncMethodHelper;
+            }
+        }
+
+        private Assembly targetAssembly = null;
+        private bool tryToLoadAssembly = true;
+        private Assembly TargetAssembly
+        {
+            get
+            {
+                if (tryToLoadAssembly)
+                {
+                    targetAssembly = Assembly.LoadFrom(sourceAssembly);
+                    tryToLoadAssembly = false;
+                }
+
+                return targetAssembly;
             }
         }
 
