@@ -156,7 +156,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         public abstract class BaseClass
         {
-            public void EmptyMethodThreeLines()
+            public void EmptyMethod_ThreeLines()
             { // minLineDebug = 160
             } // maxLineDebug = minLineRelease = maxLineRelease = 161
         }
