@@ -23,7 +23,7 @@ namespace NUnit.VisualStudio.TestAdapter.Internal
 
             if (type != null)
             {
-                var method = type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                var method = type.GetMethods().Where(o => o.Name == methodName).OrderBy(o => o.GetParameters().Length).FirstOrDefault();
                 if (method != null)
                     return method.DeclaringType.FullName;
             }

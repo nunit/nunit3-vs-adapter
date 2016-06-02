@@ -161,7 +161,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             } // maxLineDebug = minLineRelease = maxLineRelease = 161
         }
 
-        public class DerivedClass
+        public class DerivedClass : BaseClass
         {
         }
     }

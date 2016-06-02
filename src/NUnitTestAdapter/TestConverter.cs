@@ -143,7 +143,7 @@ namespace NUnit.VisualStudio.TestAdapter
             var className = testNode.GetAttribute("classname");
             var methodName = testNode.GetAttribute("methodname");
             var navData = GetNavigationData(className, methodName);
-            if (navData != null)
+            if (NavigationDataIsValid(navData))
             {
                 testCase.CodeFilePath = navData.FileName;
                 testCase.LineNumber = navData.MinLineNumber;
@@ -162,7 +162,7 @@ namespace NUnit.VisualStudio.TestAdapter
             // First try using the class and method names provided directly
             var navData = DiaSession.GetNavigationData(className, methodName);
 
-            if (navData != null && navData.FileName != null) return navData;
+            if (NavigationDataIsValid(navData)) return navData;
 
             // We only use NavigationDataHelper if the normal call to DiaSession fails
             // because it causes creation of a separate AppDomain for reflection.
@@ -172,7 +172,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 if (definingClassName != className)
                 {
                     navData = DiaSession.GetNavigationData(definingClassName, methodName);
-                    if (navData != null && navData.FileName != null)
+                    if (NavigationDataIsValid(navData))
                         return navData;
                 }
 
@@ -181,10 +181,15 @@ namespace NUnit.VisualStudio.TestAdapter
                     navData = diaSession.GetNavigationData(stateMachineClassName, "MoveNext");
             }
 
-            if (navData == null || navData.FileName == null)
+            if (!NavigationDataIsValid(navData))
                 logger.Warning(string.Format("No source data found for {0}.{1}", className, methodName));
 
             return navData;
+        }
+
+        private static bool NavigationDataIsValid(DiaNavigationData navData)
+        {
+            return navData != null && navData.FileName != null;
         }
 
         // Public for testing
