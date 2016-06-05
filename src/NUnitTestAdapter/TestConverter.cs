@@ -151,39 +151,6 @@ namespace NUnit.VisualStudio.TestAdapter
             return testCase;
         }
 
-        // public for testing
-        //public NavigationData GetNavigationData(string className, string methodName)
-        //{
-            //    if (this.DiaSession == null) return null;
-
-            //    // First try using the class and method names provided directly
-            //    var navData = DiaSession.GetNavigationData(className, methodName);
-
-            //    if (NavigationDataIsValid(navData)) return navData;
-
-            //    // We only use NavigationDataHelper if the normal call to DiaSession fails
-            //    // because it causes creation of a separate AppDomain for reflection.
-            //    if (NavigationDataHelper != null)
-            //    {
-            //        string definingClassName = NavigationDataHelper.GetDefiningClassName(className, methodName);
-            //        if (definingClassName != className)
-            //        {
-            //            navData = DiaSession.GetNavigationData(definingClassName, methodName);
-            //            if (NavigationDataIsValid(navData))
-            //                return navData;
-            //        }
-
-            //        string stateMachineClassName = NavigationDataHelper.GetClassNameForAsyncMethod(className, methodName);
-            //        if (stateMachineClassName != null)
-            //            navData = diaSession.GetNavigationData(stateMachineClassName, "MoveNext");
-            //    }
-
-            //    if (!NavigationDataIsValid(navData))
-            //        logger.Warning(string.Format("No source data found for {0}.{1}", className, methodName));
-
-            //    return navData;
-        //}
-
         // Public for testing
         public static TestOutcome GetTestOutcome(XmlNode resultNode)
         {
