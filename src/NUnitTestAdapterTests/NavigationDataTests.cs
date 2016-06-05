@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using NUnit.Framework;
+using NUnit.VisualStudio.TestAdapter.Internal;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
@@ -8,24 +9,23 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     [Category("Navigation")]
     public class NavigationDataTests
     {
-        TestConverter testConverter;
+        NavigationDataProvider _provider;
 
         const string Prefix = "NUnit.VisualStudio.TestAdapter.Tests.NavigationTestData";
 
         [SetUp]
         public void SetUp()
         {
-            
-            testConverter = new TestConverter(
-                new TestLogger( new MessageLoggerStub(), 0), 
+
+            _provider = new NavigationDataProvider(
                 Path.Combine(TestContext.CurrentContext.TestDirectory, "NUnit.VisualStudio.TestAdapter.Tests.dll"));
         }
 
-        [TearDown]
-        public void TearDown()
-        {
-            testConverter.Dispose();
-        }
+        //[TearDown]
+        //public void TearDown()
+        //{
+        //    testConverter.Dispose();
+        //}
 
         [TestCase("", "EmptyMethod_OneLine", 9, 9, 9, 9)]
         [TestCase("", "EmptyMethod_TwoLines", 12, 13, 13, 13)]
@@ -52,7 +52,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             // Get the navigation data - ensure names are spelled correctly!
             var className = Prefix + suffix;
-            var data = testConverter.GetNavigationData(className, methodName);
+            var data = _provider.GetNavigationData(className, methodName);
             Assert.NotNull(data, "Unable to retrieve navigation data");
 
             // Verify the navigation data
@@ -69,13 +69,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             //   Max line: Last code line if that line is an 
             //             unconditional return statement, otherwise
             //             the closing curly brace.
-            Assert.That(data.FileName, Does.EndWith("NavigationTestData.cs"));
+            Assert.That(data.FilePath, Does.EndWith("NavigationTestData.cs"));
 #if DEBUG
-            Assert.That(data.MinLineNumber, Is.EqualTo(minLineDebug));
-            Assert.That(data.MaxLineNumber, Is.EqualTo(maxLineDebug));
+            Assert.That(data.LineNumber, Is.EqualTo(minLineDebug));
 #else
-            Assert.That(data.MaxLineNumber, Is.EqualTo(maxLineRelease));
-            Assert.That(data.MinLineNumber, Is.EqualTo(minLineRelease));
+            Assert.That(data.LineNumber, Is.EqualTo(minLineRelease));
 #endif
         }
     }
