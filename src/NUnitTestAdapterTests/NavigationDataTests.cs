@@ -41,19 +41,20 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase("", "AsyncMethod_Void", 60, 62, 64, 64)]
         [TestCase("", "AsyncMethod_Task", 67, 69, 71, 71)]
         [TestCase("", "AsyncMethod_ReturnsInt", 74, 76, 78, 78)]
-        [TestCase("+NestedClass", "SimpleMethod_Void_NoArgs", 83, 85, 86, 86)]
-        [TestCase("+ParameterizedFixture", "SimpleMethod_ReturnsString_OneArg", 101, 102, 102, 103)]
+        // Nested classes use ECMA-335 format
+        [TestCase("/NestedClass", "SimpleMethod_Void_NoArgs", 83, 85, 86, 86)]
+        [TestCase("/ParameterizedFixture", "SimpleMethod_ReturnsString_OneArg", 101, 102, 102, 103)]
         // Generic Fixture requires ` plus type arg count
-        [TestCase("+GenericFixture`2", "Matches", 116, 117, 117, 118)]
-        [TestCase("+GenericFixture`2+DoublyNested", "WriteBoth", 132, 133, 134, 134)]
-        [TestCase("+GenericFixture`2+DoublyNested`1", "WriteAllThree", 151, 152, 153, 153)]
-        [TestCase("+DerivedClass", "EmptyMethod_ThreeLines", 160, 161, 161, 161)]
+        [TestCase("/GenericFixture`2", "Matches", 116, 117, 117, 118)]
+        [TestCase("/GenericFixture`2/DoublyNested", "WriteBoth", 132, 133, 134, 134)]
+        [TestCase("/GenericFixture`2/DoublyNested`1", "WriteAllThree", 151, 152, 153, 153)]
+        [TestCase("/DerivedClass", "EmptyMethod_ThreeLines", 160, 161, 161, 161)]
         public void VerifyNavigationData(string suffix, string methodName, int minLineDebug, int minLineRelease, int maxLineRelease, int maxLineDebug)
         {
             // Get the navigation data - ensure names are spelled correctly!
             var className = Prefix + suffix;
             var data = _provider.GetNavigationData(className, methodName);
-            Assert.NotNull(data, "Unable to retrieve navigation data");
+            Assert.That(data.IsValid, "Unable to retrieve navigation data");
 
             // Verify the navigation data
             // Note that different line numbers are returned for our
