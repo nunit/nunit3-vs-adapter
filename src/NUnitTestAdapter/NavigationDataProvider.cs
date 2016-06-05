@@ -12,7 +12,7 @@ using Mono.Cecil.Rocks;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-    public class NavigationDataProvider : MarshalByRefObject
+    public class NavigationDataProvider
     {
         readonly string _assemblyPath;
         IDictionary<string, TypeDefinition> _typeDefs;
@@ -140,11 +140,6 @@ namespace NUnit.VisualStudio.TestAdapter
             //ECMA-335 specifies "/" instead of "+" to indicate a nested type.
 
             return className.Replace("+", "/");
-        }
-
-        public override object InitializeLifetimeService()
-        {
-            return null;
         }
     }
 }
