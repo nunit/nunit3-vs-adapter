@@ -9,25 +9,25 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using NUnit.VisualStudio.TestAdapter.Internal;
 using VSTestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
     public class TestConverter : IDisposable
     {
-        private readonly TestLogger logger;
-        private readonly Dictionary<string, TestCase> vsTestCaseMap;
-        private readonly string sourceAssembly;
-        private AppDomain asyncMethodHelperDomain;
+        private readonly TestLogger _logger;
+        private readonly Dictionary<string, TestCase> _vsTestCaseMap;
+        private readonly string _sourceAssembly;
+        private NavigationDataProvider _navigationDataProvider;
 
-        #region Constructors
+        #region Constructor
 
         public TestConverter(TestLogger logger, string sourceAssembly)
         {
-            this.logger = logger;
-            this.sourceAssembly = sourceAssembly;
-            this.vsTestCaseMap = new Dictionary<string, TestCase>();
+            _logger = logger;
+            _sourceAssembly = sourceAssembly;
+            _vsTestCaseMap = new Dictionary<string, TestCase>();
+            _navigationDataProvider = new NavigationDataProvider(sourceAssembly);
         }
 
         #endregion
@@ -46,21 +46,21 @@ namespace NUnit.VisualStudio.TestAdapter
 
             // Return cached value if we have one
             string id = testNode.GetAttribute("id");
-            if (vsTestCaseMap.ContainsKey(id))
-                return vsTestCaseMap[id];
+            if (_vsTestCaseMap.ContainsKey(id))
+                return _vsTestCaseMap[id];
            
             // Convert to VS TestCase and cache the result
             var testCase = MakeTestCaseFromXmlNode(testNode);
-            vsTestCaseMap.Add(id, testCase);
+            _vsTestCaseMap.Add(id, testCase);
             return testCase;             
         }
 
         public TestCase GetCachedTestCase(string id)
         {
-            if (vsTestCaseMap.ContainsKey(id))
-                return vsTestCaseMap[id];
+            if (_vsTestCaseMap.ContainsKey(id))
+                return _vsTestCaseMap[id];
 
-            logger.Error("Test " + id + " not found in cache");
+            _logger.Error("Test " + id + " not found in cache");
             return null;
         }
 
@@ -105,7 +105,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
@@ -113,11 +113,8 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             if (disposing)
             {
-                if (this.diaSession != null) this.diaSession.Dispose();
-                if (this.asyncMethodHelperDomain != null) AppDomain.Unload(this.asyncMethodHelperDomain);
+                //?
             }
-            diaSession = null;
-            asyncMethodHelperDomain = null;
         }
 
         #endregion
@@ -133,7 +130,7 @@ namespace NUnit.VisualStudio.TestAdapter
             var testCase = new TestCase(
                                      testNode.GetAttribute("fullname"),
                                      new Uri(NUnit3TestExecutor.ExecutorUri),
-                                     this.sourceAssembly)
+                                     _sourceAssembly)
             {
                 DisplayName = testNode.GetAttribute("name"),
                 CodeFilePath = null,
@@ -142,54 +139,16 @@ namespace NUnit.VisualStudio.TestAdapter
 
             var className = testNode.GetAttribute("classname");
             var methodName = testNode.GetAttribute("methodname");
-            var navData = GetNavigationData(className, methodName);
-            if (NavigationDataIsValid(navData))
+            var navData = _navigationDataProvider.GetNavigationData(className, methodName);
+            if (navData.IsValid)
             {
-                testCase.CodeFilePath = navData.FileName;
-                testCase.LineNumber = navData.MinLineNumber;
+                testCase.CodeFilePath = navData.FilePath;
+                testCase.LineNumber = navData.LineNumber;
             }
 
             testCase.AddTraitsFromTestNode(testNode);
 
             return testCase;
-        }
-
-        // public for testing
-        public DiaNavigationData GetNavigationData(string className, string methodName)
-        {
-            if (this.DiaSession == null) return null;
-
-            // First try using the class and method names provided directly
-            var navData = DiaSession.GetNavigationData(className, methodName);
-
-            if (NavigationDataIsValid(navData)) return navData;
-
-            // We only use NavigationDataHelper if the normal call to DiaSession fails
-            // because it causes creation of a separate AppDomain for reflection.
-            if (NavigationDataHelper != null)
-            {
-                string definingClassName = NavigationDataHelper.GetDefiningClassName(className, methodName);
-                if (definingClassName != className)
-                {
-                    navData = DiaSession.GetNavigationData(definingClassName, methodName);
-                    if (NavigationDataIsValid(navData))
-                        return navData;
-                }
-
-                string stateMachineClassName = NavigationDataHelper.GetClassNameForAsyncMethod(className, methodName);
-                if (stateMachineClassName != null)
-                    navData = diaSession.GetNavigationData(stateMachineClassName, "MoveNext");
-            }
-
-            if (!NavigationDataIsValid(navData))
-                logger.Warning(string.Format("No source data found for {0}.{1}", className, methodName));
-
-            return navData;
-        }
-
-        private static bool NavigationDataIsValid(DiaNavigationData navData)
-        {
-            return navData != null && navData.FileName != null;
         }
 
         // Public for testing
@@ -237,85 +196,6 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             return null;
-        }
-
-        private NavigationDataHelper TryCreateHelper(string sourceAssembly)
-        {
-            var setup = new AppDomainSetup();
-
-            var thisAssembly = Assembly.GetExecutingAssembly();
-            setup.ApplicationBase = Path.GetDirectoryName(thisAssembly.ManifestModule.FullyQualifiedName);
-
-            this.asyncMethodHelperDomain = AppDomain.CreateDomain("NavigationHelperDomain", null, setup);
-
-            try
-            {
-                var helper = this.asyncMethodHelperDomain.CreateInstanceAndUnwrap(
-                    thisAssembly.FullName,
-                    typeof(NavigationDataHelper).FullName) as NavigationDataHelper;
-                helper.LoadAssembly(sourceAssembly);
-                return helper as NavigationDataHelper;
-            }
-            catch (Exception ex)
-            {
-                // If we can't load it for some reason, we issue a warning
-                // and won't try to do it again for the assembly.
-                logger.Warning("Unable to create AsyncMethodHelper\r\nSource data will not be available for some of the tests", ex);
-                return null;
-            }
-        }
-
-
-        #endregion
-
-        #region Private Properties
-
-        // NOTE: There is some sort of timing issue involved
-        // in creating the DiaSession. When it is created
-        // in the constructor, an exception is thrown on the
-        // call to GetNavigationData. We don't understand
-        // this, we're just dealing with it.
-        private DiaSession diaSession;
-        private bool tryToCreateDiaSession = true;
-        private DiaSession DiaSession
-        {
-            get
-            {
-                if (tryToCreateDiaSession)
-                {
-                    try
-                    {
-                        diaSession = new DiaSession(sourceAssembly);
-                    }
-                    catch (Exception ex)
-                    {
-                        // If this isn't a project type supporting DiaSession,
-                        // we just issue a warning. We won't try this again.
-                        logger.Warning("Unable to create DiaSession for " + sourceAssembly + "\r\nNo source location data will be available for this assembly.");
-                        logger.Debug(ex.Message);
-                    }
-
-                    tryToCreateDiaSession = false;
-                }
-
-                return diaSession;
-            }
-        }
-
-        private NavigationDataHelper asyncMethodHelper;
-        bool tryToCreateHelper = true;
-        private NavigationDataHelper NavigationDataHelper
-        {
-            get
-            {
-                if (tryToCreateHelper)
-                {
-                    tryToCreateHelper = false;
-                    asyncMethodHelper = TryCreateHelper(sourceAssembly);
-                }
-
-                return asyncMethodHelper;
-            }
         }
 
         #endregion
