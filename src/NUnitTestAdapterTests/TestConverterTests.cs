@@ -29,12 +29,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             testConverter = new TestConverter(new TestLogger(new MessageLoggerStub(), 0), FakeTestData.AssemblyPath);
         }
 
-        [TearDown]
-        public void TearDown()
-        {
-            testConverter.Dispose();
-        }
-
         [Test]
         public void CanMakeTestCaseFromTest()
         {

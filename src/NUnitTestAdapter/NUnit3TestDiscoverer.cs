@@ -56,12 +56,11 @@ namespace NUnit.VisualStudio.TestAdapter
                     if (loadResult.GetAttribute("runstate") == "Runnable")
                     {
                         XmlNode topNode = runner.Explore(TestFilter.Empty);
+                        var testConverter = new TestConverter(TestLog, sourceAssembly);
 
-                        using (var testConverter = new TestConverter(TestLog, sourceAssembly))
-                        {
-                            int cases = ProcessTestCases(topNode, discoverySink, testConverter);
-                            TestLog.Debug(string.Format("Discovered {0} test cases", cases));
-                        }
+                        int cases = ProcessTestCases(topNode, discoverySink, testConverter);
+
+                        TestLog.Debug(string.Format("Discovered {0} test cases", cases));
                     }
                     else
                     {

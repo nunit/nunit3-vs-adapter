@@ -13,7 +13,7 @@ using VSTestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-    public class TestConverter : IDisposable
+    public class TestConverter
     {
         private readonly TestLogger _logger;
         private readonly Dictionary<string, TestCase> _vsTestCaseMap;
@@ -101,20 +101,6 @@ namespace NUnit.VisualStudio.TestAdapter
                 ourResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, outputNode.InnerText));
 
             return ourResult;
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                //?
-            }
         }
 
         #endregion
