@@ -59,6 +59,9 @@
         <include name="nunit.engine.dll"/>
         <include name="nunit.engine.api.dll"/>
         <include name="Mono.Cecil.dll"/>
+        <include name="Mono.Cecil.Pdb.dll"/>
+        <include name="Mono.Cecil.Mdb.dll"/>
+        <include name="Mono.Cecil.Rocks.dll"/>
         <include name="ignore.addins"/>
       </fileset>
 		</copy>

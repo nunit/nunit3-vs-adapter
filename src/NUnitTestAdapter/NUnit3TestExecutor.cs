@@ -190,43 +190,42 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     var nunitTestCases = loadResult.SelectNodes("//test-case");
 
-                    using (var testConverter = new TestConverter(TestLog, assemblyName))
+                    var testConverter = new TestConverter(TestLog, assemblyName);
+
+                    var loadedTestCases = new List<TestCase>();
+
+                    // As a side effect of calling TestConverter.ConvertTestCase, 
+                    // the converter's cache of all test cases is populated as well. 
+                    // All future calls to convert a test case may now use the cache.
+                    foreach (XmlNode testNode in nunitTestCases)
+                        loadedTestCases.Add(testConverter.ConvertTestCase(testNode));
+
+                    TestLog.Info(string.Format("NUnit3TestExecutor converted {0} of {1} NUnit test cases", loadedTestCases.Count, nunitTestCases.Count));
+
+                    // If we have a TFS Filter, convert it to an nunit filter
+                    if (TfsFilter != null && !TfsFilter.IsEmpty)
                     {
-                        var loadedTestCases = new List<TestCase>();
+                        // NOTE This overwrites filter used in call
+                        var filterBuilder = new NUnitTestFilterBuilder(TestEngine.Services.GetService<ITestFilterService>());
+                        filter = filterBuilder.ConvertTfsFilterToNUnitFilter(TfsFilter, loadedTestCases);
+                    }
 
-                        // As a side effect of calling TestConverter.ConvertTestCase, 
-                        // the converter's cache of all test cases is populated as well. 
-                        // All future calls to convert a test case may now use the cache.
-                        foreach (XmlNode testNode in nunitTestCases)
-                            loadedTestCases.Add(testConverter.ConvertTestCase(testNode));
+                    if (filter == NUnitTestFilterBuilder.NoTestsFound)
+                    {
+                        TestLog.Info("Skipping assembly - no matching test cases found");
+                        return;
+                    }
 
-                        TestLog.Info(string.Format("NUnit3TestExecutor converted {0} of {1} NUnit test cases", loadedTestCases.Count, nunitTestCases.Count));
-
-                        // If we have a TFS Filter, convert it to an nunit filter
-                        if (TfsFilter != null && !TfsFilter.IsEmpty)
+                    using (var listener = new NUnitEventListener(FrameworkHandle, testConverter))
+                    {
+                        try
                         {
-                            // NOTE This overwrites filter used in call
-                            var filterBuilder = new NUnitTestFilterBuilder(TestEngine.Services.GetService<ITestFilterService>());
-                            filter = filterBuilder.ConvertTfsFilterToNUnitFilter(TfsFilter, loadedTestCases);
+                            _activeRunner.Run(listener, filter);
                         }
-
-                        if (filter == NUnitTestFilterBuilder.NoTestsFound)
+                        catch (NullReferenceException)
                         {
-                            TestLog.Info("Skipping assembly - no matching test cases found");
-                            return;
-                        }
-
-                        using (var listener = new NUnitEventListener(FrameworkHandle, testConverter))
-                        {
-                            try
-                            {
-                                _activeRunner.Run(listener, filter);
-                            }
-                            catch (NullReferenceException)
-                            {
-                                // this happens during the run when CancelRun is called.
-                                TestLog.Debug("Nullref caught");
-                            }
+                            // this happens during the run when CancelRun is called.
+                            TestLog.Debug("Nullref caught");
                         }
                     }
                 }

@@ -3,87 +3,87 @@ using System.Globalization;
 using System.Threading.Tasks;
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
-    // Contains methods used in testing use of DiaSession.
+    // Contains methods used in testing NavigationDataProvider.
     class NavigationTestData
     {
-        public void EmptyMethod_OneLine() { } // minLineDebug = minLineRelease = maxLineDebug = maxLineRelease = 8
+        public void EmptyMethod_OneLine() { } // expectedLineDebug = expectedLineRelease = 8
 
         public void EmptyMethod_TwoLines()
-        { // minLineDebug = 12
-        } // minLineRelease = maxLineDebug = maxLineRelease = 13
+        { // expectedLineDebug = 12
+        } // expectedLineRelease = 13
 
         public void EmptyMethod_ThreeLines()
-        { // minLineDebug = 16
-        } // minLineRelease = maxLineDebug = maxLineRelease = 17
+        { // expectedLineDebug = 16
+        } // expectedLineRelease = 17
 
         public void EmptyMethod_LotsOfLines()
-        { // minLineDebug = 20
+        { // expectedLineDebug = 20
 
 
-        } // minLineRelease = maxLineDebug = maxLineRelease = 23
+        } // expectedLineRelease = 23
 
         public void SimpleMethod_Void_NoArgs()
-        {// minLineDebug = 26
+        {// expectedLineDebug = 26
             const int answer = 42;
-            Console.Write(answer); // minLineRelease = 28
-        } // maxLineDebug = maxLineRelease = 29
+            Console.Write(answer); // expectedLineRelease = 28
+        }
 
         public void SimpleMethod_Void_OneArg(int x)
-        { // minLineDebug = 32
-            var answer = x; // minLineRelease = 33
+        { // expectedLineDebug = 32
+            var answer = x; // expectedLineRelease = 33
             Console.Write(answer);
-        } // maxLineDebug = maxLineRelease = 35
+        }
 
         public void SimpleMethod_Void_TwoArgs(int x, int y)
-        { // minLineDebug = 38
-            var answer = x + y; // minLineRelease = 39
+        { // expectedLineDebug = 38
+            var answer = x + y; // expectedLineRelease = 39
             Console.Write(answer);
-        } // maxLineDebug = maxLineRelease = 41
+        }
 
         public int SimpleMethod_ReturnsInt_NoArgs()
-        {// minLineDebug = 44
+        {// expectedLineDebug = 44
             const int answer = 42;
-            return answer; // minLineRelease = maxLineRelease = 46
-        } // maxLineDebug = 47
+            return answer; // expectedLineRelease = 46
+        }
 
         public string SimpleMethod_ReturnsString_OneArg(int x)
-        { // minLineDebug = 50
-            return x.ToString(CultureInfo.InvariantCulture); // minLineRelease = maxLineRelease = 51
-        } // maxLineDebug = 52
+        { // expectedLineDebug = 50
+            return x.ToString(CultureInfo.InvariantCulture); // expectedLineRelease = 51
+        }
 
         public string GenericMethod_ReturnsString_OneArg<T>(T x)
-        { // minLineDebug = 55
-            return x.ToString(); // minLineRelease = maxLineRelease = 56
-        } // maxLineDebug = 57
+        { // expectedLineDebug = 55
+            return x.ToString(); // expectedLineRelease = 56
+        }
 
         public async void AsyncMethod_Void()
-        { // minLineDebug = 60
+        { // expectedLineDebug = 60
             const int answer = 42;
-            await Task.Delay(0); // minLineRelease = 62
+            await Task.Delay(0); // expectedLineRelease = 62
             Console.Write(answer);
-        } // maxLineDebug = maxLineRelease = 64
+        }
 
         public async Task AsyncMethod_Task()
-        { // minLineDebug = 67
+        { // expectedLineDebug = 67
             const int answer = 42;
-            await Task.Delay(0); // minLineRelease = 69
+            await Task.Delay(0); // expectedLineRelease = 69
             Console.Write(answer);
-        } // maxLineDebug = maxLineRelease = 71
+        }
 
         public async Task<int> AsyncMethod_ReturnsInt()
-        { // minLineDebug = 74
+        { // expectedLineDebug = 74
             const int answer = 42;
-            await Task.Delay(0); // minLinerelease = 76
+            await Task.Delay(0); // expectedLineRelease = 76
             return answer;
-        } // maxLineDebug = maxLineRelease = 78
+        }
 
         public class NestedClass
         {
             public void SimpleMethod_Void_NoArgs()
-            {// minLineDebug = 83
+            {// expectedLineDebug = 83
                 const int answer = 42;
-                Console.Write(answer); // minLineRelease = 85
-            } // maxLineDebug = maxLineRelease = 86
+                Console.Write(answer); // expectedLineRelease = 85
+            }
         }
 
         public class ParameterizedFixture
@@ -98,9 +98,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             }
 
             public string SimpleMethod_ReturnsString_OneArg(int i)
-            { // minLineDebug = 101
-                return s + x * i; // minLineRelease = maxLineRelease = 102
-            } // maxLineDebug = 103
+            { // expectedLineDebug = 101
+                return s + x * i; // expectedLineRelease = 102
+            }
         }
 
         public class GenericFixture<T1, T2>
@@ -113,9 +113,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             }
 
             public bool Matches(T2 y)
-            { // minLineDebug = 116
-                return x.Equals(y); // minLineRelease = maxLineRelease = 117
-            } // maxLineDebug = 118
+            { // expectedLineDebug = 116
+                return x.Equals(y); // expectedLineRelease = 117
+            }
 
             public class DoublyNested
             {
@@ -129,9 +129,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 }
 
                 public void WriteBoth()
-                { // minLineDebug = 132
-                    Console.Write(X + Y.ToString()); // minLineRelease = 133
-                } // maxLineDebug = maxLineRelease = 134
+                { // expectedLineDebug = 132
+                    Console.Write(X + Y.ToString()); // expectedLineRelease = 133
+                }
             }
 
             public class DoublyNested<T3>
@@ -148,17 +148,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 }
 
                 public void WriteAllThree()
-                { // minLineDebug = 151
-                    Console.Write(X + Y.ToString() + Z); // minLineRelease = 152
-                } // maxLineDebug = maxLineRelease = 153
+                { // expectedLineDebug = 151
+                    Console.Write(X + Y.ToString() + Z); // expectedLineRelease = 152
+                }
             }
         }
 
         public abstract class BaseClass
         {
             public void EmptyMethod_ThreeLines()
-            { // minLineDebug = 160
-            } // maxLineDebug = minLineRelease = maxLineRelease = 161
+            { // expectedLineDebug = 160
+            } // expectedLineRelease = 161
         }
 
         public class DerivedClass : BaseClass
