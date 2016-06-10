@@ -164,6 +164,9 @@ namespace NUnit.VisualStudio.TestAdapter
             package.Settings[PackageSettings.ProcessModel] = "InProcess";
             package.Settings[PackageSettings.DomainUsage] = "Single";
 
+            // Force truncation of string arguments to test cases
+            package.Settings[PackageSettings.DefaultTestNamePattern] = "{m}{a:40}";
+
             // Set the work directory to the assembly location unless a setting is provided
             var workDir = Settings.WorkDirectory;
             if (workDir == null)
