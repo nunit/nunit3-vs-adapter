@@ -19,8 +19,36 @@ namespace NUnitTestDemo
         [Test]
         public void WriteToError()
         {
-            Console.Error.Write("This is Error line 1");
-            Console.Error.Write("This is Error line 2\nThis is Error line 3");
+            Console.Error.WriteLine("This is Error line 1");
+            Console.Error.WriteLine("This is Error line 2\nThis is Error line 3");
+        }
+
+        [Test]
+        public void WriteToTestContext()
+        {
+            TestContext.WriteLine("Line 1 to TestContext");
+            TestContext.WriteLine("Line 2 to TestContext\nLine 3 to TestContext");
+        }
+
+        [Test]
+        public void WriteToTestContextOut()
+        {
+            TestContext.Out.WriteLine("Line 1 to TestContext.Out");
+            TestContext.Out.WriteLine("Line 2 to TestContext.Out\nLine 3 to TestContext.Out");
+        }
+
+        [Test]
+        public void WriteToTestContextError()
+        {
+            TestContext.Error.WriteLine("Line 1 to TestContext.Error");
+            TestContext.Error.WriteLine("Line 2 to TestContext.Error\nLine 3 to TestContext.Error");
+        }
+
+        [Test]
+        public void WriteToTestContextProgress()
+        {
+            TestContext.Progress.WriteLine("Line 1 to TestContext.Progress");
+            TestContext.Progress.WriteLine("Line 2 to TestContext.Progress\nLine 3 to TestContext.Progress");
         }
 
         [Test]

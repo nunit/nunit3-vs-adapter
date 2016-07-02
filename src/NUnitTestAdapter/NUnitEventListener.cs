@@ -58,6 +58,10 @@ namespace NUnit.VisualStudio.TestAdapter
                     case "test-suite":
                         SuiteFinished(node);
                         break;
+
+                    case "test-output":
+                        TestOutput(node);
+                        break;
                 }
             }
             catch(Exception ex)
@@ -137,6 +141,23 @@ namespace NUnit.VisualStudio.TestAdapter
                         _recorder.SendMessage(TestMessageLevel.Error, stackNode.InnerText);
                 }
             }
+        }
+
+        private static readonly string NL = Environment.NewLine;
+        private static readonly int NL_LENGTH = NL.Length;
+
+        public void TestOutput(XmlNode outputNode)
+        {
+            var testName = outputNode.GetAttribute("testname");
+            var stream = outputNode.GetAttribute("stream");
+            var text = outputNode.InnerText;
+            var level = stream == "Error" ? TestMessageLevel.Error : TestMessageLevel.Informational;
+
+            // Remove final newline since logger will add one
+            if (text.EndsWith(NL))
+                text = text.Substring(0, text.Length - NL_LENGTH);
+
+            _recorder.SendMessage(level, text);
         }
     }
 }
