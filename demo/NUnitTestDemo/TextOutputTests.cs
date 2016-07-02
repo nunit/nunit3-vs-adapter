@@ -40,5 +40,15 @@ namespace NUnitTestDemo
             Console.WriteLine("WorkDirectory={0}", TestContext.CurrentContext.WorkDirectory);
             Console.WriteLine("DefaultTimeout={0}", NUnit.Framework.Internal.TestExecutionContext.CurrentContext.TestCaseTimeout);
         }
+
+        [Test]
+        public void DisplayTestParameters()
+        {
+            if (TestContext.Parameters.Count == 0)
+                Console.WriteLine("No TestParameters were passed");
+            else
+            foreach (var name in TestContext.Parameters.Names)
+                Console.WriteLine("Parameter: {0} = {1}", name, TestContext.Parameters.Get(name));
+        }
     }
 }

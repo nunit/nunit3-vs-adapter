@@ -2,7 +2,7 @@
 // Copyright (c) 2011-2015 NUnit Software. All rights reserved.
 // ****************************************************************
 
-//#define LAUNCHDEBUGGER
+#define LAUNCHDEBUGGER
 
 using System;
 using System.Collections.Generic;

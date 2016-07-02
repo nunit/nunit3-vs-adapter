@@ -15,6 +15,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Remoting.Channels;
+using System.Text;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Common;
@@ -159,6 +160,19 @@ namespace NUnit.VisualStudio.TestAdapter
 
             if (Settings.RandomSeed != -1)
                 package.Settings[PackageSettings.RandomSeed] = Settings.RandomSeed;
+
+            if (Settings.TestProperties.Count > 0)
+            {
+                var sb = new StringBuilder();
+                var index = 0;
+                foreach(string name in Settings.TestProperties.Keys)
+                {
+                    if (index++ > 0) sb.Append(";");
+                    sb.AppendFormat("{0}={1}", name, Settings.TestProperties[name]);
+                }
+
+                package.Settings[PackageSettings.TestParameters] = sb.ToString();
+            }
 
             // Always run one assembly at a time in process in it's own domain
             package.Settings[PackageSettings.ProcessModel] = "InProcess";
