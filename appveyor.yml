@@ -1,11 +1,8 @@
 version: 3.5.{build}
 image: Visual Studio 2015
-configuration: Release
-before_build:
-- cmd: nuget restore
-build:
-  project: NUnit3TestAdapter.sln
-  publish_nuget: true
-  verbosity: minimal
-test:
-  assemblies: NUnit.VisualStudio.TestAdapter.Tests.dll
+
+build_script:
+  - ps: .\build.ps1 -Target "Appveyor"
+
+# disable built-in tests.
+test: off
