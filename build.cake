@@ -24,19 +24,29 @@ var packageVersion = version + modifier + dbgSuffix;
 
 // Directories
 var PROJECT_DIR = Context.Environment.WorkingDirectory.FullPath + "/";
+var ADAPTER_DIR = PROJECT_DIR + "src/NUnitTestAdapter/";
+var TEST_DIR = PROJECT_DIR + "src/NUnitTestAdapterTests/";
+var INSTALL_DIR = PROJECT_DIR + "src/NUnitTestAdapterInstall/";
+var DEMO_DIR = PROJECT_DIR + "demo/";
 var PACKAGE_DIR = PROJECT_DIR + "package/";
-var NUNIT3_CONSOLE = PROJECT_DIR + "tools/NUnit.ConsoleRunner/tools/nunit3-console.exe";
+var TOOLS_DIR = PROJECT_DIR + "tools/";
 
-// TODO: Consolidate in one directory
-var ADAPTER_DIR = PROJECT_DIR + "src/NUnitTestAdapter/bin/" + configuration + "/";
-var TEST_DIR = PROJECT_DIR + "src/NUnitTestAdapterTests/bin/" + configuration + "/";
-var INSTALL_DIR = PROJECT_DIR + "src/NUnitTestAdapterInstall/bin/" + configuration + "/";
+// TODO: Consolidate in one directory if possible
+var ADAPTER_BIN_DIR = ADAPTER_DIR + "bin/" + configuration + "/";
+var TEST_BIN_DIR = TEST_DIR + "bin/" + configuration + "/";
+var INSTALL_BIN_DIR = INSTALL_DIR + "bin/" + configuration + "/";
+var DEMO_BIN_DIR = DEMO_DIR + "NUnitTestDemo/bin/" + configuration + "/";
 
-// Solution
+// Solutions
 var ADAPTER_SOLUTION = PROJECT_DIR + "NUnit3TestAdapter.sln";
+var DEMO_SOLUTION = DEMO_DIR + "NUnit3TestDemo.sln";
 
-// Test Assembly
-var ADAPTER_TESTS = TEST_DIR + "NUnit.VisualStudio.TestAdapter.Tests.dll";
+// Test Runner
+var NUNIT3_CONSOLE = TOOLS_DIR + "NUnit.ConsoleRunner/tools/nunit3-console.exe";
+
+// Test Assemblies
+var ADAPTER_TESTS = TEST_BIN_DIR + "NUnit.VisualStudio.TestAdapter.Tests.dll";
+var DEMO_TESTS = DEMO_BIN_DIR + "NUnit3TestDemo.dll";
 
 // Packages
 var SRC_PACKAGE = PACKAGE_DIR + "NUnit3TestAdapter-" + version + modifier + "-src.zip";
@@ -49,9 +59,10 @@ var ZIP_PACKAGE = PACKAGE_DIR + "NUnit3TestAdapter-" + packageVersion + ".zip";
 Task("Clean")
     .Does(() =>
 {
-    CleanDirectory(ADAPTER_DIR);
-    CleanDirectory(TEST_DIR);
-    CleanDirectory(INSTALL_DIR);
+    CleanDirectory(ADAPTER_BIN_DIR);
+    CleanDirectory(TEST_BIN_DIR);
+    CleanDirectory(INSTALL_BIN_DIR);
+	CleanDirectory(DEMO_BIN_DIR);
 });
 
 
@@ -63,6 +74,7 @@ Task("InitializeBuild")
     .Does(() =>
 {
     NuGetRestore(ADAPTER_SOLUTION);
+	NuGetRestore(DEMO_SOLUTION);
 
 	if (BuildSystem.IsRunningOnAppVeyor)
 	{
@@ -94,12 +106,8 @@ Task("Build")
     .IsDependentOn("InitializeBuild")
     .Does(() =>
     {
-		MSBuild(ADAPTER_SOLUTION, new MSBuildSettings()
-			.SetConfiguration(configuration)
-            .SetMSBuildPlatform(MSBuildPlatform.x86)
-			.SetVerbosity(Verbosity.Minimal)
-			.SetNodeReuse(false)
-		);
+		BuildSolution(ADAPTER_SOLUTION, configuration);
+		BuildSolution(DEMO_SOLUTION, configuration);
     });
 
 //////////////////////////////////////////////////////////////////////
@@ -138,16 +146,16 @@ Task("PackageZip")
 		var zipFiles = new FilePath[]
 		{
 			PROJECT_DIR + "README.md",
-			ADAPTER_DIR + "NUnit3.TestAdapter.dll",
-            ADAPTER_DIR + "nunit.engine.dll",
-			ADAPTER_DIR + "nunit.engine.api.dll",
-			ADAPTER_DIR + "Mono.Cecil.dll",
-			ADAPTER_DIR + "Mono.Cecil.Pdb.dll",
-			ADAPTER_DIR + "Mono.Cecil.Mdb.dll",
-			ADAPTER_DIR + "Mono.Cecil.Rocks.dll"
+			ADAPTER_BIN_DIR + "NUnit3.TestAdapter.dll",
+            ADAPTER_BIN_DIR + "nunit.engine.dll",
+			ADAPTER_BIN_DIR + "nunit.engine.api.dll",
+			ADAPTER_BIN_DIR + "Mono.Cecil.dll",
+			ADAPTER_BIN_DIR + "Mono.Cecil.Pdb.dll",
+			ADAPTER_BIN_DIR + "Mono.Cecil.Mdb.dll",
+			ADAPTER_BIN_DIR + "Mono.Cecil.Rocks.dll"
 		};
 
-		Zip(ADAPTER_DIR, File(ZIP_PACKAGE), zipFiles);
+		Zip(ADAPTER_BIN_DIR, File(ZIP_PACKAGE), zipFiles);
 	});
 
 //////////////////////////////////////////////////////////////////////
@@ -160,6 +168,16 @@ void RunGitCommand(string arguments)
 	{
 		Arguments = arguments
 	});
+}
+
+void BuildSolution(string solutionPath, string configuration)
+{
+	MSBuild(solutionPath, new MSBuildSettings()
+		.SetConfiguration(configuration)
+        .SetMSBuildPlatform(MSBuildPlatform.x86)
+		.SetVerbosity(Verbosity.Minimal)
+		.SetNodeReuse(false)
+	);
 }
 
 //////////////////////////////////////////////////////////////////////
