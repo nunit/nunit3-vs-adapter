@@ -27,7 +27,12 @@ tools/Cake
 packages/
 # !packages/repositories.config
 
+# NUnit results
+TestResult.xml
 
+# Tools installed by Cake
+tools/
+!tools/packages.config
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
