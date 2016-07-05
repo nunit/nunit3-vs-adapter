@@ -11,12 +11,13 @@ var configuration = Argument("configuration", "Debug");
 // SET PACKAGE VERSION
 //////////////////////////////////////////////////////////////////////
 
-var version = "3.5";
+var version = "3.5.0";
 var modifier = "";
 
 var isAppveyor = BuildSystem.IsRunningOnAppVeyor;
 var dbgSuffix = configuration == "Debug" ? "-dbg" : "";
 var packageVersion = version + modifier + dbgSuffix;
+var packageName = "NUnit3TestAdapter-" + packageVersion;
 
 //////////////////////////////////////////////////////////////////////
 // DEFINE RUN CONSTANTS
@@ -29,6 +30,7 @@ var TEST_DIR = PROJECT_DIR + "src/NUnitTestAdapterTests/";
 var INSTALL_DIR = PROJECT_DIR + "src/NUnitTestAdapterInstall/";
 var DEMO_DIR = PROJECT_DIR + "demo/";
 var PACKAGE_DIR = PROJECT_DIR + "package/";
+var PACKAGE_IMAGE_DIR = PACKAGE_DIR + packageName + "/";
 var TOOLS_DIR = PROJECT_DIR + "tools/";
 
 // TODO: Consolidate in one directory if possible
@@ -131,21 +133,31 @@ Task("Test")
 //////////////////////////////////////////////////////////////////////
 
 Task("PackageSource")
-  .Does(() =>
+    .IsDependentOn("CreatePackageDir")
+    .Does(() =>
 	{
 		CreateDirectory(PACKAGE_DIR);
 		RunGitCommand(string.Format("archive -o {0} HEAD", SRC_PACKAGE));
 	});
 
-Task("PackageZip")
-	.IsDependentOn("Build")
+Task("CreatePackageDir")
 	.Does(() =>
 	{
 		CreateDirectory(PACKAGE_DIR);
+	});
 
-		var zipFiles = new FilePath[]
+Task("CreateWorkingImage")
+	.IsDependentOn("Build")
+	.IsDependentOn("CreatePackageDir")
+	.Does(() =>
+	{
+		CreateDirectory(PACKAGE_IMAGE_DIR);
+		CleanDirectory(PACKAGE_IMAGE_DIR);
+
+		// TODO: Copy files to root
+
+		var binFiles = new FilePath[]
 		{
-			PROJECT_DIR + "README.md",
 			ADAPTER_BIN_DIR + "NUnit3.TestAdapter.dll",
             ADAPTER_BIN_DIR + "nunit.engine.dll",
 			ADAPTER_BIN_DIR + "nunit.engine.api.dll",
@@ -155,7 +167,36 @@ Task("PackageZip")
 			ADAPTER_BIN_DIR + "Mono.Cecil.Rocks.dll"
 		};
 
-		Zip(ADAPTER_BIN_DIR, File(ZIP_PACKAGE), zipFiles);
+		var binDir = PACKAGE_IMAGE_DIR + "bin/";
+		CreateDirectory(binDir);
+		CopyFiles(binFiles, binDir);
+	});
+
+Task("PackageZip")
+	.IsDependentOn("CreateWorkingImage")
+	.Does(() =>
+	{
+		Zip(PACKAGE_IMAGE_DIR, File(ZIP_PACKAGE));
+	});
+
+Task("PackageNuGet")
+	.IsDependentOn("CreateWorkingImage")
+	.Does(() => 
+	{
+        NuGetPack("nuget/NUnit3TestAdapter.nuspec", new NuGetPackSettings()
+        {
+            Version = packageVersion,
+            BasePath = PACKAGE_IMAGE_DIR,
+            OutputDirectory = PACKAGE_DIR
+        });
+	});
+
+Task("PackageVsix")
+	.IsDependentOn("Build")
+	.IsDependentOn("CreatePackageDir")
+	.Does(() =>
+	{
+		CopyFileToDirectory(INSTALL_BIN_DIR + "NUnit3TestAdapter.vsix", PACKAGE_DIR);
 	});
 
 //////////////////////////////////////////////////////////////////////
@@ -190,12 +231,14 @@ Task("Rebuild")
 
 Task("Package")
 	.IsDependentOn("PackageSource")
-	.IsDependentOn("PackageZip");
+	.IsDependentOn("PackageZip")
+	.IsDependentOn("PackageNuGet")
+	.IsDependentOn("PackageVsix");
 
 Task("Appveyor")
 	.IsDependentOn("Build")
-	.IsDependentOn("Test");
-	//.IsDependentOn("Package");
+	.IsDependentOn("Test")
+	.IsDependentOn("Package");
 
 Task("Default")
     .IsDependentOn("Build");
