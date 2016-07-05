@@ -22,6 +22,7 @@ The package works with Visual Studio 2012, 2013 and 2015.</description>
         <tags>test visualstudio testadapter nunit nunit3</tags>
     </metadata>
     <files>
+        <file src="LICENSE.txt" />
         <file src="bin/NUnit3.TestAdapter.dll" target="lib\NUnit3.TestAdapter.dll" />
         <file src="bin/nunit.engine.dll" target="lib\nunit.engine.dll" />
         <file src="bin/nunit.engine.api.dll" target="lib\nunit.engine.api.dll" />

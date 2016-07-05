@@ -154,7 +154,7 @@ Task("CreateWorkingImage")
 		CreateDirectory(PACKAGE_IMAGE_DIR);
 		CleanDirectory(PACKAGE_IMAGE_DIR);
 
-		// TODO: Copy files to root
+		CopyFileToDirectory("LICENSE.txt", PACKAGE_IMAGE_DIR);
 
 		var binFiles = new FilePath[]
 		{
@@ -196,7 +196,9 @@ Task("PackageVsix")
 	.IsDependentOn("CreatePackageDir")
 	.Does(() =>
 	{
-		CopyFileToDirectory(INSTALL_BIN_DIR + "NUnit3TestAdapter.vsix", PACKAGE_DIR);
+		CopyFile(
+			INSTALL_BIN_DIR + "NUnit3TestAdapter.vsix", 
+			PACKAGE_DIR + packageName + ".vsix");
 	});
 
 //////////////////////////////////////////////////////////////////////
