@@ -51,7 +51,6 @@ var ADAPTER_TESTS = TEST_BIN_DIR + "NUnit.VisualStudio.TestAdapter.Tests.dll";
 var DEMO_TESTS = DEMO_BIN_DIR + "NUnit3TestDemo.dll";
 
 // Packages
-var SRC_PACKAGE = PACKAGE_DIR + "NUnit3TestAdapter-" + version + modifier + "-src.zip";
 var ZIP_PACKAGE = PACKAGE_DIR + "NUnit3TestAdapter-" + packageVersion + ".zip";
 
 // Custom settings for VSTest
