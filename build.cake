@@ -43,7 +43,7 @@ var DEMO_BIN_DIR = DEMO_DIR + "NUnitTestDemo/bin/" + configuration + "/";
 var ADAPTER_SOLUTION = PROJECT_DIR + "NUnit3TestAdapter.sln";
 var DEMO_SOLUTION = DEMO_DIR + "NUnit3TestDemo.sln";
 
-// Test Runner
+// Test Runners
 var NUNIT3_CONSOLE = TOOLS_DIR + "NUnit.ConsoleRunner/tools/nunit3-console.exe";
 
 // Test Assemblies
@@ -53,6 +53,12 @@ var DEMO_TESTS = DEMO_BIN_DIR + "NUnit3TestDemo.dll";
 // Packages
 var SRC_PACKAGE = PACKAGE_DIR + "NUnit3TestAdapter-" + version + modifier + "-src.zip";
 var ZIP_PACKAGE = PACKAGE_DIR + "NUnit3TestAdapter-" + packageVersion + ".zip";
+
+// Custom settings for VSTest
+var VSTestCustomSettings = new VSTestSettings()
+{
+	ArgumentCustomization = args => args.Append("/TestAdapterPath:" + ADAPTER_BIN_DIR)
+};
 
 //////////////////////////////////////////////////////////////////////
 // CLEAN
@@ -116,7 +122,7 @@ Task("Build")
 // TEST
 //////////////////////////////////////////////////////////////////////
 
-Task("Test")
+Task("TestAdapterUsingConsole")
 	.IsDependentOn("Build")
 	.Does(() =>
 	{
@@ -128,17 +134,31 @@ Task("Test")
 			});
 	});
 
+Task("TestAdapterUsingVSTest")
+	.IsDependentOn("Build")
+	.Does(() =>
+	{
+		VSTest(ADAPTER_TESTS, VSTestCustomSettings);
+	});
+
+Task("RunTestDemo")
+	.IsDependentOn("Build")
+	.Does(() =>
+	{
+		try
+		{
+			VSTest(DEMO_BIN_DIR + "NUnit3TestDemo.dll", VSTestCustomSettings);
+		}
+		catch(Exception ex)
+		{
+			Information("\nNOTE: Demo tests failed as expected.");
+			Information("This is normally not an error.\n");
+		}
+	});
+
 //////////////////////////////////////////////////////////////////////
 // PACKAGE
 //////////////////////////////////////////////////////////////////////
-
-Task("PackageSource")
-    .IsDependentOn("CreatePackageDir")
-    .Does(() =>
-	{
-		CreateDirectory(PACKAGE_DIR);
-		RunGitCommand(string.Format("archive -o {0} HEAD", SRC_PACKAGE));
-	});
 
 Task("CreatePackageDir")
 	.Does(() =>
@@ -205,14 +225,6 @@ Task("PackageVsix")
 // HELPER METHODS
 //////////////////////////////////////////////////////////////////////
 
-void RunGitCommand(string arguments)
-{
-	StartProcess("git", new ProcessSettings()
-	{
-		Arguments = arguments
-	});
-}
-
 void BuildSolution(string solutionPath, string configuration)
 {
 	MSBuild(solutionPath, new MSBuildSettings()
@@ -231,8 +243,13 @@ Task("Rebuild")
     .IsDependentOn("Clean")
 	.IsDependentOn("Build");
 
+Task("Test")
+	.IsDependentOn("TestAdapterUsingConsole")
+	.IsDependentOn("TestAdapterUsingVSTest")
+	.IsDependentOn("RunTestDemo");
+
 Task("Package")
-	.IsDependentOn("PackageSource")
+	.IsDependentOn("Build")
 	.IsDependentOn("PackageZip")
 	.IsDependentOn("PackageNuGet")
 	.IsDependentOn("PackageVsix");
