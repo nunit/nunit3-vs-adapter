@@ -14,9 +14,30 @@ var configuration = Argument("configuration", "Debug");
 var version = "3.5.0";
 var modifier = "";
 
-var isAppveyor = BuildSystem.IsRunningOnAppVeyor;
 var dbgSuffix = configuration == "Debug" ? "-dbg" : "";
 var packageVersion = version + modifier + dbgSuffix;
+
+if (BuildSystem.IsRunningOnAppVeyor)
+{
+	var tag = AppVeyor.Environment.Repository.Tag;
+
+	if (tag.IsTag)
+	{
+		packageVersion = tag.Name;
+	}
+	else
+	{
+		var buildNumber = AppVeyor.Environment.Build.Number;
+		packageVersion = version + "-CI-" + buildNumber + dbgSuffix;
+		if (AppVeyor.Environment.PullRequest.IsPullRequest)
+			packageVersion += "-PR-" + AppVeyor.Environment.PullRequest.Number;
+		else
+			packageVersion += "-" + AppVeyor.Environment.Repository.Branch;
+	}
+
+	AppVeyor.UpdateBuildVersion(packageVersion);
+}
+
 var packageName = "NUnit3TestAdapter-" + packageVersion;
 
 //////////////////////////////////////////////////////////////////////
@@ -50,9 +71,6 @@ var NUNIT3_CONSOLE = TOOLS_DIR + "NUnit.ConsoleRunner/tools/nunit3-console.exe";
 var ADAPTER_TESTS = TEST_BIN_DIR + "NUnit.VisualStudio.TestAdapter.Tests.dll";
 var DEMO_TESTS = DEMO_BIN_DIR + "NUnit3TestDemo.dll";
 
-// Packages
-var ZIP_PACKAGE = PACKAGE_DIR + "NUnit3TestAdapter-" + packageVersion + ".zip";
-
 // Custom settings for VSTest
 var VSTestCustomSettings = new VSTestSettings()
 {
@@ -77,32 +95,11 @@ Task("Clean")
 // INITIALIZE FOR BUILD
 //////////////////////////////////////////////////////////////////////
 
-Task("InitializeBuild")
+Task("NuGetRestore")
     .Does(() =>
 {
     NuGetRestore(ADAPTER_SOLUTION);
 	NuGetRestore(DEMO_SOLUTION);
-
-	if (BuildSystem.IsRunningOnAppVeyor)
-	{
-		var tag = AppVeyor.Environment.Repository.Tag;
-
-		if (tag.IsTag)
-		{
-			packageVersion = tag.Name;
-		}
-		else
-		{
-			var buildNumber = AppVeyor.Environment.Build.Number;
-			packageVersion = version + "-CI-" + buildNumber + dbgSuffix;
-			if (AppVeyor.Environment.PullRequest.IsPullRequest)
-				packageVersion += "-PR-" + AppVeyor.Environment.PullRequest.Number;
-			else
-				packageVersion += "-" + AppVeyor.Environment.Repository.Branch;
-		}
-
-		AppVeyor.UpdateBuildVersion(packageVersion);
-	}
 });
 
 //////////////////////////////////////////////////////////////////////
@@ -110,7 +107,7 @@ Task("InitializeBuild")
 //////////////////////////////////////////////////////////////////////
 
 Task("Build")
-    .IsDependentOn("InitializeBuild")
+    .IsDependentOn("NuGetRestore")
     .Does(() =>
     {
 		BuildSolution(ADAPTER_SOLUTION, configuration);
@@ -125,12 +122,21 @@ Task("TestAdapterUsingConsole")
 	.IsDependentOn("Build")
 	.Does(() =>
 	{
-        StartProcess(
+		int rc = StartProcess(
 			NUNIT3_CONSOLE,
 			new ProcessSettings()
 			{
 				Arguments = ADAPTER_TESTS
 			});
+
+		if (rc != 0)
+		{
+			var message = rc > 0
+				? string.Format("Test failure: {0} tests failed", rc)
+				: string.Format("Test exited with rc = {0}", rc);
+
+			throw new CakeException(message);
+		}
 	});
 
 Task("TestAdapterUsingVSTest")
@@ -140,7 +146,7 @@ Task("TestAdapterUsingVSTest")
 		VSTest(ADAPTER_TESTS, VSTestCustomSettings);
 	});
 
-Task("RunTestDemo")
+Task("TestDemo")
 	.IsDependentOn("Build")
 	.Does(() =>
 	{
@@ -195,7 +201,7 @@ Task("PackageZip")
 	.IsDependentOn("CreateWorkingImage")
 	.Does(() =>
 	{
-		Zip(PACKAGE_IMAGE_DIR, File(ZIP_PACKAGE));
+		Zip(PACKAGE_IMAGE_DIR, File(PACKAGE_DIR + packageName + ".zip"));
 	});
 
 Task("PackageNuGet")
@@ -244,8 +250,7 @@ Task("Rebuild")
 
 Task("Test")
 	.IsDependentOn("TestAdapterUsingConsole")
-	.IsDependentOn("TestAdapterUsingVSTest")
-	.IsDependentOn("RunTestDemo");
+	.IsDependentOn("TestAdapterUsingVSTest");
 
 Task("Package")
 	.IsDependentOn("Build")
