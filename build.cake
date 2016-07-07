@@ -46,35 +46,27 @@ var packageName = "NUnit3TestAdapter-" + packageVersion;
 
 // Directories
 var PROJECT_DIR = Context.Environment.WorkingDirectory.FullPath + "/";
-var ADAPTER_DIR = PROJECT_DIR + "src/NUnitTestAdapter/";
-var TEST_DIR = PROJECT_DIR + "src/NUnitTestAdapterTests/";
-var INSTALL_DIR = PROJECT_DIR + "src/NUnitTestAdapterInstall/";
-var DEMO_DIR = PROJECT_DIR + "demo/";
 var PACKAGE_DIR = PROJECT_DIR + "package/";
 var PACKAGE_IMAGE_DIR = PACKAGE_DIR + packageName + "/";
 var TOOLS_DIR = PROJECT_DIR + "tools/";
-
-// TODO: Consolidate in one directory if possible
-var ADAPTER_BIN_DIR = ADAPTER_DIR + "bin/" + configuration + "/";
-var TEST_BIN_DIR = TEST_DIR + "bin/" + configuration + "/";
-var INSTALL_BIN_DIR = INSTALL_DIR + "bin/" + configuration + "/";
-var DEMO_BIN_DIR = DEMO_DIR + "NUnitTestDemo/bin/" + configuration + "/";
+var BIN_DIR = PROJECT_DIR + "bin/" + configuration + "/";
+var DEMO_BIN_DIR = PROJECT_DIR + "demo/NUnitTestDemo/bin/" + configuration + "/";
 
 // Solutions
 var ADAPTER_SOLUTION = PROJECT_DIR + "NUnit3TestAdapter.sln";
-var DEMO_SOLUTION = DEMO_DIR + "NUnit3TestDemo.sln";
+var DEMO_SOLUTION = PROJECT_DIR + "demo/NUnit3TestDemo.sln";
 
-// Test Runners
+// Test Runner
 var NUNIT3_CONSOLE = TOOLS_DIR + "NUnit.ConsoleRunner/tools/nunit3-console.exe";
 
 // Test Assemblies
-var ADAPTER_TESTS = TEST_BIN_DIR + "NUnit.VisualStudio.TestAdapter.Tests.dll";
+var ADAPTER_TESTS = BIN_DIR + "NUnit.VisualStudio.TestAdapter.Tests.dll";
 var DEMO_TESTS = DEMO_BIN_DIR + "NUnit3TestDemo.dll";
 
 // Custom settings for VSTest
 var VSTestCustomSettings = new VSTestSettings()
 {
-	ArgumentCustomization = args => args.Append("/TestAdapterPath:" + ADAPTER_BIN_DIR)
+	ArgumentCustomization = args => args.Append("/TestAdapterPath:" + BIN_DIR)
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -84,9 +76,7 @@ var VSTestCustomSettings = new VSTestSettings()
 Task("Clean")
     .Does(() =>
 {
-    CleanDirectory(ADAPTER_BIN_DIR);
-    CleanDirectory(TEST_BIN_DIR);
-    CleanDirectory(INSTALL_BIN_DIR);
+    CleanDirectory(BIN_DIR);
 	CleanDirectory(DEMO_BIN_DIR);
 });
 
@@ -152,7 +142,7 @@ Task("TestDemo")
 	{
 		try
 		{
-			VSTest(DEMO_BIN_DIR + "NUnit3TestDemo.dll", VSTestCustomSettings);
+			VSTest(DEMO_TESTS, VSTestCustomSettings);
 		}
 		catch(Exception ex)
 		{
@@ -183,13 +173,13 @@ Task("CreateWorkingImage")
 
 		var binFiles = new FilePath[]
 		{
-			ADAPTER_BIN_DIR + "NUnit3.TestAdapter.dll",
-            ADAPTER_BIN_DIR + "nunit.engine.dll",
-			ADAPTER_BIN_DIR + "nunit.engine.api.dll",
-			ADAPTER_BIN_DIR + "Mono.Cecil.dll",
-			ADAPTER_BIN_DIR + "Mono.Cecil.Pdb.dll",
-			ADAPTER_BIN_DIR + "Mono.Cecil.Mdb.dll",
-			ADAPTER_BIN_DIR + "Mono.Cecil.Rocks.dll"
+			BIN_DIR + "NUnit3.TestAdapter.dll",
+            BIN_DIR + "nunit.engine.dll",
+			BIN_DIR + "nunit.engine.api.dll",
+			BIN_DIR + "Mono.Cecil.dll",
+			BIN_DIR + "Mono.Cecil.Pdb.dll",
+			BIN_DIR + "Mono.Cecil.Mdb.dll",
+			BIN_DIR + "Mono.Cecil.Rocks.dll"
 		};
 
 		var binDir = PACKAGE_IMAGE_DIR + "bin/";
@@ -222,7 +212,7 @@ Task("PackageVsix")
 	.Does(() =>
 	{
 		CopyFile(
-			INSTALL_BIN_DIR + "NUnit3TestAdapter.vsix", 
+			BIN_DIR + "NUnit3TestAdapter.vsix", 
 			PACKAGE_DIR + packageName + ".vsix");
 	});
 
