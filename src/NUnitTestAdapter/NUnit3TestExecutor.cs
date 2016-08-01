@@ -61,9 +61,9 @@ namespace NUnit.VisualStudio.TestAdapter
 #endif
             Initialize(runContext, frameworkHandle);
 
-            try
+            foreach (var source in sources)
             {
-                foreach (var source in sources)
+                try
                 {
                     var assemblyName = source;
                     if (!Path.IsPathRooted(assemblyName))
@@ -73,18 +73,16 @@ namespace NUnit.VisualStudio.TestAdapter
 
                     RunAssembly(assemblyName, TestFilter.Empty);
                 }
+                catch (Exception ex)
+                {
+                    if (ex is TargetInvocationException)
+                        ex = ex.InnerException;
+                    TestLog.Error("Exception thrown executing tests", ex);
+                }
             }
-            catch (Exception ex)
-            {
-                if (ex is TargetInvocationException)
-                    ex = ex.InnerException;
-                TestLog.Error("Exception thrown executing tests", ex);
-            }
-            finally
-            {
-                TestLog.Info(string.Format("NUnit Adapter {0}: Test execution complete", AdapterVersion));
-                Unload();
-            }
+
+            TestLog.Info(string.Format("NUnit Adapter {0}: Test execution complete", AdapterVersion));
+            Unload();
 
         }
 
