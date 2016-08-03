@@ -48,7 +48,7 @@ if (BuildSystem.IsRunningOnAppVeyor)
 			if (suffix.Length > 21)
 				suffix = suffix.Substring(0, 21);
 
-			suffix = suffix.Replace(".", "_");
+			suffix = suffix.Replace(".", "");
 
 			packageVersion = version + suffix;
 		}
