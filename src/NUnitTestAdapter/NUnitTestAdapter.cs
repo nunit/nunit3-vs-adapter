@@ -45,7 +45,6 @@ namespace NUnit.VisualStudio.TestAdapter
         public NUnitTestAdapter()
         {
             AdapterVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            Settings = new AdapterSettings();
         }
 
         #endregion
@@ -89,16 +88,18 @@ namespace NUnit.VisualStudio.TestAdapter
 
         // The Adapter is constructed using the default constructor.
         // We don't have any info to initialize it until one of the
-        // ITestDiscovery or ITestExecutor methods is called. The
-        // each Discover or Execute method must call this method.
+        // ITestDiscovery or ITestExecutor methods is called. Each 
+        // Discover or Execute method must call this method.
         protected void Initialize(IDiscoveryContext context, IMessageLogger messageLogger)
         {
             TestEngine = new TestEngineClass();
-            TestLog = new TestLogger(messageLogger, Settings.Verbosity);
+            TestLog = new TestLogger(messageLogger);
+            Settings = new AdapterSettings(TestLog);
 
             try
             {
                 Settings.Load(context);
+                TestLog.Verbosity = Settings.Verbosity;
             }
             catch (Exception e)
             {
@@ -158,7 +159,7 @@ namespace NUnit.VisualStudio.TestAdapter
             if (Settings.PrivateBinPath != null)
                 package.Settings[PackageSettings.PrivateBinPath] = Settings.PrivateBinPath;
 
-            if (Settings.RandomSeed != -1)
+            if (Settings.RandomSeed.HasValue)
                 package.Settings[PackageSettings.RandomSeed] = Settings.RandomSeed;
 
             if (Settings.TestProperties.Count > 0)

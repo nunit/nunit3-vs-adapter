@@ -175,6 +175,11 @@ namespace NUnit.VisualStudio.TestAdapter
             if (!Debugger.IsAttached)
                 Debugger.Launch();
 #endif
+
+            // No need to restore if the seed was in runsettings file
+            if (!Settings.RandomSeedSpecified)
+                Settings.RestoreRandomSeed(Path.GetDirectoryName(assemblyName));
+
             _activeRunner = GetRunnerFor(assemblyName);
 
             try

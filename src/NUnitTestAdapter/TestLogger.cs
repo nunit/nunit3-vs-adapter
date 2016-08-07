@@ -23,7 +23,9 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private IMessageLogger MessageLogger { get; set; }
 
-        private int Verbosity { get; set; }
+        public int Verbosity { get; set; }
+
+        public TestLogger(IMessageLogger messageLogger) : this(messageLogger, 0) { }
 
         public TestLogger(IMessageLogger messageLogger, int verbosity)
         {

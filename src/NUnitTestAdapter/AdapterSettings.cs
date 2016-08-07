@@ -12,6 +12,17 @@ namespace NUnit.VisualStudio.TestAdapter
 {
     public class AdapterSettings
     {
+        private TestLogger _logger;
+
+        #region Constructor
+
+        public AdapterSettings(TestLogger logger)
+        {
+            _logger = logger;
+        }
+
+        #endregion
+
         #region Properties - General
 
         public int MaxCpuCount { get; private set; }
@@ -52,7 +63,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public string PrivateBinPath { get; private set; }
 
-        public int RandomSeed { get; private set; }
+        public int? RandomSeed { get; private set; }
+        public bool RandomSeedSpecified { get; private set; }
 
         #endregion
 
@@ -104,7 +116,10 @@ namespace NUnit.VisualStudio.TestAdapter
             UseVsKeepEngineRunning = GetInnerTextAsBool(nunitNode, "UseVsKeepEngineRunning");
             BasePath = GetInnerText(nunitNode, "BasePath");
             PrivateBinPath = GetInnerText(nunitNode, "PrivateBinPath");
-            RandomSeed = GetInnerTextAsInt(nunitNode, "RandomSeed", -1);
+            RandomSeed = GetInnerTextAsNullableInt(nunitNode, "RandomSeed");
+            RandomSeedSpecified = RandomSeed.HasValue;
+            if (!RandomSeedSpecified)
+                RandomSeed = new Random().Next();
             
 #if SUPPORT_REGISTRY_SETTINGS
             // Legacy (CTP) registry settings override defaults
@@ -121,6 +136,45 @@ namespace NUnit.VisualStudio.TestAdapter
             // Force Verbosity to 1 under Debug
             Verbosity = 1;
 #endif
+        }
+
+        public void SaveRandomSeed(string dirname)
+        {
+            TextWriter writer = null;
+
+            try
+            {
+                writer = new StreamWriter(Path.Combine(dirname, "$RANDOM_SEED$"));
+                writer.Write(RandomSeed.Value);
+            }
+            catch(Exception ex)
+            {
+                _logger.Error("Failed to save random seed.", ex);
+            }
+            finally
+            {
+                if (writer != null)
+                    writer.Close();
+            }
+        }
+
+        public void RestoreRandomSeed(string dirname)
+        {
+            TextReader reader = null;
+            try
+            {
+                reader = new StreamReader(Path.Combine(dirname, "$RANDOM_SEED$"));
+                RandomSeed = int.Parse(reader.ReadLine());
+            }
+            catch(Exception ex)
+            {
+                _logger.Error("Unable to restore random seed.", ex);
+            }
+            finally
+            {
+                if (reader != null)
+                    reader.Close();
+            }
         }
 
         #endregion
@@ -155,10 +209,20 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private int GetInnerTextAsInt(XmlNode startNode, string xpath, int defaultValue)
         {
+            int? temp = GetInnerTextAsNullableInt(startNode, xpath);
+
+            if (temp == null)
+                return defaultValue;
+
+            return temp.Value;
+        }
+
+        private int? GetInnerTextAsNullableInt(XmlNode startNode, string xpath)
+        {
             string temp = GetInnerText(startNode, xpath);
 
             if (string.IsNullOrEmpty(temp))
-                return defaultValue;
+                return null;
 
             return int.Parse(temp);
         }
