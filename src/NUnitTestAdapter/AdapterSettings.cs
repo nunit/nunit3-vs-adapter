@@ -52,7 +52,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public string PrivateBinPath { get; private set; }
 
-        public int RandomSeed { get; private set; }
+        public int? RandomSeed { get; private set; } 
 
         #endregion
 
@@ -104,7 +104,9 @@ namespace NUnit.VisualStudio.TestAdapter
             UseVsKeepEngineRunning = GetInnerTextAsBool(nunitNode, "UseVsKeepEngineRunning");
             BasePath = GetInnerText(nunitNode, "BasePath");
             PrivateBinPath = GetInnerText(nunitNode, "PrivateBinPath");
-            RandomSeed = GetInnerTextAsInt(nunitNode, "RandomSeed", -1);
+            RandomSeed = GetInnerTextAsNullableInt(nunitNode, "RandomSeed");
+            if (RandomSeed == null)
+                RandomSeed = new Random().Next();
             
 #if SUPPORT_REGISTRY_SETTINGS
             // Legacy (CTP) registry settings override defaults
@@ -121,6 +123,18 @@ namespace NUnit.VisualStudio.TestAdapter
             // Force Verbosity to 1 under Debug
             Verbosity = 1;
 #endif
+        }
+
+        public void SaveRandomSeed(string dirname)
+        {
+            using (var writer = new StreamWriter(Path.Combine(dirname, "$RANDOM_SEED$")))
+                writer.Write(RandomSeed.Value);
+        }
+
+        public void RestoreRandomSeed(string dirname)
+        {
+            using (var reader = new StreamReader(Path.Combine(dirname, "$RANDOM_SEED$")))
+                RandomSeed = int.Parse(reader.ReadLine());
         }
 
         #endregion
@@ -155,10 +169,20 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private int GetInnerTextAsInt(XmlNode startNode, string xpath, int defaultValue)
         {
+            int? temp = GetInnerTextAsNullableInt(startNode, xpath);
+
+            if (temp == null)
+                return defaultValue;
+
+            return temp.Value;
+        }
+
+        private int? GetInnerTextAsNullableInt(XmlNode startNode, string xpath)
+        {
             string temp = GetInnerText(startNode, xpath);
 
             if (string.IsNullOrEmpty(temp))
-                return defaultValue;
+                return null;
 
             return int.Parse(temp);
         }

@@ -175,6 +175,9 @@ namespace NUnit.VisualStudio.TestAdapter
             if (!Debugger.IsAttached)
                 Debugger.Launch();
 #endif
+
+            Settings.RestoreRandomSeed(Path.GetDirectoryName(assemblyName));
+
             _activeRunner = GetRunnerFor(assemblyName);
 
             try

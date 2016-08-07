@@ -55,7 +55,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.False(_settings.UseVsKeepEngineRunning);
             Assert.Null(_settings.BasePath);
             Assert.Null(_settings.PrivateBinPath);
-            Assert.That(_settings.RandomSeed, Is.EqualTo(-1));
+            Assert.NotNull(_settings.RandomSeed);
         }
 
         [Test]

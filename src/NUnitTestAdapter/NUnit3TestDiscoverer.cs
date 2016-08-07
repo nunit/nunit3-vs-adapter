@@ -41,6 +41,8 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 TestLog.Debug("Processing " + sourceAssembly);
 
+                Settings.SaveRandomSeed(Path.GetDirectoryName(sourceAssembly));
+
                 ITestRunner runner = null;
 
                 runner = GetRunnerFor(sourceAssembly);

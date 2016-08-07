@@ -96,6 +96,11 @@ namespace NUnitTestDemo
         {
         }
 
+        [Test]
+        public void TestCaseWithRandomParameter([Random(1)] int x)
+        {
+        }
+
 #if false // Test for issue #144
         [MyTestCase]
         public void TestCaseWithBadTestBuilder(string baz)
