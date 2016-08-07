@@ -45,7 +45,6 @@ namespace NUnit.VisualStudio.TestAdapter
         public NUnitTestAdapter()
         {
             AdapterVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            Settings = new AdapterSettings();
         }
 
         #endregion
@@ -94,11 +93,13 @@ namespace NUnit.VisualStudio.TestAdapter
         protected void Initialize(IDiscoveryContext context, IMessageLogger messageLogger)
         {
             TestEngine = new TestEngineClass();
-            TestLog = new TestLogger(messageLogger, Settings.Verbosity);
+            TestLog = new TestLogger(messageLogger);
+            Settings = new AdapterSettings(TestLog);
 
             try
             {
                 Settings.Load(context);
+                TestLog.Verbosity = Settings.Verbosity;
             }
             catch (Exception e)
             {

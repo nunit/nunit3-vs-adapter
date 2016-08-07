@@ -28,6 +28,7 @@
     <DefaultTimeout>5000</DefaultTimeout>
     <WorkDirectory>work</WorkDirectory>
     <InternalTraceLevel>Info</InternalTraceLevel>
+    <RandomSeed>1234567</RandomSeed>
   </NUnit>-->
 
 </RunSettings>

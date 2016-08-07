@@ -41,7 +41,11 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 TestLog.Debug("Processing " + sourceAssembly);
 
-                Settings.SaveRandomSeed(Path.GetDirectoryName(sourceAssembly));
+                // Only save if seed is not specified in runsettings
+                // This allows workaround in case there is no valid
+                // location in which the seed may be saved.
+                if (!Settings.RandomSeedSpecified)
+                    Settings.SaveRandomSeed(Path.GetDirectoryName(sourceAssembly));
 
                 ITestRunner runner = null;
 

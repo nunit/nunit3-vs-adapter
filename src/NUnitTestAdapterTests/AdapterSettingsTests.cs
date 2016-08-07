@@ -15,7 +15,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [SetUp]
         public void SetUp()
         {
-            _settings = new AdapterSettings();
+            _settings = new AdapterSettings(null);
         }
 
         [Test]
