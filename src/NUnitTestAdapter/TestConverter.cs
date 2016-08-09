@@ -125,11 +125,15 @@ namespace NUnit.VisualStudio.TestAdapter
 
             var className = testNode.GetAttribute("classname");
             var methodName = testNode.GetAttribute("methodname");
-            var navData = _navigationDataProvider.GetNavigationData(className, methodName);
-            if (navData.IsValid)
+
+            if (!string.IsNullOrEmpty(className) && !string.IsNullOrEmpty(methodName))
             {
-                testCase.CodeFilePath = navData.FilePath;
-                testCase.LineNumber = navData.LineNumber;
+                var navData = _navigationDataProvider.GetNavigationData(className, methodName);
+                if (navData.IsValid)
+                {
+                    testCase.CodeFilePath = navData.FilePath;
+                    testCase.LineNumber = navData.LineNumber;
+                }
             }
 
             testCase.AddTraitsFromTestNode(testNode);

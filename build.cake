@@ -189,6 +189,8 @@ Task("CreateWorkingImage")
 		CleanDirectory(PACKAGE_IMAGE_DIR);
 
 		CopyFileToDirectory("LICENSE.txt", PACKAGE_IMAGE_DIR);
+		CopyFileToDirectory("nuget/install.ps1", PACKAGE_IMAGE_DIR);
+		CopyFileToDirectory("nuget/nunit.nuget.addins", PACKAGE_IMAGE_DIR);
 
 		var binFiles = new FilePath[]
 		{
@@ -198,7 +200,11 @@ Task("CreateWorkingImage")
 			BIN_DIR + "Mono.Cecil.dll",
 			BIN_DIR + "Mono.Cecil.Pdb.dll",
 			BIN_DIR + "Mono.Cecil.Mdb.dll",
-			BIN_DIR + "Mono.Cecil.Rocks.dll"
+			BIN_DIR + "Mono.Cecil.Rocks.dll",
+			BIN_DIR + "nunit.v2.driver.dll",
+			BIN_DIR + "nunit.core.dll",
+			BIN_DIR + "nunit.core.interfaces.dll",
+			BIN_DIR + "nunit.v2.driver.addins"
 		};
 
 		var binDir = PACKAGE_IMAGE_DIR + "bin/";

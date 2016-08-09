@@ -102,6 +102,10 @@
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <None Include="app.config" />
+    <Content Include="nunit.v2.driver.addins">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <None Include="packages.config" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
@@ -138,7 +142,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Mono.Cecil, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Mono.Cecil.0.9.6.1\lib\net35\Mono.Cecil.dll</HintPath>
+      <HintPath>..\..\packages\NUnit.Engine.3.5.0\lib\Mono.Cecil.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Mono.Cecil.Mdb, Version=0.9.6.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
@@ -153,13 +157,22 @@
       <HintPath>..\..\packages\Mono.Cecil.0.9.6.1\lib\net35\Mono.Cecil.Rocks.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="nunit.engine, Version=3.4.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\NUnit.Engine.3.4.1\lib\nunit.engine.dll</HintPath>
+    <Reference Include="nunit.core">
+      <HintPath>..\..\packages\NUnit.Extension.NUnitV2Driver.3.5.0\tools\nunit.core.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.core.interfaces">
+      <HintPath>..\..\packages\NUnit.Extension.NUnitV2Driver.3.5.0\tools\nunit.core.interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.engine, Version=3.5.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\NUnit.Engine.3.5.0\lib\nunit.engine.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="nunit.engine.api, Version=3.0.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\NUnit.Engine.3.4.1\lib\nunit.engine.api.dll</HintPath>
+      <HintPath>..\..\packages\NUnit.Engine.3.5.0\lib\nunit.engine.api.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="nunit.v2.driver">
+      <HintPath>..\..\packages\NUnit.Extension.NUnitV2Driver.3.5.0\tools\nunit.v2.driver.dll</HintPath>
     </Reference>
   </ItemGroup>
   <PropertyGroup>

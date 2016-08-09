@@ -23,6 +23,8 @@ The package works with Visual Studio 2012, 2013 and 2015.</description>
     </metadata>
     <files>
         <file src="LICENSE.txt" />
+        <file src="nunit.nuget.addins" target="lib\nunit.nuget.addins" />
+        <file src="install.ps1" target="tools" />
         <file src="bin/NUnit3.TestAdapter.dll" target="lib\NUnit3.TestAdapter.dll" />
         <file src="bin/nunit.engine.dll" target="lib\nunit.engine.dll" />
         <file src="bin/nunit.engine.api.dll" target="lib\nunit.engine.api.dll" />
@@ -30,6 +32,9 @@ The package works with Visual Studio 2012, 2013 and 2015.</description>
         <file src="bin/Mono.Cecil.Pdb.dll" target="lib\Mono.Cecil.Pdb.dll" />
         <file src="bin/Mono.Cecil.Mdb.dll" target="lib\Mono.Cecil.Mdb.dll" />
         <file src="bin/Mono.Cecil.Rocks.dll" target="lib\Mono.Cecil.Rocks.dll" />
-        <file src="../../nuget/install.ps1" target="tools\install.ps1" />
+        <file src="bin/nunit.v2.driver.dll" target ="lib" />
+        <file src="bin/nunit.core.dll" target ="lib" />
+        <file src="bin/nunit.core.interfaces.dll" target="lib" />
+        <file src="bin/nunit.v2.driver.addins" target="lib" />
     </files>
 </package>
