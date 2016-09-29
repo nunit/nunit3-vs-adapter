@@ -66,6 +66,10 @@ namespace NUnit.VisualStudio.TestAdapter
         public int? RandomSeed { get; private set; }
         public bool RandomSeedSpecified { get; private set; }
 
+        public bool SynchronousEvents { get; private set; }
+
+        public string DomainUsage { get; set; }
+
         #endregion
 
         #region Public Methods
@@ -116,6 +120,8 @@ namespace NUnit.VisualStudio.TestAdapter
             UseVsKeepEngineRunning = GetInnerTextAsBool(nunitNode, "UseVsKeepEngineRunning");
             BasePath = GetInnerText(nunitNode, "BasePath");
             PrivateBinPath = GetInnerText(nunitNode, "PrivateBinPath");
+            SynchronousEvents = GetInnerTextAsBool(nunitNode, "SynchronousEvents");
+            DomainUsage = GetInnerText(nunitNode, "DomainUsage", "Single", "None");
             RandomSeed = GetInnerTextAsNullableInt(nunitNode, "RandomSeed");
             RandomSeedSpecified = RandomSeed.HasValue;
             if (!RandomSeedSpecified)

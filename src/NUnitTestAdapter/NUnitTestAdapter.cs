@@ -146,6 +146,8 @@ namespace NUnit.VisualStudio.TestAdapter
                     package.Settings[PackageSettings.NumberOfTestWorkers] = workers;
             }
 
+            package.Settings[PackageSettings.SynchronousEvents] = Settings.SynchronousEvents;
+
             int timeout = Settings.DefaultTimeout;
             if (timeout > 0)
                 package.Settings[PackageSettings.DefaultTimeout] = timeout;
@@ -177,7 +179,15 @@ namespace NUnit.VisualStudio.TestAdapter
 
             // Always run one assembly at a time in process in it's own domain
             package.Settings[PackageSettings.ProcessModel] = "InProcess";
-            package.Settings[PackageSettings.DomainUsage] = "Single";
+
+            if (Settings.DomainUsage != null)
+            {
+                package.Settings[PackageSettings.DomainUsage] = Settings.DomainUsage;
+            }
+            else
+            {
+                package.Settings[PackageSettings.DomainUsage] = "Single";
+            }
 
             // Force truncation of string arguments to test cases
             package.Settings[PackageSettings.DefaultTestNamePattern] = "{m}{a:40}";
