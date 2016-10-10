@@ -56,6 +56,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.Null(_settings.BasePath);
             Assert.Null(_settings.PrivateBinPath);
             Assert.NotNull(_settings.RandomSeed);
+            Assert.False(_settings.SynchronousEvents);
+            Assert.Null(_settings.DomainUsage);
         }
 
         [Test]
@@ -170,6 +172,23 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             _settings.Load("<RunSettings><NUnit><RandomSeed>12345</RandomSeed></NUnit></RunSettings>");
             Assert.That(_settings.RandomSeed, Is.EqualTo(12345));
+        }
+
+        [Test]
+        public void SynchronousEventsSetting()
+        {
+            _settings.Load("<RunSettings><NUnit><SynchronousEvents>True</SynchronousEvents></NUnit></RunSettings>");
+            Assert.True(_settings.SynchronousEvents);
+        }
+
+        [Test]
+        public void DomainUsageSetting()
+        {
+            _settings.Load("<RunSettings><NUnit><DomainUsage>None</DomainUsage></NUnit></RunSettings>");
+            Assert.That(_settings.DomainUsage, Is.EqualTo("None"));
+
+            _settings.Load("<RunSettings><NUnit><DomainUsage>Single</DomainUsage></NUnit></RunSettings>");
+            Assert.That(_settings.DomainUsage, Is.EqualTo("Single"));
         }
     }
 }
