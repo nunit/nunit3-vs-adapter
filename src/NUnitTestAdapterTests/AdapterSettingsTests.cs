@@ -187,8 +187,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             _settings.Load($"<RunSettings><NUnit><DomainUsage>{domainUsage}</DomainUsage></NUnit></RunSettings>");
             Assert.That(_settings.DomainUsage, Is.EqualTo(domainUsage));
-        {
+        }
 
+        [TestCase]
+        public void InvalidDomainUsage()
+        {
+            var exception = Assert.Throws<ArgumentException>(() => _settings.Load(
+                "<RunSettings><NUnit><DomainUsage>InvalidValue</DomainUsage></NUnit></RunSettings>"));
+
+            Assert.That(exception.Message, Is.EqualTo("Invalid value InvalidValue passed for element DomainUsage."));
         }
     }
 }
