@@ -181,14 +181,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.True(_settings.SynchronousEvents);
         }
 
-        [Test]
-        public void DomainUsageSetting()
+        [TestCase("None")]
+        [TestCase("Single")]
+        public void DomainUsageSetting(string domainUsage)
         {
-            _settings.Load("<RunSettings><NUnit><DomainUsage>None</DomainUsage></NUnit></RunSettings>");
-            Assert.That(_settings.DomainUsage, Is.EqualTo("None"));
+            _settings.Load($"<RunSettings><NUnit><DomainUsage>{domainUsage}</DomainUsage></NUnit></RunSettings>");
+            Assert.That(_settings.DomainUsage, Is.EqualTo(domainUsage));
+        {
 
-            _settings.Load("<RunSettings><NUnit><DomainUsage>Single</DomainUsage></NUnit></RunSettings>");
-            Assert.That(_settings.DomainUsage, Is.EqualTo("Single"));
         }
     }
 }
