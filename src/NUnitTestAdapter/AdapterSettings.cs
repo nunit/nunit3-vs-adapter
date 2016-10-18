@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -168,7 +168,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             catch(Exception ex)
             {
-                _logger.Error("Unable to restore random seed.", ex);
+                _logger.Warning("Unable to restore random seed.", ex);
             }
             finally
             {
