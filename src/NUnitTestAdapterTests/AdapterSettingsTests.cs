@@ -58,6 +58,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.NotNull(_settings.RandomSeed);
             Assert.False(_settings.SynchronousEvents);
             Assert.Null(_settings.DomainUsage);
+            Assert.False(_settings.InProcDataCollectorsAvailable);
         }
 
         [Test]
@@ -175,27 +176,21 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
-        public void SynchronousEventsSetting()
+        public void InProcDataCollector()
         {
-            _settings.Load("<RunSettings><NUnit><SynchronousEvents>True</SynchronousEvents></NUnit></RunSettings>");
+            _settings.Load(@"
+<RunSettings>
+    <InProcDataCollectionRunSettings>
+        <InProcDataCollectors>
+            <InProcDataCollector friendlyName='DummyCollectorName' uri='InProcDataCollector://NUnit/DummyCollectorName' />
+        </InProcDataCollectors>
+    </InProcDataCollectionRunSettings>
+</RunSettings>");
+
+            Assert.That(_settings.DomainUsage, Is.EqualTo("None"));
             Assert.True(_settings.SynchronousEvents);
-        }
-
-        [TestCase("None")]
-        [TestCase("Single")]
-        public void DomainUsageSetting(string domainUsage)
-        {
-            _settings.Load($"<RunSettings><NUnit><DomainUsage>{domainUsage}</DomainUsage></NUnit></RunSettings>");
-            Assert.That(_settings.DomainUsage, Is.EqualTo(domainUsage));
-        }
-
-        [TestCase]
-        public void InvalidDomainUsage()
-        {
-            var exception = Assert.Throws<ArgumentException>(() => _settings.Load(
-                "<RunSettings><NUnit><DomainUsage>InvalidValue</DomainUsage></NUnit></RunSettings>"));
-
-            Assert.That(exception.Message, Is.EqualTo("Invalid value InvalidValue passed for element DomainUsage."));
+            Assert.That(_settings.NumberOfTestWorkers, Is.Zero);
+            Assert.True(_settings.InProcDataCollectorsAvailable);
         }
     }
 }
