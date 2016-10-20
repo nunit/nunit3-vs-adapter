@@ -2,7 +2,7 @@
 // Copyright (c) 2011-2015 NUnit Software. All rights reserved.
 // ****************************************************************
 
-//#define VERBOSE
+//#define LAUNCHDEBUGGER
 
 // We use an alias so that we don't accidentally make
 // references to engine internals, except for creating
@@ -92,6 +92,11 @@ namespace NUnit.VisualStudio.TestAdapter
         // Discover or Execute method must call this method.
         protected void Initialize(IDiscoveryContext context, IMessageLogger messageLogger)
         {
+#if LAUNCHDEBUGGER
+            if (!Debugger.IsAttached)
+                Debugger.Launch();
+#endif
+
             TestEngine = new TestEngineClass();
             TestLog = new TestLogger(messageLogger);
             Settings = new AdapterSettings(TestLog);

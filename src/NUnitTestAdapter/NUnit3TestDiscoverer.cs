@@ -2,11 +2,8 @@
 // Copyright (c) 2011-2015 NUnit Software. All rights reserved.
 // ****************************************************************
 
-//#define LAUNCHDEBUGGER
-
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -26,10 +23,6 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger messageLogger, ITestCaseDiscoverySink discoverySink)
         {
-#if LAUNCHDEBUGGER
-            if (!Debugger.IsAttached)
-                Debugger.Launch();
-#endif
             Initialize(discoveryContext, messageLogger);
 
             TestLog.Info(string.Format("NUnit Adapter {0}: Test discovery starting", AdapterVersion));
@@ -131,10 +124,6 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 try
                 {
-#if LAUNCHDEBUGGER
-                    if (!Debugger.IsAttached)
-                        Debugger.Launch();
-#endif
                     TestCase testCase = testConverter.ConvertTestCase(testNode);
                     discoverySink.SendTestCase(testCase);
                     cases += 1;

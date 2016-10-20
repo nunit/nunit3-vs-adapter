@@ -2,8 +2,6 @@
 // Copyright (c) 2011-2015 NUnit Software. All rights reserved.
 // ****************************************************************
 
-//#define LAUNCHDEBUGGER
-
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -55,10 +53,6 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <param name="frameworkHandle">Test log to send results and messages through</param>
         public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
-#if LAUNCHDEBUGGER
-            if (!Debugger.IsAttached)
-                Debugger.Launch();
-#endif
             Initialize(runContext, frameworkHandle);
 
             foreach (var source in sources)
@@ -94,10 +88,6 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <param name="frameworkHandle">The FrameworkHandle</param>
         public void RunTests(IEnumerable<TestCase> tests, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
-#if LAUNCHDEBUGGER
-            if (!Debugger.IsAttached)
-                Debugger.Launch();
-#endif
             Initialize(runContext, frameworkHandle);
 
             var assemblyGroups = tests.GroupBy(tc => tc.Source);
@@ -171,11 +161,6 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private void RunAssembly(string assemblyName, TestFilter filter)
         {
-#if LAUNCHDEBUGGER
-            if (!Debugger.IsAttached)
-                Debugger.Launch();
-#endif
-
             // No need to restore if the seed was in runsettings file
             if (!Settings.RandomSeedSpecified)
                 Settings.RestoreRandomSeed(Path.GetDirectoryName(assemblyName));
