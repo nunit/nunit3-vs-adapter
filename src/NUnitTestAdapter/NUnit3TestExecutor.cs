@@ -77,7 +77,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     if (ex is TargetInvocationException)
                         ex = ex.InnerException;
-                    TestLog.Error("Exception thrown executing tests", ex);
+                    TestLog.Warning("Exception thrown executing tests", ex);
                 }
             }
 
@@ -249,7 +249,7 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 if (ex is TargetInvocationException)
                     ex = ex.InnerException;
-                TestLog.Error("Exception thrown executing tests in " + assemblyName, ex);
+                TestLog.Warning("Exception thrown executing tests in " + assemblyName, ex);
             }
 
             _activeRunner.Dispose();
