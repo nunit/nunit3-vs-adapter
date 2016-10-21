@@ -53,15 +53,14 @@ namespace NUnit.VisualStudio.TestAdapter
 
                 try
                 {
-                    XmlNode loadResult = runner.Load();
+                    XmlNode topNode = runner.Explore(TestFilter.Empty);
 
                     // Currently, this will always be the case but it might change
-                    if (loadResult.Name == "test-run")
-                        loadResult = loadResult.FirstChild;
+                    if (topNode.Name == "test-run")
+                        topNode = topNode.FirstChild;
 
-                    if (loadResult.GetAttribute("runstate") == "Runnable")
+                    if (topNode.GetAttribute("runstate") == "Runnable")
                     {
-                        XmlNode topNode = runner.Explore(TestFilter.Empty);
                         var testConverter = new TestConverter(TestLog, sourceAssembly);
 
                         int cases = ProcessTestCases(topNode, discoverySink, testConverter);
@@ -70,7 +69,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     }
                     else
                     {
-                        var msgNode = loadResult.SelectSingleNode("properties/property[@name='_SKIPREASON']");
+                        var msgNode = topNode.SelectSingleNode("properties/property[@name='_SKIPREASON']");
                         if (msgNode != null && (new[] { "contains no tests", "Has no TestFixtures" }).Any(msgNode.GetAttribute("value").Contains))
                             TestLog.Info("Assembly contains no NUnit 3.0 tests: " + sourceAssembly);
                         else
