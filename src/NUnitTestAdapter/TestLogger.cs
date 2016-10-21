@@ -42,18 +42,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void Error(string message, Exception ex)
         {
-            switch (Verbosity)
-            {
-                case 0:
-                    Type type = ex.GetType();
-                    Error(string.Format(EXCEPTION_FORMAT, type, message));
-                    Error(ex.Message);
-                    break;
-                default:
-                    Error(message);
-                    Error(ex.ToString());
-                    break;
-            }
+            SendMessage(TestMessageLevel.Error, message, ex);
         }
 
         #endregion
@@ -67,21 +56,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void Warning(string message,Exception ex)
         {
-            switch (Verbosity)
-            {
-                case 0:
-                    var type = ex.GetType();
-                    Warning(string.Format(EXCEPTION_FORMAT, type, message));
-                    Warning(ex.Message);
-                    break;
-
-                default:
-                    Warning(message);
-                    Warning(ex.ToString());
-                    break;
-            }
-
-            SendMessage(TestMessageLevel.Warning, message);
+            SendMessage(TestMessageLevel.Warning, message, ex);
         }
 
         #endregion
@@ -106,10 +81,30 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #endregion
 
+        #region SendMessage
+
         public void SendMessage(TestMessageLevel testMessageLevel, string message)
         {
             if (MessageLogger != null)
                 MessageLogger.SendMessage(testMessageLevel, message);
         }
+
+        public void SendMessage(TestMessageLevel testMessageLevel, string message, Exception ex)
+        {
+            switch (Verbosity)
+            {
+                case 0:
+                    var type = ex.GetType();
+                    SendMessage(testMessageLevel, string.Format(EXCEPTION_FORMAT, type, message));
+                    SendMessage(testMessageLevel, ex.Message);
+                    break;
+
+                default:
+                    SendMessage(testMessageLevel, message);
+                    SendMessage(testMessageLevel, ex.ToString());
+                    break;
+            }
+        }
+        #endregion
     }
 }

@@ -66,9 +66,9 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             catch(Exception ex)
             {
-                _recorder.SendMessage(TestMessageLevel.Error,
+                _recorder.SendMessage(TestMessageLevel.Warning,
                     string.Format("Error processing {0} event for {1}", node.Name, node.GetAttribute("fullname")));
-                _recorder.SendMessage(TestMessageLevel.Error, ex.ToString());
+                _recorder.SendMessage(TestMessageLevel.Warning, ex.ToString());
             }
         }
 
@@ -129,16 +129,16 @@ namespace NUnit.VisualStudio.TestAdapter
                 if (site == "SetUp" || site == "TearDown")
                 {
                     _recorder.SendMessage(
-                        TestMessageLevel.Error,
+                        TestMessageLevel.Warning,
                         string.Format("{0} failed for test fixture {1}", site, resultNode.GetAttribute("fullname")));
 
                     var messageNode = resultNode.SelectSingleNode("failure/message");
                     if (messageNode != null)
-                        _recorder.SendMessage(TestMessageLevel.Error, messageNode.InnerText);
+                        _recorder.SendMessage(TestMessageLevel.Warning, messageNode.InnerText);
 
                     var stackNode = resultNode.SelectSingleNode("failure/stack-trace");
                     if (stackNode != null)
-                        _recorder.SendMessage(TestMessageLevel.Error, stackNode.InnerText);
+                        _recorder.SendMessage(TestMessageLevel.Warning, stackNode.InnerText);
                 }
             }
         }
@@ -151,13 +151,12 @@ namespace NUnit.VisualStudio.TestAdapter
             var testName = outputNode.GetAttribute("testname");
             var stream = outputNode.GetAttribute("stream");
             var text = outputNode.InnerText;
-            var level = stream == "Error" ? TestMessageLevel.Error : TestMessageLevel.Informational;
 
             // Remove final newline since logger will add one
             if (text.EndsWith(NL))
                 text = text.Substring(0, text.Length - NL_LENGTH);
 
-            _recorder.SendMessage(level, text);
+            _recorder.SendMessage(TestMessageLevel.Warning, text);
         }
     }
 }

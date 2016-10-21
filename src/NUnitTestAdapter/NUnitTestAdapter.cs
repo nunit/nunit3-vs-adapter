@@ -103,8 +103,8 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             catch (Exception e)
             {
-                TestLog.Error("Error initializing RunSettings. Default settings will be used");
-                TestLog.Error(e.ToString());
+                TestLog.Warning("Error initializing RunSettings. Default settings will be used");
+                TestLog.Warning(e.ToString());
             }
         }
 

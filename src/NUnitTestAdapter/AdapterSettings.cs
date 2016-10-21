@@ -149,7 +149,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             catch(Exception ex)
             {
-                _logger.Error("Failed to save random seed.", ex);
+                _logger.Warning("Failed to save random seed.", ex);
             }
             finally
             {
@@ -168,7 +168,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             catch(Exception ex)
             {
-                _logger.Error("Unable to restore random seed.", ex);
+                _logger.Warning("Unable to restore random seed.", ex);
             }
             finally
             {

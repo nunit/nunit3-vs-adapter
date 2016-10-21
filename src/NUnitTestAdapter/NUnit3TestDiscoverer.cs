@@ -97,11 +97,11 @@ namespace NUnit.VisualStudio.TestAdapter
                     if (ex.TypeName == "NUnit.Framework.Api.FrameworkController")
                         TestLog.Warning("   Skipping NUnit 2.x test assembly");
                     else
-                        TestLog.Error("Exception thrown discovering tests in " + sourceAssembly, ex);
+                        TestLog.Warning("Exception thrown discovering tests in " + sourceAssembly, ex);
                 }
                 catch (Exception ex)
                 {
-                    TestLog.Error("Exception thrown discovering tests in " + sourceAssembly, ex);
+                    TestLog.Warning("Exception thrown discovering tests in " + sourceAssembly, ex);
                 }
                 finally
                 {
@@ -140,7 +140,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
                 catch (Exception ex)
                 {
-                    TestLog.Error("Exception converting " + testNode.GetAttribute("fullname"), ex);
+                    TestLog.Warning("Exception converting " + testNode.GetAttribute("fullname"), ex);
                 }
             }
 

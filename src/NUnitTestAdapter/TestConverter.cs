@@ -60,7 +60,7 @@ namespace NUnit.VisualStudio.TestAdapter
             if (_vsTestCaseMap.ContainsKey(id))
                 return _vsTestCaseMap[id];
 
-            _logger.Error("Test " + id + " not found in cache");
+            _logger.Warning("Test " + id + " not found in cache");
             return null;
         }
 
