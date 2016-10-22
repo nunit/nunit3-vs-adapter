@@ -156,6 +156,9 @@ namespace NUnit.VisualStudio.TestAdapter
             if (text.EndsWith(NL))
                 text = text.Substring(0, text.Length - NL_LENGTH);
 
+            // An empty message will cause SendMessage to throw
+            if (text.Length == 0) text = " ";
+
             _recorder.SendMessage(TestMessageLevel.Warning, text);
         }
     }
