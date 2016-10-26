@@ -49,10 +49,10 @@ namespace NUnit.VisualStudio.TestAdapter
 
                 ITestRunner runner = null;
 
-                runner = GetRunnerFor(sourceAssembly);
-
                 try
                 {
+                    runner = GetRunnerFor(sourceAssembly);
+
                     XmlNode topNode = runner.Explore(TestFilter.Empty);
 
                     // Currently, this will always be the case but it might change
@@ -105,11 +105,14 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
                 finally
                 {
-                    if (runner.IsTestRunning)
-                        runner.StopRun(true);
+                    if (runner != null)
+                    {
+                        if (runner.IsTestRunning)
+                            runner.StopRun(true);
 
-                    runner.Unload();
-                    runner.Dispose();
+                        runner.Unload();
+                        runner.Dispose();
+                    }
                 }
             }
 
