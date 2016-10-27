@@ -61,6 +61,13 @@ namespace NUnit.VisualStudio.TestAdapter
 #endif
             Initialize(runContext, frameworkHandle);
 
+            if (Settings.InProcDataCollectorsAvailable && sources.Count() > 1)
+            {
+                TestLog.Error("Failed to run tests for multiple assemblies when InProcDataCollectors specified in run configuration.");
+                Unload();
+                return;
+            }
+
             foreach (var source in sources)
             {
                 try
@@ -101,6 +108,13 @@ namespace NUnit.VisualStudio.TestAdapter
             Initialize(runContext, frameworkHandle);
 
             var assemblyGroups = tests.GroupBy(tc => tc.Source);
+            if (Settings.InProcDataCollectorsAvailable && assemblyGroups.Count() > 1)
+            {
+                TestLog.Error("Failed to run tests for multiple assemblies when InProcDataCollectors specified in run configuration.");
+                Unload();
+                return;
+            }
+
             foreach (var assemblyGroup in assemblyGroups)
             {
                 var assemblyName = assemblyGroup.Key;

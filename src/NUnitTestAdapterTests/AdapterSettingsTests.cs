@@ -56,6 +56,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.Null(_settings.BasePath);
             Assert.Null(_settings.PrivateBinPath);
             Assert.NotNull(_settings.RandomSeed);
+            Assert.False(_settings.SynchronousEvents);
+            Assert.Null(_settings.DomainUsage);
+            Assert.False(_settings.InProcDataCollectorsAvailable);
         }
 
         [Test]
@@ -170,6 +173,24 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             _settings.Load("<RunSettings><NUnit><RandomSeed>12345</RandomSeed></NUnit></RunSettings>");
             Assert.That(_settings.RandomSeed, Is.EqualTo(12345));
+        }
+
+        [Test]
+        public void InProcDataCollector()
+        {
+            _settings.Load(@"
+<RunSettings>
+    <InProcDataCollectionRunSettings>
+        <InProcDataCollectors>
+            <InProcDataCollector friendlyName='DummyCollectorName' uri='InProcDataCollector://NUnit/DummyCollectorName' />
+        </InProcDataCollectors>
+    </InProcDataCollectionRunSettings>
+</RunSettings>");
+
+            Assert.That(_settings.DomainUsage, Is.EqualTo("None"));
+            Assert.True(_settings.SynchronousEvents);
+            Assert.That(_settings.NumberOfTestWorkers, Is.Zero);
+            Assert.True(_settings.InProcDataCollectorsAvailable);
         }
     }
 }

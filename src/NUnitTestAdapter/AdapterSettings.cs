@@ -66,6 +66,12 @@ namespace NUnit.VisualStudio.TestAdapter
         public int? RandomSeed { get; private set; }
         public bool RandomSeedSpecified { get; private set; }
 
+        public bool InProcDataCollectorsAvailable { get; private set; }
+
+        public bool SynchronousEvents { get; private set; }
+
+        public string DomainUsage { get; set; }
+
         #endregion
 
         #region Public Methods
@@ -136,6 +142,16 @@ namespace NUnit.VisualStudio.TestAdapter
             // Force Verbosity to 1 under Debug
             Verbosity = 1;
 #endif
+
+            // If any in proc data collector will be instantiated by the TestPlatform run tests sequentially.
+            var inProcDataCollectorNode = doc.SelectSingleNode("RunSettings/InProcDataCollectionRunSettings/InProcDataCollectors");
+            InProcDataCollectorsAvailable = inProcDataCollectorNode != null && inProcDataCollectorNode.SelectNodes("InProcDataCollector").Count > 0;
+            if (InProcDataCollectorsAvailable)
+            {
+                NumberOfTestWorkers = 0;
+                DomainUsage = "None";
+                SynchronousEvents = true;
+            }
         }
 
         public void SaveRandomSeed(string dirname)
