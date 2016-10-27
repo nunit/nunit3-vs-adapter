@@ -13,8 +13,8 @@
     <ProjectGuid>{D6990436-E3BA-4AC1-8A7D-9FFF9C3B19AD}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NUnit3TestAdapterInstall</RootNamespace>
-    <AssemblyName>NUnit3TestAdapterInstall</AssemblyName>
+    <RootNamespace>NUnit3TestAdapter</RootNamespace>
+    <AssemblyName>NUnit3TestAdapter</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <GeneratePkgDefFile>false</GeneratePkgDefFile>
     <IncludeAssemblyInVSIXContainer>false</IncludeAssemblyInVSIXContainer>
