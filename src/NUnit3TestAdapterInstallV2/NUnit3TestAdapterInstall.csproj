@@ -64,7 +64,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="stylesheet.css" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NUnitTestAdapter\NUnit3TestAdapter.csproj">
