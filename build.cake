@@ -28,7 +28,7 @@ if (BuildSystem.IsRunningOnAppVeyor)
 	else
 	{
 		var buildNumber = AppVeyor.Environment.Build.Number.ToString("00000");
-		var branch = AppVeyor.Environment.Repository.Branch;
+		var branch = AppVeyor.Environment.Repository.Branch.Replace(".", "").Replace("/", "");
 		var isPullRequest = AppVeyor.Environment.PullRequest.IsPullRequest;
 
 		if (branch == "master" && !isPullRequest)
@@ -41,14 +41,14 @@ if (BuildSystem.IsRunningOnAppVeyor)
 
 			if (isPullRequest)
 				suffix += "-pr-" + AppVeyor.Environment.PullRequest.Number;
+            else if (branch.StartsWith("release", StringComparison.OrdinalIgnoreCase))
+                suffix += "-pre-" + branch.Substring(8);
 			else
 				suffix += "-" + branch;
 
 			// Nuget limits "special version part" to 20 chars. Add one for the hyphen.
 			if (suffix.Length > 21)
 				suffix = suffix.Substring(0, 21);
-
-                        suffix = suffix.Replace(".", "");
 
 			packageVersion = version + suffix;
 		}
