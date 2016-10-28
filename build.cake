@@ -41,8 +41,6 @@ if (BuildSystem.IsRunningOnAppVeyor)
 
 			if (isPullRequest)
 				suffix += "-pr-" + AppVeyor.Environment.PullRequest.Number;
-            else if (branch.StartsWith("release", StringComparison.OrdinalIgnoreCase))
-                suffix += "-pre-" + branch.Substring(8);
 			else
 				suffix += "-" + branch;
 
