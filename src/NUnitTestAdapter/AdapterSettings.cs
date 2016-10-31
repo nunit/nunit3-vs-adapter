@@ -116,7 +116,7 @@ namespace NUnit.VisualStudio.TestAdapter
             InternalTraceLevel = GetInnerText(nunitNode, "InternalTraceLevel", "Off", "Error", "Warning", "Info", "Verbose", "Debug");
             WorkDirectory = GetInnerText(nunitNode, "WorkDirectory");
             DefaultTimeout = GetInnerTextAsInt(nunitNode, "DefaultTimeout", 0);
-            NumberOfTestWorkers = GetInnerTextAsInt(nunitNode, "NumberOfTestWorkers", -1); 
+            NumberOfTestWorkers = GetInnerTextAsInt(nunitNode, "NumberOfTestWorkers", -1);
             ShadowCopyFiles = GetInnerTextAsBool(nunitNode, "ShadowCopyFiles");
             Verbosity = GetInnerTextAsInt(nunitNode, "Verbosity", 0);
             UseVsKeepEngineRunning = GetInnerTextAsBool(nunitNode, "UseVsKeepEngineRunning");
@@ -126,7 +126,7 @@ namespace NUnit.VisualStudio.TestAdapter
             RandomSeedSpecified = RandomSeed.HasValue;
             if (!RandomSeedSpecified)
                 RandomSeed = new Random().Next();
-            
+
 #if SUPPORT_REGISTRY_SETTINGS
             // Legacy (CTP) registry settings override defaults
             var registry = RegistryCurrentUser.OpenRegistryCurrentUser(@"Software\nunit.org\VSAdapter");
@@ -157,13 +157,12 @@ namespace NUnit.VisualStudio.TestAdapter
         public void SaveRandomSeed(string dirname)
         {
             TextWriter writer = null;
-
             try
             {
                 writer = new StreamWriter(Path.Combine(dirname, "$RANDOM_SEED$"));
                 writer.Write(RandomSeed.Value);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.Warning("Failed to save random seed.", ex);
             }
@@ -177,12 +176,15 @@ namespace NUnit.VisualStudio.TestAdapter
         public void RestoreRandomSeed(string dirname)
         {
             TextReader reader = null;
+            var fullpath = Path.Combine(dirname, "$RANDOM_SEED$");
+            if (!File.Exists(fullpath))
+                return;
             try
             {
                 reader = new StreamReader(Path.Combine(dirname, "$RANDOM_SEED$"));
                 RandomSeed = int.Parse(reader.ReadLine());
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.Warning("Unable to restore random seed.", ex);
             }
