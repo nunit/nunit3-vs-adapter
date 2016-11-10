@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="NUnit.NUnit3TestAdapter" Version="4.0.0.0" Language="en-US" Publisher="Terje Sandstrom" />
+    <Identity Id="NUnit.NUnit3TestAdapter" Version="3.6.0.1" Language="en-US" Publisher="Terje Sandstrom" />
     <DisplayName>NUnit 3 Test Adapter</DisplayName>
     <Description xml:space="preserve">NUnit 3 adapter for running tests in Visual Studio. Works with NUnit 3.x, use the NUnit 2 adapter for 2.x tests.</Description>
     <MoreInfo>https://github.com/nunit/docs/wiki/VS-Adapter</MoreInfo>
@@ -11,7 +11,7 @@
     <Tags>test, Testing, adapter, NUNit, TDD, NUnit3</Tags>
   </Metadata>
   <Installation>
-    <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[11.0,15.0)" />
+    <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[11.0,16.0)" />
   </Installation>
   <Dependencies>
     <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5,)" />
@@ -19,4 +19,7 @@
   <Assets>
     <Asset Type="UnitTestExtension" d:Source="Project" d:ProjectName="NUnit3TestAdapter" Path="|NUnit3TestAdapter|" />
   </Assets>
+  <Prerequisites>
+    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0.25904.2,16.0)" DisplayName="Visual Studio core editor" />
+  </Prerequisites>
 </PackageManifest>
