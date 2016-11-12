@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("NUnit Software")]
 [assembly: AssemblyProduct("NUnit3TestAdapter")]
-[assembly: AssemblyCopyright("Copyright 2011-2016, NUnit Software")]
+[assembly: AssemblyCopyright("Copyright © 2011-2016, NUnit Software")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: CLSCompliant(false)]

@@ -1,6 +1,6 @@
 # NUnit 3 VS Test Adapter #
 
-The NUnit 3 Test Adapter for runs NUnit 3.x tests in Visual Studio.
+The NUnit 3 Test Adapter runs NUnit 3.x tests in Visual Studio 2012 and newer.
 
 This adapter works with NUnit 3.0 and higher only. Use the NUnit 2 Adapter to run NUnit 2.x tests.
 
