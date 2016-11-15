@@ -1,5 +1,3 @@
-#tool nuget:?package=NUnit.ConsoleRunner&version=3.5.0
-
 //////////////////////////////////////////////////////////////////////
 // ARGUMENTS
 //////////////////////////////////////////////////////////////////////
@@ -11,7 +9,7 @@ var configuration = Argument("configuration", "Debug");
 // SET PACKAGE VERSION
 //////////////////////////////////////////////////////////////////////
 
-var version = "4.0.0";
+var version = "3.6.0";
 var modifier = "";
 
 var dbgSuffix = configuration == "Debug" ? "-dbg" : "";
@@ -65,6 +63,7 @@ var packageName = "NUnit3TestAdapter-" + packageVersion;
 var PROJECT_DIR = Context.Environment.WorkingDirectory.FullPath + "/";
 var PACKAGE_DIR = PROJECT_DIR + "package/";
 var PACKAGE_IMAGE_DIR = PACKAGE_DIR + packageName + "/";
+var SRC_DIR = PROJECT_DIR + "src/";
 var TOOLS_DIR = PROJECT_DIR + "tools/";
 var BIN_DIR = PROJECT_DIR + "bin/" + configuration + "/";
 var DEMO_BIN_DIR = PROJECT_DIR + "demo/NUnitTestDemo/bin/" + configuration + "/";
@@ -179,7 +178,6 @@ Task("CreatePackageDir")
 	});
 
 Task("CreateWorkingImage")
-	.IsDependentOn("Build")
 	.IsDependentOn("CreatePackageDir")
 	.Does(() =>
 	{
@@ -213,7 +211,7 @@ Task("PackageZip")
 
 Task("PackageNuGet")
 	.IsDependentOn("CreateWorkingImage")
-	.Does(() => 
+	.Does(() =>
 	{
         NuGetPack("nuget/NUnit3TestAdapter.nuspec", new NuGetPackSettings()
         {
@@ -224,12 +222,11 @@ Task("PackageNuGet")
 	});
 
 Task("PackageVsix")
-	.IsDependentOn("Build")
 	.IsDependentOn("CreatePackageDir")
 	.Does(() =>
 	{
 		CopyFile(
-			BIN_DIR + "NUnit3TestAdapter.vsix", 
+			BIN_DIR + "NUnit3TestAdapter.vsix",
 			PACKAGE_DIR + packageName + ".vsix");
 	});
 
@@ -239,12 +236,10 @@ Task("PackageVsix")
 
 void BuildSolution(string solutionPath, string configuration)
 {
-	MSBuild(solutionPath, new MSBuildSettings()
-		.SetConfiguration(configuration)
-        .SetMSBuildPlatform(MSBuildPlatform.x86)
-		.SetVerbosity(Verbosity.Minimal)
-		.SetNodeReuse(false)
-	);
+	DotNetBuild(solutionPath, settings =>
+		settings.SetConfiguration(configuration)
+        .WithTarget("Build")
+        .WithProperty("NodeReuse", "false"));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -260,7 +255,6 @@ Task("Test")
 	.IsDependentOn("TestAdapterUsingVSTest");
 
 Task("Package")
-	.IsDependentOn("Build")
 	.IsDependentOn("PackageZip")
 	.IsDependentOn("PackageNuGet")
 	.IsDependentOn("PackageVsix");
