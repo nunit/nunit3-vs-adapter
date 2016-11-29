@@ -39,7 +39,8 @@ namespace NUnit.Tests
 
             public const int Tests = MockTestFixture.Tests 
                         + Singletons.OneTestCase.Tests 
-                        + TestAssembly.MockTestFixture.Tests 
+                        + TestAssembly.MockTestFixture.Tests
+                        + InheritedTests.DerivedFixture.Tests
                         + IgnoredFixture.Tests
                         + ExplicitFixture.Tests
                         + BadFixture.Tests
@@ -196,6 +197,26 @@ namespace NUnit.Tests
             {
             }
         }
+    }
+
+    namespace InheritedTests
+    {
+        [TestFixture]
+        public abstract class BaseFixture
+        {
+            public const int Tests = 1;
+
+            [Test]
+            public void RunTest()
+            {
+            }
+        }
+
+        [TestFixture]
+        public class DerivedFixture : BaseFixture
+        {
+        }
+
     }
 
     [TestFixture, Ignore("BECAUSE")]
