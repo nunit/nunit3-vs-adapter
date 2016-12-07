@@ -4,7 +4,7 @@
     <Identity Id="NUnit.NUnit3TestAdapter" Version="4.0.0.0" Language="en-US" Publisher="Terje Sandstrom" />
     <DisplayName>NUnit 3 Test Adapter</DisplayName>
     <Description xml:space="preserve">NUnit 3 adapter for running tests in Visual Studio. Works with NUnit 3.x, use the NUnit 2 adapter for 2.x tests.</Description>
-    <MoreInfo>https://github.com/nunit/docs/wiki/VS-Adapter</MoreInfo>
+    <MoreInfo>https://github.com/nunit/docs/wiki/Visual-Studio-Test-Adapter</MoreInfo>
     <License>license.rtf</License>
     <Icon>nunit3_32x32.png</Icon>
     <PreviewImage>preview.png</PreviewImage>
