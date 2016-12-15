@@ -38,6 +38,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase("<test-case result='Failed' label='NotRunnable'/>", ExpectedResult = TestOutcome.Failed)]
         [TestCase("<test-case result='Skipped'/>", ExpectedResult = TestOutcome.None)]
         [TestCase("<test-case result='Passed'/>", ExpectedResult = TestOutcome.Passed)]
+        [TestCase("<test-case result='Warning'/>", ExpectedResult = TestOutcome.Skipped)]
         public TestOutcome ResultStateToTestOutcome(string result)
         {
             var resultNode = XmlHelper.CreateXmlNode(result);

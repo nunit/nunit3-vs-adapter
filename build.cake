@@ -236,10 +236,10 @@ Task("PackageVsix")
 
 void BuildSolution(string solutionPath, string configuration)
 {
-	DotNetBuild(solutionPath, settings =>
-		settings.SetConfiguration(configuration)
-        .WithTarget("Build")
-        .WithProperty("NodeReuse", "false"));
+	MSBuild(solutionPath, new MSBuildSettings()
+		.SetConfiguration(configuration)
+        .SetNodeReuse(false)
+        .SetPlatformTarget(PlatformTarget.MSIL));
 }
 
 //////////////////////////////////////////////////////////////////////
