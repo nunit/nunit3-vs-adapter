@@ -169,6 +169,8 @@ namespace NUnit.VisualStudio.TestAdapter
                     return resultNode.GetAttribute("label")=="Ignored"
                         ? TestOutcome.Skipped
                         : TestOutcome.None;
+                case "Warning":
+                    return TestOutcome.Skipped;
                 default:
                     return TestOutcome.None;
             }
