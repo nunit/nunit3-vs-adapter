@@ -22,6 +22,7 @@
 // ***********************************************************************
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.Remoting;
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -131,10 +132,17 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void TestFinished(XmlNode resultNode)
         {
-            TestResult ourResult = _testConverter.ConvertTestResult(resultNode);
+            bool firstResult = true;
+            foreach (var vsResult in _testConverter.GetVSTestResults(resultNode))
+            {
+                if (firstResult)
+                {
+                    _recorder.RecordEnd(vsResult.TestCase, vsResult.Outcome);
+                    firstResult = false;
+                }
 
-            _recorder.RecordEnd(ourResult.TestCase, ourResult.Outcome);
-            _recorder.RecordResult(ourResult);
+                _recorder.RecordResult(vsResult);
+            }
         }
 
         public void SuiteFinished(XmlNode resultNode)

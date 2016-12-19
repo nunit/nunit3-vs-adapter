@@ -85,54 +85,30 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private static readonly string NL = Environment.NewLine;
 
-        public VSTestResult ConvertTestResult(XmlNode resultNode)
+        public IList<VSTestResult> GetVSTestResults(XmlNode resultNode)
         {
-            TestCase ourCase = GetCachedTestCase(resultNode.GetAttribute("id"));
-            if (ourCase == null) return null;
+            var results = new List<VSTestResult>();
+            XmlNodeList assertions = resultNode.SelectNodes("assertions/assertion");
 
-            VSTestResult ourResult = new VSTestResult(ourCase)
+            foreach (XmlNode assertion in assertions)
             {
-                DisplayName = ourCase.DisplayName,
-                Outcome = GetTestOutcome(resultNode),
-                Duration = TimeSpan.FromSeconds(resultNode.GetAttribute("duration", 0.0))
-            };
-
-            var startTime = resultNode.GetAttribute("start-time");
-            if (startTime != null)
-                ourResult.StartTime = DateTimeOffset.Parse(startTime);
-
-            var endTime = resultNode.GetAttribute("end-time");
-            if (endTime != null)
-                ourResult.EndTime = DateTimeOffset.Parse(endTime);
-
-            // TODO: Remove this when NUnit provides a better duration
-            if (ourResult.Duration == TimeSpan.Zero && (ourResult.Outcome == TestOutcome.Passed || ourResult.Outcome == TestOutcome.Failed))
-                ourResult.Duration = TimeSpan.FromTicks(1);
-
-            ourResult.ComputerName = Environment.MachineName;
-
-            var assertions = resultNode.SelectNodes("assertions/assertion");
-            var node = assertions.Count > 0
-                ? assertions[0]
-                : resultNode.SelectSingleNode("failure") ?? resultNode.SelectSingleNode("reason");
-
-            string message = node?.SelectSingleNode("message")?.InnerText;
-            // If we're running in the IDE, remove any caret line from the message
-            // since it will be displayed using a variable font and won't make sense.
-            if (!string.IsNullOrEmpty(message) && NUnitTestAdapter.IsRunningUnderIDE)
-            {
-                string pattern = NL + "  -*\\^" + NL;
-                message = Regex.Replace(message, pattern, NL, RegexOptions.Multiline);
+                var oneResult = GetBasicResult(resultNode);
+                if (oneResult != null)
+                {
+                    oneResult.ErrorMessage = assertion.SelectSingleNode("message")?.InnerText;
+                    oneResult.ErrorStackTrace = assertion.SelectSingleNode("stack-trace")?.InnerText;
+                    results.Add(oneResult);
+                }
             }
 
-            ourResult.ErrorMessage = message;
-            ourResult.ErrorStackTrace = node?.SelectSingleNode("stack-trace")?.InnerText;
+            if (results.Count == 0)
+            {
+                var result = MakeTestResultFromLegacyXmlNode(resultNode);
+                if (result != null)
+                    results.Add(result);
+            }
 
-            XmlNode outputNode = resultNode.SelectSingleNode("output");
-            if (outputNode != null)
-                ourResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, outputNode.InnerText));
-
-            return ourResult;
+            return results;
         }
 
         #endregion
@@ -163,10 +139,66 @@ namespace NUnit.VisualStudio.TestAdapter
                 testCase.CodeFilePath = navData.FilePath;
                 testCase.LineNumber = navData.LineNumber;
             }
-
+            
             testCase.AddTraitsFromTestNode(testNode);
 
             return testCase;
+        }
+
+        private VSTestResult MakeTestResultFromLegacyXmlNode(XmlNode resultNode)
+        {
+            VSTestResult ourResult = GetBasicResult(resultNode);
+            if (ourResult != null)
+            {
+                var node = resultNode.SelectSingleNode("failure") ?? resultNode.SelectSingleNode("reason");
+
+                string message = node?.SelectSingleNode("message")?.InnerText;
+                // If we're running in the IDE, remove any caret line from the message
+                // since it will be displayed using a variable font and won't make sense.
+                if (!string.IsNullOrEmpty(message) && NUnitTestAdapter.IsRunningUnderIDE)
+                {
+                    string pattern = NL + "  -*\\^" + NL;
+                    message = Regex.Replace(message, pattern, NL, RegexOptions.Multiline);
+                }
+
+                ourResult.ErrorMessage = message;
+                ourResult.ErrorStackTrace = node?.SelectSingleNode("stack-trace")?.InnerText;
+            }
+
+            return ourResult;
+        }
+
+        private VSTestResult GetBasicResult(XmlNode resultNode)
+        {
+            TestCase vsTest = GetCachedTestCase(resultNode.GetAttribute("id"));
+            if (vsTest == null) return null;
+
+            VSTestResult vsResult = new VSTestResult(vsTest)
+            {
+                DisplayName = vsTest.DisplayName,
+                Outcome = GetTestOutcome(resultNode),
+                Duration = TimeSpan.FromSeconds(resultNode.GetAttribute("duration", 0.0))
+            };
+
+            var startTime = resultNode.GetAttribute("start-time");
+            if (startTime != null)
+                vsResult.StartTime = DateTimeOffset.Parse(startTime);
+
+            var endTime = resultNode.GetAttribute("end-time");
+            if (endTime != null)
+                vsResult.EndTime = DateTimeOffset.Parse(endTime);
+
+            // TODO: Remove this when NUnit provides a better duration
+            if (vsResult.Duration == TimeSpan.Zero && (vsResult.Outcome == TestOutcome.Passed || vsResult.Outcome == TestOutcome.Failed))
+                vsResult.Duration = TimeSpan.FromTicks(1);
+
+            vsResult.ComputerName = Environment.MachineName;
+
+            XmlNode outputNode = resultNode.SelectSingleNode("output");
+            if (outputNode != null)
+                vsResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, outputNode.InnerText));
+
+            return vsResult;
         }
 
         // Public for testing

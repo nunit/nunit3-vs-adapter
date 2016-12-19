@@ -33,6 +33,14 @@ namespace NUnitTestDemo
             Assert.Warn("This is a warning");
         }
 
+        [Test, ExpectWarning]
+        public void TestWarnsThreeTimes()
+        {
+            Assert.Warn("Warning 1");
+            Assert.Warn("Warning 2");
+            Assert.Warn("Warning 3");
+        }
+
         [Test, ExpectFailure]
         public void TestFails_StringEquality()
         {

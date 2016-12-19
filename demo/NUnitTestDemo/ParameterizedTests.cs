@@ -41,6 +41,15 @@ namespace NUnitTestDemo
             Warn.Unless(a + b, Is.EqualTo(sum));
         }
 
+        [ExpectWarning]
+        [TestCase(31, 11, 99)]
+        public void TestCaseWarnsThreeTimes(int a, int b, int answer)
+        {
+            Warn.Unless(a + b, Is.EqualTo(answer), "Bad sum");
+            Warn.Unless(a - b, Is.EqualTo(answer), "Bad difference");
+            Warn.Unless(a * b, Is.EqualTo(answer), "Bad product");
+        }
+
         [TestCase(31, 11, ExpectedResult = 99), ExpectFailure]
         public int TestCaseFails_Result(int a, int b)
         {
