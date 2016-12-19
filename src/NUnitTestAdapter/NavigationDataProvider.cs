@@ -48,7 +48,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
 #if true
             TypeDefinition typeDef;
-            if (!_typeDefs.TryGetValue(className, out typeDef))
+            if (!TryGetTypeDefinition(className, out typeDef))
                 return NavigationData.Invalid;
 
             MethodDefinition methodDef = null;
@@ -110,10 +110,15 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             TypeDefinition type;
 
-            if (_typeDefs.TryGetValue(StandardizeTypeName(className), out type))
+            if (TryGetTypeDefinition(className, out type))
                 return type.GetMethods();
 
             return Enumerable.Empty<MethodDefinition>();
+        }
+
+        bool TryGetTypeDefinition(string className, out TypeDefinition typeDef)
+        {
+            return _typeDefs.TryGetValue(StandardizeTypeName(className), out typeDef);
         }
 
         static SequencePoint FirstOrDefaultSequencePoint(MethodDefinition testMethod)

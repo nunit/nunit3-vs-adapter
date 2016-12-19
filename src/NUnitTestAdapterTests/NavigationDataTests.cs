@@ -39,6 +39,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase("/GenericFixture`2/DoublyNested", "WriteBoth", 132, 133)]
         [TestCase("/GenericFixture`2/DoublyNested`1", "WriteAllThree", 151, 152)]
         [TestCase("/DerivedClass", "EmptyMethod_ThreeLines", 160, 161)]
+        // Handles sub class format from Type.FullName
+        [TestCase("+NestedClass", "SimpleMethod_Void_NoArgs", 83, 85)]
+        [TestCase("+GenericFixture`2+DoublyNested", "WriteBoth", 132, 133)]
+        [TestCase("+GenericFixture`2+DoublyNested`1", "WriteAllThree", 151, 152)]
         public void VerifyNavigationData(string suffix, string methodName, int expectedLineDebug, int expectedLineRelease)
         {
             // Get the navigation data - ensure names are spelled correctly!
