@@ -34,6 +34,13 @@ namespace NUnitTestDemo
             Assert.That(a + b, Is.EqualTo(sum));
         }
 
+        [ExpectWarning]
+        [TestCase(31, 11, 99)]
+        public void TestCaseWarns(int a, int b, int sum)
+        {
+            Warn.Unless(a + b, Is.EqualTo(sum));
+        }
+
         [TestCase(31, 11, ExpectedResult = 99), ExpectFailure]
         public int TestCaseFails_Result(int a, int b)
         {

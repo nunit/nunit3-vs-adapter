@@ -83,6 +83,8 @@ namespace NUnit.VisualStudio.TestAdapter
             return null;
         }
 
+        private static readonly string NL = Environment.NewLine;
+
         public VSTestResult ConvertTestResult(XmlNode resultNode)
         {
             TestCase ourCase = GetCachedTestCase(resultNode.GetAttribute("id"));
@@ -109,11 +111,22 @@ namespace NUnit.VisualStudio.TestAdapter
 
             ourResult.ComputerName = Environment.MachineName;
 
-            ourResult.ErrorMessage = GetErrorMessage(resultNode);
+            var assertions = resultNode.SelectNodes("assertions/assertion");
+            var node = assertions.Count > 0
+                ? assertions[0]
+                : resultNode.SelectSingleNode("failure") ?? resultNode.SelectSingleNode("reason");
 
-            XmlNode stackTraceNode = resultNode.SelectSingleNode("failure/stack-trace");
-            if (stackTraceNode != null)
-                ourResult.ErrorStackTrace = stackTraceNode.InnerText;
+            string message = node?.SelectSingleNode("message")?.InnerText;
+            // If we're running in the IDE, remove any caret line from the message
+            // since it will be displayed using a variable font and won't make sense.
+            if (!string.IsNullOrEmpty(message) && NUnitTestAdapter.IsRunningUnderIDE)
+            {
+                string pattern = NL + "  -*\\^" + NL;
+                message = Regex.Replace(message, pattern, NL, RegexOptions.Multiline);
+            }
+
+            ourResult.ErrorMessage = message;
+            ourResult.ErrorStackTrace = node?.SelectSingleNode("stack-trace")?.InnerText;
 
             XmlNode outputNode = resultNode.SelectSingleNode("output");
             if (outputNode != null)
@@ -174,35 +187,6 @@ namespace NUnit.VisualStudio.TestAdapter
                 default:
                     return TestOutcome.None;
             }
-        }
-
-        private static readonly string NL = Environment.NewLine;
-
-        private string GetErrorMessage(XmlNode resultNode)
-        {
-            XmlNode messageNode = resultNode.SelectSingleNode("failure/message");
-            if (messageNode != null)
-            {
-                string message = messageNode.InnerText;
-
-                // If we're running in the IDE, remove any caret line from the message
-                // since it will be displayed using a variable font and won't make sense.
-                if (!string.IsNullOrEmpty(message) && NUnitTestAdapter.IsRunningUnderIDE)
-                {
-                    string pattern = NL + "  -*\\^" + NL;
-                    message = Regex.Replace(message, pattern, NL, RegexOptions.Multiline);
-                }
-
-                return message;
-            }
-            else
-            {
-                XmlNode reasonNode = resultNode.SelectSingleNode("reason/message");
-                if (reasonNode != null)
-                    return reasonNode.InnerText;
-            }
-
-            return null;
         }
 
         #endregion
