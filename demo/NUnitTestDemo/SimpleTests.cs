@@ -27,6 +27,20 @@ namespace NUnitTestDemo
             Assert.That(2 + 2, Is.EqualTo(5));
         }
 
+        [Test, ExpectWarning]
+        public void TestWarns()
+        {
+            Assert.Warn("This is a warning");
+        }
+
+        [Test, ExpectWarning]
+        public void TestWarnsThreeTimes()
+        {
+            Assert.Warn("Warning 1");
+            Assert.Warn("Warning 2");
+            Assert.Warn("Warning 3");
+        }
+
         [Test, ExpectFailure]
         public void TestFails_StringEquality()
         {

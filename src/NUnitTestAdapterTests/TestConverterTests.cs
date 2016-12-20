@@ -69,8 +69,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void CannotMakeTestResultWhenTestCaseIsNotInCache()
         {
             var fakeResultNode = FakeTestData.GetResultNode();
-            var testResult = testConverter.ConvertTestResult(fakeResultNode);
-            Assert.Null(testResult);
+            var results = testConverter.GetVSTestResults(fakeResultNode);
+            Assert.That(results.Count, Is.EqualTo(0));
         }
 
         [Test]
@@ -80,7 +80,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var cachedTestCase = testConverter.ConvertTestCase(fakeTestNode);
             var fakeResultNode = FakeTestData.GetResultNode();
 
-            var testResult = testConverter.ConvertTestResult(fakeResultNode);
+            var testResult = testConverter.GetVSTestResults(fakeResultNode)[0];
             var testCase = testResult.TestCase;
 
             Assert.That(testCase, Is.SameAs(cachedTestCase));

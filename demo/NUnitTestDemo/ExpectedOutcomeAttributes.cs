@@ -18,6 +18,11 @@ namespace NUnitTestDemo
         public ExpectFailureAttribute() : base("Expect", "Failure") { }
     }
 
+    public class ExpectWarningAttribute : PropertyAttribute
+    {
+        public ExpectWarningAttribute() : base("Expect", "Warning") { }
+    }
+
     public class ExpectIgnoreAttribute : PropertyAttribute
     {
         public ExpectIgnoreAttribute() : base("Expect", "Ignore") { }
