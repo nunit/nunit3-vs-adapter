@@ -53,7 +53,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             MockAssemblyPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "mock-assembly.dll");
 
             // Sanity check to be sure we have the correct version of mock-assembly.dll
-            Assert.That(MockAssembly.Tests, Is.EqualTo(31),
+            Assert.That(MockAssembly.Tests, Is.EqualTo(34),
                 "The reference to mock-assembly.dll appears to be the wrong version");
             new List<TestCase>();
             testResults = new List<TestResult>();

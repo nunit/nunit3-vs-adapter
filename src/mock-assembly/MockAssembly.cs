@@ -37,15 +37,16 @@ namespace NUnit.Tests
             public const int Classes = 9;
             public const int NamespaceSuites = 6; // assembly, NUnit, Tests, Assemblies, Singletons, TestAssembly
 
-            public const int Tests = MockTestFixture.Tests 
-                        + Singletons.OneTestCase.Tests 
-                        + TestAssembly.MockTestFixture.Tests 
+            public const int Tests = MockTestFixture.Tests
+                        + Singletons.OneTestCase.Tests
+                        + TestAssembly.MockTestFixture.Tests
                         + IgnoredFixture.Tests
                         + ExplicitFixture.Tests
                         + BadFixture.Tests
                         + FixtureWithTestCases.Tests
                         + ParameterizedFixture.Tests
-                        + GenericFixtureConstants.Tests;
+                        + GenericFixtureConstants.Tests
+                        + ParentClass.Tests;
             
             public const int Suites = MockTestFixture.Suites 
                         + Singletons.OneTestCase.Suites
@@ -293,5 +294,25 @@ namespace NUnit.Tests
         
         [Test]
         public void Test2() { }
+    }
+
+    public class ParentClass
+    {
+        public const int Tests = 3;
+
+        [Test]
+        public void NestedClassTest1() { }
+
+        public class ChildClass
+        {
+            [Test]
+            public void NestedClassTest2() { }
+
+            public class GrandChildClass
+            {
+                [Test]
+                public void NestedClassTest3() { }
+            }
+        }
     }
 }
