@@ -12,6 +12,7 @@ namespace NUnit.VisualStudio.TestAdapter
 {
     public class AdapterSettings
     {
+        private const string RANDOM_SEED_FILE = "nunit_random_seed.tmp";
         private TestLogger _logger;
 
         #region Constructor
@@ -159,7 +160,7 @@ namespace NUnit.VisualStudio.TestAdapter
             TextWriter writer = null;
             try
             {
-                writer = new StreamWriter(Path.Combine(dirname, "$RANDOM_SEED$"));
+                writer = new StreamWriter(Path.Combine(dirname, RANDOM_SEED_FILE));
                 writer.Write(RandomSeed.Value);
             }
             catch (Exception ex)
@@ -176,12 +177,12 @@ namespace NUnit.VisualStudio.TestAdapter
         public void RestoreRandomSeed(string dirname)
         {
             TextReader reader = null;
-            var fullpath = Path.Combine(dirname, "$RANDOM_SEED$");
+            var fullpath = Path.Combine(dirname, RANDOM_SEED_FILE);
             if (!File.Exists(fullpath))
                 return;
             try
             {
-                reader = new StreamReader(Path.Combine(dirname, "$RANDOM_SEED$"));
+                reader = new StreamReader(Path.Combine(dirname, RANDOM_SEED_FILE));
                 RandomSeed = int.Parse(reader.ReadLine());
             }
             catch (Exception ex)
