@@ -30,6 +30,7 @@ extern alias ENG;
 using TestEngineClass = ENG::NUnit.Engine.TestEngine;
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -184,19 +185,9 @@ namespace NUnit.VisualStudio.TestAdapter
                 package.Settings[PackageSettings.RandomSeed] = Settings.RandomSeed;
 
             if (Settings.TestProperties.Count > 0)
-            {
-                var sb = new StringBuilder();
-                var index = 0;
-                foreach(string name in Settings.TestProperties.Keys)
-                {
-                    if (index++ > 0) sb.Append(";");
-                    sb.AppendFormat("{0}={1}", name, Settings.TestProperties[name]);
-                }
+                SetTestParameters(package.Settings, Settings.TestProperties);
 
-                package.Settings[PackageSettings.TestParameters] = sb.ToString();
-            }
-
-            // Always run one assembly at a time in process in it's own domain
+            // Always run one assembly at a time in process in its own domain
             package.Settings[PackageSettings.ProcessModel] = "InProcess";
 
             if (Settings.DomainUsage != null)
@@ -222,6 +213,27 @@ namespace NUnit.VisualStudio.TestAdapter
             package.Settings[PackageSettings.WorkDirectory] = workDir;
 
             return package;
+        }
+
+        /// <summary>
+        /// Sets test parameters, handling backwards compatibility.
+        /// </summary>
+        private static void SetTestParameters(IDictionary<string, object> runSettings, IDictionary<string, string> testParameters)
+        {
+            runSettings[PackageSettings.TestParametersDictionary] = testParameters;
+
+            if (testParameters.Count != 0)
+            {
+                // Kept for backwards compatibility with old frameworks.
+                // Reserializes the way old frameworks understand, even if the parsing above is changed.
+                // This reserialization cannot be changed without breaking compatibility with old frameworks.
+
+                var oldFrameworkSerializedParameters = new StringBuilder();
+                foreach (var parameter in testParameters)
+                    oldFrameworkSerializedParameters.Append(parameter.Key).Append('=').Append(parameter.Value).Append(';');
+
+                runSettings[PackageSettings.TestParameters] = oldFrameworkSerializedParameters.ToString(0, oldFrameworkSerializedParameters.Length - 1);
+            }
         }
 
         protected static void CleanUpRegisteredChannels()
