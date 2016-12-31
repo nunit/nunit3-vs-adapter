@@ -80,8 +80,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="nunit3_32x32.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="nunit_64.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="preview.png">
