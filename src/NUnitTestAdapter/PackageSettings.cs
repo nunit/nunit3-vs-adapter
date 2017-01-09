@@ -52,7 +52,7 @@ namespace NUnit.Common
 
         /// <summary>
         /// Full path of the directory to be used for work and result files.
-        /// This path is provided to tests by the frameowrk TestContext.
+        /// This path is provided to tests by the framework TestContext.
         /// </summary>
         public const string WorkDirectory = "WorkDirectory";
 
@@ -108,7 +108,7 @@ namespace NUnit.Common
         public const string PrivateBinPath = "PrivateBinPath";
 
         /// <summary>
-        /// The maximum number of test agents permitted to run simultneously. 
+        /// The maximum number of test agents permitted to run simultaneously. 
         /// Ignored if the ProcessModel is not set or defaulted to Multiple.
         /// </summary>
         public const string MaxAgents = "MaxAgents";
