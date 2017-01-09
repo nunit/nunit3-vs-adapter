@@ -57,13 +57,13 @@ namespace NUnit.VisualStudio.TestAdapter
             SupportedPropertiesCache = new Dictionary<string, TestProperty>(StringComparer.OrdinalIgnoreCase);
             SupportedPropertiesCache["FullyQualifiedName"] = TestCaseProperties.FullyQualifiedName;
             SupportedPropertiesCache["Name"] = TestCaseProperties.DisplayName;
-            // Intialize the trait cache
+            // Initialize the trait cache
             var priorityTrait = new NTrait("Priority", "");
             var categoryTrait = new NTrait("Category", "");
             SupportedTraitCache = new Dictionary<string, NTrait>(StringComparer.OrdinalIgnoreCase);
             SupportedTraitCache["Priority"] = priorityTrait;
             SupportedTraitCache["TestCategory"] = categoryTrait;
-            // Initalize the trait property map, since TFS doesnt know about traits
+            // Initialize the trait property map, since TFS doesnt know about traits
             TraitPropertyMap = new Dictionary<NTrait, TestProperty>(new NTraitNameComparer());
             var priorityProperty = TestProperty.Find("Priority") ??
                       TestProperty.Register("Priority", "Priority", typeof(string), typeof(TestCase));
