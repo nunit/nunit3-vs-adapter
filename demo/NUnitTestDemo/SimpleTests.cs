@@ -42,6 +42,47 @@ namespace NUnitTestDemo
         }
 
         [Test, ExpectFailure]
+        public void TestWithThreeFailures()
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.Fail("Failure 1");
+                Assert.That(2 + 2, Is.EqualTo(5), "Failure 2");
+                Assert.That(42, Is.GreaterThan(99), "Failure 3");
+            });
+        }
+
+        [Test, ExpectFailure]
+        public void TestWithTwoFailuresAndAnError()
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(2 + 2, Is.EqualTo(5));
+                Assert.That(42, Is.GreaterThan(99));
+                throw new Exception("Throwing after two failures");
+            });
+        }
+
+        [Test, ExpectFailure]
+        public void TestWithFailureAndWarning()
+        {
+            Assert.Warn("WARNING!");
+            Assert.Fail("FAILING!");
+        }
+
+        [Test, ExpectFailure]
+        public void TestWithTwoFailuresAndAWarning()
+        {
+            Warn.Unless(2 + 2 == 5, "Math is too hard!");
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(2 + 2, Is.EqualTo(5));
+                Assert.That(42, Is.GreaterThan(99));
+            });
+        }
+
+        [Test, ExpectFailure]
         public void TestFails_StringEquality()
         {
             Assert.That("Hello" + "World" + "!", Is.EqualTo("Hello World!"));
