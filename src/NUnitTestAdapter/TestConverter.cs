@@ -95,6 +95,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 var oneResult = GetBasicResult(resultNode);
                 if (oneResult != null)
                 {
+                    oneResult.Outcome = GetAssertionOutcome(assertion);
                     oneResult.ErrorMessage = assertion.SelectSingleNode("message")?.InnerText;
                     oneResult.ErrorStackTrace = assertion.SelectSingleNode("stack-trace")?.InnerText;
                     results.Add(oneResult);
@@ -216,6 +217,23 @@ namespace NUnit.VisualStudio.TestAdapter
                         : TestOutcome.None;
                 case "Warning":
                     return TestOutcome.Skipped;
+                default:
+                    return TestOutcome.None;
+            }
+        }
+
+        TestOutcome GetAssertionOutcome(XmlNode assertion)
+        {
+            switch (assertion.GetAttribute("result"))
+            {
+                case "Passed":
+                    return TestOutcome.Passed;
+                case "Failed":
+                case "Error":
+                    return TestOutcome.Failed;
+                case "Warning":
+                    return TestOutcome.Skipped;
+                case "Inconclusive":
                 default:
                     return TestOutcome.None;
             }
