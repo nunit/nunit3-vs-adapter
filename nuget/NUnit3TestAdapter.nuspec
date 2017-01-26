@@ -8,7 +8,7 @@
         <owners>Charlie Poole</owners>
         <licenseUrl>http://nunit.org/nuget/nunit3-license.txt</licenseUrl>
         <projectUrl>https://github.com/nunit/docs/wiki/VS-Adapter</projectUrl>
-        <iconUrl>https://cdn.rawgit.com/nunit/resources/master/images/icon/nunit_90.png</iconUrl>
+        <iconUrl>https://cdn.rawgit.com/nunit/resources/master/images/icon/nunit_256.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <summary>NUnit 3 adapter for running tests in Visual Studio. Works with NUnit 3.x, use the NUnit 2 adapter for 2.x tests.</summary>
         <description>A package including the NUnit 3 TestAdapter for Visual Studio 2012 onwards.  With this package you don't need to install the VSIX adapter package, and you don't need to upload the adapter to your TFS server.
