@@ -24,7 +24,9 @@
 using System;
 using System.IO;
 using System.Reflection;
+#if !NETCOREAPP1_0
 using System.Runtime.Remoting;
+#endif
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
@@ -140,6 +142,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         #endregion
 
         #region Listener Lifetime Tests
+#if !NETCOREAPP1_0
         [Test]
         public void Listener_LeaseLifetimeWillNotExpire()
         {
@@ -154,6 +157,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             // A null lifetime (as opposed to an ILease) means the object has an infinite lifetime
             Assert.IsNull(lifetime);
         }
+#endif
         #endregion
 
         #region Helper Methods

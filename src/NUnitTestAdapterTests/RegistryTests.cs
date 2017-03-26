@@ -1,11 +1,9 @@
-﻿
+﻿#if !NETCOREAPP1_0
 using Microsoft.Win32;
 using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
-
-
     [SetUpFixture]
     public class Init
     {
@@ -21,16 +19,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
     }
 
-
     [TestFixture]
     public class RegistryTests
     {
 
-
         [SetUp]
         public void Init()
-        {
-            
+        {            
         }
 
         [Test]
@@ -39,7 +34,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var reg = new RegistryCurrentUser("UseDuringTest");
 
             Assert.That(reg, Is.Not.Null);
-
         }
 
         // [TestCase(true,true)] doesnt do booleans
@@ -55,7 +49,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             var wr = reg.Read<T>("SomeData");
             Assert.That(wr, Is.EqualTo(expected));
-
         }
 
 
@@ -78,3 +71,4 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
     }
 }
+#endif
