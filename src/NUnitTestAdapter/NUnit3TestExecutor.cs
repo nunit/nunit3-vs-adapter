@@ -35,6 +35,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Engine;
+using NUnit.Engine.Services;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -93,7 +94,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     var assemblyName = source;
                     if (!Path.IsPathRooted(assemblyName))
-                        assemblyName = Path.Combine(Environment.CurrentDirectory, assemblyName);
+                        assemblyName = Path.Combine(Directory.GetCurrentDirectory(), assemblyName);
 
                     TestLog.Info("Running all tests in " + assemblyName);
 
@@ -141,8 +142,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     TestLog.Info("Debugging selected tests in " + assemblyName);
                 else
                     TestLog.Info("Running selected tests in " + assemblyName);
-
-                var filterBuilder = new NUnitTestFilterBuilder(TestEngine.Services.GetService<ITestFilterService>());
+                var filterBuilder = CreateTestFilterBuilder();
                 var filter = filterBuilder.MakeTestFilter(assemblyGroup);
 
                 RunAssembly(assemblyName, filter);
@@ -242,7 +242,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     if (TfsFilter != null && !TfsFilter.IsEmpty)
                     {
                         // NOTE This overwrites filter used in call
-                        var filterBuilder = new NUnitTestFilterBuilder(TestEngine.Services.GetService<ITestFilterService>());
+                        var filterBuilder = CreateTestFilterBuilder();
                         filter = filterBuilder.ConvertTfsFilterToNUnitFilter(TfsFilter, loadedTestCases);
                     }
 
@@ -287,6 +287,15 @@ namespace NUnit.VisualStudio.TestAdapter
 
             _activeRunner.Dispose();
             _activeRunner = null;
+        }
+
+        private NUnitTestFilterBuilder CreateTestFilterBuilder()
+        {
+#if NETCOREAPP1_0
+            return new NUnitTestFilterBuilder(new TestFilterService());
+#else
+            return new NUnitTestFilterBuilder(TestEngine.Services.GetService<ITestFilterService>());
+#endif
         }
 
         #endregion

@@ -27,7 +27,6 @@ using System.IO;
 using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using Mono.Cecil.Rocks;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -60,7 +59,7 @@ namespace NUnit.VisualStudio.TestAdapter
             // TODO: Once NUnit is changed, try to simplify this.
             while (true)
             {
-                methodDef = typeDef.GetMethods().FirstOrDefault(o => o.Name == methodName);
+                methodDef = typeDef.Methods.FirstOrDefault(o => o.Name == methodName);
 
                 if (methodDef != null)
                     break;
@@ -112,7 +111,7 @@ namespace NUnit.VisualStudio.TestAdapter
             TypeDefinition type;
 
             if (TryGetTypeDefinition(className, out type))
-                return type.GetMethods();
+                return type.Methods;
 
             return Enumerable.Empty<MethodDefinition>();
         }
@@ -129,7 +128,11 @@ namespace NUnit.VisualStudio.TestAdapter
             if (TryGetAsyncStateMachineAttribute(testMethod, out asyncStateMachineAttribute))
                 testMethod = GetStateMachineMoveNextMethod(asyncStateMachineAttribute);
 
+#if NETCOREAPP1_0
+            return FirstOrDefaultUnhiddenSequencePoint(testMethod.DebugInformation);
+#else
             return FirstOrDefaultUnhiddenSequencePoint(testMethod.Body);
+#endif
         }
 
         static bool TryGetAsyncStateMachineAttribute(MethodDefinition method, out CustomAttribute attribute)
@@ -141,20 +144,22 @@ namespace NUnit.VisualStudio.TestAdapter
         static MethodDefinition GetStateMachineMoveNextMethod(CustomAttribute asyncStateMachineAttribute)
         {
             var stateMachineType = (TypeDefinition)asyncStateMachineAttribute.ConstructorArguments[0].Value;
-            var stateMachineMoveNextMethod = stateMachineType.GetMethods().First(m => m.Name == "MoveNext");
+            var stateMachineMoveNextMethod = stateMachineType.Methods.First(m => m.Name == "MoveNext");
             return stateMachineMoveNextMethod;
         }
 
-        static SequencePoint FirstOrDefaultUnhiddenSequencePoint(MethodBody body)
-        {
-            const int lineNumberIndicatingHiddenLine = 16707566; //0xfeefee
+        const int lineNumberIndicatingHiddenLine = 16707566; //0xfeefee
 
-            foreach (var instruction in body.Instructions)
-                if (instruction.SequencePoint != null && instruction.SequencePoint.StartLine != lineNumberIndicatingHiddenLine)
-                    return instruction.SequencePoint;
-
-            return null;
-        }
+#if NETCOREAPP1_0
+        static SequencePoint FirstOrDefaultUnhiddenSequencePoint(MethodDebugInformation body) =>
+            body.SequencePoints.FirstOrDefault(sp => sp != null && sp.StartLine != lineNumberIndicatingHiddenLine);
+#else
+        static SequencePoint FirstOrDefaultUnhiddenSequencePoint(MethodBody body) =>
+            body.Instructions
+                .Where(i => i.SequencePoint != null && i.SequencePoint.StartLine != lineNumberIndicatingHiddenLine)
+                .Select(i => i.SequencePoint)
+                .FirstOrDefault();
+#endif
 
         static string StandardizeTypeName(string className)
         {

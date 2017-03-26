@@ -23,14 +23,17 @@ namespace NUnit.VisualStudio.TestAdapter.Internal
 			string wordAt = null;
 			string wordsInLine = null;
 
-			MethodInfo info = typeof(Environment).GetMethod("GetResourceString", BindingFlags.NonPublic | BindingFlags.Static, null, new[] { typeof(string) }, null);
-			if (info != null)
-			{
-				wordAt = (string)info.Invoke(null, new object[] { "Word_At" });
-				wordsInLine = (string)info.Invoke(null, new object[] { "StackTrace_InFileLineNumber" });
-			}
+#if !NETCOREAPP1_0
+            // TODO: This doesn't work cross platform
+            MethodInfo info = typeof(Environment).GetMethod("GetResourceString", BindingFlags.NonPublic | BindingFlags.Static, null, new[] { typeof(string) }, null);
+            if (info != null)
+            {
+                wordAt = (string)info.Invoke(null, new object[] { "Word_At" });
+                wordsInLine = (string)info.Invoke(null, new object[] { "StackTrace_InFileLineNumber" });
+            }
+#endif
 
-			return new StackFrameParser(wordAt ?? "at", wordsInLine ?? "in {0}:line {1}");
+            return new StackFrameParser(wordAt ?? "at", wordsInLine ?? "in {0}:line {1}");
 		}
 
 		private StackFrameParser(string wordAtFormat, string wordsInLineFormat)

@@ -26,15 +26,16 @@
 // We use an alias so that we don't accidentally make
 // references to engine internals, except for creating
 // the engine object in the Initialize method.
-extern alias ENG;
-using TestEngineClass = ENG::NUnit.Engine.TestEngine;
+using TestEngineClass = NUnit.Engine.TestEngine;
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+#if !NETCOREAPP1_0
 using System.Runtime.Remoting.Channels;
+#endif
 using System.Text;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
@@ -64,7 +65,11 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public NUnitTestAdapter()
         {
+#if NETCOREAPP1_0
+            AdapterVersion = typeof(NUnitTestAdapter).GetTypeInfo().Assembly.GetName().Version.ToString();
+#else
             AdapterVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+#endif
         }
 
         #endregion
@@ -238,8 +243,10 @@ namespace NUnit.VisualStudio.TestAdapter
 
         protected static void CleanUpRegisteredChannels()
         {
+#if !NETCOREAPP1_0
             foreach (IChannel chan in ChannelServices.RegisteredChannels)
                 ChannelServices.UnregisterChannel(chan);
+#endif
         }
 
         protected void Unload()
