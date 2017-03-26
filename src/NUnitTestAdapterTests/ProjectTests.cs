@@ -36,9 +36,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void ThatTheTestAdapterEndsWithTestAdapterDll()
         {
-            var dir = TestContext.CurrentContext.TestDirectory;
-            bool found = File.Exists(dir + "/NUnit3.TestAdapter.dll");
-            Assert.That(found,Is.True,string.Format(@"Did not find 'NUnit3.TestAdapter.dll' in {0}. Ensure the Testadapter ends with '.TestAdapter.dll'",dir));
+            var adapter = typeof(NUnitTestAdapter).GetTypeInfo().Assembly.Location;
+            Assert.That(adapter, Does.EndWith(".TestAdapter.dll"), $"Ensure the Testadapter {Path.GetFileName(adapter)} ends with '.TestAdapter.dll'");
         }
 
         [Test]
