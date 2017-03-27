@@ -14,15 +14,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     {
 #if !NETCOREAPP1_0
         [Test]
-        public void ThatTheTestAdapterUsesFrameWork35()
-        {
-            var dir = TestContext.CurrentContext.TestDirectory;
-            var assembly = Assembly.LoadFrom(dir+"/NUnit3.TestAdapter.dll");
-            var version = assembly.ImageRuntimeVersion;
-            Assert.That(version,Is.EqualTo("v2.0.50727"),"The NUnitTestAdapter project must be set to target .net framework 3.5");
-        }
-
-        [Test]
         public void ThatTheReferenceToMicrosoftTestObjectModelPointsToVS2012Version()
         {
             var dir = TestContext.CurrentContext.TestDirectory;

@@ -1,4 +1,3 @@
-#if NETCOREAPP1_0
 using NUnitLite;
 using System;
 using System.Reflection;
@@ -14,4 +13,3 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
     }
 }
-#endif

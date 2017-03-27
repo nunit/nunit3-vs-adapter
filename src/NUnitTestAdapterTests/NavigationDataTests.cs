@@ -14,7 +14,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void SetUp()
         {
             _provider = new NavigationDataProvider(
+#if NETCOREAPP1_0
                 Path.Combine(TestContext.CurrentContext.TestDirectory, "NUnit.VisualStudio.TestAdapter.Tests.dll"));
+#else
+                Path.Combine(TestContext.CurrentContext.TestDirectory, "NUnit.VisualStudio.TestAdapter.Tests.exe"));
+#endif
         }
 
         [TestCase("", "EmptyMethod_OneLine", 9, 9)]

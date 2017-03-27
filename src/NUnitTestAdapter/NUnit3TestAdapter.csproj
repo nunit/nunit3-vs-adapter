@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
     <RootNamespace>NUnit.VisualStudio.TestAdapter</RootNamespace>
-    <TargetFrameworks>net35;netcoreapp1.0</TargetFrameworks>
+    <TargetFrameworks>net45;netcoreapp1.0</TargetFrameworks>
     <CodeAnalysisRuleSet>..\..\Osiris.Extended.ruleset</CodeAnalysisRuleSet>
     <DebugType>embedded</DebugType>
     <Version>4.0.0-alpha1</Version>
@@ -13,7 +13,7 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
-    <AssemblyName Condition=" '$(TargetFramework)' == 'net35' ">NUnit3.TestAdapter</AssemblyName>
+    <AssemblyName Condition=" '$(TargetFramework)' == 'net45' ">NUnit3.TestAdapter</AssemblyName>
     <AssemblyName Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">NUnit3.NetStandard.TestAdapter</AssemblyName>
   </PropertyGroup>
 
@@ -32,7 +32,7 @@
     <AssemblyVersion>4.0.0.0</AssemblyVersion>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net35' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <PackageReference Include="Microsoft.VisualStudio.TestPlatform.ObjectModel" Version="0.0.3" PrivateAssets="All" />
     <PackageReference Include="Mono.Cecil" Version="0.9.6.1" />
     <PackageReference Include="nunit.engine" Version="3.6.0" PrivateAssets="All" />
