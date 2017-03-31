@@ -9,8 +9,8 @@ var configuration = Argument("configuration", "Debug");
 // SET PACKAGE VERSION
 //////////////////////////////////////////////////////////////////////
 
-var version = "3.7.0";
-var modifier = "";
+var version = "4.0.0";
+var modifier = "-alpha1";
 
 var dbgSuffix = configuration == "Debug" ? "-dbg" : "";
 var packageVersion = version + modifier + dbgSuffix;
@@ -68,16 +68,22 @@ var TOOLS_DIR = PROJECT_DIR + "tools/";
 var BIN_DIR = PROJECT_DIR + "bin/" + configuration + "/";
 var DEMO_BIN_DIR = PROJECT_DIR + "demo/NUnitTestDemo/bin/" + configuration + "/";
 
+var BIN_DIRS = new [] {
+    PROJECT_DIR + "src/empty-assembly/bin",
+    PROJECT_DIR + "src/mock-assembly/bin",
+    PROJECT_DIR + "src/NUnit3TestAdapterInstall/bin",
+    PROJECT_DIR + "src/NUnit3TestAdapter/bin",
+    PROJECT_DIR + "src/NUnit3TestAdapterTests/bin",
+};
+
 // Solutions
 var ADAPTER_SOLUTION = PROJECT_DIR + "NUnit3TestAdapter.sln";
 var DEMO_SOLUTION = PROJECT_DIR + "demo/NUnit3TestDemo.sln";
 
-// Test Runner
-var NUNIT3_CONSOLE = TOOLS_DIR + "NUnit.ConsoleRunner/tools/nunit3-console.exe";
-
 // Test Assemblies
-var ADAPTER_TESTS = BIN_DIR + "NUnit.VisualStudio.TestAdapter.Tests.dll";
 var DEMO_TESTS = DEMO_BIN_DIR + "NUnit3TestDemo.dll";
+
+var TEST_PROJECT = SRC_DIR + "NUnitTestAdapterTests/NUnit3TestAdapterTests.csproj";
 
 // Custom settings for VSTest
 var VSTestCustomSettings = new VSTestSettings()
@@ -92,7 +98,8 @@ var VSTestCustomSettings = new VSTestSettings()
 Task("Clean")
     .Does(() =>
 {
-    CleanDirectory(BIN_DIR);
+    foreach(var dir in BIN_DIRS)
+        CleanDirectory(dir);
 	CleanDirectory(DEMO_BIN_DIR);
 });
 
@@ -104,7 +111,7 @@ Task("Clean")
 Task("NuGetRestore")
     .Does(() =>
 {
-    NuGetRestore(ADAPTER_SOLUTION);
+    DotNetCoreRestore(ADAPTER_SOLUTION);
 	NuGetRestore(DEMO_SOLUTION);
 });
 
@@ -116,7 +123,14 @@ Task("Build")
     .IsDependentOn("NuGetRestore")
     .Does(() =>
     {
-		BuildSolution(ADAPTER_SOLUTION, configuration);
+        var settings = new DotNetCoreBuildSettings
+        {
+            Configuration = configuration,
+            EnvironmentVariables = new Dictionary<string, string>()
+        };
+        settings.EnvironmentVariables.Add("PackageVersion", packageVersion);
+        DotNetCoreBuild(ADAPTER_SOLUTION, settings);
+
 		BuildSolution(DEMO_SOLUTION, configuration);
     });
 
@@ -124,32 +138,35 @@ Task("Build")
 // TEST
 //////////////////////////////////////////////////////////////////////
 
-Task("TestAdapterUsingConsole")
+Task("TestAdapterNet45")
 	.IsDependentOn("Build")
 	.Does(() =>
 	{
-		int rc = StartProcess(
-			NUNIT3_CONSOLE,
-			new ProcessSettings()
-			{
-				Arguments = ADAPTER_TESTS
-			});
+        var settings = new DotNetCoreRunSettings
+        {
+            Framework = "net45",
+            Configuration = configuration
+        };
+		DotNetCoreRun(TEST_PROJECT, "", settings);
+	});
 
-		if (rc != 0)
-		{
-			var message = rc > 0
-				? string.Format("Test failure: {0} tests failed", rc)
-				: string.Format("Test exited with rc = {0}", rc);
-
-			throw new CakeException(message);
-		}
+Task("TestAdapterNetCore")
+	.IsDependentOn("Build")
+	.Does(() =>
+	{
+        var settings = new DotNetCoreRunSettings
+        {
+            Framework = "netcoreapp1.0",
+            Configuration = configuration
+        };
+		DotNetCoreRun(TEST_PROJECT, "", settings);
 	});
 
 Task("TestAdapterUsingVSTest")
 	.IsDependentOn("Build")
 	.Does(() =>
 	{
-		VSTest(ADAPTER_TESTS, VSTestCustomSettings);
+		//VSTest(ADAPTER_TESTS, VSTestCustomSettings);
 	});
 
 Task("TestDemo")
@@ -158,7 +175,7 @@ Task("TestDemo")
 	{
 		try
 		{
-			VSTest(DEMO_TESTS, VSTestCustomSettings);
+			//VSTest(DEMO_TESTS, VSTestCustomSettings);
 		}
 		catch(Exception ex)
 		{
@@ -177,57 +194,23 @@ Task("CreatePackageDir")
 		CreateDirectory(PACKAGE_DIR);
 	});
 
-Task("CreateWorkingImage")
+Task("PackageNuGet")
 	.IsDependentOn("CreatePackageDir")
 	.Does(() =>
 	{
-		CreateDirectory(PACKAGE_IMAGE_DIR);
-		CleanDirectory(PACKAGE_IMAGE_DIR);
-
-		CopyFileToDirectory("LICENSE.txt", PACKAGE_IMAGE_DIR);
-
-		var binFiles = new FilePath[]
-		{
-			BIN_DIR + "NUnit3.TestAdapter.dll",
-            BIN_DIR + "nunit.engine.dll",
-			BIN_DIR + "nunit.engine.api.dll",
-			BIN_DIR + "Mono.Cecil.dll",
-			BIN_DIR + "Mono.Cecil.Pdb.dll",
-			BIN_DIR + "Mono.Cecil.Mdb.dll",
-			BIN_DIR + "Mono.Cecil.Rocks.dll"
-		};
-
-		var binDir = PACKAGE_IMAGE_DIR + "bin/";
-		CreateDirectory(binDir);
-		CopyFiles(binFiles, binDir);
-	});
-
-Task("PackageZip")
-	.IsDependentOn("CreateWorkingImage")
-	.Does(() =>
-	{
-		Zip(PACKAGE_IMAGE_DIR, File(PACKAGE_DIR + packageName + ".zip"));
-	});
-
-Task("PackageNuGet")
-	.IsDependentOn("CreateWorkingImage")
-	.Does(() =>
-	{
-        NuGetPack("nuget/NUnit3TestAdapter.nuspec", new NuGetPackSettings()
-        {
-            Version = packageVersion,
-            BasePath = PACKAGE_IMAGE_DIR,
-            OutputDirectory = PACKAGE_DIR
-        });
+        var nuget = "NUnit3TestAdapter." + packageVersion + ".nupkg";
+        var src   = "src/NUnitTestAdapter/bin/" + configuration + "/" + nuget;
+        var dest  = PACKAGE_DIR + nuget;
+        CopyFile(src, dest);
 	});
 
 Task("PackageVsix")
 	.IsDependentOn("CreatePackageDir")
 	.Does(() =>
 	{
-		CopyFile(
-			BIN_DIR + "NUnit3TestAdapter.vsix",
-			PACKAGE_DIR + packageName + ".vsix");
+		//CopyFile(
+		//	BIN_DIR + "NUnit3TestAdapter.vsix",
+		//	PACKAGE_DIR + packageName + ".vsix");
 	});
 
 //////////////////////////////////////////////////////////////////////
@@ -251,11 +234,11 @@ Task("Rebuild")
 	.IsDependentOn("Build");
 
 Task("Test")
-	.IsDependentOn("TestAdapterUsingConsole")
+	.IsDependentOn("TestAdapterNet45")
+	.IsDependentOn("TestAdapterNetCore")
 	.IsDependentOn("TestAdapterUsingVSTest");
 
 Task("Package")
-	.IsDependentOn("PackageZip")
 	.IsDependentOn("PackageNuGet")
 	.IsDependentOn("PackageVsix");
 
