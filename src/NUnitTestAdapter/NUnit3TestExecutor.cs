@@ -39,7 +39,6 @@ using NUnit.Engine.Services;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-
     [ExtensionUri(ExecutorUri)]
     public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDisposable
     {

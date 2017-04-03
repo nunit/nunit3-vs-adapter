@@ -20,7 +20,7 @@
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <AssemblyName Condition=" '$(TargetFramework)' == 'net45' ">NUnit3.TestAdapter</AssemblyName>
-    <AssemblyName Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">NUnit3.NetStandard.TestAdapter</AssemblyName>
+    <AssemblyName Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">NUnit3.NetCore.TestAdapter</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup>
