@@ -112,7 +112,7 @@ Task("NuGetRestore")
     .Does(() =>
 {
     DotNetCoreRestore(ADAPTER_SOLUTION);
-	NuGetRestore(DEMO_SOLUTION);
+	//NuGetRestore(DEMO_SOLUTION);
 });
 
 //////////////////////////////////////////////////////////////////////
@@ -138,13 +138,13 @@ Task("Build")
 // TEST
 //////////////////////////////////////////////////////////////////////
 
-Task("TestAdapterNet45")
+Task("TestAdapter")
 	.IsDependentOn("Build")
 	.Does(() =>
 	{
         var settings = new DotNetCoreRunSettings
         {
-            Framework = "net45",
+            Framework = "net35",
             Configuration = configuration
         };
 		DotNetCoreRun(TEST_PROJECT, "", settings);
@@ -234,7 +234,7 @@ Task("Rebuild")
 	.IsDependentOn("Build");
 
 Task("Test")
-	.IsDependentOn("TestAdapterNet45")
+	.IsDependentOn("TestAdapter")
 	.IsDependentOn("TestAdapterNetCore")
 	.IsDependentOn("TestAdapterUsingVSTest");
 
