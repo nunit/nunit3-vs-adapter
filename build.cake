@@ -129,6 +129,7 @@ Task("Build")
     .IsDependentOn("NuGetRestore")
     .Does(() =>
     {
+        Information("Building using MSBuild at " + msBuildPathX64);
         var settings = new MSBuildSettings
         {
             Configuration = configuration,
