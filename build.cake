@@ -125,7 +125,8 @@ Task("Build")
     .Does(() =>
     {
         // Debugging information
-        DirectoryPathCollection allInstalled  = VSWhereAll(new VSWhereAllSettings { Requires = "Microsoft.Component.MSBuild" });
+        Information("Searching for Visual Studio 2017 installations...");
+        DirectoryPathCollection allInstalled  = VSWhereAll(/*new VSWhereAllSettings { Requires = "Microsoft.Component.MSBuild" }*/);
 
         foreach(var install in allInstalled)
         {
