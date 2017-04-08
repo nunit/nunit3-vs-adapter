@@ -1,3 +1,5 @@
+#tool nuget:?package=vswhere
+
 //////////////////////////////////////////////////////////////////////
 // ARGUMENTS
 //////////////////////////////////////////////////////////////////////
@@ -86,6 +88,11 @@ var DEMO_TESTS = DEMO_BIN_DIR + "NUnit3TestDemo.dll";
 var TEST_NET45 = SRC_DIR + "NUnitTestAdapterTests/bin/" + configuration + "/net45/NUnit.VisualStudio.TestAdapter.Tests.exe";
 var TEST_PROJECT = SRC_DIR + "NUnitTestAdapterTests/NUnit.TestAdapter.Tests.csproj";
 
+// Find MSBuild for Visual Studio 2017
+DirectoryPath vsLatest  = VSWhereLatest();
+FilePath msBuildPathX64 = (vsLatest==null) ? null
+                            : vsLatest.CombineWithFilePath("./MSBuild/15.0/Bin/amd64/MSBuild.exe");
+
 // Custom settings for VSTest
 var VSTestCustomSettings = new VSTestSettings()
 {
@@ -128,6 +135,7 @@ Task("Build")
             EnvironmentVariables = new Dictionary<string, string>(),
             NodeReuse = false,
             PlatformTarget = PlatformTarget.MSIL,
+            ToolPath = msBuildPathX64,
             ToolVersion = MSBuildToolVersion.VS2017
         };
         settings.EnvironmentVariables.Add("PackageVersion", packageVersion);
