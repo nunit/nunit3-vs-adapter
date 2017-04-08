@@ -83,7 +83,8 @@ var DEMO_SOLUTION = PROJECT_DIR + "demo/NUnit3TestDemo.sln";
 // Test Assemblies
 var DEMO_TESTS = DEMO_BIN_DIR + "NUnit3TestDemo.dll";
 
-var TEST_PROJECT = SRC_DIR + "NUnitTestAdapterTests/NUnit3TestAdapterTests.csproj";
+var TEST_NET45 = SRC_DIR + "NUnitTestAdapterTests/bin/" + configuration + "/net45/NUnit.VisualStudio.TestAdapter.Tests.exe";
+var TEST_PROJECT = SRC_DIR + "NUnitTestAdapterTests/NUnit.TestAdapter.Tests.csproj";
 
 // Custom settings for VSTest
 var VSTestCustomSettings = new VSTestSettings()
@@ -103,7 +104,6 @@ Task("Clean")
 	CleanDirectory(DEMO_BIN_DIR);
 });
 
-
 //////////////////////////////////////////////////////////////////////
 // INITIALIZE FOR BUILD
 //////////////////////////////////////////////////////////////////////
@@ -111,8 +111,7 @@ Task("Clean")
 Task("NuGetRestore")
     .Does(() =>
 {
-    DotNetCoreRestore(ADAPTER_SOLUTION);
-	//NuGetRestore(DEMO_SOLUTION);
+	NuGetRestore(DEMO_SOLUTION);
 });
 
 //////////////////////////////////////////////////////////////////////
@@ -123,15 +122,18 @@ Task("Build")
     .IsDependentOn("NuGetRestore")
     .Does(() =>
     {
-        var settings = new DotNetCoreBuildSettings
+        var settings = new MSBuildSettings
         {
             Configuration = configuration,
-            EnvironmentVariables = new Dictionary<string, string>()
+            EnvironmentVariables = new Dictionary<string, string>(),
+            NodeReuse = false,
+            PlatformTarget = PlatformTarget.MSIL,
+            ToolVersion = MSBuildToolVersion.VS2017
         };
         settings.EnvironmentVariables.Add("PackageVersion", packageVersion);
-        DotNetCoreBuild(ADAPTER_SOLUTION, settings);
 
-		BuildSolution(DEMO_SOLUTION, configuration);
+        MSBuild(ADAPTER_SOLUTION, settings);
+		MSBuild(DEMO_SOLUTION, settings);
     });
 
 //////////////////////////////////////////////////////////////////////
@@ -142,12 +144,9 @@ Task("TestAdapter")
 	.IsDependentOn("Build")
 	.Does(() =>
 	{
-        var settings = new DotNetCoreRunSettings
-        {
-            Framework = "net35",
-            Configuration = configuration
-        };
-		DotNetCoreRun(TEST_PROJECT, "", settings);
+        int result = StartProcess(TEST_NET45);
+        if (result != 0)
+            throw new Exception("TestAdapter failed");
 	});
 
 Task("TestAdapterNetCore")
@@ -212,18 +211,6 @@ Task("PackageVsix")
 		//	BIN_DIR + "NUnit3TestAdapter.vsix",
 		//	PACKAGE_DIR + packageName + ".vsix");
 	});
-
-//////////////////////////////////////////////////////////////////////
-// HELPER METHODS
-//////////////////////////////////////////////////////////////////////
-
-void BuildSolution(string solutionPath, string configuration)
-{
-	MSBuild(solutionPath, new MSBuildSettings()
-		.SetConfiguration(configuration)
-        .SetNodeReuse(false)
-        .SetPlatformTarget(PlatformTarget.MSIL));
-}
 
 //////////////////////////////////////////////////////////////////////
 // TASK TARGETS

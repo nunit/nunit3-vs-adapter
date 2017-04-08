@@ -1,16 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
+    <AssemblyName>NUnit3.TestAdapter</AssemblyName>
     <RootNamespace>NUnit.VisualStudio.TestAdapter</RootNamespace>
     <TargetFrameworks>net35;netcoreapp1.0</TargetFrameworks>
     <CodeAnalysisRuleSet>..\..\Osiris.Extended.ruleset</CodeAnalysisRuleSet>
-    <DebugType>embedded</DebugType>    
+    <DebugType>embedded</DebugType>
     <Version>4.0.0-alpha1</Version>
     <PackageLicenseUrl>http://nunit.org/nuget/nunit3-license.txt</PackageLicenseUrl>
     <PackageProjectUrl>http://nunit.org</PackageProjectUrl>
     <PackageIconUrl>https://cdn.rawgit.com/nunit/resources/master/images/icon/nunit_256.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/nunit/nunit3-vs-adapter.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageTags>nunit test testing tdd engine</PackageTags>    
+    <PackageTags>nunit test testing tdd engine</PackageTags>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>

@@ -8,8 +8,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     {
         static int Main(string[] args)
         {
-            int result = new TextRunner(typeof(Program).GetTypeInfo().Assembly).Execute(args);
-            return result;
+            return new TextRunner(typeof(Program).GetTypeInfo().Assembly).Execute(args);
         }
     }
 }
