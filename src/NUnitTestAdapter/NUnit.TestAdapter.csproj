@@ -6,6 +6,7 @@
     <CodeAnalysisRuleSet>..\..\Osiris.Extended.ruleset</CodeAnalysisRuleSet>
     <DebugType>embedded</DebugType>
     <Version>4.0.0-alpha1</Version>
+    <PackageName>NUnit3TestAdapter</PackageName>
     <PackageLicenseUrl>http://nunit.org/nuget/nunit3-license.txt</PackageLicenseUrl>
     <PackageProjectUrl>http://nunit.org</PackageProjectUrl>
     <PackageIconUrl>https://cdn.rawgit.com/nunit/resources/master/images/icon/nunit_256.png</PackageIconUrl>
@@ -33,7 +34,13 @@
     <AssemblyOriginatorKeyFile>NUnitAdapter.snk</AssemblyOriginatorKeyFile>
     <DelaySign>false</DelaySign>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageId>NUnit3TestAdapter</PackageId>
+    <Authors>Charlie Poole</Authors>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="..\..\LICENSE.txt" Link="LICENSE.txt" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="NUnitAdapter.snk" />
