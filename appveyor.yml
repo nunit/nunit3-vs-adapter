@@ -1,5 +1,5 @@
-version: 3.7.{build}
-image: Visual Studio 2015
+version: 4.0.{build}
+image: Visual Studio 2017
 
 build_script:
   - ps: .\build.ps1 -Target "Appveyor"
@@ -23,5 +23,5 @@ deploy:
 
 # Holds the build machine open and displays information on how to RDP into the box.
 # Useful for figuring out why your builds are not working, but comment out when you are done :)
-on_finish:
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+#on_finish:
+#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
