@@ -113,6 +113,7 @@ Task("Clean")
 Task("NuGetRestore")
     .Does(() =>
 {
+	NuGetRestore(ADAPTER_SOLUTION);
 	NuGetRestore(DEMO_SOLUTION);
 });
 
@@ -124,16 +125,6 @@ Task("Build")
     .IsDependentOn("NuGetRestore")
     .Does(() =>
     {
-        // Debugging information
-        Information("Searching for Visual Studio 2017 installations...");
-        DirectoryPathCollection allInstalled  = VSWhereAll(/*new VSWhereAllSettings { Requires = "Microsoft.Component.MSBuild" }*/);
-
-        foreach(var install in allInstalled)
-        {
-            // Find the installation you need
-            Information("Found VS2017 at " + install);
-        }
-
         // Find MSBuild for Visual Studio 2017
         DirectoryPath vsLatest  = VSWhereLatest();
         FilePath msBuildPathX64 = (vsLatest==null) ? null
