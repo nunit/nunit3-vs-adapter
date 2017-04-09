@@ -67,7 +67,7 @@ var PACKAGE_DIR = PROJECT_DIR + "package/";
 var PACKAGE_IMAGE_DIR = PACKAGE_DIR + packageName + "/";
 var SRC_DIR = PROJECT_DIR + "src/";
 var TOOLS_DIR = PROJECT_DIR + "tools/";
-var BIN_DIR = PROJECT_DIR + "bin/" + configuration + "/";
+var NET35_BIN_DIR = SRC_DIR + "NUnitTestAdapter/bin/" + configuration + "/net35/";
 var DEMO_BIN_DIR = PROJECT_DIR + "demo/NUnitTestDemo/bin/" + configuration + "/";
 
 var BIN_DIRS = new [] {
@@ -85,14 +85,8 @@ var DEMO_SOLUTION = PROJECT_DIR + "demo/NUnit3TestDemo.sln";
 // Test Assemblies
 var DEMO_TESTS = DEMO_BIN_DIR + "NUnit3TestDemo.dll";
 
-var TEST_NET45 = SRC_DIR + "NUnitTestAdapterTests/bin/" + configuration + "/net45/NUnit.VisualStudio.TestAdapter.Tests.exe";
+var TEST_NET35 = SRC_DIR + "NUnitTestAdapterTests/bin/" + configuration + "/net45/NUnit.VisualStudio.TestAdapter.Tests.exe";
 var TEST_PROJECT = SRC_DIR + "NUnitTestAdapterTests/NUnit.TestAdapter.Tests.csproj";
-
-// Custom settings for VSTest
-var VSTestCustomSettings = new VSTestSettings()
-{
-	ArgumentCustomization = args => args.Append("/TestAdapterPath:" + BIN_DIR)
-};
 
 //////////////////////////////////////////////////////////////////////
 // CLEAN
@@ -154,7 +148,7 @@ Task("TestAdapter")
 	.IsDependentOn("Build")
 	.Does(() =>
 	{
-        int result = StartProcess(TEST_NET45);
+        int result = StartProcess(TEST_NET35);
         if (result != 0)
             throw new Exception("TestAdapter failed");
 	});
@@ -175,7 +169,11 @@ Task("TestAdapterUsingVSTest")
 	.IsDependentOn("Build")
 	.Does(() =>
 	{
-		//VSTest(ADAPTER_TESTS, VSTestCustomSettings);
+        var VSTestCustomSettings = new VSTestSettings()
+        {
+            ArgumentCustomization = args => args.Append("/TestAdapterPath:" + NET35_BIN_DIR)
+        };
+		VSTest(TEST_NET35, VSTestCustomSettings);
 	});
 
 Task("TestDemo")
@@ -184,7 +182,11 @@ Task("TestDemo")
 	{
 		try
 		{
-			//VSTest(DEMO_TESTS, VSTestCustomSettings);
+            var VSTestCustomSettings = new VSTestSettings()
+            {
+                ArgumentCustomization = args => args.Append("/TestAdapterPath:" + NET35_BIN_DIR)
+            };
+			VSTest(DEMO_TESTS, VSTestCustomSettings);
 		}
 		catch(Exception ex)
 		{
