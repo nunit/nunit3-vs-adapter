@@ -20,3 +20,8 @@ deploy:
     skip_symbols: true
     on:
       branch: master
+
+# Holds the build machine open and displays information on how to RDP into the box.
+# Useful for figuring out why your builds are not working, but comment out when you are done :)
+on_finish:
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
