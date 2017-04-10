@@ -69,7 +69,17 @@ namespace NUnit.VisualStudio.TestAdapter
                 if (baseType == null || baseType.FullName == "System.Object")
                     return NavigationData.Invalid;
 
-                typeDef = typeDef.BaseType.Resolve();
+                try
+                {
+                    typeDef = typeDef.BaseType.Resolve();
+                }
+                catch
+                {
+                    // when resolving the assembly containing the base-type has failed,
+                    // handle it the same way as when the most derived type has not
+                    // been found
+                    return NavigationData.Invalid;
+                }
             }
 
             var sequencePoint = FirstOrDefaultSequencePoint(methodDef);
@@ -96,7 +106,15 @@ namespace NUnit.VisualStudio.TestAdapter
         static IDictionary<string, TypeDefinition> CacheTypes(string assemblyPath)
         {
             var readsymbols = DoesPdbFileExist(assemblyPath);
-            var readerParameters = new ReaderParameters { ReadSymbols = readsymbols};
+            var resolver = new DefaultAssemblyResolver();
+            resolver.AddSearchDirectory(Path.GetDirectoryName(assemblyPath));
+
+            var readerParameters = new ReaderParameters
+            {
+                ReadSymbols = readsymbols,
+                AssemblyResolver = resolver
+            };
+
             var module = ModuleDefinition.ReadModule(assemblyPath, readerParameters);
 
             var types = new Dictionary<string, TypeDefinition>();
