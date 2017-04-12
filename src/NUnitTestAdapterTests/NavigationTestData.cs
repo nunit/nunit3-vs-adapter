@@ -164,5 +164,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public class DerivedClass : BaseClass
         {
         }
+
+        public class DerivedFromExternalAbstractClass : AbstractBaseClass
+        {
+        }
+
+        public class DerivedFromExternalConcreteClass : ConcreteBaseClass
+        {
+        }
     }
 }

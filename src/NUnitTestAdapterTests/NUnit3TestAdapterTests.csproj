@@ -107,6 +107,10 @@
       <Project>{2e368281-3ba8-4050-b05e-0e0e43f8f446}</Project>
       <Name>mock-assembly</Name>
     </ProjectReference>
+    <ProjectReference Include="..\NUnit3AdapterExternalTests\NUnit3AdapterExternalTests.csproj">
+      <Project>{661fb6bc-6194-4ba9-a7d5-945c341acbea}</Project>
+      <Name>NUnit3AdapterExternalTests</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NUnitTestAdapter\NUnit3TestAdapter.csproj">
       <Project>{8a85e26a-c706-48b1-bc36-06ebde3efd25}</Project>
       <Name>NUnit3TestAdapter</Name>

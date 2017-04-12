@@ -1,7 +1,7 @@
 
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26009.0
+VisualStudioVersion = 15.0.26403.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7CE30108-5D81-4850-BE6B-C8BCA35D3592}"
 	ProjectSection(SolutionItems) = preProject
@@ -29,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "empty-assembly", "src\empty
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NUnit3TestAdapterInstall", "src\NUnit3TestAdapterInstall\NUnit3TestAdapterInstall.csproj", "{D6990436-E3BA-4AC1-8A7D-9FFF9C3B19AD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NUnit3AdapterExternalTests", "src\NUnit3AdapterExternalTests\NUnit3AdapterExternalTests.csproj", "{661FB6BC-6194-4BA9-A7D5-945C341ACBEA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,10 @@ Global
 		{D6990436-E3BA-4AC1-8A7D-9FFF9C3B19AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D6990436-E3BA-4AC1-8A7D-9FFF9C3B19AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D6990436-E3BA-4AC1-8A7D-9FFF9C3B19AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{661FB6BC-6194-4BA9-A7D5-945C341ACBEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{661FB6BC-6194-4BA9-A7D5-945C341ACBEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{661FB6BC-6194-4BA9-A7D5-945C341ACBEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{661FB6BC-6194-4BA9-A7D5-945C341ACBEA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
