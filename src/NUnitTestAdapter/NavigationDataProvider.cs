@@ -76,7 +76,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             var directory = Path.GetDirectoryName(assemblyPath);
             resolver.AddSearchDirectory(directory);
-            var knownSearchDirectories = new Dictionary<string, object> { { directory, null } };
+            var knownSearchDirectories = new HashSet<string> { directory };
 
             var module = ModuleDefinition.ReadModule(assemblyPath, readerParameters);
             var types = new Dictionary<string, TypeDefinition>();
@@ -84,10 +84,10 @@ namespace NUnit.VisualStudio.TestAdapter
             foreach (var type in module.GetTypes())
             {
                 directory = Path.GetDirectoryName(type.Module.FullyQualifiedName);
-                if (!knownSearchDirectories.ContainsKey(directory))
+                if (!knownSearchDirectories.Contains(directory))
                 {
                     resolver.AddSearchDirectory(directory);
-                    knownSearchDirectories.Add(directory, null);
+                    knownSearchDirectories.Add(directory);
                 }
 
                 types[type.FullName] = type;
