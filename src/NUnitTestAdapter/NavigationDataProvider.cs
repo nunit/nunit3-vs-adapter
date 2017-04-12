@@ -46,58 +46,20 @@ namespace NUnit.VisualStudio.TestAdapter
             if (_typeDefs == null)
                 _typeDefs = CacheTypes(_assemblyPath);
 
-#if true
-            TypeDefinition typeDef;
-            if (!TryGetTypeDefinition(className, out typeDef))
-                return NavigationData.Invalid;
-
-            MethodDefinition methodDef = null;
-
             // Through NUnit 3.2.1, the class name provided by NUnit is
             // the reflected class - that is, the class of the fixture
             // that is being run. To use for location data, we actually
-            // need the class where the method is defined.
+            // need the class where the method is defined (for example,
+            // a base class being used as an abstract test fixture).
             // TODO: Once NUnit is changed, try to simplify this.
-            while (true)
-            {
-                methodDef = typeDef.GetMethods().FirstOrDefault(o => o.Name == methodName);
-
-                if (methodDef != null)
-                    break;
-
-                var baseType = typeDef.BaseType;
-                if (baseType == null || baseType.FullName == "System.Object")
-                    return NavigationData.Invalid;
-
-                try
-                {
-                    typeDef = typeDef.BaseType.Resolve();
-                }
-                catch
-                {
-                    // when resolving the assembly containing the base-type has failed,
-                    // handle it the same way as when the most derived type has not
-                    // been found
-                    return NavigationData.Invalid;
-                }
-            }
-
-            var sequencePoint = FirstOrDefaultSequencePoint(methodDef);
-            if (sequencePoint != null)
-                return new NavigationData(sequencePoint.Document.Url, sequencePoint.StartLine);
-
-            return NavigationData.Invalid;
-#else
-            var navigationData = GetMethods(className)
-                .Where(m => m.Name == methodName)
-                .Select(FirstOrDefaultSequencePoint)
+            var sequencePoint = GetTypeLineage(className)
+                .Select(typeDef => typeDef.GetMethods().FirstOrDefault(o => o.Name == methodName))
                 .Where(x => x != null)
-                .OrderBy(x => x.StartLine)
-                .Select(x => new NavigationData(x.Document.Url, x.StartLine))
+                .Select(FirstOrDefaultSequencePoint)
                 .FirstOrDefault();
 
-            return navigationData ?? NavigationData.Invalid;
-#endif
+            if (sequencePoint == null) { return NavigationData.Invalid; }
+            return new NavigationData(sequencePoint.Document.Url, sequencePoint.StartLine);
         }
 
         static bool DoesPdbFileExist(string filepath) => File.Exists(Path.ChangeExtension(filepath, ".pdb"));
@@ -105,18 +67,17 @@ namespace NUnit.VisualStudio.TestAdapter
 
         static IDictionary<string, TypeDefinition> CacheTypes(string assemblyPath)
         {
-            var readsymbols = DoesPdbFileExist(assemblyPath);
             var resolver = new DefaultAssemblyResolver();
-            resolver.AddSearchDirectory(Path.GetDirectoryName(assemblyPath));
-
             var readerParameters = new ReaderParameters
             {
-                ReadSymbols = readsymbols,
+                ReadSymbols = DoesPdbFileExist(assemblyPath),
                 AssemblyResolver = resolver
             };
 
-            var module = ModuleDefinition.ReadModule(assemblyPath, readerParameters);
+            var directory = Path.GetDirectoryName(assemblyPath);
+            resolver.AddSearchDirectory(directory);
 
+            var module = ModuleDefinition.ReadModule(assemblyPath, readerParameters);
             var types = new Dictionary<string, TypeDefinition>();
 
             foreach (var type in module.GetTypes())
@@ -125,19 +86,25 @@ namespace NUnit.VisualStudio.TestAdapter
             return types;
         }
 
-        IEnumerable<MethodDefinition> GetMethods(string className)
+        IEnumerable<TypeDefinition> GetTypeLineage(string className)
         {
-            TypeDefinition type;
+            var typeDef = GetTypeDefinitionOrDefault(className);
+            while (typeDef != default(TypeDefinition) && typeDef.FullName != "System.Object")
+            {
+                if (!_typeDefs.ContainsKey(typeDef.FullName))
+                {
+                    _typeDefs[typeDef.FullName] = typeDef;
+                }
 
-            if (TryGetTypeDefinition(className, out type))
-                return type.GetMethods();
-
-            return Enumerable.Empty<MethodDefinition>();
+                yield return typeDef;
+                typeDef = typeDef.BaseType.Resolve();
+            }
         }
 
-        bool TryGetTypeDefinition(string className, out TypeDefinition typeDef)
+        TypeDefinition GetTypeDefinitionOrDefault(string className)
         {
-            return _typeDefs.TryGetValue(StandardizeTypeName(className), out typeDef);
+            TypeDefinition typeDef;
+            return _typeDefs.TryGetValue(StandardizeTypeName(className), out typeDef) ? typeDef : default(TypeDefinition);
         }
 
         static SequencePoint FirstOrDefaultSequencePoint(MethodDefinition testMethod)
