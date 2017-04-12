@@ -76,12 +76,22 @@ namespace NUnit.VisualStudio.TestAdapter
 
             var directory = Path.GetDirectoryName(assemblyPath);
             resolver.AddSearchDirectory(directory);
+            var knownSearchDirectories = new Dictionary<string, object> { { directory, null } };
 
             var module = ModuleDefinition.ReadModule(assemblyPath, readerParameters);
             var types = new Dictionary<string, TypeDefinition>();
 
             foreach (var type in module.GetTypes())
+            {
+                directory = Path.GetDirectoryName(type.Module.FullyQualifiedName);
+                if (!knownSearchDirectories.ContainsKey(directory))
+                {
+                    resolver.AddSearchDirectory(directory);
+                    knownSearchDirectories.Add(directory, null);
+                }
+
                 types[type.FullName] = type;
+            }
 
             return types;
         }
