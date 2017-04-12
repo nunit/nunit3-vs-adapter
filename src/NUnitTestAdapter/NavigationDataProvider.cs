@@ -34,6 +34,7 @@ namespace NUnit.VisualStudio.TestAdapter
     public class NavigationDataProvider
     {
         readonly string _assemblyPath;
+        ICollection<string> _knownReferencedAssemblies;
         IDictionary<string, TypeDefinition> _typeDefs;
 
         public NavigationDataProvider(string assemblyPath)
@@ -44,7 +45,10 @@ namespace NUnit.VisualStudio.TestAdapter
         public NavigationData GetNavigationData(string className, string methodName)
         {
             if (_typeDefs == null)
+            {
                 _typeDefs = CacheTypes(_assemblyPath);
+                _knownReferencedAssemblies = new HashSet<string> { _assemblyPath };
+            }
 
             // Through NUnit 3.2.1, the class name provided by NUnit is
             // the reflected class - that is, the class of the fixture
@@ -64,8 +68,14 @@ namespace NUnit.VisualStudio.TestAdapter
 
         static bool DoesPdbFileExist(string filepath) => File.Exists(Path.ChangeExtension(filepath, ".pdb"));
 
-
         static IDictionary<string, TypeDefinition> CacheTypes(string assemblyPath)
+        {
+            var types = new Dictionary<string, TypeDefinition>();
+            CacheNewTypes(assemblyPath, types);
+            return types;
+        }
+
+        private static void CacheNewTypes(string assemblyPath, IDictionary<string, TypeDefinition> types)
         {
             var resolver = new DefaultAssemblyResolver();
             var readerParameters = new ReaderParameters
@@ -79,7 +89,6 @@ namespace NUnit.VisualStudio.TestAdapter
             var knownSearchDirectories = new HashSet<string> { directory };
 
             var module = ModuleDefinition.ReadModule(assemblyPath, readerParameters);
-            var types = new Dictionary<string, TypeDefinition>();
 
             foreach (var type in module.GetTypes())
             {
@@ -92,8 +101,6 @@ namespace NUnit.VisualStudio.TestAdapter
 
                 types[type.FullName] = type;
             }
-
-            return types;
         }
 
         IEnumerable<TypeDefinition> GetTypeLineage(string className)
@@ -107,7 +114,39 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
 
                 yield return typeDef;
-                typeDef = typeDef.BaseType.Resolve();
+
+                // .Resolve() will resolve the type within all configured
+                // search-directories, but it will _not_ try to read any
+                // symbols, which we need for navigation data.
+                //
+                // So, first resolve the type to get the full-path, and
+                // then re-read and cache the module with our reader-settings.
+                //
+                // This feels like it should be handled by Mono.Cecil.  A
+                // follow-up may be in order.
+                try
+                {
+                    var newTypeDef = typeDef.BaseType.Resolve();
+                    var newAssemblyPath = newTypeDef.Module.FullyQualifiedName;
+                    if (!_knownReferencedAssemblies.Contains(newAssemblyPath))
+                    {
+                        CacheNewTypes(newAssemblyPath, _typeDefs);
+                        _knownReferencedAssemblies.Add(newAssemblyPath);
+                        if (_typeDefs.ContainsKey(newTypeDef.FullName))
+                        {
+                            newTypeDef = _typeDefs[newTypeDef.FullName];
+                        }
+                    }
+
+                    typeDef = newTypeDef;
+                }
+                catch (AssemblyResolutionException)
+                {
+                    // when resolving the assembly for the base-type fails
+                    // (assembly not found in the known search-directories)
+                    // stop the type-lineage here ("best-effort").
+                    typeDef = null;
+                }
             }
         }
 
