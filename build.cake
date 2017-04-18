@@ -232,13 +232,16 @@ Task("CreateWorkingImage")
 		var net35Dir = PACKAGE_IMAGE_DIR + "build/net35";
 		CreateDirectory(net35Dir);
 		CopyFiles(net35Files, net35Dir);
+        CopyFileToDirectory("nuget/net35/NUnit3TestAdapter.props", net35Dir);
 
+        var netcoreDir = PACKAGE_IMAGE_DIR + "build/netcoreapp1.0";
         DotNetCorePublish(ADAPTER_PROJECT, new DotNetCorePublishSettings
         {
             Configuration = configuration,
-            OutputDirectory = PACKAGE_IMAGE_DIR + "build/netcoreapp1.0",
+            OutputDirectory = netcoreDir,
             Framework = "netcoreapp1.0"
         });
+        CopyFileToDirectory("nuget/netcoreapp1.0/NUnit3TestAdapter.props", netcoreDir);
 	});
 
 Task("PackageZip")
