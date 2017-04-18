@@ -33,7 +33,7 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>NUnitAdapter.snk</AssemblyOriginatorKeyFile>
     <DelaySign>false</DelaySign>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <PackageId>NUnit3TestAdapter</PackageId>
     <Authors>Charlie Poole</Authors>
   </PropertyGroup>

@@ -67,8 +67,11 @@ var PACKAGE_DIR = PROJECT_DIR + "package/";
 var PACKAGE_IMAGE_DIR = PACKAGE_DIR + packageName + "/";
 var SRC_DIR = PROJECT_DIR + "src/";
 var TOOLS_DIR = PROJECT_DIR + "tools/";
-var NET35_BIN_DIR = SRC_DIR + "NUnitTestAdapter/bin/" + configuration + "/net35/";
 var DEMO_BIN_DIR = PROJECT_DIR + "demo/NUnitTestDemo/bin/" + configuration + "/";
+
+var ADAPTER_PROJECT = SRC_DIR + "NUnitTestAdapter/NUnit.TestAdapter.csproj";
+
+var NET35_BIN_DIR = SRC_DIR + "NUnitTestAdapter/bin/" + configuration + "/net35/";
 
 var BIN_DIRS = new [] {
     PROJECT_DIR + "src/empty-assembly/bin",
@@ -205,14 +208,56 @@ Task("CreatePackageDir")
 		CreateDirectory(PACKAGE_DIR);
 	});
 
-Task("PackageNuGet")
+Task("CreateWorkingImage")
 	.IsDependentOn("CreatePackageDir")
 	.Does(() =>
 	{
-        var nuget = "NUnit3TestAdapter." + packageVersion + ".nupkg";
-        var src   = "src/NUnitTestAdapter/bin/" + configuration + "/" + nuget;
-        var dest  = PACKAGE_DIR + nuget;
-        CopyFile(src, dest);
+		CreateDirectory(PACKAGE_IMAGE_DIR);
+		CleanDirectory(PACKAGE_IMAGE_DIR);
+
+		CopyFileToDirectory("LICENSE.txt", PACKAGE_IMAGE_DIR);
+
+        // dotnet publish doesn't work for .NET 3.5
+		var net35Files = new FilePath[]
+		{
+			NET35_BIN_DIR + "NUnit3.TestAdapter.dll",
+            NET35_BIN_DIR + "nunit.engine.dll",
+			NET35_BIN_DIR + "nunit.engine.api.dll",
+			NET35_BIN_DIR + "Mono.Cecil.dll",
+			NET35_BIN_DIR + "Mono.Cecil.Pdb.dll",
+			NET35_BIN_DIR + "Mono.Cecil.Mdb.dll",
+			NET35_BIN_DIR + "Mono.Cecil.Rocks.dll"
+		};
+
+		var net35Dir = PACKAGE_IMAGE_DIR + "build/net35";
+		CreateDirectory(net35Dir);
+		CopyFiles(net35Files, net35Dir);
+
+        DotNetCorePublish(ADAPTER_PROJECT, new DotNetCorePublishSettings
+        {
+            Configuration = configuration,
+            OutputDirectory = PACKAGE_IMAGE_DIR + "build/netcoreapp1.0",
+            Framework = "netcoreapp1.0"
+        });
+	});
+
+Task("PackageZip")
+	.IsDependentOn("CreateWorkingImage")
+	.Does(() =>
+	{
+		Zip(PACKAGE_IMAGE_DIR, File(PACKAGE_DIR + packageName + ".zip"));
+	});
+
+Task("PackageNuGet")
+	.IsDependentOn("CreateWorkingImage")
+	.Does(() =>
+	{
+        NuGetPack("nuget/NUnit3TestAdapter.nuspec", new NuGetPackSettings()
+        {
+            Version = packageVersion,
+            BasePath = PACKAGE_IMAGE_DIR,
+            OutputDirectory = PACKAGE_DIR
+        });
 	});
 
 Task("PackageVsix")
@@ -238,6 +283,7 @@ Task("Test")
 	.IsDependentOn("TestAdapterUsingVSTest");
 
 Task("Package")
+	.IsDependentOn("PackageZip")
 	.IsDependentOn("PackageNuGet")
 	.IsDependentOn("PackageVsix");
 
