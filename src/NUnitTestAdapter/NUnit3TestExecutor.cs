@@ -266,7 +266,13 @@ namespace NUnit.VisualStudio.TestAdapter
                     }
                 }
                 else
-                    TestLog.Info("NUnit failed to load " + assemblyName);
+                {
+                    var msgNode = loadResult.SelectSingleNode("properties/property[@name='_SKIPREASON']");
+                    if (msgNode != null && (new[] { "contains no tests", "Has no TestFixtures" }).Any(msgNode.GetAttribute("value").Contains))
+                        TestLog.Info("NUnit couldn't find any tests in " + assemblyName);
+                    else
+                        TestLog.Info("NUnit failed to load " + assemblyName);
+                }
             }
             catch (BadImageFormatException)
             {
