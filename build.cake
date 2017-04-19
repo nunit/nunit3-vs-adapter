@@ -67,6 +67,7 @@ var PACKAGE_DIR = PROJECT_DIR + "package/";
 var PACKAGE_IMAGE_DIR = PACKAGE_DIR + packageName + "/";
 var SRC_DIR = PROJECT_DIR + "src/";
 var TOOLS_DIR = PROJECT_DIR + "tools/";
+var BIN_DIR = PROJECT_DIR + "bin/" + configuration + "/";
 var DEMO_BIN_DIR = PROJECT_DIR + "demo/NUnitTestDemo/bin/" + configuration + "/";
 
 var ADAPTER_PROJECT = SRC_DIR + "NUnitTestAdapter/NUnit.TestAdapter.csproj";
@@ -139,7 +140,8 @@ Task("Build")
         };
         settings.EnvironmentVariables.Add("PackageVersion", packageVersion);
 
-        MSBuild(ADAPTER_SOLUTION, settings);
+        MSBuild(PROJECT_DIR + "src/NUnitTestAdapterTests/NUnit.TestAdapter.Tests.csproj", settings);
+        MSBuild(PROJECT_DIR + "src/NUnit3TestAdapterInstall/NUnit3TestAdapterInstall.csproj", settings);
 		MSBuild(DEMO_SOLUTION, settings);
     });
 
@@ -267,9 +269,9 @@ Task("PackageVsix")
 	.IsDependentOn("CreatePackageDir")
 	.Does(() =>
 	{
-		//CopyFile(
-		//	BIN_DIR + "NUnit3TestAdapter.vsix",
-		//	PACKAGE_DIR + packageName + ".vsix");
+		CopyFile(
+			BIN_DIR + "NUnit3TestAdapter.vsix",
+			PACKAGE_DIR + packageName + ".vsix");
 	});
 
 //////////////////////////////////////////////////////////////////////
