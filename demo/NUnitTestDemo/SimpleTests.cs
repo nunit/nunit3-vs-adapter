@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using System.Text;
 using NUnit.Framework;
 
+#if NETCOREAPP1_1
+namespace NUnitCoreTestDemo
+#else
 namespace NUnitTestDemo
+#endif
 {
     public class SimpleTests
     {
@@ -105,11 +109,13 @@ namespace NUnitTestDemo
             Assert.Ignore("Ignoring this test deliberately");
         }
 
+#if !NETCOREAPP1_1
         // Since we only run under .NET, test is always excluded
         [Test, ExpectSkip, Platform("Exclude=\"NET\"")]
         public void TestIsSkipped_Platform()
         {
         }
+#endif
 
         [Test, ExpectSkip, Explicit]
         public void TestIsExplicit()

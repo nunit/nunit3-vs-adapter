@@ -5,7 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
 
+#if NETCOREAPP1_1
+namespace NUnitCoreTestDemo
+#else
 namespace NUnitTestDemo
+#endif
 {
     public class ExpectPassAttribute : PropertyAttribute
     {
