@@ -112,7 +112,7 @@ Task("NuGetRestore")
     .Does(() =>
 {
 	DotNetCoreRestore(ADAPTER_SOLUTION);
-	NuGetRestore(DEMO_SOLUTION);
+	DotNetCoreRestore(DEMO_SOLUTION);
 });
 
 //////////////////////////////////////////////////////////////////////
