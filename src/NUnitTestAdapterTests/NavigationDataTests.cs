@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
@@ -47,7 +48,25 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase("+NestedClass", "SimpleMethod_Void_NoArgs", 83, 85)]
         [TestCase("+GenericFixture`2+DoublyNested", "WriteBoth", 132, 133)]
         [TestCase("+GenericFixture`2+DoublyNested`1", "WriteAllThree", 151, 152)]
-        public void VerifyNavigationData(string suffix, string methodName, int expectedLineDebug, int expectedLineRelease)
+        public void VerifyNavigationData_WithinAssembly(string suffix, string methodName, int expectedLineDebug, int expectedLineRelease)
+        {
+            VerifyNavigationData(suffix, methodName, "NUnitTestAdapterTests", expectedLineDebug, expectedLineRelease);
+        }
+      
+#if !NETCOREAPP1_0
+        // .NET Standard does not have the assembly resolvers, so the fixes for this do not work
+        [TestCase("/DerivedFromExternalAbstractClass", "EmptyMethod_ThreeLines", 6, 7)]
+        [TestCase("/DerivedFromExternalConcreteClass", "EmptyMethod_ThreeLines", 13, 14)]
+        public void VerifyNavigationData_WithExternalAssembly(string suffix, string methodName, int expectedLineDebug, int expectedLineRelease)
+        {
+#if LAUNCH_DEBUGGER
+            if (!Debugger.IsAttached) { Debugger.Launch(); }
+#endif
+            VerifyNavigationData(suffix, methodName, "NUnit3AdapterExternalTests", expectedLineDebug, expectedLineRelease);
+        }
+#endif
+
+        private void VerifyNavigationData(string suffix, string methodName, string expectedDirectory, int expectedLineDebug, int expectedLineRelease)
         {
             // Get the navigation data - ensure names are spelled correctly!
             var className = Prefix + suffix;
@@ -66,6 +85,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             //   curly brace if the method is empty.
 
             Assert.That(data.FilePath, Does.EndWith("NavigationTestData.cs"));
+            Assert.That(Path.GetDirectoryName(data.FilePath), Does.EndWith(expectedDirectory));
 #if DEBUG
             Assert.That(data.LineNumber, Is.EqualTo(expectedLineDebug));
 #else

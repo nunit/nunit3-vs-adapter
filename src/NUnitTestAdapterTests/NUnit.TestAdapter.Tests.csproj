@@ -25,6 +25,7 @@
     <ProjectReference Include="..\empty-assembly\empty-assembly.csproj" />
     <ProjectReference Include="..\mock-assembly\mock-assembly.csproj" />
     <ProjectReference Include="..\NUnitTestAdapter\NUnit.TestAdapter.csproj" />
+    <ProjectReference Include="..\NUnit3AdapterExternalTests\NUnit3AdapterExternalTests.csproj" />
   </ItemGroup>
 
   <ItemGroup>

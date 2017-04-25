@@ -114,6 +114,12 @@ Task("NuGetRestore")
     Information("Restoring NuGet Packages for the Adapter Solution");
 	DotNetCoreRestore(ADAPTER_SOLUTION);
 
+    Information("Restoring NuGet Packages for the VSIX project");
+    NuGetRestore(PROJECT_DIR + "src/NUnit3TestAdapterInstall/NUnit3TestAdapterInstall.csproj",
+                 new NuGetRestoreSettings {
+                     PackagesDirectory = PROJECT_DIR + "packages"
+                 });
+
     Information("Restoring NuGet Packages for the Demo Solution");
 	DotNetCoreRestore(DEMO_SOLUTION);
 });
