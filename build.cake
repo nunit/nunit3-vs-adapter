@@ -111,7 +111,10 @@ Task("Clean")
 Task("NuGetRestore")
     .Does(() =>
 {
+    Information("Restoring NuGet Packages for the Adapter Solution");
 	DotNetCoreRestore(ADAPTER_SOLUTION);
+
+    Information("Restoring NuGet Packages for the Demo Solution");
 	DotNetCoreRestore(DEMO_SOLUTION);
 });
 
