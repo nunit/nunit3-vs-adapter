@@ -120,8 +120,14 @@ Task("NuGetRestore")
                      PackagesDirectory = PROJECT_DIR + "packages"
                  });
 
-    Information("Restoring NuGet Packages for the Demo Solution");
-	DotNetCoreRestore(DEMO_SOLUTION);
+    Information("Restoring NuGet Packages for the Demo .NET Core Project");
+	DotNetCoreRestore(PROJECT_DIR + "demo/NUnit3CoreTestDemo/NUnit3CoreTestDemo.csproj");
+
+    Information("Restoring NuGet Packages for the Demo .NET Project");
+    NuGetRestore(PROJECT_DIR + "demo/NUnitTestDemo/NUnit3TestDemo.csproj",
+                 new NuGetRestoreSettings {
+                     PackagesDirectory = PROJECT_DIR + "demo/packages"
+                 });
 });
 
 //////////////////////////////////////////////////////////////////////
