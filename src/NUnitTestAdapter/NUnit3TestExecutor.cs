@@ -42,7 +42,6 @@ namespace NUnit.VisualStudio.TestAdapter
     [ExtensionUri(ExecutorUri)]
     public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDisposable
     {
-
         // Fields related to the currently executing assembly
         private ITestRunner _activeRunner;
 
@@ -95,21 +94,17 @@ namespace NUnit.VisualStudio.TestAdapter
                     if (!Path.IsPathRooted(assemblyName))
                         assemblyName = Path.Combine(Environment.CurrentDirectory, assemblyName);
 
-                    TestLog.Info("Running all tests in " + assemblyName);
-
                     RunAssembly(assemblyName, TestFilter.Empty);
                 }
                 catch (Exception ex)
                 {
-                    if (ex is TargetInvocationException)
-                        ex = ex.InnerException;
+                    if (ex is TargetInvocationException) { ex = ex.InnerException; }
                     TestLog.Warning("Exception thrown executing tests", ex);
                 }
             }
 
             TestLog.Info(string.Format("NUnit Adapter {0}: Test execution complete", AdapterVersion));
             Unload();
-
         }
 
         /// <summary>
@@ -136,16 +131,19 @@ namespace NUnit.VisualStudio.TestAdapter
 
             foreach (var assemblyGroup in assemblyGroups)
             {
-                var assemblyName = assemblyGroup.Key;
-                if (Debugger.IsAttached)
-                    TestLog.Info("Debugging selected tests in " + assemblyName);
-                else
-                    TestLog.Info("Running selected tests in " + assemblyName);
+                try
+                {
+                    var assemblyName = assemblyGroup.Key;
+                    var filterBuilder = new NUnitTestFilterBuilder(TestEngine.Services.GetService<ITestFilterService>());
+                    var filter = filterBuilder.MakeTestFilter(assemblyGroup);
 
-                var filterBuilder = new NUnitTestFilterBuilder(TestEngine.Services.GetService<ITestFilterService>());
-                var filter = filterBuilder.MakeTestFilter(assemblyGroup);
-
-                RunAssembly(assemblyName, filter);
+                    RunAssembly(assemblyName, filter);
+                }
+                catch (Exception ex)
+                {
+                    if (ex is TargetInvocationException) { ex = ex.InnerException; }
+                    TestLog.Warning("Exception thrown executing tests", ex);
+                }
             }
 
             TestLog.Info(string.Format("NUnit Adapter {0}: Test execution complete", AdapterVersion));
@@ -209,14 +207,18 @@ namespace NUnit.VisualStudio.TestAdapter
                 Debugger.Launch();
 #endif
 
+            var actionText = Debugger.IsAttached ? "Debugging " : "Running ";
+            var selectionText = filter == null || filter == TestFilter.Empty ? "all" : "selected";
+            TestLog.Info(actionText + selectionText + " tests in " + assemblyName);
+
             // No need to restore if the seed was in runsettings file
             if (!Settings.RandomSeedSpecified)
                 Settings.RestoreRandomSeed(Path.GetDirectoryName(assemblyName));
 
-            _activeRunner = GetRunnerFor(assemblyName);
-
             try
             {
+                _activeRunner = GetRunnerFor(assemblyName);
+
                 var loadResult = _activeRunner.Explore(TestFilter.Empty);
 
                 if (loadResult.Name == "test-run")
@@ -279,7 +281,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 // we skip the native c++ binaries that we don't support.
                 TestLog.Warning("Assembly not supported: " + assemblyName);
             }
-            catch (System.IO.FileNotFoundException ex)
+            catch (FileNotFoundException ex)
             {
                 // Probably from the GetExportedTypes in NUnit.core, attempting to find an assembly, not a problem if it is not NUnit here
                 TestLog.Warning("Dependent Assembly " + ex.FileName + " of " + assemblyName + " not found. Can be ignored if not a NUnit project.");
@@ -290,9 +292,21 @@ namespace NUnit.VisualStudio.TestAdapter
                     ex = ex.InnerException;
                 TestLog.Warning("Exception thrown executing tests in " + assemblyName, ex);
             }
-
-            _activeRunner.Dispose();
-            _activeRunner = null;
+            finally
+            {
+                try
+                {
+                    _activeRunner.Dispose();
+                    _activeRunner = null;
+                }
+                catch (Exception ex)
+                {
+                    // can happen if CLR throws CannotUnloadAppDomainException, for example
+                    // due to a long-lasting operation in a protected region (catch/finally clause).
+                    if (ex is TargetInvocationException) { ex = ex.InnerException; }
+                    TestLog.Warning("Exception thrown unloading tests from " + assemblyName, ex);
+                }
+            }
         }
 
         #endregion
