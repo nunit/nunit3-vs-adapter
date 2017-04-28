@@ -21,21 +21,20 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-using System;
-using System.Collections.Generic;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
 {
     class FakeDiscoveryContext : IDiscoveryContext
     {
+        public FakeDiscoveryContext(IRunSettings runSettings)
+        {
+            RunSettings = runSettings;
+        }
+
         #region IDiscoveryContextMembers
 
-        IRunSettings IDiscoveryContext.RunSettings
-        {
-            get { return new FakeRunSettings(); }
-        }
+        public IRunSettings RunSettings { get; private set; }
 
         #endregion
     }

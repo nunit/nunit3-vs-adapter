@@ -82,15 +82,13 @@ namespace NUnit.VisualStudio.TestAdapter
             if (context == null)
                 throw new ArgumentNullException("context", "Load called with null context");
 
-            Load(context.RunSettings.SettingsXml);
+            Load(context?.RunSettings?.SettingsXml);
         }
 
         public void Load(string settingsXml)
         {
-            if (settingsXml == null)
-                throw new ArgumentNullException("settingsXml", "Load called with null XML string");
-            if (settingsXml == string.Empty)
-                throw new ArgumentException("settingsXml", "Load called with empty XML string");
+            if (string.IsNullOrEmpty(settingsXml))
+                settingsXml = "<RunSettings />";
 
             // Visual Studio already gives a good error message if the .runsettings
             // file is poorly formed, so we don't need to do anything more.

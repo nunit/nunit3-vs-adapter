@@ -32,8 +32,19 @@ using NUnit.Framework;
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
     using Fakes;
+    using System.Collections;
+
+    internal static class TestDiscoveryDataProvider
+    {
+        public static IEnumerable<IDiscoveryContext> TestDiscoveryData()
+        {
+            yield return new FakeDiscoveryContext(null);
+            yield return new FakeDiscoveryContext(new FakeRunSettings());
+        }
+    }
 
     [Category("TestDiscovery")]
+    [TestFixtureSource(typeof(TestDiscoveryDataProvider), nameof(TestDiscoveryDataProvider.TestDiscoveryData))]
     public class TestDiscoveryTests : ITestCaseDiscoverySink
     {
         static readonly string MockAssemblyPath = 
@@ -42,6 +53,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         List<TestCase> TestCases;
 
         private static ITestDiscoverer nunittestDiscoverer;
+
+        private IDiscoveryContext _context;
+
+        public TestDiscoveryTests(IDiscoveryContext context)
+        {
+            _context = context;
+        }
 
         [OneTimeSetUp]
         public void LoadMockassembly()
@@ -57,7 +75,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             nunittestDiscoverer = ((ITestDiscoverer)new NUnit3TestDiscoverer());
             nunittestDiscoverer.DiscoverTests(
                 new[] { MockAssemblyPath}, 
-                new FakeDiscoveryContext(), 
+                _context, 
                 new MessageLoggerStub(), 
                 this);
         }
@@ -106,15 +124,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Path.Combine(TestContext.CurrentContext.TestDirectory, "empty-assembly.dll");
 
         private static ITestDiscoverer nunittestDiscoverer;
-
-        [Test]
-        public void VerifyLoading()
+        
+        [TestCaseSource(typeof(TestDiscoveryDataProvider), nameof(TestDiscoveryDataProvider.TestDiscoveryData))]
+        public void VerifyLoading(IDiscoveryContext context)
         {
             // Load the NUnit empty-assembly.dll once for this test
             nunittestDiscoverer = ((ITestDiscoverer)new NUnit3TestDiscoverer());
             nunittestDiscoverer.DiscoverTests(
                 new[] { EmptyAssemblyPath}, 
-                new FakeDiscoveryContext(), 
+                context, 
                 new MessageLoggerStub(), 
                 this);
         }
