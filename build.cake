@@ -11,7 +11,7 @@ var configuration = Argument("configuration", "Debug");
 // SET PACKAGE VERSION
 //////////////////////////////////////////////////////////////////////
 
-var version = "4.0.0";
+var version = "3.8.0";
 var modifier = "-alpha1";
 
 var dbgSuffix = configuration == "Debug" ? "-dbg" : "";
