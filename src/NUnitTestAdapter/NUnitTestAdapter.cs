@@ -8,10 +8,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -63,7 +63,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region Constructor
 
-        public NUnitTestAdapter()
+        protected NUnitTestAdapter()
         {
 #if NETCOREAPP1_0
             AdapterVersion = typeof(NUnitTestAdapter).GetTypeInfo().Assembly.GetName().Version.ToString();
@@ -113,7 +113,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         // The Adapter is constructed using the default constructor.
         // We don't have any info to initialize it until one of the
-        // ITestDiscovery or ITestExecutor methods is called. Each 
+        // ITestDiscovery or ITestExecutor methods is called. Each
         // Discover or Execute method must call this method.
         protected void Initialize(IDiscoveryContext context, IMessageLogger messageLogger)
         {
