@@ -8,10 +8,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -27,7 +27,6 @@ using System.IO;
 using System.Linq;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using Mono.Cecil.Rocks;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -57,7 +56,7 @@ namespace NUnit.VisualStudio.TestAdapter
             // a base class being used as an abstract test fixture).
             // TODO: Once NUnit is changed, try to simplify this.
             var sequencePoint = GetTypeLineage(className)
-                .Select(typeDef => typeDef.GetMethods().FirstOrDefault(o => o.Name == methodName))
+                .Select(typeDef => typeDef.Methods.FirstOrDefault(o => o.Name == methodName))
                 .Where(x => x != null)
                 .Select(FirstOrDefaultSequencePoint)
                 .FirstOrDefault();
@@ -77,6 +76,19 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private static void CacheNewTypes(string assemblyPath, IDictionary<string, TypeDefinition> types)
         {
+#if NETCOREAPP1_0
+            var readerParameters = new ReaderParameters
+            {
+                ReadSymbols = DoesPdbFileExist(assemblyPath)
+            };
+
+            var module = ModuleDefinition.ReadModule(assemblyPath, readerParameters);
+
+            foreach (var type in module.GetTypes())
+            {
+                types[type.FullName] = type;
+            }
+#else
             var resolver = new DefaultAssemblyResolver();
             var readerParameters = new ReaderParameters
             {
@@ -101,6 +113,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
                 types[type.FullName] = type;
             }
+#endif
         }
 
         IEnumerable<TypeDefinition> GetTypeLineage(string className)
@@ -127,7 +140,11 @@ namespace NUnit.VisualStudio.TestAdapter
                 try
                 {
                     var newTypeDef = typeDef.BaseType.Resolve();
+#if NETCOREAPP1_0
+                    var newAssemblyPath = newTypeDef.Module.FileName;
+#else
                     var newAssemblyPath = newTypeDef.Module.FullyQualifiedName;
+#endif
                     if (!_knownReferencedAssemblies.Contains(newAssemblyPath))
                     {
                         CacheNewTypes(newAssemblyPath, _typeDefs);
@@ -140,7 +157,11 @@ namespace NUnit.VisualStudio.TestAdapter
 
                     typeDef = newTypeDef;
                 }
+#if NETCOREAPP1_0
+                catch (Exception)
+#else
                 catch (AssemblyResolutionException)
+#endif
                 {
                     // when resolving the assembly for the base-type fails
                     // (assembly not found in the known search-directories)
@@ -163,7 +184,11 @@ namespace NUnit.VisualStudio.TestAdapter
             if (TryGetAsyncStateMachineAttribute(testMethod, out asyncStateMachineAttribute))
                 testMethod = GetStateMachineMoveNextMethod(asyncStateMachineAttribute);
 
+#if NETCOREAPP1_0
+            return FirstOrDefaultUnhiddenSequencePoint(testMethod.DebugInformation);
+#else
             return FirstOrDefaultUnhiddenSequencePoint(testMethod.Body);
+#endif
         }
 
         static bool TryGetAsyncStateMachineAttribute(MethodDefinition method, out CustomAttribute attribute)
@@ -175,20 +200,22 @@ namespace NUnit.VisualStudio.TestAdapter
         static MethodDefinition GetStateMachineMoveNextMethod(CustomAttribute asyncStateMachineAttribute)
         {
             var stateMachineType = (TypeDefinition)asyncStateMachineAttribute.ConstructorArguments[0].Value;
-            var stateMachineMoveNextMethod = stateMachineType.GetMethods().First(m => m.Name == "MoveNext");
+            var stateMachineMoveNextMethod = stateMachineType.Methods.First(m => m.Name == "MoveNext");
             return stateMachineMoveNextMethod;
         }
 
-        static SequencePoint FirstOrDefaultUnhiddenSequencePoint(MethodBody body)
-        {
-            const int lineNumberIndicatingHiddenLine = 16707566; //0xfeefee
+        const int lineNumberIndicatingHiddenLine = 16707566; //0xfeefee
 
-            foreach (var instruction in body.Instructions)
-                if (instruction.SequencePoint != null && instruction.SequencePoint.StartLine != lineNumberIndicatingHiddenLine)
-                    return instruction.SequencePoint;
-
-            return null;
-        }
+#if NETCOREAPP1_0
+        static SequencePoint FirstOrDefaultUnhiddenSequencePoint(MethodDebugInformation body) =>
+            body.SequencePoints.FirstOrDefault(sp => sp != null && sp.StartLine != lineNumberIndicatingHiddenLine);
+#else
+        static SequencePoint FirstOrDefaultUnhiddenSequencePoint(MethodBody body) =>
+            body.Instructions
+                .Where(i => i.SequencePoint != null && i.SequencePoint.StartLine != lineNumberIndicatingHiddenLine)
+                .Select(i => i.SequencePoint)
+                .FirstOrDefault();
+#endif
 
         static string StandardizeTypeName(string className)
         {

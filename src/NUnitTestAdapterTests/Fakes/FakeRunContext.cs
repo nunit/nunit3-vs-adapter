@@ -30,6 +30,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
 {
     class FakeRunContext : FakeDiscoveryContext, IRunContext
     {
+        public FakeRunContext() : base(new FakeRunSettings())
+        {
+        }
+
         #region IRunContext Members
 
         bool IRunContext.InIsolation

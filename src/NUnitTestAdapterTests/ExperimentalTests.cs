@@ -14,7 +14,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void LocationTest()
         {
-            var location = Assembly.GetExecutingAssembly().Location;
+            var location = typeof(ExperimentalTests).GetTypeInfo().Assembly.Location;
         }
     }
 }

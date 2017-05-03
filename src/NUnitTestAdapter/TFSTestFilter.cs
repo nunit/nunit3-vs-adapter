@@ -29,7 +29,9 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
+    using NUnit.VisualStudio.TestAdapter.Internal;
     using System.Collections;
+    using System.Reflection;
 
     public interface ITfsTestFilter
     {
@@ -149,11 +151,11 @@ namespace NUnit.VisualStudio.TestAdapter
             return (testCase, traitName) =>
             {
                 var testCaseType = typeof(TestCase);
-                var property = testCaseType.GetProperty("Traits");
+                var property = testCaseType.GetTypeInfo().GetProperty("Traits");
                 if (property == null)
                     return null;
                 var traits = property.GetValue(testCase, null) as IEnumerable;
-                return (from object t in traits let name = t.GetType().GetProperty("Name").GetValue(t, null) as string where name == traitName select t.GetType().GetProperty("Value").GetValue(t, null) as string).ToArray();
+                return (from object t in traits let name = t.GetType().GetTypeInfo().GetProperty("Name").GetValue(t, null) as string where name == traitName select t.GetType().GetProperty("Value").GetValue(t, null) as string).ToArray();
             };
         }
 

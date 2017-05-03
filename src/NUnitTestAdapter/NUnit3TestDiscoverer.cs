@@ -36,6 +36,9 @@ using NUnit.Engine;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
+#if NETCOREAPP1_0
+    [FileExtension(".appx")]
+#endif
     [FileExtension(".dll")]
     [FileExtension(".exe")]
     [DefaultExecutorUri(NUnit3TestExecutor.ExecutorUri)]

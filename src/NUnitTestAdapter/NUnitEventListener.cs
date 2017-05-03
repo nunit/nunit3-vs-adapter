@@ -23,7 +23,9 @@
 
 using System;
 using System.Collections.Generic;
+#if !NETCOREAPP1_0
 using System.Runtime.Remoting;
+#endif
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
@@ -37,11 +39,16 @@ namespace NUnit.VisualStudio.TestAdapter
     /// NUnitEventListener implements the EventListener interface and
     /// translates each event into a message for the VS test platform.
     /// </summary>
-    public class NUnitEventListener : MarshalByRefObject, ITestEventListener, IDisposable // Public for testing
+    public class NUnitEventListener :
+#if !NETCOREAPP1_0
+        MarshalByRefObject, 
+#endif
+        ITestEventListener, IDisposable // Public for testing
     {
         private readonly ITestExecutionRecorder _recorder;
         private readonly TestConverter _testConverter;
 
+#if !NETCOREAPP1_0
         public override object InitializeLifetimeService()
         {
             // Give the listener an infinite lease lifetime by returning null
@@ -50,6 +57,7 @@ namespace NUnit.VisualStudio.TestAdapter
             // http://nbevans.wordpress.com/2011/04/17/memory-leaks-with-an-infinite-lifetime-instance-of-marshalbyrefobject/
             return null;
         }
+#endif
 
         public NUnitEventListener(ITestExecutionRecorder recorder, TestConverter testConverter)
         {
@@ -109,7 +117,9 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 if (disposing)
                 {
+#if !NETCOREAPP1_0
                     RemotingServices.Disconnect(this);
+#endif
                 }
             }
             disposed = true;

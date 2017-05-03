@@ -8,10 +8,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -35,10 +35,10 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Engine;
+using NUnit.Engine.Services;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-
     [ExtensionUri(ExecutorUri)]
     public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDisposable
     {
@@ -55,7 +55,7 @@ namespace NUnit.VisualStudio.TestAdapter
         // NOTE: an earlier version of this code had a FilterBuilder
         // property. This seemed to make sense, because we instantiate
         // it in two different places. However, the existence of an
-        // NUnitTestFilterBuilder, containing a reference to an engine 
+        // NUnitTestFilterBuilder, containing a reference to an engine
         // service caused our second-level tests of the test executor
         // to throw an exception. So if you consider doing this, beware!
 
@@ -92,7 +92,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     var assemblyName = source;
                     if (!Path.IsPathRooted(assemblyName))
-                        assemblyName = Path.Combine(Environment.CurrentDirectory, assemblyName);
+                        assemblyName = Path.Combine(Directory.GetCurrentDirectory(), assemblyName);
 
                     RunAssembly(assemblyName, TestFilter.Empty);
                 }
@@ -134,7 +134,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 try
                 {
                     var assemblyName = assemblyGroup.Key;
-                    var filterBuilder = new NUnitTestFilterBuilder(TestEngine.Services.GetService<ITestFilterService>());
+                    var filterBuilder = CreateTestFilterBuilder();
                     var filter = filterBuilder.MakeTestFilter(assemblyGroup);
 
                     RunAssembly(assemblyName, filter);
@@ -232,8 +232,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
                     var loadedTestCases = new List<TestCase>();
 
-                    // As a side effect of calling TestConverter.ConvertTestCase, 
-                    // the converter's cache of all test cases is populated as well. 
+                    // As a side effect of calling TestConverter.ConvertTestCase,
+                    // the converter's cache of all test cases is populated as well.
                     // All future calls to convert a test case may now use the cache.
                     foreach (XmlNode testNode in nunitTestCases)
                         loadedTestCases.Add(testConverter.ConvertTestCase(testNode));
@@ -244,7 +244,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     if (TfsFilter != null && !TfsFilter.IsEmpty)
                     {
                         // NOTE This overwrites filter used in call
-                        var filterBuilder = new NUnitTestFilterBuilder(TestEngine.Services.GetService<ITestFilterService>());
+                        var filterBuilder = CreateTestFilterBuilder();
                         filter = filterBuilder.ConvertTfsFilterToNUnitFilter(TfsFilter, loadedTestCases);
                     }
 
@@ -307,6 +307,15 @@ namespace NUnit.VisualStudio.TestAdapter
                     TestLog.Warning("Exception thrown unloading tests from " + assemblyName, ex);
                 }
             }
+        }
+
+        private NUnitTestFilterBuilder CreateTestFilterBuilder()
+        {
+#if NETCOREAPP1_0
+            return new NUnitTestFilterBuilder(new TestFilterService());
+#else
+            return new NUnitTestFilterBuilder(TestEngine.Services.GetService<ITestFilterService>());
+#endif
         }
 
         #endregion

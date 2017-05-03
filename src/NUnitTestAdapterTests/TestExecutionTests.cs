@@ -31,6 +31,7 @@ using NUnit.Tests;
 using NUnit.Tests.Assemblies;
 using NUnit.Tests.Singletons;
 using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
+using System.Linq;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
@@ -126,10 +127,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public int TestOutcomeTotalsAreCorrect(TestOutcome outcome)
         {
             return testLog.Events
-                .FindAll(e => e.EventType == FakeFrameworkHandle.EventType.RecordResult)
-                .ConvertAll(e => e.TestResult)
-                .FindAll(r => r.Outcome == outcome)
-                .Count;
+                .Count(e => e.EventType == FakeFrameworkHandle.EventType.RecordResult && e.TestResult.Outcome == outcome);
         }
 
         [TestCase("MockTest3", TestOutcome.Passed, "Succeeded!", false)]
@@ -143,9 +141,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void TestResultIsReportedCorrectly(string name, TestOutcome outcome, string message, bool hasStackTrace)
         {
             var testResult = testLog.Events
-                .FindAll(e => e.EventType == FakeFrameworkHandle.EventType.RecordResult)
-                .ConvertAll(e => e.TestResult)
-                .Find(r => r.TestCase.DisplayName == name);
+                .Where(e => e.EventType == FakeFrameworkHandle.EventType.RecordResult && e.TestResult.TestCase.DisplayName == name)
+                .Select(e => e.TestResult)
+                .FirstOrDefault();
 
             Assert.NotNull(testResult, "Unable to find result for method: " + name);
             Assert.That(testResult.Outcome, Is.EqualTo(outcome));

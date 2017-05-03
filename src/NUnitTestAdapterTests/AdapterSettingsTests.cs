@@ -24,22 +24,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(() => _settings.Load((IDiscoveryContext)null), Throws.ArgumentNullException);
         }
 
-        [Test]
-        public void NullStringThrowsException()
+        [TestCase(null)]
+        [TestCase("")]
+        [TestCase("<RunSettings />")]
+        public void DefaultSettings(string xml)
         {
-            Assert.That(() => _settings.Load((string)null), Throws.ArgumentNullException);
-        }
-
-        [Test]
-        public void EmptyStringThrowsException()
-        {
-            Assert.That(() => _settings.Load(string.Empty), Throws.ArgumentException);
-        }
-
-        [Test]
-        public void DefaultSettings()
-        {
-            _settings.Load("<RunSettings/>");
+            _settings.Load(xml);
             Assert.That(_settings.MaxCpuCount, Is.EqualTo(-1));
             Assert.Null(_settings.ResultsDirectory);
             Assert.Null(_settings.TargetFrameworkVersion);

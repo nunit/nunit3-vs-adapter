@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !NETCOREAPP1_0
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -66,5 +67,4 @@ namespace NUnit.VisualStudio.TestAdapter
         }
     }
 }
-
-
+#endif

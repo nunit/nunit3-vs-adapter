@@ -18,9 +18,6 @@
   <Dependencies>
     <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5,)" />
   </Dependencies>
-  <Assets>
-    <Asset Type="UnitTestExtension" d:Source="Project" d:ProjectName="NUnit3TestAdapter" Path="|NUnit3TestAdapter|" />
-  </Assets>
   <Prerequisites>
     <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0.25904.2,16.0)" DisplayName="Visual Studio core editor" />
     <Prerequisite Id="Microsoft.VisualStudio.Component.ManagedDesktop.Prerequisites" Version="[15.0.25904.2,16.0)" DisplayName=".NET desktop development tools" />

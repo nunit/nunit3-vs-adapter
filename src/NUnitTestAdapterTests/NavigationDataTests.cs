@@ -15,7 +15,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void SetUp()
         {
             _provider = new NavigationDataProvider(
+#if NETCOREAPP1_0
                 Path.Combine(TestContext.CurrentContext.TestDirectory, "NUnit.VisualStudio.TestAdapter.Tests.dll"));
+#else
+                Path.Combine(TestContext.CurrentContext.TestDirectory, "NUnit.VisualStudio.TestAdapter.Tests.exe"));
+#endif
         }
 
         [TestCase("", "EmptyMethod_OneLine", 9, 9)]
@@ -48,7 +52,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             VerifyNavigationData(suffix, methodName, "NUnitTestAdapterTests", expectedLineDebug, expectedLineRelease);
         }
-
+      
+#if !NETCOREAPP1_0
+        // .NET Standard does not have the assembly resolvers, so the fixes for this do not work
         [TestCase("/DerivedFromExternalAbstractClass", "EmptyMethod_ThreeLines", 6, 7)]
         [TestCase("/DerivedFromExternalConcreteClass", "EmptyMethod_ThreeLines", 13, 14)]
         public void VerifyNavigationData_WithExternalAssembly(string suffix, string methodName, int expectedLineDebug, int expectedLineRelease)
@@ -58,6 +64,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 #endif
             VerifyNavigationData(suffix, methodName, "NUnit3AdapterExternalTests", expectedLineDebug, expectedLineRelease);
         }
+#endif
 
         private void VerifyNavigationData(string suffix, string methodName, string expectedDirectory, int expectedLineDebug, int expectedLineRelease)
         {

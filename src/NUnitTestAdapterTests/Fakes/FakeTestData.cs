@@ -90,11 +90,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
 
         public const string FullyQualifiedName = "NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData.FakeTestCase";
 
-        public static readonly string AssemblyPath =
-            Assembly.GetExecutingAssembly().ManifestModule.FullyQualifiedName;
+        public static readonly string AssemblyPath = 
+            typeof(FakeTestData).GetTypeInfo().Assembly.ManifestModule.FullyQualifiedName;
 
         public static readonly string CodeFile =
-            Path.Combine(Path.GetDirectoryName(AssemblyPath), @"..\..\src\NUnitTestAdapterTests\Fakes\FakeTestData.cs");
+            Path.Combine(Path.GetDirectoryName(AssemblyPath), @"..\..\..\Fakes\FakeTestData.cs");
 
         // NOTE: If the location of the FakeTestCase method defined 
         // above changes, update the value of LineNumber.

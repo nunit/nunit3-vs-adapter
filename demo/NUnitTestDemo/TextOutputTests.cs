@@ -1,10 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using System.Text;
 using NUnit.Framework;
 using System.Diagnostics;
 
+#if NETCOREAPP1_1
+namespace NUnitCoreTestDemo
+#else
 namespace NUnitTestDemo
+#endif
 {
     [ExpectPass]
     public class TextOutputTests
@@ -62,9 +68,14 @@ namespace NUnitTestDemo
         [Test, Description("Displays various settings for verification")]
         public void DisplayTestSettings()
         {
+#if NETCOREAPP1_1
+            Console.WriteLine("CurrentDirectory={0}", Directory.GetCurrentDirectory());
+            Console.WriteLine("Location={0}", typeof(TextOutputTests).GetTypeInfo().Assembly.Location);
+#else
             Console.WriteLine("CurrentDirectory={0}", Environment.CurrentDirectory);
             Console.WriteLine("BasePath={0}", AppDomain.CurrentDomain.BaseDirectory);
             Console.WriteLine("PrivateBinPath={0}", AppDomain.CurrentDomain.SetupInformation.PrivateBinPath);
+#endif
             Console.WriteLine("WorkDirectory={0}", TestContext.CurrentContext.WorkDirectory);
             Console.WriteLine("DefaultTimeout={0}", NUnit.Framework.Internal.TestExecutionContext.CurrentContext.TestCaseTimeout);
         }

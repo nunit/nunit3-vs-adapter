@@ -82,15 +82,13 @@ namespace NUnit.VisualStudio.TestAdapter
             if (context == null)
                 throw new ArgumentNullException("context", "Load called with null context");
 
-            Load(context.RunSettings.SettingsXml);
+            Load(context?.RunSettings?.SettingsXml);
         }
 
         public void Load(string settingsXml)
         {
-            if (settingsXml == null)
-                throw new ArgumentNullException("settingsXml", "Load called with null XML string");
-            if (settingsXml == string.Empty)
-                throw new ArgumentException("settingsXml", "Load called with empty XML string");
+            if (string.IsNullOrEmpty(settingsXml))
+                settingsXml = "<RunSettings />";
 
             // Visual Studio already gives a good error message if the .runsettings
             // file is poorly formed, so we don't need to do anything more.
@@ -157,42 +155,30 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void SaveRandomSeed(string dirname)
         {
-            TextWriter writer = null;
             try
             {
-                writer = new StreamWriter(Path.Combine(dirname, RANDOM_SEED_FILE));
-                writer.Write(RandomSeed.Value);
+                var path = Path.Combine(dirname, RANDOM_SEED_FILE);
+                File.WriteAllText(path, RandomSeed.Value.ToString());
             }
             catch (Exception ex)
             {
                 _logger.Warning("Failed to save random seed.", ex);
             }
-            finally
-            {
-                if (writer != null)
-                    writer.Close();
-            }
         }
 
         public void RestoreRandomSeed(string dirname)
         {
-            TextReader reader = null;
             var fullpath = Path.Combine(dirname, RANDOM_SEED_FILE);
             if (!File.Exists(fullpath))
                 return;
             try
             {
-                reader = new StreamReader(Path.Combine(dirname, RANDOM_SEED_FILE));
-                RandomSeed = int.Parse(reader.ReadLine());
+                string value = File.ReadAllText(fullpath);
+                RandomSeed = int.Parse(value);
             }
             catch (Exception ex)
             {
                 _logger.Warning("Unable to restore random seed.", ex);
-            }
-            finally
-            {
-                if (reader != null)
-                    reader.Close();
             }
         }
 
