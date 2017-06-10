@@ -86,15 +86,13 @@ namespace NUnit.VisualStudio.TestAdapter
                 return;
             }
 
-            foreach (var source in sources)
+            foreach (var assemblyName in sources)
             {
                 try
                 {
-                    var assemblyName = source;
-                    if (!Path.IsPathRooted(assemblyName))
-                        assemblyName = Path.Combine(Directory.GetCurrentDirectory(), assemblyName);
+                    var assemblyPath = Path.IsPathRooted(assemblyName) ? assemblyName : Path.Combine(Directory.GetCurrentDirectory(), assemblyName);
 
-                    RunAssembly(assemblyName, TestFilter.Empty);
+                    RunAssembly(assemblyPath, TestFilter.Empty);
                 }
                 catch (Exception ex)
                 {
@@ -134,10 +132,12 @@ namespace NUnit.VisualStudio.TestAdapter
                 try
                 {
                     var assemblyName = assemblyGroup.Key;
+                    var assemblyPath = Path.IsPathRooted(assemblyName) ? assemblyName : Path.Combine(Directory.GetCurrentDirectory(), assemblyName);
+
                     var filterBuilder = CreateTestFilterBuilder();
                     var filter = filterBuilder.MakeTestFilter(assemblyGroup);
 
-                    RunAssembly(assemblyName, filter);
+                    RunAssembly(assemblyPath, filter);
                 }
                 catch (Exception ex)
                 {

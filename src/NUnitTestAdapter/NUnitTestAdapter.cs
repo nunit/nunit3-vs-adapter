@@ -210,9 +210,9 @@ namespace NUnit.VisualStudio.TestAdapter
             // Set the work directory to the assembly location unless a setting is provided
             var workDir = Settings.WorkDirectory;
             if (workDir == null)
-                workDir = Path.GetDirectoryName(Path.GetFullPath(assemblyName));
+                workDir = Path.GetDirectoryName(assemblyName);
             else if (!Path.IsPathRooted(workDir))
-                workDir = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(assemblyName), workDir));
+                workDir = Path.Combine(Path.GetDirectoryName(assemblyName), workDir);
             if (!Directory.Exists(workDir))
                 Directory.CreateDirectory(workDir);
             package.Settings[PackageSettings.WorkDirectory] = workDir;
