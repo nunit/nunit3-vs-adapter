@@ -68,19 +68,21 @@ namespace NUnit.VisualStudio.TestAdapter
 
             foreach (string sourceAssembly in sources)
             {
+                var sourceAssemblyPath = Path.IsPathRooted(sourceAssembly) ? sourceAssembly : Path.Combine(Directory.GetCurrentDirectory(), sourceAssembly);
+
                 TestLog.Debug("Processing " + sourceAssembly);
 
                 // Only save if seed is not specified in runsettings
                 // This allows workaround in case there is no valid
                 // location in which the seed may be saved.
                 if (!Settings.RandomSeedSpecified)
-                    Settings.SaveRandomSeed(Path.GetDirectoryName(sourceAssembly));
+                    Settings.SaveRandomSeed(Path.GetDirectoryName(sourceAssemblyPath));
 
                 ITestRunner runner = null;
 
                 try
                 {
-                    runner = GetRunnerFor(sourceAssembly);
+                    runner = GetRunnerFor(sourceAssemblyPath);
 
                     XmlNode topNode = runner.Explore(TestFilter.Empty);
 
@@ -90,7 +92,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
                     if (topNode.GetAttribute("runstate") == "Runnable")
                     {
-                        var testConverter = new TestConverter(TestLog, sourceAssembly);
+                        var testConverter = new TestConverter(TestLog, sourceAssemblyPath);
 
                         int cases = ProcessTestCases(topNode, discoverySink, testConverter);
 
