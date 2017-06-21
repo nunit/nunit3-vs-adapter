@@ -18,7 +18,7 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>NUnitAdapter.snk</AssemblyOriginatorKeyFile>
     <PackageId>NUnit3TestAdapter</PackageId>
-    <Authors>Charlie Poole</Authors>
+    <Authors>Charlie Poole, Terje Sandstrom</Authors>
   </PropertyGroup>
 
   <ItemGroup>

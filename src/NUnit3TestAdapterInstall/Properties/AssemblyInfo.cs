@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("NUnit3TestAdapterInstall")]
-[assembly: AssemblyCopyright("Copyright © 2011-2016, Charlie Poole")]
+[assembly: AssemblyCopyright("Copyright © 2011-2017 Charlie Poole,2014-2017 Terje Sandstrom")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
