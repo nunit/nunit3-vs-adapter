@@ -72,12 +72,6 @@ namespace NUnit.VisualStudio.TestAdapter
 
                 TestLog.Debug("Processing " + sourceAssembly);
 
-                // Only save if seed is not specified in runsettings
-                // This allows workaround in case there is no valid
-                // location in which the seed may be saved.
-                if (!Settings.RandomSeedSpecified)
-                    Settings.SaveRandomSeed(Path.GetDirectoryName(sourceAssemblyPath));
-
                 ITestRunner runner = null;
 
                 try
@@ -97,6 +91,11 @@ namespace NUnit.VisualStudio.TestAdapter
                         int cases = ProcessTestCases(topNode, discoverySink, testConverter);
 
                         TestLog.Debug(string.Format("Discovered {0} test cases", cases));
+                        // Only save if seed is not specified in runsettings
+                        // This allows workaround in case there is no valid
+                        // location in which the seed may be saved.
+                        if (cases>0 && !Settings.RandomSeedSpecified)
+                            Settings.SaveRandomSeed(Path.GetDirectoryName(sourceAssemblyPath));
                     }
                     else
                     {
