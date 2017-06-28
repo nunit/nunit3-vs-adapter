@@ -54,16 +54,20 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             MockAssemblyPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "mock-assembly.dll");
 
             // Sanity check to be sure we have the correct version of mock-assembly.dll
-            Assert.That(MockAssembly.Tests, Is.EqualTo(34),
+            Assert.That(MockAssembly.TestsAtRuntime , Is.EqualTo(MockAssembly.Tests),
                 "The reference to mock-assembly.dll appears to be the wrong version");
             new List<TestCase>();
-            testResults = new List<TestResult>();
             testLog = new FakeFrameworkHandle();
 
             // Load the NUnit mock-assembly.dll once for this test, saving
             // the list of test cases sent to the discovery sink
             executor = ((ITestExecutor) new NUnit3TestExecutor());
             executor.RunTests(new[] { MockAssemblyPath }, Context, testLog);
+
+            testResults = testLog.Events
+               .Where(e => e.EventType == FakeFrameworkHandle.EventType.RecordResult)
+               .Select(e => e.TestResult)
+               .ToList();
             this.Summary = new ResultSummary(testResults);
         }
 
@@ -134,6 +138,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase("FailingTest", TestOutcome.Failed, "Intentional failure", true)]
         [TestCase("TestWithException", TestOutcome.Failed, "System.Exception : Intentional Exception", true)]
         // NOTE: Should Inconclusive be reported as TestOutcome.None?
+        [TestCase("ExplicitlyRunTest", TestOutcome.None, null, false)]
         [TestCase("InconclusiveTest", TestOutcome.None, "No valid data", false)]
         [TestCase("MockTest4", TestOutcome.Skipped, "ignoring this test method for now", false)]
         // NOTE: Should this be failed?
@@ -153,9 +158,48 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
-        public void ExplicitTestDoesNotShowUpInResults()
+        public void AttachmentsShowUpInResults()
         {
-            Assert.Null(testResults.Find(r => r.TestCase.DisplayName == "ExplicitlyRunTest"));
+            TestResult test = testResults.Find(r => r.TestCase.DisplayName == "SingleAttachmentTest");
+            Assert.NotNull(test);
+
+            Assert.AreEqual(1, test.Attachments.Count);
+
+            var attachmentSet = test.Attachments[0];
+            Assert.AreEqual(NUnitTestAdapter.ExecutorUri, attachmentSet.Uri.OriginalString);
+            Assert.AreEqual(1, attachmentSet.Attachments.Count);
+
+            VerifyAttachment(attachmentSet.Attachments[0], FixtureWithAttachment.Attachment1Name, FixtureWithAttachment.Attachment1Description, FixtureWithAttachment.Attachment1Contents);
+        }
+
+        [Test]
+        public void AttachmentsShowSupportMultipleFiles()
+        {
+            TestResult test = testResults.Find(r => r.TestCase.DisplayName == "MultiAttachmentTest");
+            Assert.NotNull(test);
+
+            Assert.AreEqual(1, test.Attachments.Count);
+
+            var attachmentSet = test.Attachments[0];
+            Assert.AreEqual(NUnitTestAdapter.ExecutorUri, attachmentSet.Uri.OriginalString);
+            Assert.AreEqual(2, attachmentSet.Attachments.Count);
+
+            VerifyAttachment(attachmentSet.Attachments[0], FixtureWithAttachment.Attachment1Name, FixtureWithAttachment.Attachment1Description, FixtureWithAttachment.Attachment1Contents);
+            VerifyAttachment(attachmentSet.Attachments[1], FixtureWithAttachment.Attachment2Name, FixtureWithAttachment.Attachment2Description, FixtureWithAttachment.Attachment2Contents);
+        }
+
+        private static void VerifyAttachment(UriDataAttachment attachment, string expectedName, string expectedDescription, string expectedContents)
+        {
+            var filePath = attachment.Uri.OriginalString;
+
+            Assert.Multiple(() =>
+            {
+                StringAssert.EndsWith(expectedName, filePath);
+                Assert.AreEqual(expectedDescription, attachment.Description);
+            });
+
+            // Only verify contents if everything else is file
+            Assert.AreEqual(expectedContents, File.ReadAllText(filePath), "Attachment contents should match");
         }
 
         #region Nested ResultSummary Helper Class

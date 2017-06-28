@@ -22,6 +22,7 @@
 // ***********************************************************************
 
 using System;
+using System.IO;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
 
@@ -34,9 +35,13 @@ namespace NUnit.Tests
         /// </summary>
         public class MockAssembly
         {
-            public const int Classes = 9;
+            public const int Classes = 10;
             public const int NamespaceSuites = 6; // assembly, NUnit, Tests, Assemblies, Singletons, TestAssembly
 
+            // While const values are copied to other projects at compile time, 
+            // readonly are taken from assembly loaded at runtime
+            // We can check the difference to see if value has changed since compilation
+            public static readonly int TestsAtRuntime = Tests;
             public const int Tests = MockTestFixture.Tests
                         + Singletons.OneTestCase.Tests
                         + TestAssembly.MockTestFixture.Tests
@@ -46,8 +51,9 @@ namespace NUnit.Tests
                         + FixtureWithTestCases.Tests
                         + ParameterizedFixture.Tests
                         + GenericFixtureConstants.Tests
-                        + ParentClass.Tests;
-            
+                        + ParentClass.Tests
+                        + FixtureWithAttachment.Tests;
+
             public const int Suites = MockTestFixture.Suites 
                         + Singletons.OneTestCase.Suites
                         + TestAssembly.MockTestFixture.Suites 
@@ -315,4 +321,43 @@ namespace NUnit.Tests
             }
         }
     }
+
+    [TestFixture]
+    public class FixtureWithAttachment
+    {
+        public const int Tests = 2;
+
+        public static readonly string Attachment1Name = "attachment1.txt";
+        public static readonly string Attachment1Contents = "CONTENTS";
+        public static readonly string Attachment1Description = "A description with some <values>";
+
+        public static readonly string Attachment2Name = "attachment2.txt";
+        public static readonly string Attachment2Contents = "CONTENTS2";
+        public static readonly string Attachment2Description = "second description";
+
+        [Test]
+        public void SingleAttachmentTest()
+        {
+            var context = TestContext.CurrentContext;
+            var filepath = Path.Combine(context.WorkDirectory, Attachment1Name);
+
+            File.WriteAllText(filepath, Attachment1Contents);
+            TestContext.AddTestAttachment(filepath, Attachment1Description);
+        }
+
+        [Test]
+        public void MultiAttachmentTest()
+        {
+            var context = TestContext.CurrentContext;
+            var filepath1 = Path.Combine(context.WorkDirectory, Attachment1Name);
+            var filepath2 = Path.Combine(context.WorkDirectory, Attachment2Name);
+
+            File.WriteAllText(filepath1, Attachment1Contents);
+            TestContext.AddTestAttachment(filepath1, Attachment1Description);
+
+            File.WriteAllText(filepath2, Attachment2Contents);
+            TestContext.AddTestAttachment(filepath2, Attachment2Description);
+        }
+    }
+
 }
