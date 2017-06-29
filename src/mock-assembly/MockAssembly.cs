@@ -22,6 +22,7 @@
 // ***********************************************************************
 
 using System;
+using System.IO;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
 
@@ -34,9 +35,13 @@ namespace NUnit.Tests
         /// </summary>
         public class MockAssembly
         {
-            public const int Classes = 9;
+            public const int Classes = 10;
             public const int NamespaceSuites = 6; // assembly, NUnit, Tests, Assemblies, Singletons, TestAssembly
 
+            // While const values are copied to other projects at compile time, 
+            // readonly are taken from assembly loaded at runtime
+            // We can check the difference to see if value has changed since compilation
+            public static readonly int TestsAtRuntime = Tests;
             public const int Tests = MockTestFixture.Tests
                         + Singletons.OneTestCase.Tests
                         + TestAssembly.MockTestFixture.Tests
@@ -46,8 +51,9 @@ namespace NUnit.Tests
                         + FixtureWithTestCases.Tests
                         + ParameterizedFixture.Tests
                         + GenericFixtureConstants.Tests
-                        + ParentClass.Tests;
-            
+                        + ParentClass.Tests
+                        + FixtureWithAttachment.Tests;
+
             public const int Suites = MockTestFixture.Suites 
                         + Singletons.OneTestCase.Suites
                         + TestAssembly.MockTestFixture.Suites 
@@ -313,6 +319,27 @@ namespace NUnit.Tests
                 [Test]
                 public void NestedClassTest3() { }
             }
+        }
+    }
+
+    [TestFixture]
+    public class FixtureWithAttachment
+    {
+        public const int Tests = 1;
+
+        public static readonly string Attachment1Name = "mock-assembly.dll";
+        public static readonly string Attachment1Description = "A description with some <values> including & special characters";
+
+        public static readonly string Attachment2Name = "empty-assembly.dll";
+        public static readonly string Attachment2Description = null;
+
+        [Test]
+        public void AttachmentTest()
+        {
+            var filepath1 = Path.Combine(TestContext.CurrentContext.WorkDirectory, Attachment1Name);
+            var filepath2 = Path.Combine(TestContext.CurrentContext.WorkDirectory, Attachment2Name);
+            TestContext.AddTestAttachment(filepath1, Attachment1Description);
+            TestContext.AddTestAttachment(filepath2, Attachment2Description);
         }
     }
 }

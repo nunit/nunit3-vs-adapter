@@ -199,7 +199,46 @@ namespace NUnit.VisualStudio.TestAdapter
             if (outputNode != null)
                 vsResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, outputNode.InnerText));
 
+            var attachmentSet = ParseAttachments(resultNode);
+            if (attachmentSet.Attachments.Count > 0)
+                vsResult.Attachments.Add(attachmentSet);
+
             return vsResult;
+        }
+
+        /// <summary>
+        /// Looks for attachments in a results node and if any attachments are found they
+        /// are added to <paramref name="vsResult"/>
+        /// </summary>
+        /// <param name="resultNode">xml node for test result</param>
+        /// <returns>attachments to be added to the test, it will be empty if no attachments are found</returns>
+        private AttachmentSet ParseAttachments(XmlNode resultNode)
+        {
+            var attachmentSet = new AttachmentSet(new Uri(NUnitTestAdapter.ExecutorUri), "Attachments");
+
+            foreach (XmlNode attachment in resultNode.SelectNodes("attachments/attachment"))
+            {
+                var path = attachment.SelectSingleNode("filePath")?.InnerText ?? string.Empty;
+                var description = attachment.SelectSingleNode("description")?.InnerText;
+
+                try
+                {
+                    // We only support absolute paths since we dont lookup working directory here
+                    // any problem with path will throw an exception
+                    var fileUri = new Uri(path, UriKind.Absolute);
+                    attachmentSet.Attachments.Add(new UriDataAttachment(fileUri, description));
+                }
+                catch (UriFormatException ex)
+                {
+                    _logger.Warning($"Ignoring attachment with path '{path}' due to problem with path: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    _logger.Warning($"Ignoring attachment with path '{path}': {ex.Message}.");
+                }
+            }
+
+            return attachmentSet;
         }
 
         // Public for testing
