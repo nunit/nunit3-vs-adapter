@@ -325,39 +325,21 @@ namespace NUnit.Tests
     [TestFixture]
     public class FixtureWithAttachment
     {
-        public const int Tests = 2;
+        public const int Tests = 1;
 
-        public static readonly string Attachment1Name = "attachment1.txt";
-        public static readonly string Attachment1Contents = "CONTENTS";
-        public static readonly string Attachment1Description = "A description with some <values>";
+        public static readonly string Attachment1Name = "mock-assembly.dll";
+        public static readonly string Attachment1Description = "A description with some <values> including & special characters";
 
-        public static readonly string Attachment2Name = "attachment2.txt";
-        public static readonly string Attachment2Contents = "CONTENTS2";
-        public static readonly string Attachment2Description = "second description";
+        public static readonly string Attachment2Name = "empty-assembly.dll";
+        public static readonly string Attachment2Description = null;
 
         [Test]
-        public void SingleAttachmentTest()
+        public void AttachmentTest()
         {
-            var context = TestContext.CurrentContext;
-            var filepath = Path.Combine(context.WorkDirectory, Attachment1Name);
-
-            File.WriteAllText(filepath, Attachment1Contents);
-            TestContext.AddTestAttachment(filepath, Attachment1Description);
-        }
-
-        [Test]
-        public void MultiAttachmentTest()
-        {
-            var context = TestContext.CurrentContext;
-            var filepath1 = Path.Combine(context.WorkDirectory, Attachment1Name);
-            var filepath2 = Path.Combine(context.WorkDirectory, Attachment2Name);
-
-            File.WriteAllText(filepath1, Attachment1Contents);
+            var filepath1 = Path.Combine(TestContext.CurrentContext.WorkDirectory, Attachment1Name);
+            var filepath2 = Path.Combine(TestContext.CurrentContext.WorkDirectory, Attachment2Name);
             TestContext.AddTestAttachment(filepath1, Attachment1Description);
-
-            File.WriteAllText(filepath2, Attachment2Contents);
             TestContext.AddTestAttachment(filepath2, Attachment2Description);
         }
     }
-
 }

@@ -42,7 +42,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         private string MockAssemblyPath; 
         static readonly IRunContext Context = new FakeRunContext();
 
-        private List<TestResult> testResults;
         private FakeFrameworkHandle testLog;
         private static ITestExecutor executor;
         ResultSummary Summary { get;  set; }    
@@ -56,15 +55,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             // Sanity check to be sure we have the correct version of mock-assembly.dll
             Assert.That(MockAssembly.TestsAtRuntime , Is.EqualTo(MockAssembly.Tests),
                 "The reference to mock-assembly.dll appears to be the wrong version");
-            new List<TestCase>();
             testLog = new FakeFrameworkHandle();
 
             // Load the NUnit mock-assembly.dll once for this test, saving
             // the list of test cases sent to the discovery sink
-            executor = ((ITestExecutor) new NUnit3TestExecutor());
+            executor = new NUnit3TestExecutor();
             executor.RunTests(new[] { MockAssemblyPath }, Context, testLog);
 
-            testResults = testLog.Events
+            var testResults = testLog.Events
                .Where(e => e.EventType == FakeFrameworkHandle.EventType.RecordResult)
                .Select(e => e.TestResult)
                .ToList();
@@ -145,10 +143,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase("NotRunnableTest", TestOutcome.Failed, "No arguments were provided", false)]
         public void TestResultIsReportedCorrectly(string name, TestOutcome outcome, string message, bool hasStackTrace)
         {
-            var testResult = testLog.Events
-                .Where(e => e.EventType == FakeFrameworkHandle.EventType.RecordResult && e.TestResult.TestCase.DisplayName == name)
-                .Select(e => e.TestResult)
-                .FirstOrDefault();
+            TestResult testResult = GetTestResult(name);
 
             Assert.NotNull(testResult, "Unable to find result for method: " + name);
             Assert.That(testResult.Outcome, Is.EqualTo(outcome));
@@ -158,48 +153,41 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
-        public void AttachmentsShowUpInResults()
-        {
-            TestResult test = testResults.Find(r => r.TestCase.DisplayName == "SingleAttachmentTest");
-            Assert.NotNull(test);
-
-            Assert.AreEqual(1, test.Attachments.Count);
-
-            var attachmentSet = test.Attachments[0];
-            Assert.AreEqual(NUnitTestAdapter.ExecutorUri, attachmentSet.Uri.OriginalString);
-            Assert.AreEqual(1, attachmentSet.Attachments.Count);
-
-            VerifyAttachment(attachmentSet.Attachments[0], FixtureWithAttachment.Attachment1Name, FixtureWithAttachment.Attachment1Description, FixtureWithAttachment.Attachment1Contents);
-        }
-
-        [Test]
         public void AttachmentsShowSupportMultipleFiles()
         {
-            TestResult test = testResults.Find(r => r.TestCase.DisplayName == "MultiAttachmentTest");
-            Assert.NotNull(test);
+            TestResult test = GetTestResult(nameof(FixtureWithAttachment.AttachmentTest));
+            Assert.That(test, Is.Not.Null, "Could not find test result");
 
-            Assert.AreEqual(1, test.Attachments.Count);
+            Assert.That(test.Attachments.Count, Is.EqualTo(1));
 
             var attachmentSet = test.Attachments[0];
-            Assert.AreEqual(NUnitTestAdapter.ExecutorUri, attachmentSet.Uri.OriginalString);
-            Assert.AreEqual(2, attachmentSet.Attachments.Count);
+            Assert.That(attachmentSet.Uri.OriginalString, Is.EqualTo(NUnitTestAdapter.ExecutorUri));
+            Assert.That(attachmentSet.Attachments.Count, Is.EqualTo(2));
 
-            VerifyAttachment(attachmentSet.Attachments[0], FixtureWithAttachment.Attachment1Name, FixtureWithAttachment.Attachment1Description, FixtureWithAttachment.Attachment1Contents);
-            VerifyAttachment(attachmentSet.Attachments[1], FixtureWithAttachment.Attachment2Name, FixtureWithAttachment.Attachment2Description, FixtureWithAttachment.Attachment2Contents);
+            VerifyAttachment(attachmentSet.Attachments[0], FixtureWithAttachment.Attachment1Name, FixtureWithAttachment.Attachment1Description);
+            VerifyAttachment(attachmentSet.Attachments[1], FixtureWithAttachment.Attachment2Name, FixtureWithAttachment.Attachment2Description);
         }
 
-        private static void VerifyAttachment(UriDataAttachment attachment, string expectedName, string expectedDescription, string expectedContents)
+        private static void VerifyAttachment(UriDataAttachment attachment, string expectedName, string expectedDescription)
         {
-            var filePath = attachment.Uri.OriginalString;
-
             Assert.Multiple(() =>
             {
-                StringAssert.EndsWith(expectedName, filePath);
-                Assert.AreEqual(expectedDescription, attachment.Description);
+                Assert.That(attachment.Uri.OriginalString, Does.EndWith(expectedName));
+                Assert.That(attachment.Description, Is.EqualTo(expectedDescription));
             });
+        }
 
-            // Only verify contents if everything else is file
-            Assert.AreEqual(expectedContents, File.ReadAllText(filePath), "Attachment contents should match");
+        /// <summary>
+        /// Tries to get the <see cref="TestResult"/> with the specified DisplayName
+        /// </summary>
+        /// <param name="displayName">DisplayName to search for</param>
+        /// <returns>The first testresult with the specified DisplayName, or <c>null</c> if none where found</returns>
+        private TestResult GetTestResult(string displayName)
+        {
+            return testLog.Events
+                            .Where(e => e.EventType == FakeFrameworkHandle.EventType.RecordResult && e.TestResult.TestCase.DisplayName == displayName)
+                            .Select(e => e.TestResult)
+                            .FirstOrDefault();
         }
 
         #region Nested ResultSummary Helper Class
