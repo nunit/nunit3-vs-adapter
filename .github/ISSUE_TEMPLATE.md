@@ -2,7 +2,7 @@ When reporting a bug, please provide the following information to speed up triag
 
 * NUnit and NUnit3TestAdapter versions
 * Visual Studio edition and full version number (see Help About)
-* A short repro,preferably attached or pointing to a git repo or gist
-* What .net version is being targeted
+* A short repro, preferably attached or pointing to a git repo or gist
+* What .net platform and version is being targeted
 * If TFS/VSTS issue, what version, hosted, on-premises, and what build task you see this in
 

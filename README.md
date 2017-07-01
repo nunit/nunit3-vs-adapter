@@ -11,5 +11,9 @@ The NUnit 3 Test Adapter is Open Source software released under the [MIT license
 ## Developing
 
 You need Visual Studio 2017 for building the adapter
-You will get some failing tests in VS, that is intended.  Use command line (Cake build):  build -t test , to get it right.
+You will get some failing tests in VS, that is intended.  Use command line (Cake build):  
+
+`build -t test` 
+
+to get it right.
 For more details see https://github.com/nunit/docs/wiki/Packaging-the-V3-Adapter  
