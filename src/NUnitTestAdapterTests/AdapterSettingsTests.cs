@@ -35,6 +35,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.Null(_settings.TargetFrameworkVersion);
             Assert.Null(_settings.TargetPlatform);
             Assert.Null(_settings.TestAdapterPaths);
+            Assert.IsTrue(_settings.CollectSourceInformation);
             Assert.IsEmpty(_settings.TestProperties);
             Assert.Null(_settings.InternalTraceLevel);
             Assert.Null(_settings.WorkDirectory);
@@ -84,6 +85,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             _settings.Load("<RunSettings><RunConfiguration><TestAdapterPaths>/first/path;/second/path</TestAdapterPaths></RunConfiguration></RunSettings>");
             Assert.That(_settings.TestAdapterPaths, Is.EqualTo("/first/path;/second/path"));
+        }
+
+        [Test]
+        public void CollectSourceInformationSetting()
+        {
+            _settings.Load("<RunSettings><RunConfiguration><CollectSourceInformation>False</CollectSourceInformation></RunConfiguration></RunSettings>");
+            Assert.That(_settings.CollectSourceInformation, Is.EqualTo(false));
         }
 
         [Test]
