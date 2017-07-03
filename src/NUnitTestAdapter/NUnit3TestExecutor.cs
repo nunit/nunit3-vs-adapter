@@ -228,7 +228,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     var nunitTestCases = loadResult.SelectNodes("//test-case");
 
-                    var testConverter = new TestConverter(TestLog, assemblyName);
+                    var testConverter = new TestConverter(TestLog, assemblyName, Settings.CollectSourceInformation);
 
                     var loadedTestCases = new List<TestCase>();
 
