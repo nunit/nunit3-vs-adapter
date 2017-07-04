@@ -36,6 +36,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public string TestAdapterPaths { get; private set; }
 
+        public bool CollectSourceInformation { get; private set; }
+
         #endregion
 
         #region Properties - TestRunParameters
@@ -101,6 +103,7 @@ namespace NUnit.VisualStudio.TestAdapter
             TargetPlatform = GetInnerText(runConfiguration, "TargetPlatform");
             TargetFrameworkVersion = GetInnerText(runConfiguration, "TargetFrameworkVersion");
             TestAdapterPaths = GetInnerText(runConfiguration, "TestAdapterPaths");
+            CollectSourceInformation = GetInnerTextAsBool(runConfiguration, "CollectSourceInformation", true);
 
             TestProperties = new Dictionary<string, string>();
             foreach (XmlNode node in doc.SelectNodes("RunSettings/TestRunParameters/Parameter"))
@@ -116,9 +119,9 @@ namespace NUnit.VisualStudio.TestAdapter
             WorkDirectory = GetInnerText(nunitNode, "WorkDirectory");
             DefaultTimeout = GetInnerTextAsInt(nunitNode, "DefaultTimeout", 0);
             NumberOfTestWorkers = GetInnerTextAsInt(nunitNode, "NumberOfTestWorkers", -1);
-            ShadowCopyFiles = GetInnerTextAsBool(nunitNode, "ShadowCopyFiles");
+            ShadowCopyFiles = GetInnerTextAsBool(nunitNode, "ShadowCopyFiles", false);
             Verbosity = GetInnerTextAsInt(nunitNode, "Verbosity", 0);
-            UseVsKeepEngineRunning = GetInnerTextAsBool(nunitNode, "UseVsKeepEngineRunning");
+            UseVsKeepEngineRunning = GetInnerTextAsBool(nunitNode, "UseVsKeepEngineRunning", false);
             BasePath = GetInnerText(nunitNode, "BasePath");
             PrivateBinPath = GetInnerText(nunitNode, "PrivateBinPath");
             RandomSeed = GetInnerTextAsNullableInt(nunitNode, "RandomSeed");
@@ -232,12 +235,12 @@ namespace NUnit.VisualStudio.TestAdapter
             return int.Parse(temp);
         }
 
-        private bool GetInnerTextAsBool(XmlNode startNode, string xpath)
+        private bool GetInnerTextAsBool(XmlNode startNode, string xpath, bool defaultValue)
         {
             string temp = GetInnerText(startNode, xpath);
 
             if (string.IsNullOrEmpty(temp))
-                return false;
+                return defaultValue;
 
             return bool.Parse(temp);
         }

@@ -86,7 +86,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
                     if (topNode.GetAttribute("runstate") == "Runnable")
                     {
-                        var testConverter = new TestConverter(TestLog, sourceAssemblyPath);
+                        var testConverter = new TestConverter(TestLog, sourceAssemblyPath, Settings.CollectSourceInformation);
 
                         int cases = ProcessTestCases(topNode, discoverySink, testConverter);
 
