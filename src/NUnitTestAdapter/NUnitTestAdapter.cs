@@ -141,7 +141,7 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 return TestEngine.GetRunner(package);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 TestLog.Error("Error: Unable to get runner for this assembly. Check installation, including any extensions.");
                 TestLog.Error(ex.GetType().Name + ": " + ex.Message);
@@ -203,9 +203,15 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 package.Settings[PackageSettings.DomainUsage] = "Single";
             }
-
-            // Force truncation of string arguments to test cases
-            package.Settings[PackageSettings.DefaultTestNamePattern] = "{m}{a:40}";
+            if (Settings.DefaultTestNamePattern != null)
+            {
+                package.Settings[PackageSettings.DefaultTestNamePattern] = Settings.DefaultTestNamePattern;
+            }
+            else
+            {
+                // Force truncation of string arguments to test cases
+                package.Settings[PackageSettings.DefaultTestNamePattern] = "{m}{a:40}";
+            }
 
             // Set the work directory to the assembly location unless a setting is provided
             var workDir = Settings.WorkDirectory;
