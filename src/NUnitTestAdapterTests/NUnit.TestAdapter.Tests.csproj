@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="NUnit" Version="3.7.1" />
+    <PackageReference Include="nunit3testadapter" Version="3.7.0" />
     <PackageReference Include="NUnitLite" Version="3.7.1" />
   </ItemGroup>
 
