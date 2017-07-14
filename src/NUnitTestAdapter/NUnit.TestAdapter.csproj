@@ -31,15 +31,15 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net35'">
     <PackageReference Include="Microsoft.VisualStudio.TestPlatform.ObjectModel" Version="0.0.3" PrivateAssets="All" />
-    <PackageReference Include="Mono.Cecil" Version="0.9.6.1" />
+    <PackageReference Include="Mono.Cecil" Version="0.9.6.4" />
     <PackageReference Include="nunit.engine" Version="3.7.0" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0'">
-    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="1.1.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.1.0" />
+    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="1.1.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.1.2" />
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="15.0.0" PrivateAssets="All" />
-    <PackageReference Include="Mono.Cecil" Version="0.10.0-beta4" />
+    <PackageReference Include="Mono.Cecil" Version="0.10.0-beta6" />
     <PackageReference Include="nunit.engine.netstandard" Version="3.7.0" />
   </ItemGroup>
 

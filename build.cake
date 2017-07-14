@@ -12,7 +12,7 @@ var configuration = Argument("configuration", "Debug");
 //////////////////////////////////////////////////////////////////////
 
 var version = "3.8.0";
-var modifier = "-alpha1";
+var modifier = "-rc1";
 
 var dbgSuffix = configuration == "Debug" ? "-dbg" : "";
 var packageVersion = version + modifier + dbgSuffix;
