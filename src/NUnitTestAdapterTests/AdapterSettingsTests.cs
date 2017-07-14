@@ -174,6 +174,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
+        public void DefaultTestNamePattern()
+        {
+            _settings.Load("<RunSettings><NUnit><DefaultTestNamePattern>{m}{a:1000}</DefaultTestNamePattern></NUnit></RunSettings>");
+            Assert.That(_settings.DefaultTestNamePattern,Is.EqualTo("{m}{a:1000}"));
+        }
+
+        [Test]
         public void InProcDataCollector()
         {
             _settings.Load(@"
