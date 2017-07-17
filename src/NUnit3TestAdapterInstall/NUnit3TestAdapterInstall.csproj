@@ -26,7 +26,7 @@
     <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
     <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
     <DeployExtension>False</DeployExtension>
-    <IsProductComponent>true</IsProductComponent>
+    <IsProductComponent>false</IsProductComponent>
     <VsixInputFileLocation>..\NUnitTestAdapter\bin\$(Configuration)\net35\</VsixInputFileLocation>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
