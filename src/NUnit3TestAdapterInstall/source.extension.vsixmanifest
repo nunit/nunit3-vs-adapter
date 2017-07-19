@@ -9,7 +9,7 @@ For running NUnit 2 tests, use the NUnit 2 adapter.</Description>
         <License>license.rtf</License>
         <Icon>nunit_90.png</Icon>
         <PreviewImage>preview.png</PreviewImage>
-        <Tags>test, Testing, adapter, NUNit, TDD, NUnit3</Tags>
+        <Tags>test, Testing, adapter, NUnit, TDD, NUnit3, UnitTesting</Tags>
     </Metadata>
     <Installation>
         <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[11.0,16.0)" />
