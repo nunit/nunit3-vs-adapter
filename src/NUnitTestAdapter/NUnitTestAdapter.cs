@@ -136,17 +136,7 @@ namespace NUnit.VisualStudio.TestAdapter
         protected ITestRunner GetRunnerFor(string assemblyName)
         {
             var package = CreateTestPackage(assemblyName);
-
-            try
-            {
-                return TestEngine.GetRunner(package);
-            }
-            catch (Exception ex)
-            {
-                TestLog.Error("Error: Unable to get runner for this assembly. Check installation, including any extensions.");
-                TestLog.Error(ex.GetType().Name + ": " + ex.Message);
-                throw;
-            }
+            return TestEngine.GetRunner(package);
         }
 
         private TestPackage CreateTestPackage(string assemblyName)
