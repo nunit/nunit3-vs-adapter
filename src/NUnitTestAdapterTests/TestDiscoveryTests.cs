@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2015 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2017 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -24,10 +24,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Framework;
+using Enumerable = System.Linq.Enumerable;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
@@ -47,7 +49,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     [TestFixtureSource(typeof(TestDiscoveryDataProvider), nameof(TestDiscoveryDataProvider.TestDiscoveryData))]
     public class TestDiscoveryTests : ITestCaseDiscoverySink
     {
-        static readonly string MockAssemblyPath = 
+        static readonly string MockAssemblyPath =
             Path.Combine(TestContext.CurrentContext.TestDirectory, "mock-assembly.dll");
 
         List<TestCase> TestCases;
@@ -74,9 +76,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             // the list of test cases sent to the discovery sink
             nunittestDiscoverer = ((ITestDiscoverer)new NUnit3TestDiscoverer());
             nunittestDiscoverer.DiscoverTests(
-                new[] { MockAssemblyPath}, 
-                _context, 
-                new MessageLoggerStub(), 
+                new[] { MockAssemblyPath },
+                _context,
+                new MessageLoggerStub(),
                 this);
         }
 
@@ -102,7 +104,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void VerifyNestedTestCaseSourceIsAvailable(string name)
         {
             var testCase = TestCases.Find(tc => tc.DisplayName == name);
-            
+
             Assert.That(!string.IsNullOrEmpty(testCase.Source));
             Assert.Greater(testCase.LineNumber, 0);
         }
@@ -120,24 +122,24 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     [Category("TestDiscovery")]
     public class EmptyAssemblyDiscoveryTests : ITestCaseDiscoverySink
     {
-        static readonly string EmptyAssemblyPath = 
+        static readonly string EmptyAssemblyPath =
             Path.Combine(TestContext.CurrentContext.TestDirectory, "empty-assembly.dll");
 
         private static ITestDiscoverer nunittestDiscoverer;
-        
+
         [TestCaseSource(typeof(TestDiscoveryDataProvider), nameof(TestDiscoveryDataProvider.TestDiscoveryData))]
         public void VerifyLoading(IDiscoveryContext context)
         {
             // Load the NUnit empty-assembly.dll once for this test
             nunittestDiscoverer = ((ITestDiscoverer)new NUnit3TestDiscoverer());
             nunittestDiscoverer.DiscoverTests(
-                new[] { EmptyAssemblyPath}, 
-                context, 
-                new MessageLoggerStub(), 
+                new[] { EmptyAssemblyPath },
+                context,
+                new MessageLoggerStub(),
                 this);
         }
 
-         #region ITestCaseDiscoverySink Methods
+        #region ITestCaseDiscoverySink Methods
 
         void ITestCaseDiscoverySink.SendTestCase(TestCase discoveredTest)
         {
@@ -145,4 +147,66 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         #endregion
     }
+
+    [Category("TestDiscovery")]
+    public class FailuresInDiscovery : ITestCaseDiscoverySink
+    {
+        bool testcaseWasSent;
+
+
+        [SetUp]
+        public void Setup()
+        {
+            testcaseWasSent = false;
+        }
+
+        [Test]
+        public void WhenAssemblyDontExist()
+        {
+
+#if DEBUG
+            int noOfMessagesFound = 4;  // Start + end , one debug + info
+#else
+            int noOfMessagesFound = 3; // Start + end, + info
+#endif
+            var nunittestDiscoverer = new NUnit3TestDiscoverer();
+            var context = new FakeDiscoveryContext(null);
+            var messageLoggerStub = new MessageLoggerStub();
+            nunittestDiscoverer.DiscoverTests(
+                    new[] { "FileThatDoesntExist.dll" },
+                    context,
+                    messageLoggerStub,
+                    this);
+            Assert.That(messageLoggerStub.Count, Is.EqualTo(noOfMessagesFound));
+            Assert.That(messageLoggerStub.LatestTestMessageLevel, Is.EqualTo(TestMessageLevel.Informational));
+            Assert.That(testcaseWasSent, Is.False);
+            Assert.That(!messageLoggerStub.ErrorMessages.Any());
+        }
+
+        [Test]
+        public void WhenAssemblyIsNative()
+        {
+            var nunittestDiscoverer = new NUnit3TestDiscoverer();
+            var context = new FakeDiscoveryContext(null);
+            var messageLoggerStub = new MessageLoggerStub();
+            var path = Path.Combine(TestContext.CurrentContext.TestDirectory, "NativeTests.dll");
+            Assert.That(File.Exists(path));
+            nunittestDiscoverer.DiscoverTests(
+                new[] { path },
+                context,
+                messageLoggerStub,
+                this);
+            Assert.That(testcaseWasSent, Is.False);
+            Assert.That(messageLoggerStub.WarningMessages.Count(), Is.EqualTo(1));
+            Assert.That(!messageLoggerStub.ErrorMessages.Any());
+            var warningmsg = messageLoggerStub.WarningMessages.Select(o => o.Item2).Single();
+            Assert.That(warningmsg, Does.Contain("Assembly not supported"));
+        }
+
+        public void SendTestCase(TestCase discoveredTest)
+        {
+            testcaseWasSent = true;
+        }
+    }
+
 }

@@ -7,6 +7,11 @@
     <OutputType>exe</OutputType>
     <OutputTypeEx>exe</OutputTypeEx>
   </PropertyGroup>
+  <ItemGroup>
+    <Content Include="..\native-assembly\NativeTests.dll" Link="NativeTests.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="NUnit" Version="3.7.1" />
@@ -31,5 +36,11 @@
 
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="NavigationDataTests.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Compile>
   </ItemGroup>
 </Project>
