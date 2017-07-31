@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2015 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2015-2017 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -21,15 +21,28 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
 {
     public class MessageLoggerStub : IMessageLogger
     {
+        private readonly List<Tuple<TestMessageLevel, string>> messages = new List<Tuple<TestMessageLevel, string>>();
         public void SendMessage(TestMessageLevel testMessageLevel, string message)
         {
-            // Do nothing
+            messages.Add(new Tuple<TestMessageLevel, string>(testMessageLevel, message));
         }
+
+        public TestMessageLevel LatestTestMessageLevel => messages.Last().Item1;
+        public string LatestMessage => messages.Last().Item2;
+
+        public int Count => messages.Count;
+
+        public IEnumerable<Tuple<TestMessageLevel, string>> Messages => messages;
+        public IEnumerable<Tuple<TestMessageLevel, string>> WarningMessages => messages.Where(o => o.Item1 == TestMessageLevel.Warning);
+        public IEnumerable<Tuple<TestMessageLevel, string>> ErrorMessages => messages.Where(o => o.Item1 == TestMessageLevel.Error);
     }
 }
