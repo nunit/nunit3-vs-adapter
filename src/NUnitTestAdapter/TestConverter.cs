@@ -39,6 +39,7 @@ namespace NUnit.VisualStudio.TestAdapter
         private readonly string _sourceAssembly;
         private NavigationDataProvider _navigationDataProvider;
         private bool _collectSourceInformation;
+        private IDictionary<string, List<KeyValuePair<string, string>>> _attributesCache;
 
         #region Constructor
 
@@ -118,9 +119,59 @@ namespace NUnit.VisualStudio.TestAdapter
             return results;
         }
 
+        /// <summary>
+        /// Builds attributes cache for the testrun / assembly
+        /// </summary>
+        /// <param name="topNode"></param>
+        public void BuildAttributesCache(XmlNode topNode)
+        {
+            var assemblyAttributes = topNode.SelectNodes("properties/property");
+            this.ReadAttributes(assemblyAttributes);
+
+            var testSuiteAttributes = topNode.SelectNodes("test-suite/test-suite/properties/property");
+            this.ReadAttributes(testSuiteAttributes);
+
+            var testCaseAttributes = topNode.SelectNodes("test-suite/test-suite/test-case/properties/property");
+            this.ReadAttributes(testCaseAttributes);
+
+        }
+
         #endregion
 
         #region Helper Methods
+
+        private void ReadAttributes(XmlNodeList attributes)
+        {
+            var enumerator = attributes.GetEnumerator();
+
+            while(enumerator.MoveNext())
+            {
+                var property = (XmlNode)enumerator.Current;
+                var parentId = property.ParentNode?.ParentNode?.Attributes["id"]?.Value ?? "0-0000";
+
+                var propertyName = property.Attributes["name"]?.Value;
+                var propertyValue = property.Attributes["value"]?.Value;
+
+                this.AddAttributesToCache(parentId, propertyName, propertyValue);
+            }
+        }
+
+        private void AddAttributesToCache(string parentId, string propertyName, string propertyValue)
+        {
+            if (!string.IsNullOrEmpty(propertyName) && propertyName[0] != '_' && !string.IsNullOrEmpty(propertyValue))
+            {
+                if (_attributesCache.ContainsKey(parentId))
+                {
+                    _attributesCache[parentId].Add(new KeyValuePair<string, string>(propertyName, propertyValue));
+                }
+                else
+                {
+                    var kps = new List<KeyValuePair<string, string>>();
+                    kps.Add(new KeyValuePair<string, string>(propertyName, propertyValue));
+                    _attributesCache[parentId] = kps;
+                }
+            }
+        }
 
         /// <summary>
         /// Makes a TestCase from an NUnit test, adding
@@ -150,7 +201,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
             }
             
-            testCase.AddTraitsFromTestNode(testNode);
+            testCase.AddTraitsFromTestNode(testNode, this._attributesCache);
 
             return testCase;
         }

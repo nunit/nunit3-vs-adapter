@@ -68,10 +68,33 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
-        public static void AddTraitsFromTestNode(this TestCase testCase, XmlNode testNode)
+        public static void AddTraitsFromTestNode(this TestCase testCase, XmlNode testNode, IDictionary<string,List<KeyValuePair<string,string>>> propertiesCache)
         {
             if (IsSupported)
-                AddTraitsFromTestNode(testNode, TraitsProperty.GetValue(testCase, new object[0]));
+            {
+                var assemblyId = testNode.ParentNode?.ParentNode?.Attributes["id"]?.Value;
+                List<KeyValuePair<string, string>> testCaseProperties = new List<KeyValuePair<string, string>>();
+
+                // Reading properties at the assembly level.
+                if(!string.IsNullOrEmpty(assemblyId) && propertiesCache.ContainsKey(assemblyId))
+                    testCaseProperties = propertiesCache[assemblyId];
+
+                // Reading properties at the class (test suite) level.
+                var testSuiteId = testNode.ParentNode?.Attributes["id"]?.Value;
+                if(!string.IsNullOrEmpty(testSuiteId) && propertiesCache.ContainsKey(testSuiteId))
+                    testCaseProperties.AddRange(propertiesCache[testSuiteId]);
+
+                // Reading properties at the test case level.
+                var testCaseId = testNode?.Attributes["id"].Value;
+                if(!string.IsNullOrEmpty(testCaseId) && propertiesCache.ContainsKey(testCaseId))
+                    testCaseProperties.AddRange(propertiesCache[testCaseId]);
+
+                var obj = TraitsProperty.GetValue(testCase, new object[0]);
+                foreach (var property in testCaseProperties)
+                {
+                    TraitsCollectionAdd.Invoke(obj, new object[] { property.Key, property.Value });
+                }
+            }
         }
 
         private static void AddTraitsFromTestNode(XmlNode test, object traitsCollection)
