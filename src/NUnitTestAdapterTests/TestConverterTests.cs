@@ -52,8 +52,20 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void CanMakeTestCaseFromTest()
         {
             var testCase = testConverter.ConvertTestCase(fakeTestNode);
+            CheckTestCase(testCase);
+        }
+
+        [Test]
+        public void CanMakeTestCaseFromTestWithCache()
+        {
+
+            var testCase = testConverter.ConvertTestCase(fakeTestNode);
 
             CheckTestCase(testCase);
+            if(TraitsFeature.IsSupported)
+            {
+                Assert.That(testConverter.AttributesCache.Keys.Count, Is.EqualTo(2));
+            }
         }
 
         [Test]

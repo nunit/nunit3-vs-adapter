@@ -49,6 +49,7 @@ namespace NUnit.VisualStudio.TestAdapter
             _sourceAssembly = sourceAssembly;
             _vsTestCaseMap = new Dictionary<string, TestCase>();
             _collectSourceInformation = collectSourceInformation;
+            _attributesCache = new Dictionary<string, List<KeyValuePair<string, string>>>();
 
             if (_collectSourceInformation)
             {
@@ -58,8 +59,15 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #endregion
 
-        #region Public Methods
+        public IDictionary<string, List<KeyValuePair<string, string>>> AttributesCache
+        {
+            get
+            {
+                return _attributesCache;
+            }
+        }
 
+        #region Public Methods
         /// <summary>
         /// Converts an NUnit test into a TestCase for Visual Studio,
         /// using the best method available according to the exact
@@ -118,61 +126,9 @@ namespace NUnit.VisualStudio.TestAdapter
 
             return results;
         }
-
-        /// <summary>
-        /// Builds attributes cache for the testrun / assembly
-        /// </summary>
-        /// <param name="topNode"></param>
-        public void BuildAttributesCache(XmlNode topNode)
-        {
-            var assemblyAttributes = topNode.SelectNodes("properties/property");
-            this.ReadAttributes(assemblyAttributes);
-
-            var testSuiteAttributes = topNode.SelectNodes("test-suite/test-suite/properties/property");
-            this.ReadAttributes(testSuiteAttributes);
-
-            var testCaseAttributes = topNode.SelectNodes("test-suite/test-suite/test-case/properties/property");
-            this.ReadAttributes(testCaseAttributes);
-
-        }
-
         #endregion
 
         #region Helper Methods
-
-        private void ReadAttributes(XmlNodeList attributes)
-        {
-            var enumerator = attributes.GetEnumerator();
-
-            while(enumerator.MoveNext())
-            {
-                var property = (XmlNode)enumerator.Current;
-                var parentId = property.ParentNode?.ParentNode?.Attributes["id"]?.Value ?? "0-0000";
-
-                var propertyName = property.Attributes["name"]?.Value;
-                var propertyValue = property.Attributes["value"]?.Value;
-
-                this.AddAttributesToCache(parentId, propertyName, propertyValue);
-            }
-        }
-
-        private void AddAttributesToCache(string parentId, string propertyName, string propertyValue)
-        {
-            if (!string.IsNullOrEmpty(propertyName) && propertyName[0] != '_' && !string.IsNullOrEmpty(propertyValue))
-            {
-                if (_attributesCache.ContainsKey(parentId))
-                {
-                    _attributesCache[parentId].Add(new KeyValuePair<string, string>(propertyName, propertyValue));
-                }
-                else
-                {
-                    var kps = new List<KeyValuePair<string, string>>();
-                    kps.Add(new KeyValuePair<string, string>(propertyName, propertyValue));
-                    _attributesCache[parentId] = kps;
-                }
-            }
-        }
-
         /// <summary>
         /// Makes a TestCase from an NUnit test, adding
         /// navigation data if it can be found.
