@@ -62,10 +62,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var testCase = testConverter.ConvertTestCase(fakeTestNode);
 
             CheckTestCase(testCase);
-            if(TraitsFeature.IsSupported)
-            {
-                Assert.That(testConverter.AttributesCache.Keys.Count, Is.EqualTo(2));
-            }
+
+            Assert.That(testConverter.AttributesCache.Keys.Count, Is.EqualTo(1));
+            Assert.That(testConverter.AttributesCache["121"].Count, Is.EqualTo(1));
+            var parentTrait = testConverter.AttributesCache["121"];
+            Assert.That(parentTrait[0].Name, Is.EqualTo("Category"));
+            Assert.That(parentTrait[0].Value, Is.EqualTo("super"));
         }
 
         [Test]
@@ -116,14 +118,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 Assert.That(testCase.LineNumber, Is.EqualTo(FakeTestData.LineNumber));
             }
 
-            // Check traits using reflection, since the feature was added
-            // in an update to VisualStudio and may not be present.
-            if (TraitsFeature.IsSupported)
-            {
                 var traitList = testCase.GetTraits().Select(trait => trait.Name + ":" + trait.Value).ToList();
-
                 Assert.That(traitList, Is.EquivalentTo(new[] { "Category:super", "Category:cat1", "Priority:medium" }));
-            }
         }
     }
 }

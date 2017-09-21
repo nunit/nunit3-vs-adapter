@@ -39,7 +39,7 @@ namespace NUnit.VisualStudio.TestAdapter
         private readonly string _sourceAssembly;
         private NavigationDataProvider _navigationDataProvider;
         private bool _collectSourceInformation;
-        private IDictionary<string, List<KeyValuePair<string, string>>> _attributesCache;
+        private IDictionary<string, List<Trait>> _attributesCache;
 
         #region Constructor
 
@@ -49,7 +49,7 @@ namespace NUnit.VisualStudio.TestAdapter
             _sourceAssembly = sourceAssembly;
             _vsTestCaseMap = new Dictionary<string, TestCase>();
             _collectSourceInformation = collectSourceInformation;
-            _attributesCache = new Dictionary<string, List<KeyValuePair<string, string>>>();
+            _attributesCache = new Dictionary<string, List<Trait>>();
 
             if (_collectSourceInformation)
             {
@@ -59,7 +59,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #endregion
 
-        public IDictionary<string, List<KeyValuePair<string, string>>> AttributesCache
+        public IDictionary<string, List<Trait>> AttributesCache
         {
             get
             {
