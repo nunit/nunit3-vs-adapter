@@ -55,9 +55,25 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public string TestAdapterPaths { get; private set; }
 
+        /// <summary>
+        /// If false, an adapter need not parse symbols to provide test case file, line number
+        /// </summary>
         public bool CollectSourceInformation { get; private set; }
 
+        /// <summary>
+        /// If true, an adapter shouldn't create appdomains to run tests
+        /// </summary>
         public bool DisableAppDomain { get; private set; }
+
+        /// <summary>
+        /// If true, an adapter should disable any test case parallelization
+        /// </summary>
+        public bool DisableParallelization { get; private set; }
+
+        /// <summary>
+        /// True if test run is triggered in an IDE/Editor context.
+        /// </summary>
+        public bool DesignMode { get; private set; }
 
         #endregion
 
@@ -131,6 +147,8 @@ namespace NUnit.VisualStudio.TestAdapter
             TestAdapterPaths = GetInnerText(runConfiguration, "TestAdapterPaths");
             CollectSourceInformation = GetInnerTextAsBool(runConfiguration, "CollectSourceInformation", true);
             DisableAppDomain = GetInnerTextAsBool(runConfiguration, "DisableAppDomain", false);
+            DisableParallelization = GetInnerTextAsBool(runConfiguration, "DisableParallelization", false);
+            DesignMode = GetInnerTextAsBool(runConfiguration, "DesignMode", false);
 
             TestProperties = new Dictionary<string, string>();
             foreach (XmlNode node in doc.SelectNodes("RunSettings/TestRunParameters/Parameter"))
@@ -186,6 +204,12 @@ namespace NUnit.VisualStudio.TestAdapter
             if(DisableAppDomain)
             {
                 DomainUsage = "None";
+            }
+
+            // If DisableParallelization setting is passed from the testplatform, set the NumberOfTestWorkers to 0
+            if(DisableParallelization)
+            {
+                NumberOfTestWorkers = 0;
             }
         }
 

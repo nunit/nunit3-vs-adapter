@@ -103,6 +103,20 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
+        public void DisableParallelizationSetting()
+        {
+            _settings.Load("<RunSettings><RunConfiguration><DisableParallelization>true</DisableParallelization></RunConfiguration></RunSettings>");
+            Assert.That(_settings.NumberOfTestWorkers, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void DesignModeSetting()
+        {
+            _settings.Load("<RunSettings><RunConfiguration><DesignMode>true</DesignMode></RunConfiguration></RunSettings>");
+            Assert.That(_settings.DesignMode, Is.EqualTo(true));
+        }
+
+        [Test]
         public void TestRunParameterSettings()
         {
             _settings.Load("<RunSettings><TestRunParameters><Parameter name='Answer' value='42'/><Parameter name='Question' value='Why?'/></TestRunParameters></RunSettings>");
