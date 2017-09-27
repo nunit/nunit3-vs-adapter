@@ -57,6 +57,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public bool CollectSourceInformation { get; private set; }
 
+        public bool DisableAppDomain { get; private set; }
+
         #endregion
 
         #region Properties - TestRunParameters
@@ -128,6 +130,7 @@ namespace NUnit.VisualStudio.TestAdapter
             TargetFrameworkVersion = GetInnerText(runConfiguration, "TargetFrameworkVersion");
             TestAdapterPaths = GetInnerText(runConfiguration, "TestAdapterPaths");
             CollectSourceInformation = GetInnerTextAsBool(runConfiguration, "CollectSourceInformation", true);
+            DisableAppDomain = GetInnerTextAsBool(runConfiguration, "DisableAppDomain", false);
 
             TestProperties = new Dictionary<string, string>();
             foreach (XmlNode node in doc.SelectNodes("RunSettings/TestRunParameters/Parameter"))
@@ -177,6 +180,12 @@ namespace NUnit.VisualStudio.TestAdapter
                 NumberOfTestWorkers = 0;
                 DomainUsage = "None";
                 SynchronousEvents = true;
+            }
+
+            // If DisableAppDomain settings is passed from the testplatform, set the DomainUsage to None.
+            if(DisableAppDomain)
+            {
+                DomainUsage = "None";
             }
         }
 

@@ -50,6 +50,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.False(_settings.SynchronousEvents);
             Assert.Null(_settings.DomainUsage);
             Assert.False(_settings.InProcDataCollectorsAvailable);
+            Assert.IsFalse(_settings.DisableAppDomain);
         }
 
         [Test]
@@ -92,6 +93,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             _settings.Load("<RunSettings><RunConfiguration><CollectSourceInformation>False</CollectSourceInformation></RunConfiguration></RunSettings>");
             Assert.That(_settings.CollectSourceInformation, Is.EqualTo(false));
+        }
+
+        [Test]
+        public void DisableAppDomainSetting()
+        {
+            _settings.Load("<RunSettings><RunConfiguration><DisableAppDomain>true</DisableAppDomain></RunConfiguration></RunSettings>");
+            Assert.That(_settings.DisableAppDomain, Is.EqualTo(true));
         }
 
         [Test]
