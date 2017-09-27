@@ -51,6 +51,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.Null(_settings.DomainUsage);
             Assert.False(_settings.InProcDataCollectorsAvailable);
             Assert.IsFalse(_settings.DisableAppDomain);
+            Assert.IsFalse(_settings.DisableParallelization);
+            Assert.IsFalse(_settings.DesignMode);
         }
 
         [Test]
