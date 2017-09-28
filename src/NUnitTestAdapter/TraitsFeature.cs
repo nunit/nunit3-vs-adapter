@@ -97,19 +97,22 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private static void AddAttributesToCache(IDictionary<string, List<Trait>> propertiesCache, string key, string propertyName, string propertyValue)
         {
-            if (propertiesCache.ContainsKey(key) && !IsInternalProperty(propertyName, propertyValue))
+            if (propertiesCache.ContainsKey(key))
             {
-                propertiesCache[key].Add(new Trait(propertyName, propertyValue));
+                if(!IsInternalProperty(propertyName, propertyValue))
+                    propertiesCache[key].Add(new Trait(propertyName, propertyValue));
+                return;
             }
-            else
+
+
+            var traits = new List<Trait>();
+
+            // Will add empty list of traits, if the property is internal type. So that we will not make SelectNodes call again.
+            if (!IsInternalProperty(propertyName, propertyValue))
             {
-                var traits = new List<Trait>();
-                if (!IsInternalProperty(propertyName, propertyValue))
-                {
-                    traits.Add(new Trait(propertyName, propertyValue));
-                }
-                propertiesCache[key] = traits;
+                traits.Add(new Trait(propertyName, propertyValue));
             }
+            propertiesCache[key] = traits;
         }
 
         public static IEnumerable<NTrait> GetTraits(this TestCase testCase)

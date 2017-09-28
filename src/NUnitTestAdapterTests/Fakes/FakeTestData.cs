@@ -60,6 +60,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
         public const string TestXml2 = @"<test-run id='2' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' testcasecount='5'>
 	<test-suite type='Assembly' id='0-1009' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' runstate='Runnable' testcasecount='5'>
 		<properties>
+			<property name='Category' value='AsmCat' />
 			<property name='_PID' value='6164' />
 			<property name='_APPDOMAIN' value='domain-71b2ab93-nUnitClassLibrary.dll' />
 		</properties>

@@ -74,7 +74,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void CanMakeTestCaseShouldBuildTraitsCache()
         {
-            //System.Diagnostics.Debugger.Launch();
             var xmlNodeList = FakeTestData.GetTestNodes();
 
             foreach(XmlNode node in xmlNodeList)
@@ -95,8 +94,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             // Will not be storing leaf nodes test-case nodes in the cache.
             CheckNoTestCaseNodesExist(attributesCache);
 
+            // Checking assembly level attribute.
+            CheckNodeProperties(attributesCache, "0-1009", new KeyValuePair<string, string>[] { new KeyValuePair<string, string>("Category", "AsmCat") });
+
+            // Checking Class level attributes base class & dervied class
             CheckNodeProperties(attributesCache, "0-1000", new KeyValuePair<string,string>[] { new KeyValuePair<string, string>("Category", "BaseClass") });
             CheckNodeProperties(attributesCache, "0-1002", new KeyValuePair<string, string>[] { new KeyValuePair<string, string>("Category", "DerivedClass"), new KeyValuePair<string, string>("Category", "BaseClass") });
+
+            // Checking Nested class attributes.
             CheckNodeProperties(attributesCache, "0-1005", new KeyValuePair<string, string>[] { new KeyValuePair<string, string>("Category", "NS1") });
             CheckNodeProperties(attributesCache, "0-1007", new KeyValuePair<string, string>[] { new KeyValuePair<string, string>("Category", "NS2") });
 
@@ -157,7 +162,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         private void CheckNodesWithNoProperties(IDictionary<string, List<Trait>> attributesCache)
         {
             Assert.That(attributesCache["2"].Count, Is.EqualTo(0));
-            Assert.That(attributesCache["0-1009"].Count, Is.EqualTo(0));
             Assert.That(attributesCache["0-1010"].Count, Is.EqualTo(0));
         }
 
