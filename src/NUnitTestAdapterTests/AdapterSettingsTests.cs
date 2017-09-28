@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using NUnit.Framework;
+using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
@@ -15,7 +16,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [SetUp]
         public void SetUp()
         {
-            _settings = new AdapterSettings(null);
+            _settings = new AdapterSettings(new TestLogger(new MessageLoggerStub(), 0));
         }
 
         [Test]
@@ -108,6 +109,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void DisableParallelizationSetting()
         {
             _settings.Load("<RunSettings><RunConfiguration><DisableParallelization>true</DisableParallelization></RunConfiguration></RunSettings>");
+            Assert.That(_settings.NumberOfTestWorkers, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void UpdateNumberOfTestWorkersWhenConflictingSettings()
+        {
+            _settings.Load("<RunSettings><RunConfiguration><DisableParallelization>true</DisableParallelization></RunConfiguration><NUnit><NumberOfTestWorkers>12</NumberOfTestWorkers></NUnit></RunSettings>");
+
+            // When there's a conflicting values in DisableParallelization and NumberOfTestWorkers. Falling back to DisableParallelization setting.
             Assert.That(_settings.NumberOfTestWorkers, Is.EqualTo(0));
         }
 

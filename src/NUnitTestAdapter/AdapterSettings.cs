@@ -206,11 +206,8 @@ namespace NUnit.VisualStudio.TestAdapter
                 DomainUsage = "None";
             }
 
-            // If DisableParallelization setting is passed from the testplatform, set the NumberOfTestWorkers to 0
-            if(DisableParallelization)
-            {
-                NumberOfTestWorkers = 0;
-            }
+            // Update NumberOfTestWorkers based on the DisableParallelization and NumberOfTestWorkers from runsettings.
+            UpdateNumberOfTestWorkers();
         }
 
         public void SaveRandomSeed(string dirname)
@@ -245,6 +242,19 @@ namespace NUnit.VisualStudio.TestAdapter
         #endregion
 
         #region Helper Methods
+
+        private void UpdateNumberOfTestWorkers()
+        {
+            if(DisableParallelization && NumberOfTestWorkers <=0)
+            {
+                NumberOfTestWorkers = 0;
+            }
+            else if(DisableParallelization && NumberOfTestWorkers > 0)
+            {
+                _logger.Warning(string.Format("DisableParallelization:{0} & NumberOfTestWorkers:{1} are conflicting settings, hence not running in parallel", DisableParallelization, NumberOfTestWorkers));
+                NumberOfTestWorkers = 0;
+            }
+        }
 
         private string GetInnerText(XmlNode startNode, string xpath, params string[] validValues)
         {
