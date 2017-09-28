@@ -90,7 +90,21 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public static bool IsRunningUnderIDE
         {
-            get; private set;
+            get
+            {
+                if (exeName == null)
+                {
+                    Assembly entryAssembly = Assembly.GetEntryAssembly();
+                    if (entryAssembly != null)
+                        exeName = entryAssembly.Location;
+
+                }
+
+                return exeName != null && (
+                       exeName.Contains("vstest.executionengine") ||
+                       exeName.Contains("vstest.discoveryengine") ||
+                       exeName.Contains("TE.ProcessHost"));
+            }
         }
 
         #endregion
@@ -111,7 +125,6 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 Settings.Load(context);
                 TestLog.Verbosity = Settings.Verbosity;
-                IsRunningUnderIDE = Settings.DesignMode;
             }
             catch (Exception e)
             {
