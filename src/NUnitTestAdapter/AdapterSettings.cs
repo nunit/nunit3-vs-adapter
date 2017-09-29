@@ -68,7 +68,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <summary>
         /// If true, an adapter should disable any test case parallelization
         /// </summary>
-        public bool? DisableParallelization { get; private set; }
+        public bool DisableParallelization { get; private set; }
 
         /// <summary>
         /// True if test run is triggered in an IDE/Editor context.
@@ -147,7 +147,7 @@ namespace NUnit.VisualStudio.TestAdapter
             TestAdapterPaths = GetInnerText(runConfiguration, "TestAdapterPaths");
             CollectSourceInformation = GetInnerTextAsBool(runConfiguration, "CollectSourceInformation", true);
             DisableAppDomain = GetInnerTextAsBool(runConfiguration, "DisableAppDomain", false);
-            DisableParallelization = GetInnerTextAsNullableBool(runConfiguration, "DisableParallelization");
+            DisableParallelization = GetInnerTextAsBool(runConfiguration, "DisableParallelization", false);
             DesignMode = GetInnerTextAsBool(runConfiguration, "DesignMode", false);
 
             TestProperties = new Dictionary<string, string>();
@@ -245,25 +245,15 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private void UpdateNumberOfTestWorkers()
         {
-            if(!DisableParallelization.HasValue)
-            {
-                return;
-            }
-
-            if(DisableParallelization.Value && NumberOfTestWorkers < 0)
+            // Overriding the NumberOfTestWorkers if DisableParallelization is true.
+            if(DisableParallelization && NumberOfTestWorkers < 0)
             {
                 NumberOfTestWorkers = 0;
             }
-           else if(DisableParallelization.Value && NumberOfTestWorkers > 0)
+           else if(DisableParallelization && NumberOfTestWorkers > 0)
             {
                 _logger.Warning(string.Format("DisableParallelization:{0} & NumberOfTestWorkers:{1} are conflicting settings, hence not running in parallel", DisableParallelization, NumberOfTestWorkers));
                 NumberOfTestWorkers = 0;
-            }
-           else if(!DisableParallelization.Value && NumberOfTestWorkers == 0)
-            {
-                _logger.Warning(string.Format("DisableParallelization:{0} & NumberOfTestWorkers:{1} are conflicting settings, hence running in parallel", DisableParallelization, NumberOfTestWorkers));
-                // Setting it to less than zero, so that framework will decide it.
-                NumberOfTestWorkers = -1;
             }
         }
 
