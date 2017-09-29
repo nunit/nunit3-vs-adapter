@@ -34,6 +34,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
     {
         // ReSharper disable once UnusedMember.Local
         private static void FakeTestCase() { } // LineNumber should be this line
+
         #region TestXmls
         public const string TestXml =
             @"<test-suite
@@ -57,7 +58,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
                 </test-case>
             </test-suite>";
 
-        public const string TestXml2 = @"<test-run id='2' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' testcasecount='5'>
+        public const string HierarchyTestXml = @"<test-run id='2' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' testcasecount='5'>
 	<test-suite type='Assembly' id='0-1009' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' runstate='Runnable' testcasecount='5'>
 		<properties>
 			<property name='Category' value='AsmCat' />
@@ -166,7 +167,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
 
         public static XmlNodeList GetTestNodes()
         {
-            return XmlHelper.CreateXmlNode(TestXml2).SelectNodes("//test-case");
+            return XmlHelper.CreateXmlNode(HierarchyTestXml).SelectNodes("//test-case");
         }
 
         public static XmlNode GetResultNode()
