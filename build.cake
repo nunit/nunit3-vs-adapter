@@ -157,7 +157,6 @@ Task("Build")
 
         MSBuild(PROJECT_DIR + "src/NUnitTestAdapterTests/NUnit.TestAdapter.Tests.csproj", settings);
         MSBuild(PROJECT_DIR + "src/NUnit3TestAdapterInstall/NUnit3TestAdapterInstall.csproj", settings);
-        //MSBuild(ADAPTER_SOLUTION, settings);
 		MSBuild(DEMO_SOLUTION, settings);
     });
 
