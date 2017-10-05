@@ -13,12 +13,12 @@
     </Content>
   </ItemGroup>
 
-  <ItemGroup>
+<ItemGroup>
     <PackageReference Include="NSubstitute" Version="2.0.3" />
     <PackageReference Include="NUnit" Version="3.7.1" />
     <PackageReference Include="nunit3testadapter" Version="3.7.0" />
     <PackageReference Include="NUnitLite" Version="3.7.2" />
-  </ItemGroup>
+</ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="11.0.0" PrivateAssets="All" />
