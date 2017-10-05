@@ -147,6 +147,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     testCase.CodeFilePath = navData.FilePath;
                     testCase.LineNumber = navData.LineNumber;
+                    testCase.FullyQualifiedName = $"{className}.{methodName}";
                 }
             }
             
