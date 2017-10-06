@@ -33,6 +33,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Engine;
+using NUnit.VisualStudio.TestAdapter.Dump;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -44,6 +45,8 @@ namespace NUnit.VisualStudio.TestAdapter
     [DefaultExecutorUri(NUnit3TestExecutor.ExecutorUri)]
     public sealed class NUnit3TestDiscoverer : NUnitTestAdapter, ITestDiscoverer
     {
+        private Dump.DumpXml dumpXml;
+
         #region ITestDiscoverer Members
 
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger messageLogger, ITestCaseDiscoverySink discoverySink)
@@ -54,7 +57,9 @@ namespace NUnit.VisualStudio.TestAdapter
 #endif
             Initialize(discoveryContext, messageLogger);
 
-            TestLog.Info(string.Format("NUnit Adapter {0}: Test discovery starting", AdapterVersion));
+            
+
+            TestLog.Info($"NUnit Adapter {AdapterVersion}: Test discovery starting");
 
             // Ensure any channels registered by other adapters are unregistered
             CleanUpRegisteredChannels();
@@ -69,17 +74,23 @@ namespace NUnit.VisualStudio.TestAdapter
             foreach (string sourceAssembly in sources)
             {
                 var sourceAssemblyPath = Path.IsPathRooted(sourceAssembly) ? sourceAssembly : Path.Combine(Directory.GetCurrentDirectory(), sourceAssembly);
-
                 TestLog.Debug("Processing " + sourceAssembly);
-
                 ITestRunner runner = null;
 
+                if (Settings.DumpXmlTestDiscovery)
+                {
+                    dumpXml = new Dump.DumpXml(sourceAssemblyPath);
+                    
+                }
+               
                 try
                 {
                     runner = GetRunnerFor(sourceAssemblyPath);
 
                     XmlNode topNode = runner.Explore(TestFilter.Empty);
-
+#if !NETCOREAPP1_0
+                    dumpXml?.AddString(topNode.AsString());
+#endif
                     // Currently, this will always be the case but it might change
                     if (topNode.Name == "test-run")
                         topNode = topNode.FirstChild;
@@ -90,7 +101,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
                         int cases = ProcessTestCases(topNode, discoverySink, testConverter);
 
-                        TestLog.Debug(string.Format("Discovered {0} test cases", cases));
+                        TestLog.Debug($"Discovered {cases} test cases");
                         // Only save if seed is not specified in runsettings
                         // This allows workaround in case there is no valid
                         // location in which the seed may be saved.
@@ -105,6 +116,7 @@ namespace NUnit.VisualStudio.TestAdapter
                         else
                             TestLog.Info("NUnit failed to load " + sourceAssembly);
                     }
+                    dumpXml?.Dump4Discovery();
                 }
                 catch (BadImageFormatException)
                 {
@@ -135,6 +147,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
                 finally
                 {
+
                     if (runner != null)
                     {
                         if (runner.IsTestRunning)
@@ -146,7 +159,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
             }
 
-            TestLog.Info(string.Format("NUnit Adapter {0}: Test discovery complete", AdapterVersion));
+            TestLog.Info($"NUnit Adapter {AdapterVersion}: Test discovery complete");
 
             Unload();
         }
