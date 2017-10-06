@@ -45,8 +45,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void PropertyValueProviderCategoryWithOneCategory()
         {
-            CheckTraitsSupported();
-
             var tc = new TestCase("Test1", new Uri("executor://NUnitTestExecutor"), "NUnit.VSIX");
             tc.AddTrait("Category", "CI");
             var testFilter = new TfsTestFilter(null);
@@ -57,8 +55,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void PropertyValueProviderCategoryWithNoTraits()
         {
-            CheckTraitsSupported();
-
             var tc = new TestCase("Test1", new Uri("executor://NUnitTestExecutor"), "NUnit.VSIX");
             var testFilter = new TfsTestFilter(null);
             var obj = TfsTestFilter.PropertyValueProvider(tc, "TestCategory");
@@ -68,8 +64,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void PropertyValueProviderCategoryWithMultipleCategories()
         {
-            CheckTraitsSupported();
-
             var tc = new TestCase("Test1", new Uri("executor://NUnitTestExecutor"), "NUnit.VSIX");
             tc.AddTrait("Category", "CI");
             tc.AddTrait("Category", "MyOwn");
@@ -89,12 +83,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var testFilter = new TfsTestFilter(null);
             var obj = TfsTestFilter.PropertyValueProvider(tc, "Garbage");
             Assert.Null(obj);
-        }
-
-        private static void CheckTraitsSupported()
-        {
-            if (!TraitsFeature.IsSupported)
-                Assert.Inconclusive("This version of Visual Studio does not support Traits");
         }
     }
 }

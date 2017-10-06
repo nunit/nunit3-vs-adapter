@@ -40,6 +40,7 @@ namespace NUnit.VisualStudio.TestAdapter
         private readonly string _sourceAssembly;
         private NavigationDataProvider _navigationDataProvider;
         private bool _collectSourceInformation;
+        private IDictionary<string, List<Trait>> _attributesCache;
 
         #region Constructor
 
@@ -49,6 +50,7 @@ namespace NUnit.VisualStudio.TestAdapter
             _sourceAssembly = sourceAssembly;
             _vsTestCaseMap = new Dictionary<string, TestCase>();
             _collectSourceInformation = collectSourceInformation;
+            _attributesCache = new Dictionary<string, List<Trait>>();
 
             if (_collectSourceInformation)
             {
@@ -58,8 +60,15 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #endregion
 
-        #region Public Methods
+        public IDictionary<string, List<Trait>> AttributesCache
+        {
+            get
+            {
+                return _attributesCache;
+            }
+        }
 
+        #region Public Methods
         /// <summary>
         /// Converts an NUnit test into a TestCase for Visual Studio,
         /// using the best method available according to the exact
@@ -118,11 +127,9 @@ namespace NUnit.VisualStudio.TestAdapter
 
             return results;
         }
-
         #endregion
 
         #region Helper Methods
-
         /// <summary>
         /// Makes a TestCase from an NUnit test, adding
         /// navigation data if it can be found.
@@ -151,7 +158,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
             }
             
-            testCase.AddTraitsFromTestNode(testNode);
+            testCase.AddTraitsFromTestNode(testNode, this._attributesCache);
 
             return testCase;
         }
