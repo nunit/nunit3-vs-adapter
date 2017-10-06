@@ -23,12 +23,12 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
 
         public bool DirectoryExist(string path)
         {
-            return System.IO.Directory.Exists(path);
+            return Directory.Exists(path);
         }
 
         public void CreateDirectory(string path)
         {
-            System.IO.Directory.CreateDirectory(path);
+            Directory.CreateDirectory(path);
         }
     }
 
@@ -40,6 +40,9 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
 
     public class DumpXml : IDumpXml
     {
+        private const string Header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+        private const string Rootstart = "<NUnitXml>\n";
+        private const string Rootend = "\n</NUnitXml>";
         private readonly IFile file;
         private readonly string directory;
         private readonly string filename;
@@ -47,20 +50,18 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
 
         public DumpXml(string path, IFile file=null)
         {
-            this.directory = Path.GetDirectoryName(path);
-            this.filename = Path.GetFileName(path);
+            directory = Path.GetDirectoryName(path);
+            filename = Path.GetFileName(path);
             this.file = file ?? new File();
             txt = new StringBuilder();
+            txt.Append(Header);
+            txt.Append(Rootstart);
         }
-
-        
-
-
-        
 
         public void Dump2File(string path)
         {
             EnsurePathExist(path);
+            txt.Append(Rootend);
             file.WriteAllText(path,txt.ToString());
             txt = new StringBuilder();
         }
@@ -107,7 +108,7 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
     {
         public static string AsString(this System.Xml.XmlNode node)
         {
-            using (var swriter = new System.IO.StringWriter())
+            using (var swriter = new StringWriter())
             {
                 using (var twriter = new System.Xml.XmlTextWriter(swriter))
                 {
