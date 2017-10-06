@@ -9,7 +9,7 @@ using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
-
+   
     public class TestDataForTraits
     {
         #region TestXml Data
@@ -212,15 +212,58 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         </test-suite>
     </test-suite>
 </test-suite>";
+
+
+
+
+
+        /// <summary>
+        ///  [TestCase(1, 2, ExpectedResult = 3, Category="Single")]
+        ///  [TestCase(4, 5, ExpectedResult = 9)]
+        ///  [TestCase(27, 30, ExpectedResult = 57)]
+        ///  public int SumTests(int a, int b)
+        ///  {
+        ///    var sut = new Calculator();
+        ///
+        ///    return sut.Sum(a, b);
+        ///}
+        /// </summary>
+        private const string TestCaseWithCategory =
+            @"<test-suite type='Assembly' id='3-1005' name='ClassLibrary11.dll' fullname='C:\Users\Terje\documents\visual studio 2017\Projects\ClassLibrary11\ClassLibrary11\bin\Debug\ClassLibrary11.dll' runstate='Runnable' testcasecount='3'>
+   <properties>
+      <property name='_PID' value='23304' />
+      <property name='_APPDOMAIN' value='domain-aa3de7f5-ClassLibrary11.dll' />
+   </properties>
+   <test-suite type='TestSuite' id='3-1006' name='ClassLibrary11' fullname='ClassLibrary11' runstate='Runnable' testcasecount='3'>
+      <test-suite type='TestFixture' id='3-1000' name='Class1' fullname='ClassLibrary11.Class1' classname='ClassLibrary11.Class1' runstate='Runnable' testcasecount='3'>
+         <test-suite type='ParameterizedMethod' id='3-1004' name='SumTests' fullname='ClassLibrary11.Class1.SumTests' classname='ClassLibrary11.Class1' runstate='Runnable' testcasecount='3'>
+            <test-case id='3-1001' name='SumTests(1,2)' fullname='ClassLibrary11.Class1.SumTests(1,2)' methodname='SumTests' classname='ClassLibrary11.Class1' runstate='Runnable' seed='433189107'>
+               <properties>
+                  <property name='Category' value='Single' />
+               </properties>
+            </test-case>
+            <test-case id='3-1002' name='SumTests(4,5)' fullname='ClassLibrary11.Class1.SumTests(4,5)' methodname='SumTests' classname='ClassLibrary11.Class1' runstate='Runnable' seed='1896735603' />
+            <test-case id='3-1003' name='SumTests(27,30)' fullname='ClassLibrary11.Class1.SumTests(27,30)' methodname='SumTests' classname='ClassLibrary11.Class1' runstate='Runnable' seed='225813975' />
+         </test-suite>
+      </test-suite>
+   </test-suite>
+</test-suite>";
+
+
+
         #endregion
 
         public XmlNode XmlForNestedClasses => XmlHelper.CreateXmlNode(XmlNestedClasses);
         public XmlNode XmlForHierarchyOfClasses => XmlHelper.CreateXmlNode(XmlHierarchyOfClasses);
         public XmlNode XmlForParametrizedTests => XmlHelper.CreateXmlNode(TestXmlParametrizedData);
         public XmlNode XmlForStandardTest => XmlHelper.CreateXmlNode(TestXmlStandardClass);
+
+        public XmlNode XmlForTestCaseWithCategory => XmlHelper.CreateXmlNode(TestCaseWithCategory);
     }
 
 #if !NETCOREAPP1_0
+
+    [Category(nameof(TestTraits))]
     public class TestTraits
     {
         private TestConverter testconverter;
@@ -304,6 +347,23 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var testcase1 = testcaselist.FirstOrDefault(o => o.DisplayName == "ThatWeExist");
             Assert.That(testcase1, Is.Not.Null, "Didn't find the  testcase");
             Assert.That(testcase1.Traits.Count(), Is.EqualTo(2), "Wrong number of categories for first test case");
+
+        }
+
+        [Test]
+        public void ThatTestCaseHasTraits()
+        {
+            var xml = testDataForTraits.XmlForTestCaseWithCategory;
+
+            ProcessXml2TestCase(xml);
+
+            Assert.That(testcaselist.Count, Is.EqualTo(3), "Wrong number of testcases found");
+            var testcasesWithCategories = testcaselist.Where(o => o.Traits?.FirstOrDefault(p=>p.Name=="Category")!= null);
+            Assert.That(testcasesWithCategories, Is.Not.Null, "Didn't find the  testcases");
+            Assert.That(testcasesWithCategories.Count(),Is.EqualTo(1),"Wrong number of testcases with categories, should be only 1");
+            var tc = testcasesWithCategories.FirstOrDefault();
+            Assert.That(tc.Traits.Count(), Is.EqualTo(1), "Wrong number of categories for test case");
+            Assert.That(tc.Traits.First().Value,Is.EqualTo("Single"));
 
         }
 
