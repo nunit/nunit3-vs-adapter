@@ -106,7 +106,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public void Load(IDiscoveryContext context)
         {
             if (context == null)
-                throw new ArgumentNullException("context", "Load called with null context");
+                throw new ArgumentNullException(nameof(context), "Load called with null context");
 
             Load(context?.RunSettings?.SettingsXml);
         }
@@ -121,13 +121,16 @@ namespace NUnit.VisualStudio.TestAdapter
             var doc = new XmlDocument();
             doc.LoadXml(settingsXml);
 
+            var nunitNode = doc.SelectSingleNode("RunSettings/NUnit");
+            Verbosity = GetInnerTextAsInt(nunitNode, nameof(Verbosity), 0);
+
             var runConfiguration = doc.SelectSingleNode("RunSettings/RunConfiguration");
-            MaxCpuCount = GetInnerTextAsInt(runConfiguration, "MaxCpuCount", -1);
-            ResultsDirectory = GetInnerText(runConfiguration, "ResultsDirectory");
-            TargetPlatform = GetInnerText(runConfiguration, "TargetPlatform");
-            TargetFrameworkVersion = GetInnerText(runConfiguration, "TargetFrameworkVersion");
-            TestAdapterPaths = GetInnerText(runConfiguration, "TestAdapterPaths");
-            CollectSourceInformation = GetInnerTextAsBool(runConfiguration, "CollectSourceInformation", true);
+            MaxCpuCount = GetInnerTextAsInt(runConfiguration, nameof(MaxCpuCount), -1);
+            ResultsDirectory = GetInnerTextWithLog(runConfiguration, nameof(ResultsDirectory));
+            TargetPlatform = GetInnerTextWithLog(runConfiguration, nameof(TargetPlatform));
+            TargetFrameworkVersion = GetInnerTextWithLog(runConfiguration, nameof(TargetFrameworkVersion));
+            TestAdapterPaths = GetInnerTextWithLog(runConfiguration, nameof(TestAdapterPaths));
+            CollectSourceInformation = GetInnerTextAsBool(runConfiguration, nameof(CollectSourceInformation), true);
 
             TestProperties = new Dictionary<string, string>();
             foreach (XmlNode node in doc.SelectNodes("RunSettings/TestRunParameters/Parameter"))
@@ -138,21 +141,20 @@ namespace NUnit.VisualStudio.TestAdapter
                     TestProperties.Add(key, value);
             }
 
-            var nunitNode = doc.SelectSingleNode("RunSettings/NUnit");
-            InternalTraceLevel = GetInnerText(nunitNode, "InternalTraceLevel", "Off", "Error", "Warning", "Info", "Verbose", "Debug");
-            WorkDirectory = GetInnerText(nunitNode, "WorkDirectory");
-            DefaultTimeout = GetInnerTextAsInt(nunitNode, "DefaultTimeout", 0);
-            NumberOfTestWorkers = GetInnerTextAsInt(nunitNode, "NumberOfTestWorkers", -1);
-            ShadowCopyFiles = GetInnerTextAsBool(nunitNode, "ShadowCopyFiles", false);
-            Verbosity = GetInnerTextAsInt(nunitNode, "Verbosity", 0);
-            UseVsKeepEngineRunning = GetInnerTextAsBool(nunitNode, "UseVsKeepEngineRunning", false);
-            BasePath = GetInnerText(nunitNode, "BasePath");
-            PrivateBinPath = GetInnerText(nunitNode, "PrivateBinPath");
-            RandomSeed = GetInnerTextAsNullableInt(nunitNode, "RandomSeed");
+        
+            InternalTraceLevel = GetInnerTextWithLog(nunitNode, nameof(InternalTraceLevel), "Off", "Error", "Warning", "Info", "Verbose", "Debug");
+            WorkDirectory = GetInnerTextWithLog(nunitNode, nameof(WorkDirectory));
+            DefaultTimeout = GetInnerTextAsInt(nunitNode, nameof(DefaultTimeout), 0);
+            NumberOfTestWorkers = GetInnerTextAsInt(nunitNode, nameof(NumberOfTestWorkers), -1);
+            ShadowCopyFiles = GetInnerTextAsBool(nunitNode, nameof(ShadowCopyFiles), false);
+            UseVsKeepEngineRunning = GetInnerTextAsBool(nunitNode, nameof(UseVsKeepEngineRunning), false);
+            BasePath = GetInnerTextWithLog(nunitNode, nameof(BasePath));
+            PrivateBinPath = GetInnerTextWithLog(nunitNode, nameof(PrivateBinPath));
+            RandomSeed = GetInnerTextAsNullableInt(nunitNode, nameof(RandomSeed));
             RandomSeedSpecified = RandomSeed.HasValue;
             if (!RandomSeedSpecified)
                 RandomSeed = new Random().Next();
-            DefaultTestNamePattern = GetInnerText(nunitNode,"DefaultTestNamePattern");
+            DefaultTestNamePattern = GetInnerTextWithLog(nunitNode, nameof(DefaultTestNamePattern));
 #if SUPPORT_REGISTRY_SETTINGS
             // Legacy (CTP) registry settings override defaults
             var registry = RegistryCurrentUser.OpenRegistryCurrentUser(@"Software\nunit.org\VSAdapter");
@@ -177,6 +179,10 @@ namespace NUnit.VisualStudio.TestAdapter
                 NumberOfTestWorkers = 0;
                 DomainUsage = "None";
                 SynchronousEvents = true;
+                if (Verbosity >= 4)
+                {
+                    _logger.Info($"InProcDataCollectors are available: turning off Parallel, DomainUsage=None, SynchronousEvents=true");
+                }
             }
         }
 
@@ -213,60 +219,75 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region Helper Methods
 
-        private string GetInnerText(XmlNode startNode, string xpath, params string[] validValues)
+        private string GetInnerTextWithLog(XmlNode startNode, string xpath, params string[] validValues)
         {
-            if (startNode != null)
+            return GetInnerText(startNode, xpath, true, validValues);
+        }
+
+
+        private string GetInnerText(XmlNode startNode, string xpath, bool log, params string[] validValues)
+        {
+            string val = null;
+            var targetNode = startNode?.SelectSingleNode(xpath);
+            if (targetNode != null)
             {
-                var targetNode = startNode.SelectSingleNode(xpath);
-                if (targetNode != null)
+                val = targetNode.InnerText;
+
+                if (validValues != null && validValues.Length > 0)
                 {
-                    string val = targetNode.InnerText;
+                    foreach (string valid in validValues)
+                        if (string.Compare(valid, val, StringComparison.OrdinalIgnoreCase) == 0)
+                            return valid;
 
-                    if (validValues != null && validValues.Length > 0)
-                    {
-                        foreach (string valid in validValues)
-                            if (string.Compare(valid, val, StringComparison.OrdinalIgnoreCase) == 0)
-                                return valid;
-
-                        throw new ArgumentException(string.Format(
-                            "Invalid value {0} passed for element {1}.", val, xpath));
-                    }
-
-                    return val;
+                    throw new ArgumentException(string.Format(
+                        "Invalid value {0} passed for element {1}.", val, xpath));
                 }
-            }
 
-            return null;
+                    
+            }
+            if (log)
+                Log(xpath,val);
+
+            return val;
         }
 
         private int GetInnerTextAsInt(XmlNode startNode, string xpath, int defaultValue)
         {
-            int? temp = GetInnerTextAsNullableInt(startNode, xpath);
-
-            if (temp == null)
-                return defaultValue;
-
-            return temp.Value;
+            var temp = GetInnerTextAsNullableInt(startNode, xpath,false);
+            var res = defaultValue;
+            if (temp != null)
+                res = temp.Value;
+            Log(xpath, res);
+            return res;
         }
 
-        private int? GetInnerTextAsNullableInt(XmlNode startNode, string xpath)
+        private int? GetInnerTextAsNullableInt(XmlNode startNode, string xpath,bool log=true)
         {
-            string temp = GetInnerText(startNode, xpath);
-
-            if (string.IsNullOrEmpty(temp))
-                return null;
-
-            return int.Parse(temp);
+            string temp = GetInnerText(startNode, xpath,log);
+            int? res = null;
+            if (!string.IsNullOrEmpty(temp))
+                res = int.Parse(temp);
+            if (log)
+                Log(xpath,res);
+            return res;
         }
 
         private bool GetInnerTextAsBool(XmlNode startNode, string xpath, bool defaultValue)
         {
-            string temp = GetInnerText(startNode, xpath);
+            string temp = GetInnerText(startNode, xpath,false);
+            bool res = defaultValue;
+            if (!string.IsNullOrEmpty(temp))
+                res = bool.Parse(temp);
+            Log(xpath,res);
+            return res;
+        }
 
-            if (string.IsNullOrEmpty(temp))
-                return defaultValue;
-
-            return bool.Parse(temp);
+        private void Log<T>(string xpath, T res)
+        {
+            if (Verbosity >= 4)
+            {
+                _logger.Info($"Setting: {xpath} = {res}");
+            }
         }
 
         #endregion
