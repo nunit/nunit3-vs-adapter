@@ -158,7 +158,6 @@ namespace NUnit.VisualStudio.TestAdapter
         private int ProcessTestCases(XmlNode topNode, ITestCaseDiscoverySink discoverySink, TestConverter testConverter)
         {
             int cases = 0;
-
             foreach (XmlNode testNode in topNode.SelectNodes("//test-case"))
             {
                 try

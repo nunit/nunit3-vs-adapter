@@ -32,78 +32,97 @@ namespace NUnit.VisualStudio.TestAdapter
 {
     public static class TraitsFeature
     {
-        private static readonly PropertyInfo TraitsProperty;
-        private static readonly MethodInfo TraitsCollectionAdd;
-        private static readonly PropertyInfo NameProperty;
-        private static readonly PropertyInfo ValueProperty;
-
-        static TraitsFeature()
-        {
-            TraitsProperty = typeof(TestCase).GetProperty("Traits");
-            if (TraitsProperty != null)
-            {
-
-                var traitsCollectionType = TraitsProperty.PropertyType;
-                TraitsCollectionAdd = traitsCollectionType.GetMethod("Add", new[] { typeof(string), typeof(string) });
-
-                var traitType = Type.GetType("Microsoft.VisualStudio.TestPlatform.ObjectModel.Trait,Microsoft.VisualStudio.TestPlatform.ObjectModel");
-                if (traitType != null)
-                {
-                    NameProperty = traitType.GetProperty("Name");
-                    ValueProperty = traitType.GetProperty("Value");
-                }
-            }
-
-            IsSupported = TraitsProperty != null && NameProperty != null && ValueProperty != null;
-        }
-
-        public static bool IsSupported { get; private set; }
-
         public static void AddTrait(this TestCase testCase, string name, string value)
         {
-            if (TraitsCollectionAdd != null)
+            if(testCase != null)
             {
-                object traitsCollection = TraitsProperty.GetValue(testCase, new object[0]);
-                TraitsCollectionAdd.Invoke(traitsCollection, new object[] { name, value });
+                testCase.Traits.Add(new Trait(name, value));
             }
         }
 
-        public static void AddTraitsFromTestNode(this TestCase testCase, XmlNode testNode)
+        public static void AddTraitsFromTestNode(this TestCase testCase, XmlNode testNode, IDictionary<string,List<Trait>> propertiesCache)
         {
-            if (IsSupported)
-                AddTraitsFromTestNode(testNode, TraitsProperty.GetValue(testCase, new object[0]));
-        }
+            var ancestor = testNode.ParentNode;
+            var key = ancestor.Attributes?["id"]?.Value;
 
-        private static void AddTraitsFromTestNode(XmlNode test, object traitsCollection)
-        {
-            if (test.ParentNode != null)
-                AddTraitsFromTestNode(test.ParentNode, traitsCollection);
+            // Reading ancestor properties of a test-case node. And cacheing it.
+            while (ancestor != null && key != null)
+            {
+                if (propertiesCache.ContainsKey(key))
+                {
+                    testCase.Traits.AddRange(propertiesCache[key]);
+                }
+                else
+                {
+                    var nodesList = ancestor.SelectNodes("properties/property");
+                    foreach (XmlNode propertyNode in nodesList)
+                    {
+                        string propertyName = propertyNode.GetAttribute("name");
+                        string propertyValue = propertyNode.GetAttribute("value");
 
-            foreach (XmlNode propertyNode in test.SelectNodes("properties/property"))
+                        AddAttributesToCache(propertiesCache, key, propertyName, propertyValue);
+                        if (!IsInternalProperty(propertyName, propertyValue))
+                        {
+                            testCase.Traits.Add(new Trait(propertyName, propertyValue));
+                        }
+                    }
+                    // Adding empty list to dictionary, so that we will not make SelectNodes call again.
+                    if (nodesList.Count == 0 && !propertiesCache.ContainsKey(key))
+                    {
+                        propertiesCache[key] = new List<Trait>();
+                    }
+                }
+                ancestor = ancestor.ParentNode;
+                key = ancestor?.Attributes?["id"]?.Value;
+            }
+
+            // No Need to store test-case properties in dictionary.
+            foreach (XmlNode propertyNode in testNode.SelectNodes("properties/property"))
             {
                 string propertyName = propertyNode.GetAttribute("name");
                 string propertyValue = propertyNode.GetAttribute("value");
 
-                // Property names starting with '_' are for internal use only
-                if (!string.IsNullOrEmpty(propertyName) && propertyName[0] != '_' && !string.IsNullOrEmpty(propertyValue))
+                if (!IsInternalProperty(propertyName, propertyValue))
                 {
-                    TraitsCollectionAdd.Invoke(traitsCollection, new object[] { propertyName, propertyValue });
+                    testCase.Traits.Add(new Trait(propertyName, propertyValue));
                 }
             }
+        }
+
+        private static bool IsInternalProperty(string propertyName, string propertyValue)
+        {
+            // Property names starting with '_' are for internal use only
+            return string.IsNullOrEmpty(propertyName) || propertyName[0] == '_' || string.IsNullOrEmpty(propertyValue);
+        }
+
+        private static void AddAttributesToCache(IDictionary<string, List<Trait>> propertiesCache, string key, string propertyName, string propertyValue)
+        {
+            if (propertiesCache.ContainsKey(key))
+            {
+                if(!IsInternalProperty(propertyName, propertyValue))
+                    propertiesCache[key].Add(new Trait(propertyName, propertyValue));
+                return;
+            }
+
+
+            var traits = new List<Trait>();
+
+            // Will add empty list of traits, if the property is internal type. So that we will not make SelectNodes call again.
+            if (!IsInternalProperty(propertyName, propertyValue))
+            {
+                traits.Add(new Trait(propertyName, propertyValue));
+            }
+            propertiesCache[key] = traits;
         }
 
         public static IEnumerable<NTrait> GetTraits(this TestCase testCase)
         {
             var traits = new List<NTrait>();
 
-            if (IsSupported)
+            if (testCase != null && testCase.Traits != null)
             {
-                var traitsCollection = TraitsProperty.GetValue(testCase, new object[0]) as IEnumerable<object>;
-
-                if (traitsCollection != null)
-                    traits.AddRange(from traitObject in traitsCollection let name = NameProperty.GetValue(traitObject, new object[0]) as string let value = ValueProperty.GetValue(traitObject, new object[0]) as string select new NTrait(name, value));
+                traits.AddRange(from trait in testCase.Traits let name = trait.Name let value = trait.Value select new NTrait(name, value));
             }
-
             return traits;
         }
     }
