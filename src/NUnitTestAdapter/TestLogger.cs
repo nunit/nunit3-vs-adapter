@@ -116,11 +116,17 @@ namespace NUnit.VisualStudio.TestAdapter
                     var type = ex.GetType();
                     SendMessage(testMessageLevel, string.Format(EXCEPTION_FORMAT, type, message));
                     SendMessage(testMessageLevel, ex.Message);
+                    SendMessage(testMessageLevel,ex.StackTrace);
+                    if (ex.InnerException != null)
+                    {
+                        SendMessage(testMessageLevel,$"Innerexception: {ex.InnerException.ToString()}");
+                    }
                     break;
 
                 default:
                     SendMessage(testMessageLevel, message);
                     SendMessage(testMessageLevel, ex.ToString());
+                    SendMessage(testMessageLevel, ex.StackTrace);
                     break;
             }
         }

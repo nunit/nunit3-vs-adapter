@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -192,11 +193,11 @@ namespace NUnit.VisualStudio.TestAdapter
 
             var startTime = resultNode.GetAttribute("start-time");
             if (startTime != null)
-                vsResult.StartTime = DateTimeOffset.Parse(startTime);
+                vsResult.StartTime = DateTimeOffset.Parse(startTime, CultureInfo.InvariantCulture);
 
             var endTime = resultNode.GetAttribute("end-time");
             if (endTime != null)
-                vsResult.EndTime = DateTimeOffset.Parse(endTime);
+                vsResult.EndTime = DateTimeOffset.Parse(endTime, CultureInfo.InvariantCulture);
 
             // TODO: Remove this when NUnit provides a better duration
             if (vsResult.Duration == TimeSpan.Zero && (vsResult.Outcome == TestOutcome.Passed || vsResult.Outcome == TestOutcome.Failed))
