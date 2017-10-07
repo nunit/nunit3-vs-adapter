@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using NUnit.Framework;
+using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
@@ -15,7 +16,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [SetUp]
         public void SetUp()
         {
-            _settings = new AdapterSettings(null);
+            _settings = new AdapterSettings(new TestLogger(new MessageLoggerStub(), 0));
         }
 
         [Test]
@@ -50,6 +51,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.False(_settings.SynchronousEvents);
             Assert.Null(_settings.DomainUsage);
             Assert.False(_settings.InProcDataCollectorsAvailable);
+            Assert.IsFalse(_settings.DisableAppDomain);
+            Assert.IsFalse(_settings.DisableParallelization);
+            Assert.IsFalse(_settings.DesignMode);
         }
 
         [Test]
@@ -92,6 +96,44 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             _settings.Load("<RunSettings><RunConfiguration><CollectSourceInformation>False</CollectSourceInformation></RunConfiguration></RunSettings>");
             Assert.That(_settings.CollectSourceInformation, Is.EqualTo(false));
+        }
+
+        [Test]
+        public void DisableAppDomainSetting()
+        {
+            _settings.Load("<RunSettings><RunConfiguration><DisableAppDomain>true</DisableAppDomain></RunConfiguration></RunSettings>");
+            Assert.That(_settings.DisableAppDomain, Is.EqualTo(true));
+        }
+
+        [Test]
+        public void DisableParallelizationSetting()
+        {
+            _settings.Load("<RunSettings><RunConfiguration><DisableParallelization>true</DisableParallelization></RunConfiguration></RunSettings>");
+            Assert.That(_settings.NumberOfTestWorkers, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void UpdateNumberOfTestWorkersWhenConflictingSettings()
+        {
+            _settings.Load("<RunSettings><RunConfiguration><DisableParallelization>true</DisableParallelization></RunConfiguration><NUnit><NumberOfTestWorkers>12</NumberOfTestWorkers></NUnit></RunSettings>");
+
+            // When there's a conflicting values in DisableParallelization and NumberOfTestWorkers. Override the NumberOfTestWorkers.
+            Assert.That(_settings.NumberOfTestWorkers, Is.EqualTo(0));
+
+            // Do not override the NumberOfTestWorkers when DisableParallelization is False
+            _settings.Load("<RunSettings><RunConfiguration><DisableParallelization>false</DisableParallelization></RunConfiguration><NUnit><NumberOfTestWorkers>0</NumberOfTestWorkers></NUnit></RunSettings>");
+            Assert.That(_settings.NumberOfTestWorkers, Is.EqualTo(0));
+
+            // Do not override the NumberOfTestWorkers when DisableParallelization is not defined
+            _settings.Load("<RunSettings><RunConfiguration></RunConfiguration><NUnit><NumberOfTestWorkers>12</NumberOfTestWorkers></NUnit></RunSettings>");
+            Assert.That(_settings.NumberOfTestWorkers, Is.EqualTo(12));
+        }
+
+        [Test]
+        public void DesignModeSetting()
+        {
+            _settings.Load("<RunSettings><RunConfiguration><DesignMode>true</DesignMode></RunConfiguration></RunSettings>");
+            Assert.That(_settings.DesignMode, Is.EqualTo(true));
         }
 
         [Test]

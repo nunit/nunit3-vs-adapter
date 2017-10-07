@@ -55,7 +55,25 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public string TestAdapterPaths { get; private set; }
 
+        /// <summary>
+        /// If false, an adapter need not parse symbols to provide test case file, line number
+        /// </summary>
         public bool CollectSourceInformation { get; private set; }
+
+        /// <summary>
+        /// If true, an adapter shouldn't create appdomains to run tests
+        /// </summary>
+        public bool DisableAppDomain { get; private set; }
+
+        /// <summary>
+        /// If true, an adapter should disable any test case parallelization
+        /// </summary>
+        public bool DisableParallelization { get; private set; }
+
+        /// <summary>
+        /// True if test run is triggered in an IDE/Editor context.
+        /// </summary>
+        public bool DesignMode { get; private set; }
 
         #endregion
 
@@ -131,6 +149,9 @@ namespace NUnit.VisualStudio.TestAdapter
             TargetFrameworkVersion = GetInnerTextWithLog(runConfiguration, nameof(TargetFrameworkVersion));
             TestAdapterPaths = GetInnerTextWithLog(runConfiguration, nameof(TestAdapterPaths));
             CollectSourceInformation = GetInnerTextAsBool(runConfiguration, nameof(CollectSourceInformation), true);
+            DisableAppDomain = GetInnerTextAsBool(runConfiguration, nameof(DisableAppDomain), false);
+            DisableParallelization = GetInnerTextAsBool(runConfiguration, nameof(DisableParallelization), false);
+            DesignMode = GetInnerTextAsBool(runConfiguration, nameof(DesignMode), false);
 
             TestProperties = new Dictionary<string, string>();
             foreach (XmlNode node in doc.SelectNodes("RunSettings/TestRunParameters/Parameter"))
@@ -184,6 +205,15 @@ namespace NUnit.VisualStudio.TestAdapter
                     _logger.Info($"InProcDataCollectors are available: turning off Parallel, DomainUsage=None, SynchronousEvents=true");
                 }
             }
+
+            // If DisableAppDomain settings is passed from the testplatform, set the DomainUsage to None.
+            if(DisableAppDomain)
+            {
+                DomainUsage = "None";
+            }
+
+            // Update NumberOfTestWorkers based on the DisableParallelization and NumberOfTestWorkers from runsettings.
+            UpdateNumberOfTestWorkers();
         }
 
         public void SaveRandomSeed(string dirname)
@@ -218,6 +248,23 @@ namespace NUnit.VisualStudio.TestAdapter
         #endregion
 
         #region Helper Methods
+
+        private void UpdateNumberOfTestWorkers()
+        {
+            // Overriding the NumberOfTestWorkers if DisableParallelization is true.
+            if(DisableParallelization && NumberOfTestWorkers < 0)
+            {
+                NumberOfTestWorkers = 0;
+            }
+           else if(DisableParallelization && NumberOfTestWorkers > 0)
+            {
+                if(_logger.Verbosity > 0)
+                {
+                    _logger.Warning(string.Format("DisableParallelization:{0} & NumberOfTestWorkers:{1} are conflicting settings, hence not running in parallel", DisableParallelization, NumberOfTestWorkers));
+                }
+                NumberOfTestWorkers = 0;
+            }
+        }
 
         private string GetInnerTextWithLog(XmlNode startNode, string xpath, params string[] validValues)
         {
@@ -289,7 +336,6 @@ namespace NUnit.VisualStudio.TestAdapter
                 _logger.Info($"Setting: {xpath} = {res}");
             }
         }
-
         #endregion
     }
 }
