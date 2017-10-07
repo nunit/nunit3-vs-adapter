@@ -143,15 +143,15 @@ namespace NUnit.VisualStudio.TestAdapter
             Verbosity = GetInnerTextAsInt(nunitNode, nameof(Verbosity), 0);
 
             var runConfiguration = doc.SelectSingleNode("RunSettings/RunConfiguration");
-            MaxCpuCount = GetInnerTextAsInt(runConfiguration, "MaxCpuCount", -1);
-            ResultsDirectory = GetInnerTextWithLog(runConfiguration, "ResultsDirectory");
-            TargetPlatform = GetInnerTextWithLog(runConfiguration, "TargetPlatform");
-            TargetFrameworkVersion = GetInnerTextWithLog(runConfiguration, "TargetFrameworkVersion");
-            TestAdapterPaths = GetInnerTextWithLog(runConfiguration, "TestAdapterPaths");
-            CollectSourceInformation = GetInnerTextAsBool(runConfiguration, "CollectSourceInformation", true);
-            DisableAppDomain = GetInnerTextAsBool(runConfiguration, "DisableAppDomain", false);
-            DisableParallelization = GetInnerTextAsBool(runConfiguration, "DisableParallelization", false);
-            DesignMode = GetInnerTextAsBool(runConfiguration, "DesignMode", false);
+            MaxCpuCount = GetInnerTextAsInt(runConfiguration, nameof(MaxCpuCount), -1);
+            ResultsDirectory = GetInnerTextWithLog(runConfiguration, nameof(ResultsDirectory));
+            TargetPlatform = GetInnerTextWithLog(runConfiguration, nameof(TargetPlatform));
+            TargetFrameworkVersion = GetInnerTextWithLog(runConfiguration, nameof(TargetFrameworkVersion));
+            TestAdapterPaths = GetInnerTextWithLog(runConfiguration, nameof(TestAdapterPaths));
+            CollectSourceInformation = GetInnerTextAsBool(runConfiguration, nameof(CollectSourceInformation), true);
+            DisableAppDomain = GetInnerTextAsBool(runConfiguration, nameof(DisableAppDomain), false);
+            DisableParallelization = GetInnerTextAsBool(runConfiguration, nameof(DisableParallelization), false);
+            DesignMode = GetInnerTextAsBool(runConfiguration, nameof(DesignMode), false);
 
             TestProperties = new Dictionary<string, string>();
             foreach (XmlNode node in doc.SelectNodes("RunSettings/TestRunParameters/Parameter"))
