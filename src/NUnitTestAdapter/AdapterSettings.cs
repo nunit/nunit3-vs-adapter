@@ -252,7 +252,10 @@ namespace NUnit.VisualStudio.TestAdapter
             }
            else if(DisableParallelization && NumberOfTestWorkers > 0)
             {
-                _logger.Warning(string.Format("DisableParallelization:{0} & NumberOfTestWorkers:{1} are conflicting settings, hence not running in parallel", DisableParallelization, NumberOfTestWorkers));
+                if(_logger.Verbosity == 0)
+                {
+                    _logger.Warning(string.Format("DisableParallelization:{0} & NumberOfTestWorkers:{1} are conflicting settings, hence not running in parallel", DisableParallelization, NumberOfTestWorkers));
+                }
                 NumberOfTestWorkers = 0;
             }
         }
@@ -312,17 +315,6 @@ namespace NUnit.VisualStudio.TestAdapter
 
             return bool.Parse(temp);
         }
-
-        private bool? GetInnerTextAsNullableBool(XmlNode startNode, string xpath)
-        {
-            string temp = GetInnerText(startNode, xpath);
-
-            if (string.IsNullOrEmpty(temp))
-                return null;
-
-            return bool.Parse(temp);
-        }
-
         #endregion
     }
 }
