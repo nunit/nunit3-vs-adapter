@@ -252,7 +252,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
            else if(DisableParallelization && NumberOfTestWorkers > 0)
             {
-                if(_logger.Verbosity == 0)
+                if(_logger.Verbosity > 0)
                 {
                     _logger.Warning(string.Format("DisableParallelization:{0} & NumberOfTestWorkers:{1} are conflicting settings, hence not running in parallel", DisableParallelization, NumberOfTestWorkers));
                 }
