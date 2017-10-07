@@ -32,52 +32,19 @@ namespace NUnit.VisualStudio.TestAdapter
 {
     public static class TraitsFeature
     {
-        private static readonly PropertyInfo TraitsProperty;
-        private static readonly MethodInfo TraitsCollectionAdd;
-        private static readonly PropertyInfo NameProperty;
-        private static readonly PropertyInfo ValueProperty;
-
-        static TraitsFeature()
-        {
-            TraitsProperty = typeof(TestCase).GetProperty("Traits");
-            if (TraitsProperty != null)
-            {
-
-                var traitsCollectionType = TraitsProperty.PropertyType;
-                TraitsCollectionAdd = traitsCollectionType.GetMethod("Add", new[] { typeof(string), typeof(string) });
-
-                var traitType = Type.GetType("Microsoft.VisualStudio.TestPlatform.ObjectModel.Trait,Microsoft.VisualStudio.TestPlatform.ObjectModel");
-                if (traitType != null)
-                {
-                    NameProperty = traitType.GetProperty("Name");
-                    ValueProperty = traitType.GetProperty("Value");
-                }
-            }
-
-            IsSupported = TraitsProperty != null && NameProperty != null && ValueProperty != null;
-        }
-
-        public static bool IsSupported { get; private set; }
 
         public static void AddTrait(this TestCase testCase, string name, string value)
         {
-            if (TraitsCollectionAdd != null)
+            if(testCase != null)
             {
-                object traitsCollection = TraitsProperty.GetValue(testCase, new object[0]);
-                TraitsCollectionAdd.Invoke(traitsCollection, new object[] { name, value });
+                testCase.Traits.Add(new Trait(name, value));
             }
         }
 
-        public static void AddTraitsFromTestNode(this TestCase testCase, XmlNode testNode)
-        {
-            if (IsSupported)
-                AddTraitsFromTestNode(testNode, TraitsProperty.GetValue(testCase, new object[0]));
-        }
-
-        private static void AddTraitsFromTestNode(XmlNode test, object traitsCollection)
+        public static void AddTraitsFromTestNode(this TestCase testCase, XmlNode test)
         {
             if (test.ParentNode != null)
-                AddTraitsFromTestNode(test.ParentNode, traitsCollection);
+                AddTraitsFromTestNode(testCase, test.ParentNode);
 
             foreach (XmlNode propertyNode in test.SelectNodes("properties/property"))
             {
@@ -87,7 +54,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 // Property names starting with '_' are for internal use only
                 if (!string.IsNullOrEmpty(propertyName) && propertyName[0] != '_' && !string.IsNullOrEmpty(propertyValue))
                 {
-                    TraitsCollectionAdd.Invoke(traitsCollection, new object[] { propertyName, propertyValue });
+                    AddTrait(testCase, propertyName, propertyValue);
                 }
             }
         }
@@ -96,12 +63,9 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             var traits = new List<NTrait>();
 
-            if (IsSupported)
+            if (testCase != null && testCase.Traits != null)
             {
-                var traitsCollection = TraitsProperty.GetValue(testCase, new object[0]) as IEnumerable<object>;
-
-                if (traitsCollection != null)
-                    traits.AddRange(from traitObject in traitsCollection let name = NameProperty.GetValue(traitObject, new object[0]) as string let value = ValueProperty.GetValue(traitObject, new object[0]) as string select new NTrait(name, value));
+                traits.AddRange(from trait in testCase.Traits let name = trait.Name let value = trait.Value select new NTrait(name, value));
             }
 
             return traits;
