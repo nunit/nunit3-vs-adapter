@@ -73,7 +73,7 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             var node = XmlHelper.CreateXmlNode(report);
 #if !NETCOREAPP1_0
-            dumpXml?.AddString(node.AsString());
+            dumpXml?.AddTestEvent(node.AsString());
 #endif
             try
             {

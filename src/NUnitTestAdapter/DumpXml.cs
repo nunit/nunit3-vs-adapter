@@ -36,6 +36,7 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
     public interface IDumpXml
     {
         void AddString(string text);
+        void AddTestEvent(string text);
     }
 
     public class DumpXml : IDumpXml
@@ -94,6 +95,16 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
             var res2 = Regex.Replace(res, @"[^a-zA-Z0-9]", "");
              return res2+".dump";
         }
+
+        public void AddTestEvent(string text)
+        {
+            txt.Append("<NUnitTestEvent>");
+            txt.Append(text);
+            txt.Append("</NUnitTestEvent>");
+        }
+
+
+
 
 
         public void AddString(string text)
