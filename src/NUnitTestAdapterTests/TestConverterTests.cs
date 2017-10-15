@@ -104,14 +104,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 Assert.That(testCase.LineNumber, Is.EqualTo(FakeTestData.LineNumber));
             }
 
-            // Check traits using reflection, since the feature was added
-            // in an update to VisualStudio and may not be present.
-            if (TraitsFeature.IsSupported)
-            {
-                var traitList = testCase.GetTraits().Select(trait => trait.Name + ":" + trait.Value).ToList();
+            var traitList = testCase.GetTraits().Select(trait => trait.Name + ":" + trait.Value).ToList();
 
-                Assert.That(traitList, Is.EquivalentTo(new[] { "Category:super", "Category:cat1", "Priority:medium" }));
-            }
+            Assert.That(traitList, Is.EquivalentTo(new[] { "Category:super", "Category:cat1", "Priority:medium" }));
         }
     }
 }
