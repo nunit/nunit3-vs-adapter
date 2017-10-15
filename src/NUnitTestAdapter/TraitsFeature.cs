@@ -60,7 +60,7 @@ namespace NUnit.VisualStudio.TestAdapter
                         string propertyName = propertyNode.GetAttribute("name");
                         string propertyValue = propertyNode.GetAttribute("value");
 
-                        AddAttributesToCache(propertiesCache, key, propertyName, propertyValue);
+                        AddTraitsToCache(propertiesCache, key, propertyName, propertyValue);
                         if (!IsInternalProperty(propertyName, propertyValue))
                         {
                             testCase.Traits.Add(new Trait(propertyName, propertyValue));
@@ -95,7 +95,7 @@ namespace NUnit.VisualStudio.TestAdapter
             return string.IsNullOrEmpty(propertyName) || propertyName[0] == '_' || string.IsNullOrEmpty(propertyValue);
         }
 
-        private static void AddAttributesToCache(IDictionary<string, List<Trait>> propertiesCache, string key, string propertyName, string propertyValue)
+        private static void AddTraitsToCache(IDictionary<string, List<Trait>> propertiesCache, string key, string propertyName, string propertyValue)
         {
             if (propertiesCache.ContainsKey(key))
             {
