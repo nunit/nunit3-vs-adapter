@@ -29,7 +29,44 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-    public class AdapterSettings
+    public interface IAdapterSettings
+    {
+        int MaxCpuCount { get; }
+        string ResultsDirectory { get; }
+        string TargetPlatform { get; }
+        string TargetFrameworkVersion { get; }
+        string TestAdapterPaths { get; }
+        bool CollectSourceInformation { get; }
+        IDictionary<string, string> TestProperties { get; }
+        string InternalTraceLevel { get; }
+        string WorkDirectory { get; }
+        int DefaultTimeout { get; }
+        int NumberOfTestWorkers { get; }
+        bool ShadowCopyFiles { get; }
+        int Verbosity { get; }
+        bool UseVsKeepEngineRunning { get; }
+        string BasePath { get; }
+        string PrivateBinPath { get; }
+        int? RandomSeed { get; }
+        bool RandomSeedSpecified { get; }
+        bool InProcDataCollectorsAvailable { get; }
+        bool SynchronousEvents { get; }
+        string DomainUsage { get;  }
+        bool DumpXmlTestDiscovery { get;  }
+        bool DumpXmlTestResults { get;  }
+
+        /// <summary>
+        ///  Syntax documentation <see cref="https://github.com/nunit/docs/wiki/Template-Based-Test-Naming"/>
+        /// </summary>
+        string DefaultTestNamePattern { get;  }
+
+        void Load(IDiscoveryContext context);
+        void Load(string settingsXml);
+        void SaveRandomSeed(string dirname);
+        void RestoreRandomSeed(string dirname);
+    }
+
+    public class AdapterSettings : IAdapterSettings
     {
         private const string RANDOM_SEED_FILE = "nunit_random_seed.tmp";
         private TestLogger _logger;
@@ -55,7 +92,25 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public string TestAdapterPaths { get; private set; }
 
+        /// <summary>
+        /// If false, an adapter need not parse symbols to provide test case file, line number
+        /// </summary>
         public bool CollectSourceInformation { get; private set; }
+
+        /// <summary>
+        /// If true, an adapter shouldn't create appdomains to run tests
+        /// </summary>
+        public bool DisableAppDomain { get; private set; }
+
+        /// <summary>
+        /// If true, an adapter should disable any test case parallelization
+        /// </summary>
+        public bool DisableParallelization { get; private set; }
+
+        /// <summary>
+        /// True if test run is triggered in an IDE/Editor context.
+        /// </summary>
+        public bool DesignMode { get; private set; }
 
         #endregion
 
@@ -92,7 +147,12 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public bool SynchronousEvents { get; private set; }
 
-        public string DomainUsage { get; set; }
+        public string DomainUsage { get; private set; }
+
+
+        public bool DumpXmlTestDiscovery { get; private set; }
+
+        public bool DumpXmlTestResults { get; private set; }
 
         /// <summary>
         ///  Syntax documentation <see cref="https://github.com/nunit/docs/wiki/Template-Based-Test-Naming"/>
@@ -123,6 +183,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             var nunitNode = doc.SelectSingleNode("RunSettings/NUnit");
             Verbosity = GetInnerTextAsInt(nunitNode, nameof(Verbosity), 0);
+            _logger.Verbosity = Verbosity;
 
             var runConfiguration = doc.SelectSingleNode("RunSettings/RunConfiguration");
             MaxCpuCount = GetInnerTextAsInt(runConfiguration, nameof(MaxCpuCount), -1);
@@ -131,6 +192,9 @@ namespace NUnit.VisualStudio.TestAdapter
             TargetFrameworkVersion = GetInnerTextWithLog(runConfiguration, nameof(TargetFrameworkVersion));
             TestAdapterPaths = GetInnerTextWithLog(runConfiguration, nameof(TestAdapterPaths));
             CollectSourceInformation = GetInnerTextAsBool(runConfiguration, nameof(CollectSourceInformation), true);
+            DisableAppDomain = GetInnerTextAsBool(runConfiguration, nameof(DisableAppDomain), false);
+            DisableParallelization = GetInnerTextAsBool(runConfiguration, nameof(DisableParallelization), false);
+            DesignMode = GetInnerTextAsBool(runConfiguration, nameof(DesignMode), false);
 
             TestProperties = new Dictionary<string, string>();
             foreach (XmlNode node in doc.SelectNodes("RunSettings/TestRunParameters/Parameter"))
@@ -141,7 +205,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     TestProperties.Add(key, value);
             }
 
-        
+          // NUnit settings
             InternalTraceLevel = GetInnerTextWithLog(nunitNode, nameof(InternalTraceLevel), "Off", "Error", "Warning", "Info", "Verbose", "Debug");
             WorkDirectory = GetInnerTextWithLog(nunitNode, nameof(WorkDirectory));
             DefaultTimeout = GetInnerTextAsInt(nunitNode, nameof(DefaultTimeout), 0);
@@ -155,6 +219,12 @@ namespace NUnit.VisualStudio.TestAdapter
             if (!RandomSeedSpecified)
                 RandomSeed = new Random().Next();
             DefaultTestNamePattern = GetInnerTextWithLog(nunitNode, nameof(DefaultTestNamePattern));
+
+            DumpXmlTestDiscovery = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestDiscovery),false);
+            DumpXmlTestResults= GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestResults), false);
+
+
+
 #if SUPPORT_REGISTRY_SETTINGS
             // Legacy (CTP) registry settings override defaults
             var registry = RegistryCurrentUser.OpenRegistryCurrentUser(@"Software\nunit.org\VSAdapter");
@@ -184,6 +254,15 @@ namespace NUnit.VisualStudio.TestAdapter
                     _logger.Info($"InProcDataCollectors are available: turning off Parallel, DomainUsage=None, SynchronousEvents=true");
                 }
             }
+
+            // If DisableAppDomain settings is passed from the testplatform, set the DomainUsage to None.
+            if(DisableAppDomain)
+            {
+                DomainUsage = "None";
+            }
+
+            // Update NumberOfTestWorkers based on the DisableParallelization and NumberOfTestWorkers from runsettings.
+            UpdateNumberOfTestWorkers();
         }
 
         public void SaveRandomSeed(string dirname)
@@ -218,6 +297,23 @@ namespace NUnit.VisualStudio.TestAdapter
         #endregion
 
         #region Helper Methods
+
+        private void UpdateNumberOfTestWorkers()
+        {
+            // Overriding the NumberOfTestWorkers if DisableParallelization is true.
+            if(DisableParallelization && NumberOfTestWorkers < 0)
+            {
+                NumberOfTestWorkers = 0;
+            }
+           else if(DisableParallelization && NumberOfTestWorkers > 0)
+            {
+                if(_logger.Verbosity > 0)
+                {
+                    _logger.Warning(string.Format("DisableParallelization:{0} & NumberOfTestWorkers:{1} are conflicting settings, hence not running in parallel", DisableParallelization, NumberOfTestWorkers));
+                }
+                NumberOfTestWorkers = 0;
+            }
+        }
 
         private string GetInnerTextWithLog(XmlNode startNode, string xpath, params string[] validValues)
         {
@@ -289,7 +385,6 @@ namespace NUnit.VisualStudio.TestAdapter
                 _logger.Info($"Setting: {xpath} = {res}");
             }
         }
-
         #endregion
     }
 }

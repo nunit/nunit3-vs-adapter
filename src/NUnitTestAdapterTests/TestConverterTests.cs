@@ -46,7 +46,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void SetUp()
         {
             fakeTestNode = FakeTestData.GetTestNode();
-            testConverter = new TestConverter(new TestLogger(new MessageLoggerStub(), 0), FakeTestData.AssemblyPath, collectSourceInformation: true);
+            testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, collectSourceInformation: true);
         }
 
         [Test]
