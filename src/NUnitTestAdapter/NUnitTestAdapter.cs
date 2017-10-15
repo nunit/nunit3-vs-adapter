@@ -120,6 +120,7 @@ namespace NUnit.VisualStudio.TestAdapter
             TestEngine = new TestEngineClass();
             TestLog = new TestLogger(messageLogger);
             Settings = new AdapterSettings(TestLog);
+            TestLog.InitSettings(Settings);
 
             try
             {

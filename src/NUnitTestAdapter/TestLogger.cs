@@ -38,18 +38,24 @@ namespace NUnit.VisualStudio.TestAdapter
     /// </summary>
     public class TestLogger : IMessageLogger
     {
+        private IAdapterSettings adapterSettings;
         private const string EXCEPTION_FORMAT = "Exception {0}, {1}";
 
         private IMessageLogger MessageLogger { get; set; }
 
         public int Verbosity { get; set; }
 
-        public TestLogger(IMessageLogger messageLogger) : this(messageLogger, 0) { }
-
-        public TestLogger(IMessageLogger messageLogger, int verbosity)
+        public TestLogger(IMessageLogger messageLogger)
         {
+
             MessageLogger = messageLogger;
-            Verbosity = verbosity;
+        }
+
+        public TestLogger InitSettings(IAdapterSettings settings)
+        {
+            adapterSettings = settings;
+            Verbosity = adapterSettings.Verbosity;
+            return this;
         }
 
         #region Error Messages
@@ -73,7 +79,7 @@ namespace NUnit.VisualStudio.TestAdapter
             SendMessage(TestMessageLevel.Warning, message);
         }
 
-        public void Warning(string message,Exception ex)
+        public void Warning(string message, Exception ex)
         {
             SendMessage(TestMessageLevel.Warning, message, ex);
         }
@@ -93,9 +99,9 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void Debug(string message)
         {
-#if DEBUG
-            SendMessage(TestMessageLevel.Informational, message);
-#endif
+            if (adapterSettings?.Verbosity >= 5)
+                SendMessage(TestMessageLevel.Informational, message);
+
         }
 
         #endregion
@@ -116,10 +122,10 @@ namespace NUnit.VisualStudio.TestAdapter
                     var type = ex.GetType();
                     SendMessage(testMessageLevel, string.Format(EXCEPTION_FORMAT, type, message));
                     SendMessage(testMessageLevel, ex.Message);
-                    SendMessage(testMessageLevel,ex.StackTrace);
+                    SendMessage(testMessageLevel, ex.StackTrace);
                     if (ex.InnerException != null)
                     {
-                        SendMessage(testMessageLevel,$"Innerexception: {ex.InnerException.ToString()}");
+                        SendMessage(testMessageLevel, $"Innerexception: {ex.InnerException.ToString()}");
                     }
                     break;
 

@@ -36,6 +36,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Engine;
 using NUnit.Engine.Services;
+using NUnit.VisualStudio.TestAdapter.Dump;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -85,6 +86,8 @@ namespace NUnit.VisualStudio.TestAdapter
                 Unload();
                 return;
             }
+
+
 
             foreach (var assemblyName in sources)
             {
@@ -200,7 +203,7 @@ namespace NUnit.VisualStudio.TestAdapter
             TestLog.Debug("EnableShutdown: " + enableShutdown.ToString());
         }
 
-        private void RunAssembly(string assemblyName, TestFilter filter)
+        private void RunAssembly(string assemblyPath, TestFilter filter)
         {
 #if LAUNCHDEBUGGER
             if (!Debugger.IsAttached)
@@ -209,18 +212,26 @@ namespace NUnit.VisualStudio.TestAdapter
 
             var actionText = Debugger.IsAttached ? "Debugging " : "Running ";
             var selectionText = filter == null || filter == TestFilter.Empty ? "all" : "selected";
-            TestLog.Info(actionText + selectionText + " tests in " + assemblyName);
+            TestLog.Info(actionText + selectionText + " tests in " + assemblyPath);
 
             // No need to restore if the seed was in runsettings file
             if (!Settings.RandomSeedSpecified)
-                Settings.RestoreRandomSeed(Path.GetDirectoryName(assemblyName));
+                Settings.RestoreRandomSeed(Path.GetDirectoryName(assemblyPath));
+            DumpXml dumpXml=null;
+            if (Settings.DumpXmlTestResults)
+            {
+                dumpXml = new Dump.DumpXml(assemblyPath);
+
+            }
 
             try
             {
-                _activeRunner = GetRunnerFor(assemblyName);
+                _activeRunner = GetRunnerFor(assemblyPath);
 
                 var loadResult = _activeRunner.Explore(TestFilter.Empty);
-
+#if !NETCOREAPP1_0
+                dumpXml?.AddString(loadResult.AsString());
+#endif
                 if (loadResult.Name == "test-run")
                     loadResult = loadResult.FirstChild;
 
@@ -228,7 +239,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     var nunitTestCases = loadResult.SelectNodes("//test-case");
 
-                    var testConverter = new TestConverter(TestLog, assemblyName, Settings.CollectSourceInformation);
+                    var testConverter = new TestConverter(TestLog, assemblyPath, Settings.CollectSourceInformation);
 
                     var loadedTestCases = new List<TestCase>();
 
@@ -238,7 +249,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     foreach (XmlNode testNode in nunitTestCases)
                         loadedTestCases.Add(testConverter.ConvertTestCase(testNode));
 
-                    TestLog.Info(string.Format("NUnit3TestExecutor converted {0} of {1} NUnit test cases", loadedTestCases.Count, nunitTestCases.Count));
+                    TestLog.Info($"NUnit3TestExecutor converted {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases");
 
                     // If we have a TFS Filter, convert it to an nunit filter
                     if (TfsFilter != null && !TfsFilter.IsEmpty)
@@ -254,7 +265,7 @@ namespace NUnit.VisualStudio.TestAdapter
                         return;
                     }
 
-                    using (var listener = new NUnitEventListener(FrameworkHandle, testConverter))
+                    using (var listener = new NUnitEventListener(FrameworkHandle, testConverter,dumpXml))
                     {
                         try
                         {
@@ -271,26 +282,27 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     var msgNode = loadResult.SelectSingleNode("properties/property[@name='_SKIPREASON']");
                     if (msgNode != null && (new[] { "contains no tests", "Has no TestFixtures" }).Any(msgNode.GetAttribute("value").Contains))
-                        TestLog.Info("NUnit couldn't find any tests in " + assemblyName);
+                        TestLog.Info("NUnit couldn't find any tests in " + assemblyPath);
                     else
-                        TestLog.Info("NUnit failed to load " + assemblyName);
+                        TestLog.Info("NUnit failed to load " + assemblyPath);
                 }
+                dumpXml?.Dump4Execution();
             }
             catch (BadImageFormatException)
             {
                 // we skip the native c++ binaries that we don't support.
-                TestLog.Warning("Assembly not supported: " + assemblyName);
+                TestLog.Warning("Assembly not supported: " + assemblyPath);
             }
             catch (FileNotFoundException ex)
             {
                 // Probably from the GetExportedTypes in NUnit.core, attempting to find an assembly, not a problem if it is not NUnit here
-                TestLog.Warning("Dependent Assembly " + ex.FileName + " of " + assemblyName + " not found. Can be ignored if not a NUnit project.");
+                TestLog.Warning("Dependent Assembly " + ex.FileName + " of " + assemblyPath + " not found. Can be ignored if not a NUnit project.");
             }
             catch (Exception ex)
             {
                 if (ex is TargetInvocationException)
                     ex = ex.InnerException;
-                TestLog.Warning("Exception thrown executing tests in " + assemblyName, ex);
+                TestLog.Warning("Exception thrown executing tests in " + assemblyPath, ex);
             }
             finally
             {
@@ -304,7 +316,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     // can happen if CLR throws CannotUnloadAppDomainException, for example
                     // due to a long-lasting operation in a protected region (catch/finally clause).
                     if (ex is TargetInvocationException) { ex = ex.InnerException; }
-                    TestLog.Warning("Exception thrown unloading tests from " + assemblyName, ex);
+                    TestLog.Warning("Exception thrown unloading tests from " + assemblyPath, ex);
                 }
             }
         }

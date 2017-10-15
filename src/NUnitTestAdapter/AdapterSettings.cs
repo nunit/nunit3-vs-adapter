@@ -29,7 +29,44 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-    public class AdapterSettings
+    public interface IAdapterSettings
+    {
+        int MaxCpuCount { get; }
+        string ResultsDirectory { get; }
+        string TargetPlatform { get; }
+        string TargetFrameworkVersion { get; }
+        string TestAdapterPaths { get; }
+        bool CollectSourceInformation { get; }
+        IDictionary<string, string> TestProperties { get; }
+        string InternalTraceLevel { get; }
+        string WorkDirectory { get; }
+        int DefaultTimeout { get; }
+        int NumberOfTestWorkers { get; }
+        bool ShadowCopyFiles { get; }
+        int Verbosity { get; }
+        bool UseVsKeepEngineRunning { get; }
+        string BasePath { get; }
+        string PrivateBinPath { get; }
+        int? RandomSeed { get; }
+        bool RandomSeedSpecified { get; }
+        bool InProcDataCollectorsAvailable { get; }
+        bool SynchronousEvents { get; }
+        string DomainUsage { get;  }
+        bool DumpXmlTestDiscovery { get;  }
+        bool DumpXmlTestResults { get;  }
+
+        /// <summary>
+        ///  Syntax documentation <see cref="https://github.com/nunit/docs/wiki/Template-Based-Test-Naming"/>
+        /// </summary>
+        string DefaultTestNamePattern { get;  }
+
+        void Load(IDiscoveryContext context);
+        void Load(string settingsXml);
+        void SaveRandomSeed(string dirname);
+        void RestoreRandomSeed(string dirname);
+    }
+
+    public class AdapterSettings : IAdapterSettings
     {
         private const string RANDOM_SEED_FILE = "nunit_random_seed.tmp";
         private TestLogger _logger;
@@ -110,7 +147,12 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public bool SynchronousEvents { get; private set; }
 
-        public string DomainUsage { get; set; }
+        public string DomainUsage { get; private set; }
+
+
+        public bool DumpXmlTestDiscovery { get; private set; }
+
+        public bool DumpXmlTestResults { get; private set; }
 
         /// <summary>
         ///  Syntax documentation <see cref="https://github.com/nunit/docs/wiki/Template-Based-Test-Naming"/>
@@ -141,6 +183,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             var nunitNode = doc.SelectSingleNode("RunSettings/NUnit");
             Verbosity = GetInnerTextAsInt(nunitNode, nameof(Verbosity), 0);
+            _logger.Verbosity = Verbosity;
 
             var runConfiguration = doc.SelectSingleNode("RunSettings/RunConfiguration");
             MaxCpuCount = GetInnerTextAsInt(runConfiguration, nameof(MaxCpuCount), -1);
@@ -162,7 +205,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     TestProperties.Add(key, value);
             }
 
-        
+          // NUnit settings
             InternalTraceLevel = GetInnerTextWithLog(nunitNode, nameof(InternalTraceLevel), "Off", "Error", "Warning", "Info", "Verbose", "Debug");
             WorkDirectory = GetInnerTextWithLog(nunitNode, nameof(WorkDirectory));
             DefaultTimeout = GetInnerTextAsInt(nunitNode, nameof(DefaultTimeout), 0);
@@ -176,6 +219,12 @@ namespace NUnit.VisualStudio.TestAdapter
             if (!RandomSeedSpecified)
                 RandomSeed = new Random().Next();
             DefaultTestNamePattern = GetInnerTextWithLog(nunitNode, nameof(DefaultTestNamePattern));
+
+            DumpXmlTestDiscovery = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestDiscovery),false);
+            DumpXmlTestResults= GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestResults), false);
+
+
+
 #if SUPPORT_REGISTRY_SETTINGS
             // Legacy (CTP) registry settings override defaults
             var registry = RegistryCurrentUser.OpenRegistryCurrentUser(@"Software\nunit.org\VSAdapter");
