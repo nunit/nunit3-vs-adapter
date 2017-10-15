@@ -77,7 +77,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public TestCase ConvertTestCase(XmlNode testNode)
         {
             if (testNode == null || testNode.Name != "test-case")
-                throw new ArgumentException("The argument must be a test case", "test");
+                throw new ArgumentException("The argument must be a test case", nameof(testNode));
 
             // Return cached value if we have one
             string id = testNode.GetAttribute("id");
