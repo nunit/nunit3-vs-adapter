@@ -1,5 +1,5 @@
 // ***********************************************************************
-// Copyright (c) 2011-2015 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2017 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -24,8 +24,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -38,8 +36,8 @@ namespace NUnit.VisualStudio.TestAdapter
         private readonly TestLogger _logger;
         private readonly Dictionary<string, TestCase> _vsTestCaseMap;
         private readonly string _sourceAssembly;
-        private NavigationDataProvider _navigationDataProvider;
-        private bool _collectSourceInformation;
+        private readonly NavigationDataProvider _navigationDataProvider;
+        private readonly bool _collectSourceInformation;
 
         #region Constructor
 
@@ -49,6 +47,7 @@ namespace NUnit.VisualStudio.TestAdapter
             _sourceAssembly = sourceAssembly;
             _vsTestCaseMap = new Dictionary<string, TestCase>();
             _collectSourceInformation = collectSourceInformation;
+            TraitsCache = new Dictionary<string, List<Trait>>();
 
             if (_collectSourceInformation)
             {
@@ -58,8 +57,9 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #endregion
 
-        #region Public Methods
+        public IDictionary<string, List<Trait>> TraitsCache { get; }
 
+        #region Public Methods
         /// <summary>
         /// Converts an NUnit test into a TestCase for Visual Studio,
         /// using the best method available according to the exact
@@ -68,7 +68,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public TestCase ConvertTestCase(XmlNode testNode)
         {
             if (testNode == null || testNode.Name != "test-case")
-                throw new ArgumentException("The argument must be a test case", "test");
+                throw new ArgumentException("The argument must be a test case", nameof(testNode));
 
             // Return cached value if we have one
             string id = testNode.GetAttribute("id");
@@ -118,11 +118,9 @@ namespace NUnit.VisualStudio.TestAdapter
 
             return results;
         }
-
         #endregion
 
         #region Helper Methods
-
         /// <summary>
         /// Makes a TestCase from an NUnit test, adding
         /// navigation data if it can be found.
@@ -131,7 +129,7 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             var testCase = new TestCase(
                                      testNode.GetAttribute("fullname"),
-                                     new Uri(NUnit3TestExecutor.ExecutorUri),
+                                     new Uri(NUnitTestAdapter.ExecutorUri),
                                      _sourceAssembly)
             {
                 DisplayName = testNode.GetAttribute("name"),
@@ -151,7 +149,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
             }
             
-            testCase.AddTraitsFromTestNode(testNode);
+            testCase.AddTraitsFromTestNode(testNode, TraitsCache);
 
             return testCase;
         }
@@ -218,7 +216,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         /// <summary>
         /// Looks for attachments in a results node and if any attachments are found they
-        /// are added to <paramref name="vsResult"/>
+        /// are returned"/>
         /// </summary>
         /// <param name="resultNode">xml node for test result</param>
         /// <returns>attachments to be added to the test, it will be empty if no attachments are found</returns>

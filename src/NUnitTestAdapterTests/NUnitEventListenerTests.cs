@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2012-2015 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2012-2017 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -148,7 +148,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             testLog = new FakeFrameworkHandle();
             testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, collectSourceInformation: true);
-            MarshalByRefObject localInstance = (MarshalByRefObject)Activator.CreateInstance(typeof(NUnitEventListener), testLog, testConverter);
+            var localInstance = (MarshalByRefObject)Activator.CreateInstance(typeof(NUnitEventListener), testLog, testConverter);
 
             RemotingServices.Marshal(localInstance);
 

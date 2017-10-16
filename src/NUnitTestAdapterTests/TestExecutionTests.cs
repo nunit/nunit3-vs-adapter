@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2012-2015 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2012-2017 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -143,7 +143,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase("NotRunnableTest", TestOutcome.Failed, "No arguments were provided", false)]
         public void TestResultIsReportedCorrectly(string name, TestOutcome outcome, string message, bool hasStackTrace)
         {
-            TestResult testResult = GetTestResult(name);
+            var testResult = GetTestResult(name);
 
             Assert.NotNull(testResult, "Unable to find result for method: " + name);
             Assert.That(testResult.Outcome, Is.EqualTo(outcome));
@@ -155,7 +155,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void AttachmentsShowSupportMultipleFiles()
         {
-            TestResult test = GetTestResult(nameof(FixtureWithAttachment.AttachmentTest));
+            var test = GetTestResult(nameof(FixtureWithAttachment.AttachmentTest));
             Assert.That(test, Is.Not.Null, "Could not find test result");
 
             Assert.That(test.Attachments.Count, Is.EqualTo(1));

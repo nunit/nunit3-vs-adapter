@@ -98,9 +98,9 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
 
         public void AddTestEvent(string text)
         {
-            txt.Append("<NUnitTestEvent>");
+            txt.Append("<NUnitTestEvent>\n");
             txt.Append(text);
-            txt.Append("</NUnitTestEvent>");
+            txt.Append("\n</NUnitTestEvent>\n");
         }
 
 
@@ -126,7 +126,7 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
                     twriter.Formatting = System.Xml.Formatting.Indented;
                     twriter.Indentation = 3;
                     twriter.QuoteChar = '\'';
-                    node.WriteContentTo(twriter);
+                    node.WriteTo(twriter);
                 }
                 return swriter.ToString();
             }
