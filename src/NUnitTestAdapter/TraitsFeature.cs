@@ -21,10 +21,8 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
@@ -34,13 +32,10 @@ namespace NUnit.VisualStudio.TestAdapter
     {
         public static void AddTrait(this TestCase testCase, string name, string value)
         {
-            if(testCase != null)
-            {
-                testCase.Traits.Add(new Trait(name, value));
-            }
+            testCase?.Traits.Add(new Trait(name, value));
         }
 
-        public static void AddTraitsFromTestNode(this TestCase testCase, XmlNode testNode, IDictionary<string,List<Trait>> propertiesCache)
+        public static void AddTraitsFromTestNode(this TestCase testCase, XmlNode testNode, IDictionary<string,List<Trait>> traitsCache)
         {
             var ancestor = testNode.ParentNode;
             var key = ancestor.Attributes?["id"]?.Value;
@@ -48,9 +43,9 @@ namespace NUnit.VisualStudio.TestAdapter
             // Reading ancestor properties of a test-case node. And cacheing it.
             while (ancestor != null && key != null)
             {
-                if (propertiesCache.ContainsKey(key))
+                if (traitsCache.ContainsKey(key))
                 {
-                    testCase.Traits.AddRange(propertiesCache[key]);
+                    testCase.Traits.AddRange(traitsCache[key]);
                 }
                 else
                 {
@@ -60,16 +55,16 @@ namespace NUnit.VisualStudio.TestAdapter
                         string propertyName = propertyNode.GetAttribute("name");
                         string propertyValue = propertyNode.GetAttribute("value");
 
-                        AddTraitsToCache(propertiesCache, key, propertyName, propertyValue);
+                        AddTraitsToCache(traitsCache, key, propertyName, propertyValue);
                         if (!IsInternalProperty(propertyName, propertyValue))
                         {
                             testCase.Traits.Add(new Trait(propertyName, propertyValue));
                         }
                     }
                     // Adding empty list to dictionary, so that we will not make SelectNodes call again.
-                    if (nodesList.Count == 0 && !propertiesCache.ContainsKey(key))
+                    if (nodesList.Count == 0 && !traitsCache.ContainsKey(key))
                     {
-                        propertiesCache[key] = new List<Trait>();
+                        traitsCache[key] = new List<Trait>();
                     }
                 }
                 ancestor = ancestor.ParentNode;
@@ -95,12 +90,12 @@ namespace NUnit.VisualStudio.TestAdapter
             return string.IsNullOrEmpty(propertyName) || propertyName[0] == '_' || string.IsNullOrEmpty(propertyValue);
         }
 
-        private static void AddTraitsToCache(IDictionary<string, List<Trait>> propertiesCache, string key, string propertyName, string propertyValue)
+        private static void AddTraitsToCache(IDictionary<string, List<Trait>> traitsCache, string key, string propertyName, string propertyValue)
         {
-            if (propertiesCache.ContainsKey(key))
+            if (traitsCache.ContainsKey(key))
             {
                 if(!IsInternalProperty(propertyName, propertyValue))
-                    propertiesCache[key].Add(new Trait(propertyName, propertyValue));
+                    traitsCache[key].Add(new Trait(propertyName, propertyValue));
                 return;
             }
 
@@ -112,14 +107,14 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 traits.Add(new Trait(propertyName, propertyValue));
             }
-            propertiesCache[key] = traits;
+            traitsCache[key] = traits;
         }
 
         public static IEnumerable<NTrait> GetTraits(this TestCase testCase)
         {
             var traits = new List<NTrait>();
 
-            if (testCase != null && testCase.Traits != null)
+            if (testCase?.Traits != null)
             {
                 traits.AddRange(from trait in testCase.Traits let name = trait.Name let value = trait.Value select new NTrait(name, value));
             }
@@ -129,8 +124,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
     public class NTrait
     {
-        public string Name { get; private set; }
-        public string Value { get; private set; }
+        public string Name { get; }
+        public string Value { get; }
 
         public NTrait(string name, string value)
         {
