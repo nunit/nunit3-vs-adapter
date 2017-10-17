@@ -148,7 +148,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             testLog = new FakeFrameworkHandle();
             testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, collectSourceInformation: true);
-            var localInstance = (MarshalByRefObject)Activator.CreateInstance(typeof(NUnitEventListener), testLog, testConverter);
+            var localInstance = (MarshalByRefObject)Activator.CreateInstance(typeof(NUnitEventListener), testLog, testConverter,null);
 
             RemotingServices.Marshal(localInstance);
 

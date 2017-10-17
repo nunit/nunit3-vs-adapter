@@ -163,12 +163,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void WhenAssemblyDontExist()
         {
-
-#if DEBUG
-            int noOfMessagesFound = 4;  // Start + end , one debug + info
-#else
             int noOfMessagesFound = 3; // Start + end, + info
-#endif
             var nunittestDiscoverer = new NUnit3TestDiscoverer();
             var context = new FakeDiscoveryContext(null);
             var messageLoggerStub = new MessageLoggerStub();
