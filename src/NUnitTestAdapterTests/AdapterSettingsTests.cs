@@ -1,10 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// ***********************************************************************
+// Copyright (c) 2011-2017 Charlie Poole, Terje Sandstrom
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+// 
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// ***********************************************************************
+
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using NUnit.Framework;
+using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
@@ -15,7 +34,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [SetUp]
         public void SetUp()
         {
-            _settings = new AdapterSettings(null);
+            var testlogger = new TestLogger(new MessageLoggerStub());
+            _settings = new AdapterSettings(testlogger);
+            testlogger.InitSettings(_settings);
         }
 
         [Test]
@@ -50,6 +71,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.False(_settings.SynchronousEvents);
             Assert.Null(_settings.DomainUsage);
             Assert.False(_settings.InProcDataCollectorsAvailable);
+            Assert.IsFalse(_settings.DisableAppDomain);
+            Assert.IsFalse(_settings.DisableParallelization);
+            Assert.IsFalse(_settings.DesignMode);
         }
 
         [Test]
@@ -92,6 +116,44 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             _settings.Load("<RunSettings><RunConfiguration><CollectSourceInformation>False</CollectSourceInformation></RunConfiguration></RunSettings>");
             Assert.That(_settings.CollectSourceInformation, Is.EqualTo(false));
+        }
+
+        [Test]
+        public void DisableAppDomainSetting()
+        {
+            _settings.Load("<RunSettings><RunConfiguration><DisableAppDomain>true</DisableAppDomain></RunConfiguration></RunSettings>");
+            Assert.That(_settings.DisableAppDomain, Is.EqualTo(true));
+        }
+
+        [Test]
+        public void DisableParallelizationSetting()
+        {
+            _settings.Load("<RunSettings><RunConfiguration><DisableParallelization>true</DisableParallelization></RunConfiguration></RunSettings>");
+            Assert.That(_settings.NumberOfTestWorkers, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void UpdateNumberOfTestWorkersWhenConflictingSettings()
+        {
+            _settings.Load("<RunSettings><RunConfiguration><DisableParallelization>true</DisableParallelization></RunConfiguration><NUnit><NumberOfTestWorkers>12</NumberOfTestWorkers></NUnit></RunSettings>");
+
+            // When there's a conflicting values in DisableParallelization and NumberOfTestWorkers. Override the NumberOfTestWorkers.
+            Assert.That(_settings.NumberOfTestWorkers, Is.EqualTo(0));
+
+            // Do not override the NumberOfTestWorkers when DisableParallelization is False
+            _settings.Load("<RunSettings><RunConfiguration><DisableParallelization>false</DisableParallelization></RunConfiguration><NUnit><NumberOfTestWorkers>0</NumberOfTestWorkers></NUnit></RunSettings>");
+            Assert.That(_settings.NumberOfTestWorkers, Is.EqualTo(0));
+
+            // Do not override the NumberOfTestWorkers when DisableParallelization is not defined
+            _settings.Load("<RunSettings><RunConfiguration></RunConfiguration><NUnit><NumberOfTestWorkers>12</NumberOfTestWorkers></NUnit></RunSettings>");
+            Assert.That(_settings.NumberOfTestWorkers, Is.EqualTo(12));
+        }
+
+        [Test]
+        public void DesignModeSetting()
+        {
+            _settings.Load("<RunSettings><RunConfiguration><DesignMode>true</DesignMode></RunConfiguration></RunSettings>");
+            Assert.That(_settings.DesignMode, Is.EqualTo(true));
         }
 
         [Test]

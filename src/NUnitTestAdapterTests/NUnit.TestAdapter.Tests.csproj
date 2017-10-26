@@ -14,13 +14,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="NUnit" Version="3.7.1" />
-    <PackageReference Include="nunit3testadapter" Version="3.7.0" />
-    <PackageReference Include="NUnitLite" Version="3.7.2" />
+    <PackageReference Include="NSubstitute" Version="2.0.3" />
+    <PackageReference Include="NUnit" Version="3.8.1" />
+    <PackageReference Include="nunit3testadapter" Version="3.8.0" />
+    <PackageReference Include="NUnitLite" Version="3.8.1" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
-    <PackageReference Include="Microsoft.VisualStudio.TestPlatform.ObjectModel" Version="0.0.3" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="11.0.0" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">

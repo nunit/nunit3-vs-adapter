@@ -22,6 +22,7 @@
 // ***********************************************************************
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -45,15 +46,65 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void SetUp()
         {
             fakeTestNode = FakeTestData.GetTestNode();
-            testConverter = new TestConverter(new TestLogger(new MessageLoggerStub(), 0), FakeTestData.AssemblyPath, collectSourceInformation: true);
+            testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, collectSourceInformation: true);
         }
 
         [Test]
         public void CanMakeTestCaseFromTest()
         {
             var testCase = testConverter.ConvertTestCase(fakeTestNode);
+            CheckTestCase(testCase);
+        }
+
+        [Test]
+        public void CanMakeTestCaseFromTestWithCache()
+        {
+
+            var testCase = testConverter.ConvertTestCase(fakeTestNode);
 
             CheckTestCase(testCase);
+
+            Assert.That(testConverter.TraitsCache.Keys.Count, Is.EqualTo(1));
+            Assert.That(testConverter.TraitsCache["121"].Count, Is.EqualTo(1));
+            var parentTrait = testConverter.TraitsCache["121"];
+            Assert.That(parentTrait[0].Name, Is.EqualTo("Category"));
+            Assert.That(parentTrait[0].Value, Is.EqualTo("super"));
+        }
+
+        [Test]
+        public void CanMakeTestCaseShouldBuildTraitsCache()
+        {
+            var xmlNodeList = FakeTestData.GetTestNodes();
+
+            foreach(XmlNode node in xmlNodeList)
+            {
+                var testCase = testConverter.ConvertTestCase(node);
+            }
+
+            var traitsCache = testConverter.TraitsCache;
+
+            // There are 12 ids in the TestXml2, but will be storing only ancestor properties.
+            // Not the leaf node test-case properties.
+            Assert.That(traitsCache.Keys.Count, Is.EqualTo(7));
+
+            // Even though ancestor doesn't have any properties. Will be storing their ids.
+            // So that we will not make call SelectNodes call again.
+            CheckNodesWithNoProperties(traitsCache);
+
+            // Will not be storing leaf nodes test-case nodes in the cache.
+            CheckNoTestCaseNodesExist(traitsCache);
+
+            // Checking assembly level attribute.
+            CheckNodeProperties(traitsCache, "0-1009", new KeyValuePair<string, string>[] { new KeyValuePair<string, string>("Category", "AsmCat") });
+
+            // Checking Class level attributes base class & dervied class
+            CheckNodeProperties(traitsCache, "0-1000", new KeyValuePair<string,string>[] { new KeyValuePair<string, string>("Category", "BaseClass") });
+            CheckNodeProperties(traitsCache, "0-1002", new KeyValuePair<string, string>[] { new KeyValuePair<string, string>("Category", "DerivedClass"), new KeyValuePair<string, string>("Category", "BaseClass") });
+
+            // Checking Nested class attributes.
+            CheckNodeProperties(traitsCache, "0-1005", new KeyValuePair<string, string>[] { new KeyValuePair<string, string>("Category", "NS1") });
+            CheckNodeProperties(traitsCache, "0-1007", new KeyValuePair<string, string>[] { new KeyValuePair<string, string>("Category", "NS2") });
+
         }
 
         [Test]
@@ -104,13 +155,34 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 Assert.That(testCase.LineNumber, Is.EqualTo(FakeTestData.LineNumber));
             }
 
-            // Check traits using reflection, since the feature was added
-            // in an update to VisualStudio and may not be present.
-            if (TraitsFeature.IsSupported)
-            {
                 var traitList = testCase.GetTraits().Select(trait => trait.Name + ":" + trait.Value).ToList();
-
                 Assert.That(traitList, Is.EquivalentTo(new[] { "Category:super", "Category:cat1", "Priority:medium" }));
+        }
+
+        private void CheckNodesWithNoProperties(IDictionary<string, List<Trait>> traits)
+        {
+            Assert.That(traits["2"].Count, Is.EqualTo(0));
+            Assert.That(traits["0-1010"].Count, Is.EqualTo(0));
+        }
+
+        private void CheckNoTestCaseNodesExist(IDictionary<string, List<Trait>> traits)
+        {
+            Assert.That(!traits.ContainsKey("0-1008"));
+            Assert.That(!traits.ContainsKey("0-1006"));
+            Assert.That(!traits.ContainsKey("0-1004"));
+            Assert.That(!traits.ContainsKey("0-1003"));
+            Assert.That(!traits.ContainsKey("0-1001"));
+        }
+
+        private void CheckNodeProperties(IDictionary<string, List<Trait>> traitssCache, string id, KeyValuePair<string,string>[] kps)
+        {
+            Assert.That(traitssCache.ContainsKey(id));
+            Assert.That(traitssCache[id].Count, Is.EqualTo(kps.Count()));
+            var traits = traitssCache[id];
+
+            foreach(var kp in kps)
+            {
+                Assert.That(traits.Any(t => t.Name == kp.Key && t.Value == kp.Value));
             }
         }
     }

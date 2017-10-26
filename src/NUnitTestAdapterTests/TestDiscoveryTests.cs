@@ -8,10 +8,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -163,12 +163,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void WhenAssemblyDontExist()
         {
-
-#if DEBUG
-            int noOfMessagesFound = 4;  // Start + end , one debug + info
-#else
             int noOfMessagesFound = 3; // Start + end, + info
-#endif
             var nunittestDiscoverer = new NUnit3TestDiscoverer();
             var context = new FakeDiscoveryContext(null);
             var messageLoggerStub = new MessageLoggerStub();
@@ -183,6 +178,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(!messageLoggerStub.ErrorMessages.Any());
         }
 
+#if NET45
         [Test]
         public void WhenAssemblyIsNative()
         {
@@ -202,6 +198,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var warningmsg = messageLoggerStub.WarningMessages.Select(o => o.Item2).Single();
             Assert.That(warningmsg, Does.Contain("Assembly not supported"));
         }
+#endif
 
         public void SendTestCase(TestCase discoveredTest)
         {

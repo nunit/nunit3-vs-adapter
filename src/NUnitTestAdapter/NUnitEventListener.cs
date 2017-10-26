@@ -31,6 +31,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Engine;
+using NUnit.VisualStudio.TestAdapter.Dump;
 using TestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
 
 namespace NUnit.VisualStudio.TestAdapter
@@ -59,8 +60,9 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 #endif
 
-        public NUnitEventListener(ITestExecutionRecorder recorder, TestConverter testConverter)
+        public NUnitEventListener(ITestExecutionRecorder recorder, TestConverter testConverter, IDumpXml dumpXml)
         {
+            this.dumpXml = dumpXml;
             _recorder = recorder;
             _testConverter = testConverter;
         }
@@ -70,7 +72,9 @@ namespace NUnit.VisualStudio.TestAdapter
         public void OnTestEvent(string report)
         {
             var node = XmlHelper.CreateXmlNode(report);
-
+#if !NETCOREAPP1_0
+            dumpXml?.AddTestEvent(node.AsString());
+#endif
             try
             {
                 switch (node.Name)
@@ -94,8 +98,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             catch(Exception ex)
             {
-                _recorder.SendMessage(TestMessageLevel.Warning,
-                    string.Format("Error processing {0} event for {1}", node.Name, node.GetAttribute("fullname")));
+                _recorder.SendMessage(TestMessageLevel.Warning,$"Error processing {node.Name} event for {node.GetAttribute("fullname")}");
                 _recorder.SendMessage(TestMessageLevel.Warning, ex.ToString());
             }
         }
@@ -182,6 +185,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private static readonly string NL = Environment.NewLine;
         private static readonly int NL_LENGTH = NL.Length;
+        private IDumpXml dumpXml;
 
         public void TestOutput(XmlNode outputNode)
         {

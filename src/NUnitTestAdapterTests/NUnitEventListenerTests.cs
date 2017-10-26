@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2012-2015 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2012-2017 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -48,14 +48,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void SetUp()
         {
             testLog = new FakeFrameworkHandle();
-            testConverter = new TestConverter(new TestLogger(new MessageLoggerStub(), 0), FakeTestData.AssemblyPath, collectSourceInformation: true);
+            testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, collectSourceInformation: true);
             fakeTestNode = FakeTestData.GetTestNode();
 
             // Ensure that the converted testcase is cached
             testConverter.ConvertTestCase(fakeTestNode);
             Assert.NotNull(testConverter.GetCachedTestCase("123"));
             
-            listener = new NUnitEventListener(testLog, testConverter);
+            listener = new NUnitEventListener(testLog, testConverter,null);
         }
 
         #region TestStarted Tests
@@ -147,8 +147,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void Listener_LeaseLifetimeWillNotExpire()
         {
             testLog = new FakeFrameworkHandle();
-            testConverter = new TestConverter(new TestLogger(new MessageLoggerStub(), 0), FakeTestData.AssemblyPath, collectSourceInformation: true);
-            MarshalByRefObject localInstance = (MarshalByRefObject)Activator.CreateInstance(typeof(NUnitEventListener), testLog, testConverter);
+            testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, collectSourceInformation: true);
+            var localInstance = (MarshalByRefObject)Activator.CreateInstance(typeof(NUnitEventListener), testLog, testConverter,null);
 
             RemotingServices.Marshal(localInstance);
 
