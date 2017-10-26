@@ -74,11 +74,11 @@ namespace NUnit.VisualStudio.TestAdapter
             string id = testNode.GetAttribute("id");
             if (_vsTestCaseMap.ContainsKey(id))
                 return _vsTestCaseMap[id];
-           
+
             // Convert to VS TestCase and cache the result
             var testCase = MakeTestCaseFromXmlNode(testNode);
             _vsTestCaseMap.Add(id, testCase);
-            return testCase;             
+            return testCase;
         }
 
         public TestCase GetCachedTestCase(string id)
@@ -127,9 +127,12 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         private TestCase MakeTestCaseFromXmlNode(XmlNode testNode)
         {
-            var testCase = new TestCase(
-                                     testNode.GetAttribute("fullname"),
-                                     new Uri(NUnitTestAdapter.ExecutorUri),
+            var className = testNode.GetAttribute("classname");
+            var methodName = testNode.GetAttribute("methodname");
+            var fullyQualifiedName = $"{className}.{methodName}";  // Former:    testNode.GetAttribute("fullname"),
+
+            var testCase = new TestCase(fullyQualifiedName,
+                                     new Uri(NUnit3TestExecutor.ExecutorUri),
                                      _sourceAssembly)
             {
                 DisplayName = testNode.GetAttribute("name"),
@@ -139,8 +142,6 @@ namespace NUnit.VisualStudio.TestAdapter
 
             if (_collectSourceInformation && _navigationDataProvider != null)
             {
-                var className = testNode.GetAttribute("classname");
-                var methodName = testNode.GetAttribute("methodname");
                 var navData = _navigationDataProvider.GetNavigationData(className, methodName);
                 if (navData.IsValid)
                 {
@@ -259,7 +260,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 case "Failed":
                     return TestOutcome.Failed;
                 case "Skipped":
-                    return resultNode.GetAttribute("label")=="Ignored"
+                    return resultNode.GetAttribute("label") == "Ignored"
                         ? TestOutcome.Skipped
                         : TestOutcome.None;
                 case "Warning":
