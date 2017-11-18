@@ -28,6 +28,7 @@ The package works with Visual Studio 2012 and newer.</description>
             <dependency id="System.ComponentModel.TypeConverter" version="4.3.0" />
             <dependency id="System.Diagnostics.Process" version="4.3.0" />
             <dependency id="System.Reflection" version="4.3.0" />
+            <dependency id="System.Runtime.InteropServices.RuntimeInformation" version="4.3.0" />
             <dependency id="System.Threading.Thread" version="4.3.0" />
             <dependency id="System.Xml.XmlDocument" version="4.3.0" />
             <dependency id="System.Xml.XPath.XmlDocument" version="4.3.0" />
