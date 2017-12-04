@@ -111,7 +111,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void ConvertedTestCaseIsCached()
         {
             testConverter.ConvertTestCase(fakeTestNode);
-            var testCase = testConverter.GetCachedTestCase("123");
+            var testCase = testConverter.GetCachedTestCase(FakeTestData.TestCaseId);
 
             CheckTestCase(testCase);
         }
@@ -148,6 +148,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(testCase.FullyQualifiedName, Is.EqualTo(FakeTestData.FullyQualifiedName));
             Assert.That(testCase.DisplayName, Is.EqualTo(FakeTestData.DisplayName));
             Assert.That(testCase.Source, Is.SamePath(FakeTestData.AssemblyPath));
+            Assert.That(testCase.Id, Is.EqualTo(new Guid(FakeTestData.TestCaseId)));
 
             if (testCase.CodeFilePath != null) // Unavailable if not running under VS
             {
@@ -155,8 +156,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 Assert.That(testCase.LineNumber, Is.EqualTo(FakeTestData.LineNumber));
             }
 
-                var traitList = testCase.GetTraits().Select(trait => trait.Name + ":" + trait.Value).ToList();
-                Assert.That(traitList, Is.EquivalentTo(new[] { "Category:super", "Category:cat1", "Priority:medium" }));
+            var traitList = testCase.GetTraits().Select(trait => trait.Name + ":" + trait.Value).ToList();
+            Assert.That(traitList, Is.EquivalentTo(new[] { "Category:super", "Category:cat1", "Priority:medium" }));
         }
 
         private void CheckNodesWithNoProperties(IDictionary<string, List<Trait>> traits)

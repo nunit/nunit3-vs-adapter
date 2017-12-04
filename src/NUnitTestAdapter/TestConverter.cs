@@ -24,6 +24,8 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -74,11 +76,11 @@ namespace NUnit.VisualStudio.TestAdapter
             string id = testNode.GetAttribute("id");
             if (_vsTestCaseMap.ContainsKey(id))
                 return _vsTestCaseMap[id];
-           
+
             // Convert to VS TestCase and cache the result
             var testCase = MakeTestCaseFromXmlNode(testNode);
             _vsTestCaseMap.Add(id, testCase);
-            return testCase;             
+            return testCase;
         }
 
         public TestCase GetCachedTestCase(string id)
@@ -127,20 +129,24 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         private TestCase MakeTestCaseFromXmlNode(XmlNode testNode)
         {
+            var className = testNode.GetAttribute("classname");
+            var methodName = testNode.GetAttribute("methodname");
+            var fullyQualifiedName = $"{className}.{methodName}";
+            var fullName = testNode.GetAttribute("fullname");
+
             var testCase = new TestCase(
-                                     testNode.GetAttribute("fullname"),
-                                     new Uri(NUnitTestAdapter.ExecutorUri),
-                                     _sourceAssembly)
+                          fullyQualifiedName,
+                          new Uri(NUnitTestAdapter.ExecutorUri),
+                          _sourceAssembly)
             {
                 DisplayName = testNode.GetAttribute("name"),
                 CodeFilePath = null,
-                LineNumber = 0
+                LineNumber = 0,
+                Id = GuidFromString($"{NUnitTestAdapter.ExecutorUri}{_sourceAssembly}{fullName}")
             };
 
             if (_collectSourceInformation && _navigationDataProvider != null)
             {
-                var className = testNode.GetAttribute("classname");
-                var methodName = testNode.GetAttribute("methodname");
                 var navData = _navigationDataProvider.GetNavigationData(className, methodName);
                 if (navData.IsValid)
                 {
@@ -148,7 +154,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     testCase.LineNumber = navData.LineNumber;
                 }
             }
-            
+
             testCase.AddTraitsFromTestNode(testNode, TraitsCache);
 
             return testCase;
@@ -259,7 +265,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 case "Failed":
                     return TestOutcome.Failed;
                 case "Skipped":
-                    return resultNode.GetAttribute("label")=="Ignored"
+                    return resultNode.GetAttribute("label") == "Ignored"
                         ? TestOutcome.Skipped
                         : TestOutcome.None;
                 case "Warning":
@@ -283,6 +289,17 @@ namespace NUnit.VisualStudio.TestAdapter
                 case "Inconclusive":
                 default:
                     return TestOutcome.None;
+            }
+        }
+
+        private Guid GuidFromString(string data)
+        {
+            using (var provider = SHA1.Create())
+            {
+                byte[] hash = provider.ComputeHash(Encoding.Unicode.GetBytes(data));
+                byte[] toGuid = new byte[16];
+                Array.Copy(hash, toGuid, 16);
+                return new Guid(toGuid);
             }
         }
 

@@ -91,11 +91,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase("MockTest3", "NUnit.Tests.Assemblies.MockTestFixture.MockTest3")]
         [TestCase("MockTest4", "NUnit.Tests.Assemblies.MockTestFixture.MockTest4")]
         [TestCase("ExplicitlyRunTest", "NUnit.Tests.Assemblies.MockTestFixture.ExplicitlyRunTest")]
-        [TestCase("MethodWithParameters(9,11)", "NUnit.Tests.FixtureWithTestCases.MethodWithParameters(9,11)")]
         public void VerifyTestCaseIsFound(string name, string fullName)
         {
             var testCase = TestCases.Find(tc => tc.DisplayName == name);
             Assert.That(testCase.FullyQualifiedName, Is.EqualTo(fullName));
+        }
+
+        [TestCase("MethodWithParameters(9,11)", "NUnit.Tests.FixtureWithTestCases.MethodWithParameters(9,11)")]
+        public void VerifyTestCaseWithParametersIsFound(string name, string fullName)
+        {
+            var testCase = TestCases.Find(tc => tc.DisplayName == name);
+            Assert.That(testCase.FullyQualifiedName, Is.SubsetOf(fullName));
         }
 
         [TestCase("NestedClassTest1")] // parent

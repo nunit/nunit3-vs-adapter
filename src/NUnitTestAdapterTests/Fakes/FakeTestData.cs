@@ -46,7 +46,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
                     <property name='Category' value='super' />
                 </properties>
                 <test-case
-                    id='123' 
+                    id='a849281d-1bd6-fb7e-bcb6-a00e2190bfc3' 
                     name='FakeTestCase'
                     fullname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData.FakeTestCase'
                     methodname='FakeTestCase'
@@ -127,7 +127,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
                     <property name='Category' value='super' />
                 </properties>
                 <test-case
-                    id='123' 
+                    id='a849281d-1bd6-fb7e-bcb6-a00e2190bfc3' 
                     name='FakeTestCase'
                     fullname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData.FakeTestCase'
                     methodname='FakeTestCase'
@@ -150,7 +150,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
 
         public const string FullyQualifiedName = "NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData.FakeTestCase";
 
-        public static readonly string AssemblyPath = 
+        public const string TestCaseId = "a849281d-1bd6-fb7e-bcb6-a00e2190bfc3";
+
+        public static readonly string AssemblyPath =
             typeof(FakeTestData).GetTypeInfo().Assembly.ManifestModule.FullyQualifiedName;
 
         public static readonly string CodeFile =
