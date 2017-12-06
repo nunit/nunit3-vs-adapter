@@ -45,7 +45,7 @@ namespace NUnit.VisualStudio.TestAdapter
     [DefaultExecutorUri(NUnit3TestExecutor.ExecutorUri)]
     public sealed class NUnit3TestDiscoverer : NUnitTestAdapter, ITestDiscoverer
     {
-        private Dump.DumpXml dumpXml;
+        private Dump.DumpXml dumpXml;        
 
         #region ITestDiscoverer Members
 
@@ -97,7 +97,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
                     if (topNode.GetAttribute("runstate") == "Runnable")
                     {
-                        var testConverter = new TestConverter(TestLog, sourceAssemblyPath, Settings.CollectSourceInformation);
+                        var testConverter = new TestConverter(TestLog, sourceAssemblyPath, Settings.CollectSourceInformation, pp);
 
                         int cases = ProcessTestCases(topNode, discoverySink, testConverter);
 

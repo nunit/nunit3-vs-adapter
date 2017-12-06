@@ -41,6 +41,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Common;
 using NUnit.Engine;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -59,12 +60,16 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public const string SettingsName = "NUnitAdapterSettings";
 
+        public TestProperty pp = TestProperty.Register("ExecutionFQN", "ExecutionFQN", typeof(string), typeof(NUnit3TestDiscoverer));
+
         #endregion
 
         #region Constructor
 
         protected NUnitTestAdapter()
         {
+            Debugger.Launch();
+
 #if NETCOREAPP1_0
             AdapterVersion = typeof(NUnitTestAdapter).GetTypeInfo().Assembly.GetName().Version.ToString();
 #else

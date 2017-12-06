@@ -40,16 +40,21 @@ namespace NUnit.VisualStudio.TestAdapter
         private readonly string _sourceAssembly;
         private readonly NavigationDataProvider _navigationDataProvider;
         private readonly bool _collectSourceInformation;
+        private readonly TestProperty _pp;
 
         #region Constructor
 
-        public TestConverter(TestLogger logger, string sourceAssembly, bool collectSourceInformation)
+        public TestConverter(TestLogger logger, string sourceAssembly, bool collectSourceInformation, TestProperty pp)
         {
+            System.Diagnostics.Debugger.Launch();
+
             _logger = logger;
             _sourceAssembly = sourceAssembly;
             _vsTestCaseMap = new Dictionary<string, TestCase>();
             _collectSourceInformation = collectSourceInformation;
             TraitsCache = new Dictionary<string, List<Trait>>();
+
+            _pp = pp;
 
             if (_collectSourceInformation)
             {
@@ -130,8 +135,8 @@ namespace NUnit.VisualStudio.TestAdapter
         private TestCase MakeTestCaseFromXmlNode(XmlNode testNode)
         {
             var className = testNode.GetAttribute("classname");
-            var methodName = testNode.GetAttribute("methodname");
-            var fullyQualifiedName = $"{className}.{methodName}";
+            var name = testNode.GetAttribute("methodname"); //method name
+            var fullyQualifiedName = $"{className}.{name}";
             var fullName = testNode.GetAttribute("fullname");
 
             var testCase = new TestCase(
@@ -147,6 +152,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             if (_collectSourceInformation && _navigationDataProvider != null)
             {
+                var methodName = testNode.GetAttribute("methodname");
                 var navData = _navigationDataProvider.GetNavigationData(className, methodName);
                 if (navData.IsValid)
                 {
@@ -156,6 +162,8 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             testCase.AddTraitsFromTestNode(testNode, TraitsCache);
+
+            testCase.SetPropertyValue(_pp, fullName);            
 
             return testCase;
         }
@@ -292,7 +300,8 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
-        private Guid GuidFromString(string data)
+        // Public for testing
+        public static Guid GuidFromString(string data)
         {
             using (var provider = SHA1.Create())
             {
