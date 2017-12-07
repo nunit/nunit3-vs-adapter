@@ -97,7 +97,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var testCase = TestCases.Find(tc => tc.DisplayName == name);
             Assert.That(testCase.FullyQualifiedName, Is.EqualTo(fullName));
         }
-        
+
         [TestCase("NestedClassTest1")] // parent
         [TestCase("NestedClassTest2")] // child
         [TestCase("NestedClassTest3")] // grandchild

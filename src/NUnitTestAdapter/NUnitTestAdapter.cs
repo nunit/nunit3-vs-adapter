@@ -58,6 +58,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public const string ExecutorUri = "executor://NUnit3TestExecutor";
 
         public const string SettingsName = "NUnitAdapterSettings";
+
         #endregion
 
         #region Constructor

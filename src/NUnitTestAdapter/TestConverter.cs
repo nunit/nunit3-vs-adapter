@@ -71,7 +71,7 @@ namespace NUnit.VisualStudio.TestAdapter
             string id = testNode.GetAttribute("id");
             if (_vsTestCaseMap.ContainsKey(id))
                 return _vsTestCaseMap[id];
-
+           
             // Convert to VS TestCase and cache the result
             var testCase = MakeTestCaseFromXmlNode(testNode);
             _vsTestCaseMap.Add(id, testCase);
@@ -127,7 +127,7 @@ namespace NUnit.VisualStudio.TestAdapter
             var methodName = testNode.GetAttribute("methodname");
             var displayName = testNode.GetAttribute("name");
             
-            bool bIsTestNameScenario = string.Compare(methodName, displayName) != 0;
+            bool isTestNameScenario = string.Compare(methodName, displayName) != 0;
 
             var testCase = new TestCase(
                                      testNode.GetAttribute("fullname"),
@@ -139,7 +139,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 LineNumber = 0
             };
 
-            if ((_collectSourceInformation || bIsTestNameScenario) && _navigationDataProvider != null)
+            if ((_collectSourceInformation || isTestNameScenario) && _navigationDataProvider != null)
             {
                 try
                 {

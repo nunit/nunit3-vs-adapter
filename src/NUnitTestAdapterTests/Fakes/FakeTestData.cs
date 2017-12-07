@@ -171,8 +171,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
         public const string DisplayName = "FakeTestCase";
 
         public const string FullyQualifiedName = "NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData.FakeTestCase";
-        
-        public static readonly string AssemblyPath =
+
+        public static readonly string AssemblyPath = 
             typeof(FakeTestData).GetTypeInfo().Assembly.ManifestModule.FullyQualifiedName;
 
         public static readonly string CodeFile =
