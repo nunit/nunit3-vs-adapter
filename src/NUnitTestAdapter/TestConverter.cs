@@ -126,9 +126,9 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             var methodName = testNode.GetAttribute("methodname");
             var displayName = testNode.GetAttribute("name");
-            
-            bool isTestNameScenario = string.Compare(methodName, displayName) != 0;
 
+            bool isTestNameScenario = IsTestNameScenario(testNode, methodName, displayName);
+            
             var testCase = new TestCase(
                                      testNode.GetAttribute("fullname"),
                                      new Uri(NUnitTestAdapter.ExecutorUri),
@@ -160,6 +160,29 @@ namespace NUnit.VisualStudio.TestAdapter
             testCase.AddTraitsFromTestNode(testNode, TraitsCache);
             
             return testCase;
+        }
+
+        private bool IsTestNameScenario(XmlNode testNode, string testCaseMethodName, string testCaseDisplayName)
+        {
+            if (string.Compare(testCaseMethodName, testCaseDisplayName) == 0)
+            {
+                return false;
+            }
+            else
+            {
+                // Either TestName or Parameterized test case scenario
+                int index = testCaseDisplayName.IndexOf('(');
+
+                if (index > -1)
+                {
+                    testCaseDisplayName = testCaseDisplayName.Remove(index).TrimEnd();
+                    return string.Compare(testCaseMethodName, testCaseDisplayName) != 0;
+                }
+                else
+                {
+                    return true;
+                }
+            }
         }
 
         private VSTestResult MakeTestResultFromLegacyXmlNode(XmlNode resultNode)
