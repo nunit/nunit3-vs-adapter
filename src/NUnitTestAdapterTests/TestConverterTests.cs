@@ -149,8 +149,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(testCase.DisplayName, Is.EqualTo(FakeTestData.DisplayName));
             Assert.That(testCase.Source, Is.SamePath(FakeTestData.AssemblyPath));
             
-            Assert.That(testCase.Id, Is.EqualTo(TestConverter.GuidFromString($"{NUnitTestAdapter.ExecutorUri}{FakeTestData.AssemblyPath}{FakeTestData.FullyQualifiedName}")));
-
             if (testCase.CodeFilePath != null) // Unavailable if not running under VS
             {
                 Assert.That(testCase.CodeFilePath, Is.SamePath(FakeTestData.CodeFile));

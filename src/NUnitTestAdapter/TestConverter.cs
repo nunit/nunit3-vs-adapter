@@ -24,8 +24,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -39,27 +37,19 @@ namespace NUnit.VisualStudio.TestAdapter
         private readonly Dictionary<string, TestCase> _vsTestCaseMap;
         private readonly string _sourceAssembly;
         private readonly NavigationDataProvider _navigationDataProvider;
-        private readonly bool _collectSourceInformation;
-        private readonly TestProperty _pp;
+        private readonly bool _collectSourceInformation;        
 
         #region Constructor
 
-        public TestConverter(TestLogger logger, string sourceAssembly, bool collectSourceInformation, TestProperty pp)
+        public TestConverter(TestLogger logger, string sourceAssembly, bool collectSourceInformation)
         {
-            System.Diagnostics.Debugger.Launch();
-
             _logger = logger;
             _sourceAssembly = sourceAssembly;
             _vsTestCaseMap = new Dictionary<string, TestCase>();
-            _collectSourceInformation = collectSourceInformation;
+            _collectSourceInformation = collectSourceInformation;            
             TraitsCache = new Dictionary<string, List<Trait>>();
 
-            _pp = pp;
-
-            if (_collectSourceInformation)
-            {
-                _navigationDataProvider = new NavigationDataProvider(sourceAssembly);
-            }
+            _navigationDataProvider = new NavigationDataProvider(sourceAssembly);
         }
 
         #endregion
@@ -134,25 +124,24 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         private TestCase MakeTestCaseFromXmlNode(XmlNode testNode)
         {
-            var className = testNode.GetAttribute("classname");
-            var name = testNode.GetAttribute("methodname"); //method name
-            var fullyQualifiedName = $"{className}.{name}";
-            var fullName = testNode.GetAttribute("fullname");
+            var methodName = testNode.GetAttribute("methodname");
+            var displayName = testNode.GetAttribute("name");
+            
+            bool bIsTestNameScenario = string.Compare(methodName, displayName) != 0;
 
             var testCase = new TestCase(
-                          fullyQualifiedName,
-                          new Uri(NUnitTestAdapter.ExecutorUri),
-                          _sourceAssembly)
+                                     testNode.GetAttribute("fullname"),
+                                     new Uri(NUnitTestAdapter.ExecutorUri),
+                                     _sourceAssembly)
             {
-                DisplayName = testNode.GetAttribute("name"),
+                DisplayName = displayName,
                 CodeFilePath = null,
-                LineNumber = 0,
-                Id = GuidFromString($"{NUnitTestAdapter.ExecutorUri}{_sourceAssembly}{fullName}")
+                LineNumber = 0
             };
 
-            if (_collectSourceInformation && _navigationDataProvider != null)
+            if ((_collectSourceInformation || bIsTestNameScenario) && _navigationDataProvider != null)
             {
-                var methodName = testNode.GetAttribute("methodname");
+                var className = testNode.GetAttribute("classname");
                 var navData = _navigationDataProvider.GetNavigationData(className, methodName);
                 if (navData.IsValid)
                 {
@@ -162,9 +151,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             testCase.AddTraitsFromTestNode(testNode, TraitsCache);
-
-            testCase.SetPropertyValue(_pp, fullName);            
-
+            
             return testCase;
         }
 
@@ -297,18 +284,6 @@ namespace NUnit.VisualStudio.TestAdapter
                 case "Inconclusive":
                 default:
                     return TestOutcome.None;
-            }
-        }
-
-        // Public for testing
-        public static Guid GuidFromString(string data)
-        {
-            using (var provider = SHA1.Create())
-            {
-                byte[] hash = provider.ComputeHash(Encoding.Unicode.GetBytes(data));
-                byte[] toGuid = new byte[16];
-                Array.Copy(hash, toGuid, 16);
-                return new Guid(toGuid);
             }
         }
 

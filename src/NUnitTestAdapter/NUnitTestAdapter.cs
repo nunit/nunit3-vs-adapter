@@ -59,17 +59,12 @@ namespace NUnit.VisualStudio.TestAdapter
         public const string ExecutorUri = "executor://NUnit3TestExecutor";
 
         public const string SettingsName = "NUnitAdapterSettings";
-
-        public TestProperty pp = TestProperty.Register("ExecutionFQN", "ExecutionFQN", typeof(string), typeof(NUnit3TestDiscoverer));
-
         #endregion
 
         #region Constructor
 
         protected NUnitTestAdapter()
         {
-            Debugger.Launch();
-
 #if NETCOREAPP1_0
             AdapterVersion = typeof(NUnitTestAdapter).GetTypeInfo().Assembly.GetName().Version.ToString();
 #else

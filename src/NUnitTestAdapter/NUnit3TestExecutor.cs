@@ -138,7 +138,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     var assemblyPath = Path.IsPathRooted(assemblyName) ? assemblyName : Path.Combine(Directory.GetCurrentDirectory(), assemblyName);
 
                     var filterBuilder = CreateTestFilterBuilder();
-                    var filter = filterBuilder.MakeTestFilter(assemblyGroup, pp);
+                    var filter = filterBuilder.MakeTestFilter(assemblyGroup);
 
                     RunAssembly(assemblyPath, filter);
                 }
@@ -239,7 +239,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     var nunitTestCases = loadResult.SelectNodes("//test-case");
 
-                    var testConverter = new TestConverter(TestLog, assemblyPath, Settings.CollectSourceInformation, pp);
+                    var testConverter = new TestConverter(TestLog, assemblyPath, Settings.CollectSourceInformation);
 
                     var loadedTestCases = new List<TestCase>();
 
@@ -256,7 +256,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     {
                         // NOTE This overwrites filter used in call
                         var filterBuilder = CreateTestFilterBuilder();
-                        filter = filterBuilder.ConvertTfsFilterToNUnitFilter(TfsFilter, loadedTestCases, pp);
+                        filter = filterBuilder.ConvertTfsFilterToNUnitFilter(TfsFilter, loadedTestCases);
                     }
 
                     if (filter == NUnitTestFilterBuilder.NoTestsFound)

@@ -21,15 +21,15 @@ namespace NUnit.VisualStudio.TestAdapter
             _filterService = filterService;
         }
 
-        public TestFilter ConvertTfsFilterToNUnitFilter(TfsTestFilter tfsFilter, List<TestCase> loadedTestCases, TestProperty pp)
+        public TestFilter ConvertTfsFilterToNUnitFilter(TfsTestFilter tfsFilter, List<TestCase> loadedTestCases)
         {
             var filteredTestCases = tfsFilter.CheckFilter(loadedTestCases);
             var testCases = filteredTestCases as TestCase[] ?? filteredTestCases.ToArray();
             //TestLog.Info(string.Format("TFS Filter detected: LoadedTestCases {0}, Filterered Test Cases {1}", loadedTestCases.Count, testCases.Count()));
-            return MakeTestFilter(testCases, pp);
+            return MakeTestFilter(testCases);
         }
 
-        public TestFilter MakeTestFilter(IEnumerable<TestCase> testCases, TestProperty pp)
+        public TestFilter MakeTestFilter(IEnumerable<TestCase> testCases)
         {
             if (testCases.Count() == 0)
                 return NoTestsFound;
@@ -38,8 +38,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             foreach (TestCase testCase in testCases)
             {
-                string executionFQN = testCase.GetPropertyValue(pp) as string;
-                filterBuilder.AddTest(executionFQN ?? testCase.FullyQualifiedName);
+                filterBuilder.AddTest(testCase.FullyQualifiedName);
             }
 
             return filterBuilder.GetFilter();
