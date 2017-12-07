@@ -141,12 +141,19 @@ namespace NUnit.VisualStudio.TestAdapter
 
             if ((_collectSourceInformation || bIsTestNameScenario) && _navigationDataProvider != null)
             {
-                var className = testNode.GetAttribute("classname");
-                var navData = _navigationDataProvider.GetNavigationData(className, methodName);
-                if (navData.IsValid)
+                try
                 {
-                    testCase.CodeFilePath = navData.FilePath;
-                    testCase.LineNumber = navData.LineNumber;
+                    var className = testNode.GetAttribute("classname");
+                    var navData = _navigationDataProvider.GetNavigationData(className, methodName);
+                    if (navData.IsValid)
+                    {
+                        testCase.CodeFilePath = navData.FilePath;
+                        testCase.LineNumber = navData.LineNumber;
+                    }
+                }
+                catch
+                {
+                    // Above code will throw for VS for Mac. We dont want test discovery/execution to be aborted due to this.
                 }
             }
 
