@@ -143,6 +143,22 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(testResult.Duration, Is.EqualTo(TimeSpan.FromSeconds(1.234)));
         }
 
+        [Test]
+        public void NavigationInformationForTestNameScenario()
+        {   
+            TestConverter converterWithCSIFalse = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, collectSourceInformation: false);
+            var testCaseWithNoNavigationData = converterWithCSIFalse.ConvertTestCase(fakeTestNode);
+
+            Assert.That(string.IsNullOrEmpty(testCaseWithNoNavigationData.CodeFilePath), Is.EqualTo(true));
+            Assert.That(testCaseWithNoNavigationData.LineNumber, Is.EqualTo(0));
+
+            XmlNode differentDisplayName = FakeTestData.GetTestNodeForDifferentDisplayName();
+            var testCaseWithNavigationData = converterWithCSIFalse.ConvertTestCase(differentDisplayName);
+
+            Assert.That(string.IsNullOrEmpty(testCaseWithNavigationData.CodeFilePath), Is.EqualTo(false));
+            Assert.That(testCaseWithNavigationData.LineNumber, Is.GreaterThanOrEqualTo(0));
+        }
+
         private void CheckTestCase(TestCase testCase)
         {
             Assert.That(testCase.FullyQualifiedName, Is.EqualTo(FakeTestData.FullyQualifiedName));
