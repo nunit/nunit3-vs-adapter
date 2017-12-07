@@ -157,6 +157,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             Assert.That(string.IsNullOrEmpty(testCaseWithNavigationData.CodeFilePath), Is.EqualTo(false));
             Assert.That(testCaseWithNavigationData.LineNumber, Is.GreaterThanOrEqualTo(0));
+
+            XmlNode parameterizedTestCase = FakeTestData.GetTestNodeForParameterizedTestCase();
+            var parameterizedTestCaseWithoutNavigationData = converterWithCSIFalse.ConvertTestCase(parameterizedTestCase);
+
+            Assert.That(string.IsNullOrEmpty(parameterizedTestCaseWithoutNavigationData.CodeFilePath), Is.EqualTo(true));
+            Assert.That(parameterizedTestCaseWithoutNavigationData.LineNumber, Is.EqualTo(0));
         }
 
         private void CheckTestCase(TestCase testCase)
