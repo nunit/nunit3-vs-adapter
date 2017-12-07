@@ -46,7 +46,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
                     <property name='Category' value='super' />
                 </properties>
                 <test-case
-                    id='a849281d-1bd6-fb7e-bcb6-a00e2190bfc3' 
+                    id='123' 
                     name='FakeTestCase'
                     fullname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData.FakeTestCase'
                     methodname='FakeTestCase'
@@ -60,7 +60,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
 
         public const string TestXmlWithDifferentDisplayName =
             @"<test-suite
-                id='122'
+                id='132'
                 name='FakeTestData'
                 fullname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData'
                 classname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData'>
@@ -68,7 +68,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
                     <property name='Category' value='super' />
                 </properties>
                 <test-case
-                    id='b527101h-4ha2-bc4d-cca3-c25a3201ced4' 
+                    id='133' 
                     name='FakeTestDisplayName'
                     fullname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData.FakeTestDisplayName'
                     methodname='FakeTestCase'
@@ -149,7 +149,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
                     <property name='Category' value='super' />
                 </properties>
                 <test-case
-                    id='a849281d-1bd6-fb7e-bcb6-a00e2190bfc3' 
+                    id='123' 
                     name='FakeTestCase'
                     fullname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData.FakeTestCase'
                     methodname='FakeTestCase'
@@ -171,9 +171,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
         public const string DisplayName = "FakeTestCase";
 
         public const string FullyQualifiedName = "NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData.FakeTestCase";
-
-        public const string TestCaseId = "a849281d-1bd6-fb7e-bcb6-a00e2190bfc3";
-
+        
         public static readonly string AssemblyPath =
             typeof(FakeTestData).GetTypeInfo().Assembly.ManifestModule.FullyQualifiedName;
 

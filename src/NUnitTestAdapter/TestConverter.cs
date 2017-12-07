@@ -37,7 +37,7 @@ namespace NUnit.VisualStudio.TestAdapter
         private readonly Dictionary<string, TestCase> _vsTestCaseMap;
         private readonly string _sourceAssembly;
         private readonly NavigationDataProvider _navigationDataProvider;
-        private readonly bool _collectSourceInformation;        
+        private readonly bool _collectSourceInformation;
 
         #region Constructor
 
@@ -46,7 +46,7 @@ namespace NUnit.VisualStudio.TestAdapter
             _logger = logger;
             _sourceAssembly = sourceAssembly;
             _vsTestCaseMap = new Dictionary<string, TestCase>();
-            _collectSourceInformation = collectSourceInformation;            
+            _collectSourceInformation = collectSourceInformation; 
             TraitsCache = new Dictionary<string, List<Trait>>();
 
             _navigationDataProvider = new NavigationDataProvider(sourceAssembly);
@@ -75,7 +75,7 @@ namespace NUnit.VisualStudio.TestAdapter
             // Convert to VS TestCase and cache the result
             var testCase = MakeTestCaseFromXmlNode(testNode);
             _vsTestCaseMap.Add(id, testCase);
-            return testCase;
+            return testCase;             
         }
 
         public TestCase GetCachedTestCase(string id)
@@ -267,7 +267,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 case "Failed":
                     return TestOutcome.Failed;
                 case "Skipped":
-                    return resultNode.GetAttribute("label") == "Ignored"
+                    return resultNode.GetAttribute("label")=="Ignored"
                         ? TestOutcome.Skipped
                         : TestOutcome.None;
                 case "Warning":

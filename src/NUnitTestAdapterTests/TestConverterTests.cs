@@ -111,7 +111,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void ConvertedTestCaseIsCached()
         {
             testConverter.ConvertTestCase(fakeTestNode);
-            var testCase = testConverter.GetCachedTestCase(FakeTestData.TestCaseId);
+            var testCase = testConverter.GetCachedTestCase("123");
 
             CheckTestCase(testCase);
         }
@@ -164,7 +164,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(testCase.FullyQualifiedName, Is.EqualTo(FakeTestData.FullyQualifiedName));
             Assert.That(testCase.DisplayName, Is.EqualTo(FakeTestData.DisplayName));
             Assert.That(testCase.Source, Is.SamePath(FakeTestData.AssemblyPath));
-            
+
             if (testCase.CodeFilePath != null) // Unavailable if not running under VS
             {
                 Assert.That(testCase.CodeFilePath, Is.SamePath(FakeTestData.CodeFile));

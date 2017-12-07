@@ -53,7 +53,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             // Ensure that the converted testcase is cached
             testConverter.ConvertTestCase(fakeTestNode);
-            Assert.NotNull(testConverter.GetCachedTestCase("a849281d-1bd6-fb7e-bcb6-a00e2190bfc3"));
+            Assert.NotNull(testConverter.GetCachedTestCase("123"));
 
             listener = new NUnitEventListener(testLog, testConverter,null);
         }
@@ -63,7 +63,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void TestStarted_CallsRecordStartCorrectly()
         {
-            listener.OnTestEvent("<start-test id='a849281d-1bd6-fb7e-bcb6-a00e2190bfc3' name='FakeTestMethod'/>");
+            listener.OnTestEvent("<start-test id='123' name='FakeTestMethod'/>");
             Assert.That(testLog.Events.Count, Is.EqualTo(1));
             Assert.That(
                 testLog.Events[0].EventType,
