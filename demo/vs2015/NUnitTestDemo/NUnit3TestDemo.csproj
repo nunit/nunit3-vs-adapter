@@ -48,25 +48,51 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ApartmentTests.cs" />
-    <Compile Include="AsyncTests.cs" />
-    <Compile Include="ConfigFileTests.cs" />
-    <Compile Include="ExpectedOutcomeAttributes.cs" />
-    <Compile Include="GenericTests.cs" />
-    <Compile Include="InheritedTestTests.cs" />
-    <Compile Include="TextOutputTests.cs" />
-    <Compile Include="ParameterizedTests.cs" />
-    <Compile Include="SetUpFixtureTests.cs" />
-    <Compile Include="SimpleTests.cs" />
+    <Compile Include="..\..\csharp\ApartmentTests.cs">
+      <Link>ApartmentTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\csharp\AsyncTests.cs">
+      <Link>AsyncTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\csharp\ConfigFileTests.cs">
+      <Link>ConfigFileTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\csharp\ExpectedOutcomeAttributes.cs">
+      <Link>ExpectedOutcomeAttributes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\csharp\GenericTests.cs">
+      <Link>GenericTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\csharp\InheritedTestTests.cs">
+      <Link>InheritedTestTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\csharp\OneTimeSetUpTests.cs">
+      <Link>OneTimeSetUpTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\csharp\ParameterizedTests.cs">
+      <Link>ParameterizedTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\csharp\SetUpFixtureTests.cs">
+      <Link>SetUpFixtureTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\csharp\SimpleTests.cs">
+      <Link>SimpleTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\csharp\TextOutputTests.cs">
+      <Link>TextOutputTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\csharp\Theories.cs">
+      <Link>Theories.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="OneTimeSetUpTests.cs" />
-    <Compile Include="Theories.cs" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="..\..\App.config">
+      <Link>App.config</Link>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -14,16 +14,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\NUnitTestDemo\AsyncTests.cs" Link="AsyncTests.cs" />
-    <Compile Include="..\NUnitTestDemo\ExpectedOutcomeAttributes.cs" Link="ExpectedOutcomeAttributes.cs" />
-    <Compile Include="..\NUnitTestDemo\GenericTests.cs" Link="GenericTests.cs" />
-    <Compile Include="..\NUnitTestDemo\InheritedTestTests.cs" Link="InheritedTestTests.cs" />
-    <Compile Include="..\NUnitTestDemo\OneTimeSetUpTests.cs" Link="OneTimeSetUpTests.cs" />
-    <Compile Include="..\NUnitTestDemo\ParameterizedTests.cs" Link="ParameterizedTests.cs" />
-    <Compile Include="..\NUnitTestDemo\SetUpFixtureTests.cs" Link="SetUpFixtureTests.cs" />
-    <Compile Include="..\NUnitTestDemo\SimpleTests.cs" Link="SimpleTests.cs" />
-    <Compile Include="..\NUnitTestDemo\TextOutputTests.cs" Link="TextOutputTests.cs" />
-    <Compile Include="..\NUnitTestDemo\Theories.cs" Link="Theories.cs" />
+    <Compile Include="..\..\csharp\AsyncTests.cs" Link="AsyncTests.cs" />
+    <Compile Include="..\..\csharp\ExpectedOutcomeAttributes.cs" Link="ExpectedOutcomeAttributes.cs" />
+    <Compile Include="..\..\csharp\GenericTests.cs" Link="GenericTests.cs" />
+    <Compile Include="..\..\csharp\InheritedTestTests.cs" Link="InheritedTestTests.cs" />
+    <Compile Include="..\..\csharp\OneTimeSetUpTests.cs" Link="OneTimeSetUpTests.cs" />
+    <Compile Include="..\..\csharp\ParameterizedTests.cs" Link="ParameterizedTests.cs" />
+    <Compile Include="..\..\csharp\SetUpFixtureTests.cs" Link="SetUpFixtureTests.cs" />
+    <Compile Include="..\..\csharp\SimpleTests.cs" Link="SimpleTests.cs" />
+    <Compile Include="..\..\csharp\TextOutputTests.cs" Link="TextOutputTests.cs" />
+    <Compile Include="..\..\csharp\Theories.cs" Link="Theories.cs" />
   </ItemGroup>
 
   <ItemGroup>
