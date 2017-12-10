@@ -75,7 +75,7 @@ var ADAPTER_PROJECT = SRC_DIR + "NUnitTestAdapter/NUnit.TestAdapter.csproj";
 var TEST_PROJECT = SRC_DIR + "NUnitTestAdapterTests/NUnit.TestAdapter.Tests.csproj";
 var DEMO_SOLUTION = DEMO_DIR + "csharp/NUnit3TestDemo.sln";
 string[] DemoSolutions = System.IO.Directory.GetFiles(DEMO_DIR, "*.sln", SearchOption.AllDirectories);
-string[] DemoProjects = System.IO.Directory.GetFiles(DEMO_DIR, "*.csproj", SearchOption.AllDirectories);
+string[] DemoProjects = System.IO.Directory.GetFiles(DEMO_DIR, "*.*proj", SearchOption.AllDirectories);
 
 var NET35_BIN_DIR = SRC_DIR + "NUnitTestAdapter/bin/" + configuration + "/net35/";
 var NETCORE_BIN_DIR = SRC_DIR + "NUnitTestAdapter/bin/" + configuration + "/netcoreapp1.0/";
