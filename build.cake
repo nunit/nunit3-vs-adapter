@@ -233,10 +233,17 @@ Task("BuildDemos")
             //ToolPath = msBuildPathX64,
             //ToolVersion = MSBuildToolVersion.VS2017
         };
-        settings.EnvironmentVariables.Add("PackageVersion", packageVersion);
+        //settings.EnvironmentVariables.Add("PackageVersion", packageVersion);
 
-		foreach (var sln in DemoSolutions)
-			MSBuild(sln, settings);
+		foreach (var proj in DemoProjects)
+		{
+			if (proj.Contains("vs2017"))
+				settings.ToolVersion = MSBuildToolVersion.VS2017;
+			else if (proj.Contains("vs2015"))
+				settings.ToolVersion = MSBuildToolVersion.VS2015;
+
+			MSBuild(proj, settings);
+		}
     });
 
 Task("RunDemos")
@@ -245,13 +252,19 @@ Task("RunDemos")
 	{
         var vstestSettings = new VSTestSettings()
         {
+			InIsolation = true,
             ArgumentCustomization = args => args.Append("/TestAdapterPath:" + NET35_BIN_DIR)
         };
 
 		foreach(var proj in DemoProjects)
 		{
+			// All somewhat adhoc for the time being, until we create separate
+			// scripts for each project.
 			var demoName = System.IO.Path.GetFileNameWithoutExtension(proj);
-			var binDir = System.IO.Path.GetDirectoryName(proj) + "/bin/" + configuration + "/";
+			var binDir = System.IO.Path.GetDirectoryName(proj) + "/";
+			if (!demoName.StartsWith("Cpp"))
+				binDir += "bin/";
+			binDir += configuration + "/";
 			var testAssembly = binDir + demoName + ".dll";
 
 			Information("");
