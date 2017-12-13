@@ -66,7 +66,8 @@ namespace NUnitTestDemo
 			return Task.Run(() => 1);
 		}
 
-		private static Task<int> ThrowException()
+#pragma warning disable 162
+        private static Task<int> ThrowException()
 		{
 			return Task.Run(() =>
 			{
@@ -74,5 +75,6 @@ namespace NUnitTestDemo
 				return 1;
 			});
 		}
-	}
+#pragma warning restore 162
+    }
 }

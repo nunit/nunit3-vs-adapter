@@ -61,36 +61,50 @@ var packageName = "NUnit3TestAdapter-" + packageVersion;
 // DEFINE RUN CONSTANTS
 //////////////////////////////////////////////////////////////////////
 
-// Directories
+// Top-Level Directories
 var PROJECT_DIR = Context.Environment.WorkingDirectory.FullPath + "/";
 var PACKAGE_DIR = PROJECT_DIR + "package/";
 var PACKAGE_IMAGE_DIR = PACKAGE_DIR + packageName + "/";
 var SRC_DIR = PROJECT_DIR + "src/";
-var TOOLS_DIR = PROJECT_DIR + "tools/";
 var BIN_DIR = PROJECT_DIR + "bin/" + configuration + "/";
-var DEMO_BIN_DIR = PROJECT_DIR + "demo/NUnitTestDemo/bin/" + configuration + "/";
+var DEMO_DIR = PROJECT_DIR + "demo/";
 
+// Solutions and Projects
+var ADAPTER_SOLUTION = PROJECT_DIR + "NUnit3TestAdapter.sln";
 var ADAPTER_PROJECT = SRC_DIR + "NUnitTestAdapter/NUnit.TestAdapter.csproj";
+var TEST_PROJECT = SRC_DIR + "NUnitTestAdapterTests/NUnit.TestAdapter.Tests.csproj";
+var DEMO_SOLUTION = DEMO_DIR + "csharp/NUnit3TestDemo.sln";
+string[] DemoSolutions = System.IO.Directory.GetFiles(DEMO_DIR, "*.sln", SearchOption.AllDirectories);
+string[] DemoProjects = System.IO.Directory.GetFiles(DEMO_DIR, "*.*proj", SearchOption.AllDirectories);
 
 var NET35_BIN_DIR = SRC_DIR + "NUnitTestAdapter/bin/" + configuration + "/net35/";
+var NETCORE_BIN_DIR = SRC_DIR + "NUnitTestAdapter/bin/" + configuration + "/netcoreapp1.0/";
 
 var BIN_DIRS = new [] {
-    PROJECT_DIR + "src/empty-assembly/bin",
-    PROJECT_DIR + "src/mock-assembly/bin",
-    PROJECT_DIR + "src/NUnit3TestAdapterInstall/bin",
-    PROJECT_DIR + "src/NUnit3TestAdapter/bin",
-    PROJECT_DIR + "src/NUnit3TestAdapterTests/bin",
+    SRC_DIR + "empty-assembly/bin",
+    SRC_DIR + "mock-assembly/bin",
+    SRC_DIR + "NUnit3TestAdapterInstall/bin",
+    SRC_DIR + "NUnit3TestAdapter/bin",
+    SRC_DIR + "NUnit3TestAdapterTests/bin",
 };
 
-// Solutions
-var ADAPTER_SOLUTION = PROJECT_DIR + "NUnit3TestAdapter.sln";
-var DEMO_SOLUTION = PROJECT_DIR + "demo/NUnit3TestDemo.sln";
+var DEMO_BIN_DIRS = new [] {
+	DEMO_DIR + "csharp/NUnitTestDemo/bin/" + configuration + "/"
+};
 
 // Test Assemblies
-var DEMO_TESTS = DEMO_BIN_DIR + "NUnit3TestDemo.dll";
+var DEMO_TESTS = DEMO_BIN_DIRS[0] + "NUnit3TestDemo.dll";
 
 var TEST_NET35 = SRC_DIR + "NUnitTestAdapterTests/bin/" + configuration + "/net45/NUnit.VisualStudio.TestAdapter.Tests.exe";
-var TEST_PROJECT = SRC_DIR + "NUnitTestAdapterTests/NUnit.TestAdapter.Tests.csproj";
+
+Task("Dump")
+	.Does(() =>
+	{
+		foreach (var sln in DemoSolutions)
+			Information(sln);
+		foreach (var proj in DemoProjects)
+			Information(proj);
+	});
 
 //////////////////////////////////////////////////////////////////////
 // CLEAN
@@ -101,7 +115,8 @@ Task("Clean")
 {
     foreach(var dir in BIN_DIRS)
         CleanDirectory(dir);
-	CleanDirectory(DEMO_BIN_DIR);
+	foreach(var dir in DEMO_BIN_DIRS)
+		CleanDirectory(dir);
 });
 
 //////////////////////////////////////////////////////////////////////
@@ -110,28 +125,19 @@ Task("Clean")
 
 Task("NuGetRestore")
     .Does(() =>
-{
-    Information("Restoring NuGet Packages for the Adapter Solution");
-	DotNetCoreRestore(ADAPTER_SOLUTION);
+	{
+		Information("Restoring NuGet Packages for the Adapter Solution");
+		DotNetCoreRestore(ADAPTER_SOLUTION);
 
-    Information("Restoring NuGet Packages for the VSIX project");
-    NuGetRestore(PROJECT_DIR + "src/NUnit3TestAdapterInstall/NUnit3TestAdapterInstall.csproj",
-                 new NuGetRestoreSettings {
-                     PackagesDirectory = PROJECT_DIR + "packages"
-                 });
-
-    Information("Restoring NuGet Packages for the Demo .NET Core Project");
-	DotNetCoreRestore(PROJECT_DIR + "demo/NUnit3CoreTestDemo/NUnit3CoreTestDemo.csproj");
-
-    Information("Restoring NuGet Packages for the Demo .NET Project");
-    NuGetRestore(PROJECT_DIR + "demo/NUnitTestDemo/NUnit3TestDemo.csproj",
-                 new NuGetRestoreSettings {
-                     PackagesDirectory = PROJECT_DIR + "demo/packages"
-                 });
-});
+		Information("Restoring NuGet Packages for the VSIX project");
+		NuGetRestore(SRC_DIR + "NUnit3TestAdapterInstall/NUnit3TestAdapterInstall.csproj",
+					 new NuGetRestoreSettings {
+						 PackagesDirectory = PROJECT_DIR + "packages"
+					 });
+	});
 
 //////////////////////////////////////////////////////////////////////
-// BUILD
+// BUILD TASKS
 //////////////////////////////////////////////////////////////////////
 
 Task("Build")
@@ -155,10 +161,9 @@ Task("Build")
         };
         settings.EnvironmentVariables.Add("PackageVersion", packageVersion);
 
-        MSBuild(PROJECT_DIR + "src/NUnitTestAdapterTests/NUnit.TestAdapter.Tests.csproj", settings);
-        MSBuild(PROJECT_DIR + "src/NUnit3TestAdapterInstall/NUnit3TestAdapterInstall.csproj", settings);
-		MSBuild(DEMO_SOLUTION, settings);
-    });
+        MSBuild(SRC_DIR + "NUnitTestAdapterTests/NUnit.TestAdapter.Tests.csproj", settings);
+        MSBuild(SRC_DIR + "NUnit3TestAdapterInstall/NUnit3TestAdapterInstall.csproj", settings);
+	});
 
 //////////////////////////////////////////////////////////////////////
 // TEST
@@ -196,22 +201,90 @@ Task("TestAdapterUsingVSTest")
 		VSTest(TEST_NET35, VSTestCustomSettings);
 	});
 
-Task("TestDemo")
-	.IsDependentOn("Build")
+//////////////////////////////////////////////////////////////////////
+// Demo-related Tasks
+//////////////////////////////////////////////////////////////////////
+
+Task("NuGetRestoreDemos")
 	.Does(() =>
 	{
-		try
+		foreach (var sln in DemoSolutions)
 		{
-            var VSTestCustomSettings = new VSTestSettings()
-            {
-                ArgumentCustomization = args => args.Append("/TestAdapterPath:" + NET35_BIN_DIR)
-            };
-			VSTest(DEMO_TESTS, VSTestCustomSettings);
+			Information("Restoring NuGet Packages for " + sln);
+			NuGetRestore(sln,
+				new NuGetRestoreSettings {
+					PackagesDirectory = System.IO.Path.GetDirectoryName(sln) + "/packages"
+				});
+			DotNetCoreRestore(sln);
 		}
-		catch(Exception ex)
+	});
+
+Task("BuildDemos")
+	.IsDependentOn("Build")
+	.IsDependentOn("NugetRestoreDemos")
+	.Does(() =>
+	{
+        var settings = new MSBuildSettings
+        {
+            Configuration = configuration,
+            EnvironmentVariables = new Dictionary<string, string>(),
+            NodeReuse = false,
+            PlatformTarget = PlatformTarget.MSIL,
+            //ToolPath = msBuildPathX64,
+            //ToolVersion = MSBuildToolVersion.VS2017
+        };
+        //settings.EnvironmentVariables.Add("PackageVersion", packageVersion);
+
+		foreach (var proj in DemoProjects)
 		{
-			Information("\nNOTE: Demo tests failed as expected.");
-			Information("This is normally not an error.\n");
+			if (proj.Contains("vs2017"))
+				settings.ToolVersion = MSBuildToolVersion.VS2017;
+			else if (proj.Contains("vs2015"))
+				settings.ToolVersion = MSBuildToolVersion.VS2015;
+
+			MSBuild(proj, settings);
+		}
+    });
+
+Task("RunDemos")
+	.IsDependentOn("BuildDemos")
+	.Does(() =>
+	{
+        var vstestSettings = new VSTestSettings()
+        {
+			InIsolation = true,
+            ArgumentCustomization = args => args.Append("/TestAdapterPath:" + NET35_BIN_DIR)
+        };
+
+		foreach(var proj in DemoProjects)
+		{
+			// All somewhat adhoc for the time being, until we create separate
+			// scripts for each project.
+			var demoName = System.IO.Path.GetFileNameWithoutExtension(proj);
+			var binDir = System.IO.Path.GetDirectoryName(proj) + "/";
+			if (!demoName.StartsWith("Cpp"))
+				binDir += "bin/";
+			binDir += configuration + "/";
+			var testAssembly = binDir + demoName + ".dll";
+
+			Information("");
+			Information("********************************************************************************************");
+			Information("Demo: " + testAssembly);
+			Information("********************************************************************************************");
+			Information("");
+
+			try
+			{
+                if (!demoName.Contains("Core"))
+                    VSTest(testAssembly, vstestSettings);
+                else
+                    Information("Skipping .NET Core demo for now");
+			}
+			catch(Exception ex)
+			{
+				Information("\nNOTE: Demo tests failed as expected.");
+				Information("This is normally not an error.\n");
+			}
 		}
 	});
 
@@ -310,6 +383,7 @@ Task("Package")
 Task("Appveyor")
 	.IsDependentOn("Build")
 	.IsDependentOn("Test")
+	.IsDependentOn("RunDemos")
 	.IsDependentOn("Package");
 
 Task("Default")

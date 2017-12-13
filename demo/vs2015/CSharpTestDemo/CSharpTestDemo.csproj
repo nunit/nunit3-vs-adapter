@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{03C3F9EC-FB25-46C0-8F0D-17A0C6E60E9F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NUnitTestDemo</RootNamespace>
+    <AssemblyName>CSharpTestDemo</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="nunit.framework, Version=3.9.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>packages\NUnit.3.9.0\lib\net45\nunit.framework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\csharp\ApartmentTests.cs">
+      <Link>ApartmentTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\csharp\AsyncTests.cs">
+      <Link>AsyncTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\csharp\ConfigFileTests.cs">
+      <Link>ConfigFileTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\csharp\ExpectedOutcomeAttributes.cs">
+      <Link>ExpectedOutcomeAttributes.cs</Link>
+    </Compile>
+    <Compile Include="..\..\csharp\GenericTests.cs">
+      <Link>GenericTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\csharp\InheritedTestTests.cs">
+      <Link>InheritedTestTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\csharp\OneTimeSetUpTests.cs">
+      <Link>OneTimeSetUpTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\csharp\ParameterizedTests.cs">
+      <Link>ParameterizedTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\csharp\SetUpFixtureTests.cs">
+      <Link>SetUpFixtureTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\csharp\SimpleTests.cs">
+      <Link>SimpleTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\csharp\TextOutputTests.cs">
+      <Link>TextOutputTests.cs</Link>
+    </Compile>
+    <Compile Include="..\..\csharp\Theories.cs">
+      <Link>Theories.cs</Link>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\App.config">
+      <Link>App.config</Link>
+    </None>
+    <None Include="CSharpTestDemo.runsettings">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
