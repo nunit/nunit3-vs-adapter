@@ -66,9 +66,7 @@ var PROJECT_DIR = Context.Environment.WorkingDirectory.FullPath + "/";
 var PACKAGE_DIR = PROJECT_DIR + "package/";
 var PACKAGE_IMAGE_DIR = PACKAGE_DIR + packageName + "/";
 var SRC_DIR = PROJECT_DIR + "src/";
-var TOOLS_DIR = PROJECT_DIR + "tools/";
 var BIN_DIR = PROJECT_DIR + "bin/" + configuration + "/";
-var DEMO_BIN_DIR = PROJECT_DIR + "demo/NUnitTestDemo/bin/" + configuration + "/";
 
 var ADAPTER_PROJECT = SRC_DIR + "NUnitTestAdapter/NUnit.TestAdapter.csproj";
 
@@ -82,13 +80,10 @@ var BIN_DIRS = new [] {
     PROJECT_DIR + "src/NUnit3TestAdapterTests/bin",
 };
 
-// Solutions
+// Solution
 var ADAPTER_SOLUTION = PROJECT_DIR + "NUnit3TestAdapter.sln";
-var DEMO_SOLUTION = PROJECT_DIR + "demo/NUnit3TestDemo.sln";
 
 // Test Assemblies
-var DEMO_TESTS = DEMO_BIN_DIR + "NUnit3TestDemo.dll";
-
 var TEST_NET35 = SRC_DIR + "NUnitTestAdapterTests/bin/" + configuration + "/net45/NUnit.VisualStudio.TestAdapter.Tests.exe";
 var TEST_PROJECT = SRC_DIR + "NUnitTestAdapterTests/NUnit.TestAdapter.Tests.csproj";
 
@@ -101,7 +96,6 @@ Task("Clean")
 {
     foreach(var dir in BIN_DIRS)
         CleanDirectory(dir);
-	CleanDirectory(DEMO_BIN_DIR);
 });
 
 //////////////////////////////////////////////////////////////////////
@@ -118,15 +112,6 @@ Task("NuGetRestore")
     NuGetRestore(PROJECT_DIR + "src/NUnit3TestAdapterInstall/NUnit3TestAdapterInstall.csproj",
                  new NuGetRestoreSettings {
                      PackagesDirectory = PROJECT_DIR + "packages"
-                 });
-
-    Information("Restoring NuGet Packages for the Demo .NET Core Project");
-	DotNetCoreRestore(PROJECT_DIR + "demo/NUnit3CoreTestDemo/NUnit3CoreTestDemo.csproj");
-
-    Information("Restoring NuGet Packages for the Demo .NET Project");
-    NuGetRestore(PROJECT_DIR + "demo/NUnitTestDemo/NUnit3TestDemo.csproj",
-                 new NuGetRestoreSettings {
-                     PackagesDirectory = PROJECT_DIR + "demo/packages"
                  });
 });
 
@@ -157,7 +142,6 @@ Task("Build")
 
         MSBuild(PROJECT_DIR + "src/NUnitTestAdapterTests/NUnit.TestAdapter.Tests.csproj", settings);
         MSBuild(PROJECT_DIR + "src/NUnit3TestAdapterInstall/NUnit3TestAdapterInstall.csproj", settings);
-		MSBuild(DEMO_SOLUTION, settings);
     });
 
 //////////////////////////////////////////////////////////////////////
@@ -194,25 +178,6 @@ Task("TestAdapterUsingVSTest")
             ArgumentCustomization = args => args.Append("/TestAdapterPath:" + NET35_BIN_DIR)
         };
 		VSTest(TEST_NET35, VSTestCustomSettings);
-	});
-
-Task("TestDemo")
-	.IsDependentOn("Build")
-	.Does(() =>
-	{
-		try
-		{
-            var VSTestCustomSettings = new VSTestSettings()
-            {
-                ArgumentCustomization = args => args.Append("/TestAdapterPath:" + NET35_BIN_DIR)
-            };
-			VSTest(DEMO_TESTS, VSTestCustomSettings);
-		}
-		catch(Exception ex)
-		{
-			Information("\nNOTE: Demo tests failed as expected.");
-			Information("This is normally not an error.\n");
-		}
 	});
 
 //////////////////////////////////////////////////////////////////////
