@@ -126,9 +126,8 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             var methodName = testNode.GetAttribute("methodname");
             var displayName = testNode.GetAttribute("name");
+            var className = testNode.GetAttribute("classname");
 
-            bool isTestNameScenario = IsTestNameScenario(testNode, methodName, displayName);
-            
             var testCase = new TestCase(
                                      testNode.GetAttribute("fullname"),
                                      new Uri(NUnitTestAdapter.ExecutorUri),
@@ -139,26 +138,28 @@ namespace NUnit.VisualStudio.TestAdapter
                 LineNumber = 0
             };
 
-            if ((_collectSourceInformation || isTestNameScenario) && _navigationDataProvider != null)
+            if (_collectSourceInformation && _navigationDataProvider != null)
             {
-                try
+                var navData = _navigationDataProvider.GetNavigationData(className, methodName);
+                if (navData.IsValid)
                 {
-                    var className = testNode.GetAttribute("classname");
-                    var navData = _navigationDataProvider.GetNavigationData(className, methodName);
-                    if (navData.IsValid)
-                    {
-                        testCase.CodeFilePath = navData.FilePath;
-                        testCase.LineNumber = navData.LineNumber;
-                    }
-                }
-                catch
+                    testCase.CodeFilePath = navData.FilePath;
+                    testCase.LineNumber = navData.LineNumber;
+                }               
+            }
+            else
+            {
+                bool isTestNameScenario = IsTestNameScenario(testNode, methodName, displayName);
+
+                if (isTestNameScenario)
                 {
-                    // Above code will throw for VS for Mac. We dont want test discovery/execution to be aborted due to this.
+                    // Stash property in test case object
+                    testCase.SetPropertyValue(Constants.TestCaseAdjustedFQNProperty, string.Format("{0}.{1}", className, methodName));
                 }
             }
 
             testCase.AddTraitsFromTestNode(testNode, TraitsCache);
-            
+
             return testCase;
         }
 

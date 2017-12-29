@@ -144,25 +144,38 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
-        public void NavigationInformationForTestNameScenario()
-        {   
+        public void TestCaseAdjustedFQNPropertyForTestNameScenario()
+        {
             TestConverter converterWithCSIFalse = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, collectSourceInformation: false);
-            var testCaseWithNoNavigationData = converterWithCSIFalse.ConvertTestCase(fakeTestNode);
 
-            Assert.That(string.IsNullOrEmpty(testCaseWithNoNavigationData.CodeFilePath), Is.EqualTo(true));
-            Assert.That(testCaseWithNoNavigationData.LineNumber, Is.EqualTo(0));
+            var testCaseWithoutAdjustedFQNProperty = converterWithCSIFalse.ConvertTestCase(fakeTestNode);
+            VerifyTestCaseForAdjustedFqnProperty(testCaseWithoutAdjustedFQNProperty, false);
+            
+            var testCaseWithAdjustedFQNProperty = converterWithCSIFalse.ConvertTestCase(FakeTestData.GetTestNodeForDifferentDisplayName());
+            VerifyTestCaseForAdjustedFqnProperty(testCaseWithAdjustedFQNProperty, true);
+                        
+            var parameterizedTestCaseWithoutAdjustedFQNProperty = converterWithCSIFalse.ConvertTestCase(FakeTestData.GetTestNodeForParameterizedTestCase());
+            VerifyTestCaseForAdjustedFqnProperty(parameterizedTestCaseWithoutAdjustedFQNProperty, false);            
+        }
 
-            XmlNode differentDisplayName = FakeTestData.GetTestNodeForDifferentDisplayName();
-            var testCaseWithNavigationData = converterWithCSIFalse.ConvertTestCase(differentDisplayName);
+        private void VerifyTestCaseForAdjustedFqnProperty(TestCase testCase, bool propertyExpected)
+        {
+            TestProperty TestCaseAdjustedFqnProperty = Constants.TestCaseAdjustedFQNProperty;
 
-            Assert.That(string.IsNullOrEmpty(testCaseWithNavigationData.CodeFilePath), Is.EqualTo(false));
-            Assert.That(testCaseWithNavigationData.LineNumber, Is.GreaterThanOrEqualTo(0));
+            if (testCase.Properties.Contains(TestCaseAdjustedFqnProperty))
+            {
+                Assert.That(propertyExpected == true);
+                string propertyValue = testCase.GetPropertyValue(TestCaseAdjustedFqnProperty) as string;
 
-            XmlNode parameterizedTestCase = FakeTestData.GetTestNodeForParameterizedTestCase();
-            var parameterizedTestCaseWithoutNavigationData = converterWithCSIFalse.ConvertTestCase(parameterizedTestCase);
-
-            Assert.That(string.IsNullOrEmpty(parameterizedTestCaseWithoutNavigationData.CodeFilePath), Is.EqualTo(true));
-            Assert.That(parameterizedTestCaseWithoutNavigationData.LineNumber, Is.EqualTo(0));
+                if(string.IsNullOrEmpty(propertyValue))
+                {
+                    Assert.Fail("AdjustedFQN property value is null or empty.");
+                }               
+            }
+            else
+            {
+                Assert.That(propertyExpected == false);
+            }
         }
 
         private void CheckTestCase(TestCase testCase)
