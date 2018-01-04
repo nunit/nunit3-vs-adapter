@@ -149,7 +149,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             else
             {
-                bool isTestNameScenario = IsTestNameScenario(testNode, methodName, displayName);
+                bool isTestNameScenario = IsTestNameScenario(methodName, displayName);
 
                 if (isTestNameScenario)
                 {
@@ -163,7 +163,7 @@ namespace NUnit.VisualStudio.TestAdapter
             return testCase;
         }
 
-        private bool IsTestNameScenario(XmlNode testNode, string testCaseMethodName, string testCaseDisplayName)
+        private bool IsTestNameScenario(string testCaseMethodName, string testCaseDisplayName)
         {
             if (string.Compare(testCaseMethodName, testCaseDisplayName) == 0)
             {
