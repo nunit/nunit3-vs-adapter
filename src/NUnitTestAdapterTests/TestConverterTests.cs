@@ -155,7 +155,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             VerifyTestCaseForAdjustedFqnProperty(testCaseWithAdjustedFQNProperty, true);
                         
             var parameterizedTestCaseWithoutAdjustedFQNProperty = converterWithCSIFalse.ConvertTestCase(FakeTestData.GetTestNodeForParameterizedTestCase());
-            VerifyTestCaseForAdjustedFqnProperty(parameterizedTestCaseWithoutAdjustedFQNProperty, false);            
+            VerifyTestCaseForAdjustedFqnProperty(parameterizedTestCaseWithoutAdjustedFQNProperty, false);
+
+            var genericTestCaseWithoutAdjustedFQNProperty = converterWithCSIFalse.ConvertTestCase(FakeTestData.GetTestNodeForGenericTestCase());
+            VerifyTestCaseForAdjustedFqnProperty(genericTestCaseWithoutAdjustedFQNProperty, false);
         }
 
         private void VerifyTestCaseForAdjustedFqnProperty(TestCase testCase, bool propertyExpected)

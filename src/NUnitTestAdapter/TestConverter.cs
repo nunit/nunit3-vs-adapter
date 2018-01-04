@@ -171,17 +171,30 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             else
             {
-                // Either TestName or Parameterized test case scenario
-                int index = testCaseDisplayName.IndexOf('(');
+                // Can be TestName, Generic, or Parameterized test case scenario
+                int index = testCaseDisplayName.IndexOf('<');
 
                 if (index > -1)
                 {
+                    // Generic test method
                     testCaseDisplayName = testCaseDisplayName.Remove(index).TrimEnd();
                     return string.Compare(testCaseMethodName, testCaseDisplayName) != 0;
                 }
                 else
                 {
-                    return true;
+                    // Parameterized test method
+                    index = testCaseDisplayName.IndexOf('(');
+
+                    if (index > -1)
+                    {
+                        testCaseDisplayName = testCaseDisplayName.Remove(index).TrimEnd();
+                        return string.Compare(testCaseMethodName, testCaseDisplayName) != 0;
+                    }
+                    else
+                    {
+                        // Neither Generic, nor parameterized. testCaseMethodName and testCaseDisplayName don't match. Hence must be TestName scenario.
+                        return true;
+                    }
                 }
             }
         }

@@ -100,6 +100,26 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
                  </test-case>
                </test-suite>";
 
+        public const string GenericTestXml =
+            @"<test-suite 
+                type='TestFixture' 
+                id='142' 
+                name='FakeTestData' 
+                fullname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData' 
+                classname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData' 
+                runstate='Runnable' 
+                testcasecount='1'>
+                <test-case 
+                    id='143' 
+                    name='FakeTestCase&lt;T&gt;' 
+                    fullname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData.FakeTestCase&lt;T&gt;' 
+                    methodname='FakeTestCase' 
+                    classname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData' 
+                    runstate='Runnable' 
+                    seed='795824917'>
+                </test-case>
+              </test-suite>";
+
         public const string HierarchyTestXml = @"<test-run id='2' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' testcasecount='5'>
 	<test-suite type='Assembly' id='0-1009' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' runstate='Runnable' testcasecount='5'>
 		<properties>
@@ -215,6 +235,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
         public static XmlNode GetTestNodeForParameterizedTestCase()
         {
             return XmlHelper.CreateXmlNode(ParameterizedTestXml).SelectSingleNode("test-case");
+        }
+
+        public static XmlNode GetTestNodeForGenericTestCase()
+        {
+            return XmlHelper.CreateXmlNode(GenericTestXml).SelectSingleNode("test-case");
         }
 
         public static XmlNodeList GetTestNodes()
