@@ -149,9 +149,9 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             else
             {
-                bool isTestNameScenario = IsTestNameScenario(methodName, displayName);
+                var testName = testNode.GetAttribute("TestName");
 
-                if (isTestNameScenario)
+                if (!string.IsNullOrEmpty(testName))
                 {
                     // Stash property in test case object
                     testCase.SetPropertyValue(Constants.TestCaseAdjustedFQNProperty, string.Format("{0}.{1}", className, methodName));
@@ -162,43 +162,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             return testCase;
         }
-
-        private bool IsTestNameScenario(string testCaseMethodName, string testCaseDisplayName)
-        {
-            if (string.Compare(testCaseMethodName, testCaseDisplayName) == 0)
-            {
-                return false;
-            }
-            else
-            {
-                // Can be TestName, Generic, or Parameterized test case scenario
-                int index = testCaseDisplayName.IndexOf('<');
-
-                if (index > -1)
-                {
-                    // Generic test method
-                    testCaseDisplayName = testCaseDisplayName.Remove(index).TrimEnd();
-                    return string.Compare(testCaseMethodName, testCaseDisplayName) != 0;
-                }
-                else
-                {
-                    // Parameterized test method
-                    index = testCaseDisplayName.IndexOf('(');
-
-                    if (index > -1)
-                    {
-                        testCaseDisplayName = testCaseDisplayName.Remove(index).TrimEnd();
-                        return string.Compare(testCaseMethodName, testCaseDisplayName) != 0;
-                    }
-                    else
-                    {
-                        // Neither Generic, nor parameterized. testCaseMethodName and testCaseDisplayName don't match. Hence must be TestName scenario.
-                        return true;
-                    }
-                }
-            }
-        }
-
+        
         private VSTestResult MakeTestResultFromLegacyXmlNode(XmlNode resultNode)
         {
             VSTestResult ourResult = GetBasicResult(resultNode);
