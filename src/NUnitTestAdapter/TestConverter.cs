@@ -49,7 +49,10 @@ namespace NUnit.VisualStudio.TestAdapter
             _collectSourceInformation = collectSourceInformation; 
             TraitsCache = new Dictionary<string, List<Trait>>();
 
-            _navigationDataProvider = new NavigationDataProvider(sourceAssembly);
+            if (_collectSourceInformation)
+            {
+                _navigationDataProvider = new NavigationDataProvider(sourceAssembly);
+            }
         }
 
         #endregion
@@ -149,7 +152,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             else
             {
-                var testName = testNode.GetAttribute("TestName");
+                var testName = testNode.GetAttribute("testname");
 
                 if (!string.IsNullOrEmpty(testName))
                 {
@@ -162,7 +165,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             return testCase;
         }
-        
+
         private VSTestResult MakeTestResultFromLegacyXmlNode(XmlNode resultNode)
         {
             VSTestResult ourResult = GetBasicResult(resultNode);

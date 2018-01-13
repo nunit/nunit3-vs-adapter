@@ -72,53 +72,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
                     name='FakeTestDisplayName'
                     fullname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData.FakeTestDisplayName'
                     methodname='FakeTestCase'
-                    classname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData'>
+                    classname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData'
+                    testname='FakeTestDisplayName'>
                     <properties>
                         <property name='Category' value='cat1' />
                         <property name='Priority' value='medium' />
                     </properties>
                 </test-case>
             </test-suite>";
-
-        public const string ParameterizedTestXml =
-            @"<test-suite 
-                type='ParameterizedMethod' 
-                id='0-1002' 
-                name='FakeTestCase' 
-                fullname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData.FakeTestCase' 
-                classname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData' 
-                runstate='Runnable' 
-                testcasecount='1'>
-                <test-case 
-                    id='0-1001' 
-                    name='FakeTestCase(1)' 
-                    fullname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData.FakeTestCase(1)' 
-                    methodname='FakeTestCase' 
-                    classname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData' 
-                    runstate='Runnable' 
-                    seed='1024479512'>
-                 </test-case>
-               </test-suite>";
-
-        public const string GenericTestXml =
-            @"<test-suite 
-                type='TestFixture' 
-                id='142' 
-                name='FakeTestData' 
-                fullname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData' 
-                classname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData' 
-                runstate='Runnable' 
-                testcasecount='1'>
-                <test-case 
-                    id='143' 
-                    name='FakeTestCase&lt;T&gt;' 
-                    fullname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData.FakeTestCase&lt;T&gt;' 
-                    methodname='FakeTestCase' 
-                    classname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData' 
-                    runstate='Runnable' 
-                    seed='795824917'>
-                </test-case>
-              </test-suite>";
 
         public const string HierarchyTestXml = @"<test-run id='2' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' testcasecount='5'>
 	<test-suite type='Assembly' id='0-1009' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' runstate='Runnable' testcasecount='5'>
@@ -231,17 +192,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
         {
             return XmlHelper.CreateXmlNode(TestXmlWithDifferentDisplayName).SelectSingleNode("test-case");
         }
-
-        public static XmlNode GetTestNodeForParameterizedTestCase()
-        {
-            return XmlHelper.CreateXmlNode(ParameterizedTestXml).SelectSingleNode("test-case");
-        }
-
-        public static XmlNode GetTestNodeForGenericTestCase()
-        {
-            return XmlHelper.CreateXmlNode(GenericTestXml).SelectSingleNode("test-case");
-        }
-
+        
         public static XmlNodeList GetTestNodes()
         {
             return XmlHelper.CreateXmlNode(HierarchyTestXml).SelectNodes("//test-case");
