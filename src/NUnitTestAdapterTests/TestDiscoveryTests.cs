@@ -69,7 +69,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             // Sanity check to be sure we have the correct version of mock-assembly.dll
             Assert.That(NUnit.Tests.Assemblies.MockAssembly.TestsAtRuntime, Is.EqualTo(NUnit.Tests.Assemblies.MockAssembly.Tests),
                 "The reference to mock-assembly.dll appears to be the wrong version");
-
+            Assert.That(File.Exists(MockAssemblyPath), $"Can't locate mock-assembly.dll at {MockAssemblyPath}");
             TestCases = new List<TestCase>();
 
             // Load the NUnit mock-assembly.dll once for this test, saving

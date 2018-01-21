@@ -3,6 +3,7 @@
     <RootNamespace>NUnit.VisualStudio.TestAdapter.Tests</RootNamespace>
     <AssemblyName>NUnit.VisualStudio.TestAdapter.Tests</AssemblyName>
     <TargetFrameworks>net45;netcoreapp1.0</TargetFrameworks>
+    <!--<TargetFramework>net45</TargetFramework>-->
     <DebugType Condition="'$(TargetFramework)' != '' AND '$(TargetFramework)' != 'netcoreapp1.0'">Full</DebugType>
     <OutputType>exe</OutputType>
     <OutputTypeEx>exe</OutputTypeEx>

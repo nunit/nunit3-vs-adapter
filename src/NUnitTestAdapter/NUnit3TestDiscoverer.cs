@@ -79,7 +79,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
                 if (Settings.DumpXmlTestDiscovery)
                 {
-                    dumpXml = new Dump.DumpXml(sourceAssemblyPath);
+                    dumpXml = new DumpXml(sourceAssemblyPath);
                     
                 }
                
