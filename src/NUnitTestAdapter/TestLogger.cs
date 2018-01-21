@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2013 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2013-2018 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -27,6 +27,15 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
+    public interface ITestLogger
+    {
+        void Error(string message);
+        void Error(string message, Exception ex);
+        void Warning(string message);
+        void Warning(string message, Exception ex);
+        void Info(string message);
+    }
+
     /// <summary>
     /// TestLogger wraps an IMessageLogger and adds various
     /// utility methods for sending messages. Since the
@@ -36,7 +45,7 @@ namespace NUnit.VisualStudio.TestAdapter
     /// simply swallows all messages without sending them
     /// anywhere.
     /// </summary>
-    public class TestLogger : IMessageLogger
+    public class TestLogger : IMessageLogger, ITestLogger
     {
         private IAdapterSettings adapterSettings;
         private const string EXCEPTION_FORMAT = "Exception {0}, {1}";

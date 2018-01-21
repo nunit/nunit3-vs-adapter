@@ -145,16 +145,11 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void TestFinished(XmlNode resultNode)
         {
-            bool firstResult = true;
-            foreach (var vsResult in _testConverter.GetVSTestResults(resultNode))
+            var result = _testConverter.GetVSTestResults(resultNode);
+            _recorder.RecordEnd(result.TestCaseResult.TestCase,result.TestCaseResult.Outcome);
+            foreach (var vsResult in result.TestResults)
             {
-                if (firstResult)
-                {
-                    _recorder.RecordEnd(vsResult.TestCase, vsResult.Outcome);
-                    firstResult = false;
-                }
-
-                _recorder.RecordResult(vsResult);
+               _recorder.RecordResult(vsResult);
             }
         }
 

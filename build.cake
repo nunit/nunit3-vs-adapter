@@ -12,7 +12,7 @@ var configuration = Argument("configuration", "Release");
 //////////////////////////////////////////////////////////////////////
 
 var version = "3.10.0";
-var modifier = "";
+var modifier = ".2";
 
 var dbgSuffix = configuration == "Debug" ? "-dbg" : "";
 var packageVersion = version + modifier + dbgSuffix;
@@ -129,6 +129,7 @@ Task("Build")
                                     : vsLatest.CombineWithFilePath("./MSBuild/15.0/Bin/MSBuild.exe");
 
         Information("Building using MSBuild at " + msBuildPathX64);
+        Information("Configuration is:"+configuration);
         var settings = new MSBuildSettings
         {
             Configuration = configuration,

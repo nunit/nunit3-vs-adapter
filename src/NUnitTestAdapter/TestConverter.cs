@@ -1,5 +1,5 @@
 // ***********************************************************************
-// Copyright (c) 2011-2017 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2018 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -33,7 +33,7 @@ namespace NUnit.VisualStudio.TestAdapter
 {
     public class TestConverter
     {
-        private readonly TestLogger _logger;
+        private readonly ITestLogger _logger;
         private readonly Dictionary<string, TestCase> _vsTestCaseMap;
         private readonly string _sourceAssembly;
         private readonly NavigationDataProvider _navigationDataProvider;
@@ -41,7 +41,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region Constructor
 
-        public TestConverter(TestLogger logger, string sourceAssembly, bool collectSourceInformation)
+        public TestConverter(ITestLogger logger, string sourceAssembly, bool collectSourceInformation)
         {
             _logger = logger;
             _sourceAssembly = sourceAssembly;
@@ -74,11 +74,11 @@ namespace NUnit.VisualStudio.TestAdapter
             string id = testNode.GetAttribute("id");
             if (_vsTestCaseMap.ContainsKey(id))
                 return _vsTestCaseMap[id];
-           
+
             // Convert to VS TestCase and cache the result
             var testCase = MakeTestCaseFromXmlNode(testNode);
             _vsTestCaseMap.Add(id, testCase);
-            return testCase;             
+            return testCase;
         }
 
         public TestCase GetCachedTestCase(string id)
@@ -92,14 +92,14 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private static readonly string NL = Environment.NewLine;
 
-        public IList<VSTestResult> GetVSTestResults(XmlNode resultNode)
+        public TestResultSet GetVSTestResults(XmlNode resultNode)
         {
             var results = new List<VSTestResult>();
             XmlNodeList assertions = resultNode.SelectNodes("assertions/assertion");
-
+            var testcaseResult = GetBasicResult(resultNode);
             foreach (XmlNode assertion in assertions)
             {
-                var oneResult = GetBasicResult(resultNode);
+                var oneResult = GetBasicResult(resultNode); // we need a new copy, this is currently the simplest way
                 if (oneResult != null)
                 {
                     oneResult.Outcome = GetAssertionOutcome(assertion);
@@ -116,8 +116,15 @@ namespace NUnit.VisualStudio.TestAdapter
                     results.Add(result);
             }
 
-            return results;
+            return new TestResultSet {TestCaseResult = testcaseResult, TestResults = results};
         }
+
+        public struct TestResultSet
+        {
+            public IList<VSTestResult> TestResults { get; set; }
+            public TestResult TestCaseResult { get; set; }
+        }
+
         #endregion
 
         #region Helper Methods
@@ -148,7 +155,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     testCase.LineNumber = navData.LineNumber;
                 }
             }
-            
+
             testCase.AddTraitsFromTestNode(testNode, TraitsCache);
 
             return testCase;
@@ -179,10 +186,10 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private VSTestResult GetBasicResult(XmlNode resultNode)
         {
-            TestCase vsTest = GetCachedTestCase(resultNode.GetAttribute("id"));
+            var vsTest = GetCachedTestCase(resultNode.GetAttribute("id"));
             if (vsTest == null) return null;
 
-            VSTestResult vsResult = new VSTestResult(vsTest)
+            var vsResult = new VSTestResult(vsTest)
             {
                 DisplayName = vsTest.DisplayName,
                 Outcome = GetTestOutcome(resultNode),
@@ -259,7 +266,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 case "Failed":
                     return TestOutcome.Failed;
                 case "Skipped":
-                    return resultNode.GetAttribute("label")=="Ignored"
+                    return resultNode.GetAttribute("label") == "Ignored"
                         ? TestOutcome.Skipped
                         : TestOutcome.None;
                 case "Warning":
