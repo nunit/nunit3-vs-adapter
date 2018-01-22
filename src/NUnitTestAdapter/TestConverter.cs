@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -108,6 +109,9 @@ namespace NUnit.VisualStudio.TestAdapter
                     results.Add(oneResult);
                 }
             }
+
+            if (testcaseResult.Outcome == TestOutcome.Failed && results.Any() && results.All(o => o.Outcome != TestOutcome.Failed))
+                results.First().Outcome = TestOutcome.Failed;
 
             if (results.Count == 0)
             {
