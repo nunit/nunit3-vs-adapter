@@ -110,7 +110,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
             }
 
-            if (testcaseResult.Outcome == TestOutcome.Failed && results.Any() && results.All(o => o.Outcome != TestOutcome.Failed))
+            if (testcaseResult!=null && testcaseResult.Outcome == TestOutcome.Failed && results.Any() && results.All(o => o.Outcome != TestOutcome.Failed))
                 results.First().Outcome = TestOutcome.Failed;
 
             if (results.Count == 0)
