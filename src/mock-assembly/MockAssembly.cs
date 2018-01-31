@@ -330,7 +330,7 @@ namespace NUnit.Tests
         public static readonly string Attachment1Name = "mock-assembly.dll";
         public static readonly string Attachment1Description = "A description with some <values> including & special characters";
 
-        public static readonly string Attachment2Name = "empty-assembly.dll";
+        public static readonly string Attachment2Name = "nunit.framework.dll";
         public static readonly string Attachment2Description = null;
 
         [Test]
@@ -338,7 +338,9 @@ namespace NUnit.Tests
         {
             var filepath1 = Path.Combine(TestContext.CurrentContext.WorkDirectory, Attachment1Name);
             var filepath2 = Path.Combine(TestContext.CurrentContext.WorkDirectory, Attachment2Name);
+            Assert.That(File.Exists(filepath1),$"Could not find {filepath1}");
             TestContext.AddTestAttachment(filepath1, Attachment1Description);
+            Assert.That(File.Exists(filepath2),$"Could not find {filepath2}");
             TestContext.AddTestAttachment(filepath2, Attachment2Description);
         }
     }

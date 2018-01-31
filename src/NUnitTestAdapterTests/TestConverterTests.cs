@@ -29,8 +29,9 @@ using System.Reflection;
 using System.Xml;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Framework;
+using NUnit.Framework.Internal;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
@@ -121,7 +122,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             var fakeResultNode = FakeTestData.GetResultNode();
             var results = testConverter.GetVSTestResults(fakeResultNode);
-            Assert.That(results.Count, Is.EqualTo(0));
+            Assert.That(results.TestResults.Count, Is.EqualTo(0));
         }
 
         [Test]
@@ -131,7 +132,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var cachedTestCase = testConverter.ConvertTestCase(fakeTestNode);
             var fakeResultNode = FakeTestData.GetResultNode();
 
-            var testResult = testConverter.GetVSTestResults(fakeResultNode)[0];
+            var testResults = testConverter.GetVSTestResults(fakeResultNode);
+            var testResult = testResults.TestResults[0];
             var testCase = testResult.TestCase;
 
             Assert.That(testCase, Is.SameAs(cachedTestCase));
@@ -185,5 +187,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 Assert.That(traits.Any(t => t.Name == kp.Key && t.Value == kp.Value));
             }
         }
+
+      
     }
 }
