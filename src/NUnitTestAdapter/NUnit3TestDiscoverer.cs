@@ -116,7 +116,7 @@ namespace NUnit.VisualStudio.TestAdapter
                         else
                             TestLog.Info("NUnit failed to load " + sourceAssembly);
                     }
-                    dumpXml?.Dump4Discovery();
+                    
                 }
                 catch (BadImageFormatException)
                 {
@@ -147,7 +147,9 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
                 finally
                 {
-
+#if !NETCOREAPP1_0
+                    dumpXml?.Dump4Discovery();
+#endif
                     if (runner != null)
                     {
                         if (runner.IsTestRunning)
