@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2013-2015 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2013-2018 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -34,35 +34,30 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             testCase?.Traits.Add(new Trait(name, value));
         }
-
-        public static void AddTraitsFromTestNode(this TestCase testCase, XmlNode testNode, IDictionary<string,List<Trait>> traitsCache)
+        private const string NunitTestCategoryLabel = "Category";
+       
+       
+        public static void AddTraitsFromTestNode(this TestCase testCase, XmlNode testNode,
+            IDictionary<string, List<Trait>> traitsCache, ITestLogger logger)
         {
             var ancestor = testNode.ParentNode;
             var key = ancestor.Attributes?["id"]?.Value;
-
-            // Reading ancestor properties of a test-case node. And cacheing it.
+            var categorylist = new CategoryList(testCase);
+            // Reading ancestor properties of a test-case node. And adding to the cache.
             while (ancestor != null && key != null)
             {
                 if (traitsCache.ContainsKey(key))
                 {
-                    testCase.Traits.AddRange(traitsCache[key]);
+                    categorylist.AddRange(traitsCache[key].Where(o => o.Name == NunitTestCategoryLabel).Select(prop => prop.Value).ToList());
+                    var traitslist = traitsCache[key].Where(o => o.Name != NunitTestCategoryLabel).ToList();
+                    if (traitslist.Count > 0)
+                        testCase.Traits.AddRange(traitslist);
                 }
                 else
                 {
-                    var nodesList = ancestor.SelectNodes("properties/property");
-                    foreach (XmlNode propertyNode in nodesList)
-                    {
-                        string propertyName = propertyNode.GetAttribute("name");
-                        string propertyValue = propertyNode.GetAttribute("value");
-
-                        AddTraitsToCache(traitsCache, key, propertyName, propertyValue);
-                        if (!IsInternalProperty(propertyName, propertyValue))
-                        {
-                            testCase.Traits.Add(new Trait(propertyName, propertyValue));
-                        }
-                    }
+                    categorylist.ProcessTestCaseProperties(ancestor,true,key,traitsCache);
                     // Adding empty list to dictionary, so that we will not make SelectNodes call again.
-                    if (nodesList.Count == 0 && !traitsCache.ContainsKey(key))
+                    if (categorylist.LastNodeListCount == 0 && !traitsCache.ContainsKey(key))
                     {
                         traitsCache[key] = new List<Trait>();
                     }
@@ -71,45 +66,12 @@ namespace NUnit.VisualStudio.TestAdapter
                 key = ancestor?.Attributes?["id"]?.Value;
             }
 
-            // No Need to store test-case properties in dictionary.
-            foreach (XmlNode propertyNode in testNode.SelectNodes("properties/property"))
-            {
-                string propertyName = propertyNode.GetAttribute("name");
-                string propertyValue = propertyNode.GetAttribute("value");
-
-                if (!IsInternalProperty(propertyName, propertyValue))
-                {
-                    testCase.Traits.Add(new Trait(propertyName, propertyValue));
-                }
-            }
+            // No Need to store test-case properties in cache.
+            categorylist.ProcessTestCaseProperties(testNode,false);
+            categorylist.UpdateCategoriesToVs();
         }
 
-        private static bool IsInternalProperty(string propertyName, string propertyValue)
-        {
-            // Property names starting with '_' are for internal use only
-            return string.IsNullOrEmpty(propertyName) || propertyName[0] == '_' || string.IsNullOrEmpty(propertyValue);
-        }
-
-        private static void AddTraitsToCache(IDictionary<string, List<Trait>> traitsCache, string key, string propertyName, string propertyValue)
-        {
-            if (traitsCache.ContainsKey(key))
-            {
-                if(!IsInternalProperty(propertyName, propertyValue))
-                    traitsCache[key].Add(new Trait(propertyName, propertyValue));
-                return;
-            }
-
-
-            var traits = new List<Trait>();
-
-            // Will add empty list of traits, if the property is internal type. So that we will not make SelectNodes call again.
-            if (!IsInternalProperty(propertyName, propertyValue))
-            {
-                traits.Add(new Trait(propertyName, propertyValue));
-            }
-            traitsCache[key] = traits;
-        }
-
+       
         public static IEnumerable<NTrait> GetTraits(this TestCase testCase)
         {
             var traits = new List<NTrait>();
@@ -119,6 +81,12 @@ namespace NUnit.VisualStudio.TestAdapter
                 traits.AddRange(from trait in testCase.Traits let name = trait.Name let value = trait.Value select new NTrait(name, value));
             }
             return traits;
+        }
+
+        public static IEnumerable<string> GetCategories(this TestCase testCase)
+        {
+            var categories = testCase.GetPropertyValue(CategoryList.NUnitTestCategoryProperty) as string[];
+            return categories;
         }
     }
 

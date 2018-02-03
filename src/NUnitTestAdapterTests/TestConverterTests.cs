@@ -1,5 +1,5 @@
 // ***********************************************************************
-// Copyright (c) 2011-2015 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2018 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -23,15 +23,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Xml;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Framework;
-using NUnit.Framework.Internal;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
@@ -96,15 +92,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             CheckNoTestCaseNodesExist(traitsCache);
 
             // Checking assembly level attribute.
-            CheckNodeProperties(traitsCache, "0-1009", new KeyValuePair<string, string>[] { new KeyValuePair<string, string>("Category", "AsmCat") });
+            CheckNodeProperties(traitsCache, "0-1009", new[] { new KeyValuePair<string, string>("Category", "AsmCat") });
 
             // Checking Class level attributes base class & dervied class
-            CheckNodeProperties(traitsCache, "0-1000", new KeyValuePair<string,string>[] { new KeyValuePair<string, string>("Category", "BaseClass") });
-            CheckNodeProperties(traitsCache, "0-1002", new KeyValuePair<string, string>[] { new KeyValuePair<string, string>("Category", "DerivedClass"), new KeyValuePair<string, string>("Category", "BaseClass") });
+            CheckNodeProperties(traitsCache, "0-1000", new[] { new KeyValuePair<string, string>("Category", "BaseClass") });
+            CheckNodeProperties(traitsCache, "0-1002", new[] { new KeyValuePair<string, string>("Category", "DerivedClass"), new KeyValuePair<string, string>("Category", "BaseClass") });
 
             // Checking Nested class attributes.
-            CheckNodeProperties(traitsCache, "0-1005", new KeyValuePair<string, string>[] { new KeyValuePair<string, string>("Category", "NS1") });
-            CheckNodeProperties(traitsCache, "0-1007", new KeyValuePair<string, string>[] { new KeyValuePair<string, string>("Category", "NS2") });
+            CheckNodeProperties(traitsCache, "0-1005", new[] { new KeyValuePair<string, string>("Category", "NS1") });
+            CheckNodeProperties(traitsCache, "0-1007", new[] { new KeyValuePair<string, string>("Category", "NS2") });
 
         }
 
@@ -157,8 +153,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 Assert.That(testCase.LineNumber, Is.EqualTo(FakeTestData.LineNumber));
             }
 
-                var traitList = testCase.GetTraits().Select(trait => trait.Name + ":" + trait.Value).ToList();
-                Assert.That(traitList, Is.EquivalentTo(new[] { "Category:super", "Category:cat1", "Priority:medium" }));
+            var traitList = testCase.GetTraits().Select(trait => trait.Name + ":" + trait.Value).ToList();
+            Assert.That(traitList, Is.EquivalentTo(new[] { "Priority:medium" }));
+            Assert.That(testCase.GetCategories(),Is.EquivalentTo(new [] { "super", "cat1", }));
         }
 
         private void CheckNodesWithNoProperties(IDictionary<string, List<Trait>> traits)

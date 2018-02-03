@@ -400,11 +400,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(testcaselist.Count, Is.EqualTo(2), "Wrong number of testcases found");
             var testcase1 = testcaselist.FirstOrDefault(o => o.DisplayName == "ThatWeExist(1)");
             Assert.That(testcase1, Is.Not.Null, "Didn't find the first testcase");
-            Assert.That(testcase1.Traits.Count(), Is.EqualTo(3), "Wrong number of categories for first test case");
+            Assert.That(testcase1.GetCategories().Count(), Is.EqualTo(3), "Wrong number of categories for first test case");
 
             var testcase2 = testcaselist.FirstOrDefault(o => o.DisplayName == "ThatWeExist(2)");
             Assert.That(testcase2, Is.Not.Null, "Didn't find the second testcase");
-            Assert.That(testcase2.Traits.Count(), Is.EqualTo(3), "Wrong number of categories for second test case");
+            Assert.That(testcase2.GetCategories().Count(), Is.EqualTo(3), "Wrong number of categories for second test case");
 
         }
 
@@ -418,8 +418,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(testcaselist.Count, Is.EqualTo(3), "Wrong number of testcases found");
             var testcase1 = testcaselist.FirstOrDefault(o => o.DisplayName == "dNunitTest");
             Assert.That(testcase1, Is.Not.Null, "Didn't find the  testcase");
-            Assert.That(testcase1.Traits.Count(), Is.EqualTo(3), "Wrong number of categories for derived test case");
-        }
+            VerifyCategoriesOnly(testcase1, 3, "derived");
+       }
 
         [Test]
         public void ThatNestedClassesHaveTraits()
@@ -431,7 +431,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(testcaselist.Count, Is.EqualTo(2), "Wrong number of testcases found");
             var testcase1 = testcaselist.FirstOrDefault(o => o.DisplayName == "NC21");
             Assert.That(testcase1, Is.Not.Null, "Didn't find the  testcase");
-            Assert.That(testcase1.Traits.Count(), Is.EqualTo(2), "Wrong number of categories for derived test case");
+            VerifyCategoriesOnly(testcase1, 2, "nested");
         }
 
 
@@ -441,25 +441,25 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var xml = testDataForTraits.XmlForTestCaseWithInheritedTestsInSameAssembly;
             ProcessXml2TestCase(xml);
             Assert.That(testcaselist.Count, Is.EqualTo(3), "Wrong number of testcases found");
-            var uniqueTraits = UniqueTraits();
-            Assert.That(uniqueTraits.Count(),Is.EqualTo(4),"Wrong number of traits");
+            var uniqueTraits = UniqueCategories();
+            Assert.That(uniqueTraits.Count(), Is.EqualTo(4), "Wrong number of traits");
             string searchTrait = "BaseClass";
             var tcWithTrait = TcWithTrait(searchTrait);
-            Assert.That(tcWithTrait.Count(),Is.EqualTo(3),$"Wrong number of testcases found for trait={searchTrait}");
+            Assert.That(tcWithTrait.Count(), Is.EqualTo(3), $"Wrong number of testcases found for trait={searchTrait}");
 
         }
 
         private IEnumerable<TestCase> TcWithTrait(string searchTrait)
         {
-            return testcaselist.Where(o => o.Traits.Select(t => t.Value).Contains(searchTrait));
+            return testcaselist.Where(o => o.GetCategories().Contains(searchTrait));
         }
 
-        private IEnumerable<string> UniqueTraits()
+        private IEnumerable<string> UniqueCategories()
         {
             var traits = new List<string>();
             foreach (var tc in testcaselist)
             {
-                traits.AddRange(tc.Traits.Select(o => o.Value));
+                traits.AddRange(tc.GetCategories());
             }
             var uniqueTraits = traits.Distinct();
             return uniqueTraits;
@@ -472,7 +472,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var xml = testDataForTraits.XmlForTestCaseWithAbstractInheritedTestsInSameAssembly;
             ProcessXml2TestCase(xml);
             Assert.That(testcaselist.Count, Is.EqualTo(2), "Wrong number of testcases found");
-            var uniqueTraits = UniqueTraits();
+            var uniqueTraits = UniqueCategories();
             Assert.That(uniqueTraits.Count(), Is.EqualTo(4), "Wrong number of traits");
             string searchTrait = "BaseClass";
             var tcWithTrait = TcWithTrait(searchTrait);
@@ -501,8 +501,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(testcaselist.Count, Is.EqualTo(1), "Wrong number of testcases found");
             var testcase1 = testcaselist.FirstOrDefault(o => o.DisplayName == "ThatWeExist");
             Assert.That(testcase1, Is.Not.Null, "Didn't find the  testcase");
-            Assert.That(testcase1.Traits.Count(), Is.EqualTo(2), "Wrong number of categories for first test case");
 
+            VerifyCategoriesOnly(testcase1, 2, "first");
         }
 
         [Test]
@@ -513,13 +513,24 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             ProcessXml2TestCase(xml);
 
             Assert.That(testcaselist.Count, Is.EqualTo(3), "Wrong number of testcases found");
-            var testcasesWithCategories = testcaselist.Where(o => o.Traits?.FirstOrDefault(p => p.Name == "Category") != null);
+            var testcasesWithCategories = testcaselist.Where(o => o.GetCategories()?.FirstOrDefault() != null).ToList();
             Assert.That(testcasesWithCategories, Is.Not.Null, "Didn't find the  testcases");
             Assert.That(testcasesWithCategories.Count(), Is.EqualTo(1), "Wrong number of testcases with categories, should be only 1");
             var tc = testcasesWithCategories.FirstOrDefault();
-            Assert.That(tc.Traits.Count(), Is.EqualTo(1), "Wrong number of categories for test case");
-            Assert.That(tc.Traits.First().Value, Is.EqualTo("Single"));
+            VerifyCategoriesOnly(tc, 1, "simple");
+            Assert.That(tc.GetCategories().First(), Is.EqualTo("Single"));
 
+        }
+
+
+        private void VerifyCategoriesOnly(TestCase testcase, int expectedCategories, string forTest)
+        {
+            var categories = testcase.GetCategories();
+            Assert.Multiple(() =>
+            {
+                Assert.That(categories.Count(), Is.EqualTo(expectedCategories), $"Wrong number of categories for {forTest} testcase");
+                Assert.That(testcase.Traits.Any(), Is.False, "There should be no traits");
+            });
         }
 
     }
