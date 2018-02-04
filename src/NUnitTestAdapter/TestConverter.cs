@@ -160,7 +160,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
             }
 
-            testCase.AddTraitsFromTestNode(testNode, TraitsCache);
+            testCase.AddTraitsFromTestNode(testNode, TraitsCache,_logger);
 
             return testCase;
         }
