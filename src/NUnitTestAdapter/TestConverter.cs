@@ -47,7 +47,7 @@ namespace NUnit.VisualStudio.TestAdapter
             _logger = logger;
             _sourceAssembly = sourceAssembly;
             _vsTestCaseMap = new Dictionary<string, TestCase>();
-            _collectSourceInformation = collectSourceInformation;
+            _collectSourceInformation = collectSourceInformation; 
             TraitsCache = new Dictionary<string, List<Trait>>();
 
             if (_collectSourceInformation)
@@ -138,25 +138,37 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         private TestCase MakeTestCaseFromXmlNode(XmlNode testNode)
         {
+            var methodName = testNode.GetAttribute("methodname");
+            var displayName = testNode.GetAttribute("name");
+            var className = testNode.GetAttribute("classname");
+
             var testCase = new TestCase(
                                      testNode.GetAttribute("fullname"),
                                      new Uri(NUnitTestAdapter.ExecutorUri),
                                      _sourceAssembly)
             {
-                DisplayName = testNode.GetAttribute("name"),
+                DisplayName = displayName,
                 CodeFilePath = null,
                 LineNumber = 0
             };
 
             if (_collectSourceInformation && _navigationDataProvider != null)
             {
-                var className = testNode.GetAttribute("classname");
-                var methodName = testNode.GetAttribute("methodname");
                 var navData = _navigationDataProvider.GetNavigationData(className, methodName);
                 if (navData.IsValid)
                 {
                     testCase.CodeFilePath = navData.FilePath;
                     testCase.LineNumber = navData.LineNumber;
+                }               
+            }
+            else
+            {
+                var testName = testNode.GetAttribute("testname");
+
+                if (!string.IsNullOrEmpty(testName))
+                {
+                    // Stash property in test case object
+                    testCase.SetPropertyValue(Constants.TestCaseAdjustedFQNProperty, string.Format("{0}.{1}", className, methodName));
                 }
             }
 

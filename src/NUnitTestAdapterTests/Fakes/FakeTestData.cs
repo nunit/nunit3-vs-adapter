@@ -58,6 +58,29 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
                 </test-case>
             </test-suite>";
 
+        public const string TestXmlWithDifferentDisplayName =
+            @"<test-suite
+                id='132'
+                name='FakeTestData'
+                fullname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData'
+                classname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData'>
+                <properties>
+                    <property name='Category' value='super' />
+                </properties>
+                <test-case
+                    id='133' 
+                    name='FakeTestDisplayName'
+                    fullname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData.FakeTestDisplayName'
+                    methodname='FakeTestCase'
+                    classname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData'
+                    testname='FakeTestDisplayName'>
+                    <properties>
+                        <property name='Category' value='cat1' />
+                        <property name='Priority' value='medium' />
+                    </properties>
+                </test-case>
+            </test-suite>";
+
         public const string HierarchyTestXml = @"<test-run id='2' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' testcasecount='5'>
 	<test-suite type='Assembly' id='0-1009' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' runstate='Runnable' testcasecount='5'>
 		<properties>
@@ -165,6 +188,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
             return XmlHelper.CreateXmlNode(TestXml).SelectSingleNode("test-case");
         }
 
+        public static XmlNode GetTestNodeForDifferentDisplayName()
+        {
+            return XmlHelper.CreateXmlNode(TestXmlWithDifferentDisplayName).SelectSingleNode("test-case");
+        }
+        
         public static XmlNodeList GetTestNodes()
         {
             return XmlHelper.CreateXmlNode(HierarchyTestXml).SelectNodes("//test-case");

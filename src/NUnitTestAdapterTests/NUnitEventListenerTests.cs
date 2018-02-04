@@ -54,7 +54,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             // Ensure that the converted testcase is cached
             testConverter.ConvertTestCase(fakeTestNode);
             Assert.NotNull(testConverter.GetCachedTestCase("123"));
-            
+
             listener = new NUnitEventListener(testLog, testConverter,null);
         }
 
@@ -110,7 +110,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assume.That(
                 testLog.Events[1].EventType,
                 Is.EqualTo(FakeFrameworkHandle.EventType.RecordResult));
-            
+
             VerifyTestResult(testLog.Events[1].TestResult);
         }
 
@@ -153,7 +153,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             RemotingServices.Marshal(localInstance);
 
             var lifetime = ((MarshalByRefObject)localInstance).GetLifetimeService();
-            
+
             // A null lifetime (as opposed to an ILease) means the object has an infinite lifetime
             Assert.IsNull(lifetime);
         }

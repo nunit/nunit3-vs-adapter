@@ -145,6 +145,38 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(testResult.Duration, Is.EqualTo(TimeSpan.FromSeconds(1.234)));
         }
 
+        [Test]
+        public void TestCaseAdjustedFQNPropertyForTestNameScenario()
+        {
+            TestConverter converterWithCSIFalse = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, collectSourceInformation: false);
+
+            var testCaseWithoutAdjustedFQNProperty = converterWithCSIFalse.ConvertTestCase(fakeTestNode);
+            VerifyTestCaseForAdjustedFqnProperty(testCaseWithoutAdjustedFQNProperty, false);
+            
+            var testCaseWithAdjustedFQNProperty = converterWithCSIFalse.ConvertTestCase(FakeTestData.GetTestNodeForDifferentDisplayName());
+            VerifyTestCaseForAdjustedFqnProperty(testCaseWithAdjustedFQNProperty, true);                      
+        }
+
+        private void VerifyTestCaseForAdjustedFqnProperty(TestCase testCase, bool propertyExpected)
+        {
+            TestProperty TestCaseAdjustedFqnProperty = Constants.TestCaseAdjustedFQNProperty;
+
+            if (testCase.Properties.Contains(TestCaseAdjustedFqnProperty))
+            {
+                Assert.That(propertyExpected == true);
+                string propertyValue = testCase.GetPropertyValue(TestCaseAdjustedFqnProperty) as string;
+
+                if(string.IsNullOrEmpty(propertyValue))
+                {
+                    Assert.Fail("AdjustedFQN property value is null or empty.");
+                }               
+            }
+            else
+            {
+                Assert.That(propertyExpected == false);
+            }
+        }
+
         private void CheckTestCase(TestCase testCase)
         {
             Assert.That(testCase.FullyQualifiedName, Is.EqualTo(FakeTestData.FullyQualifiedName));
@@ -157,8 +189,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 Assert.That(testCase.LineNumber, Is.EqualTo(FakeTestData.LineNumber));
             }
 
-                var traitList = testCase.GetTraits().Select(trait => trait.Name + ":" + trait.Value).ToList();
-                Assert.That(traitList, Is.EquivalentTo(new[] { "Category:super", "Category:cat1", "Priority:medium" }));
+            var traitList = testCase.GetTraits().Select(trait => trait.Name + ":" + trait.Value).ToList();
+            Assert.That(traitList, Is.EquivalentTo(new[] { "Category:super", "Category:cat1", "Priority:medium" }));
         }
 
         private void CheckNodesWithNoProperties(IDictionary<string, List<Trait>> traits)
