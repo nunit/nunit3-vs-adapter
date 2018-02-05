@@ -42,7 +42,7 @@ if (BuildSystem.IsRunningOnAppVeyor)
 			if (isPullRequest)
 				suffix += "-pr-" + AppVeyor.Environment.PullRequest.Number;
 			else
-				suffix += "-" + branch;
+				suffix += "-" + System.Text.RegularExpressions.Regex.Replace(branch, "[^0-9A-Za-z-]+", "-");
 
 			// Nuget limits "special version part" to 20 chars. Add one for the hyphen.
 			if (suffix.Length > 21)
@@ -85,7 +85,7 @@ var ADAPTER_SOLUTION = PROJECT_DIR + "NUnit3TestAdapter.sln";
 
 // Test Assemblies
 var TEST_NET35 = SRC_DIR + "NUnitTestAdapterTests/bin/" + configuration + "/net45/NUnit.VisualStudio.TestAdapter.Tests.exe";
-var TEST_PROJECT = SRC_DIR + "NUnitTestAdapterTests/NUnit.TestAdapter.Tests.csproj";
+var TEST_NETCOREAPP10 = SRC_DIR + "NUnitTestAdapterTests/bin/" + configuration + "/netcoreapp1.0/publish/NUnit.VisualStudio.TestAdapter.Tests.dll";
 
 //////////////////////////////////////////////////////////////////////
 // CLEAN
@@ -130,19 +130,29 @@ Task("Build")
 
         Information("Building using MSBuild at " + msBuildPathX64);
         Information("Configuration is:"+configuration);
-        var settings = new MSBuildSettings
-        {
-            Configuration = configuration,
-            EnvironmentVariables = new Dictionary<string, string>(),
-            NodeReuse = false,
-            PlatformTarget = PlatformTarget.MSIL,
-            ToolPath = msBuildPathX64,
-            ToolVersion = MSBuildToolVersion.VS2017
-        };
-        settings.EnvironmentVariables.Add("PackageVersion", packageVersion);
 
+        var settings = CreateSettings(msBuildPathX64);
         MSBuild(PROJECT_DIR + "src/NUnitTestAdapterTests/NUnit.TestAdapter.Tests.csproj", settings);
         MSBuild(PROJECT_DIR + "src/NUnit3TestAdapterInstall/NUnit3TestAdapterInstall.csproj", settings);
+
+		Information("Publishing netcoreapp1.0 tests so that dependencies are present...");
+
+        MSBuild(PROJECT_DIR + "src/NUnitTestAdapterTests/NUnit.TestAdapter.Tests.csproj", CreateSettings(msBuildPathX64)
+			.WithTarget("Publish")
+            .WithProperty("TargetFramework", "netcoreapp1.0")
+            .WithProperty("NoBuild", "true") // https://github.com/dotnet/cli/issues/5331#issuecomment-338392972
+			.WithRawArgument("/nologo"));
+
+        MSBuildSettings CreateSettings(FilePath toolPath) => new MSBuildSettings
+        {
+            Configuration = configuration,
+            ToolPath = toolPath,
+            ToolVersion = MSBuildToolVersion.VS2017,
+            EnvironmentVariables = new Dictionary<string, string>
+            {
+                ["PackageVersion"] = packageVersion
+            }
+        };
     });
 
 //////////////////////////////////////////////////////////////////////
@@ -162,23 +172,26 @@ Task("TestAdapterNetCore")
 	.IsDependentOn("Build")
 	.Does(() =>
 	{
-        var settings = new DotNetCoreRunSettings
-        {
-            Framework = "netcoreapp1.0",
-            Configuration = configuration
-        };
-		DotNetCoreRun(TEST_PROJECT, "", settings);
+		DotNetCoreExecute(TEST_NETCOREAPP10);
 	});
 
 Task("TestAdapterUsingVSTest")
 	.IsDependentOn("Build")
 	.Does(() =>
 	{
-        var VSTestCustomSettings = new VSTestSettings()
+        var settings = new VSTestSettings();
+
+        // https://github.com/Microsoft/vswhere/issues/126#issuecomment-360542783
+        var vstestInstallation = VSWhereLatest(new VSWhereLatestSettings
         {
-            ArgumentCustomization = args => args.Append("/TestAdapterPath:" + NET35_BIN_DIR)
-        };
-		VSTest(TEST_NET35, VSTestCustomSettings);
+             Requires = "Microsoft.VisualStudio.TestTools.TestPlatform.V1.CLI"
+        }.WithRawArgument("-products *"));
+
+        if (vstestInstallation != null) settings.ToolPath = vstestInstallation
+            .CombineWithFilePath(@"Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe");
+
+		VSTest(TEST_NET35, settings
+            .WithRawArgument("/TestAdapterPath:" + NET35_BIN_DIR));
 	});
 
 //////////////////////////////////////////////////////////////////////
@@ -254,6 +267,26 @@ Task("PackageVsix")
 			BIN_DIR + "NUnit3TestAdapter.vsix",
 			PACKAGE_DIR + packageName + ".vsix");
 	});
+
+//////////////////////////////////////////////////////////////////////
+// HELPER METHODS
+//////////////////////////////////////////////////////////////////////
+
+public static T WithRawArgument<T>(this T settings, string rawArgument) where T : Cake.Core.Tooling.ToolSettings
+{
+    if (settings == null) throw new ArgumentNullException(nameof(settings));
+
+    if (!string.IsNullOrEmpty(rawArgument))
+    {
+        var previousCustomizer = settings.ArgumentCustomization;
+        if (previousCustomizer != null)
+            settings.ArgumentCustomization = builder => previousCustomizer.Invoke(builder).Append(rawArgument);
+        else
+            settings.ArgumentCustomization = builder => builder.Append(rawArgument);
+    }
+
+    return settings;
+}
 
 //////////////////////////////////////////////////////////////////////
 // TASK TARGETS
