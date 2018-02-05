@@ -42,7 +42,7 @@ if (BuildSystem.IsRunningOnAppVeyor)
 			if (isPullRequest)
 				suffix += "-pr-" + AppVeyor.Environment.PullRequest.Number;
 			else
-				suffix += "-" + branch;
+				suffix += "-" + System.Text.RegularExpressions.Regex.Replace(branch, "[^0-9A-Za-z-]+", "-");
 
 			// Nuget limits "special version part" to 20 chars. Add one for the hyphen.
 			if (suffix.Length > 21)
