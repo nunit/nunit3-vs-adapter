@@ -179,7 +179,18 @@ Task("TestAdapterUsingVSTest")
 	.IsDependentOn("Build")
 	.Does(() =>
 	{
-		VSTest(TEST_NET35, new VSTestSettings()
+        var settings = new VSTestSettings();
+
+        // https://github.com/Microsoft/vswhere/issues/126#issuecomment-360542783
+        var vstestInstallation = VSWhereLatest(new VSWhereLatestSettings
+        {
+             Requires = "Microsoft.VisualStudio.TestTools.TestPlatform.V1.CLI"
+        }.WithRawArgument("-products *"));
+
+        if (vstestInstallation != null) settings.ToolPath = vstestInstallation
+            .CombineWithFilePath(@"Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe");
+
+		VSTest(TEST_NET35, settings
             .WithRawArgument("/TestAdapterPath:" + NET35_BIN_DIR));
 	});
 
