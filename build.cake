@@ -131,9 +131,7 @@ Task("Build")
         Information("Building using MSBuild at " + msBuildPathX64);
         Information("Configuration is:"+configuration);
 
-        var settings = CreateSettings(msBuildPathX64);
-        MSBuild(PROJECT_DIR + "src/NUnitTestAdapterTests/NUnit.TestAdapter.Tests.csproj", settings);
-        MSBuild(PROJECT_DIR + "src/NUnit3TestAdapterInstall/NUnit3TestAdapterInstall.csproj", settings);
+        MSBuild(ADAPTER_SOLUTION, CreateSettings(msBuildPathX64));
 
 		Information("Publishing netcoreapp1.0 tests so that dependencies are present...");
 
