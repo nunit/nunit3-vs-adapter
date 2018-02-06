@@ -19,40 +19,40 @@ var packageVersion = version + modifier + dbgSuffix;
 
 if (BuildSystem.IsRunningOnAppVeyor)
 {
-	var tag = AppVeyor.Environment.Repository.Tag;
+    var tag = AppVeyor.Environment.Repository.Tag;
 
-	if (tag.IsTag)
-	{
-		packageVersion = tag.Name;
-	}
-	else
-	{
-		var buildNumber = AppVeyor.Environment.Build.Number.ToString("00000");
-		var branch = AppVeyor.Environment.Repository.Branch.Replace(".", "").Replace("/", "");
-		var isPullRequest = AppVeyor.Environment.PullRequest.IsPullRequest;
+    if (tag.IsTag)
+    {
+        packageVersion = tag.Name;
+    }
+    else
+    {
+        var buildNumber = AppVeyor.Environment.Build.Number.ToString("00000");
+        var branch = AppVeyor.Environment.Repository.Branch.Replace(".", "").Replace("/", "");
+        var isPullRequest = AppVeyor.Environment.PullRequest.IsPullRequest;
 
-		if (branch == "master" && !isPullRequest)
-		{
-			packageVersion = version + "-dev-" + buildNumber + dbgSuffix;
-		}
-		else
-		{
-			var suffix = "-ci-" + buildNumber + dbgSuffix;
+        if (branch == "master" && !isPullRequest)
+        {
+            packageVersion = version + "-dev-" + buildNumber + dbgSuffix;
+        }
+        else
+        {
+            var suffix = "-ci-" + buildNumber + dbgSuffix;
 
-			if (isPullRequest)
-				suffix += "-pr-" + AppVeyor.Environment.PullRequest.Number;
-			else
-				suffix += "-" + System.Text.RegularExpressions.Regex.Replace(branch, "[^0-9A-Za-z-]+", "-");
+            if (isPullRequest)
+                suffix += "-pr-" + AppVeyor.Environment.PullRequest.Number;
+            else
+                suffix += "-" + System.Text.RegularExpressions.Regex.Replace(branch, "[^0-9A-Za-z-]+", "-");
 
-			// Nuget limits "special version part" to 20 chars. Add one for the hyphen.
-			if (suffix.Length > 21)
-				suffix = suffix.Substring(0, 21);
+            // Nuget limits "special version part" to 20 chars. Add one for the hyphen.
+            if (suffix.Length > 21)
+                suffix = suffix.Substring(0, 21);
 
-			packageVersion = version + suffix;
-		}
-	}
+            packageVersion = version + suffix;
+        }
+    }
 
-	AppVeyor.UpdateBuildVersion(packageVersion);
+    AppVeyor.UpdateBuildVersion(packageVersion);
 }
 
 var packageName = "NUnit3TestAdapter-" + packageVersion;
@@ -106,7 +106,7 @@ Task("NuGetRestore")
     .Does(() =>
 {
     Information("Restoring NuGet Packages for the Adapter Solution");
-	DotNetCoreRestore(ADAPTER_SOLUTION);
+    DotNetCoreRestore(ADAPTER_SOLUTION);
 
     Information("Restoring NuGet Packages for the VSIX project");
     NuGetRestore(PROJECT_DIR + "src/NUnit3TestAdapterInstall/NUnit3TestAdapterInstall.csproj",
@@ -133,13 +133,13 @@ Task("Build")
 
         MSBuild(ADAPTER_SOLUTION, CreateSettings(msBuildPathX64));
 
-		Information("Publishing netcoreapp1.0 tests so that dependencies are present...");
+        Information("Publishing netcoreapp1.0 tests so that dependencies are present...");
 
         MSBuild(PROJECT_DIR + "src/NUnitTestAdapterTests/NUnit.TestAdapter.Tests.csproj", CreateSettings(msBuildPathX64)
-			.WithTarget("Publish")
+            .WithTarget("Publish")
             .WithProperty("TargetFramework", "netcoreapp1.0")
             .WithProperty("NoBuild", "true") // https://github.com/dotnet/cli/issues/5331#issuecomment-338392972
-			.WithRawArgument("/nologo"));
+            .WithRawArgument("/nologo"));
 
         MSBuildSettings CreateSettings(FilePath toolPath) => new MSBuildSettings
         {
@@ -158,25 +158,25 @@ Task("Build")
 //////////////////////////////////////////////////////////////////////
 
 Task("TestAdapter")
-	.IsDependentOn("Build")
-	.Does(() =>
-	{
+    .IsDependentOn("Build")
+    .Does(() =>
+    {
         int result = StartProcess(TEST_NET35);
         if (result != 0)
             throw new Exception("TestAdapter failed");
-	});
+    });
 
 Task("TestAdapterNetCore")
-	.IsDependentOn("Build")
-	.Does(() =>
-	{
-		DotNetCoreExecute(TEST_NETCOREAPP10);
-	});
+    .IsDependentOn("Build")
+    .Does(() =>
+    {
+        DotNetCoreExecute(TEST_NETCOREAPP10);
+    });
 
 Task("TestAdapterUsingVSTest")
-	.IsDependentOn("Build")
-	.Does(() =>
-	{
+    .IsDependentOn("Build")
+    .Does(() =>
+    {
         var settings = new VSTestSettings();
 
         // https://github.com/Microsoft/vswhere/issues/126#issuecomment-360542783
@@ -188,44 +188,44 @@ Task("TestAdapterUsingVSTest")
         if (vstestInstallation != null) settings.ToolPath = vstestInstallation
             .CombineWithFilePath(@"Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe");
 
-		VSTest(TEST_NET35, settings
+        VSTest(TEST_NET35, settings
             .WithRawArgument("/TestAdapterPath:" + NET35_BIN_DIR));
-	});
+    });
 
 //////////////////////////////////////////////////////////////////////
 // PACKAGE
 //////////////////////////////////////////////////////////////////////
 
 Task("CreatePackageDir")
-	.Does(() =>
-	{
-		CreateDirectory(PACKAGE_DIR);
-	});
+    .Does(() =>
+    {
+        CreateDirectory(PACKAGE_DIR);
+    });
 
 Task("CreateWorkingImage")
-	.IsDependentOn("CreatePackageDir")
-	.Does(() =>
-	{
-		CreateDirectory(PACKAGE_IMAGE_DIR);
-		CleanDirectory(PACKAGE_IMAGE_DIR);
+    .IsDependentOn("CreatePackageDir")
+    .Does(() =>
+    {
+        CreateDirectory(PACKAGE_IMAGE_DIR);
+        CleanDirectory(PACKAGE_IMAGE_DIR);
 
-		CopyFileToDirectory("LICENSE.txt", PACKAGE_IMAGE_DIR);
+        CopyFileToDirectory("LICENSE.txt", PACKAGE_IMAGE_DIR);
 
         // dotnet publish doesn't work for .NET 3.5
-		var net35Files = new FilePath[]
-		{
-			NET35_BIN_DIR + "NUnit3.TestAdapter.dll",
+        var net35Files = new FilePath[]
+        {
+            NET35_BIN_DIR + "NUnit3.TestAdapter.dll",
             NET35_BIN_DIR + "nunit.engine.dll",
-			NET35_BIN_DIR + "nunit.engine.api.dll",
-			NET35_BIN_DIR + "Mono.Cecil.dll",
-			NET35_BIN_DIR + "Mono.Cecil.Pdb.dll",
-			NET35_BIN_DIR + "Mono.Cecil.Mdb.dll",
-			NET35_BIN_DIR + "Mono.Cecil.Rocks.dll"
-		};
+            NET35_BIN_DIR + "nunit.engine.api.dll",
+            NET35_BIN_DIR + "Mono.Cecil.dll",
+            NET35_BIN_DIR + "Mono.Cecil.Pdb.dll",
+            NET35_BIN_DIR + "Mono.Cecil.Mdb.dll",
+            NET35_BIN_DIR + "Mono.Cecil.Rocks.dll"
+        };
 
-		var net35Dir = PACKAGE_IMAGE_DIR + "build/net35";
-		CreateDirectory(net35Dir);
-		CopyFiles(net35Files, net35Dir);
+        var net35Dir = PACKAGE_IMAGE_DIR + "build/net35";
+        CreateDirectory(net35Dir);
+        CopyFiles(net35Files, net35Dir);
         CopyFileToDirectory("nuget/net35/NUnit3TestAdapter.props", net35Dir);
 
         var netcoreDir = PACKAGE_IMAGE_DIR + "build/netcoreapp1.0";
@@ -236,35 +236,35 @@ Task("CreateWorkingImage")
             Framework = "netcoreapp1.0"
         });
         CopyFileToDirectory("nuget/netcoreapp1.0/NUnit3TestAdapter.props", netcoreDir);
-	});
+    });
 
 Task("PackageZip")
-	.IsDependentOn("CreateWorkingImage")
-	.Does(() =>
-	{
-		Zip(PACKAGE_IMAGE_DIR, File(PACKAGE_DIR + packageName + ".zip"));
-	});
+    .IsDependentOn("CreateWorkingImage")
+    .Does(() =>
+    {
+        Zip(PACKAGE_IMAGE_DIR, File(PACKAGE_DIR + packageName + ".zip"));
+    });
 
 Task("PackageNuGet")
-	.IsDependentOn("CreateWorkingImage")
-	.Does(() =>
-	{
+    .IsDependentOn("CreateWorkingImage")
+    .Does(() =>
+    {
         NuGetPack("nuget/NUnit3TestAdapter.nuspec", new NuGetPackSettings()
         {
             Version = packageVersion,
             BasePath = PACKAGE_IMAGE_DIR,
             OutputDirectory = PACKAGE_DIR
         });
-	});
+    });
 
 Task("PackageVsix")
-	.IsDependentOn("CreatePackageDir")
-	.Does(() =>
-	{
-		CopyFile(
-			BIN_DIR + "NUnit3TestAdapter.vsix",
-			PACKAGE_DIR + packageName + ".vsix");
-	});
+    .IsDependentOn("CreatePackageDir")
+    .Does(() =>
+    {
+        CopyFile(
+            BIN_DIR + "NUnit3TestAdapter.vsix",
+            PACKAGE_DIR + packageName + ".vsix");
+    });
 
 //////////////////////////////////////////////////////////////////////
 // HELPER METHODS
@@ -292,22 +292,22 @@ public static T WithRawArgument<T>(this T settings, string rawArgument) where T 
 
 Task("Rebuild")
     .IsDependentOn("Clean")
-	.IsDependentOn("Build");
+    .IsDependentOn("Build");
 
 Task("Test")
-	.IsDependentOn("TestAdapter")
-	.IsDependentOn("TestAdapterNetCore")
-	.IsDependentOn("TestAdapterUsingVSTest");
+    .IsDependentOn("TestAdapter")
+    .IsDependentOn("TestAdapterNetCore")
+    .IsDependentOn("TestAdapterUsingVSTest");
 
 Task("Package")
-	.IsDependentOn("PackageZip")
-	.IsDependentOn("PackageNuGet")
-	.IsDependentOn("PackageVsix");
+    .IsDependentOn("PackageZip")
+    .IsDependentOn("PackageNuGet")
+    .IsDependentOn("PackageVsix");
 
 Task("Appveyor")
-	.IsDependentOn("Build")
-	.IsDependentOn("Test")
-	.IsDependentOn("Package");
+    .IsDependentOn("Build")
+    .IsDependentOn("Test")
+    .IsDependentOn("Package");
 
 Task("Default")
     .IsDependentOn("Build");
