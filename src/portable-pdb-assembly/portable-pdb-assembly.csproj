@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\Common.props" />
+  <PropertyGroup>
+    <RootNamespace>NUnit.VisualStudio.TestAdapter.Tests.PortablePdbAssembly</RootNamespace>
+    <TargetFrameworks>net45;netstandard1.6</TargetFrameworks>
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NUnit" Version="3.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+  </ItemGroup>
+
+</Project>

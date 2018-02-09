@@ -33,6 +33,7 @@
     <ProjectReference Include="..\mock-assembly\mock-assembly.csproj" />
     <ProjectReference Include="..\NUnitTestAdapter\NUnit.TestAdapter.csproj" />
     <ProjectReference Include="..\NUnit3AdapterExternalTests\NUnit3AdapterExternalTests.csproj" />
+    <ProjectReference Include="..\portable-pdb-assembly\portable-pdb-assembly.csproj" />
   </ItemGroup>
 
   <ItemGroup>
