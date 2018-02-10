@@ -29,7 +29,6 @@ using System.Runtime.Remoting;
 #endif
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
@@ -42,20 +41,22 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         private NUnitEventListener listener;
         private FakeFrameworkHandle testLog;
         private XmlNode fakeTestNode;
-        private TestConverter testConverter;
 
         [SetUp]
         public void SetUp()
         {
             testLog = new FakeFrameworkHandle();
-            testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, collectSourceInformation: true);
-            fakeTestNode = FakeTestData.GetTestNode();
 
-            // Ensure that the converted testcase is cached
-            testConverter.ConvertTestCase(fakeTestNode);
-            Assert.NotNull(testConverter.GetCachedTestCase("123"));
-            
-            listener = new NUnitEventListener(testLog, testConverter,null);
+            using (var testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, collectSourceInformation: true))
+            {
+                fakeTestNode = FakeTestData.GetTestNode();
+
+                // Ensure that the converted testcase is cached
+                testConverter.ConvertTestCase(fakeTestNode);
+                Assert.NotNull(testConverter.GetCachedTestCase("123"));
+
+                listener = new NUnitEventListener(testLog, testConverter, null);
+            }
         }
 
         #region TestStarted Tests
@@ -147,15 +148,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void Listener_LeaseLifetimeWillNotExpire()
         {
             testLog = new FakeFrameworkHandle();
-            testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, collectSourceInformation: true);
-            var localInstance = (MarshalByRefObject)Activator.CreateInstance(typeof(NUnitEventListener), testLog, testConverter,null);
+            using (var testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, collectSourceInformation: true))
+            {
+                var localInstance = (MarshalByRefObject) Activator.CreateInstance(typeof(NUnitEventListener), testLog, testConverter, null);
 
-            RemotingServices.Marshal(localInstance);
+                RemotingServices.Marshal(localInstance);
 
-            var lifetime = ((MarshalByRefObject)localInstance).GetLifetimeService();
-            
-            // A null lifetime (as opposed to an ILease) means the object has an infinite lifetime
-            Assert.IsNull(lifetime);
+                var lifetime = ((MarshalByRefObject) localInstance).GetLifetimeService();
+
+                // A null lifetime (as opposed to an ILease) means the object has an infinite lifetime
+                Assert.IsNull(lifetime);
+            }
         }
 #endif
         #endregion

@@ -25,7 +25,7 @@ using System;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-    public class NavigationDataProvider
+    public sealed class NavigationDataProvider : IDisposable
     {
         private readonly string _assemblyPath;
 
@@ -37,6 +37,10 @@ namespace NUnit.VisualStudio.TestAdapter
         public NavigationData GetNavigationData(string className, string methodName)
         {
             throw new NotImplementedException();
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

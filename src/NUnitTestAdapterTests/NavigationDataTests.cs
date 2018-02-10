@@ -18,6 +18,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 typeof(NavigationDataTests).GetTypeInfo().Assembly.Location);
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            _provider.Dispose();
+        }
+
         [TestCase("", "EmptyMethod_OneLine", 9, 9)]
         [TestCase("", "EmptyMethod_TwoLines", 12, 13)]
         [TestCase("", "EmptyMethod_ThreeLines", 16, 17)]

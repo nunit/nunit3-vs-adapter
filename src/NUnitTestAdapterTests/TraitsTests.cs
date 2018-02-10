@@ -390,6 +390,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             testcaselist = new List<TestCase>();
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            testconverter.Dispose();
+        }
+
         [Test]
         public void ThatParametrizedTestsHaveTraits()
         {
