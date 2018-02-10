@@ -1,5 +1,5 @@
-﻿using System.Diagnostics;
-using System.IO;
+﻿using System.IO;
+using System.Reflection;
 using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
@@ -15,11 +15,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void SetUp()
         {
             _provider = new NavigationDataProvider(
-#if NETCOREAPP1_0
-                Path.Combine(TestContext.CurrentContext.TestDirectory, "NUnit.VisualStudio.TestAdapter.Tests.dll"));
-#else
-                Path.Combine(TestContext.CurrentContext.TestDirectory, "NUnit.VisualStudio.TestAdapter.Tests.exe"));
-#endif
+                typeof(NavigationDataTests).GetTypeInfo().Assembly.Location);
         }
 
         [TestCase("", "EmptyMethod_OneLine", 9, 9)]

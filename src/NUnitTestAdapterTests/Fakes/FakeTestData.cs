@@ -153,12 +153,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
         public static readonly string AssemblyPath = 
             typeof(FakeTestData).GetTypeInfo().Assembly.ManifestModule.FullyQualifiedName;
 
-        public static readonly string CodeFile = Path.Combine(Path.GetDirectoryName(AssemblyPath),
-#if NETCOREAPP1_0
-            @"..\..\..\..\Fakes\FakeTestData.cs");
-#else
-            @"..\..\..\Fakes\FakeTestData.cs");
-#endif
+        public static readonly string CodeFile = Path.Combine(Path.GetDirectoryName(AssemblyPath), @"..\..\..\Fakes\FakeTestData.cs");
 
         // NOTE: If the location of the FakeTestCase method defined 
         // above changes, update the value of LineNumber.

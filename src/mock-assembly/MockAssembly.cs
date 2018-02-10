@@ -330,7 +330,7 @@ namespace NUnit.Tests
         public static readonly string Attachment1Name = "mock-assembly.dll";
         public static readonly string Attachment1Description = "A description with some <values> including & special characters";
 
-        public static readonly string Attachment2Name = "nunit.framework.dll";
+        public static readonly string Attachment2Name = "empty-assembly.dll";
         public static readonly string Attachment2Description = null;
 
         [Test]
