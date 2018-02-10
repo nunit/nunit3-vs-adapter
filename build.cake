@@ -230,10 +230,7 @@ Task("CreateWorkingImage")
             ADAPTER_BIN_DIR_NET35 + "NUnit3.TestAdapter.dll",
             ADAPTER_BIN_DIR_NET35 + "nunit.engine.dll",
             ADAPTER_BIN_DIR_NET35 + "nunit.engine.api.dll",
-            ADAPTER_BIN_DIR_NET35 + "Mono.Cecil.dll",
-            ADAPTER_BIN_DIR_NET35 + "Mono.Cecil.Pdb.dll",
-            ADAPTER_BIN_DIR_NET35 + "Mono.Cecil.Mdb.dll",
-            ADAPTER_BIN_DIR_NET35 + "Mono.Cecil.Rocks.dll"
+            ADAPTER_BIN_DIR_NET35 + "Mono.Cecil.dll"
         };
 
         var net35Dir = PACKAGE_IMAGE_DIR + "build/net35";
