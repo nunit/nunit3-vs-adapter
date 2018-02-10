@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2016 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2018 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -22,25 +22,33 @@
 // ***********************************************************************
 
 using System;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
     public sealed class NavigationDataProvider : IDisposable
     {
-        private readonly string _assemblyPath;
+        private readonly DiaSession _session;
 
         public NavigationDataProvider(string assemblyPath)
         {
-            _assemblyPath = assemblyPath;
+            if (string.IsNullOrEmpty(assemblyPath))
+                throw new ArgumentException("Assembly path must be specified.", nameof(assemblyPath));
+
+            _session = new DiaSession(assemblyPath);
         }
 
         public NavigationData GetNavigationData(string className, string methodName)
         {
-            throw new NotImplementedException();
+            var data = _session.GetNavigationData(className, methodName);
+            if (data == null) return NavigationData.Invalid;
+
+            return new NavigationData(data.FileName, data.MinLineNumber);
         }
 
         public void Dispose()
         {
+            _session.Dispose();
         }
     }
 }
