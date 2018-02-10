@@ -43,4 +43,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
   </ItemGroup>
+
+  <Target Name="PreventTestPlatformObjectModelCopyLocal" AfterTargets="ResolveReferences">
+    <ItemGroup>
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' == 'Microsoft.VisualStudio.TestPlatform.ObjectModel'" />
+    </ItemGroup>
+  </Target>
+
 </Project>

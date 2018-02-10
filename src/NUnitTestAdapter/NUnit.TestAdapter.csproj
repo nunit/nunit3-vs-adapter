@@ -43,4 +43,10 @@
     <PackageReference Include="nunit.engine.netstandard" Version="3.7.0" />
   </ItemGroup>
 
+  <Target Name="PreventTestPlatformObjectModelCopyLocal" AfterTargets="ResolveReferences">
+    <ItemGroup>
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' == 'Microsoft.VisualStudio.TestPlatform.ObjectModel'" />
+    </ItemGroup>
+  </Target>
+
 </Project>
