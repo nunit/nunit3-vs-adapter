@@ -153,7 +153,13 @@ Task("VSTest-net45")
     .IsDependentOn("Build")
     .Does(() =>
     {
-        var settings = new VSTestSettings { TestAdapterPath = ADAPTER_BIN_DIR_NET35 };
+        var settings = new VSTestSettings
+        {
+            TestAdapterPath = ADAPTER_BIN_DIR_NET35,
+            // Enables the tests to run against the correct version of Microsoft.VisualStudio.TestPlatform.ObjectModel.dll.
+            // (The DLL they are compiled against depends on VS2012 at runtime.)
+            SettingsFile = File("DisableAppDomain.runsettings")
+        };
 
         // https://github.com/Microsoft/vswhere/issues/126#issuecomment-360542783
         var vstestInstallation = VSWhereLatest(new VSWhereLatestSettings
@@ -192,7 +198,8 @@ foreach (var (framework, adapterDir) in new[] {
                 Configuration = configuration,
                 Framework = framework,
                 NoBuild = true,
-                TestAdapterPath = adapterDir
+                TestAdapterPath = adapterDir,
+                Settings = File("DisableAppDomain.runsettings")
             });
         });
 }
