@@ -74,8 +74,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             // Load the NUnit mock-assembly.dll once for this test, saving
             // the list of test cases sent to the discovery sink
-            nunittestDiscoverer = ((ITestDiscoverer)new NUnit3TestDiscoverer());
-            nunittestDiscoverer.DiscoverTests(
+            TestAdapterUtils.CreateDiscoverer().DiscoverTests(
                 new[] { MockAssemblyPath },
                 _context,
                 new MessageLoggerStub(),
@@ -125,27 +124,24 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         static readonly string EmptyAssemblyPath =
             Path.Combine(TestContext.CurrentContext.TestDirectory, "empty-assembly.dll");
 
-        private static ITestDiscoverer nunittestDiscoverer;
-
         [TestCaseSource(typeof(TestDiscoveryDataProvider), nameof(TestDiscoveryDataProvider.TestDiscoveryData))]
         public void VerifyLoading(IDiscoveryContext context)
         {
             // Load the NUnit empty-assembly.dll once for this test
-            nunittestDiscoverer = ((ITestDiscoverer)new NUnit3TestDiscoverer());
-            nunittestDiscoverer.DiscoverTests(
+            TestAdapterUtils.CreateDiscoverer().DiscoverTests(
                 new[] { EmptyAssemblyPath },
                 context,
                 new MessageLoggerStub(),
                 this);
         }
 
-        #region ITestCaseDiscoverySink Methods
+#region ITestCaseDiscoverySink Methods
 
         void ITestCaseDiscoverySink.SendTestCase(TestCase discoveredTest)
         {
         }
 
-        #endregion
+#endregion
     }
 
     [Category("TestDiscovery")]
@@ -164,10 +160,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void WhenAssemblyDontExist()
         {
             int noOfMessagesFound = 3; // Start + end, + info
-            var nunittestDiscoverer = new NUnit3TestDiscoverer();
             var context = new FakeDiscoveryContext(null);
             var messageLoggerStub = new MessageLoggerStub();
-            nunittestDiscoverer.DiscoverTests(
+            TestAdapterUtils.CreateDiscoverer().DiscoverTests(
                     new[] { "FileThatDoesntExist.dll" },
                     context,
                     messageLoggerStub,
@@ -182,12 +177,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void WhenAssemblyIsNative()
         {
-            var nunittestDiscoverer = new NUnit3TestDiscoverer();
             var context = new FakeDiscoveryContext(null);
             var messageLoggerStub = new MessageLoggerStub();
             var path = Path.Combine(TestContext.CurrentContext.TestDirectory, "NativeTests.dll");
             Assert.That(File.Exists(path));
-            nunittestDiscoverer.DiscoverTests(
+            TestAdapterUtils.CreateDiscoverer().DiscoverTests(
                 new[] { path },
                 context,
                 messageLoggerStub,

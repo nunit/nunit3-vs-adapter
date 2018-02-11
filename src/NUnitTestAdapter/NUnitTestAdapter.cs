@@ -74,6 +74,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #endregion
 
+        internal event Action<TestEngineClass> InternalEngineCreated;
+
         #region Properties
 
         public AdapterSettings Settings { get; private set; }
@@ -117,7 +119,9 @@ namespace NUnit.VisualStudio.TestAdapter
         // Discover or Execute method must call this method.
         protected void Initialize(IDiscoveryContext context, IMessageLogger messageLogger)
         {
-            TestEngine = new TestEngineClass();
+            var engine = new TestEngineClass();
+            InternalEngineCreated?.Invoke(engine);
+            TestEngine = engine;
             TestLog = new TestLogger(messageLogger);
             Settings = new AdapterSettings(TestLog);
             TestLog.InitSettings(Settings);
