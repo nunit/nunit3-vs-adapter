@@ -38,18 +38,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase("", "AsyncMethod_Void", 60, 62)]
         [TestCase("", "AsyncMethod_Task", 67, 69)]
         [TestCase("", "AsyncMethod_ReturnsInt", 74, 76)]
-        // Nested classes use ECMA-335 format
-        [TestCase("/NestedClass", "SimpleMethod_Void_NoArgs", 83, 85)]
-        [TestCase("/ParameterizedFixture", "SimpleMethod_ReturnsString_OneArg", 101, 102)]
-        // Generic Fixture requires ` plus type arg count
-        [TestCase("/GenericFixture`2", "Matches", 116, 117)]
-        [TestCase("/GenericFixture`2/DoublyNested", "WriteBoth", 132, 133)]
-        [TestCase("/GenericFixture`2/DoublyNested`1", "WriteAllThree", 151, 152)]
-        [TestCase("/DerivedClass", "EmptyMethod_ThreeLines", 160, 161)]
-        // Handles sub class format from Type.FullName
+        // Nested classes use Type.FullName format
         [TestCase("+NestedClass", "SimpleMethod_Void_NoArgs", 83, 85)]
+        [TestCase("+ParameterizedFixture", "SimpleMethod_ReturnsString_OneArg", 101, 102)]
+        // Generic Fixture requires ` plus type arg count
+        [TestCase("+GenericFixture`2", "Matches", 116, 117)]
         [TestCase("+GenericFixture`2+DoublyNested", "WriteBoth", 132, 133)]
         [TestCase("+GenericFixture`2+DoublyNested`1", "WriteAllThree", 151, 152)]
+        [TestCase("+DerivedClass", "EmptyMethod_ThreeLines", 160, 161)]
         public void VerifyNavigationData_WithinAssembly(string suffix, string methodName, int expectedLineDebug, int expectedLineRelease)
         {
             VerifyNavigationData(suffix, methodName, "NUnitTestAdapterTests", expectedLineDebug, expectedLineRelease);
@@ -57,13 +53,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
       
 #if !NETCOREAPP1_0
         // .NET Standard does not have the assembly resolvers, so the fixes for this do not work
-        [TestCase("/DerivedFromExternalAbstractClass", "EmptyMethod_ThreeLines", 6, 7)]
-        [TestCase("/DerivedFromExternalConcreteClass", "EmptyMethod_ThreeLines", 13, 14)]
+        [TestCase("+DerivedFromExternalAbstractClass", "EmptyMethod_ThreeLines", 6, 7)]
+        [TestCase("+DerivedFromExternalConcreteClass", "EmptyMethod_ThreeLines", 13, 14)]
         public void VerifyNavigationData_WithExternalAssembly(string suffix, string methodName, int expectedLineDebug, int expectedLineRelease)
         {
-#if LAUNCH_DEBUGGER
-            if (!Debugger.IsAttached) { Debugger.Launch(); }
-#endif
             VerifyNavigationData(suffix, methodName, "NUnit3AdapterExternalTests", expectedLineDebug, expectedLineRelease);
         }
 #endif
