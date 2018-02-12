@@ -1,88 +1,102 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
+
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
     // Contains methods used in testing NavigationDataProvider.
     class NavigationTestData
     {
-        public void EmptyMethod_OneLine() { } // expectedLineDebug = expectedLineRelease = 8
+        public void EmptyMethod_OneLine() { } // expectedLineDebug, expectedLineRelease
 
         public void EmptyMethod_TwoLines()
-        { // expectedLineDebug = 12
-        } // expectedLineRelease = 13
+        { // expectedLineDebug
+        } // expectedLineRelease
 
         public void EmptyMethod_ThreeLines()
-        { // expectedLineDebug = 16
-        } // expectedLineRelease = 17
+        { // expectedLineDebug
+        } // expectedLineRelease
 
         public void EmptyMethod_LotsOfLines()
-        { // expectedLineDebug = 20
+        { // expectedLineDebug
 
 
-        } // expectedLineRelease = 23
+        } // expectedLineRelease
 
         public void SimpleMethod_Void_NoArgs()
-        {// expectedLineDebug = 26
+        {// expectedLineDebug
             const int answer = 42;
-            Console.Write(answer); // expectedLineRelease = 28
+            Console.Write(answer); // expectedLineRelease
         }
 
         public void SimpleMethod_Void_OneArg(int x)
-        { // expectedLineDebug = 32
-            var answer = x; // expectedLineRelease = 33
+        { // expectedLineDebug
+            var answer = x; // expectedLineRelease
             Console.Write(answer);
         }
 
         public void SimpleMethod_Void_TwoArgs(int x, int y)
-        { // expectedLineDebug = 38
-            var answer = x + y; // expectedLineRelease = 39
+        { // expectedLineDebug
+            var answer = x + y; // expectedLineRelease
             Console.Write(answer);
         }
 
         public int SimpleMethod_ReturnsInt_NoArgs()
-        {// expectedLineDebug = 44
+        {// expectedLineDebug
             const int answer = 42;
-            return answer; // expectedLineRelease = 46
+            return answer; // expectedLineRelease
         }
 
         public string SimpleMethod_ReturnsString_OneArg(int x)
-        { // expectedLineDebug = 50
-            return x.ToString(CultureInfo.InvariantCulture); // expectedLineRelease = 51
+        { // expectedLineDebug
+            return x.ToString(CultureInfo.InvariantCulture); // expectedLineRelease
         }
 
         public string GenericMethod_ReturnsString_OneArg<T>(T x)
-        { // expectedLineDebug = 55
-            return x.ToString(); // expectedLineRelease = 56
+        { // expectedLineDebug
+            return x.ToString(); // expectedLineRelease
         }
 
         public async void AsyncMethod_Void()
-        { // expectedLineDebug = 60
+        { // expectedLineDebug
             const int answer = 42;
-            await Task.Delay(0); // expectedLineRelease = 62
+            await Task.Delay(0); // expectedLineRelease
             Console.Write(answer);
         }
 
         public async Task AsyncMethod_Task()
-        { // expectedLineDebug = 67
+        { // expectedLineDebug
             const int answer = 42;
-            await Task.Delay(0); // expectedLineRelease = 69
+            await Task.Delay(0); // expectedLineRelease
             Console.Write(answer);
         }
 
         public async Task<int> AsyncMethod_ReturnsInt()
-        { // expectedLineDebug = 74
+        { // expectedLineDebug
             const int answer = 42;
-            await Task.Delay(0); // expectedLineRelease = 76
+            await Task.Delay(0); // expectedLineRelease
             return answer;
+        }
+
+        public IEnumerable<int> IteratorMethod_ReturnsEnumerable()
+        { // expectedLineDebug
+            const int answer = 42;
+            yield return answer; // expectedLineRelease
+        }
+
+        public IEnumerator<int> IteratorMethod_ReturnsEnumerator()
+        { // expectedLineDebug
+            const int answer = 42;
+            yield return answer; // expectedLineRelease
         }
 
         public class NestedClass
         {
             public void SimpleMethod_Void_NoArgs()
-            {// expectedLineDebug = 83
+            {// expectedLineDebug
                 const int answer = 42;
-                Console.Write(answer); // expectedLineRelease = 85
+                Console.Write(answer); // expectedLineRelease
             }
         }
 
@@ -98,8 +112,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             }
 
             public string SimpleMethod_ReturnsString_OneArg(int i)
-            { // expectedLineDebug = 101
-                return s + x * i; // expectedLineRelease = 102
+            { // expectedLineDebug
+                return s + x * i; // expectedLineRelease
             }
         }
 
@@ -113,8 +127,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             }
 
             public bool Matches(T2 y)
-            { // expectedLineDebug = 116
-                return x.Equals(y); // expectedLineRelease = 117
+            { // expectedLineDebug
+                return x.Equals(y); // expectedLineRelease
             }
 
             public class DoublyNested
@@ -129,8 +143,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 }
 
                 public void WriteBoth()
-                { // expectedLineDebug = 132
-                    Console.Write(X + Y.ToString()); // expectedLineRelease = 133
+                { // expectedLineDebug
+                    Console.Write(X + Y.ToString()); // expectedLineRelease
                 }
             }
 
@@ -148,8 +162,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 }
 
                 public void WriteAllThree()
-                { // expectedLineDebug = 151
-                    Console.Write(X + Y.ToString() + Z); // expectedLineRelease = 152
+                { // expectedLineDebug
+                    Console.Write(X + Y.ToString() + Z); // expectedLineRelease
                 }
             }
         }
@@ -157,8 +171,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public abstract class BaseClass
         {
             public void EmptyMethod_ThreeLines()
-            { // expectedLineDebug = 160
-            } // expectedLineRelease = 161
+            { // expectedLineDebug
+            } // expectedLineRelease
         }
 
         public class DerivedClass : BaseClass
