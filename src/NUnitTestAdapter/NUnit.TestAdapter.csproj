@@ -7,7 +7,6 @@
     <TargetFrameworks>net35;netcoreapp1.0</TargetFrameworks>
     <CodeAnalysisRuleSet>..\..\Osiris.Extended.ruleset</CodeAnalysisRuleSet>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <PropertyGroup>

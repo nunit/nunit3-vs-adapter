@@ -5,7 +5,6 @@
     <AssemblyName>NUnit.VisualStudio.TestAdapter.ExternalTests</AssemblyName>
     <RootNamespace>NUnit.VisualStudio.TestAdapter.Tests</RootNamespace>
     <TargetFrameworks>net45;netstandard1.6</TargetFrameworks>
-    <DebugType Condition="'$(TargetFramework)' != '' AND '$(TargetFramework)' != 'netstandard1.6'">Full</DebugType>
   </PropertyGroup>
 
   <ItemGroup>

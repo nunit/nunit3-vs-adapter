@@ -5,7 +5,6 @@
     <RootNamespace>NUnit.VisualStudio.TestAdapter.Tests</RootNamespace>
     <AssemblyName>NUnit.VisualStudio.TestAdapter.Tests</AssemblyName>
     <TargetFrameworks>net45;netcoreapp1.0</TargetFrameworks>
-    <DebugType Condition="'$(TargetFramework)' != '' AND '$(TargetFramework)' != 'netcoreapp1.0'">Full</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -33,7 +32,6 @@
     <ProjectReference Include="..\mock-assembly\mock-assembly.csproj" />
     <ProjectReference Include="..\NUnitTestAdapter\NUnit.TestAdapter.csproj" />
     <ProjectReference Include="..\NUnit3AdapterExternalTests\NUnit3AdapterExternalTests.csproj" />
-    <ProjectReference Include="..\portable-pdb-assembly\portable-pdb-assembly.csproj" />
   </ItemGroup>
 
   <ItemGroup>

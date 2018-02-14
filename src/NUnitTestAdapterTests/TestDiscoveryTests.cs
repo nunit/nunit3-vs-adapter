@@ -144,40 +144,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     }
 
     [Category("TestDiscovery")]
-    public static class PortablePdbAssemblyDiscoveryTests
-    {
-        [TestCaseSource(typeof(TestDiscoveryDataProvider), nameof(TestDiscoveryDataProvider.TestDiscoveryData))]
-        public static void VerifyLoading(IDiscoveryContext context)
-        {
-            var dummyFixtureType = typeof(PortablePdbAssembly.DummyFixture);
-            var portablePdbAssemblyPath = dummyFixtureType.GetTypeInfo().Assembly.Location;
-
-            var sink = Substitute.For<ITestCaseDiscoverySink>();
-
-            TestAdapterUtils.CreateDiscoverer().DiscoverTests(
-                new[] { portablePdbAssemblyPath },
-                context,
-                new ValidatingLogger(),
-                sink);
-
-            var expectedTestName = $"{dummyFixtureType.FullName}.{nameof(PortablePdbAssembly.DummyFixture.DummyTest)}";
-
-            sink.Received().SendTestCase(
-                Arg.Is<TestCase>(testCase => testCase.FullyQualifiedName == expectedTestName));
-        }
-
-        private sealed class ValidatingLogger : IMessageLogger
-        {
-            public void SendMessage(TestMessageLevel testMessageLevel, string message)
-            {
-                Assert.That(testMessageLevel,
-                    Is.Not.EqualTo(TestMessageLevel.Error).And.Not.EqualTo(TestMessageLevel.Warning),
-                    $"{testMessageLevel} message: {message}");
-            }
-        }
-    }
-
-    [Category("TestDiscovery")]
     public class FailuresInDiscovery : ITestCaseDiscoverySink
     {
         bool testcaseWasSent;
