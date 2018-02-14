@@ -10,17 +10,20 @@ The NUnit 3 Test Adapter is Open Source software released under the [MIT license
 
 ## Developing
 
-You need Visual Studio 2017 for building the adapter
+Visual Studio 2017 is required to build the adapter.
 
-You will get some failing tests (6) in VS, that is intended.  
+Use `.\build -t test` at the command line to run complete tests.
 
-Use command line (Cake build):  
+To run and debug tests on .NET Framework, load `DisableAppDomain.runsettings`.
 
-`build -t test` 
+Visual Studio’s Test Explorer only allows you to run tests against the first target in the test project
+[(upvote)](https://developercommunity.visualstudio.com/content/problem/150864/running-tests-in-a-csproj-with-multiple-targetfram.html).
+That makes command line is the easiest way to run .NET Core tests for now. If you need to frequently debug into .NET Core tests,
+you can temporarily switch the order of the `<TargetFrameworks>` in `NUnit.TestAdapter.Tests.csproj`.
 
-to get the right results, or exclude the tests from mock-assembly. 
+The `mock-assembly` tests are not for direct running.
 
-For more details see https://github.com/nunit/docs/wiki/Packaging-the-V3-Adapter  
+See https://github.com/nunit/docs/wiki/Packaging-the-V3-Adapter for more details.
 
 
 ## Announcement
