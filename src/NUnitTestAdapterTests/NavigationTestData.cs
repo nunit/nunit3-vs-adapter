@@ -173,6 +173,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             public void EmptyMethod_ThreeLines()
             { // expectedLineDebug
             } // expectedLineRelease
+
+            public async Task AsyncMethod_Task()
+            { // expectedLineDebug
+                const int answer = 42;
+                await Task.Delay(0); // expectedLineRelease
+                Console.Write(answer);
+            }
         }
 
         public class DerivedClass : BaseClass
