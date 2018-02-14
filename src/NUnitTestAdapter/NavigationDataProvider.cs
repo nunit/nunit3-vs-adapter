@@ -53,7 +53,7 @@ namespace NUnit.VisualStudio.TestAdapter
             _metadataProvider.Dispose();
 
             foreach (var session in _sessionsByAssemblyPath.Values)
-                session.Dispose();
+                session?.Dispose();
         }
 
         public NavigationData GetNavigationData(string className, string methodName)
@@ -67,9 +67,21 @@ namespace NUnit.VisualStudio.TestAdapter
         private NavigationData TryGetSessionData(string assemblyPath, string declaringTypeName, string methodName)
         {
             if (!_sessionsByAssemblyPath.TryGetValue(assemblyPath, out var session))
-                _sessionsByAssemblyPath.Add(assemblyPath, session = new DiaSession(assemblyPath));
+            {
+                try
+                {
+                    session = new DiaSession(assemblyPath);
+                }
+                // DiaSession crashes for .NET Framework tests run via `dotnet test` or `dotnet vstest`.
+                // See https://github.com/Microsoft/vstest/issues/1432.
+                catch // TestPlatformException not available in net35.
+                {
+                    session = null;
+                }
+                _sessionsByAssemblyPath.Add(assemblyPath, session);
+            }
 
-            var data = session.GetNavigationData(declaringTypeName, methodName);
+            var data = session?.GetNavigationData(declaringTypeName, methodName);
 
             return string.IsNullOrEmpty(data?.FileName) ? null :
                 new NavigationData(data.FileName, data.MinLineNumber);
