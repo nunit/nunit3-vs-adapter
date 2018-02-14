@@ -149,46 +149,35 @@ string GetTestAssemblyPath(string framework)
     return SRC_DIR + $"NUnitTestAdapterTests/bin/{configuration}/{framework}/NUnit.VisualStudio.TestAdapter.Tests.dll";
 }
 
-Task("VSTest-net45")
-    .IsDependentOn("Build")
-    .Does(() =>
-    {
-        var settings = new VSTestSettings
-        {
-            TestAdapterPath = ADAPTER_BIN_DIR_NET35,
-            // Enables the tests to run against the correct version of Microsoft.VisualStudio.TestPlatform.ObjectModel.dll.
-            // (The DLL they are compiled against depends on VS2012 at runtime.)
-            SettingsFile = File("DisableAppDomain.runsettings")
-        };
-
-        // https://github.com/Microsoft/vswhere/issues/126#issuecomment-360542783
-        var vstestInstallation = VSWhereLatest(new VSWhereLatestSettings
-        {
-             Requires = "Microsoft.VisualStudio.TestTools.TestPlatform.V1.CLI"
-        }.WithRawArgument("-products *"));
-
-        if (vstestInstallation != null) settings.ToolPath = vstestInstallation
-            .CombineWithFilePath(@"Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe");
-
-        VSTest(GetTestAssemblyPath("net45"), settings);
-    });
-
-Task("VSTest-netcoreapp1.0")
-    .IsDependentOn("Build")
-    .Does(() =>
-    {
-        DotNetCoreVSTest(GetTestAssemblyPath("netcoreapp1.0"), new DotNetCoreVSTestSettings
-        {
-            TestAdapterPath = ADAPTER_BIN_DIR_NETCOREAPP10,
-            Framework = "FrameworkCore10"
-        });
-    });
-
-foreach (var (framework, adapterDir) in new[] {
-    ("net45", ADAPTER_BIN_DIR_NET35),
-    ("netcoreapp1.0", ADAPTER_BIN_DIR_NETCOREAPP10)
+foreach (var (framework, vstestFramework, adapterDir) in new[] {
+    ("net45", "Framework45", ADAPTER_BIN_DIR_NET35),
+    ("netcoreapp1.0", "FrameworkCore10", ADAPTER_BIN_DIR_NETCOREAPP10)
 })
 {
+    Task($"VSTest-{framework}")
+        .IsDependentOn("Build")
+        .Does(() =>
+        {
+            var settings = new VSTestSettings
+            {
+                TestAdapterPath = adapterDir,
+                // Enables the tests to run against the correct version of Microsoft.VisualStudio.TestPlatform.ObjectModel.dll.
+                // (The DLL they are compiled against depends on VS2012 at runtime.)
+                SettingsFile = File("DisableAppDomain.runsettings")
+            };
+
+            // https://github.com/Microsoft/vswhere/issues/126#issuecomment-360542783
+            var vstestInstallation = VSWhereLatest(new VSWhereLatestSettings
+            {
+                Requires = "Microsoft.VisualStudio.TestTools.TestPlatform.V1.CLI"
+            }.WithRawArgument("-products *"));
+
+            if (vstestInstallation != null) settings.ToolPath = vstestInstallation
+                .CombineWithFilePath(@"Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe");
+
+            VSTest(GetTestAssemblyPath(framework), settings);
+        });
+
     Task($"DotnetTest-{framework}")
         .IsDependentOn("Build")
         .Does(() =>
@@ -199,6 +188,18 @@ foreach (var (framework, adapterDir) in new[] {
                 Framework = framework,
                 NoBuild = true,
                 TestAdapterPath = adapterDir,
+                Settings = File("DisableAppDomain.runsettings")
+            });
+        });
+
+    Task($"DotnetVSTest-{framework}")
+        .IsDependentOn("Build")
+        .Does(() =>
+        {
+            DotNetCoreVSTest(GetTestAssemblyPath(framework), new DotNetCoreVSTestSettings
+            {
+                TestAdapterPath = adapterDir,
+                Framework = vstestFramework,
                 Settings = File("DisableAppDomain.runsettings")
             });
         });
@@ -310,7 +311,9 @@ Task("Test")
     .IsDependentOn("VSTest-net45")
     .IsDependentOn("VSTest-netcoreapp1.0")
     .IsDependentOn("DotnetTest-net45")
-    .IsDependentOn("DotnetTest-netcoreapp1.0");
+    .IsDependentOn("DotnetTest-netcoreapp1.0")
+    .IsDependentOn("DotnetVSTest-net45")
+    .IsDependentOn("DotnetVSTest-netcoreapp1.0");
 
 Task("Package")
     .IsDependentOn("PackageZip")
