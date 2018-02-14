@@ -96,6 +96,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(testCase.FullyQualifiedName, Is.EqualTo(fullName));
         }
 
+        [Category("Navigation")]
         [TestCase("NestedClassTest1")] // parent
         [TestCase("NestedClassTest2")] // child
         [TestCase("NestedClassTest3")] // grandchild

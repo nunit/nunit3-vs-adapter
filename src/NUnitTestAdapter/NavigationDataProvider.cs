@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.VisualStudio.TestAdapter.Metadata;
 
@@ -59,9 +60,21 @@ namespace NUnit.VisualStudio.TestAdapter
         public NavigationData GetNavigationData(string className, string methodName)
         {
             return TryGetSessionData(_assemblyPath, className, methodName)
-                ?? TryGetSessionData(_metadataProvider.GetStateMachineType(_assemblyPath, className, methodName), "MoveNext")
-                ?? TryGetSessionData(_metadataProvider.GetDeclaringType(_assemblyPath, className, methodName), methodName)
+                ?? TryGetSessionData(DoSafe(_metadataProvider.GetStateMachineType, _assemblyPath, className, methodName), "MoveNext")
+                ?? TryGetSessionData(DoSafe(_metadataProvider.GetDeclaringType, _assemblyPath, className, methodName), methodName)
                 ?? NavigationData.Invalid;
+        }
+
+        private static TypeInfo? DoSafe(Func<string, string, string, TypeInfo?> method, string assemblyPath, string declaringTypeName, string methodName)
+        {
+            try
+            {
+                return method.Invoke(assemblyPath, declaringTypeName, methodName);
+            }
+            catch (FileNotFoundException)
+            {
+                return null;
+            }
         }
 
         private NavigationData TryGetSessionData(string assemblyPath, string declaringTypeName, string methodName)

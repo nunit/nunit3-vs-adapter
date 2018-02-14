@@ -22,6 +22,7 @@
 // ***********************************************************************
 
 using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using NUnit.VisualStudio.TestAdapter.Internal;
@@ -74,16 +75,24 @@ namespace NUnit.VisualStudio.TestAdapter.Metadata
 
         private static MethodInfo TryGetSingleMethod(string assemblyPath, string reflectedTypeName, string methodName)
         {
+            try
+            {
 #if NETCOREAPP1_0
-            var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
+                var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
 #else
-            var assembly = Assembly.ReflectionOnlyLoadFrom(assemblyPath);
+                var assembly = Assembly.ReflectionOnlyLoadFrom(assemblyPath);
 #endif
-            var type = assembly.GetType(reflectedTypeName, throwOnError: false);
-            if (type == null) return null;
 
-            var methods = type.GetMethods().Where(m => m.Name == methodName).Take(2).ToList();
-            return methods.Count == 1 ? methods[0] : null;
+                var type = assembly.GetType(reflectedTypeName, throwOnError: false);
+                if (type == null) return null;
+
+                var methods = type.GetMethods().Where(m => m.Name == methodName).Take(2).ToList();
+                return methods.Count == 1 ? methods[0] : null;
+            }
+            catch (FileNotFoundException)
+            {
+                return null;
+            }
         }
 
         void IDisposable.Dispose()
