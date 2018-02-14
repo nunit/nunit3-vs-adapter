@@ -22,6 +22,8 @@
 // ***********************************************************************
 
 using System;
+using System.Reflection;
+using NUnit.VisualStudio.TestAdapter.Internal;
 
 namespace NUnit.VisualStudio.TestAdapter.Metadata
 {
@@ -30,13 +32,11 @@ namespace NUnit.VisualStudio.TestAdapter.Metadata
 #endif
     public struct TypeInfo
     {
-#if !NETCOREAPP1_0
         public TypeInfo(Type type)
         {
-            AssemblyPath = type.Assembly.Location;
+            AssemblyPath = type.GetTypeInfo().Assembly.Location;
             FullName = type.FullName;
         }
-#endif
 
         public TypeInfo(string assemblyPath, string fullName)
         {

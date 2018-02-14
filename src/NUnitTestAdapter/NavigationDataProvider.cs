@@ -32,9 +32,7 @@ namespace NUnit.VisualStudio.TestAdapter
     {
         private readonly string _assemblyPath;
         private readonly Dictionary<string, DiaSession> _sessionsByAssemblyPath = new Dictionary<string, DiaSession>(StringComparer.OrdinalIgnoreCase);
-#if !NETCOREAPP1_0
         private readonly IMetadataProvider _metadataProvider;
-#endif
 
         public NavigationDataProvider(string assemblyPath)
         {
@@ -43,16 +41,17 @@ namespace NUnit.VisualStudio.TestAdapter
 
             _assemblyPath = assemblyPath;
 
-#if !NETCOREAPP1_0
+#if NETCOREAPP1_0
+            _metadataProvider = new DirectReflectionMetadataProvider();
+#else
             _metadataProvider = new ReflectionAppDomainMetadataProvider();
 #endif
         }
 
         public void Dispose()
         {
-#if !NETCOREAPP1_0
             _metadataProvider.Dispose();
-#endif
+
             foreach (var session in _sessionsByAssemblyPath.Values)
                 session.Dispose();
         }
@@ -60,10 +59,8 @@ namespace NUnit.VisualStudio.TestAdapter
         public NavigationData GetNavigationData(string className, string methodName)
         {
             return TryGetSessionData(_assemblyPath, className, methodName)
-#if !NETCOREAPP1_0
                 ?? TryGetSessionData(_metadataProvider.GetStateMachineType(_assemblyPath, className, methodName), "MoveNext")
                 ?? TryGetSessionData(_metadataProvider.GetDeclaringType(_assemblyPath, className, methodName), methodName)
-#endif
                 ?? NavigationData.Invalid;
         }
 
@@ -74,7 +71,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             var data = session.GetNavigationData(declaringTypeName, methodName);
 
-            return data?.FileName == null ? null :
+            return string.IsNullOrEmpty(data?.FileName) ? null :
                 new NavigationData(data.FileName, data.MinLineNumber);
         }
 

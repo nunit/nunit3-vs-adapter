@@ -73,6 +73,21 @@ namespace NUnit.VisualStudio.TestAdapter.Metadata
         {
             return GetHelper().GetStateMachineType(assemblyPath, reflectedTypeName, methodName);
         }
+
+        private sealed class AppDomainHelper : MarshalByRefObject
+        {
+            private readonly DirectReflectionMetadataProvider provider = new DirectReflectionMetadataProvider();
+
+            public TypeInfo? GetDeclaringType(string assemblyPath, string reflectedTypeName, string methodName)
+            {
+                return provider.GetDeclaringType(assemblyPath, reflectedTypeName, methodName);
+            }
+
+            public TypeInfo? GetStateMachineType(string assemblyPath, string reflectedTypeName, string methodName)
+            {
+                return provider.GetStateMachineType(assemblyPath, reflectedTypeName, methodName);
+            }
+        }
     }
 }
 #endif
