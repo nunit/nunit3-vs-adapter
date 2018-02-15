@@ -59,6 +59,7 @@ namespace NUnit.VisualStudio.TestAdapter
             SupportedPropertiesCache = new Dictionary<string, TestProperty>(StringComparer.OrdinalIgnoreCase);
             SupportedPropertiesCache["FullyQualifiedName"] = TestCaseProperties.FullyQualifiedName;
             SupportedPropertiesCache["Name"] = TestCaseProperties.DisplayName;
+            SupportedPropertiesCache["TestCategory"] = CategoryList.NUnitTestCategoryProperty;
             // Initialize the trait cache
             var priorityTrait = new NTrait("Priority", "");
             var categoryTrait = new NTrait("Category", "");
