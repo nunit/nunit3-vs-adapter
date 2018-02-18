@@ -43,7 +43,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         static readonly IRunContext Context = new FakeRunContext();
 
         private FakeFrameworkHandle testLog;
-        private static ITestExecutor executor;
         ResultSummary Summary { get;  set; }    
 
 
@@ -59,8 +58,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             // Load the NUnit mock-assembly.dll once for this test, saving
             // the list of test cases sent to the discovery sink
-            executor = new NUnit3TestExecutor();
-            executor.RunTests(new[] { MockAssemblyPath }, Context, testLog);
+            TestAdapterUtils.CreateExecutor().RunTests(new[] { MockAssemblyPath }, Context, testLog);
 
             var testResults = testLog.Events
                .Where(e => e.EventType == FakeFrameworkHandle.EventType.RecordResult)

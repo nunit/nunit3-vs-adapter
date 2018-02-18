@@ -55,15 +55,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void ThatAdapterInstallProjectHasVsixManifestWithUnitTestExtensionAsset()
         {
             var location = TestContext.CurrentContext.TestDirectory;
-#if NETCOREAPP1_0
-            var di = new DirectoryInfo(location).MoveUp(5);
-#else
             var di = new DirectoryInfo(location).MoveUp(4);
-#endif
             Assert.That(di,Is.Not.Null,"Invalid parent");
             var installDir = di.EnumerateDirectories("NUnit3TestAdapterInstall").SingleOrDefault();
-            Assert.That(installDir,Is.Not.Null,$"Didn't find NUnit3TestAdapterInstall folder at {di.Name}");
-            var vsixManifestFile = installDir.EnumerateFiles("*.vsixmanifest").SingleOrDefault();
+            Assert.That(installDir,Is.Not.Null,$"Didn't find NUnit3TestAdapterInstall folder at {di.Name}");            var vsixManifestFile = installDir.EnumerateFiles("*.vsixmanifest").SingleOrDefault();
             Assert.That(vsixManifestFile,Is.Not.Null,$"Didn't find any vsixmanifestfile at folder {installDir.Name}");
             var vsixManifestTxt = File.ReadAllText(vsixManifestFile.FullName);
             Assert.That(vsixManifestTxt.Length,Is.GreaterThan(0),"No content in vsixmanifestfile");

@@ -1,4 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\Common.props" />
   <PropertyGroup>
     <AssemblyName>NUnit3.TestAdapter</AssemblyName>
     <RootNamespace>NUnit.VisualStudio.TestAdapter</RootNamespace>
@@ -15,8 +17,6 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>NUnitAdapter.snk</AssemblyOriginatorKeyFile>
     <PackageId>NUnit3TestAdapter</PackageId>
     <Authors>Charlie Poole, Terje Sandstrom</Authors>
   </PropertyGroup>
@@ -25,14 +25,10 @@
     <Content Include="..\..\LICENSE.txt" Link="LICENSE.txt" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="NUnitAdapter.snk" />
-  </ItemGroup>
-
   <ItemGroup Condition="'$(TargetFramework)' == 'net35'">
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="11.0.0" PrivateAssets="All" />
     <PackageReference Include="Mono.Cecil" Version="0.9.6.4" />
-    <PackageReference Include="nunit.engine" Version="3.7.0" PrivateAssets="All" />
+    <PackageReference Include="nunit.engine" Version="3.7.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0'">
@@ -42,5 +38,11 @@
     <PackageReference Include="Mono.Cecil" Version="0.10.0-beta6" />
     <PackageReference Include="nunit.engine.netstandard" Version="3.7.0" />
   </ItemGroup>
+
+  <Target Name="PreventTestPlatformObjectModelCopyLocal" AfterTargets="ResolveReferences">
+    <ItemGroup>
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' == 'Microsoft.VisualStudio.TestPlatform.ObjectModel'" />
+    </ItemGroup>
+  </Target>
 
 </Project>

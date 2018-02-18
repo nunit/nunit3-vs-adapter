@@ -70,7 +70,8 @@ var BIN_DIR = PROJECT_DIR + "bin/" + configuration + "/";
 
 var ADAPTER_PROJECT = SRC_DIR + "NUnitTestAdapter/NUnit.TestAdapter.csproj";
 
-var NET35_BIN_DIR = SRC_DIR + "NUnitTestAdapter/bin/" + configuration + "/net35/";
+var ADAPTER_BIN_DIR_NET35 = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/net35/";
+var ADAPTER_BIN_DIR_NETCOREAPP10 = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/netcoreapp1.0/";
 
 var BIN_DIRS = new [] {
     PROJECT_DIR + "src/empty-assembly/bin",
@@ -82,10 +83,6 @@ var BIN_DIRS = new [] {
 
 // Solution
 var ADAPTER_SOLUTION = PROJECT_DIR + "NUnit3TestAdapter.sln";
-
-// Test Assemblies
-var TEST_NET35 = SRC_DIR + "NUnitTestAdapterTests/bin/" + configuration + "/net45/NUnit.VisualStudio.TestAdapter.Tests.exe";
-var TEST_NETCOREAPP10 = SRC_DIR + "NUnitTestAdapterTests/bin/" + configuration + "/netcoreapp1.0/publish/NUnit.VisualStudio.TestAdapter.Tests.dll";
 
 //////////////////////////////////////////////////////////////////////
 // CLEAN
@@ -131,66 +128,82 @@ Task("Build")
         Information("Building using MSBuild at " + msBuildPathX64);
         Information("Configuration is:"+configuration);
 
-        MSBuild(ADAPTER_SOLUTION, CreateSettings(msBuildPathX64));
-
-        Information("Publishing netcoreapp1.0 tests so that dependencies are present...");
-
-        MSBuild(PROJECT_DIR + "src/NUnitTestAdapterTests/NUnit.TestAdapter.Tests.csproj", CreateSettings(msBuildPathX64)
-            .WithTarget("Publish")
-            .WithProperty("TargetFramework", "netcoreapp1.0")
-            .WithProperty("NoBuild", "true") // https://github.com/dotnet/cli/issues/5331#issuecomment-338392972
-            .WithRawArgument("/nologo"));
-
-        MSBuildSettings CreateSettings(FilePath toolPath) => new MSBuildSettings
+        MSBuild(ADAPTER_SOLUTION, new MSBuildSettings
         {
             Configuration = configuration,
-            ToolPath = toolPath,
+            ToolPath = msBuildPathX64,
             ToolVersion = MSBuildToolVersion.VS2017,
             EnvironmentVariables = new Dictionary<string, string>
             {
                 ["PackageVersion"] = packageVersion
             }
-        };
+        });
     });
 
 //////////////////////////////////////////////////////////////////////
 // TEST
 //////////////////////////////////////////////////////////////////////
 
-Task("TestAdapter")
-    .IsDependentOn("Build")
-    .Does(() =>
-    {
-        int result = StartProcess(TEST_NET35);
-        if (result != 0)
-            throw new Exception("TestAdapter failed");
-    });
+string GetTestAssemblyPath(string framework)
+{
+    return SRC_DIR + $"NUnitTestAdapterTests/bin/{configuration}/{framework}/NUnit.VisualStudio.TestAdapter.Tests.dll";
+}
 
-Task("TestAdapterNetCore")
-    .IsDependentOn("Build")
-    .Does(() =>
-    {
-        DotNetCoreExecute(TEST_NETCOREAPP10);
-    });
-
-Task("TestAdapterUsingVSTest")
-    .IsDependentOn("Build")
-    .Does(() =>
-    {
-        var settings = new VSTestSettings();
-
-        // https://github.com/Microsoft/vswhere/issues/126#issuecomment-360542783
-        var vstestInstallation = VSWhereLatest(new VSWhereLatestSettings
+foreach (var (framework, vstestFramework, adapterDir) in new[] {
+    ("net45", "Framework45", ADAPTER_BIN_DIR_NET35),
+    ("netcoreapp1.0", "FrameworkCore10", ADAPTER_BIN_DIR_NETCOREAPP10)
+})
+{
+    Task($"VSTest-{framework}")
+        .IsDependentOn("Build")
+        .Does(() =>
         {
-             Requires = "Microsoft.VisualStudio.TestTools.TestPlatform.V1.CLI"
-        }.WithRawArgument("-products *"));
+            var settings = new VSTestSettings
+            {
+                TestAdapterPath = adapterDir,
+                // Enables the tests to run against the correct version of Microsoft.VisualStudio.TestPlatform.ObjectModel.dll.
+                // (The DLL they are compiled against depends on VS2012 at runtime.)
+                SettingsFile = File("DisableAppDomain.runsettings")
+            };
 
-        if (vstestInstallation != null) settings.ToolPath = vstestInstallation
-            .CombineWithFilePath(@"Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe");
+            // https://github.com/Microsoft/vswhere/issues/126#issuecomment-360542783
+            var vstestInstallation = VSWhereLatest(new VSWhereLatestSettings
+            {
+                Requires = "Microsoft.VisualStudio.TestTools.TestPlatform.V1.CLI"
+            }.WithRawArgument("-products *"));
 
-        VSTest(TEST_NET35, settings
-            .WithRawArgument("/TestAdapterPath:" + NET35_BIN_DIR));
-    });
+            if (vstestInstallation != null) settings.ToolPath = vstestInstallation
+                .CombineWithFilePath(@"Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe");
+
+            VSTest(GetTestAssemblyPath(framework), settings);
+        });
+
+    Task($"DotnetTest-{framework}")
+        .IsDependentOn("Build")
+        .Does(() =>
+        {
+            DotNetCoreTest(SRC_DIR + "NUnitTestAdapterTests/NUnit.TestAdapter.Tests.csproj", new DotNetCoreTestSettings
+            {
+                Configuration = configuration,
+                Framework = framework,
+                NoBuild = true,
+                TestAdapterPath = adapterDir,
+                Settings = File("DisableAppDomain.runsettings")
+            });
+        });
+
+    Task($"DotnetVSTest-{framework}")
+        .IsDependentOn("Build")
+        .Does(() =>
+        {
+            DotNetCoreVSTest(GetTestAssemblyPath(framework), new DotNetCoreVSTestSettings
+            {
+                TestAdapterPath = adapterDir,
+                Framework = vstestFramework,
+                Settings = File("DisableAppDomain.runsettings")
+            });
+        });
+}
 
 //////////////////////////////////////////////////////////////////////
 // PACKAGE
@@ -214,13 +227,13 @@ Task("CreateWorkingImage")
         // dotnet publish doesn't work for .NET 3.5
         var net35Files = new FilePath[]
         {
-            NET35_BIN_DIR + "NUnit3.TestAdapter.dll",
-            NET35_BIN_DIR + "nunit.engine.dll",
-            NET35_BIN_DIR + "nunit.engine.api.dll",
-            NET35_BIN_DIR + "Mono.Cecil.dll",
-            NET35_BIN_DIR + "Mono.Cecil.Pdb.dll",
-            NET35_BIN_DIR + "Mono.Cecil.Mdb.dll",
-            NET35_BIN_DIR + "Mono.Cecil.Rocks.dll"
+            ADAPTER_BIN_DIR_NET35 + "NUnit3.TestAdapter.dll",
+            ADAPTER_BIN_DIR_NET35 + "nunit.engine.dll",
+            ADAPTER_BIN_DIR_NET35 + "nunit.engine.api.dll",
+            ADAPTER_BIN_DIR_NET35 + "Mono.Cecil.dll",
+            ADAPTER_BIN_DIR_NET35 + "Mono.Cecil.Pdb.dll",
+            ADAPTER_BIN_DIR_NET35 + "Mono.Cecil.Mdb.dll",
+            ADAPTER_BIN_DIR_NET35 + "Mono.Cecil.Rocks.dll"
         };
 
         var net35Dir = PACKAGE_IMAGE_DIR + "build/net35";
@@ -295,9 +308,12 @@ Task("Rebuild")
     .IsDependentOn("Build");
 
 Task("Test")
-    .IsDependentOn("TestAdapter")
-    .IsDependentOn("TestAdapterNetCore")
-    .IsDependentOn("TestAdapterUsingVSTest");
+    .IsDependentOn("VSTest-net45")
+    .IsDependentOn("VSTest-netcoreapp1.0")
+    .IsDependentOn("DotnetTest-net45")
+    .IsDependentOn("DotnetTest-netcoreapp1.0")
+    .IsDependentOn("DotnetVSTest-net45")
+    .IsDependentOn("DotnetVSTest-netcoreapp1.0");
 
 Task("Package")
     .IsDependentOn("PackageZip")

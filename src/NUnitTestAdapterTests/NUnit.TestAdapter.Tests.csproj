@@ -1,13 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\Common.props" />
   <PropertyGroup>
     <RootNamespace>NUnit.VisualStudio.TestAdapter.Tests</RootNamespace>
     <AssemblyName>NUnit.VisualStudio.TestAdapter.Tests</AssemblyName>
     <TargetFrameworks>net45;netcoreapp1.0</TargetFrameworks>
-    <!--<TargetFramework>net45</TargetFramework>-->
     <DebugType Condition="'$(TargetFramework)' != '' AND '$(TargetFramework)' != 'netcoreapp1.0'">Full</DebugType>
-    <OutputType>exe</OutputType>
-    <OutputTypeEx>exe</OutputTypeEx>
   </PropertyGroup>
+
   <ItemGroup>
     <Content Include="..\native-assembly\NativeTests.dll" Link="NativeTests.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -17,8 +17,6 @@
   <ItemGroup>
     <PackageReference Include="NSubstitute" Version="3.1.0" />
     <PackageReference Include="NUnit" Version="3.9.0" />
-    <PackageReference Include="nunit3testadapter" Version="3.9.0" />
-    <PackageReference Include="NUnitLite" Version="3.9.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
@@ -27,6 +25,7 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="15.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -45,4 +44,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
   </ItemGroup>
+
+  <Target Name="PreventTestPlatformObjectModelCopyLocal" AfterTargets="ResolveReferences">
+    <ItemGroup>
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' == 'Microsoft.VisualStudio.TestPlatform.ObjectModel'" />
+    </ItemGroup>
+  </Target>
+
 </Project>

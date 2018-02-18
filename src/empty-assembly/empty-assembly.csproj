@@ -1,4 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\Common.props" />
   <PropertyGroup>
     <AssemblyName>empty-assembly</AssemblyName>
     <RootNamespace>NUnit.Tests</RootNamespace>
@@ -9,4 +11,5 @@
   <ItemGroup>
     <PackageReference Include="NUnit" Version="3.9.0" />
   </ItemGroup>
+
 </Project>
