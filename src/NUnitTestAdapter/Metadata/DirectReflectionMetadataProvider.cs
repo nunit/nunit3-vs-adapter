@@ -39,6 +39,16 @@ namespace NUnit.VisualStudio.TestAdapter.Metadata
         {
             var type = TryGetSingleMethod(assemblyPath, reflectedTypeName, methodName)?.DeclaringType;
             if (type == null) return null;
+
+#if NET35
+            if (type.IsGenericType)
+#else
+            if (type.IsConstructedGenericType)
+#endif
+            {
+                type = type.GetGenericTypeDefinition();
+            }
+
             return new TypeInfo(type);
         }
 
