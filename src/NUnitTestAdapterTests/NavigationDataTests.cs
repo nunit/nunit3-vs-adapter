@@ -49,6 +49,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase("+GenericFixture`2+DoublyNested`1", "WriteAllThree", 165, 166)]
         [TestCase("+DerivedClass", "EmptyMethod_ThreeLines", 174, 175)]
         [TestCase("+DerivedClass", "AsyncMethod_Task", 178, 180)]
+        [TestCase("+DerivedFromGenericClass", "EmptyMethod_ThreeLines", 200, 201)]
         public void VerifyNavigationData_WithinAssembly(string suffix, string methodName, int expectedLineDebug, int expectedLineRelease)
         {
             VerifyNavigationData(suffix, methodName, "NUnitTestAdapterTests", expectedLineDebug, expectedLineRelease);

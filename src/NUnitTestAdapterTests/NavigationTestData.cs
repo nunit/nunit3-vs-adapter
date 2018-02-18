@@ -193,5 +193,16 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public class DerivedFromExternalConcreteClass : ConcreteBaseClass
         {
         }
+
+        public class GenericBaseClass<T>
+        {
+            public void EmptyMethod_ThreeLines()
+            { // expectedLineDebug
+            } // expectedLineRelease
+        }
+
+        public class DerivedFromGenericClass : GenericBaseClass<int>
+        {
+        }
     }
 }
