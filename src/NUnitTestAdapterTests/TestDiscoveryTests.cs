@@ -21,20 +21,19 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using NSubstitute;
 using NUnit.Framework;
-using Enumerable = System.Linq.Enumerable;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
     using Fakes;
-    using System.Collections;
 
     internal static class TestDiscoveryDataProvider
     {
@@ -97,6 +96,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(testCase.FullyQualifiedName, Is.EqualTo(fullName));
         }
 
+        [Category("Navigation")]
         [TestCase("NestedClassTest1")] // parent
         [TestCase("NestedClassTest2")] // child
         [TestCase("NestedClassTest3")] // grandchild

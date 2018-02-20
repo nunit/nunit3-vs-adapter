@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2016 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2018 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -24,208 +24,86 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using Mono.Cecil;
-using Mono.Cecil.Cil;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using NUnit.VisualStudio.TestAdapter.Metadata;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-    public class NavigationDataProvider
+    public sealed class NavigationDataProvider : IDisposable
     {
-        readonly string _assemblyPath;
-        ICollection<string> _knownReferencedAssemblies;
-        IDictionary<string, TypeDefinition> _typeDefs;
+        private readonly string _assemblyPath;
+        private readonly Dictionary<string, DiaSession> _sessionsByAssemblyPath = new Dictionary<string, DiaSession>(StringComparer.OrdinalIgnoreCase);
+        private readonly IMetadataProvider _metadataProvider;
 
         public NavigationDataProvider(string assemblyPath)
         {
+            if (string.IsNullOrEmpty(assemblyPath))
+                throw new ArgumentException("Assembly path must be specified.", nameof(assemblyPath));
+
             _assemblyPath = assemblyPath;
+
+#if NETCOREAPP1_0
+            _metadataProvider = new DirectReflectionMetadataProvider();
+#else
+            _metadataProvider = new ReflectionAppDomainMetadataProvider();
+#endif
+        }
+
+        public void Dispose()
+        {
+            _metadataProvider.Dispose();
+
+            foreach (var session in _sessionsByAssemblyPath.Values)
+                session?.Dispose();
         }
 
         public NavigationData GetNavigationData(string className, string methodName)
         {
-            if (_typeDefs == null)
-            {
-                _typeDefs = CacheTypes(_assemblyPath);
-                _knownReferencedAssemblies = new HashSet<string> { _assemblyPath };
-            }
-
-            // Through NUnit 3.2.1, the class name provided by NUnit is
-            // the reflected class - that is, the class of the fixture
-            // that is being run. To use for location data, we actually
-            // need the class where the method is defined (for example,
-            // a base class being used as an abstract test fixture).
-            // TODO: Once NUnit is changed, try to simplify this.
-            var sequencePoint = GetTypeLineage(className)
-                .Select(typeDef => typeDef.Methods.FirstOrDefault(o => o.Name == methodName))
-                .Where(x => x != null)
-                .Select(FirstOrDefaultSequencePoint)
-                .FirstOrDefault();
-
-            if (sequencePoint == null) { return NavigationData.Invalid; }
-            return new NavigationData(sequencePoint.Document.Url, sequencePoint.StartLine);
+            return TryGetSessionData(_assemblyPath, className, methodName)
+                ?? TryGetSessionData(DoSafe(_metadataProvider.GetStateMachineType, _assemblyPath, className, methodName), "MoveNext")
+                ?? TryGetSessionData(DoSafe(_metadataProvider.GetDeclaringType, _assemblyPath, className, methodName), methodName)
+                ?? NavigationData.Invalid;
         }
 
-        static bool DoesPdbFileExist(string filepath) => File.Exists(Path.ChangeExtension(filepath, ".pdb"));
-
-        static IDictionary<string, TypeDefinition> CacheTypes(string assemblyPath)
+        private static TypeInfo? DoSafe(Func<string, string, string, TypeInfo?> method, string assemblyPath, string declaringTypeName, string methodName)
         {
-            var types = new Dictionary<string, TypeDefinition>();
-            CacheNewTypes(assemblyPath, types);
-            return types;
+            try
+            {
+                return method.Invoke(assemblyPath, declaringTypeName, methodName);
+            }
+            catch (FileNotFoundException)
+            {
+                return null;
+            }
         }
 
-        private static void CacheNewTypes(string assemblyPath, IDictionary<string, TypeDefinition> types)
+        private NavigationData TryGetSessionData(string assemblyPath, string declaringTypeName, string methodName)
         {
-#if NETCOREAPP1_0
-            var readerParameters = new ReaderParameters
+            if (!_sessionsByAssemblyPath.TryGetValue(assemblyPath, out var session))
             {
-                ReadSymbols = DoesPdbFileExist(assemblyPath)
-            };
-
-            var module = ModuleDefinition.ReadModule(assemblyPath, readerParameters);
-
-            foreach (var type in module.GetTypes())
-            {
-                types[type.FullName] = type;
-            }
-#else
-            var resolver = new DefaultAssemblyResolver();
-            var readerParameters = new ReaderParameters
-            {
-                ReadSymbols = DoesPdbFileExist(assemblyPath),
-                AssemblyResolver = resolver
-            };
-
-            var directory = Path.GetDirectoryName(assemblyPath);
-            resolver.AddSearchDirectory(directory);
-            var knownSearchDirectories = new HashSet<string> { directory };
-
-            var module = ModuleDefinition.ReadModule(assemblyPath, readerParameters);
-
-            foreach (var type in module.GetTypes())
-            {
-                directory = Path.GetDirectoryName(type.Module.FullyQualifiedName);
-                if (!knownSearchDirectories.Contains(directory))
-                {
-                    resolver.AddSearchDirectory(directory);
-                    knownSearchDirectories.Add(directory);
-                }
-
-                types[type.FullName] = type;
-            }
-#endif
-        }
-
-        IEnumerable<TypeDefinition> GetTypeLineage(string className)
-        {
-            var typeDef = GetTypeDefinitionOrDefault(className);
-            while (typeDef != default(TypeDefinition) && typeDef.FullName != "System.Object")
-            {
-                if (!_typeDefs.ContainsKey(typeDef.FullName))
-                {
-                    _typeDefs[typeDef.FullName] = typeDef;
-                }
-
-                yield return typeDef;
-
-                // .Resolve() will resolve the type within all configured
-                // search-directories, but it will _not_ try to read any
-                // symbols, which we need for navigation data.
-                //
-                // So, first resolve the type to get the full-path, and
-                // then re-read and cache the module with our reader-settings.
-                //
-                // This feels like it should be handled by Mono.Cecil.  A
-                // follow-up may be in order.
                 try
                 {
-                    var newTypeDef = typeDef.BaseType.Resolve();
-#if NETCOREAPP1_0
-                    var newAssemblyPath = newTypeDef.Module.FileName;
-#else
-                    var newAssemblyPath = newTypeDef.Module.FullyQualifiedName;
-#endif
-                    if (!_knownReferencedAssemblies.Contains(newAssemblyPath))
-                    {
-                        CacheNewTypes(newAssemblyPath, _typeDefs);
-                        _knownReferencedAssemblies.Add(newAssemblyPath);
-                        if (_typeDefs.ContainsKey(newTypeDef.FullName))
-                        {
-                            newTypeDef = _typeDefs[newTypeDef.FullName];
-                        }
-                    }
-
-                    typeDef = newTypeDef;
+                    session = new DiaSession(assemblyPath);
                 }
-#if NETCOREAPP1_0
-                catch (Exception)
-#else
-                catch (AssemblyResolutionException)
-#endif
+                // DiaSession crashes for .NET Framework tests run via `dotnet test` or `dotnet vstest`.
+                // See https://github.com/Microsoft/vstest/issues/1432.
+                catch // TestPlatformException not available in net35.
                 {
-                    // when resolving the assembly for the base-type fails
-                    // (assembly not found in the known search-directories)
-                    // stop the type-lineage here ("best-effort").
-                    typeDef = null;
+                    session = null;
                 }
+                _sessionsByAssemblyPath.Add(assemblyPath, session);
             }
+
+            var data = session?.GetNavigationData(declaringTypeName, methodName);
+
+            return string.IsNullOrEmpty(data?.FileName) ? null :
+                new NavigationData(data.FileName, data.MinLineNumber);
         }
 
-        TypeDefinition GetTypeDefinitionOrDefault(string className)
+        private NavigationData TryGetSessionData(TypeInfo? declaringType, string methodName)
         {
-            TypeDefinition typeDef;
-            return _typeDefs.TryGetValue(StandardizeTypeName(className), out typeDef) ? typeDef : default(TypeDefinition);
-        }
-
-        static SequencePoint FirstOrDefaultSequencePoint(MethodDefinition testMethod)
-        {
-            CustomAttribute asyncStateMachineAttribute;
-
-            if (TryGetAsyncStateMachineAttribute(testMethod, out asyncStateMachineAttribute))
-                testMethod = GetStateMachineMoveNextMethod(asyncStateMachineAttribute);
-
-#if NETCOREAPP1_0
-            return FirstOrDefaultUnhiddenSequencePoint(testMethod.DebugInformation);
-#else
-            return FirstOrDefaultUnhiddenSequencePoint(testMethod.Body);
-#endif
-        }
-
-        static bool TryGetAsyncStateMachineAttribute(MethodDefinition method, out CustomAttribute attribute)
-        {
-            attribute = method.CustomAttributes.FirstOrDefault(c => c.AttributeType.Name == "AsyncStateMachineAttribute");
-            return attribute != null;
-        }
-
-        static MethodDefinition GetStateMachineMoveNextMethod(CustomAttribute asyncStateMachineAttribute)
-        {
-            var stateMachineType = (TypeDefinition)asyncStateMachineAttribute.ConstructorArguments[0].Value;
-            var stateMachineMoveNextMethod = stateMachineType.Methods.First(m => m.Name == "MoveNext");
-            return stateMachineMoveNextMethod;
-        }
-
-        const int lineNumberIndicatingHiddenLine = 16707566; //0xfeefee
-
-#if NETCOREAPP1_0
-        static SequencePoint FirstOrDefaultUnhiddenSequencePoint(MethodDebugInformation body) =>
-            body.SequencePoints.FirstOrDefault(sp => sp != null && sp.StartLine != lineNumberIndicatingHiddenLine);
-#else
-        static SequencePoint FirstOrDefaultUnhiddenSequencePoint(MethodBody body) =>
-            body.Instructions
-                .Where(i => i.SequencePoint != null && i.SequencePoint.StartLine != lineNumberIndicatingHiddenLine)
-                .Select(i => i.SequencePoint)
-                .FirstOrDefault();
-#endif
-
-        static string StandardizeTypeName(string className)
-        {
-            //Mono.Cecil respects ECMA-335 for the FullName of a type, which can differ from Type.FullName.
-            //In order to make reliable comparisons between the class part of a MethodGroup, the class part
-            //must be standardized to the ECMA-335 format.
-            //
-            //ECMA-335 specifies "/" instead of "+" to indicate a nested type.
-
-            return className.Replace("+", "/");
+            return declaringType == null ? null :
+                TryGetSessionData(declaringType.Value.AssemblyPath, declaringType.Value.FullName, methodName);
         }
     }
 }

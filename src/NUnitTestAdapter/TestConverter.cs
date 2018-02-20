@@ -32,15 +32,13 @@ using VSTestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-    public class TestConverter
+    public sealed class TestConverter : IDisposable
     {
         private readonly ITestLogger _logger;
         private readonly Dictionary<string, TestCase> _vsTestCaseMap;
         private readonly string _sourceAssembly;
         private readonly NavigationDataProvider _navigationDataProvider;
         private readonly bool _collectSourceInformation;
-
-        #region Constructor
 
         public TestConverter(ITestLogger logger, string sourceAssembly, bool collectSourceInformation)
         {
@@ -56,7 +54,10 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
-        #endregion
+        public void Dispose()
+        {
+            _navigationDataProvider?.Dispose();
+        }
 
         public IDictionary<string, List<Trait>> TraitsCache { get; }
 

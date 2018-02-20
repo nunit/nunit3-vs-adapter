@@ -50,9 +50,6 @@
   </PropertyGroup>
   <ItemGroup>
     <VsixSourceItem Include="$(VsixInputFileLocation)\Mono.Cecil.dll" />
-    <VsixSourceItem Include="$(VsixInputFileLocation)\Mono.Cecil.Mdb.dll" />
-    <VsixSourceItem Include="$(VsixInputFileLocation)\Mono.Cecil.Pdb.dll" />
-    <VsixSourceItem Include="$(VsixInputFileLocation)\Mono.Cecil.Rocks.dll" />
     <VsixSourceItem Include="$(VsixInputFileLocation)\nunit.engine.api.dll" />
     <VsixSourceItem Include="$(VsixInputFileLocation)\nunit.engine.dll" />
     <VsixSourceItem Include="$(VsixInputFileLocation)\NUnit3.TestAdapter.dll" />

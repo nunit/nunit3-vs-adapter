@@ -97,9 +97,11 @@ namespace NUnit.VisualStudio.TestAdapter
 
                     if (topNode.GetAttribute("runstate") == "Runnable")
                     {
-                        var testConverter = new TestConverter(TestLog, sourceAssemblyPath, Settings.CollectSourceInformation);
-
-                        int cases = ProcessTestCases(topNode, discoverySink, testConverter);
+                        int cases;
+                        using (var testConverter = new TestConverter(TestLog, sourceAssemblyPath, Settings.CollectSourceInformation))
+                        {
+                            cases = ProcessTestCases(topNode, discoverySink, testConverter);
+                        }
 
                         TestLog.Debug($"Discovered {cases} test cases");
                         // Only save if seed is not specified in runsettings

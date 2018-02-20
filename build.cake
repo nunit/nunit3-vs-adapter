@@ -178,6 +178,10 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
             VSTest(GetTestAssemblyPath(framework), settings);
         });
 
+    // Workaround for https://github.com/nunit/nunit3-vs-adapter/issues/47
+    // (presence of a filter causes explicit tests to start running)
+    const string NoNavigationTests = "TestCategory!=Navigation&TestCategory!=LongRunning";
+
     Task($"DotnetTest-{framework}")
         .IsDependentOn("Build")
         .Does(() =>
@@ -188,7 +192,8 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
                 Framework = framework,
                 NoBuild = true,
                 TestAdapterPath = adapterDir,
-                Settings = File("DisableAppDomain.runsettings")
+                Settings = File("DisableAppDomain.runsettings"),
+                Filter = framework == "net45" ? NoNavigationTests : null
             });
         });
 
@@ -200,7 +205,8 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
             {
                 TestAdapterPath = adapterDir,
                 Framework = vstestFramework,
-                Settings = File("DisableAppDomain.runsettings")
+                Settings = File("DisableAppDomain.runsettings"),
+                TestCaseFilter = framework == "net45" ? NoNavigationTests : null
             });
         });
 }
@@ -230,10 +236,7 @@ Task("CreateWorkingImage")
             ADAPTER_BIN_DIR_NET35 + "NUnit3.TestAdapter.dll",
             ADAPTER_BIN_DIR_NET35 + "nunit.engine.dll",
             ADAPTER_BIN_DIR_NET35 + "nunit.engine.api.dll",
-            ADAPTER_BIN_DIR_NET35 + "Mono.Cecil.dll",
-            ADAPTER_BIN_DIR_NET35 + "Mono.Cecil.Pdb.dll",
-            ADAPTER_BIN_DIR_NET35 + "Mono.Cecil.Mdb.dll",
-            ADAPTER_BIN_DIR_NET35 + "Mono.Cecil.Rocks.dll"
+            ADAPTER_BIN_DIR_NET35 + "Mono.Cecil.dll"
         };
 
         var net35Dir = PACKAGE_IMAGE_DIR + "build/net35";

@@ -7,7 +7,6 @@
     <TargetFrameworks>net35;netcoreapp1.0</TargetFrameworks>
     <CodeAnalysisRuleSet>..\..\Osiris.Extended.ruleset</CodeAnalysisRuleSet>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -27,7 +26,6 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net35'">
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="11.0.0" PrivateAssets="All" />
-    <PackageReference Include="Mono.Cecil" Version="0.9.6.4" />
     <PackageReference Include="nunit.engine" Version="3.7.0" />
   </ItemGroup>
 
@@ -35,7 +33,6 @@
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.1.2" />
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="15.0.0" PrivateAssets="All" />
-    <PackageReference Include="Mono.Cecil" Version="0.10.0-beta6" />
     <PackageReference Include="nunit.engine.netstandard" Version="3.7.0" />
   </ItemGroup>
 

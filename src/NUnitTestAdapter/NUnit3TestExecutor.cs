@@ -237,42 +237,44 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     var nunitTestCases = loadResult.SelectNodes("//test-case");
 
-                    var testConverter = new TestConverter(TestLog, assemblyPath, Settings.CollectSourceInformation);
-
-                    var loadedTestCases = new List<TestCase>();
-
-                    // As a side effect of calling TestConverter.ConvertTestCase,
-                    // the converter's cache of all test cases is populated as well.
-                    // All future calls to convert a test case may now use the cache.
-                    foreach (XmlNode testNode in nunitTestCases)
-                        loadedTestCases.Add(testConverter.ConvertTestCase(testNode));
-
-                    TestLog.Info($"NUnit3TestExecutor converted {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases");
-
-                    // If we have a TFS Filter, convert it to an nunit filter
-                    if (TfsFilter != null && !TfsFilter.IsEmpty)
+                    using (var testConverter = new TestConverter(TestLog, assemblyPath, Settings.CollectSourceInformation))
                     {
-                        // NOTE This overwrites filter used in call
-                        var filterBuilder = CreateTestFilterBuilder();
-                        filter = filterBuilder.ConvertTfsFilterToNUnitFilter(TfsFilter, loadedTestCases);
-                    }
+                        var loadedTestCases = new List<TestCase>();
 
-                    if (filter == NUnitTestFilterBuilder.NoTestsFound)
-                    {
-                        TestLog.Info("Skipping assembly - no matching test cases found");
-                        return;
-                    }
+                        // As a side effect of calling TestConverter.ConvertTestCase,
+                        // the converter's cache of all test cases is populated as well.
+                        // All future calls to convert a test case may now use the cache.
+                        foreach (XmlNode testNode in nunitTestCases)
+                            loadedTestCases.Add(testConverter.ConvertTestCase(testNode));
 
-                    using (var listener = new NUnitEventListener(FrameworkHandle, testConverter,dumpXml))
-                    {
-                        try
+
+                        TestLog.Info($"NUnit3TestExecutor converted {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases");
+
+                        // If we have a TFS Filter, convert it to an nunit filter
+                        if (TfsFilter != null && !TfsFilter.IsEmpty)
                         {
-                            _activeRunner.Run(listener, filter);
+                            // NOTE This overwrites filter used in call
+                            var filterBuilder = CreateTestFilterBuilder();
+                            filter = filterBuilder.ConvertTfsFilterToNUnitFilter(TfsFilter, loadedTestCases);
                         }
-                        catch (NullReferenceException)
+
+                        if (filter == NUnitTestFilterBuilder.NoTestsFound)
                         {
-                            // this happens during the run when CancelRun is called.
-                            TestLog.Debug("Nullref caught");
+                            TestLog.Info("Skipping assembly - no matching test cases found");
+                            return;
+                        }
+
+                        using (var listener = new NUnitEventListener(FrameworkHandle, testConverter, dumpXml))
+                        {
+                            try
+                            {
+                                _activeRunner.Run(listener, filter);
+                            }
+                            catch (NullReferenceException)
+                            {
+                                // this happens during the run when CancelRun is called.
+                                TestLog.Debug("Nullref caught");
+                            }
                         }
                     }
                 }
