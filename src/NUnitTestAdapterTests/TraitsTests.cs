@@ -366,8 +366,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
     }
 
-#if !NETCOREAPP1_0
-
     [Category(nameof(TestTraits))]
     public class TestTraits
     {
@@ -540,5 +538,4 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
     }
-#endif
 }
