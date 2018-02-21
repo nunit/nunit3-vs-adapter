@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NSubstitute;
 using NUnit.Framework;
-
+using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
@@ -536,5 +536,37 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             });
         }
 
+        private static IList<TestCase> GetTestCases(string xml)
+        {
+            using (var converter = new TestConverter(
+                new TestLogger(new MessageLoggerStub()),
+                sourceAssembly: "unused",
+                collectSourceInformation: false))
+            {
+                return converter.ConvertTestCases(xml);
+            }
+        }
+
+        [Test]
+        public static void ThatExplicitTestCaseHasExplicitCategory()
+        {
+            var testCase = GetTestCases(
+                @"<test-suite id='1' name='Fixture' fullname='Fixture' classname='Fixture'>
+                    <test-case id='2' name='Test' fullname='Fixture.Test' methodname='Test' classname='Fixture' runstate='Explicit' />
+                </test-suite>").Single();
+
+            Assert.That(testCase.GetCategories(), Contains.Item("Explicit"));
+        }
+
+        [Test]
+        public static void ThatTestCaseWithExplicitParentHasExplicitCategory()
+        {
+            var testCase = GetTestCases(
+                @"<test-suite id='1' name='Fixture' fullname='Fixture' classname='Fixture' runstate='Explicit'>
+                    <test-case id='2' name='Test' fullname='Fixture.Test' methodname='Test' classname='Fixture'/>
+                </test-suite>").Single();
+
+            Assert.That(testCase.GetCategories(), Contains.Item("Explicit"));
+        }
     }
 }
