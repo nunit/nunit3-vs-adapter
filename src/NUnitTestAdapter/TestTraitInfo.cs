@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 namespace NUnit.VisualStudio.TestAdapter
@@ -44,6 +45,15 @@ namespace NUnit.VisualStudio.TestAdapter
 
             if (Traits != null) testCase.Traits.AddRange(Traits);
             if (Categories != null) testCase.SetPropertyValue(NUnitTestCaseProperties.TestCategory, Categories);
+        }
+
+        public static TestTraitInfo FromTestCase(TestCase testCase)
+        {
+            if (testCase == null) throw new ArgumentNullException(nameof(testCase));
+
+            return new TestTraitInfo(
+                testCase.Traits.ToArray(),
+                (string[])testCase.GetPropertyValue(NUnitTestCaseProperties.TestCategory));
         }
 
         public static TestTraitInfo Combine(TestTraitInfo inherited, TestTraitInfo current)

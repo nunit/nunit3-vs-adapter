@@ -22,7 +22,6 @@
 // ***********************************************************************
 
 using System.Collections.Generic;
-using System.Linq;
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
@@ -30,12 +29,6 @@ namespace NUnit.VisualStudio.TestAdapter
 {
     public static class TraitsFeature
     {
-        public static void AddTrait(this TestCase testCase, string name, string value)
-        {
-            testCase?.Traits.Add(new Trait(name, value));
-        }
-
-
         public static void AddTraitsFromTestNode(this TestCase testCase, XmlNode testNode, IDictionary<string, TestTraitInfo> traitsCache)
         {
             var combinedTraitInfo = BuildTestTraitInfo(traitsCache, testNode);
@@ -88,35 +81,6 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             // Property names starting with '_' are for internal use only
             return string.IsNullOrEmpty(propertyName) || propertyName[0] == '_' || string.IsNullOrEmpty(propertyValue);
-        }
-
-        public static IEnumerable<NTrait> GetTraits(this TestCase testCase)
-        {
-            var traits = new List<NTrait>();
-
-            if (testCase?.Traits != null)
-            {
-                traits.AddRange(from trait in testCase.Traits let name = trait.Name let value = trait.Value select new NTrait(name, value));
-            }
-            return traits;
-        }
-
-        public static IEnumerable<string> GetCategories(this TestCase testCase)
-        {
-            var categories = testCase.GetPropertyValue(NUnitTestCaseProperties.TestCategory) as string[];
-            return categories;
-        }
-    }
-
-    public class NTrait
-    {
-        public string Name { get; }
-        public string Value { get; }
-
-        public NTrait(string name, string value)
-        {
-            Name = name;
-            Value = value;
         }
     }
 }

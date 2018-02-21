@@ -155,9 +155,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 Assert.That(testCase.LineNumber, Is.EqualTo(FakeTestData.LineNumber));
             }
 
-            var traitList = testCase.GetTraits().Select(trait => trait.Name + ":" + trait.Value).ToList();
-            Assert.That(traitList, Is.EquivalentTo(new[] { "Priority:medium" }));
-            Assert.That(testCase.GetCategories(),Is.EquivalentTo(new [] { "super", "cat1", }));
+            CheckTraitInfo(testCase,
+                traits: new[] { new Trait("Priority", "medium") },
+                categories: new[] { "super", "cat1" });
         }
 
         private void CheckNoTestCaseNodesExist(IDictionary<string, TestTraitInfo> traits)
@@ -169,11 +169,25 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(!traits.ContainsKey("0-1001"));
         }
 
-        private void CheckNodeProperties(IDictionary<string, TestTraitInfo> traitsCache, string id, IEnumerable<KeyValuePair<string, string>> traits = null, IEnumerable<string> categories = null)
+        private void CheckNodeProperties(IDictionary<string, TestTraitInfo> traitsCache, string id, IEnumerable<Trait> traits = null, IEnumerable<string> categories = null)
         {
             Assert.That(traitsCache, Contains.Key(id));
-            Assert.That(traitsCache[id], Has.Property("Traits").EquivalentTo(traits ?? Enumerable.Empty<KeyValuePair<string, string>>()));
-            Assert.That(traitsCache[id], Has.Property("Categories").EquivalentTo(categories ?? Enumerable.Empty<string>()));
+            CheckTraitInfo(traitsCache[id], traits, categories);
+        }
+
+        private void CheckTraitInfo(TestCase testCase, IEnumerable<Trait> traits = null, IEnumerable<string> categories = null)
+        {
+            CheckTraitInfo(TestTraitInfo.FromTestCase(testCase), traits, categories);
+        }
+
+        private void CheckTraitInfo(TestTraitInfo traitInfo, IEnumerable<Trait> traits = null, IEnumerable<string> categories = null)
+        {
+            Assert.That(traitInfo, Has.Property("Traits")
+                .EquivalentTo(traits ?? Enumerable.Empty<Trait>())
+                .Using(TraitComparer.Instance));
+
+            Assert.That(traitInfo, Has.Property("Categories")
+                .EquivalentTo(categories ?? Enumerable.Empty<string>()));
         }
     }
 }

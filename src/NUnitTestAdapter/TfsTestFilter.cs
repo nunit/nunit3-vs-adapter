@@ -49,8 +49,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
         ///</summary>
         private static readonly Dictionary<string, TestProperty> SupportedPropertiesCache;
-        private static readonly Dictionary<string, NTrait> SupportedTraitCache;
-        private static readonly Dictionary<NTrait, TestProperty> TraitPropertyMap;
+        private static readonly Dictionary<string, Trait> SupportedTraitCache;
+        private static readonly Dictionary<Trait, TestProperty> TraitPropertyMap;
         private static readonly List<string> SupportedProperties;
 
         static TfsTestFilter()
@@ -61,13 +61,13 @@ namespace NUnit.VisualStudio.TestAdapter
             SupportedPropertiesCache["Name"] = TestCaseProperties.DisplayName;
             SupportedPropertiesCache["TestCategory"] = NUnitTestCaseProperties.TestCategory;
             // Initialize the trait cache
-            var priorityTrait = new NTrait("Priority", "");
-            var categoryTrait = new NTrait("Category", "");
-            SupportedTraitCache = new Dictionary<string, NTrait>(StringComparer.OrdinalIgnoreCase);
+            var priorityTrait = new Trait("Priority", "");
+            var categoryTrait = new Trait("Category", "");
+            SupportedTraitCache = new Dictionary<string, Trait>(StringComparer.OrdinalIgnoreCase);
             SupportedTraitCache["Priority"] = priorityTrait;
             SupportedTraitCache["TestCategory"] = categoryTrait;
             // Initialize the trait property map, since TFS doesnt know about traits
-            TraitPropertyMap = new Dictionary<NTrait, TestProperty>(new NTraitNameComparer());
+            TraitPropertyMap = new Dictionary<Trait, TestProperty>(new TraitNameComparer());
             var priorityProperty = TestProperty.Find("Priority") ??
                       TestProperty.Register("Priority", "Priority", typeof(string), typeof(TestCase));
             TraitPropertyMap[priorityTrait] = priorityProperty;
@@ -189,9 +189,9 @@ namespace NUnit.VisualStudio.TestAdapter
             return null;
         }
 
-        public static NTrait TraitProvider(string traitName)
+        public static Trait TraitProvider(string traitName)
         {
-            NTrait testTrait;
+            Trait testTrait;
             SupportedTraitCache.TryGetValue(traitName, out testTrait);
             return testTrait;
         }
@@ -200,15 +200,15 @@ namespace NUnit.VisualStudio.TestAdapter
 
     }
 
-    public class NTraitNameComparer : IEqualityComparer<NTrait>
+    public class TraitNameComparer : IEqualityComparer<Trait>
     {
 
-        public bool Equals(NTrait n, NTrait y)
+        public bool Equals(Trait n, Trait y)
         {
             return n.Name == y.Name;
         }
 
-        public int GetHashCode(NTrait obj)
+        public int GetHashCode(Trait obj)
         {
             return obj.Name.GetHashCode();
         }
