@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2018-2018 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2018 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -19,40 +19,19 @@
 // LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-// ***********************************************************************using System;
+// ***********************************************************************
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using NUnit.Framework;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests
+namespace NUnit.VisualStudio.TestAdapter
 {
-    /// <summary>
-    /// Experimental tests used to deduce functionality of VSTest
-    /// </summary>
-    public class VsExperimentalTests
+    internal static class NUnitTestCaseProperties
     {
-        [Test]
-        public void ThatCategoriesAreDistinct()
-        {
-            var testCase = new TestCase(
-                "whatever",
-                new Uri(NUnitTestAdapter.ExecutorUri),
-                "someassemblyname")
-            {
-                DisplayName = nameof(ThatCategoriesAreDistinct),
-                CodeFilePath = null,
-                LineNumber = 0
-            };
-            var traitInfo = new TestTraitInfo(traits: null, categories: new[] { "one", "one", "two", "two" });
-            traitInfo.ApplyTo(testCase);
-
-            var returnedCategoryList = testCase.GetCategories();
-            Assert.That(returnedCategoryList.Count(), Is.EqualTo(4), $"Found {testCase.GetCategories().Count()} category entries");
-        }
+        public static readonly TestProperty TestCategory = TestProperty.Register(
+            id: "NUnit.TestCategory",
+            label: "TestCategory",
+            valueType: typeof(string[]),
+            attributes: TestPropertyAttributes.Hidden | TestPropertyAttributes.Trait,
+            owner: typeof(TestCase));
     }
 }
