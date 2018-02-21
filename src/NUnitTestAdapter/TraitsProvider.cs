@@ -27,24 +27,21 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-    public static class TraitsFeature
+    public sealed class TraitsProvider
     {
-        public static void AddTraitsFromTestNode(this TestCase testCase, XmlNode testNode, IDictionary<string, TestTraitInfo> traitsCache)
-        {
-            var combinedTraitInfo = BuildTestTraitInfo(traitsCache, testNode);
+        private readonly Dictionary<string, TestTraitInfo> cachedInfoByTestId = new Dictionary<string, TestTraitInfo>();
 
-            combinedTraitInfo.ApplyTo(testCase);
-        }
+        internal IDictionary<string, TestTraitInfo> CachedInfoByTestId => cachedInfoByTestId;
 
-        private static TestTraitInfo BuildTestTraitInfo(IDictionary<string, TestTraitInfo> traitsCache, XmlNode testNode)
+        public TestTraitInfo GetTraitInfo(XmlNode testNode)
         {
             var currentNodeInfo = ParseNodeTraits(testNode);
 
             var parentId = testNode.ParentNode?.Attributes?["id"]?.Value;
             if (parentId == null) return currentNodeInfo;
 
-            if (!traitsCache.TryGetValue(parentId, out var combinedAncestorInfo))
-                traitsCache.Add(parentId, combinedAncestorInfo = BuildTestTraitInfo(traitsCache, testNode.ParentNode));
+            if (!cachedInfoByTestId.TryGetValue(parentId, out var combinedAncestorInfo))
+                cachedInfoByTestId.Add(parentId, combinedAncestorInfo = GetTraitInfo(testNode.ParentNode));
 
             return TestTraitInfo.Combine(combinedAncestorInfo, currentNodeInfo);
         }

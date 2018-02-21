@@ -40,13 +40,14 @@ namespace NUnit.VisualStudio.TestAdapter
         private readonly NavigationDataProvider _navigationDataProvider;
         private readonly bool _collectSourceInformation;
 
+        internal TraitsProvider TraitsProvider { get; } = new TraitsProvider();
+
         public TestConverter(ITestLogger logger, string sourceAssembly, bool collectSourceInformation)
         {
             _logger = logger;
             _sourceAssembly = sourceAssembly;
             _vsTestCaseMap = new Dictionary<string, TestCase>();
             _collectSourceInformation = collectSourceInformation;
-            TraitsCache = new Dictionary<string, TestTraitInfo>();
 
             if (_collectSourceInformation)
             {
@@ -58,8 +59,6 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             _navigationDataProvider?.Dispose();
         }
-
-        public IDictionary<string, TestTraitInfo> TraitsCache { get; }
 
         #region Public Methods
         /// <summary>
@@ -161,7 +160,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
             }
 
-            testCase.AddTraitsFromTestNode(testNode, TraitsCache);
+            TraitsProvider.GetTraitInfo(testNode).ApplyTo(testCase);
 
             return testCase;
         }

@@ -67,7 +67,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             CheckTestCase(testCase);
 
-            CheckNodeProperties(testConverter.TraitsCache, "121", categories: new[] { "super" });
+            CheckNodeProperties(testConverter.TraitsProvider.CachedInfoByTestId, "121", categories: new[] { "super" });
         }
 
         [Test]
@@ -80,7 +80,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 var testCase = testConverter.ConvertTestCase(node);
             }
 
-            var traitsCache = testConverter.TraitsCache;
+            var traitsCache = testConverter.TraitsProvider.CachedInfoByTestId;
 
             // There are 12 ids in the TestXml2, but will be storing only ancestor properties.
             // Not the leaf node test-case properties.
