@@ -50,7 +50,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             if (_collectSourceInformation)
             {
-                _navigationDataProvider = new NavigationDataProvider(sourceAssembly);
+                _navigationDataProvider = new NavigationDataProvider(sourceAssembly, logger);
             }
         }
 

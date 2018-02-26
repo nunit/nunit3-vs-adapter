@@ -23,7 +23,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.VisualStudio.TestAdapter.Metadata;
 
@@ -32,21 +31,28 @@ namespace NUnit.VisualStudio.TestAdapter
     public sealed class NavigationDataProvider : IDisposable
     {
         private readonly string _assemblyPath;
-        private readonly Dictionary<string, DiaSession> _sessionsByAssemblyPath = new Dictionary<string, DiaSession>(StringComparer.OrdinalIgnoreCase);
         private readonly IMetadataProvider _metadataProvider;
+        private readonly ITestLogger _logger;
+        private readonly Dictionary<string, DiaSession> _sessionsByAssemblyPath = new Dictionary<string, DiaSession>(StringComparer.OrdinalIgnoreCase);
+        private bool _disableMetadataLookup;
 
-        public NavigationDataProvider(string assemblyPath)
+        public NavigationDataProvider(string assemblyPath, ITestLogger logger)
+#if NETCOREAPP1_0
+            : this(assemblyPath, logger, new DirectReflectionMetadataProvider())
+#else
+            : this(assemblyPath, logger, new ReflectionAppDomainMetadataProvider())
+#endif
+        {
+        }
+
+        internal NavigationDataProvider(string assemblyPath, ITestLogger logger, IMetadataProvider metadataProvider)
         {
             if (string.IsNullOrEmpty(assemblyPath))
                 throw new ArgumentException("Assembly path must be specified.", nameof(assemblyPath));
 
             _assemblyPath = assemblyPath;
-
-#if NETCOREAPP1_0
-            _metadataProvider = new DirectReflectionMetadataProvider();
-#else
-            _metadataProvider = new ReflectionAppDomainMetadataProvider();
-#endif
+            _metadataProvider = metadataProvider ?? throw new ArgumentNullException(nameof(metadataProvider));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public void Dispose()
@@ -60,21 +66,26 @@ namespace NUnit.VisualStudio.TestAdapter
         public NavigationData GetNavigationData(string className, string methodName)
         {
             return TryGetSessionData(_assemblyPath, className, methodName)
-                ?? TryGetSessionData(DoSafe(_metadataProvider.GetStateMachineType, _assemblyPath, className, methodName), "MoveNext")
-                ?? TryGetSessionData(DoSafe(_metadataProvider.GetDeclaringType, _assemblyPath, className, methodName), methodName)
+                ?? TryGetSessionData(DoWithBreaker(_metadataProvider.GetStateMachineType, className, methodName), "MoveNext")
+                ?? TryGetSessionData(DoWithBreaker(_metadataProvider.GetDeclaringType, className, methodName), methodName)
                 ?? NavigationData.Invalid;
         }
 
-        private static TypeInfo? DoSafe(Func<string, string, string, TypeInfo?> method, string assemblyPath, string declaringTypeName, string methodName)
+        private TypeInfo? DoWithBreaker(Func<string, string, string, TypeInfo?> method, string declaringTypeName, string methodName)
         {
-            try
+            if (!_disableMetadataLookup)
             {
-                return method.Invoke(assemblyPath, declaringTypeName, methodName);
+                try
+                {
+                    return method.Invoke(_assemblyPath, declaringTypeName, methodName);
+                }
+                catch (Exception ex)
+                {
+                    _disableMetadataLookup = true;
+                    _logger.Warning($"Disabling navigation data lookup for \"{_assemblyPath}\".", ex);
+                }
             }
-            catch (FileNotFoundException)
-            {
-                return null;
-            }
+            return null;
         }
 
         private NavigationData TryGetSessionData(string assemblyPath, string declaringTypeName, string methodName)

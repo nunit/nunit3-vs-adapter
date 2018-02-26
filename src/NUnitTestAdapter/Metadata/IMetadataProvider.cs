@@ -25,7 +25,7 @@ using System;
 
 namespace NUnit.VisualStudio.TestAdapter.Metadata
 {
-    internal interface IMetadataProvider : IDisposable
+    public interface IMetadataProvider : IDisposable
     {
         TypeInfo? GetDeclaringType(string assemblyPath, string reflectedTypeName, string methodName);
         TypeInfo? GetStateMachineType(string assemblyPath, string reflectedTypeName, string methodName);

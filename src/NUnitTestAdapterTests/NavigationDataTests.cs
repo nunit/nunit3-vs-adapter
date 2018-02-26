@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Reflection;
+using NSubstitute;
 using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
@@ -15,7 +16,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void SetUp()
         {
             _provider = new NavigationDataProvider(
-                typeof(NavigationDataTests).GetTypeInfo().Assembly.Location);
+                typeof(NavigationDataTests).GetTypeInfo().Assembly.Location,
+                Substitute.For<ITestLogger>());
         }
 
         [TearDown]
