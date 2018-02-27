@@ -150,7 +150,7 @@ string GetTestAssemblyPath(string framework)
 }
 
 foreach (var (framework, vstestFramework, adapterDir) in new[] {
-    ("net45", "Framework45", ADAPTER_BIN_DIR_NET35),
+    ("net46", "Framework45", ADAPTER_BIN_DIR_NET35),
     ("netcoreapp1.0", "FrameworkCore10", ADAPTER_BIN_DIR_NETCOREAPP10)
 })
 {
@@ -193,7 +193,7 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
                 NoBuild = true,
                 TestAdapterPath = adapterDir,
                 Settings = File("DisableAppDomain.runsettings"),
-                Filter = framework == "net45" ? NoNavigationTests : null
+                Filter = framework == "net46" ? NoNavigationTests : null
             });
         });
 
@@ -206,7 +206,7 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
                 TestAdapterPath = adapterDir,
                 Framework = vstestFramework,
                 Settings = File("DisableAppDomain.runsettings"),
-                TestCaseFilter = framework == "net45" ? NoNavigationTests : null
+                TestCaseFilter = framework == "net46" ? NoNavigationTests : null
             });
         });
 }
@@ -311,11 +311,11 @@ Task("Rebuild")
     .IsDependentOn("Build");
 
 Task("Test")
-    .IsDependentOn("VSTest-net45")
+    .IsDependentOn("VSTest-net46")
     .IsDependentOn("VSTest-netcoreapp1.0")
-    .IsDependentOn("DotnetTest-net45")
+    .IsDependentOn("DotnetTest-net46")
     .IsDependentOn("DotnetTest-netcoreapp1.0")
-    .IsDependentOn("DotnetVSTest-net45")
+    .IsDependentOn("DotnetVSTest-net46")
     .IsDependentOn("DotnetVSTest-netcoreapp1.0");
 
 Task("Package")

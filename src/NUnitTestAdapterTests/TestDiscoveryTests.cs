@@ -173,7 +173,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(!messageLoggerStub.ErrorMessages.Any());
         }
 
-#if NET45
+#if NET46
         [Test]
         public void WhenAssemblyIsNative()
         {
