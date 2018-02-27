@@ -23,39 +23,39 @@
 
 #if !NETCOREAPP1_0
 using System;
-using System.IO;
 using System.Reflection;
 
 namespace NUnit.VisualStudio.TestAdapter.Metadata
 {
     internal sealed class ReflectionAppDomainMetadataProvider : IMetadataProvider
     {
+        private readonly string _applicationBase;
         private AppDomain _appDomain;
         private AppDomainHelper _helper;
+
+        public ReflectionAppDomainMetadataProvider(string applicationBase)
+        {
+            if (string.IsNullOrEmpty(applicationBase))
+                throw new ArgumentException("Application base directory must be specified.", nameof(applicationBase));
+
+            _applicationBase = applicationBase;
+        }
 
         private AppDomainHelper GetHelper()
         {
             if (_helper == null)
             {
-                var adapterAssembly = typeof(ReflectionAppDomainMetadataProvider).Assembly;
-                var adapterAssemblyPath = adapterAssembly.ManifestModule.FullyQualifiedName;
-
                 _appDomain = AppDomain.CreateDomain(
                     friendlyName: typeof(ReflectionAppDomainMetadataProvider).FullName,
                     securityInfo: null,
-                    info: new AppDomainSetup { ApplicationBase = Path.GetDirectoryName(adapterAssemblyPath) });
+                    info: new AppDomainSetup { ApplicationBase = _applicationBase });
 
-                _appDomain.ReflectionOnlyAssemblyResolve += AppDomainReflectionOnlyAssemblyResolve;
-
-                _helper = (AppDomainHelper)_appDomain.CreateInstanceAndUnwrap(adapterAssembly.FullName, typeof(AppDomainHelper).FullName);
+                _helper = (AppDomainHelper)_appDomain.CreateInstanceFromAndUnwrap(
+                    typeof(AppDomainHelper).Assembly.Location,
+                    typeof(AppDomainHelper).FullName);
             }
 
             return _helper;
-        }
-
-        private static Assembly AppDomainReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            return Assembly.ReflectionOnlyLoad(args.Name);
         }
 
         public void Dispose()
@@ -77,6 +77,12 @@ namespace NUnit.VisualStudio.TestAdapter.Metadata
         private sealed class AppDomainHelper : MarshalByRefObject
         {
             private readonly DirectReflectionMetadataProvider provider = new DirectReflectionMetadataProvider();
+
+            static AppDomainHelper()
+            {
+                AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += (sender, e) =>
+                    Assembly.ReflectionOnlyLoad(e.Name);
+            }
 
             public TypeInfo? GetDeclaringType(string assemblyPath, string reflectedTypeName, string methodName)
             {
