@@ -23,22 +23,23 @@
 
 #if !NETCOREAPP1_0
 using System;
-using System.Reflection;
 
 namespace NUnit.VisualStudio.TestAdapter.Metadata
 {
-    internal sealed class ReflectionAppDomainMetadataProvider : IMetadataProvider
+    internal sealed class AppDomainMetadataProvider : IMetadataProvider
     {
         private readonly string _applicationBase;
+        private readonly string _configurationFile;
         private AppDomain _appDomain;
         private AppDomainHelper _helper;
 
-        public ReflectionAppDomainMetadataProvider(string applicationBase)
+        public AppDomainMetadataProvider(string applicationBase, string configurationFile)
         {
             if (string.IsNullOrEmpty(applicationBase))
                 throw new ArgumentException("Application base directory must be specified.", nameof(applicationBase));
 
             _applicationBase = applicationBase;
+            _configurationFile = configurationFile;
         }
 
         private AppDomainHelper GetHelper()
@@ -46,9 +47,13 @@ namespace NUnit.VisualStudio.TestAdapter.Metadata
             if (_helper == null)
             {
                 _appDomain = AppDomain.CreateDomain(
-                    friendlyName: typeof(ReflectionAppDomainMetadataProvider).FullName,
+                    friendlyName: typeof(AppDomainMetadataProvider).FullName,
                     securityInfo: null,
-                    info: new AppDomainSetup { ApplicationBase = _applicationBase });
+                    info: new AppDomainSetup
+                    {
+                        ApplicationBase = _applicationBase,
+                        ConfigurationFile = _configurationFile
+                    });
 
                 _helper = (AppDomainHelper)_appDomain.CreateInstanceFromAndUnwrap(
                     typeof(AppDomainHelper).Assembly.Location,
@@ -77,12 +82,6 @@ namespace NUnit.VisualStudio.TestAdapter.Metadata
         private sealed class AppDomainHelper : MarshalByRefObject
         {
             private readonly DirectReflectionMetadataProvider provider = new DirectReflectionMetadataProvider();
-
-            static AppDomainHelper()
-            {
-                AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += (sender, e) =>
-                    Assembly.ReflectionOnlyLoad(e.Name);
-            }
 
             public TypeInfo? GetDeclaringType(string assemblyPath, string reflectedTypeName, string methodName)
             {

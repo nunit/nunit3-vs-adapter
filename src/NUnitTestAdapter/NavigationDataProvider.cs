@@ -41,11 +41,19 @@ namespace NUnit.VisualStudio.TestAdapter
 #if NETCOREAPP1_0
             : this(assemblyPath, logger, new DirectReflectionMetadataProvider())
 #else
-            : this(assemblyPath, logger, new ReflectionAppDomainMetadataProvider(
-                applicationBase: Path.GetDirectoryName(assemblyPath)))
+            : this(assemblyPath, logger, CreateMetadataProvider(assemblyPath))
 #endif
         {
         }
+
+#if NET35
+        internal static AppDomainMetadataProvider CreateMetadataProvider(string assemblyPath)
+        {
+            return new AppDomainMetadataProvider(
+                applicationBase: Path.GetDirectoryName(assemblyPath),
+                configurationFile: assemblyPath + ".config");
+        }
+#endif
 
         internal NavigationDataProvider(string assemblyPath, ITestLogger logger, IMetadataProvider metadataProvider)
         {

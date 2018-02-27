@@ -61,10 +61,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                         var dependencyAssemblyPath = Path.Combine(marshalled.outputDir, "AssemblyOutsideAdapterDir.dll");
                         var dependencyBaseCompilation = baseCompilation
                             .WithAssemblyName("AssemblyOutsideAdapterDir")
-                            .AddSyntaxTrees(CSharpSyntaxTree.ParseText("public sealed class AttributeDefinedOutsideAdapterDir : System.Attribute { }"))
-                            .WithOptions(baseCompilation.Options
-                                .WithPublicSign(true)
-                                .WithCryptoKeyFile(Path.Combine(Path.GetDirectoryName(typeof(NavigationDataProviderTests).Assembly.Location), "temp.snk")));
+                            .AddSyntaxTrees(CSharpSyntaxTree.ParseText("public sealed class AttributeDefinedOutsideAdapterDir : System.Attribute { }"));
+
+                        if (marshalled.withBindingRedirect)
+                        {
+                            dependencyBaseCompilation = dependencyBaseCompilation
+                                .WithOptions(baseCompilation.Options
+                                    .WithPublicSign(true)
+                                    .WithCryptoKeyFile(Path.Combine(Path.GetDirectoryName(typeof(NavigationDataProviderTests).Assembly.Location), "temp.snk")));
+                        }
 
                         var dependencyAssembly = dependencyBaseCompilation
                             .AddSyntaxTrees(CSharpSyntaxTree.ParseText("[assembly: System.Reflection.AssemblyVersion(\"1.0.1.0\")]"))
@@ -97,7 +102,23 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 }
 
                 var assemblyPath = Path.Combine(dir, "DependentAssembly.dll");
-                using (var metadataProvider = new ReflectionAppDomainMetadataProvider(applicationBase: Path.GetDirectoryName(assemblyPath)))
+                if (withBindingRedirect)
+                {
+                    File.WriteAllText(assemblyPath + ".config",
+@"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <runtime>
+    <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
+      <dependentAssembly>
+        <assemblyIdentity name=""AssemblyOutsideAdapterDir"" publicKeyToken=""0bf10b92861e5519"" culture=""neutral"" />
+        <bindingRedirect oldVersion=""0.0.0.0-1.0.1.0"" newVersion=""1.0.1.0"" />
+      </dependentAssembly>
+    </assemblyBinding>
+  </runtime>
+</configuration>");
+                }
+
+                using (var metadataProvider = NavigationDataProvider.CreateMetadataProvider(assemblyPath))
                 {
                     var result = metadataProvider.GetStateMachineType(assemblyPath, "TestClass", "AsyncMethod");
                     Assert.That(result, Is.Not.Null);
