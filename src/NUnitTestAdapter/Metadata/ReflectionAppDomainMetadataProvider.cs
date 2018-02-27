@@ -28,7 +28,7 @@ using System.Reflection;
 
 namespace NUnit.VisualStudio.TestAdapter.Metadata
 {
-    internal sealed partial class ReflectionAppDomainMetadataProvider : IMetadataProvider
+    internal sealed class ReflectionAppDomainMetadataProvider : IMetadataProvider
     {
         private AppDomain _appDomain;
         private AppDomainHelper _helper;
