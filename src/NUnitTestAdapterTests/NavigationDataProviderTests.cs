@@ -93,7 +93,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                                 .Emit(outputDll, outputPdb, options: new EmitOptions(debugInformationFormat: DebugInformationFormat.PortablePdb));
                             if (!dependentAssembly.Success) Assert.Fail("Broken test");
                         }
-                    }, (outputDir: dir.Path, withBindingRedirect: withBindingRedirect));
+                    }, (outputDir: dir.Path, withBindingRedirect));
                 }
 
                 var assemblyPath = Path.Combine(dir, "DependentAssembly.dll");
