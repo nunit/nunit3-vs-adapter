@@ -43,8 +43,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             "to load it.")]
         public static void AsyncMethodWithAttributeDefinedOutsideAdapterDirectory()
         {
-            var logger = Substitute.For<ITestLogger>();
-
             using (var dir = new TempDirectory())
             {
                 // The tests must run in the same AppDomain as VSTest for DiaSession to work,
@@ -78,14 +76,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                     }, dir.Path);
                 }
 
-                using (var navigationProvider = new NavigationDataProvider(Path.Combine(dir, "DependentAssembly.dll"), logger))
+                var assemblyPath = Path.Combine(dir, "DependentAssembly.dll");
+                using (var metadataProvider = new ReflectionAppDomainMetadataProvider(applicationBase: Path.GetDirectoryName(assemblyPath)))
                 {
-                    navigationProvider.GetNavigationData("TestClass", "AsyncMethod");
+                    var result = metadataProvider.GetStateMachineType(assemblyPath, "TestClass", "AsyncMethod");
+                    Assert.That(result, Is.Not.Null);
                 }
             }
-
-            logger.DidNotReceiveWithAnyArgs().Warning(null);
-            logger.DidNotReceiveWithAnyArgs().Warning(null, null);
         }
 #endif
 
