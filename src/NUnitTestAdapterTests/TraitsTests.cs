@@ -570,6 +570,19 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
+        public static void ThatMultipleChildTestCasesWithExplicitParentHaveExplicitTraits()
+        {
+            var testCases = GetTestCases(
+                @"<test-suite id='1' name='Fixture' fullname='Fixture' classname='Fixture' runstate='Explicit'>
+                    <test-case id='2' name='Test' fullname='Fixture.Test' methodname='Test' classname='Fixture'/>
+                    <test-case id='3' name='Test2' fullname='Fixture.Test2' methodname='Test2' classname='Fixture'/>
+                </test-suite>");
+
+            foreach (var testCase in testCases)
+                Assert.That(testCase.Traits, Has.One.With.Property("Name").EqualTo("Explicit"));
+        }
+
+        [Test]
         public static void ThatExplicitTraitValueIsEmptyString()
         {
             var testCase = GetTestCases(
