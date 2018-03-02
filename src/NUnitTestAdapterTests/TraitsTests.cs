@@ -536,7 +536,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             });
         }
 
-        private static IList<TestCase> GetTestCases(string xml)
+        private static IReadOnlyList<TestCase> GetTestCases(string xml)
         {
             using (var converter = new TestConverter(
                 new TestLogger(new MessageLoggerStub()),

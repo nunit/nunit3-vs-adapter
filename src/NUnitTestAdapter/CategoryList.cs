@@ -47,6 +47,13 @@ namespace NUnit.VisualStudio.TestAdapter
                     }
                 }
             }
+
+            const string explicitTraitName = "Explicit";
+            if (!categorylist.Contains(explicitTraitName) && testNode.Attributes?["runstate"]?.Value == "Explicit")
+            {
+                categorylist.Add(explicitTraitName);
+            }
+
             return categorylist;
         }
 

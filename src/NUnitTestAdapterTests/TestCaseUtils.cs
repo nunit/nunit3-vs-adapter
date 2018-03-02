@@ -36,7 +36,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         /// <summary>
         /// Knows how to convert an entire XML fragment.
         /// </summary>
-        public static IList<TestCase> ConvertTestCases(this TestConverter testConverter, string xml)
+        public static IReadOnlyList<TestCase> ConvertTestCases(this TestConverter testConverter, string xml)
         {
             if (testConverter == null) throw new ArgumentNullException(nameof(testConverter));
 
