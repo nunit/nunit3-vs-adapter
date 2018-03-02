@@ -548,25 +548,36 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
-        public static void ThatExplicitTestCaseHasExplicitCategory()
+        public static void ThatExplicitTestCaseHasExplicitTrait()
         {
             var testCase = GetTestCases(
                 @"<test-suite id='1' name='Fixture' fullname='Fixture' classname='Fixture'>
                     <test-case id='2' name='Test' fullname='Fixture.Test' methodname='Test' classname='Fixture' runstate='Explicit' />
                 </test-suite>").Single();
 
-            Assert.That(testCase.GetCategories(), Contains.Item("Explicit"));
+            Assert.That(testCase.Traits, Has.One.With.Property("Name").EqualTo("Explicit"));
         }
 
         [Test]
-        public static void ThatTestCaseWithExplicitParentHasExplicitCategory()
+        public static void ThatTestCaseWithExplicitParentHasExplicitTrait()
         {
             var testCase = GetTestCases(
                 @"<test-suite id='1' name='Fixture' fullname='Fixture' classname='Fixture' runstate='Explicit'>
                     <test-case id='2' name='Test' fullname='Fixture.Test' methodname='Test' classname='Fixture'/>
                 </test-suite>").Single();
 
-            Assert.That(testCase.GetCategories(), Contains.Item("Explicit"));
+            Assert.That(testCase.Traits, Has.One.With.Property("Name").EqualTo("Explicit"));
+        }
+
+        [Test]
+        public static void ThatExplicitTraitValueIsEmptyString()
+        {
+            var testCase = GetTestCases(
+                @"<test-suite id='1' name='Fixture' fullname='Fixture' classname='Fixture'>
+                    <test-case id='2' name='Test' fullname='Fixture.Test' methodname='Test' classname='Fixture' runstate='Explicit' />
+                </test-suite>").Single();
+
+            Assert.That(testCase.Traits, Has.One.With.Property("Name").EqualTo("Explicit").And.Property("Value").SameAs(string.Empty));
         }
     }
 }

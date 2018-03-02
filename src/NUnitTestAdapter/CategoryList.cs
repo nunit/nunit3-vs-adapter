@@ -49,9 +49,15 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             const string explicitTraitName = "Explicit";
-            if (!categorylist.Contains(explicitTraitName) && testNode.Attributes?["runstate"]?.Value == "Explicit")
+            if (testNode.Attributes?["runstate"]?.Value == "Explicit")
             {
-                categorylist.Add(explicitTraitName);
+                if (!testCase.Traits.Any(trait => trait.Name == explicitTraitName))
+                {
+                    // The empty string causes the UI we want.
+                    // If it's null, the explicit trait doesn't show up in Test Explorer.
+                    // If it's not empty, it shows up as “Explicit [value]” in Test Explorer.
+                    testCase.Traits.Add(new Trait(explicitTraitName, value: string.Empty));
+                }
             }
 
             return categorylist;
