@@ -5,11 +5,10 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NSubstitute;
 using NUnit.Framework;
-
+using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
-
     public class TestDataForTraits
     {
         #region TestXml Data
@@ -366,8 +365,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
     }
 
-#if !NETCOREAPP1_0
-
     [Category(nameof(TestTraits))]
     public class TestTraits
     {
@@ -539,6 +536,61 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             });
         }
 
+        private static IReadOnlyList<TestCase> GetTestCases(string xml)
+        {
+            using (var converter = new TestConverter(
+                new TestLogger(new MessageLoggerStub()),
+                sourceAssembly: "unused",
+                collectSourceInformation: false))
+            {
+                return converter.ConvertTestCases(xml);
+            }
+        }
+
+        [Test]
+        public static void ThatExplicitTestCaseHasExplicitTrait()
+        {
+            var testCase = GetTestCases(
+                @"<test-suite id='1' name='Fixture' fullname='Fixture' classname='Fixture'>
+                    <test-case id='2' name='Test' fullname='Fixture.Test' methodname='Test' classname='Fixture' runstate='Explicit' />
+                </test-suite>").Single();
+
+            Assert.That(testCase.Traits, Has.One.With.Property("Name").EqualTo("Explicit"));
+        }
+
+        [Test]
+        public static void ThatTestCaseWithExplicitParentHasExplicitTrait()
+        {
+            var testCase = GetTestCases(
+                @"<test-suite id='1' name='Fixture' fullname='Fixture' classname='Fixture' runstate='Explicit'>
+                    <test-case id='2' name='Test' fullname='Fixture.Test' methodname='Test' classname='Fixture'/>
+                </test-suite>").Single();
+
+            Assert.That(testCase.Traits, Has.One.With.Property("Name").EqualTo("Explicit"));
+        }
+
+        [Test]
+        public static void ThatMultipleChildTestCasesWithExplicitParentHaveExplicitTraits()
+        {
+            var testCases = GetTestCases(
+                @"<test-suite id='1' name='Fixture' fullname='Fixture' classname='Fixture' runstate='Explicit'>
+                    <test-case id='2' name='Test' fullname='Fixture.Test' methodname='Test' classname='Fixture'/>
+                    <test-case id='3' name='Test2' fullname='Fixture.Test2' methodname='Test2' classname='Fixture'/>
+                </test-suite>");
+
+            foreach (var testCase in testCases)
+                Assert.That(testCase.Traits, Has.One.With.Property("Name").EqualTo("Explicit"));
+        }
+
+        [Test]
+        public static void ThatExplicitTraitValueIsEmptyString()
+        {
+            var testCase = GetTestCases(
+                @"<test-suite id='1' name='Fixture' fullname='Fixture' classname='Fixture'>
+                    <test-case id='2' name='Test' fullname='Fixture.Test' methodname='Test' classname='Fixture' runstate='Explicit' />
+                </test-suite>").Single();
+
+            Assert.That(testCase.Traits, Has.One.With.Property("Name").EqualTo("Explicit").And.Property("Value").SameAs(string.Empty));
+        }
     }
-#endif
 }
