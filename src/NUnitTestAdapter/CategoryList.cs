@@ -13,6 +13,8 @@ namespace NUnit.VisualStudio.TestAdapter
         private const string VsTestCategoryLabel = "TestCategory";
         internal static readonly TestProperty NUnitTestCategoryProperty = TestProperty.Register(NUnitCategoryName, VsTestCategoryLabel, typeof(string[]), TestPropertyAttributes.Hidden | TestPropertyAttributes.Trait, typeof(TestCase));
 
+        internal static readonly TestProperty NUnitExplicitProperty = TestProperty.Register("NUnit.Explicit", "Explicit", typeof(bool), TestPropertyAttributes.Hidden, typeof(TestCase));
+
         private const string ExplicitTraitName = "Explicit";
         // The empty string causes the UI we want.
         // If it's null, the explicit trait doesn't show up in Test Explorer.
@@ -56,12 +58,20 @@ namespace NUnit.VisualStudio.TestAdapter
 
             if (testNode.Attributes?["runstate"]?.Value == "Explicit")
             {
+                // Add UI grouping “Explicit”
                 if (!testCase.Traits.Any(trait => trait.Name == ExplicitTraitName))
-                {
                     testCase.Traits.Add(new Trait(ExplicitTraitName, ExplicitTraitValue));
 
-                    if (addToCache)
-                        AddTraitsToCache(traitsCache, key, ExplicitTraitName, ExplicitTraitValue);
+                // Track whether the test is actually explicit since multiple things result in the same UI grouping
+                testCase.SetPropertyValue(NUnitExplicitProperty, true);
+
+                if (addToCache)
+                {
+                    // Add UI grouping “Explicit”
+                    AddTraitsToCache(traitsCache, key, ExplicitTraitName, ExplicitTraitValue);
+
+                    // Track whether the test is actually explicit since multiple things result in the same UI grouping
+                    AddTraitsToCache(traitsCache, key, "No great way to cache explicit property in IDictionary<string, List<Trait>>", "MAGIC");
                 }
             }
 

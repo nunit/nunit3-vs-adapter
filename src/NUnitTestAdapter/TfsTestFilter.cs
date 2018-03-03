@@ -104,12 +104,14 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public IEnumerable<TestCase> CheckFilter(IEnumerable<TestCase> tests)
         {
-            return TfsTestCaseFilterExpression == null ? tests : tests.Where(CheckFilter).ToList();
+            return tests.Where(CheckFilter).ToList();
         }
 
         private bool CheckFilter(TestCase testCase)
         {
-            return TfsTestCaseFilterExpression.MatchTestCase(testCase, p => PropertyValueProvider(testCase, p));
+            var isExplicit = testCase.GetPropertyValue(CategoryList.NUnitExplicitProperty, false);
+
+            return !isExplicit && TfsTestCaseFilterExpression?.MatchTestCase(testCase, p => PropertyValueProvider(testCase, p)) != false;
         }
 
         /// <summary>

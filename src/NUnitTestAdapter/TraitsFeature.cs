@@ -8,10 +8,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -35,8 +35,8 @@ namespace NUnit.VisualStudio.TestAdapter
             testCase?.Traits.Add(new Trait(name, value));
         }
         private const string NunitTestCategoryLabel = "Category";
-       
-       
+
+
         public static void AddTraitsFromTestNode(this TestCase testCase, XmlNode testNode,
             IDictionary<string, List<Trait>> traitsCache, ITestLogger logger)
         {
@@ -49,7 +49,11 @@ namespace NUnit.VisualStudio.TestAdapter
                 if (traitsCache.ContainsKey(key))
                 {
                     categorylist.AddRange(traitsCache[key].Where(o => o.Name == NunitTestCategoryLabel).Select(prop => prop.Value).ToList());
-                    var traitslist = traitsCache[key].Where(o => o.Name != NunitTestCategoryLabel).ToList();
+
+                    if (traitsCache[key].Any(o => o.Name == "No great way to cache explicit property in IDictionary<string, List<Trait>>"))
+                        testCase.SetPropertyValue(CategoryList.NUnitExplicitProperty, true);
+
+                    var traitslist = traitsCache[key].Where(o => o.Name != NunitTestCategoryLabel && o.Name != "No great way to cache explicit property in IDictionary<string, List<Trait>>").ToList();
                     if (traitslist.Count > 0)
                         testCase.Traits.AddRange(traitslist);
                 }
@@ -71,7 +75,7 @@ namespace NUnit.VisualStudio.TestAdapter
             categorylist.UpdateCategoriesToVs();
         }
 
-       
+
         public static IEnumerable<NTrait> GetTraits(this TestCase testCase)
         {
             var traits = new List<NTrait>();
