@@ -35,7 +35,7 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         public int LastNodeListCount { get; private set; }
-        public IEnumerable<string> ProcessTestCaseProperties(XmlNode testNode, bool addToCache, string key = null, IDictionary<string, List<Trait>> traitsCache = null)
+        public IEnumerable<string> ProcessTestCaseProperties(XmlNode testNode, bool addToCache, string key = null, IDictionary<string, TraitsFeature.CachedTestCaseInfo> traitsCache = null)
         {
             var nodelist = testNode.SelectNodes("properties/property");
             LastNodeListCount = nodelist.Count;
@@ -71,7 +71,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     AddTraitsToCache(traitsCache, key, ExplicitTraitName, ExplicitTraitValue);
 
                     // Track whether the test is actually explicit since multiple things result in the same UI grouping
-                    AddTraitsToCache(traitsCache, key, "No great way to cache explicit property in IDictionary<string, List<Trait>>", "MAGIC");
+                    GetCachedInfo(traitsCache, key).Explicit = true;
                 }
             }
 
@@ -91,23 +91,19 @@ namespace NUnit.VisualStudio.TestAdapter
             return String.IsNullOrEmpty(propertyName) || propertyName[0] == '_' || String.IsNullOrEmpty(propertyValue);
         }
 
-        private static void AddTraitsToCache(IDictionary<string, List<Trait>> traitsCache, string key, string propertyName, string propertyValue)
+        private static void AddTraitsToCache(IDictionary<string, TraitsFeature.CachedTestCaseInfo> traitsCache, string key, string propertyName, string propertyValue)
         {
-            if (traitsCache.ContainsKey(key))
-            {
-                if (!IsInternalProperty(propertyName, propertyValue))
-                    traitsCache[key].Add(new Trait(propertyName, propertyValue));
-                return;
-            }
+            if (IsInternalProperty(propertyName, propertyValue)) return;
 
-            var traits = new List<Trait>();
+            var info = GetCachedInfo(traitsCache, key);
+            info.Traits.Add(new Trait(propertyName, propertyValue));
+        }
 
-            // Will add empty list of traits, if the property is internal type. So that we will not make SelectNodes call again.
-            if (!IsInternalProperty(propertyName, propertyValue))
-            {
-                traits.Add(new Trait(propertyName, propertyValue));
-            }
-            traitsCache[key] = traits;
+        private static TraitsFeature.CachedTestCaseInfo GetCachedInfo(IDictionary<string, TraitsFeature.CachedTestCaseInfo> traitsCache, string key)
+        {
+            if (!traitsCache.TryGetValue(key, out var info))
+                traitsCache.Add(key, info = new TraitsFeature.CachedTestCaseInfo());
+            return info;
         }
 
         public void UpdateCategoriesToVs()

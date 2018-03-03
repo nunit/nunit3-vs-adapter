@@ -8,10 +8,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -68,8 +68,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             CheckTestCase(testCase);
 
             Assert.That(testConverter.TraitsCache.Keys.Count, Is.EqualTo(1));
-            Assert.That(testConverter.TraitsCache["121"].Count, Is.EqualTo(1));
-            var parentTrait = testConverter.TraitsCache["121"];
+            Assert.That(testConverter.TraitsCache["121"].Traits.Count, Is.EqualTo(1));
+            var parentTrait = testConverter.TraitsCache["121"].Traits;
             Assert.That(parentTrait[0].Name, Is.EqualTo("Category"));
             Assert.That(parentTrait[0].Value, Is.EqualTo("super"));
         }
@@ -164,33 +164,33 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(testCase.GetCategories(),Is.EquivalentTo(new [] { "super", "cat1", }));
         }
 
-        private void CheckNodesWithNoProperties(IDictionary<string, List<Trait>> traits)
+        private void CheckNodesWithNoProperties(IDictionary<string, TraitsFeature.CachedTestCaseInfo> cache)
         {
-            Assert.That(traits["2"].Count, Is.EqualTo(0));
-            Assert.That(traits["0-1010"].Count, Is.EqualTo(0));
+            Assert.That(cache["2"].Traits.Count, Is.EqualTo(0));
+            Assert.That(cache["0-1010"].Traits.Count, Is.EqualTo(0));
         }
 
-        private void CheckNoTestCaseNodesExist(IDictionary<string, List<Trait>> traits)
+        private void CheckNoTestCaseNodesExist(IDictionary<string, TraitsFeature.CachedTestCaseInfo> cache)
         {
-            Assert.That(!traits.ContainsKey("0-1008"));
-            Assert.That(!traits.ContainsKey("0-1006"));
-            Assert.That(!traits.ContainsKey("0-1004"));
-            Assert.That(!traits.ContainsKey("0-1003"));
-            Assert.That(!traits.ContainsKey("0-1001"));
+            Assert.That(!cache.ContainsKey("0-1008"));
+            Assert.That(!cache.ContainsKey("0-1006"));
+            Assert.That(!cache.ContainsKey("0-1004"));
+            Assert.That(!cache.ContainsKey("0-1003"));
+            Assert.That(!cache.ContainsKey("0-1001"));
         }
 
-        private void CheckNodeProperties(IDictionary<string, List<Trait>> traitssCache, string id, KeyValuePair<string,string>[] kps)
+        private void CheckNodeProperties(IDictionary<string, TraitsFeature.CachedTestCaseInfo> cache, string id, KeyValuePair<string,string>[] kps)
         {
-            Assert.That(traitssCache.ContainsKey(id));
-            Assert.That(traitssCache[id].Count, Is.EqualTo(kps.Count()));
-            var traits = traitssCache[id];
+            Assert.That(cache.ContainsKey(id));
+            Assert.That(cache[id].Traits.Count, Is.EqualTo(kps.Count()));
+            var info = cache[id];
 
             foreach(var kp in kps)
             {
-                Assert.That(traits.Any(t => t.Name == kp.Key && t.Value == kp.Value));
+                Assert.That(info.Traits.Any(t => t.Name == kp.Key && t.Value == kp.Value));
             }
         }
 
-      
+
     }
 }

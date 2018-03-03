@@ -37,8 +37,14 @@ namespace NUnit.VisualStudio.TestAdapter
         private const string NunitTestCategoryLabel = "Category";
 
 
+        public sealed class CachedTestCaseInfo
+        {
+            public List<Trait> Traits { get; } = new List<Trait>();
+            public bool Explicit { get; set; }
+        }
+
         public static void AddTraitsFromTestNode(this TestCase testCase, XmlNode testNode,
-            IDictionary<string, List<Trait>> traitsCache, ITestLogger logger)
+            IDictionary<string, CachedTestCaseInfo> traitsCache, ITestLogger logger)
         {
             var ancestor = testNode.ParentNode;
             var key = ancestor.Attributes?["id"]?.Value;
@@ -48,22 +54,22 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 if (traitsCache.ContainsKey(key))
                 {
-                    categorylist.AddRange(traitsCache[key].Where(o => o.Name == NunitTestCategoryLabel).Select(prop => prop.Value).ToList());
+                    categorylist.AddRange(traitsCache[key].Traits.Where(o => o.Name == NunitTestCategoryLabel).Select(prop => prop.Value).ToList());
 
-                    if (traitsCache[key].Any(o => o.Name == "No great way to cache explicit property in IDictionary<string, List<Trait>>"))
+                    if (traitsCache[key].Explicit)
                         testCase.SetPropertyValue(CategoryList.NUnitExplicitProperty, true);
 
-                    var traitslist = traitsCache[key].Where(o => o.Name != NunitTestCategoryLabel && o.Name != "No great way to cache explicit property in IDictionary<string, List<Trait>>").ToList();
+                    var traitslist = traitsCache[key].Traits.Where(o => o.Name != NunitTestCategoryLabel).ToList();
                     if (traitslist.Count > 0)
                         testCase.Traits.AddRange(traitslist);
                 }
                 else
                 {
                     categorylist.ProcessTestCaseProperties(ancestor,true,key,traitsCache);
-                    // Adding empty list to dictionary, so that we will not make SelectNodes call again.
+                    // Adding entry to dictionary, so that we will not make SelectNodes call again.
                     if (categorylist.LastNodeListCount == 0 && !traitsCache.ContainsKey(key))
                     {
-                        traitsCache[key] = new List<Trait>();
+                        traitsCache[key] = new CachedTestCaseInfo();
                     }
                 }
                 ancestor = ancestor.ParentNode;
