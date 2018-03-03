@@ -13,6 +13,12 @@ namespace NUnit.VisualStudio.TestAdapter
         private const string VsTestCategoryLabel = "TestCategory";
         internal static readonly TestProperty NUnitTestCategoryProperty = TestProperty.Register(NUnitCategoryName, VsTestCategoryLabel, typeof(string[]), TestPropertyAttributes.Hidden | TestPropertyAttributes.Trait, typeof(TestCase));
 
+        private const string ExplicitTraitName = "Explicit";
+        // The empty string causes the UI we want.
+        // If it's null, the explicit trait doesn't show up in Test Explorer.
+        // If it's not empty, it shows up as “Explicit [value]” in Test Explorer.
+        private const string ExplicitTraitValue = "";
+
         private readonly List<string> categorylist = new List<string>();
         private readonly TestCase testCase;
 
@@ -48,20 +54,14 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
             }
 
-            const string explicitTraitName = "Explicit";
-            // The empty string causes the UI we want.
-            // If it's null, the explicit trait doesn't show up in Test Explorer.
-            // If it's not empty, it shows up as “Explicit [value]” in Test Explorer.
-            const string explicitTraitValue = "";
-
             if (testNode.Attributes?["runstate"]?.Value == "Explicit")
             {
-                if (!testCase.Traits.Any(trait => trait.Name == explicitTraitName))
+                if (!testCase.Traits.Any(trait => trait.Name == ExplicitTraitName))
                 {
-                    testCase.Traits.Add(new Trait(explicitTraitName, explicitTraitValue));
+                    testCase.Traits.Add(new Trait(ExplicitTraitName, ExplicitTraitValue));
 
                     if (addToCache)
-                        AddTraitsToCache(traitsCache, key, explicitTraitName, explicitTraitValue);
+                        AddTraitsToCache(traitsCache, key, ExplicitTraitName, ExplicitTraitValue);
                 }
             }
 
@@ -70,6 +70,13 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private static bool IsInternalProperty(string propertyName, string propertyValue)
         {
+            if (propertyName == ExplicitTraitName)
+            {
+                // Otherwise the IsNullOrEmpty check does the wrong thing,
+                // but I'm not sure of the consequences of allowing all empty strings.
+                return false;
+            }
+
             // Property names starting with '_' are for internal use only
             return String.IsNullOrEmpty(propertyName) || propertyName[0] == '_' || String.IsNullOrEmpty(propertyValue);
         }
