@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.VisualStudio.TestAdapter.Metadata;
 
@@ -40,10 +41,19 @@ namespace NUnit.VisualStudio.TestAdapter
 #if NETCOREAPP1_0
             : this(assemblyPath, logger, new DirectReflectionMetadataProvider())
 #else
-            : this(assemblyPath, logger, new ReflectionAppDomainMetadataProvider())
+            : this(assemblyPath, logger, CreateMetadataProvider(assemblyPath))
 #endif
         {
         }
+
+#if NET35
+        internal static AppDomainMetadataProvider CreateMetadataProvider(string assemblyPath)
+        {
+            return new AppDomainMetadataProvider(
+                applicationBase: Path.GetDirectoryName(assemblyPath),
+                configurationFile: assemblyPath + ".config");
+        }
+#endif
 
         internal NavigationDataProvider(string assemblyPath, ITestLogger logger, IMetadataProvider metadataProvider)
         {

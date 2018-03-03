@@ -23,39 +23,44 @@
 
 #if !NETCOREAPP1_0
 using System;
-using System.IO;
-using System.Reflection;
 
 namespace NUnit.VisualStudio.TestAdapter.Metadata
 {
-    internal sealed partial class ReflectionAppDomainMetadataProvider : IMetadataProvider
+    internal sealed class AppDomainMetadataProvider : IMetadataProvider
     {
+        private readonly string _applicationBase;
+        private readonly string _configurationFile;
         private AppDomain _appDomain;
         private AppDomainHelper _helper;
+
+        public AppDomainMetadataProvider(string applicationBase, string configurationFile)
+        {
+            if (string.IsNullOrEmpty(applicationBase))
+                throw new ArgumentException("Application base directory must be specified.", nameof(applicationBase));
+
+            _applicationBase = applicationBase;
+            _configurationFile = configurationFile;
+        }
 
         private AppDomainHelper GetHelper()
         {
             if (_helper == null)
             {
-                var adapterAssembly = typeof(ReflectionAppDomainMetadataProvider).Assembly;
-                var adapterAssemblyPath = adapterAssembly.ManifestModule.FullyQualifiedName;
-
                 _appDomain = AppDomain.CreateDomain(
-                    friendlyName: typeof(ReflectionAppDomainMetadataProvider).FullName,
+                    friendlyName: typeof(AppDomainMetadataProvider).FullName,
                     securityInfo: null,
-                    info: new AppDomainSetup { ApplicationBase = Path.GetDirectoryName(adapterAssemblyPath) });
+                    info: new AppDomainSetup
+                    {
+                        ApplicationBase = _applicationBase,
+                        ConfigurationFile = _configurationFile
+                    });
 
-                _appDomain.ReflectionOnlyAssemblyResolve += AppDomainReflectionOnlyAssemblyResolve;
-
-                _helper = (AppDomainHelper)_appDomain.CreateInstanceAndUnwrap(adapterAssembly.FullName, typeof(AppDomainHelper).FullName);
+                _helper = (AppDomainHelper)_appDomain.CreateInstanceFromAndUnwrap(
+                    typeof(AppDomainHelper).Assembly.Location,
+                    typeof(AppDomainHelper).FullName);
             }
 
             return _helper;
-        }
-
-        private static Assembly AppDomainReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            return Assembly.ReflectionOnlyLoad(args.Name);
         }
 
         public void Dispose()

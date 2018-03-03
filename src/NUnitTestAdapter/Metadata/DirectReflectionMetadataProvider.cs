@@ -90,7 +90,7 @@ namespace NUnit.VisualStudio.TestAdapter.Metadata
 #if NETCOREAPP1_0
                 var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
 #else
-                var assembly = Assembly.ReflectionOnlyLoadFrom(assemblyPath);
+                var assembly = Assembly.LoadFrom(assemblyPath);
 #endif
 
                 var type = assembly.GetType(reflectedTypeName, throwOnError: false);
