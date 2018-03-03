@@ -114,8 +114,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
         /// <summary>
         /// Provides value of TestProperty corresponding to property name 'propertyName' as used in filter.
-        /// /// Return value should be a string for single valued property or array of strings for multi valued property (e.g. TestCategory)
-        /// /// </summary>
+        /// Return value should be a string for single valued property or array of strings for multi valued property (e.g. TestCategory)
+        /// </summary>
         public static object PropertyValueProvider(TestCase currentTest, string propertyName)
         {
 
