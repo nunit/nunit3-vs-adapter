@@ -8,10 +8,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -44,7 +44,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
     public class TfsTestFilter : ITfsTestFilter
     {
-        /// <summary>   
+        /// <summary>
         /// Supported properties for filtering
 
         ///</summary>
@@ -104,14 +104,18 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public IEnumerable<TestCase> CheckFilter(IEnumerable<TestCase> tests)
         {
-
-            return TfsTestCaseFilterExpression == null ? tests : tests.Where(underTest => !TfsTestCaseFilterExpression.MatchTestCase(underTest, p => PropertyValueProvider(underTest, p)) == false).ToList();
+            return TfsTestCaseFilterExpression == null ? tests : tests.Where(CheckFilter).ToList();
         }
 
-        /// <summary>    
-        /// Provides value of TestProperty corresponding to property name 'propertyName' as used in filter.    
-        /// /// Return value should be a string for single valued property or array of strings for multi valued property (e.g. TestCategory)   
-        /// /// </summary>     
+        private bool CheckFilter(TestCase testCase)
+        {
+            return TfsTestCaseFilterExpression.MatchTestCase(testCase, p => PropertyValueProvider(testCase, p));
+        }
+
+        /// <summary>
+        /// Provides value of TestProperty corresponding to property name 'propertyName' as used in filter.
+        /// /// Return value should be a string for single valued property or array of strings for multi valued property (e.g. TestCategory)
+        /// /// </summary>
         public static object PropertyValueProvider(TestCase currentTest, string propertyName)
         {
 
@@ -119,8 +123,8 @@ namespace NUnit.VisualStudio.TestAdapter
             if (testProperty != null)
             {
 
-                // Test case might not have defined this property. In that case GetPropertyValue()             
-                // would return default value. For filtering, if property is not defined return null.           
+                // Test case might not have defined this property. In that case GetPropertyValue()
+                // would return default value. For filtering, if property is not defined return null.
                 if (currentTest.Properties.Contains(testProperty))
                 {
                     return currentTest.GetPropertyValue(testProperty);
@@ -134,7 +138,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 if (val.Length == 0) return null;
                 if (val.Length == 1) // Contains a single string
                     return val[0];  // return that string
-                return val;  // otherwise return the whole array 
+                return val;  // otherwise return the whole array
             }
             return null;
         }
@@ -160,9 +164,9 @@ namespace NUnit.VisualStudio.TestAdapter
             };
         }
 
-        /// <summary>   
-        /// Provides TestProperty for property name 'propertyName' as used in filter.    
-        /// </summary>    
+        /// <summary>
+        /// Provides TestProperty for property name 'propertyName' as used in filter.
+        /// </summary>
         public static TestProperty LocalPropertyProvider(string propertyName)
         {
             TestProperty testProperty;
