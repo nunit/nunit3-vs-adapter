@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2017 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2018 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -22,17 +22,12 @@
 // ***********************************************************************
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using NSubstitute;
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests
+namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
 {
     [TestFixture, Category("TFS")]
     public class TestFilterTests
@@ -128,58 +123,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase("NS21", new[] { "nUnitClassLibrary.NestedClasses+NestedClass2.NC21" })]
         public static void CanFilterConvertedTestsByCategory(string category, IReadOnlyCollection<string> expectedMatchingTestNames)
         {
-            var filter = CreateFilter(TestDoubleFilterExpression.AnyIsEqualTo("TestCategory", category));
-
-            var matchingTestCases = filter.CheckFilter(GetConvertedTestCases());
-
-            Assert.That(matchingTestCases.Select(t => t.FullyQualifiedName), Is.EquivalentTo(expectedMatchingTestNames));
-        }
-
-        private static IReadOnlyCollection<TestCase> GetConvertedTestCases()
-        {
-            var testConverter = new TestConverter(
-                new TestLogger(new MessageLoggerStub()),
-                FakeTestData.AssemblyPath,
-                collectSourceInformation: true);
-
-            return FakeTestData.GetTestNodes()
-                .Cast<XmlNode>()
-                .Select(testConverter.ConvertTestCase)
-                .ToList();
-        }
-
-        private static TfsTestFilter CreateFilter(ITestCaseFilterExpression filterExpression)
-        {
-            var context = Substitute.For<IRunContext>();
-            context.GetTestCaseFilter(null, null).ReturnsForAnyArgs(filterExpression);
-            return new TfsTestFilter(context);
-        }
-
-        private sealed class TestDoubleFilterExpression : ITestCaseFilterExpression
-        {
-            private readonly Func<Func<string, object>, bool> predicate;
-
-            public TestDoubleFilterExpression(string testCaseFilterValue, Func<Func<string, object>, bool> predicate)
-            {
-                TestCaseFilterValue = testCaseFilterValue;
-                this.predicate = predicate;
-            }
-
-            public string TestCaseFilterValue { get; }
-
-            public bool MatchTestCase(TestCase testCase, Func<string, object> propertyValueProvider)
-            {
-                return predicate.Invoke(propertyValueProvider);
-            }
-
-            public static TestDoubleFilterExpression AnyIsEqualTo(string propertyName, object value)
-            {
-                return new TestDoubleFilterExpression($"{propertyName}={value}", propertyValueProvider =>
-                {
-                    var list = propertyValueProvider.Invoke(propertyName) as IEnumerable;
-                    return list == null ? false : list.Cast<object>().Contains(value);
-                });
-            }
+            FilteringTestUtils.AssertExpectedResult(
+                TestDoubleFilterExpression.AnyIsEqualTo("TestCategory", category),
+                FilteringTestUtils.ConvertTestCases(FakeTestData.HierarchyTestXml),
+                expectedMatchingTestNames);
         }
     }
 }
