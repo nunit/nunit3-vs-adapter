@@ -37,10 +37,26 @@ namespace NUnit.VisualStudio.TestAdapter
         private const string NunitTestCategoryLabel = "Category";
 
 
+        /// <summary>
+        /// Stores the information needed to initialize a <see cref="TestCase"/>
+        /// which can be inherited from an ancestor node during the conversion of test cases.
+        /// </summary>
         public sealed class CachedTestCaseInfo
         {
+            /// <summary>
+            /// Used to populate a test case’s <see cref="TestObject.Traits"/> collection.
+            /// Currently, the only effect this has is to add a Test Explorer grouping header
+            /// for each trait with the name “Name [Value]”, or for an empty value, “Name”.
+            /// </summary>
             public List<Trait> Traits { get; } = new List<Trait>();
+
+            /// <summary>
+            /// Used by <see cref="TfsTestFilter"/>; does not affect the Test Explorer UI.
+            /// </summary>
             public bool Explicit { get; set; }
+
+            // Eventually, we might split out the Categories collection and make this
+            // an immutable struct. (https://github.com/nunit/nunit3-vs-adapter/pull/457)
         }
 
         public static void AddTraitsFromTestNode(this TestCase testCase, XmlNode testNode,
