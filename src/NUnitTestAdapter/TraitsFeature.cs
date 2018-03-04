@@ -8,10 +8,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -35,10 +35,32 @@ namespace NUnit.VisualStudio.TestAdapter
             testCase?.Traits.Add(new Trait(name, value));
         }
         private const string NunitTestCategoryLabel = "Category";
-       
-       
+
+
+        /// <summary>
+        /// Stores the information needed to initialize a <see cref="TestCase"/>
+        /// which can be inherited from an ancestor node during the conversion of test cases.
+        /// </summary>
+        public sealed class CachedTestCaseInfo
+        {
+            /// <summary>
+            /// Used to populate a test case’s <see cref="TestObject.Traits"/> collection.
+            /// Currently, the only effect this has is to add a Test Explorer grouping header
+            /// for each trait with the name “Name [Value]”, or for an empty value, “Name”.
+            /// </summary>
+            public List<Trait> Traits { get; } = new List<Trait>();
+
+            /// <summary>
+            /// Used by <see cref="TfsTestFilter"/>; does not affect the Test Explorer UI.
+            /// </summary>
+            public bool Explicit { get; set; }
+
+            // Eventually, we might split out the Categories collection and make this
+            // an immutable struct. (https://github.com/nunit/nunit3-vs-adapter/pull/457)
+        }
+
         public static void AddTraitsFromTestNode(this TestCase testCase, XmlNode testNode,
-            IDictionary<string, List<Trait>> traitsCache, ITestLogger logger)
+            IDictionary<string, CachedTestCaseInfo> traitsCache, ITestLogger logger)
         {
             var ancestor = testNode.ParentNode;
             var key = ancestor.Attributes?["id"]?.Value;
@@ -48,18 +70,22 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 if (traitsCache.ContainsKey(key))
                 {
-                    categorylist.AddRange(traitsCache[key].Where(o => o.Name == NunitTestCategoryLabel).Select(prop => prop.Value).ToList());
-                    var traitslist = traitsCache[key].Where(o => o.Name != NunitTestCategoryLabel).ToList();
+                    categorylist.AddRange(traitsCache[key].Traits.Where(o => o.Name == NunitTestCategoryLabel).Select(prop => prop.Value).ToList());
+
+                    if (traitsCache[key].Explicit)
+                        testCase.SetPropertyValue(CategoryList.NUnitExplicitProperty, true);
+
+                    var traitslist = traitsCache[key].Traits.Where(o => o.Name != NunitTestCategoryLabel).ToList();
                     if (traitslist.Count > 0)
                         testCase.Traits.AddRange(traitslist);
                 }
                 else
                 {
                     categorylist.ProcessTestCaseProperties(ancestor,true,key,traitsCache);
-                    // Adding empty list to dictionary, so that we will not make SelectNodes call again.
+                    // Adding entry to dictionary, so that we will not make SelectNodes call again.
                     if (categorylist.LastNodeListCount == 0 && !traitsCache.ContainsKey(key))
                     {
-                        traitsCache[key] = new List<Trait>();
+                        traitsCache[key] = new CachedTestCaseInfo();
                     }
                 }
                 ancestor = ancestor.ParentNode;
@@ -71,7 +97,7 @@ namespace NUnit.VisualStudio.TestAdapter
             categorylist.UpdateCategoriesToVs();
         }
 
-       
+
         public static IEnumerable<NTrait> GetTraits(this TestCase testCase)
         {
             var traits = new List<NTrait>();
