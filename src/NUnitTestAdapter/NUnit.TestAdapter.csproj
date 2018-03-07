@@ -7,6 +7,8 @@
     <TargetFrameworks>net35;netcoreapp1.0</TargetFrameworks>
     <CodeAnalysisRuleSet>..\..\Osiris.Extended.ruleset</CodeAnalysisRuleSet>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <SourceLinkOriginUrl>https://github.com/nunit/nunit3-vs-adapter</SourceLinkOriginUrl>
+    <SourceLinkCreate>true</SourceLinkCreate>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -22,6 +24,10 @@
 
   <ItemGroup>
     <Content Include="..\..\LICENSE.txt" Link="LICENSE.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SourceLink.Create.CommandLine" Version="2.8.0" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net35'">

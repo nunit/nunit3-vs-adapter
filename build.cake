@@ -232,6 +232,7 @@ Task("CreateWorkingImage")
         var net35Files = new FilePath[]
         {
             ADAPTER_BIN_DIR_NET35 + "NUnit3.TestAdapter.dll",
+            ADAPTER_BIN_DIR_NET35 + "NUnit3.TestAdapter.pdb",
             ADAPTER_BIN_DIR_NET35 + "nunit.engine.dll",
             ADAPTER_BIN_DIR_NET35 + "nunit.engine.api.dll",
             ADAPTER_BIN_DIR_NET35 + "Mono.Cecil.dll"

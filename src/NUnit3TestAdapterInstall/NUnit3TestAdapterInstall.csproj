@@ -53,6 +53,7 @@
     <VsixSourceItem Include="$(VsixInputFileLocation)\nunit.engine.api.dll" />
     <VsixSourceItem Include="$(VsixInputFileLocation)\nunit.engine.dll" />
     <VsixSourceItem Include="$(VsixInputFileLocation)\NUnit3.TestAdapter.dll" />
+    <VsixSourceItem Include="$(VsixInputFileLocation)\NUnit3.TestAdapter.pdb" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="license.rtf">
