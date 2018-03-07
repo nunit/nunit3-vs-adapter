@@ -6,6 +6,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Visible>False</Visible>
     </Content>
+    <Content Include="$(MSBuildThisFileDirectory)NUnit3.TestAdapter.pdb">
+      <Link>NUnit3.TestAdapter.pdb</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>False</Visible>
+    </Content>
     <Content Include="$(MSBuildThisFileDirectory)nunit.engine.netstandard.dll">
       <Link>nunit.engine.netstandard.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
