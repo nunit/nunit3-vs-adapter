@@ -25,6 +25,11 @@ The `mock-assembly` tests are not for direct running.
 
 See https://github.com/nunit/docs/wiki/Packaging-the-V3-Adapter for more details.
 
+## Debugger source-stepping
+
+The NuGet package and the VSIX contain source-linked PDBs for the adapter.
+If you’re in the middle of a debugging session and realize you’d like to be able to step into NUnit adapter code,
+set breakpoints and watch variables, [follow these steps](https://github.com/nunit/docs/wiki/Adapter-Source-Stepping).
 
 ## Announcement
 From version 3.9 the NUnit3TestAdapter will stop supporting Visual Studio 2012 RTM (!), note only RTM, the later updates will still be supported fully. If you're using VS 2012 and want to update NUnit3TestAdapter, please update your Visual Studio RTM to any of the subsequent updates (Update 1-5)
