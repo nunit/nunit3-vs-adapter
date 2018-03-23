@@ -6,7 +6,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Visible>False</Visible>
     </Content>
-    <Content Include="$(MSBuildThisFileDirectory)NUnit3.TestAdapter.pdb">
+    <Content Include="$(MSBuildThisFileDirectory)NUnit3.TestAdapter.pdb" Condition="Exists('$(MSBuildThisFileDirectory)NUnit3.TestAdapter.pdb')">
       <Link>NUnit3.TestAdapter.pdb</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Visible>False</Visible>
