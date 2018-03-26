@@ -60,12 +60,14 @@ namespace NUnit.VisualStudio.TestAdapter
             SupportedPropertiesCache["FullyQualifiedName"] = TestCaseProperties.FullyQualifiedName;
             SupportedPropertiesCache["Name"] = TestCaseProperties.DisplayName;
             SupportedPropertiesCache["TestCategory"] = CategoryList.NUnitTestCategoryProperty;
+            SupportedPropertiesCache["Category"] = CategoryList.NUnitTestCategoryProperty;
             // Initialize the trait cache
             var priorityTrait = new NTrait("Priority", "");
             var categoryTrait = new NTrait("Category", "");
             SupportedTraitCache = new Dictionary<string, NTrait>(StringComparer.OrdinalIgnoreCase);
             SupportedTraitCache["Priority"] = priorityTrait;
             SupportedTraitCache["TestCategory"] = categoryTrait;
+            SupportedTraitCache["Category"] = categoryTrait;
             // Initialize the trait property map, since TFS doesnt know about traits
             TraitPropertyMap = new Dictionary<NTrait, TestProperty>(new NTraitNameComparer());
             var priorityProperty = TestProperty.Find("Priority") ??
