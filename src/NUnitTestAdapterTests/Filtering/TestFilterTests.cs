@@ -40,6 +40,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
             Assert.NotNull(prop);
             prop = TfsTestFilter.PropertyProvider("TestCategory");
             Assert.NotNull(prop);
+            prop = TfsTestFilter.PropertyProvider("Category");
+            Assert.NotNull(prop);
         }
 
         [Test]
@@ -47,6 +49,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
         {
             var testFilter = new TfsTestFilter(null);
             var trait = TfsTestFilter.TraitProvider("TestCategory");
+            Assert.NotNull(trait);
+            trait = TfsTestFilter.TraitProvider("Category");
             Assert.NotNull(trait);
         }
 
@@ -68,7 +72,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
         }
 
         [Test]
-        public void PropertyValueProviderCategoryWithOneCategory()
+        public void PropertyValueProviderWithOneCategoryAndTestCategoryAsFilter()
         {
             var tc = new TestCase("Test1", new Uri("executor://NUnitTestExecutor"), "NUnit.VSIX");
             tc.AddTrait("Category", "CI");
@@ -78,7 +82,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
         }
 
         [Test]
-        public void PropertyValueProviderCategoryWithNoTraits()
+        public void PropertyValueProviderWithOneCategoryAndCategoryAsFilter()
+        {
+            var tc = new TestCase("Test1", new Uri("executor://NUnitTestExecutor"), "NUnit.VSIX");
+            tc.AddTrait("Category", "CI");
+            var testFilter = new TfsTestFilter(null);
+            var obj = TfsTestFilter.PropertyValueProvider(tc, "Category");
+            Assert.AreSame("CI", obj);
+        }
+
+        [Test]
+        public void PropertyValueProviderWithNoTraitsAndTestCategoryAsFilter()
         {
             var tc = new TestCase("Test1", new Uri("executor://NUnitTestExecutor"), "NUnit.VSIX");
             var testFilter = new TfsTestFilter(null);
@@ -87,7 +101,16 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
         }
 
         [Test]
-        public void PropertyValueProviderCategoryWithMultipleCategories()
+        public void PropertyValueProviderWithNoTraitsAndCategoryAsFilter()
+        {
+            var tc = new TestCase("Test1", new Uri("executor://NUnitTestExecutor"), "NUnit.VSIX");
+            var testFilter = new TfsTestFilter(null);
+            var obj = TfsTestFilter.PropertyValueProvider(tc, "Category");
+            Assert.IsNull(obj);
+        }
+
+        [Test]
+        public void PropertyValueProviderWithMultipleCategoriesAndTestCategoryAsFilter()
         {
             var tc = new TestCase("Test1", new Uri("executor://NUnitTestExecutor"), "NUnit.VSIX");
             tc.AddTrait("Category", "CI");
@@ -98,6 +121,20 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
             Assert.AreEqual(obj.Length,2);
             Assert.AreSame("CI", obj[0]);
             Assert.AreSame("MyOwn",obj[1]);
+        }
+
+        [Test]
+        public void PropertyValueProviderWithMultipleCategoriesAndCategoryAsFilter()
+        {
+            var tc = new TestCase("Test1", new Uri("executor://NUnitTestExecutor"), "NUnit.VSIX");
+            tc.AddTrait("Category", "CI");
+            tc.AddTrait("Category", "MyOwn");
+            var testFilter = new TfsTestFilter(null);
+            var obj = TfsTestFilter.PropertyValueProvider(tc, "Category") as string[];
+            Assert.IsNotNull(obj);
+            Assert.AreEqual(obj.Length, 2);
+            Assert.AreSame("CI", obj[0]);
+            Assert.AreSame("MyOwn", obj[1]);
         }
 
         [Test]
@@ -121,10 +158,28 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
         [TestCase("NS11", new[] { "nUnitClassLibrary.NestedClasses.NC11" })]
         [TestCase("NS2", new[] { "nUnitClassLibrary.NestedClasses+NestedClass2.NC21" })]
         [TestCase("NS21", new[] { "nUnitClassLibrary.NestedClasses+NestedClass2.NC21" })]
-        public static void CanFilterConvertedTestsByCategory(string category, IReadOnlyCollection<string> expectedMatchingTestNames)
+        public void CanFilterConvertedTestsByCategoryWithTestCategoryAsFilter(string category, IReadOnlyCollection<string> expectedMatchingTestNames)
         {
             FilteringTestUtils.AssertExpectedResult(
                 TestDoubleFilterExpression.AnyIsEqualTo("TestCategory", category),
+                FilteringTestUtils.ConvertTestCases(FakeTestData.HierarchyTestXml),
+                expectedMatchingTestNames);
+        }
+
+        [TestCase("CategoryThatMatchesNothing", new string[0])]
+        [TestCase("AsmCat", new[] { "nUnitClassLibrary.Class1.nUnitTest", "nUnitClassLibrary.ClassD.dNunitTest", "nUnitClassLibrary.ClassD.nUnitTest", "nUnitClassLibrary.NestedClasses.NC11", "nUnitClassLibrary.NestedClasses+NestedClass2.NC21" })]
+        [TestCase("BaseClass", new[] { "nUnitClassLibrary.Class1.nUnitTest", "nUnitClassLibrary.ClassD.dNunitTest", "nUnitClassLibrary.ClassD.nUnitTest" })]
+        [TestCase("Base", new[] { "nUnitClassLibrary.Class1.nUnitTest", "nUnitClassLibrary.ClassD.nUnitTest" })]
+        [TestCase("DerivedClass", new[] { "nUnitClassLibrary.ClassD.dNunitTest", "nUnitClassLibrary.ClassD.nUnitTest" })]
+        [TestCase("Derived", new[] { "nUnitClassLibrary.ClassD.dNunitTest" })]
+        [TestCase("NS1", new[] { "nUnitClassLibrary.NestedClasses.NC11" })]
+        [TestCase("NS11", new[] { "nUnitClassLibrary.NestedClasses.NC11" })]
+        [TestCase("NS2", new[] { "nUnitClassLibrary.NestedClasses+NestedClass2.NC21" })]
+        [TestCase("NS21", new[] { "nUnitClassLibrary.NestedClasses+NestedClass2.NC21" })]
+        public void CanFilterConvertedTestsByCategoryWithCategoryAsFilter(string category, IReadOnlyCollection<string> expectedMatchingTestNames)
+        {
+            FilteringTestUtils.AssertExpectedResult(
+                TestDoubleFilterExpression.AnyIsEqualTo("Category", category),
                 FilteringTestUtils.ConvertTestCases(FakeTestData.HierarchyTestXml),
                 expectedMatchingTestNames);
         }
