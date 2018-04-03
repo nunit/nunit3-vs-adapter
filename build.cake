@@ -103,13 +103,12 @@ Task("NuGetRestore")
     .Does(() =>
 {
     Information("Restoring NuGet Packages for the Adapter Solution");
-    DotNetCoreRestore(ADAPTER_SOLUTION);
-
-    Information("Restoring NuGet Packages for the VSIX project");
-    NuGetRestore(PROJECT_DIR + "src/NUnit3TestAdapterInstall/NUnit3TestAdapterInstall.csproj",
-                 new NuGetRestoreSettings {
-                     PackagesDirectory = PROJECT_DIR + "packages"
-                 });
+    MSBuild(ADAPTER_SOLUTION, new MSBuildSettings
+    {
+        Configuration = configuration,
+        Verbosity = Verbosity.Minimal,
+        ToolVersion = MSBuildToolVersion.VS2017
+    }.WithTarget("Restore"));
 });
 
 //////////////////////////////////////////////////////////////////////
