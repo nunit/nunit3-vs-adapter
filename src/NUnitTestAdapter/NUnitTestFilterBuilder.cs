@@ -35,9 +35,9 @@ namespace NUnit.VisualStudio.TestAdapter
                 return NoTestsFound;
 
             ITestFilterBuilder filterBuilder = _filterService.GetTestFilterBuilder();
-
-            foreach (TestCase testCase in testCases)
-                filterBuilder.AddTest(testCase.FullyQualifiedName);
+            filterBuilder.SelectWhere("Category=Whatever");
+            //foreach (TestCase testCase in testCases)
+              //  filterBuilder.AddTest(testCase.FullyQualifiedName);
 
             return filterBuilder.GetFilter();
         }

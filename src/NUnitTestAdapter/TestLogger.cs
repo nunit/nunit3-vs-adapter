@@ -34,6 +34,7 @@ namespace NUnit.VisualStudio.TestAdapter
         void Warning(string message);
         void Warning(string message, Exception ex);
         void Info(string message);
+        void VerboseInfo(string message);
     }
 
     /// <summary>
@@ -100,6 +101,12 @@ namespace NUnit.VisualStudio.TestAdapter
         public void Info(string message)
         {
             SendMessage(TestMessageLevel.Informational, message);
+        }
+
+        public void VerboseInfo(string message)
+        {
+            if (adapterSettings?.Verbosity > 0)
+                SendMessage(TestMessageLevel.Informational, message);
         }
 
         #endregion
