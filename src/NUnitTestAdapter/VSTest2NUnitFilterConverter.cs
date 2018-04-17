@@ -1,12 +1,11 @@
 ﻿namespace NUnit.VisualStudio.TestAdapter
 {
-    public class VSTest2NUnitFilterConverter
+    public class VsTest2NUnitFilterConverter
     {
-        public bool Error { get; private set; }
-        private string NUnitFilter { get; set; }
-        public VSTest2NUnitFilterConverter(string vstestfilter)
+        private string NUnitFilter { get; }
+        public VsTest2NUnitFilterConverter(string vstestfilter)
         {
-            
+            NUnitFilter = vstestfilter.Replace("TestCategory", "Category");
         }
 
         public override string ToString()

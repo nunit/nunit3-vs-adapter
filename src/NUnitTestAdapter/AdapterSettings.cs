@@ -1,5 +1,5 @@
 // ***********************************************************************
-// Copyright (c) 2014-2017 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2014-2018 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -29,7 +29,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-    public interface IAdapterSettings
+    public interface IAdapterSettings : IFeatureFlags
     {
         int MaxCpuCount { get; }
         string ResultsDirectory { get; }
@@ -51,20 +51,32 @@ namespace NUnit.VisualStudio.TestAdapter
         bool RandomSeedSpecified { get; }
         bool InProcDataCollectorsAvailable { get; }
         bool SynchronousEvents { get; }
-        string DomainUsage { get;  }
-        bool DumpXmlTestDiscovery { get;  }
-        bool DumpXmlTestResults { get;  }
+        string DomainUsage { get; }
+        bool DumpXmlTestDiscovery { get; }
+        bool DumpXmlTestResults { get; }
 
         /// <summary>
         ///  Syntax documentation <see cref="https://github.com/nunit/docs/wiki/Template-Based-Test-Naming"/>
         /// </summary>
-        string DefaultTestNamePattern { get;  }
+        string DefaultTestNamePattern { get; }
 
         void Load(IDiscoveryContext context);
         void Load(string settingsXml);
         void SaveRandomSeed(string dirname);
         void RestoreRandomSeed(string dirname);
     }
+
+
+    public interface IFeatureFlags
+    {
+        bool UseTestCaseFilterConverter { get; }
+    }
+
+    public class FeatureFlags : IFeatureFlags
+    {
+        public bool UseTestCaseFilterConverter { get; set; }
+    }
+
 
     public class AdapterSettings : IAdapterSettings
     {
@@ -76,6 +88,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public AdapterSettings(TestLogger logger)
         {
             _logger = logger;
+            featureFlags = new FeatureFlags();
         }
 
         #endregion
@@ -159,6 +172,15 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         public string DefaultTestNamePattern { get; set; }
 
+        private readonly FeatureFlags featureFlags;
+
+        // FeatureFlags
+
+        public bool UseTestCaseFilterConverter => featureFlags.UseTestCaseFilterConverter;
+
+
+
+
         #endregion
 
         #region Public Methods
@@ -168,7 +190,7 @@ namespace NUnit.VisualStudio.TestAdapter
             if (context == null)
                 throw new ArgumentNullException(nameof(context), "Load called with null context");
 
-            Load(context?.RunSettings?.SettingsXml);
+            Load(context.RunSettings?.SettingsXml);
         }
 
         public void Load(string settingsXml)
@@ -196,6 +218,9 @@ namespace NUnit.VisualStudio.TestAdapter
             DisableParallelization = GetInnerTextAsBool(runConfiguration, nameof(DisableParallelization), false);
             DesignMode = GetInnerTextAsBool(runConfiguration, nameof(DesignMode), false);
 
+
+
+
             TestProperties = new Dictionary<string, string>();
             foreach (XmlNode node in doc.SelectNodes("RunSettings/TestRunParameters/Parameter"))
             {
@@ -205,7 +230,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     TestProperties.Add(key, value);
             }
 
-          // NUnit settings
+            // NUnit settings
             InternalTraceLevel = GetInnerTextWithLog(nunitNode, nameof(InternalTraceLevel), "Off", "Error", "Warning", "Info", "Verbose", "Debug");
             WorkDirectory = GetInnerTextWithLog(nunitNode, nameof(WorkDirectory));
             DefaultTimeout = GetInnerTextAsInt(nunitNode, nameof(DefaultTimeout), 0);
@@ -220,9 +245,14 @@ namespace NUnit.VisualStudio.TestAdapter
                 RandomSeed = new Random().Next();
             DefaultTestNamePattern = GetInnerTextWithLog(nunitNode, nameof(DefaultTestNamePattern));
 
-            DumpXmlTestDiscovery = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestDiscovery),false);
-            DumpXmlTestResults= GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestResults), false);
+            DumpXmlTestDiscovery = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestDiscovery), false);
+            DumpXmlTestResults = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestResults), false);
 
+            var ffNode = nunitNode?.SelectSingleNode("FeatureFlags");
+            if (ffNode != null)
+            {
+                featureFlags.UseTestCaseFilterConverter = GetInnerTextAsBool(ffNode, nameof(UseTestCaseFilterConverter), false);
+            }
 
 
 #if SUPPORT_REGISTRY_SETTINGS
@@ -256,7 +286,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             // If DisableAppDomain settings is passed from the testplatform, set the DomainUsage to None.
-            if(DisableAppDomain)
+            if (DisableAppDomain)
             {
                 DomainUsage = "None";
             }
@@ -301,13 +331,13 @@ namespace NUnit.VisualStudio.TestAdapter
         private void UpdateNumberOfTestWorkers()
         {
             // Overriding the NumberOfTestWorkers if DisableParallelization is true.
-            if(DisableParallelization && NumberOfTestWorkers < 0)
+            if (DisableParallelization && NumberOfTestWorkers < 0)
             {
                 NumberOfTestWorkers = 0;
             }
-           else if(DisableParallelization && NumberOfTestWorkers > 0)
+            else if (DisableParallelization && NumberOfTestWorkers > 0)
             {
-                if(_logger.Verbosity > 0)
+                if (_logger.Verbosity > 0)
                 {
                     _logger.Warning(string.Format("DisableParallelization:{0} & NumberOfTestWorkers:{1} are conflicting settings, hence not running in parallel", DisableParallelization, NumberOfTestWorkers));
                 }
@@ -339,17 +369,17 @@ namespace NUnit.VisualStudio.TestAdapter
                         "Invalid value {0} passed for element {1}.", val, xpath));
                 }
 
-                    
+
             }
             if (log)
-                Log(xpath,val);
+                Log(xpath, val);
 
             return val;
         }
 
         private int GetInnerTextAsInt(XmlNode startNode, string xpath, int defaultValue)
         {
-            var temp = GetInnerTextAsNullableInt(startNode, xpath,false);
+            var temp = GetInnerTextAsNullableInt(startNode, xpath, false);
             var res = defaultValue;
             if (temp != null)
                 res = temp.Value;
@@ -357,24 +387,24 @@ namespace NUnit.VisualStudio.TestAdapter
             return res;
         }
 
-        private int? GetInnerTextAsNullableInt(XmlNode startNode, string xpath,bool log=true)
+        private int? GetInnerTextAsNullableInt(XmlNode startNode, string xpath, bool log = true)
         {
-            string temp = GetInnerText(startNode, xpath,log);
+            string temp = GetInnerText(startNode, xpath, log);
             int? res = null;
             if (!string.IsNullOrEmpty(temp))
                 res = int.Parse(temp);
             if (log)
-                Log(xpath,res);
+                Log(xpath, res);
             return res;
         }
 
         private bool GetInnerTextAsBool(XmlNode startNode, string xpath, bool defaultValue)
         {
-            string temp = GetInnerText(startNode, xpath,false);
+            string temp = GetInnerText(startNode, xpath, false);
             bool res = defaultValue;
             if (!string.IsNullOrEmpty(temp))
                 res = bool.Parse(temp);
-            Log(xpath,res);
+            Log(xpath, res);
             return res;
         }
 

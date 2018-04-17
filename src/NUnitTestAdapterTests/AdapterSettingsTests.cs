@@ -74,6 +74,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.IsFalse(_settings.DisableAppDomain);
             Assert.IsFalse(_settings.DisableParallelization);
             Assert.IsFalse(_settings.DesignMode);
+            Assert.IsFalse(_settings.UseTestCaseFilterConverter);
         }
 
         [Test]
@@ -240,6 +241,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             _settings.Load("<RunSettings><NUnit><DefaultTestNamePattern>{m}{a:1000}</DefaultTestNamePattern></NUnit></RunSettings>");
             Assert.That(_settings.DefaultTestNamePattern,Is.EqualTo("{m}{a:1000}"));
+        }
+
+
+        [Test]
+        public void UseTestCaseFilterConverter()
+        {
+            _settings.Load("<RunSettings><NUnit><FeatureFlags><UseTestCaseFilterConverter>true</UseTestCaseFilterConverter></FeatureFlags></NUnit></RunSettings>");
+            Assert.That(_settings.UseTestCaseFilterConverter, Is.True);
         }
 
         [Test]

@@ -21,7 +21,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-// #define LAUNCHDEBUGGER
+ #define LAUNCHDEBUGGER
 
 using System;
 using System.IO;
@@ -130,7 +130,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     var assemblyPath = Path.IsPathRooted(assemblyName) ? assemblyName : Path.Combine(Directory.GetCurrentDirectory(), assemblyName);
 
                     var filterBuilder = CreateTestFilterBuilder();
-                    var filter = filterBuilder.MakeTestFilter(assemblyGroup);
+                    var filter = filterBuilder.MakeTestFilter(assemblyGroup,new TfsTestFilter(runContext));
 
                     RunAssembly(assemblyPath, filter);
                 }
@@ -335,9 +335,9 @@ namespace NUnit.VisualStudio.TestAdapter
         private NUnitTestFilterBuilder CreateTestFilterBuilder()
         {
 #if NETCOREAPP1_0
-            return new NUnitTestFilterBuilder(new TestFilterService());
+            return new NUnitTestFilterBuilder(new TestFilterService(),Settings,TestLog);
 #else
-            return new NUnitTestFilterBuilder(TestEngine.Services.GetService<ITestFilterService>());
+            return new NUnitTestFilterBuilder(TestEngine.Services.GetService<ITestFilterService>(),Settings,TestLog);
 #endif
         }
 
