@@ -144,7 +144,7 @@ namespace NUnit.VisualStudio.TestAdapter
                                      new Uri(NUnitTestAdapter.ExecutorUri),
                                      _sourceAssembly)
             {
-                DisplayName = testNode.GetAttribute("name"),
+                DisplayName = testNode.GetAttribute("fullname"),
                 CodeFilePath = null,
                 LineNumber = 0
             };
