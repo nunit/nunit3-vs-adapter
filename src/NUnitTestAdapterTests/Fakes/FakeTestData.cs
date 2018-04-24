@@ -120,7 +120,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
         public const string ResultXml =
             @"<test-suite
                 id='121'
-                name='FakeTestData'
+                name='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData.FakeTestCase'
                 fullname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData'
                 classname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData'>
                 <properties>
@@ -146,7 +146,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
                 </test-case>
             </test-suite>";
 
-        public const string DisplayName = "FakeTestCase";
+        public const string DisplayName = "NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData.FakeTestCase";
 
         public const string FullyQualifiedName = "NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData.FakeTestCase";
 

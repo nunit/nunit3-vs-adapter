@@ -21,6 +21,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -86,10 +87,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(TestCases.Count, Is.EqualTo(NUnit.Tests.Assemblies.MockAssembly.Tests));
         }
 
-        [TestCase("MockTest3", "NUnit.Tests.Assemblies.MockTestFixture.MockTest3")]
-        [TestCase("MockTest4", "NUnit.Tests.Assemblies.MockTestFixture.MockTest4")]
-        [TestCase("ExplicitlyRunTest", "NUnit.Tests.Assemblies.MockTestFixture.ExplicitlyRunTest")]
-        [TestCase("MethodWithParameters(9,11)", "NUnit.Tests.FixtureWithTestCases.MethodWithParameters(9,11)")]
+        [TestCase("NUnit.Tests.Assemblies.MockTestFixture.MockTest3", "NUnit.Tests.Assemblies.MockTestFixture.MockTest3")]
+        [TestCase("NUnit.Tests.Assemblies.MockTestFixture.MockTest4", "NUnit.Tests.Assemblies.MockTestFixture.MockTest4")]
+        [TestCase("NUnit.Tests.Assemblies.MockTestFixture.ExplicitlyRunTest", "NUnit.Tests.Assemblies.MockTestFixture.ExplicitlyRunTest")]
+        [TestCase("NUnit.Tests.FixtureWithTestCases.MethodWithParameters(9,11)", "NUnit.Tests.FixtureWithTestCases.MethodWithParameters(9,11)")]
         public void VerifyTestCaseIsFound(string name, string fullName)
         {
             var testCase = TestCases.Find(tc => tc.DisplayName == name);
@@ -97,9 +98,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Category("Navigation")]
-        [TestCase("NestedClassTest1")] // parent
-        [TestCase("NestedClassTest2")] // child
-        [TestCase("NestedClassTest3")] // grandchild
+        [TestCase("NUnit.Tests.ParentClass.NestedClassTest1")] // parent
+        [TestCase("NUnit.Tests.ParentClass+ChildClass.NestedClassTest2")] // child
+        [TestCase("NUnit.Tests.ParentClass+ChildClass+GrandChildClass.NestedClassTest3")] // grandchild
         public void VerifyNestedTestCaseSourceIsAvailable(string name)
         {
             var testCase = TestCases.Find(tc => tc.DisplayName == name);

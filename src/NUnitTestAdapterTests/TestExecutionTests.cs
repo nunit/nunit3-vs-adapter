@@ -130,15 +130,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 .Count(e => e.EventType == FakeFrameworkHandle.EventType.RecordResult && e.TestResult.Outcome == outcome);
         }
 
-        [TestCase("MockTest3", TestOutcome.Passed, "Succeeded!", false)]
-        [TestCase("FailingTest", TestOutcome.Failed, "Intentional failure", true)]
-        [TestCase("TestWithException", TestOutcome.Failed, "System.Exception : Intentional Exception", true)]
+        [TestCase("NUnit.Tests.Assemblies.MockTestFixture.MockTest3", TestOutcome.Passed, "Succeeded!", false)]
+        [TestCase("NUnit.Tests.Assemblies.MockTestFixture.FailingTest", TestOutcome.Failed, "Intentional failure", true)]
+        [TestCase("NUnit.Tests.Assemblies.MockTestFixture.TestWithException", TestOutcome.Failed, "System.Exception : Intentional Exception", true)]
         // NOTE: Should Inconclusive be reported as TestOutcome.None?
-        [TestCase("ExplicitlyRunTest", TestOutcome.None, null, false)]
-        [TestCase("InconclusiveTest", TestOutcome.None, "No valid data", false)]
-        [TestCase("MockTest4", TestOutcome.Skipped, "ignoring this test method for now", false)]
+        [TestCase("NUnit.Tests.Assemblies.MockTestFixture.ExplicitlyRunTest", TestOutcome.None, null, false)]
+        [TestCase("NUnit.Tests.Assemblies.MockTestFixture.InconclusiveTest", TestOutcome.None, "No valid data", false)]
+        [TestCase("NUnit.Tests.Assemblies.MockTestFixture.MockTest4", TestOutcome.Skipped, "ignoring this test method for now", false)]
         // NOTE: Should this be failed?
-        [TestCase("NotRunnableTest", TestOutcome.Failed, "No arguments were provided", false)]
+        [TestCase("NUnit.Tests.Assemblies.MockTestFixture.NotRunnableTest", TestOutcome.Failed, "No arguments were provided", false)]
         public void TestResultIsReportedCorrectly(string name, TestOutcome outcome, string message, bool hasStackTrace)
         {
             var testResult = GetTestResult(name);
@@ -153,7 +153,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void AttachmentsShowSupportMultipleFiles()
         {
-            var test = GetTestResult(nameof(FixtureWithAttachment.AttachmentTest));
+            var test = GetTestResult(typeof(FixtureWithAttachment).FullName + ".AttachmentTest");
             Assert.That(test, Is.Not.Null, "Could not find test result");
 
             Assert.That(test.Attachments.Count, Is.EqualTo(1));
@@ -178,12 +178,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         /// <summary>
         /// Tries to get the <see cref="TestResult"/> with the specified DisplayName
         /// </summary>
-        /// <param name="displayName">DisplayName to search for</param>
+        /// <param name="fullyQualifiedName">DisplayName to search for</param>
         /// <returns>The first testresult with the specified DisplayName, or <c>null</c> if none where found</returns>
-        private TestResult GetTestResult(string displayName)
+        private TestResult GetTestResult(string fullyQualifiedName)
         {
             return testLog.Events
-                            .Where(e => e.EventType == FakeFrameworkHandle.EventType.RecordResult && e.TestResult.TestCase.DisplayName == displayName)
+                            .Where(e => e.EventType == FakeFrameworkHandle.EventType.RecordResult && e.TestResult.TestCase.FullyQualifiedName == fullyQualifiedName)
                             .Select(e => e.TestResult)
                             .FirstOrDefault();
         }

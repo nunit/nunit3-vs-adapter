@@ -10,6 +10,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 {
     [Explicit]
     [TestFixture]
+    [Ignore("Temporary disabled...")]
     [Category("LongRunning")]
     class IssueNo24Tests
     {
