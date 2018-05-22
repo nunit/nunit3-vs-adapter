@@ -243,6 +243,27 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
+        public void CollectDataForEachTestSeparately()
+        {
+            _settings.Load(@"
+<RunSettings>
+    <RunConfiguration>
+        <CollectDataForEachTestSeparately>true</CollectDataForEachTestSeparately>
+    </RunConfiguration>
+    <InProcDataCollectionRunSettings>
+        <InProcDataCollectors>
+            <InProcDataCollector friendlyName='DummyCollectorName' uri='InProcDataCollector://NUnit/DummyCollectorName' />
+        </InProcDataCollectors>
+    </InProcDataCollectionRunSettings>
+</RunSettings>");
+
+            Assert.Null(_settings.DomainUsage);
+            Assert.True(_settings.SynchronousEvents);
+            Assert.That(_settings.NumberOfTestWorkers, Is.Zero);
+            Assert.True(_settings.InProcDataCollectorsAvailable);
+        }
+
+        [Test]
         public void InProcDataCollector()
         {
             _settings.Load(@"
@@ -254,9 +275,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     </InProcDataCollectionRunSettings>
 </RunSettings>");
 
-            Assert.That(_settings.DomainUsage, Is.EqualTo("None"));
-            Assert.True(_settings.SynchronousEvents);
-            Assert.That(_settings.NumberOfTestWorkers, Is.Zero);
+            Assert.Null(_settings.DomainUsage);
+            Assert.False(_settings.SynchronousEvents);
+            Assert.That(_settings.NumberOfTestWorkers, Is.EqualTo(-1));
             Assert.True(_settings.InProcDataCollectorsAvailable);
         }
     }
