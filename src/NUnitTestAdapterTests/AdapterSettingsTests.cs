@@ -280,5 +280,23 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(_settings.NumberOfTestWorkers, Is.EqualTo(-1));
             Assert.True(_settings.InProcDataCollectorsAvailable);
         }
+
+        [Test]
+        public void LiveUnitTestingDataCollector()
+        {
+            _settings.Load(@"
+<RunSettings>
+    <InProcDataCollectionRunSettings>
+        <InProcDataCollectors>
+            <InProcDataCollector friendlyName='DummyCollectorName' uri='InProcDataCollector://Microsoft/LiveUnitTesting/1.0' />
+        </InProcDataCollectors>
+    </InProcDataCollectionRunSettings>
+</RunSettings>");
+
+            Assert.Null(_settings.DomainUsage);
+            Assert.True(_settings.SynchronousEvents);
+            Assert.That(_settings.NumberOfTestWorkers, Is.Zero);
+            Assert.True(_settings.InProcDataCollectorsAvailable);
+        }
     }
 }

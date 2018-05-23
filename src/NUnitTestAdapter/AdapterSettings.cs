@@ -248,9 +248,14 @@ namespace NUnit.VisualStudio.TestAdapter
             var inProcDataCollectorNode = doc.SelectSingleNode("RunSettings/InProcDataCollectionRunSettings/InProcDataCollectors");
             InProcDataCollectorsAvailable = inProcDataCollectorNode != null && inProcDataCollectorNode.SelectNodes("InProcDataCollector").Count > 0;
 
+            // Older versions of VS do not pass the CollectDataForEachTestSeparately configuration together with the LiveUnitTesting collector.
+            // However, the adapter is expected to run in CollectDataForEachTestSeparately mode.
+            // As a result for backwards compatibility reasons enable CollectDataForEachTestSeparately mode whenever LiveUnitTesting collector is being used.
+            var hasLiveUnitTestingDataCollector = inProcDataCollectorNode?.SelectSingleNode("InProcDataCollector[@uri='InProcDataCollector://Microsoft/LiveUnitTesting/1.0']") != null;
+
             // TestPlatform can opt-in to run tests one at a time so that the InProcDataCollectors can collect the data for each one of them separately.
             // In that case, we need to ensure that tests do not run in parallel and the test started/test ended events are sent synchronously.
-            if (CollectDataForEachTestSeparately)
+            if (CollectDataForEachTestSeparately || hasLiveUnitTestingDataCollector)
             {
                 NumberOfTestWorkers = 0;
                 SynchronousEvents = true;
