@@ -183,18 +183,6 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
                 Settings = File("DisableAppDomain.runsettings")
             });
         });
-
-    Task($"DotnetVSTest-{framework}")
-        .IsDependentOn("Build")
-        .Does(() =>
-        {
-            DotNetCoreVSTest(GetTestAssemblyPath(framework), new DotNetCoreVSTestSettings
-            {
-                TestAdapterPath = adapterDir,
-                Framework = vstestFramework,
-                Settings = File("DisableAppDomain.runsettings")
-            });
-        });
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -301,9 +289,7 @@ Task("Test")
     .IsDependentOn("VSTest-net46")
     .IsDependentOn("VSTest-netcoreapp1.0")
     .IsDependentOn("DotnetTest-net46")
-    .IsDependentOn("DotnetTest-netcoreapp1.0")
-    .IsDependentOn("DotnetVSTest-net46")
-    .IsDependentOn("DotnetVSTest-netcoreapp1.0");
+    .IsDependentOn("DotnetTest-netcoreapp1.0");
 
 Task("Package")
     .IsDependentOn("PackageZip")
