@@ -157,24 +157,17 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
         .IsDependentOn("Build")
         .Does(() =>
         {
-            var settings = new VSTestSettings
+            VSTest(GetTestAssemblyPath(framework), new VSTestSettings
             {
                 TestAdapterPath = adapterDir,
                 // Enables the tests to run against the correct version of Microsoft.VisualStudio.TestPlatform.ObjectModel.dll.
                 // (The DLL they are compiled against depends on VS2012 at runtime.)
-                SettingsFile = File("DisableAppDomain.runsettings")
-            };
+                SettingsFile = File("DisableAppDomain.runsettings"),
 
-            // https://github.com/Microsoft/vswhere/issues/126#issuecomment-360542783
-            var vstestInstallation = VSWhereLatest(new VSWhereLatestSettings
-            {
-                Requires = "Microsoft.VisualStudio.TestTools.TestPlatform.V1.CLI"
-            }.WithRawArgument("-products *"));
-
-            if (vstestInstallation != null) settings.ToolPath = vstestInstallation
-                .CombineWithFilePath(@"Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe");
-
-            VSTest(GetTestAssemblyPath(framework), settings);
+                // https://github.com/cake-build/cake/issues/2077
+                #tool Microsoft.TestPlatform
+                ToolPath = Context.Tools.Resolve("vstest.console.exe")
+            });
         });
 
     Task($"DotnetTest-{framework}")
