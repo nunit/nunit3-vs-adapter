@@ -177,8 +177,6 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
             VSTest(GetTestAssemblyPath(framework), settings);
         });
 
-    const string NoNavigationTests = "TestCategory != Navigation";
-
     Task($"DotnetTest-{framework}")
         .IsDependentOn("Build")
         .Does(() =>
@@ -189,8 +187,7 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
                 Framework = framework,
                 NoBuild = true,
                 TestAdapterPath = adapterDir,
-                Settings = File("DisableAppDomain.runsettings"),
-                Filter = framework == "net46" ? NoNavigationTests : null
+                Settings = File("DisableAppDomain.runsettings")
             });
         });
 
@@ -202,8 +199,7 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
             {
                 TestAdapterPath = adapterDir,
                 Framework = vstestFramework,
-                Settings = File("DisableAppDomain.runsettings"),
-                TestCaseFilter = framework == "net46" ? NoNavigationTests : null
+                Settings = File("DisableAppDomain.runsettings")
             });
         });
 }
