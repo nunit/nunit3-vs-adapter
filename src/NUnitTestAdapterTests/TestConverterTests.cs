@@ -191,6 +191,42 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             }
         }
 
+        [Description("Third-party runners may opt to depend on this. https://github.com/nunit/nunit3-vs-adapter/issues/487#issuecomment-389222879")]
+        [TestCase("NonExplicitParent.ExplicitTest")]
+        [TestCase("ExplicitParent.NonExplicitTest")]
+        public static void NUnitExplicitBoolPropertyIsProvidedForThirdPartyRunnersInExplicitTestCases(string testName)
+        {
+            var testCase = GetSampleTestCase(testName);
 
+            var property = testCase.Properties.Single(p =>
+                p.Id == "NUnit.Explicit"
+                && p.GetValueType() == typeof(bool));
+
+            Assert.That(testCase.GetPropertyValue(property), Is.True);
+        }
+
+        [TestCase("NonExplicitParent.NonExplicitTestWithExplicitCategory")]
+        public static void NUnitExplicitBoolPropertyIsNotProvidedForThirdPartyRunnersInNonExplicitTestCases(string testName)
+        {
+            var testCase = GetSampleTestCase(testName);
+
+            Assert.That(testCase, Has.Property("Properties").With.None.With.Property("Id").EqualTo("NUnit.Explicit"));
+        }
+
+        private static TestCase GetSampleTestCase(string fullyQualifiedName)
+        {
+            return TestCaseUtils.ConvertTestCases(@"
+                <test-suite id='1' name='NonExplicitParent' fullname='NonExplicitParent'>
+                    <test-case id='2' name='NonExplicitTest' fullname='NonExplicitParent.NonExplicitTestWithExplicitCategory'>
+                        <properties>
+                            <property name='Category' value='Explicit' />
+                        </properties>
+                    </test-case>
+                    <test-case id='3' name='ExplicitTest' fullname='NonExplicitParent.ExplicitTest' runstate='Explicit' />
+                </test-suite>
+                <test-suite id='4' name='ExplicitParent' fullname='ExplicitParent' runstate='Explicit'>
+                    <test-case id='5' name='NonExplicitTest' fullname='ExplicitParent.NonExplicitTest' />
+                </test-suite>").Single(t => t.FullyQualifiedName == fullyQualifiedName);
+        }
     }
 }

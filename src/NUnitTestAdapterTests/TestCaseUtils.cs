@@ -25,6 +25,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using System;
 using System.Collections.Generic;
 using System.Xml;
+using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
@@ -50,6 +51,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 testCases[i] = testConverter.ConvertTestCase(testCaseNodes[i]);
 
             return testCases;
+        }
+
+        public static IReadOnlyCollection<TestCase> ConvertTestCases(string xml)
+        {
+            using (var testConverter = new TestConverter(
+                new TestLogger(new MessageLoggerStub()),
+                FakeTestData.AssemblyPath,
+                collectSourceInformation: false))
+            {
+                return testConverter.ConvertTestCases(xml);
+            }
         }
     }
 }

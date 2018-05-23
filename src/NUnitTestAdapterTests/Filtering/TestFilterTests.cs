@@ -162,7 +162,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
         {
             FilteringTestUtils.AssertExpectedResult(
                 TestDoubleFilterExpression.AnyIsEqualTo("TestCategory", category),
-                FilteringTestUtils.ConvertTestCases(FakeTestData.HierarchyTestXml),
+                TestCaseUtils.ConvertTestCases(FakeTestData.HierarchyTestXml),
                 expectedMatchingTestNames);
         }
 
@@ -180,7 +180,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
         {
             FilteringTestUtils.AssertExpectedResult(
                 TestDoubleFilterExpression.AnyIsEqualTo("Category", category),
-                FilteringTestUtils.ConvertTestCases(FakeTestData.HierarchyTestXml),
+                TestCaseUtils.ConvertTestCases(FakeTestData.HierarchyTestXml),
                 expectedMatchingTestNames);
         }
     }
