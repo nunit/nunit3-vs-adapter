@@ -157,27 +157,18 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
         .IsDependentOn("Build")
         .Does(() =>
         {
-            var settings = new VSTestSettings
+            VSTest(GetTestAssemblyPath(framework), new VSTestSettings
             {
                 TestAdapterPath = adapterDir,
                 // Enables the tests to run against the correct version of Microsoft.VisualStudio.TestPlatform.ObjectModel.dll.
                 // (The DLL they are compiled against depends on VS2012 at runtime.)
-                SettingsFile = File("DisableAppDomain.runsettings")
-            };
+                SettingsFile = File("DisableAppDomain.runsettings"),
 
-            // https://github.com/Microsoft/vswhere/issues/126#issuecomment-360542783
-            var vstestInstallation = VSWhereLatest(new VSWhereLatestSettings
-            {
-                Requires = "Microsoft.VisualStudio.TestTools.TestPlatform.V1.CLI"
-            }.WithRawArgument("-products *"));
-
-            if (vstestInstallation != null) settings.ToolPath = vstestInstallation
-                .CombineWithFilePath(@"Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe");
-
-            VSTest(GetTestAssemblyPath(framework), settings);
+                // https://github.com/cake-build/cake/issues/2077
+                #tool Microsoft.TestPlatform
+                ToolPath = Context.Tools.Resolve("vstest.console.exe")
+            });
         });
-
-    const string NoNavigationTests = "TestCategory != Navigation";
 
     Task($"DotnetTest-{framework}")
         .IsDependentOn("Build")
@@ -189,21 +180,7 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
                 Framework = framework,
                 NoBuild = true,
                 TestAdapterPath = adapterDir,
-                Settings = File("DisableAppDomain.runsettings"),
-                Filter = framework == "net46" ? NoNavigationTests : null
-            });
-        });
-
-    Task($"DotnetVSTest-{framework}")
-        .IsDependentOn("Build")
-        .Does(() =>
-        {
-            DotNetCoreVSTest(GetTestAssemblyPath(framework), new DotNetCoreVSTestSettings
-            {
-                TestAdapterPath = adapterDir,
-                Framework = vstestFramework,
-                Settings = File("DisableAppDomain.runsettings"),
-                TestCaseFilter = framework == "net46" ? NoNavigationTests : null
+                Settings = File("DisableAppDomain.runsettings")
             });
         });
 }
@@ -312,9 +289,7 @@ Task("Test")
     .IsDependentOn("VSTest-net46")
     .IsDependentOn("VSTest-netcoreapp1.0")
     .IsDependentOn("DotnetTest-net46")
-    .IsDependentOn("DotnetTest-netcoreapp1.0")
-    .IsDependentOn("DotnetVSTest-net46")
-    .IsDependentOn("DotnetVSTest-netcoreapp1.0");
+    .IsDependentOn("DotnetTest-netcoreapp1.0");
 
 Task("Package")
     .IsDependentOn("PackageZip")
