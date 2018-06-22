@@ -249,10 +249,8 @@ namespace NUnit.VisualStudio.TestAdapter
             DumpXmlTestResults = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestResults), false);
 
             var ffNode = nunitNode?.SelectSingleNode("FeatureFlags");
-            if (ffNode != null)
-            {
-                featureFlags.UseTestCaseFilterConverter = GetInnerTextAsBool(ffNode, nameof(UseTestCaseFilterConverter), false);
-            }
+            featureFlags.UseTestCaseFilterConverter =
+                ffNode == null || GetInnerTextAsBool(ffNode, nameof(UseTestCaseFilterConverter), true);
 
 
 #if SUPPORT_REGISTRY_SETTINGS
