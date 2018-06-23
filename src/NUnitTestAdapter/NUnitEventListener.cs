@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2015 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2018 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -22,7 +22,6 @@
 // ***********************************************************************
 
 using System;
-using System.Collections.Generic;
 #if !NETCOREAPP1_0
 using System.Runtime.Remoting;
 #endif
@@ -32,7 +31,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Engine;
 using NUnit.VisualStudio.TestAdapter.Dump;
-using TestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
+using NUnit.VisualStudio.TestAdapter.Internal;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -156,16 +155,15 @@ namespace NUnit.VisualStudio.TestAdapter
         public void SuiteFinished(XmlNode resultNode)
         {
             var result = resultNode.GetAttribute("result");
-            var label = resultNode.GetAttribute("label");
             var site = resultNode.GetAttribute("site");
-
+            
             if (result == "Failed")
             {
                 if (site == "SetUp" || site == "TearDown")
                 {
                     _recorder.SendMessage(
                         TestMessageLevel.Warning,
-                        string.Format("{0} failed for test fixture {1}", site, resultNode.GetAttribute("fullname")));
+                        $"{site} failed for test fixture {resultNode.GetAttribute("fullname")}");
 
                     var messageNode = resultNode.SelectSingleNode("failure/message");
                     if (messageNode != null)
@@ -180,22 +178,21 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private static readonly string NL = Environment.NewLine;
         private static readonly int NL_LENGTH = NL.Length;
-        private IDumpXml dumpXml;
+        private readonly IDumpXml dumpXml;
 
         public void TestOutput(XmlNode outputNode)
         {
-            var testName = outputNode.GetAttribute("testname");
-            var stream = outputNode.GetAttribute("stream");
             var text = outputNode.InnerText;
 
             // Remove final newline since logger will add one
             if (text.EndsWith(NL))
                 text = text.Substring(0, text.Length - NL_LENGTH);
 
-            // An empty message will cause SendMessage to throw
-            if (text.Length == 0) text = " ";
-
-            _recorder.SendMessage(TestMessageLevel.Warning, text);
+            if (text.IsNullOrWhiteSpace())
+            {
+                return;
+            }
+           _recorder.SendMessage(TestMessageLevel.Warning, text);
         }
     }
 }
