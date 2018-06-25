@@ -29,7 +29,11 @@ using System.Runtime.Remoting;
 #endif
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+using NSubstitute;
 using NUnit.Framework;
+using NUnit.VisualStudio.TestAdapter.Dump;
 using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
 using VSTestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
@@ -111,7 +115,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assume.That(
                 testLog.Events[1].EventType,
                 Is.EqualTo(FakeFrameworkHandle.EventType.RecordResult));
-            
+
             VerifyTestResult(testLog.Events[1].TestResult);
         }
 
@@ -150,11 +154,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             testLog = new FakeFrameworkHandle();
             using (var testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, collectSourceInformation: true))
             {
-                var localInstance = (MarshalByRefObject) Activator.CreateInstance(typeof(NUnitEventListener), testLog, testConverter, null);
+                var localInstance = (MarshalByRefObject)Activator.CreateInstance(typeof(NUnitEventListener), testLog, testConverter, null);
 
                 RemotingServices.Marshal(localInstance);
 
-                var lifetime = ((MarshalByRefObject) localInstance).GetLifetimeService();
+                var lifetime = ((MarshalByRefObject)localInstance).GetLifetimeService();
 
                 // A null lifetime (as opposed to an ILease) means the object has an infinite lifetime
                 Assert.IsNull(lifetime);
@@ -190,5 +194,47 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         #endregion
+    }
+
+    public class NUnitEventListenerOutputTests
+    {
+        private ITestExecutionRecorder recorder;
+        private ITestConverter converter;
+        private IDumpXml dumpxml;
+
+        private const string Testoutput =
+            @"<test-output stream='Progress' testid='0-1001' testname='Something.TestClass.Whatever'><![CDATA[Whatever
+]]></test-output>";
+
+        private const string BlankTestoutput =
+            @"<test-output stream='Progress' testid='0-1001' testname='Something.TestClass.Whatever'><![CDATA[   ]]></test-output>";
+
+        [SetUp]
+        public void Setup()
+        {
+            recorder = Substitute.For<ITestExecutionRecorder>();
+            converter = Substitute.For<ITestConverter>();
+            dumpxml = Substitute.For<IDumpXml>();
+        }
+
+        [Test]
+        public void ThatNormalTestOutputIsOutput()
+        {
+            var sut = new NUnitEventListener(recorder, converter, dumpxml);
+
+            sut.OnTestEvent(Testoutput);
+
+            recorder.Received().SendMessage(Arg.Any<TestMessageLevel>(), "Whatever");
+        }
+
+        [Test]
+        public void ThatTestOutputWithWhiteSpaceIsNotOutput()
+        {
+            var sut = new NUnitEventListener(recorder, converter, dumpxml);
+
+            sut.OnTestEvent(BlankTestoutput);
+
+            recorder.DidNotReceive().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Any<string>());
+        }
     }
 }

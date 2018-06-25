@@ -21,11 +21,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Internal;
 
@@ -38,6 +33,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase("    \t")]
         [TestCase("  ")]
         [TestCase("")]
+        [TestCase(null)]
+        [TestCase("\r\n")]
         public void ThatIsNullOrWhiteSpaceHandlesTabs(string value)
         {
             var res = StringExtensions.IsNullOrWhiteSpace(value);

@@ -46,7 +46,7 @@ namespace NUnit.VisualStudio.TestAdapter
         ITestEventListener, IDisposable // Public for testing
     {
         private readonly ITestExecutionRecorder _recorder;
-        private readonly TestConverter _testConverter;
+        private readonly ITestConverter _testConverter;
 
 #if !NETCOREAPP1_0
         public override object InitializeLifetimeService()
@@ -59,7 +59,7 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 #endif
 
-        public NUnitEventListener(ITestExecutionRecorder recorder, TestConverter testConverter, IDumpXml dumpXml)
+        public NUnitEventListener(ITestExecutionRecorder recorder, ITestConverter testConverter, IDumpXml dumpXml)
         {
             this.dumpXml = dumpXml;
             _recorder = recorder;
@@ -156,7 +156,7 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             var result = resultNode.GetAttribute("result");
             var site = resultNode.GetAttribute("site");
-            
+
             if (result == "Failed")
             {
                 if (site == "SetUp" || site == "TearDown")

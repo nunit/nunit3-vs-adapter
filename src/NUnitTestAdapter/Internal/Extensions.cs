@@ -3,7 +3,6 @@
 namespace NUnit.VisualStudio.TestAdapter.Internal
 {
 #if NET35
-
     public static class TypeExtensions
     {
         public static Type GetTypeInfo(this Type type) => type;
