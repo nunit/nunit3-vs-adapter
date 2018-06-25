@@ -26,7 +26,6 @@ using NUnit.VisualStudio.TestAdapter.Internal;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
-#if !NETCOREAPP1_0
     public class ExtensionsTests
     {
         [TestCase("\t\t\t")]
@@ -50,5 +49,4 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(res, Is.False);
         }
     }
-#endif
 }
