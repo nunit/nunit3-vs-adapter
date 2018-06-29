@@ -32,7 +32,13 @@ using VSTestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-    public sealed class TestConverter : IDisposable
+    public interface ITestConverter
+    {
+        TestCase GetCachedTestCase(string id);
+        TestConverter.TestResultSet GetVSTestResults(XmlNode resultNode);
+    }
+
+    public sealed class TestConverter : IDisposable, ITestConverter
     {
         private readonly ITestLogger _logger;
         private readonly Dictionary<string, TestCase> _vsTestCaseMap;

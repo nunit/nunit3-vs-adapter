@@ -4,6 +4,7 @@
   <PropertyGroup>
     <AssemblyName>NUnit3.TestAdapter</AssemblyName>
     <RootNamespace>NUnit.VisualStudio.TestAdapter</RootNamespace>
+    <!--<TargetFramework>net35</TargetFramework>--><!-- For testing and debugging-->
     <TargetFrameworks>net35;netcoreapp1.0</TargetFrameworks>
     <CodeAnalysisRuleSet>..\..\Osiris.Extended.ruleset</CodeAnalysisRuleSet>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
