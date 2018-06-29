@@ -224,7 +224,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             sut.OnTestEvent(Testoutput);
 
-            recorder.Received().SendMessage(Arg.Any<TestMessageLevel>(), "Whatever");
+            recorder.Received().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Is<string>(x=>x.StartsWith("Whatever")));
         }
 
         [Test]
