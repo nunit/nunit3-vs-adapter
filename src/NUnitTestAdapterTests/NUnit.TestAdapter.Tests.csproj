@@ -4,8 +4,8 @@
   <PropertyGroup>
     <RootNamespace>NUnit.VisualStudio.TestAdapter.Tests</RootNamespace>
     <AssemblyName>NUnit.VisualStudio.TestAdapter.Tests</AssemblyName>
-    <!--<TargetFrameworks>net46;netcoreapp1.0</TargetFrameworks>-->
-    <TargetFramework>net461</TargetFramework>
+    <TargetFrameworks>net46;netcoreapp1.0</TargetFrameworks>
+    <!--<TargetFrameworks>net46</TargetFrameworks>-->     <!-- For testing and debugging-->
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
   </PropertyGroup>
