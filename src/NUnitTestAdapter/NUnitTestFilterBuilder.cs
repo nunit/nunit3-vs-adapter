@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.Engine;
@@ -36,11 +37,25 @@ namespace NUnit.VisualStudio.TestAdapter
             var filterBuilder = _filterService.GetTestFilterBuilder();
             if (tfsFilter!=null && settings.UseTestCaseFilterConverter)
             {
-                var nunitfilter = new VsTest2NUnitFilterConverter(tfsFilter.TfsTestCaseFilterExpression.TestCaseFilterValue);
-                filterBuilder.SelectWhere(nunitfilter.ToString());
-                if (settings?.Verbosity>4)
-                    logger.Info("Converting filter using TestCaseFilterConverter");
-                    
+                var filtervalue = tfsFilter.TfsTestCaseFilterExpression.TestCaseFilterValue;
+                var nunitfilter = new VsTest2NUnitFilterConverter(filtervalue);
+                var nunitfilterstring = nunitfilter.ToString();
+                if (settings?.Verbosity > 4)
+                {
+                    logger.Info($"Converting filter using TestCaseFilterConverter: {filtervalue} => {nunitfilterstring}");
+                }
+
+                try
+                {
+                    filterBuilder.SelectWhere(nunitfilterstring);
+                }
+                catch (NUnit.Engine.TestSelectionParserException e)
+                {
+                    logger.Error("Invalid filter expression");
+                    throw;
+                }
+               
+                
             }
             else
             {
