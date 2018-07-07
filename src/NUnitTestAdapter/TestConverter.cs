@@ -240,12 +240,18 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <returns>attachments to be added to the test, it will be empty if no attachments are found</returns>
         private AttachmentSet ParseAttachments(XmlNode resultNode)
         {
+            const string fileUriScheme = "file://";
             var attachmentSet = new AttachmentSet(new Uri(NUnitTestAdapter.ExecutorUri), "Attachments");
 
             foreach (XmlNode attachment in resultNode.SelectNodes("attachments/attachment"))
             {
                 var path = attachment.SelectSingleNode("filePath")?.InnerText ?? string.Empty;
                 var description = attachment.SelectSingleNode("description")?.InnerText;
+
+                if ( !(string.IsNullOrEmpty(path) || path.StartsWith(fileUriScheme, StringComparison.OrdinalIgnoreCase)))
+                {
+                    path = fileUriScheme + path;
+                }
 
                 try
                 {
