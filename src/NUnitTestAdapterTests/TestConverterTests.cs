@@ -147,6 +147,56 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(testResult.Duration, Is.EqualTo(TimeSpan.FromSeconds(1.234)));
         }
 
+        #region Attachment tests
+
+        [Test]
+        public void Attachments_CorrectAmountOfConvertedAttachments()
+        {
+            var cachedTestCase = testConverter.ConvertTestCase(fakeTestNode);
+            var fakeResultNode = FakeTestData.GetResultNode();
+
+            var testResults = testConverter.GetVSTestResults(fakeResultNode);
+
+            var fakeAttachments = fakeResultNode.SelectNodes("attachments/attachment")
+                .OfType<XmlNode>()
+                .Where(n => !string.IsNullOrEmpty(n.SelectSingleNode("filePath")?.InnerText))
+                .ToArray();
+
+            var convertedAttachments = testResults.TestResults
+                .SelectMany(tr => tr.Attachments.SelectMany(ats => ats.Attachments))
+                .ToArray();
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(convertedAttachments.Length, Is.GreaterThan(0), "Some converted attachments were expected");
+                Assert.That(convertedAttachments.Length, Is.EqualTo(fakeAttachments.Length), "Attachments are not converted");
+            });
+        }
+
+        [Test]
+        public void Attachments_AllFilePathesStartWithFileScheme()
+        {
+            const string fileUriScheme = "file://";
+            const string errorMessage = "Path must start with file:// uri scheme";
+
+            var cachedTestCase = testConverter.ConvertTestCase(fakeTestNode);
+            var fakeResultNode = FakeTestData.GetResultNode();
+
+            var testResults = testConverter.GetVSTestResults(fakeResultNode);
+
+            var convertedAttachments = testResults.TestResults
+                .SelectMany(tr => tr.Attachments.SelectMany(ats => ats.Attachments))
+                .ToArray();
+
+            foreach (var attachment in convertedAttachments)
+            {
+                var originalPath = attachment.Uri.OriginalString;
+                Assert.That(originalPath.LastIndexOf(fileUriScheme), Is.EqualTo(0), errorMessage);
+            }
+        }
+
+        #endregion Attachment tests
+
         private void CheckTestCase(TestCase testCase)
         {
             Assert.That(testCase.FullyQualifiedName, Is.EqualTo(FakeTestData.FullyQualifiedName));
