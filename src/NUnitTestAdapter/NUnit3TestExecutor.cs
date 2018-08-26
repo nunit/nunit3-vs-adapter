@@ -41,6 +41,11 @@ namespace NUnit.VisualStudio.TestAdapter
     [ExtensionUri(ExecutorUri)]
     public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDisposable
     {
+        public NUnit3TestExecutor()
+        {
+            EmbeddedAssemblyResolution.EnsureInitialized();
+        }
+
         // Fields related to the currently executing assembly
         private ITestRunner _activeRunner;
 
@@ -286,7 +291,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     else
                         TestLog.Info("NUnit failed to load " + assemblyPath);
                 }
-              
+
             }
             catch (BadImageFormatException)
             {

@@ -8,10 +8,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -46,6 +46,11 @@ namespace NUnit.VisualStudio.TestAdapter
     [Category("managed")]
     public sealed class NUnit3TestDiscoverer : NUnitTestAdapter, ITestDiscoverer
     {
+        public NUnit3TestDiscoverer()
+        {
+            EmbeddedAssemblyResolution.EnsureInitialized();
+        }
+
         private Dump.DumpXml dumpXml;
 
         #region ITestDiscoverer Members
@@ -58,7 +63,7 @@ namespace NUnit.VisualStudio.TestAdapter
 #endif
             Initialize(discoveryContext, messageLogger);
 
-            
+
 
             TestLog.Info($"NUnit Adapter {AdapterVersion}: Test discovery starting");
 
@@ -81,9 +86,9 @@ namespace NUnit.VisualStudio.TestAdapter
                 if (Settings.DumpXmlTestDiscovery)
                 {
                     dumpXml = new DumpXml(sourceAssemblyPath);
-                    
+
                 }
-               
+
                 try
                 {
                     runner = GetRunnerFor(sourceAssemblyPath);
@@ -119,7 +124,7 @@ namespace NUnit.VisualStudio.TestAdapter
                         else
                             TestLog.Info("NUnit failed to load " + sourceAssembly);
                     }
-                    
+
                 }
                 catch (BadImageFormatException)
                 {
