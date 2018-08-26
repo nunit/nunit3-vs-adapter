@@ -14,10 +14,19 @@ Task("Acceptance")
 
         using (var tempDirectory = new TempDirectory())
         {
-            var simple = NewProjectFixture(@"tests\Simple", acceptanceTestConfiguration, tempDirectory);
-            simple.Build(packageVersion);
-            VerifySinglePassingTest(simple.Test("net35"));
-            VerifySinglePassingTest(simple.Test("netcoreapp1.0"));
+            BuildAndVerifySinglePassingTest("Simple", "net35", "netcoreapp1.0");
+            BuildAndVerifySinglePassingTest("Referencing Mono.Cecil", "net35", "netcoreapp1.0");
+
+            void BuildAndVerifySinglePassingTest(string projectName, params string[] targetFrameworks)
+            {
+                var project = NewProjectFixture(Directory($@"tests\{projectName}"), acceptanceTestConfiguration, tempDirectory);
+                project.Build(packageVersion);
+
+                foreach (var targetFramework in targetFrameworks)
+                {
+                    VerifySinglePassingTest(project.Test(targetFramework));
+                }
+            }
         }
     });
 
