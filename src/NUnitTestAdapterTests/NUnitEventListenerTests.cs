@@ -22,7 +22,9 @@
 // ***********************************************************************
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 #if !NETCOREAPP1_0
 using System.Runtime.Remoting;
@@ -206,8 +208,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             @"<test-output stream='Progress' testid='0-1001' testname='Something.TestClass.Whatever'><![CDATA[Whatever
 ]]></test-output>";
 
+        private const string TestoutputError =
+            @"<test-output stream='Error' testid='0-1001' testname='Something.TestClass.Whatever'><![CDATA[Whatever
+]]></test-output>";
+
         private const string BlankTestoutput =
             @"<test-output stream='Progress' testid='0-1001' testname='Something.TestClass.Whatever'><![CDATA[   ]]></test-output>";
+
+        private const string TestFinish = 
+            @"<test-case id='0-1001' name='Test1' fullname='UnitTests.Test1' methodname='Test1' classname='UnitTests' runstate='Runnable' seed='108294034' result='Passed' start-time='2018-10-15 09:41:24Z' end-time='2018-10-15 09:41:24Z' duration='0.000203' asserts='0' parentId='0-1000' />";
 
         [SetUp]
         public void Setup()
@@ -221,10 +230,22 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void ThatNormalTestOutputIsOutput()
         {
             var sut = new NUnitEventListener(recorder, converter, dumpxml);
-
             sut.OnTestEvent(Testoutput);
+            sut.OnTestEvent(TestFinish);
 
             recorder.Received().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Is<string>(x=>x.StartsWith("Whatever")));
+            converter.Received().GetVSTestResults(Arg.Any<XmlElement>(), Arg.Is<ICollection<XmlNode>>(x => x.Count == 1));
+        }
+
+        [Test]
+        public void ThatNormalTestOutputIsError()
+        {
+            var sut = new NUnitEventListener(recorder, converter, dumpxml);
+            sut.OnTestEvent(TestoutputError);
+            sut.OnTestEvent(TestFinish);
+
+            recorder.Received().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Is<string>(x=>x.StartsWith("Whatever")));
+            converter.Received().GetVSTestResults(Arg.Any<XmlElement>(), Arg.Is<ICollection<XmlNode>>(x => x.Count == 1));
         }
 
         [Test]
