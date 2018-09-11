@@ -1,3 +1,5 @@
+#load lib.cake
+#load acceptance.cake
 #tool nuget:?package=vswhere
 
 //////////////////////////////////////////////////////////////////////
@@ -210,8 +212,7 @@ Task("CreateWorkingImage")
             ADAPTER_BIN_DIR_NET35 + "NUnit3.TestAdapter.dll",
             ADAPTER_BIN_DIR_NET35 + "NUnit3.TestAdapter.pdb",
             ADAPTER_BIN_DIR_NET35 + "nunit.engine.dll",
-            ADAPTER_BIN_DIR_NET35 + "nunit.engine.api.dll",
-            ADAPTER_BIN_DIR_NET35 + "Mono.Cecil.dll"
+            ADAPTER_BIN_DIR_NET35 + "nunit.engine.api.dll"
         };
 
         var net35Dir = PACKAGE_IMAGE_DIR + "build/net35";
@@ -258,26 +259,6 @@ Task("PackageVsix")
     });
 
 //////////////////////////////////////////////////////////////////////
-// HELPER METHODS
-//////////////////////////////////////////////////////////////////////
-
-public static T WithRawArgument<T>(this T settings, string rawArgument) where T : Cake.Core.Tooling.ToolSettings
-{
-    if (settings == null) throw new ArgumentNullException(nameof(settings));
-
-    if (!string.IsNullOrEmpty(rawArgument))
-    {
-        var previousCustomizer = settings.ArgumentCustomization;
-        if (previousCustomizer != null)
-            settings.ArgumentCustomization = builder => previousCustomizer.Invoke(builder).Append(rawArgument);
-        else
-            settings.ArgumentCustomization = builder => builder.Append(rawArgument);
-    }
-
-    return settings;
-}
-
-//////////////////////////////////////////////////////////////////////
 // TASK TARGETS
 //////////////////////////////////////////////////////////////////////
 
@@ -299,7 +280,8 @@ Task("Package")
 Task("Appveyor")
     .IsDependentOn("Build")
     .IsDependentOn("Test")
-    .IsDependentOn("Package");
+    .IsDependentOn("Package")
+    .IsDependentOn("Acceptance");
 
 Task("Default")
     .IsDependentOn("Build");
