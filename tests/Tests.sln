@@ -5,7 +5,9 @@ VisualStudioVersion = 15.0.28010.2003
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Simple", "Simple\Simple.csproj", "{C5616DBC-FBD9-4E41-8BE3-9D3D4C00092C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Referencing Mono.Cecil", "Referencing Mono.Cecil\Referencing Mono.Cecil.csproj", "{156FD4D7-B142-4F42-9886-13565A590591}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Referencing Mono.Cecil", "Referencing Mono.Cecil\Referencing Mono.Cecil.csproj", "{156FD4D7-B142-4F42-9886-13565A590591}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Referencing Mono.Cecil 0.10.0", "Referencing Mono.Cecil 0.10.0\Referencing Mono.Cecil 0.10.0.csproj", "{3CB8B8C0-2188-4320-B061-E77AF66F8ACF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{156FD4D7-B142-4F42-9886-13565A590591}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{156FD4D7-B142-4F42-9886-13565A590591}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{156FD4D7-B142-4F42-9886-13565A590591}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3CB8B8C0-2188-4320-B061-E77AF66F8ACF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CB8B8C0-2188-4320-B061-E77AF66F8ACF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CB8B8C0-2188-4320-B061-E77AF66F8ACF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CB8B8C0-2188-4320-B061-E77AF66F8ACF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

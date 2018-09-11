@@ -16,6 +16,7 @@ Task("Acceptance")
         {
             BuildAndVerifySinglePassingTest("Simple", "net35", "netcoreapp1.0");
             BuildAndVerifySinglePassingTest("Referencing Mono.Cecil", "net35", "netcoreapp1.0");
+            BuildAndVerifySinglePassingTest("Referencing Mono.Cecil 0.10.0", "net35", "netcoreapp1.0");
 
             void BuildAndVerifySinglePassingTest(string projectName, params string[] targetFrameworks)
             {

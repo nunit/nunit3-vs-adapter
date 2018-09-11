@@ -125,7 +125,8 @@ private sealed class ProjectFixture
             Framework = targetFramework,
             NoBuild = true,
             Logger = "trx;LogFileName=" + resultsFile.GetFilename(),
-            ResultsDirectory = resultsFile.GetDirectory()
+            ResultsDirectory = resultsFile.GetDirectory(),
+            Settings = _context.File("DisableAppDomain.runsettings")
         });
 
         return resultsFile;

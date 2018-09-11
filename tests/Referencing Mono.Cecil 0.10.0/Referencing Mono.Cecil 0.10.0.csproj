@@ -2,18 +2,27 @@
 
   <PropertyGroup>
     <TargetFrameworks>net35;netcoreapp1.0</TargetFrameworks>
-    <RootNamespace>Referencing_Mono_Cecil</RootNamespace>
+    <RootNamespace>Referencing_Mono_Cecil_0_10_0</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="*" />
-    <PackageReference Include="Mono.Cecil" Version="0.10.0-beta5" />
+    <PackageReference Include="Mono.Cecil" Version="0.10.0" />
     <PackageReference Include="NUnit" Version="*" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.11.0" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'net35'">
+    <PackageReference Include="nunit.engine.api" Version="3.7.0" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0'">
     <PackageReference Include="System.Diagnostics.FileVersionInfo" Version="*" />
+    <PackageReference Include="nunit.engine.netstandard" Version="3.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="test.addins" CopyToOutputDirectory="Always" />
   </ItemGroup>
 
 </Project>

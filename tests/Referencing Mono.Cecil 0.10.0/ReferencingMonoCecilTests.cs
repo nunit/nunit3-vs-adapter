@@ -2,14 +2,14 @@
 using System.Reflection;
 using NUnit.Framework;
 
-namespace Referencing_Mono_Cecil
+namespace Referencing_Mono_Cecil_0_10_0
 {
     public class ReferencingMonoCecilTests
     {
         [Test]
         public void UsesCorrectVersionOfMonoCecil()
         {
-            const string versionNotUsedByNUnit = "0.10.0.0-beta5";
+            const string versionNotUsedByNUnit = "0.10.0.0";
 
             var assembly = typeof(Mono.Cecil.ReaderParameters)
 #if NETCOREAPP1_0
