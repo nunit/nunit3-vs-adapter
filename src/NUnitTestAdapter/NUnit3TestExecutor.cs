@@ -316,7 +316,7 @@ namespace NUnit.VisualStudio.TestAdapter
 #endif
                 try
                 {
-                    _activeRunner.Dispose();
+                    _activeRunner?.Dispose();
                     _activeRunner = null;
                 }
                 catch (Exception ex)
