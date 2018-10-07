@@ -12,9 +12,9 @@ var configuration = Argument("configuration", "Release");
 //////////////////////////////////////////////////////////////////////
 
 var version = "3.11.0";
-var modifier = "-d03";
+var modifier = "-d12";
 
-var dbgSuffix = configuration == "Debug" ? "-dbg" : "";
+var dbgSuffix = configuration.ToLower() == "debug" ? "-dbg" : "";
 var packageVersion = version + modifier + dbgSuffix;
 
 if (BuildSystem.IsRunningOnAppVeyor)

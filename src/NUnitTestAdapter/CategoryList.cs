@@ -78,20 +78,24 @@ namespace NUnit.VisualStudio.TestAdapter
             return categorylist;
         }
 
-        private static bool IsInternalProperty(string propertyName, string propertyValue)
+        private readonly string[] internalProperties = { "description","timeout","repeat" };
+        private bool IsInternalProperty(string propertyName, string propertyValue)
         {
+            
             if (propertyName == ExplicitTraitName)
             {
                 // Otherwise the IsNullOrEmpty check does the wrong thing,
                 // but I'm not sure of the consequences of allowing all empty strings.
                 return false;
             }
+            if ( internalProperties.Contains(propertyName.ToLower()))
+                return true;
 
             // Property names starting with '_' are for internal use only
-            return String.IsNullOrEmpty(propertyName) || propertyName[0] == '_' || String.IsNullOrEmpty(propertyValue);
+            return string.IsNullOrEmpty(propertyName) || propertyName[0] == '_' || string.IsNullOrEmpty(propertyValue);
         }
 
-        private static void AddTraitsToCache(IDictionary<string, TraitsFeature.CachedTestCaseInfo> traitsCache, string key, string propertyName, string propertyValue)
+        private void AddTraitsToCache(IDictionary<string, TraitsFeature.CachedTestCaseInfo> traitsCache, string key, string propertyName, string propertyValue)
         {
             if (IsInternalProperty(propertyName, propertyValue)) return;
 
