@@ -5,7 +5,10 @@
         private string NUnitFilter { get; }
         public VsTest2NUnitFilterConverter(string vstestfilter)
         {
-            NUnitFilter = vstestfilter.Replace("TestCategory", "Category");
+            NUnitFilter = vstestfilter
+                .Replace("TestCategory", "Category")
+                .Replace("FullyQualifiedName","test")
+                .Replace("~","=~");
         }
 
         public override string ToString()

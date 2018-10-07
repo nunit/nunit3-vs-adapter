@@ -50,6 +50,7 @@ namespace NUnit.VisualStudio.TestAdapter
         int? RandomSeed { get; }
         bool RandomSeedSpecified { get; }
         bool InProcDataCollectorsAvailable { get; }
+        bool CollectDataForEachTestSeparately { get; }
         bool SynchronousEvents { get; }
         string DomainUsage { get; }
         bool DumpXmlTestDiscovery { get; }
@@ -156,6 +157,8 @@ namespace NUnit.VisualStudio.TestAdapter
         public int? RandomSeed { get; private set; }
         public bool RandomSeedSpecified { get; private set; }
 
+        public bool CollectDataForEachTestSeparately { get; private set; }
+
         public bool InProcDataCollectorsAvailable { get; private set; }
 
         public bool SynchronousEvents { get; private set; }
@@ -217,6 +220,7 @@ namespace NUnit.VisualStudio.TestAdapter
             DisableAppDomain = GetInnerTextAsBool(runConfiguration, nameof(DisableAppDomain), false);
             DisableParallelization = GetInnerTextAsBool(runConfiguration, nameof(DisableParallelization), false);
             DesignMode = GetInnerTextAsBool(runConfiguration, nameof(DesignMode), false);
+            CollectDataForEachTestSeparately = GetInnerTextAsBool(runConfiguration, nameof(CollectDataForEachTestSeparately), false);
 
 
 
@@ -249,10 +253,8 @@ namespace NUnit.VisualStudio.TestAdapter
             DumpXmlTestResults = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestResults), false);
 
             var ffNode = nunitNode?.SelectSingleNode("FeatureFlags");
-            if (ffNode != null)
-            {
-                featureFlags.UseTestCaseFilterConverter = GetInnerTextAsBool(ffNode, nameof(UseTestCaseFilterConverter), false);
-            }
+            featureFlags.UseTestCaseFilterConverter =
+                ffNode == null || GetInnerTextAsBool(ffNode, nameof(UseTestCaseFilterConverter), true);
 
 
 #if SUPPORT_REGISTRY_SETTINGS
@@ -271,17 +273,26 @@ namespace NUnit.VisualStudio.TestAdapter
             Verbosity = 1;
 #endif
 
-            // If any in proc data collector will be instantiated by the TestPlatform run tests sequentially.
             var inProcDataCollectorNode = doc.SelectSingleNode("RunSettings/InProcDataCollectionRunSettings/InProcDataCollectors");
             InProcDataCollectorsAvailable = inProcDataCollectorNode != null && inProcDataCollectorNode.SelectNodes("InProcDataCollector").Count > 0;
-            if (InProcDataCollectorsAvailable)
+
+            // Older versions of VS do not pass the CollectDataForEachTestSeparately configuration together with the LiveUnitTesting collector.
+            // However, the adapter is expected to run in CollectDataForEachTestSeparately mode.
+            // As a result for backwards compatibility reasons enable CollectDataForEachTestSeparately mode whenever LiveUnitTesting collector is being used.
+            var hasLiveUnitTestingDataCollector = inProcDataCollectorNode?.SelectSingleNode("InProcDataCollector[@uri='InProcDataCollector://Microsoft/LiveUnitTesting/1.0']") != null;
+
+            // TestPlatform can opt-in to run tests one at a time so that the InProcDataCollectors can collect the data for each one of them separately.
+            // In that case, we need to ensure that tests do not run in parallel and the test started/test ended events are sent synchronously.
+            if (CollectDataForEachTestSeparately || hasLiveUnitTestingDataCollector)
             {
                 NumberOfTestWorkers = 0;
-                DomainUsage = "None";
                 SynchronousEvents = true;
                 if (Verbosity >= 4)
                 {
-                    _logger.Info($"InProcDataCollectors are available: turning off Parallel, DomainUsage=None, SynchronousEvents=true");
+                    if (!InProcDataCollectorsAvailable)
+                    {
+                        _logger.Info("CollectDataForEachTestSeparately is set, which is used to make InProcDataCollectors collect data for each test separately. No InProcDataCollectors can be found, thus the tests will run slower unnecessarily.");
+                    }
                 }
             }
 

@@ -68,7 +68,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
             var filter = FilteringTestUtils.CreateTestFilter(string.IsNullOrEmpty(vsTestFilterString) ? null :
                 FilteringTestUtils.CreateVSTestFilterExpression(vsTestFilterString));
 
-            return filter.CheckFilter(FilteringTestUtils.ConvertTestCases(testCasesXml));
+            return filter.CheckFilter(TestCaseUtils.ConvertTestCases(testCasesXml));
         }
     }
 }

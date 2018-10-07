@@ -32,8 +32,7 @@ Param(
 )
 
 $CakeVersion = "0.26.0"
-$DotNetChannel = "preview";
-$DotNetVersion = "1.1.4";
+$DotNetVersion = "2.1.201";
 $DotNetInstallerUri = "https://dot.net/v1/dotnet-install.ps1";
 $NugetUrl = "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe"
 
@@ -82,7 +81,7 @@ if($FoundDotNetCliVersion -ne $DotNetVersion) {
         mkdir -Force $InstallPath | Out-Null;
     }
     (New-Object System.Net.WebClient).DownloadFile($DotNetInstallerUri, "$InstallPath\dotnet-install.ps1");
-    & $InstallPath\dotnet-install.ps1 -Channel $DotNetChannel -Version $DotNetVersion -InstallDir $InstallPath;
+    & $InstallPath\dotnet-install.ps1 -Version $DotNetVersion -InstallDir $InstallPath;
 
     Remove-PathVariable "$InstallPath"
     $env:PATH = "$InstallPath;$env:PATH"

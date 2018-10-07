@@ -25,7 +25,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -43,6 +43,7 @@ namespace NUnit.VisualStudio.TestAdapter
     [FileExtension(".dll")]
     [FileExtension(".exe")]
     [DefaultExecutorUri(NUnit3TestExecutor.ExecutorUri)]
+    [Category("managed")]
     public sealed class NUnit3TestDiscoverer : NUnitTestAdapter, ITestDiscoverer
     {
         private Dump.DumpXml dumpXml;

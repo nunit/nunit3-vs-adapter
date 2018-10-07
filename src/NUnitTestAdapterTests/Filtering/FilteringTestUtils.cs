@@ -29,7 +29,6 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using NSubstitute;
 using NUnit.Framework;
-using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
 {
@@ -62,17 +61,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
             var matchingTestCases = CreateTestFilter(filterExpression).CheckFilter(testCases);
 
             Assert.That(matchingTestCases.Select(t => t.FullyQualifiedName), Is.EquivalentTo(expectedMatchingTestNames));
-        }
-
-        public static IReadOnlyCollection<TestCase> ConvertTestCases(string xml)
-        {
-            using (var testConverter = new TestConverter(
-                new TestLogger(new MessageLoggerStub()),
-                FakeTestData.AssemblyPath,
-                collectSourceInformation: false))
-            {
-                return testConverter.ConvertTestCases(xml);
-            }
         }
     }
 }

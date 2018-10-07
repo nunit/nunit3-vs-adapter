@@ -6,7 +6,7 @@
         <title>NUnit 3 Test Adapter for Visual Studio</title>
         <authors>Charlie Poole, Terje Sandstrom</authors>
         <licenseUrl>http://nunit.org/nuget/nunit3-license.txt</licenseUrl>
-        <projectUrl>https://github.com/nunit/docs/wiki/VS-Adapter</projectUrl>
+        <projectUrl>https://github.com/nunit/docs/wiki/Visual-Studio-Test-Adapter</projectUrl>
         <iconUrl>https://cdn.rawgit.com/nunit/resources/master/images/icon/nunit_256.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <summary>NUnit 3 adapter for running tests in Visual Studio. Works with NUnit 3.x, use the NUnit 2 adapter for 2.x tests.</summary>

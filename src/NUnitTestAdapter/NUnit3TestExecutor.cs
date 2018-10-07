@@ -122,6 +122,11 @@ namespace NUnit.VisualStudio.TestAdapter
             if (!CheckInProcDataCollectors(assemblyGroups))
                 return;
             TestLog.VerboseInfo($"In {nameof(RunTests)} by tests");
+            var tfsTestFilter = new TfsTestFilter(runContext);
+            if (Settings.Verbosity > 4)
+            {
+                TestLog.Info($"Test filter: {tfsTestFilter.TfsTestCaseFilterExpression.TestCaseFilterValue}");
+            }
             foreach (var assemblyGroup in assemblyGroups)
             {
                 try
@@ -130,7 +135,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     var assemblyPath = Path.IsPathRooted(assemblyName) ? assemblyName : Path.Combine(Directory.GetCurrentDirectory(), assemblyName);
 
                     var filterBuilder = CreateTestFilterBuilder();
-                    var filter = filterBuilder.MakeTestFilter(assemblyGroup,new TfsTestFilter(runContext));
+                    var filter = filterBuilder.MakeTestFilter(assemblyGroup,tfsTestFilter);
 
                     RunAssembly(assemblyPath, filter);
                 }
