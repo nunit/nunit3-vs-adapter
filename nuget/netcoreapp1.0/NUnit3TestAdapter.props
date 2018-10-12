@@ -11,10 +11,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Visible>False</Visible>
     </Content>
-    <Content Include="$(MSBuildThisFileDirectory)nunit.engine.netstandard.dll">
-      <Link>nunit.engine.netstandard.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Visible>False</Visible>
-    </Content>
+      <Content Include="$(MSBuildThisFileDirectory)nunit.engine.dll">
+          <Link>nunit.engine.dll</Link>
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          <Visible>False</Visible>
+      </Content>
+      <Content Include="$(MSBuildThisFileDirectory)nunit.engine.api.dll">
+          <Link>nunit.engine.api.dll</Link>
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+          <Visible>False</Visible>
+      </Content>
   </ItemGroup>
 </Project>
