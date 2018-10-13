@@ -91,7 +91,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
                 try
                 {
-                    runner = GetRunnerFor(sourceAssemblyPath);
+                    runner = GetRunnerFor(sourceAssemblyPath, null);
 
                     XmlNode topNode = runner.Explore(TestFilter.Empty);
 #if !NETCOREAPP1_0

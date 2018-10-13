@@ -41,6 +41,8 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Common;
 using NUnit.Engine;
+using System.Linq;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -138,13 +140,13 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
-        protected ITestRunner GetRunnerFor(string assemblyName)
+        protected ITestRunner GetRunnerFor(string assemblyName, IGrouping<string, TestCase> testCases)
         {
-            var package = CreateTestPackage(assemblyName);
+            var package = CreateTestPackage(assemblyName, testCases);
             return TestEngine.GetRunner(package);
         }
 
-        private TestPackage CreateTestPackage(string assemblyName)
+        private TestPackage CreateTestPackage(string assemblyName, IGrouping<string, TestCase> testCases)
         {
             var package = new TestPackage(assemblyName);
 
@@ -164,6 +166,21 @@ namespace NUnit.VisualStudio.TestAdapter
                 int workers = Settings.NumberOfTestWorkers;
                 if (workers >= 0)
                     package.Settings[PackageSettings.NumberOfTestWorkers] = workers;
+            }
+
+            if (testCases != null)
+            {
+                var prefilters = new List<string>();
+                
+                foreach (TestCase testCase in testCases)
+                {
+                    int end = testCase.FullyQualifiedName.IndexOfAny(new char[] { '(', '<' });
+                    if (end > 0)
+                        prefilters.Add(testCase.FullyQualifiedName.Substring(0, end));
+                    else
+                        prefilters.Add(testCase.FullyQualifiedName);
+                }
+                package.Settings[PackageSettings.LOAD] = prefilters;
             }
 
             package.Settings[PackageSettings.SynchronousEvents] = Settings.SynchronousEvents;
