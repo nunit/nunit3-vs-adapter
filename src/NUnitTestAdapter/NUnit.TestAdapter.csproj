@@ -40,7 +40,7 @@
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.1.2" />
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="15.0.0" PrivateAssets="All" />
-    <PackageReference Include="nunit.engine.netstandard" Version="3.8.0" />
+    <PackageReference Include="nunit.engine.netstandard" Version="3.7.0" />
   </ItemGroup>
 
   <Target Name="PreventTestPlatformObjectModelCopyLocal" AfterTargets="ResolveReferences">
