@@ -53,8 +53,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         List<TestCase> TestCases;
 
-        private static ITestDiscoverer nunittestDiscoverer;
-
         private IDiscoveryContext _context;
 
         public TestDiscoveryTests(IDiscoveryContext context)
