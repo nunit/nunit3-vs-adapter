@@ -36,6 +36,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NUnit3TestAdapterInstall", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NUnit3AdapterExternalTests", "src\NUnit3AdapterExternalTests\NUnit3AdapterExternalTests.csproj", "{A4EA819A-D77D-46D3-B2B7-2C754DBD2BC7}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "net35", "net35", "{EAA35582-E3FE-49A8-896A-4FF60114ECD4}"
+	ProjectSection(SolutionItems) = preProject
+		nuget\net35\NUnit3TestAdapter.props = nuget\net35\NUnit3TestAdapter.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "netcore1", "netcore1", "{60BCE6EE-FB99-47BC-AFDD-10B93C8A3AA4}"
+	ProjectSection(SolutionItems) = preProject
+		nuget\netcoreapp1.0\NUnit3TestAdapter.props = nuget\netcoreapp1.0\NUnit3TestAdapter.props
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +79,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{EAA35582-E3FE-49A8-896A-4FF60114ECD4} = {DE347D88-F6ED-4031-AFC2-318F63E39BC9}
+		{60BCE6EE-FB99-47BC-AFDD-10B93C8A3AA4} = {DE347D88-F6ED-4031-AFC2-318F63E39BC9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8EF03474-188E-44A8-8C76-9FBCF9A382EC}
