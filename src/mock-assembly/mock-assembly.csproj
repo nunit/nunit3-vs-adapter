@@ -5,6 +5,7 @@
     <AssemblyName>mock-assembly</AssemblyName>
     <RootNamespace>NUnit.Tests</RootNamespace>
     <TargetFrameworks>net35;netstandard1.6</TargetFrameworks>
+    <AddSyntheticProjectReferencesForSolutionDependencies>false</AddSyntheticProjectReferencesForSolutionDependencies>
   </PropertyGroup>
 
   <ItemGroup>

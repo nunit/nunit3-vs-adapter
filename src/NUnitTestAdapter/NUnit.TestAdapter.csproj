@@ -6,6 +6,7 @@
     <RootNamespace>NUnit.VisualStudio.TestAdapter</RootNamespace>
     <!--<TargetFramework>net35</TargetFramework>--><!-- For testing and debugging-->
     <TargetFrameworks>net35;netcoreapp1.0</TargetFrameworks>
+    <AddSyntheticProjectReferencesForSolutionDependencies>false</AddSyntheticProjectReferencesForSolutionDependencies>
     <CodeAnalysisRuleSet>..\..\Osiris.Extended.ruleset</CodeAnalysisRuleSet>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <SourceLinkOriginUrl>https://github.com/nunit/nunit3-vs-adapter</SourceLinkOriginUrl>

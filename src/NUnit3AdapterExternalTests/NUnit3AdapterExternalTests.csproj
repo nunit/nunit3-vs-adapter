@@ -5,6 +5,7 @@
     <AssemblyName>NUnit.VisualStudio.TestAdapter.ExternalTests</AssemblyName>
     <RootNamespace>NUnit.VisualStudio.TestAdapter.Tests</RootNamespace>
     <TargetFrameworks>net45;netstandard1.6</TargetFrameworks>
+    <AddSyntheticProjectReferencesForSolutionDependencies>false</AddSyntheticProjectReferencesForSolutionDependencies>
   </PropertyGroup>
 
   <ItemGroup>

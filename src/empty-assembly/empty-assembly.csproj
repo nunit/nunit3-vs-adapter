@@ -5,6 +5,7 @@
     <AssemblyName>empty-assembly</AssemblyName>
     <RootNamespace>NUnit.Tests</RootNamespace>
     <TargetFrameworks>net35;netstandard1.6</TargetFrameworks>
+    <AddSyntheticProjectReferencesForSolutionDependencies>false</AddSyntheticProjectReferencesForSolutionDependencies>
     <DebugType Condition="'$(TargetFramework)' != '' AND '$(TargetFramework)' != 'netstandard1.6'">Full</DebugType>
   </PropertyGroup>
 

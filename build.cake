@@ -110,7 +110,10 @@ Task("NuGetRestore")
         Configuration = configuration,
         Verbosity = Verbosity.Minimal,
         ToolVersion = MSBuildToolVersion.VS2017
-    }.WithTarget("Restore"));
+    }
+    .WithTarget("Restore")
+    // Workaround for https://github.com/Microsoft/msbuild/issues/3626
+    .WithProperty("AddSyntheticProjectReferencesForSolutionDependencies", "false"));
 });
 
 //////////////////////////////////////////////////////////////////////
@@ -138,7 +141,9 @@ Task("Build")
             {
                 ["PackageVersion"] = packageVersion
             }
-        });
+        }
+        // Workaround for https://github.com/Microsoft/msbuild/issues/3626
+        .WithProperty("AddSyntheticProjectReferencesForSolutionDependencies", "false"));
     });
 
 //////////////////////////////////////////////////////////////////////
