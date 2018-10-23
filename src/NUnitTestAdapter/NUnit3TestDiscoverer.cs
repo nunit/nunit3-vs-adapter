@@ -119,8 +119,13 @@ namespace NUnit.VisualStudio.TestAdapter
                     else
                     {
                         var msgNode = topNode.SelectSingleNode("properties/property[@name='_SKIPREASON']");
-                        if (msgNode != null && (new[] { "contains no tests", "Has no TestFixtures" }).Any(msgNode.GetAttribute("value").Contains))
-                            TestLog.Info("Assembly contains no NUnit 3.0 tests: " + sourceAssembly);
+                        if (msgNode != null &&
+                            (new[] {"contains no tests", "Has no TestFixtures"}).Any(msgNode.GetAttribute("value")
+                                .Contains))
+                        {
+                            if (Settings.Verbosity>0)
+                                TestLog.Info("Assembly contains no NUnit 3.0 tests: " + sourceAssembly);
+                        }
                         else
                             TestLog.Info("NUnit failed to load " + sourceAssembly);
                     }
