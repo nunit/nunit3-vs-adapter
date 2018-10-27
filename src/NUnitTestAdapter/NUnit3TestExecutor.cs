@@ -253,7 +253,7 @@ namespace NUnit.VisualStudio.TestAdapter
                             loadedTestCases.Add(testConverter.ConvertTestCase(testNode));
 
 
-                        TestLog.Info($"NUnit3TestExecutor converted {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases");
+                        TestLog.Info($"   NUnit3TestExecutor converted {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases");
 
                         // If we have a TFS Filter, convert it to an nunit filter
                         if (TfsFilter != null && !TfsFilter.IsEmpty)
@@ -265,7 +265,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
                         if (filter == NUnitTestFilterBuilder.NoTestsFound)
                         {
-                            TestLog.Info("Skipping assembly - no matching test cases found");
+                            TestLog.Info("   Skipping assembly - no matching test cases found");
                             return;
                         }
 
@@ -278,7 +278,7 @@ namespace NUnit.VisualStudio.TestAdapter
                             catch (NullReferenceException)
                             {
                                 // this happens during the run when CancelRun is called.
-                                TestLog.Debug("Nullref caught");
+                                TestLog.Debug("   Nullref caught");
                             }
                         }
                     }
@@ -287,27 +287,27 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     var msgNode = loadResult.SelectSingleNode("properties/property[@name='_SKIPREASON']");
                     if (msgNode != null && (new[] { "contains no tests", "Has no TestFixtures" }).Any(msgNode.GetAttribute("value").Contains))
-                        TestLog.Info("NUnit couldn't find any tests in " + assemblyPath);
+                        TestLog.Info("   NUnit couldn't find any tests in " + assemblyPath);
                     else
-                        TestLog.Info("NUnit failed to load " + assemblyPath);
+                        TestLog.Info("   NUnit failed to load " + assemblyPath);
                 }
 
             }
             catch (BadImageFormatException)
             {
                 // we skip the native c++ binaries that we don't support.
-                TestLog.Warning("Assembly not supported: " + assemblyPath);
+                TestLog.Warning("   Assembly not supported: " + assemblyPath);
             }
             catch (FileNotFoundException ex)
             {
                 // Probably from the GetExportedTypes in NUnit.core, attempting to find an assembly, not a problem if it is not NUnit here
-                TestLog.Warning("Dependent Assembly " + ex.FileName + " of " + assemblyPath + " not found. Can be ignored if not a NUnit project.");
+                TestLog.Warning("   Dependent Assembly " + ex.FileName + " of " + assemblyPath + " not found. Can be ignored if not a NUnit project.");
             }
             catch (Exception ex)
             {
                 if (ex is TargetInvocationException)
                     ex = ex.InnerException;
-                TestLog.Warning("Exception thrown executing tests in " + assemblyPath, ex);
+                TestLog.Warning("   Exception thrown executing tests in " + assemblyPath, ex);
             }
             finally
             {
@@ -324,7 +324,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     // can happen if CLR throws CannotUnloadAppDomainException, for example
                     // due to a long-lasting operation in a protected region (catch/finally clause).
                     if (ex is TargetInvocationException) { ex = ex.InnerException; }
-                    TestLog.Warning("Exception thrown unloading tests from " + assemblyPath, ex);
+                    TestLog.Warning("   Exception thrown unloading tests from " + assemblyPath, ex);
                 }
             }
         }
