@@ -23,6 +23,10 @@
     <Authors>Charlie Poole, Terje Sandstrom</Authors>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net35'">
+    <DisableHandlePackageFileConflicts>false</DisableHandlePackageFileConflicts>
+  </PropertyGroup>
+
   <ItemGroup>
     <Content Include="..\..\LICENSE.txt" Link="LICENSE.txt" />
   </ItemGroup>
