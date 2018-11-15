@@ -24,6 +24,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net35'">
+    <!-- Suppress errors from https://github.com/dotnet/sdk/issues/1897-->
     <DisableHandlePackageFileConflicts>false</DisableHandlePackageFileConflicts>
   </PropertyGroup>
 
