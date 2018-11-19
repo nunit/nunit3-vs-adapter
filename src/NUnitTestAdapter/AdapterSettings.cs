@@ -61,11 +61,20 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         string DefaultTestNamePattern { get; }
 
+        VsTestCategoryType VsTestCategoryType { get; }
+
         void Load(IDiscoveryContext context);
         void Load(string settingsXml);
         void SaveRandomSeed(string dirname);
         void RestoreRandomSeed(string dirname);
     }
+
+    public enum VsTestCategoryType
+    {
+        NUnit,
+        MsTest
+    }
+
 
     public class AdapterSettings : IAdapterSettings
     {
@@ -153,6 +162,8 @@ namespace NUnit.VisualStudio.TestAdapter
         public string DomainUsage { get; private set; }
 
 
+        public VsTestCategoryType VsTestCategoryType { get; private set; } = VsTestCategoryType.MsTest;
+
         public bool DumpXmlTestDiscovery { get; private set; }
 
         public bool DumpXmlTestResults { get; private set; }
@@ -226,6 +237,20 @@ namespace NUnit.VisualStudio.TestAdapter
 
             DumpXmlTestDiscovery = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestDiscovery), false);
             DumpXmlTestResults = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestResults), false);
+            var vsTestCategoryType = GetInnerText(nunitNode, nameof(VsTestCategoryType), Verbosity > 0);
+            if (vsTestCategoryType != null)
+                switch (vsTestCategoryType.ToLower())
+                {
+                    case "nunit":
+                        VsTestCategoryType = VsTestCategoryType.NUnit;
+                        break;
+                    case "mstest":
+                        VsTestCategoryType = VsTestCategoryType.MsTest;
+                        break;
+                    default:
+                        _logger.Warning($"Invalid value ({vsTestCategoryType}) for VsTestCategoryType, should be either NUnit or MsTest");
+                        break;
+                }
 
 
 
@@ -348,8 +373,7 @@ namespace NUnit.VisualStudio.TestAdapter
                         if (string.Compare(valid, val, StringComparison.OrdinalIgnoreCase) == 0)
                             return valid;
 
-                    throw new ArgumentException(string.Format(
-                        "Invalid value {0} passed for element {1}.", val, xpath));
+                    throw new ArgumentException($"Invalid value {val} passed for element {xpath}.");
                 }
 
 

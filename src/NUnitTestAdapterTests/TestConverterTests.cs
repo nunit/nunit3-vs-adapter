@@ -27,6 +27,7 @@ using System.Linq;
 using System.Xml;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using NSubstitute;
 using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
@@ -43,7 +44,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void SetUp()
         {
             fakeTestNode = FakeTestData.GetTestNode();
-            testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, collectSourceInformation: true);
+            var settings = Substitute.For<IAdapterSettings>();
+            settings.CollectSourceInformation.Returns(true);
+            testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings);
         }
 
         [TearDown]

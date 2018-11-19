@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -24,9 +23,11 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private readonly List<string> categorylist = new List<string>();
         private readonly TestCase testCase;
+        private IAdapterSettings settings;
 
-        public CategoryList(TestCase testCase)
+        public CategoryList(TestCase testCase, IAdapterSettings adapterSettings)
         {
+            settings = adapterSettings;
             this.testCase = testCase;
         }
 
@@ -60,7 +61,7 @@ namespace NUnit.VisualStudio.TestAdapter
             if (testNode.Attributes?["runstate"]?.Value == "Explicit")
             {
                 // Add UI grouping “Explicit”
-                if (!testCase.Traits.Any(trait => trait.Name == ExplicitTraitName))
+                if (testCase.Traits.All(trait => trait.Name != ExplicitTraitName))
                     testCase.Traits.Add(new Trait(ExplicitTraitName, ExplicitTraitValue));
 
                 // Track whether the test is actually explicit since multiple things result in the same UI grouping
@@ -89,7 +90,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             // Property names starting with '_' are for internal use only
-            return String.IsNullOrEmpty(propertyName) || propertyName[0] == '_' || String.IsNullOrEmpty(propertyValue);
+            return string.IsNullOrEmpty(propertyName) || propertyName[0] == '_' || string.IsNullOrEmpty(propertyValue);
         }
 
         private static void AddTraitsToCache(IDictionary<string, TraitsFeature.CachedTestCaseInfo> traitsCache, string key, string propertyName, string propertyValue)
@@ -111,8 +112,10 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             if (categorylist.Any())
             {
-                testCase.SetPropertyValue(NUnitTestCategoryProperty, categorylist.Distinct().ToArray());
-                testCase.SetPropertyValue(MsTestCategoryProperty, categorylist.Distinct().ToArray());
+                testCase.SetPropertyValue(
+                    settings.VsTestCategoryType == VsTestCategoryType.NUnit
+                        ? NUnitTestCategoryProperty
+                        : MsTestCategoryProperty, categorylist.Distinct().ToArray());
             }
         }
 
