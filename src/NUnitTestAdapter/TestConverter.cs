@@ -44,17 +44,19 @@ namespace NUnit.VisualStudio.TestAdapter
         private readonly Dictionary<string, TestCase> _vsTestCaseMap;
         private readonly string _sourceAssembly;
         private readonly NavigationDataProvider _navigationDataProvider;
-        private readonly bool _collectSourceInformation;
+        private bool CollectSourceInformation => adapterSettings.CollectSourceInformation;
+        private readonly IAdapterSettings adapterSettings;
 
-        public TestConverter(ITestLogger logger, string sourceAssembly, bool collectSourceInformation)
+
+        public TestConverter(ITestLogger logger, string sourceAssembly, IAdapterSettings settings)
         {
+            adapterSettings = settings;
             _logger = logger;
             _sourceAssembly = sourceAssembly;
             _vsTestCaseMap = new Dictionary<string, TestCase>();
-            _collectSourceInformation = collectSourceInformation;
             TraitsCache = new Dictionary<string, TraitsFeature.CachedTestCaseInfo>();
 
-            if (_collectSourceInformation)
+            if (CollectSourceInformation)
             {
                 _navigationDataProvider = new NavigationDataProvider(sourceAssembly, logger);
             }
@@ -99,7 +101,7 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         private static readonly string NL = Environment.NewLine;
-
+        
         public TestResultSet GetVSTestResults(XmlNode resultNode, ICollection<XmlNode> outputNodes)
         {
             var results = new List<VSTestResult>();
@@ -155,7 +157,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 LineNumber = 0
             };
 
-            if (_collectSourceInformation && _navigationDataProvider != null)
+            if (CollectSourceInformation && _navigationDataProvider != null)
             {
                 var className = testNode.GetAttribute("classname");
                 var methodName = testNode.GetAttribute("methodname");
@@ -167,7 +169,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
             }
 
-            testCase.AddTraitsFromTestNode(testNode, TraitsCache,_logger);
+            testCase.AddTraitsFromTestNode(testNode, TraitsCache,_logger,adapterSettings);
 
             return testCase;
         }
@@ -224,7 +226,7 @@ namespace NUnit.VisualStudio.TestAdapter
             FillResultFromOutputNodes(outputNodes, vsResult);
 
             // Add stdOut messages from TestFinished element to vstest result
-            XmlNode outputNode = resultNode.SelectSingleNode("output");
+            var outputNode = resultNode.SelectSingleNode("output");
             if (outputNode != null)
                 vsResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, outputNode.InnerText));
 

@@ -52,8 +52,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void SetUp()
         {
             testLog = new FakeFrameworkHandle();
-
-            using (var testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, collectSourceInformation: true))
+            var settings = Substitute.For<IAdapterSettings>();
+            settings.CollectSourceInformation.Returns(true);
+            using (var testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath,settings))
             {
                 fakeTestNode = FakeTestData.GetTestNode();
 
@@ -154,7 +155,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void Listener_LeaseLifetimeWillNotExpire()
         {
             testLog = new FakeFrameworkHandle();
-            using (var testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, collectSourceInformation: true))
+            var settings = Substitute.For<IAdapterSettings>();
+            settings.CollectSourceInformation.Returns(true);
+            using (var testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings))
             {
                 var localInstance = (MarshalByRefObject)Activator.CreateInstance(typeof(NUnitEventListener), testLog, testConverter, null);
 

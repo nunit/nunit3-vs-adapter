@@ -221,6 +221,22 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(_settings.BasePath, Is.EqualTo(".."));
         }
 
+
+        [Test]
+        public void VsTestCategoryTypeSetting()
+        {
+            _settings.Load("<RunSettings><NUnit><VsTestCategoryType>nunit</VsTestCategoryType></NUnit></RunSettings>");
+            Assert.That(_settings.VsTestCategoryType, Is.EqualTo(VsTestCategoryType.NUnit));
+        }
+
+        [Test]
+        public void VsTestCategoryTypeSettingWithGarbage()
+        {
+            _settings.Load("<RunSettings><NUnit><VsTestCategoryType>garbage</VsTestCategoryType></NUnit></RunSettings>");
+            Assert.That(_settings.VsTestCategoryType, Is.EqualTo(VsTestCategoryType.MsTest));
+        }
+
+
         [Test]
         public void PrivateBinPathSetting()
         {

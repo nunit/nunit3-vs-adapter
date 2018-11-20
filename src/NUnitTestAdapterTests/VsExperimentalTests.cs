@@ -27,6 +27,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using NSubstitute;
 using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
@@ -48,7 +49,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 CodeFilePath = null,
                 LineNumber = 0
             };
-            var cl = new CategoryList(testCase);
+            var settings = Substitute.For<IAdapterSettings>();
+            settings.VsTestCategoryType.Returns(VsTestCategoryType.NUnit);
+            var cl = new CategoryList(testCase,settings);
             cl.AddRange(new List<string> {"one","one","two","two"});
             cl.UpdateCategoriesToVs();
 

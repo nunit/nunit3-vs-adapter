@@ -382,8 +382,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             adaptersettings.Verbosity.Returns(5);
             var testlogger = new TestLogger(messagelogger);
             testlogger.InitSettings(adaptersettings);
-
-            testconverter = new TestConverter(testlogger, "whatever", false);
+            var settings = Substitute.For<IAdapterSettings>();
+            settings.CollectSourceInformation.Returns(false);
+            testconverter = new TestConverter(testlogger, "whatever", settings);
             testcaselist = new List<TestCase>();
         }
 
@@ -538,10 +539,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         private static IReadOnlyList<TestCase> GetTestCases(string xml)
         {
+            var settings = Substitute.For<IAdapterSettings>();
+            settings.CollectSourceInformation.Returns(false);
             using (var converter = new TestConverter(
                 new TestLogger(new MessageLoggerStub()),
                 sourceAssembly: "unused",
-                collectSourceInformation: false))
+                settings))
             {
                 return converter.ConvertTestCases(xml);
             }
