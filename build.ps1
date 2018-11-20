@@ -32,8 +32,8 @@ Param(
 )
 
 $CakeVersion = "0.30.0"
-# $DotNetVersion = "2.1.201";   # This will not work with the tests
-$DotNetVersion = "1.0.4";
+ $DotNetVersion = "2.1.201";   # This will not work with the tests
+# $DotNetVersion = "1.0.4";
 $DotNetInstallerUri = "https://dot.net/v1/dotnet-install.ps1";
 $NugetUrl = "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe"
 
