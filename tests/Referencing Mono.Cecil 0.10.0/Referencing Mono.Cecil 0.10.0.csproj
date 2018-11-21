@@ -14,12 +14,12 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net40'">
-    <PackageReference Include="nunit.engine.api" Version="3.7.0" />
+    <PackageReference Include="nunit.engine.api" Version="3.9.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0'">
     <PackageReference Include="System.Diagnostics.FileVersionInfo" Version="*" />
-    <PackageReference Include="nunit.engine.netstandard" Version="3.7.0" />
+    <PackageReference Include="nunit.engine.netstandard" Version="3.8.0" />
   </ItemGroup>
 
   <ItemGroup>
