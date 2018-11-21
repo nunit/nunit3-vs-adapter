@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net35;netcoreapp1.0</TargetFrameworks>
+    <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>

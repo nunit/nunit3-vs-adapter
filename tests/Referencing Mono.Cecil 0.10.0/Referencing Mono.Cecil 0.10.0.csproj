@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net35;netcoreapp1.0</TargetFrameworks>
     <RootNamespace>Referencing_Mono_Cecil_0_10_0</RootNamespace>
+    <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>
