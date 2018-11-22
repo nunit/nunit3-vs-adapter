@@ -162,7 +162,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public string DomainUsage { get; private set; }
 
 
-        public VsTestCategoryType VsTestCategoryType { get; private set; } = VsTestCategoryType.MsTest;
+        public VsTestCategoryType VsTestCategoryType { get; private set; } = VsTestCategoryType.NUnit;
 
         public bool DumpXmlTestDiscovery { get; private set; }
 
