@@ -225,15 +225,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void VsTestCategoryTypeSetting()
         {
-            _settings.Load("<RunSettings><NUnit><VsTestCategoryType>nunit</VsTestCategoryType></NUnit></RunSettings>");
-            Assert.That(_settings.VsTestCategoryType, Is.EqualTo(VsTestCategoryType.NUnit));
+            _settings.Load("<RunSettings><NUnit><VsTestCategoryType>mstest</VsTestCategoryType></NUnit></RunSettings>");
+            Assert.That(_settings.VsTestCategoryType, Is.EqualTo(VsTestCategoryType.MsTest));
         }
 
         [Test]
         public void VsTestCategoryTypeSettingWithGarbage()
         {
             _settings.Load("<RunSettings><NUnit><VsTestCategoryType>garbage</VsTestCategoryType></NUnit></RunSettings>");
-            Assert.That(_settings.VsTestCategoryType, Is.EqualTo(VsTestCategoryType.MsTest));
+            Assert.That(_settings.VsTestCategoryType, Is.EqualTo(VsTestCategoryType.NUnit));
         }
 
 
