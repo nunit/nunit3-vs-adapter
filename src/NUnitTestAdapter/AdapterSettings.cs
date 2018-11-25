@@ -62,6 +62,8 @@ namespace NUnit.VisualStudio.TestAdapter
         string DefaultTestNamePattern { get; }
 
         VsTestCategoryType VsTestCategoryType { get; }
+        string TestOutput { get; }
+        bool UseTestOutput { get; }
 
         void Load(IDiscoveryContext context);
         void Load(string settingsXml);
@@ -135,7 +137,8 @@ namespace NUnit.VisualStudio.TestAdapter
         public string InternalTraceLevel { get; private set; }
 
         public string WorkDirectory { get; private set; }
-
+        public string TestOutput { get; private set; }
+        public bool UseTestOutput => !string.IsNullOrEmpty(TestOutput);
         public int DefaultTimeout { get; private set; }
 
         public int NumberOfTestWorkers { get; private set; }
@@ -182,7 +185,7 @@ namespace NUnit.VisualStudio.TestAdapter
             if (context == null)
                 throw new ArgumentNullException(nameof(context), "Load called with null context");
 
-            Load(context?.RunSettings?.SettingsXml);
+            Load(context.RunSettings?.SettingsXml);
         }
 
         public void Load(string settingsXml)

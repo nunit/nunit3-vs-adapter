@@ -192,7 +192,7 @@ namespace NUnit.VisualStudio.TestAdapter
             TestLog.Debug("UseVsKeepEngineRunning: " + Settings.UseVsKeepEngineRunning);
 
             bool enableShutdown = true;
-            if (Settings.UseVsKeepEngineRunning )
+            if (Settings.UseVsKeepEngineRunning)
             {
                 enableShutdown = !runContext.KeepAlive;
             }
@@ -220,7 +220,7 @@ namespace NUnit.VisualStudio.TestAdapter
             // No need to restore if the seed was in runsettings file
             if (!Settings.RandomSeedSpecified)
                 Settings.RestoreRandomSeed(Path.GetDirectoryName(assemblyPath));
-            DumpXml dumpXml=null;
+            DumpXml dumpXml = null;
             if (Settings.DumpXmlTestResults)
             {
                 dumpXml = new Dump.DumpXml(assemblyPath);
@@ -329,6 +329,22 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
+
+        private void GenerateTestOutput(XmlNode testResults, string assemblypath)
+        {
+            if (!Settings.UseTestOutput)
+                return;
+#if NETCOREAPP1_0
+#else
+            var path = Path.Combine(Settings.TestOutput,$"{Path.GetFileNameWithoutExtension(assemblypath)}.xml");
+            var resultService = TestEngine.Services.GetService<IResultService>();
+            // Following null argument should work for nunit3 format. Empty array is OK as well.
+            // If you decide to handle other formats in the runsettings, it needs more work.
+            var resultWriter = resultService.GetResultWriter("nunit3", null);
+            resultWriter.WriteResultFile(testResults, path);
+#endif
+        }
+
         private NUnitTestFilterBuilder CreateTestFilterBuilder()
         {
 #if NETCOREAPP1_0
@@ -338,6 +354,6 @@ namespace NUnit.VisualStudio.TestAdapter
 #endif
         }
 
-        #endregion
+#endregion
     }
 }
