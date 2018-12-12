@@ -273,7 +273,8 @@ namespace NUnit.VisualStudio.TestAdapter
                         {
                             try
                             {
-                                _activeRunner.Run(listener, filter);
+                                var results = _activeRunner.Run(listener, filter);
+                                GenerateTestOutput(results, assemblyPath);
                             }
                             catch (NullReferenceException)
                             {
@@ -342,6 +343,7 @@ namespace NUnit.VisualStudio.TestAdapter
             // If you decide to handle other formats in the runsettings, it needs more work.
             var resultWriter = resultService.GetResultWriter("nunit3", null);
             resultWriter.WriteResultFile(testResults, path);
+            TestLog.Info($"   Test results written to {path}");
 #endif
         }
 
