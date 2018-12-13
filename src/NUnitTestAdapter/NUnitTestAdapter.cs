@@ -125,16 +125,26 @@ namespace NUnit.VisualStudio.TestAdapter
             TestLog = new TestLogger(messageLogger);
             Settings = new AdapterSettings(TestLog);
             TestLog.InitSettings(Settings);
-
             try
             {
                 Settings.Load(context);
                 TestLog.Verbosity = Settings.Verbosity;
+                CheckDirectories();
             }
             catch (Exception e)
             {
                 TestLog.Warning("Error initializing RunSettings. Default settings will be used");
                 TestLog.Warning(e.ToString());
+            }
+        }
+
+        private void CheckDirectories()
+        {
+            bool ok = true;
+            if (Settings.UseTestOutput)
+            {
+                Directory.CreateDirectory(Settings.TestOutput);
+                TestLog.Info($"  Test Output folder checked/created : {Settings.TestOutput} ");
             }
         }
 

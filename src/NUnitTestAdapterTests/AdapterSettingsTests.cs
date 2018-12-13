@@ -51,29 +51,33 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void DefaultSettings(string xml)
         {
             _settings.Load(xml);
-            Assert.That(_settings.MaxCpuCount, Is.EqualTo(-1));
-            Assert.Null(_settings.ResultsDirectory);
-            Assert.Null(_settings.TargetFrameworkVersion);
-            Assert.Null(_settings.TargetPlatform);
-            Assert.Null(_settings.TestAdapterPaths);
-            Assert.IsTrue(_settings.CollectSourceInformation);
-            Assert.IsEmpty(_settings.TestProperties);
-            Assert.Null(_settings.InternalTraceLevel);
-            Assert.Null(_settings.WorkDirectory);
-            Assert.That(_settings.NumberOfTestWorkers, Is.EqualTo(-1));
-            Assert.That(_settings.DefaultTimeout, Is.EqualTo(0));
-            Assert.That(_settings.Verbosity, Is.EqualTo(0));
-            Assert.False(_settings.ShadowCopyFiles);
-            Assert.False(_settings.UseVsKeepEngineRunning);
-            Assert.Null(_settings.BasePath);
-            Assert.Null(_settings.PrivateBinPath);
-            Assert.NotNull(_settings.RandomSeed);
-            Assert.False(_settings.SynchronousEvents);
-            Assert.Null(_settings.DomainUsage);
-            Assert.False(_settings.InProcDataCollectorsAvailable);
-            Assert.IsFalse(_settings.DisableAppDomain);
-            Assert.IsFalse(_settings.DisableParallelization);
-            Assert.IsFalse(_settings.DesignMode);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_settings.MaxCpuCount, Is.EqualTo(-1));
+                Assert.Null(_settings.ResultsDirectory);
+                Assert.Null(_settings.TargetFrameworkVersion);
+                Assert.Null(_settings.TargetPlatform);
+                Assert.Null(_settings.TestAdapterPaths);
+                Assert.IsTrue(_settings.CollectSourceInformation);
+                Assert.IsEmpty(_settings.TestProperties);
+                Assert.Null(_settings.InternalTraceLevel);
+                Assert.Null(_settings.WorkDirectory);
+                Assert.That(_settings.NumberOfTestWorkers, Is.EqualTo(-1));
+                Assert.That(_settings.DefaultTimeout, Is.EqualTo(0));
+                Assert.That(_settings.Verbosity, Is.EqualTo(0));
+                Assert.False(_settings.ShadowCopyFiles);
+                Assert.False(_settings.UseVsKeepEngineRunning);
+                Assert.Null(_settings.BasePath);
+                Assert.Null(_settings.PrivateBinPath);
+                Assert.NotNull(_settings.RandomSeed);
+                Assert.False(_settings.SynchronousEvents);
+                Assert.Null(_settings.DomainUsage);
+                Assert.False(_settings.InProcDataCollectorsAvailable);
+                Assert.IsFalse(_settings.DisableAppDomain);
+                Assert.IsFalse(_settings.DisableParallelization);
+                Assert.IsFalse(_settings.DesignMode);
+                Assert.False(_settings.UseTestOutput);
+            });
         }
 
         [Test]
@@ -180,6 +184,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
+        public void TestOutputSetting()
+        {
+            _settings.Load("<RunSettings><NUnit><TestOutput>/my/work/dir</TestOutput></NUnit></RunSettings>");
+            Assert.That(_settings.UseTestOutput);
+            Assert.That(_settings.TestOutput, Does.Contain(@"\my\work\dir"));
+        }
+
+
+        [Test]
         public void NumberOfTestWorkersSetting()
         {
             _settings.Load("<RunSettings><NUnit><NumberOfTestWorkers>12</NumberOfTestWorkers></NUnit></RunSettings>");
@@ -255,7 +268,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void DefaultTestNamePattern()
         {
             _settings.Load("<RunSettings><NUnit><DefaultTestNamePattern>{m}{a:1000}</DefaultTestNamePattern></NUnit></RunSettings>");
-            Assert.That(_settings.DefaultTestNamePattern,Is.EqualTo("{m}{a:1000}"));
+            Assert.That(_settings.DefaultTestNamePattern, Is.EqualTo("{m}{a:1000}"));
         }
 
         [Test]

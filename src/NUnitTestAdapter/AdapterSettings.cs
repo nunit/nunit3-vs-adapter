@@ -212,7 +212,8 @@ namespace NUnit.VisualStudio.TestAdapter
             DisableAppDomain = GetInnerTextAsBool(runConfiguration, nameof(DisableAppDomain), false);
             DisableParallelization = GetInnerTextAsBool(runConfiguration, nameof(DisableParallelization), false);
             DesignMode = GetInnerTextAsBool(runConfiguration, nameof(DesignMode), false);
-            CollectDataForEachTestSeparately = GetInnerTextAsBool(runConfiguration, nameof(CollectDataForEachTestSeparately), false);
+            CollectDataForEachTestSeparately =
+                GetInnerTextAsBool(runConfiguration, nameof(CollectDataForEachTestSeparately), false);
 
             TestProperties = new Dictionary<string, string>();
             foreach (XmlNode node in doc.SelectNodes("RunSettings/TestRunParameters/Parameter"))
@@ -224,7 +225,8 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             // NUnit settings
-            InternalTraceLevel = GetInnerTextWithLog(nunitNode, nameof(InternalTraceLevel), "Off", "Error", "Warning", "Info", "Verbose", "Debug");
+            InternalTraceLevel = GetInnerTextWithLog(nunitNode, nameof(InternalTraceLevel), "Off", "Error", "Warning",
+                "Info", "Verbose", "Debug");
             WorkDirectory = GetInnerTextWithLog(nunitNode, nameof(WorkDirectory));
             DefaultTimeout = GetInnerTextAsInt(nunitNode, nameof(DefaultTimeout), 0);
             NumberOfTestWorkers = GetInnerTextAsInt(nunitNode, nameof(NumberOfTestWorkers), -1);
@@ -232,7 +234,9 @@ namespace NUnit.VisualStudio.TestAdapter
             UseVsKeepEngineRunning = GetInnerTextAsBool(nunitNode, nameof(UseVsKeepEngineRunning), false);
             BasePath = GetInnerTextWithLog(nunitNode, nameof(BasePath));
             PrivateBinPath = GetInnerTextWithLog(nunitNode, nameof(PrivateBinPath));
-            TestOutput = GetInnerTextWithLog(nunitNode, nameof(TestOutput));
+            var testOutput = GetInnerTextWithLog(nunitNode, nameof(TestOutput));
+            if (!string.IsNullOrEmpty(testOutput))
+                TestOutput = ValidatedPath(testOutput,nameof(TestOutput));
             RandomSeed = GetInnerTextAsNullableInt(nunitNode, nameof(RandomSeed));
             RandomSeedSpecified = RandomSeed.HasValue;
             if (!RandomSeedSpecified)
@@ -252,14 +256,15 @@ namespace NUnit.VisualStudio.TestAdapter
                         VsTestCategoryType = VsTestCategoryType.MsTest;
                         break;
                     default:
-                        _logger.Warning($"Invalid value ({vsTestCategoryType}) for VsTestCategoryType, should be either NUnit or MsTest");
+                        _logger.Warning(
+                            $"Invalid value ({vsTestCategoryType}) for VsTestCategoryType, should be either NUnit or MsTest");
                         break;
                 }
 
 
 
 #if SUPPORT_REGISTRY_SETTINGS
-            // Legacy (CTP) registry settings override defaults
+// Legacy (CTP) registry settings override defaults
             var registry = RegistryCurrentUser.OpenRegistryCurrentUser(@"Software\nunit.org\VSAdapter");
             if (registry.Exist("ShadowCopy") && (registry.Read<int>("ShadowCopy") == 1))
                 ShadowCopyFiles = true;
@@ -270,17 +275,21 @@ namespace NUnit.VisualStudio.TestAdapter
 #endif
 
 #if DEBUG && VERBOSE
-            // Force Verbosity to 1 under Debug
+// Force Verbosity to 1 under Debug
             Verbosity = 1;
 #endif
 
-            var inProcDataCollectorNode = doc.SelectSingleNode("RunSettings/InProcDataCollectionRunSettings/InProcDataCollectors");
-            InProcDataCollectorsAvailable = inProcDataCollectorNode != null && inProcDataCollectorNode.SelectNodes("InProcDataCollector").Count > 0;
+            var inProcDataCollectorNode =
+                doc.SelectSingleNode("RunSettings/InProcDataCollectionRunSettings/InProcDataCollectors");
+            InProcDataCollectorsAvailable = inProcDataCollectorNode != null &&
+                                            inProcDataCollectorNode.SelectNodes("InProcDataCollector").Count > 0;
 
             // Older versions of VS do not pass the CollectDataForEachTestSeparately configuration together with the LiveUnitTesting collector.
             // However, the adapter is expected to run in CollectDataForEachTestSeparately mode.
             // As a result for backwards compatibility reasons enable CollectDataForEachTestSeparately mode whenever LiveUnitTesting collector is being used.
-            var hasLiveUnitTestingDataCollector = inProcDataCollectorNode?.SelectSingleNode("InProcDataCollector[@uri='InProcDataCollector://Microsoft/LiveUnitTesting/1.0']") != null;
+            var hasLiveUnitTestingDataCollector =
+                inProcDataCollectorNode?.SelectSingleNode(
+                    "InProcDataCollector[@uri='InProcDataCollector://Microsoft/LiveUnitTesting/1.0']") != null;
 
             // TestPlatform can opt-in to run tests one at a time so that the InProcDataCollectors can collect the data for each one of them separately.
             // In that case, we need to ensure that tests do not run in parallel and the test started/test ended events are sent synchronously.
@@ -292,7 +301,8 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     if (!InProcDataCollectorsAvailable)
                     {
-                        _logger.Info("CollectDataForEachTestSeparately is set, which is used to make InProcDataCollectors collect data for each test separately. No InProcDataCollectors can be found, thus the tests will run slower unnecessarily.");
+                        _logger.Info(
+                            "CollectDataForEachTestSeparately is set, which is used to make InProcDataCollectors collect data for each test separately. No InProcDataCollectors can be found, thus the tests will run slower unnecessarily.");
                     }
                 }
             }
@@ -305,6 +315,20 @@ namespace NUnit.VisualStudio.TestAdapter
 
             // Update NumberOfTestWorkers based on the DisableParallelization and NumberOfTestWorkers from runsettings.
             UpdateNumberOfTestWorkers();
+
+
+            string ValidatedPath(string path, string what)
+            {
+                try
+                {
+                    return Path.GetFullPath(path);
+                }
+                catch (Exception)
+                {
+                    _logger.Error($"   Invalid path for {what}: {path}");
+                    throw;
+                }
+            }
         }
 
         public void SaveRandomSeed(string dirname)
