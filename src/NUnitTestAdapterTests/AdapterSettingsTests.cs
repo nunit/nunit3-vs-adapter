@@ -76,7 +76,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 Assert.IsFalse(_settings.DisableAppDomain);
                 Assert.IsFalse(_settings.DisableParallelization);
                 Assert.IsFalse(_settings.DesignMode);
-                Assert.False(_settings.UseTestOutput);
+                Assert.False(_settings.UseTestOutputXml);
             });
         }
 
@@ -186,9 +186,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void TestOutputSetting()
         {
-            _settings.Load("<RunSettings><NUnit><TestOutput>/my/work/dir</TestOutput></NUnit></RunSettings>");
-            Assert.That(_settings.UseTestOutput);
-            Assert.That(_settings.TestOutput, Does.Contain(@"\my\work\dir"));
+            _settings.Load("<RunSettings><NUnit><TestOutputXml>/my/work/dir</TestOutputXml></NUnit></RunSettings>");
+            Assert.That(_settings.UseTestOutputXml);
+            Assert.That(_settings.TestOutputXml, Does.Contain(@"\my\work\dir"));
         }
 
 

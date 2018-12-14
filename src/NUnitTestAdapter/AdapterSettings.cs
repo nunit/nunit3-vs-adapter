@@ -62,8 +62,8 @@ namespace NUnit.VisualStudio.TestAdapter
         string DefaultTestNamePattern { get; }
 
         VsTestCategoryType VsTestCategoryType { get; }
-        string TestOutput { get; }
-        bool UseTestOutput { get; }
+        string TestOutputXml { get; }
+        bool UseTestOutputXml { get; }
 
         void Load(IDiscoveryContext context);
         void Load(string settingsXml);
@@ -137,8 +137,8 @@ namespace NUnit.VisualStudio.TestAdapter
         public string InternalTraceLevel { get; private set; }
 
         public string WorkDirectory { get; private set; }
-        public string TestOutput { get; private set; }
-        public bool UseTestOutput => !string.IsNullOrEmpty(TestOutput);
+        public string TestOutputXml { get; private set; }
+        public bool UseTestOutputXml => !string.IsNullOrEmpty(TestOutputXml);
         public int DefaultTimeout { get; private set; }
 
         public int NumberOfTestWorkers { get; private set; }
@@ -234,9 +234,9 @@ namespace NUnit.VisualStudio.TestAdapter
             UseVsKeepEngineRunning = GetInnerTextAsBool(nunitNode, nameof(UseVsKeepEngineRunning), false);
             BasePath = GetInnerTextWithLog(nunitNode, nameof(BasePath));
             PrivateBinPath = GetInnerTextWithLog(nunitNode, nameof(PrivateBinPath));
-            var testOutput = GetInnerTextWithLog(nunitNode, nameof(TestOutput));
+            var testOutput = GetInnerTextWithLog(nunitNode, nameof(TestOutputXml));
             if (!string.IsNullOrEmpty(testOutput))
-                TestOutput = ValidatedPath(testOutput,nameof(TestOutput));
+                TestOutputXml = ValidatedPath(testOutput,nameof(TestOutputXml));
             RandomSeed = GetInnerTextAsNullableInt(nunitNode, nameof(RandomSeed));
             RandomSeedSpecified = RandomSeed.HasValue;
             if (!RandomSeedSpecified)

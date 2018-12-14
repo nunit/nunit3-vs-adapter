@@ -333,11 +333,11 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private void GenerateTestOutput(XmlNode testResults, string assemblypath)
         {
-            if (!Settings.UseTestOutput)
+            if (!Settings.UseTestOutputXml)
                 return;
 #if NETCOREAPP1_0
 #else
-            var path = Path.Combine(Settings.TestOutput,$"{Path.GetFileNameWithoutExtension(assemblypath)}.xml");
+            var path = Path.Combine(Settings.TestOutputXml,$"{Path.GetFileNameWithoutExtension(assemblypath)}.xml");
             var resultService = TestEngine.Services.GetService<IResultService>();
             // Following null argument should work for nunit3 format. Empty array is OK as well.
             // If you decide to handle other formats in the runsettings, it needs more work.

@@ -141,10 +141,10 @@ namespace NUnit.VisualStudio.TestAdapter
         private void CheckDirectories()
         {
             bool ok = true;
-            if (Settings.UseTestOutput)
+            if (Settings.UseTestOutputXml)
             {
-                Directory.CreateDirectory(Settings.TestOutput);
-                TestLog.Info($"  Test Output folder checked/created : {Settings.TestOutput} ");
+                Directory.CreateDirectory(Settings.TestOutputXml);
+                TestLog.Info($"  Test Output folder checked/created : {Settings.TestOutputXml} ");
             }
         }
 

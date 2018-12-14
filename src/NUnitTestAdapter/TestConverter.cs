@@ -247,7 +247,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     continue;
                 }
 
-                // Add stdErr/Progress messages from TestOutput element to vstest result
+                // Add stdErr/Progress messages from TestOutputXml element to vstest result
                 vsResult.Messages.Add(new TestResultMessage(
                     "error".Equals(stream, StringComparison.OrdinalIgnoreCase)
                         ? TestResultMessage.StandardErrorCategory
