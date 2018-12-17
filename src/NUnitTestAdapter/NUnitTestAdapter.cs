@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2015 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2019 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -125,16 +125,25 @@ namespace NUnit.VisualStudio.TestAdapter
             TestLog = new TestLogger(messageLogger);
             Settings = new AdapterSettings(TestLog);
             TestLog.InitSettings(Settings);
-
             try
             {
                 Settings.Load(context);
                 TestLog.Verbosity = Settings.Verbosity;
+                CheckDirectories();
             }
             catch (Exception e)
             {
                 TestLog.Warning("Error initializing RunSettings. Default settings will be used");
                 TestLog.Warning(e.ToString());
+            }
+        }
+
+        private void CheckDirectories()
+        {
+            if (Settings.UseTestOutputXml)
+            {
+                Directory.CreateDirectory(Settings.TestOutputXml);
+                TestLog.Info($"  Test Output folder checked/created : {Settings.TestOutputXml} ");
             }
         }
 
