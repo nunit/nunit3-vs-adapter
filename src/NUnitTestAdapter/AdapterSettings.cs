@@ -1,5 +1,5 @@
 // ***********************************************************************
-// Copyright (c) 2014-2017 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2014-2019 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -64,6 +64,21 @@ namespace NUnit.VisualStudio.TestAdapter
         VsTestCategoryType VsTestCategoryType { get; }
         string TestOutputXml { get; }
         bool UseTestOutputXml { get; }
+
+        /// <summary>
+        /// True if test run is triggered in an IDE/Editor context.
+        /// </summary>
+        bool DesignMode { get; }
+
+        /// <summary>
+        /// If true, an adapter shouldn't create appdomains to run tests
+        /// </summary>
+        bool DisableAppDomain { get; }
+
+        /// <summary>
+        /// If true, an adapter should disable any test case parallelization
+        /// </summary>
+        bool DisableParallelization { get; }
 
         void Load(IDiscoveryContext context);
         void Load(string settingsXml);
@@ -236,7 +251,7 @@ namespace NUnit.VisualStudio.TestAdapter
             PrivateBinPath = GetInnerTextWithLog(nunitNode, nameof(PrivateBinPath));
             var testOutput = GetInnerTextWithLog(nunitNode, nameof(TestOutputXml));
             if (!string.IsNullOrEmpty(testOutput))
-                TestOutputXml = ValidatedPath(testOutput,nameof(TestOutputXml));
+                TestOutputXml = ValidatedPath(testOutput, nameof(TestOutputXml));
             RandomSeed = GetInnerTextAsNullableInt(nunitNode, nameof(RandomSeed));
             RandomSeedSpecified = RandomSeed.HasValue;
             if (!RandomSeedSpecified)
@@ -264,7 +279,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
 
 #if SUPPORT_REGISTRY_SETTINGS
-// Legacy (CTP) registry settings override defaults
+            // Legacy (CTP) registry settings override defaults
             var registry = RegistryCurrentUser.OpenRegistryCurrentUser(@"Software\nunit.org\VSAdapter");
             if (registry.Exist("ShadowCopy") && (registry.Read<int>("ShadowCopy") == 1))
                 ShadowCopyFiles = true;
@@ -275,7 +290,7 @@ namespace NUnit.VisualStudio.TestAdapter
 #endif
 
 #if DEBUG && VERBOSE
-// Force Verbosity to 1 under Debug
+            // Force Verbosity to 1 under Debug
             Verbosity = 1;
 #endif
 
@@ -317,15 +332,19 @@ namespace NUnit.VisualStudio.TestAdapter
             UpdateNumberOfTestWorkers();
 
 
-            string ValidatedPath(string path, string what)
+            string ValidatedPath(string path, string purpose)
             {
                 try
                 {
-                    return Path.GetFullPath(path);
+                    if (string.IsNullOrEmpty(WorkDirectory))
+                        return Path.GetFullPath(path);
+                    if (Path.IsPathRooted(path))
+                        return Path.GetFullPath(path);
+                    return Path.GetFullPath(Path.Combine(WorkDirectory, path));
                 }
                 catch (Exception)
                 {
-                    _logger.Error($"   Invalid path for {what}: {path}");
+                    _logger.Error($"   Invalid path for {purpose}: {path}");
                     throw;
                 }
             }

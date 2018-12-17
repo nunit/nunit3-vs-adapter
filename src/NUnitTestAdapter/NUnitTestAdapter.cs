@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2015 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2019 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -140,7 +140,6 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private void CheckDirectories()
         {
-            bool ok = true;
             if (Settings.UseTestOutputXml)
             {
                 Directory.CreateDirectory(Settings.TestOutputXml);

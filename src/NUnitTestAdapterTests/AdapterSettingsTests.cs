@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2017 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2019 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -21,6 +21,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
+using System.IO;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
@@ -29,14 +30,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 {
     public class AdapterSettingsTests
     {
-        private AdapterSettings _settings;
+        private IAdapterSettings _settings;
 
         [SetUp]
         public void SetUp()
         {
-            var testlogger = new TestLogger(new MessageLoggerStub());
-            _settings = new AdapterSettings(testlogger);
-            testlogger.InitSettings(_settings);
+            var testLogger = new TestLogger(new MessageLoggerStub());
+            _settings = new AdapterSettings(testLogger);
+            testLogger.InitSettings(_settings);
         }
 
         [Test]
@@ -183,12 +184,37 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(_settings.WorkDirectory, Is.EqualTo("/my/work/dir"));
         }
 
+        /// <summary>
+        /// Workdir not set, TestOutput is relative
+        /// </summary>
         [Test]
         public void TestOutputSetting()
         {
             _settings.Load("<RunSettings><NUnit><TestOutputXml>/my/work/dir</TestOutputXml></NUnit></RunSettings>");
             Assert.That(_settings.UseTestOutputXml);
-            Assert.That(_settings.TestOutputXml, Does.Contain(@"\my\work\dir"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(_settings.TestOutputXml, Does.Contain(@"\my\work\dir"));
+                Assert.That(Path.IsPathRooted(_settings.TestOutputXml), Is.True);
+            });
+
+        }
+
+        /// <summary>
+        /// Workdir set, and is absolute,  TestOutputXml is relative
+        /// </summary>
+        [Test]
+        public void TestOutputSettingWithWorkDir()
+        {
+            _settings.Load(@"<RunSettings><NUnit><WorkDirectory>C:\Whatever</WorkDirectory><TestOutputXml>/my/testoutput/dir</TestOutputXml></NUnit></RunSettings>");
+            Assert.That(_settings.UseTestOutputXml);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_settings.TestOutputXml, Does.Contain(@"\my\testoutput\dir"));
+                Assert.That(_settings, Does.StartWith(@"C:\"));
+                Assert.That(Path.IsPathRooted(_settings.TestOutputXml), Is.True);
+            });
+
         }
 
 

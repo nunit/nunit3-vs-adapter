@@ -51,11 +51,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         static readonly string MockAssemblyPath =
             Path.Combine(TestContext.CurrentContext.TestDirectory, "mock-assembly.dll");
 
-        List<TestCase> TestCases;
+        List<TestCase> testCases;
 
-        private static ITestDiscoverer nunittestDiscoverer;
+        private static readonly ITestDiscoverer nunittestDiscoverer;
 
-        private IDiscoveryContext _context;
+        private readonly IDiscoveryContext _context;
 
         public TestDiscoveryTests(IDiscoveryContext context)
         {
@@ -69,7 +69,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(NUnit.Tests.Assemblies.MockAssembly.TestsAtRuntime, Is.EqualTo(NUnit.Tests.Assemblies.MockAssembly.Tests),
                 "The reference to mock-assembly.dll appears to be the wrong version");
             Assert.That(File.Exists(MockAssemblyPath), $"Can't locate mock-assembly.dll at {MockAssemblyPath}");
-            TestCases = new List<TestCase>();
+            testCases = new List<TestCase>();
 
             // Load the NUnit mock-assembly.dll once for this test, saving
             // the list of test cases sent to the discovery sink
@@ -83,7 +83,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void VerifyTestCaseCount()
         {
-            Assert.That(TestCases.Count, Is.EqualTo(NUnit.Tests.Assemblies.MockAssembly.Tests));
+            Assert.That(testCases.Count, Is.EqualTo(NUnit.Tests.Assemblies.MockAssembly.Tests));
         }
 
         [TestCase("MockTest3", "NUnit.Tests.Assemblies.MockTestFixture.MockTest3")]
@@ -92,7 +92,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase("MethodWithParameters(9,11)", "NUnit.Tests.FixtureWithTestCases.MethodWithParameters(9,11)")]
         public void VerifyTestCaseIsFound(string name, string fullName)
         {
-            var testCase = TestCases.Find(tc => tc.DisplayName == name);
+            var testCase = testCases.Find(tc => tc.DisplayName == name);
             Assert.That(testCase.FullyQualifiedName, Is.EqualTo(fullName));
         }
 
@@ -102,7 +102,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase("NestedClassTest3")] // grandchild
         public void VerifyNestedTestCaseSourceIsAvailable(string name)
         {
-            var testCase = TestCases.Find(tc => tc.DisplayName == name);
+            var testCase = testCases.Find(tc => tc.DisplayName == name);
 
             Assert.That(!string.IsNullOrEmpty(testCase.Source));
             Assert.Greater(testCase.LineNumber, 0);
@@ -112,7 +112,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         void ITestCaseDiscoverySink.SendTestCase(TestCase discoveredTest)
         {
-            TestCases.Add(discoveredTest);
+            testCases.Add(discoveredTest);
         }
 
         #endregion

@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2018 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2019 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -331,13 +331,13 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
 
-        private void GenerateTestOutput(XmlNode testResults, string assemblypath)
+        private void GenerateTestOutput(XmlNode testResults, string assemblyPath)
         {
             if (!Settings.UseTestOutputXml)
                 return;
 #if NETCOREAPP1_0
 #else
-            var path = Path.Combine(Settings.TestOutputXml,$"{Path.GetFileNameWithoutExtension(assemblypath)}.xml");
+            var path = Path.Combine(Settings.TestOutputXml, $"{Path.GetFileNameWithoutExtension(assemblyPath)}.xml");
             var resultService = TestEngine.Services.GetService<IResultService>();
             // Following null argument should work for nunit3 format. Empty array is OK as well.
             // If you decide to handle other formats in the runsettings, it needs more work.
@@ -356,6 +356,6 @@ namespace NUnit.VisualStudio.TestAdapter
 #endif
         }
 
-#endregion
+        #endregion
     }
 }
