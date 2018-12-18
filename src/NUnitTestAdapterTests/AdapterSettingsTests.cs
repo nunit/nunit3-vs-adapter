@@ -206,12 +206,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void TestOutputSettingWithWorkDir()
         {
-            _settings.Load(@"<RunSettings><NUnit><WorkDirectory>C:\Whatever</WorkDirectory><TestOutputXml>/my/testoutput/dir</TestOutputXml></NUnit></RunSettings>");
+            _settings.Load(@"<RunSettings><NUnit><WorkDirectory>C:\Whatever</WorkDirectory><TestOutputXml>my/testoutput/dir</TestOutputXml></NUnit></RunSettings>");
             Assert.That(_settings.UseTestOutputXml,"Settings not loaded properly");
             Assert.Multiple(() =>
             {
                 Assert.That(_settings.TestOutputXml, Does.Contain(@"\my\testoutput\dir"),"Content not correct");
-                Assert.That(_settings, Does.StartWith(@"C:\"),"Not correct start drive");
+                Assert.That(_settings.TestOutputXml, Does.StartWith(@"C:\"),"Not correct start drive");
                 Assert.That(Path.IsPathRooted(_settings.TestOutputXml), Is.True,"Path not properly rooted");
             });
 

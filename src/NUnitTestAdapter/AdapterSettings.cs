@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 namespace NUnit.VisualStudio.TestAdapter
@@ -337,9 +338,14 @@ namespace NUnit.VisualStudio.TestAdapter
                 try
                 {
                     if (string.IsNullOrEmpty(WorkDirectory))
+                    {
                         return Path.GetFullPath(path);
+                    }
+
                     if (Path.IsPathRooted(path))
+                    {
                         return Path.GetFullPath(path);
+                    }
                     return Path.GetFullPath(Path.Combine(WorkDirectory, path));
                 }
                 catch (Exception)
