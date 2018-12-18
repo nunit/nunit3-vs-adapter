@@ -51,9 +51,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         static readonly string MockAssemblyPath =
             Path.Combine(TestContext.CurrentContext.TestDirectory, "mock-assembly.dll");
 
-        List<TestCase> testCases;
-
-        private static readonly ITestDiscoverer nunittestDiscoverer;
+        private List<TestCase> testCases;
 
         private readonly IDiscoveryContext _context;
 
