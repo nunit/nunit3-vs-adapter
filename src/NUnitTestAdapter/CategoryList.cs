@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -11,11 +12,19 @@ namespace NUnit.VisualStudio.TestAdapter
         private const string NunitTestCategoryLabel = "Category";
         private const string VsTestCategoryLabel = "TestCategory";
         private const string MSTestCategoryName = "MSTestDiscoverer.TestCategory";
-        internal static readonly TestProperty NUnitTestCategoryProperty = TestProperty.Register(NUnitCategoryName, VsTestCategoryLabel, typeof(string[]), TestPropertyAttributes.Hidden | TestPropertyAttributes.Trait, typeof(TestCase));
-        internal TestProperty MsTestCategoryProperty; // = TestProperty.Register(MSTestCategoryName, VsTestCategoryLabel, typeof(string[]), TestPropertyAttributes.Hidden | TestPropertyAttributes.Trait, typeof(TestCase));
-        internal static readonly TestProperty NUnitExplicitProperty = TestProperty.Register("NUnit.Explicit", "Explicit", typeof(bool), TestPropertyAttributes.Hidden, typeof(TestCase));
+
+        internal static readonly TestProperty NUnitTestCategoryProperty = TestProperty.Register(NUnitCategoryName,
+            VsTestCategoryLabel, typeof(string[]), TestPropertyAttributes.Hidden | TestPropertyAttributes.Trait,
+            typeof(TestCase));
+
+        internal TestProperty
+            MsTestCategoryProperty; // = TestProperty.Register(MSTestCategoryName, VsTestCategoryLabel, typeof(string[]), TestPropertyAttributes.Hidden | TestPropertyAttributes.Trait, typeof(TestCase));
+
+        internal static readonly TestProperty NUnitExplicitProperty = TestProperty.Register("NUnit.Explicit",
+            "Explicit", typeof(bool), TestPropertyAttributes.Hidden, typeof(TestCase));
 
         private const string ExplicitTraitName = "Explicit";
+
         // The empty string causes the UI we want.
         // If it's null, the explicit trait doesn't show up in Test Explorer.
         // If it's not empty, it shows up as “Explicit [value]” in Test Explorer.
@@ -23,7 +32,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private readonly List<string> categorylist = new List<string>();
         private readonly TestCase testCase;
-        private IAdapterSettings settings;
+        private readonly IAdapterSettings settings;
 
         public CategoryList(TestCase testCase, IAdapterSettings adapterSettings)
         {
@@ -39,7 +48,9 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         public int LastNodeListCount { get; private set; }
-        public IEnumerable<string> ProcessTestCaseProperties(XmlNode testNode, bool addToCache, string key = null, IDictionary<string, TraitsFeature.CachedTestCaseInfo> traitsCache = null)
+
+        public IEnumerable<string> ProcessTestCaseProperties(XmlNode testNode, bool addToCache, string key = null,
+            IDictionary<string, TraitsFeature.CachedTestCaseInfo> traitsCache = null)
         {
             var nodelist = testNode.SelectNodes("properties/property");
             LastNodeListCount = nodelist.Count;
@@ -82,7 +93,15 @@ namespace NUnit.VisualStudio.TestAdapter
             return categorylist;
         }
 
-        private static bool IsInternalProperty(string propertyName, string propertyValue)
+        /// <summary>
+        /// List based on https://github.com/nunit/docs/wiki/Attributes
+        /// </summary>
+        private readonly List<string> internalProperties = new List<string>
+            { "Timeout", "Repeat", "Apartment", "Author", "Combinatorial", "Culture", "Datapoint",
+              "DatapointSource", "DefaultFloatingPointTolerance", "Description", "LevelOfParallelism",
+              "MaxTime", "NonParallelizable", "Order", "Pairwise", "Platform", "Random", "Range",
+              "RequiresThread", "Retry", "Sequential", "SetCulture", "SetUICulture", "SingleThreaded", "Values", "ValueSource" };
+        private bool IsInternalProperty(string propertyName, string propertyValue)
         {
             if (propertyName == ExplicitTraitName)
             {
@@ -92,10 +111,13 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             // Property names starting with '_' are for internal use only
+            if (!settings.ShowInternalProperties &&
+                internalProperties.Contains(propertyName, StringComparer.OrdinalIgnoreCase))
+                return true;
             return string.IsNullOrEmpty(propertyName) || propertyName[0] == '_' || string.IsNullOrEmpty(propertyValue);
         }
 
-        private static void AddTraitsToCache(IDictionary<string, TraitsFeature.CachedTestCaseInfo> traitsCache, string key, string propertyName, string propertyValue)
+        private void AddTraitsToCache(IDictionary<string, TraitsFeature.CachedTestCaseInfo> traitsCache, string key, string propertyName, string propertyValue)
         {
             if (IsInternalProperty(propertyName, propertyValue)) return;
 
