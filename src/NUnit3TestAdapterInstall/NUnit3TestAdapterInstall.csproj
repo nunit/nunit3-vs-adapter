@@ -19,7 +19,7 @@
     <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
     <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
     <DeployExtension>False</DeployExtension>
-    <RuntimeIdentifiers>Win</RuntimeIdentifiers>
+    <RuntimeIdentifiers>win</RuntimeIdentifiers>
     <IsProductComponent>false</IsProductComponent>
     <OutputPath>..\..\bin\$(Configuration)\</OutputPath>
     <VsixInputFileLocation>..\NUnitTestAdapter\bin\$(Configuration)\net35\</VsixInputFileLocation>
