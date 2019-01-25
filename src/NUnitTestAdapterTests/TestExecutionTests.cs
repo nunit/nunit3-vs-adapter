@@ -166,6 +166,42 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             VerifyAttachment(attachmentSet.Attachments[1], FixtureWithAttachment.Attachment2Name, FixtureWithAttachment.Attachment2Description);
         }
 
+#if NET46
+        [Test]
+        public void NativeAssemblyProducesWarning()
+        {
+            // Create a fake environment.
+            var context = new FakeRunContext();
+            var fakeFramework = new FakeFrameworkHandle();
+
+            // Find the native exaple dll.
+            var path = Path.Combine( TestContext.CurrentContext.TestDirectory, "NativeTests.dll" );
+            Assert.That( File.Exists( path ) );
+
+            // Try to execute tests from the dll.
+            TestAdapterUtils.CreateExecutor().RunTests(
+                new[] { path },
+                context,
+                fakeFramework );
+
+            // Gather results.
+            var testResults = fakeFramework.Events
+               .Where( e => e.EventType == FakeFrameworkHandle.EventType.RecordResult )
+               .Select( e => e.TestResult )
+               .ToList();
+
+            // No tests found.
+            Assert.That( testResults.Count, Is.EqualTo( 0 ) );
+
+            // A warning about unsupported assebly format provided.
+            var messages = fakeFramework.Events
+                .Where( e=> e.EventType == FakeFrameworkHandle.EventType.SendMessage &&
+                    e.Message.Level == Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging.TestMessageLevel.Warning )
+                .Select( o => o.Message.Text );
+            Assert.That( messages, Has.Some.Contains( "Assembly not supported" ) );
+        }
+#endif
+
         private static void VerifyAttachment(UriDataAttachment attachment, string expectedName, string expectedDescription)
         {
             Assert.Multiple(() =>
