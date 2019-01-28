@@ -299,6 +299,15 @@ namespace NUnit.VisualStudio.TestAdapter
                 // we skip the native c++ binaries that we don't support.
                 TestLog.Warning("   Assembly not supported: " + assemblyPath);
             }
+            catch( NUnitEngineException e )
+            {
+                if( e.InnerException is BadImageFormatException )
+                {
+                    // we skip the native c++ binaries that we don't support.
+                    TestLog.Warning( "   Assembly not supported: " + assemblyPath );
+                }
+                throw;
+            }
             catch (FileNotFoundException ex)
             {
                 // Probably from the GetExportedTypes in NUnit.core, attempting to find an assembly, not a problem if it is not NUnit here
