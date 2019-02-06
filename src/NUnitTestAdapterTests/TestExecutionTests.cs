@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2012-2017 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2012-2019 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -35,15 +35,42 @@ using System.Linq;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
+    /// <summary>
+    /// ResultSummary Helper Class
+    /// </summary>
+    public class ResultSummary
+    {
+        private readonly Dictionary<TestOutcome, int> summary;
+
+        public ResultSummary(IEnumerable<TestResult> results)
+        {
+            summary = new Dictionary<TestOutcome, int>();
+
+            foreach (TestResult result in results)
+            {
+                var outcome = result.Outcome;
+                summary[outcome] = GetCount(outcome) + 1;
+            }
+        }
+
+        private int GetCount(TestOutcome outcome)
+        {
+            return summary.ContainsKey(outcome)
+                ? summary[outcome]
+                : 0;
+        }
+    }
+
+
 
     [Category("TestExecution")]
     public class TestExecutionTests
     {
-        private string MockAssemblyPath; 
+        private string MockAssemblyPath;
         static readonly IRunContext Context = new FakeRunContext();
 
         private FakeFrameworkHandle testLog;
-        ResultSummary Summary { get;  set; }    
+        ResultSummary Summary { get; set; }
 
 
         [OneTimeSetUp]
@@ -52,7 +79,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             MockAssemblyPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "mock-assembly.dll");
 
             // Sanity check to be sure we have the correct version of mock-assembly.dll
-            Assert.That(MockAssembly.TestsAtRuntime , Is.EqualTo(MockAssembly.Tests),
+            Assert.That(MockAssembly.TestsAtRuntime, Is.EqualTo(MockAssembly.Tests),
                 "The reference to mock-assembly.dll appears to be the wrong version");
             testLog = new FakeFrameworkHandle();
 
@@ -188,31 +215,73 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                             .FirstOrDefault();
         }
 
-        #region Nested ResultSummary Helper Class
 
-        private class ResultSummary
+    }
+
+
+
+
+
+    [Category("TestExecution")]
+    public class TestExecutionTestsForTestOutput
+    {
+        private string _mockAssemblyPath;
+        private string _mockAssemblyFolder;
+
+        private FakeFrameworkHandle testLog;
+        ResultSummary Summary { get; set; }
+
+
+        [OneTimeSetUp]
+        public void LoadMockAssembly()
         {
-            private readonly Dictionary<TestOutcome, int> summary;
+            _mockAssemblyPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "mock-assembly.dll");
+            _mockAssemblyFolder = Path.GetDirectoryName(_mockAssemblyPath);
+            // Sanity check to be sure we have the correct version of mock-assembly.dll
+            Assert.That(MockAssembly.TestsAtRuntime, Is.EqualTo(MockAssembly.Tests),
+                "The reference to mock-assembly.dll appears to be the wrong version");
+            testLog = new FakeFrameworkHandle();
 
-            public ResultSummary(IEnumerable<TestResult> results)
-            {
-                summary = new Dictionary<TestOutcome, int>();
-                
-                foreach(TestResult result in results)
-                {
-                    var outcome = result.Outcome;
-                    summary[outcome] = GetCount(outcome) + 1;
-                }
-            }
+            // Load the NUnit mock-assembly.dll once for this test, saving
+            // the list of test cases sent to the discovery sink
 
-            private int GetCount(TestOutcome outcome)
-            {
-                return summary.ContainsKey(outcome)
-                    ? summary[outcome]
-                    : 0;
-            }
+            var testResults = testLog.Events
+                .Where(e => e.EventType == FakeFrameworkHandle.EventType.RecordResult)
+                .Select(e => e.TestResult)
+                .ToList();
+            Summary = new ResultSummary(testResults);
         }
 
-        #endregion
+        [Test]
+        public void ThatTestOutputXmlHasBeenCreatedBelowAssemblyFolder()
+        {
+            var context = new FakeRunContext(new FakeRunSettingsForTestOutput());
+
+            TestAdapterUtils.CreateExecutor().RunTests(new[] { _mockAssemblyPath }, context, testLog);
+
+            var expectedFolder = Path.Combine(_mockAssemblyFolder, "TestResults");
+            Assert.That(Directory.Exists(expectedFolder), $"Folder {expectedFolder} not created");
+            var expectedFile = Path.Combine(expectedFolder, "mock-assembly.xml");
+            Assert.That(File.Exists(expectedFile), $"File {expectedFile} not found");
+        }
+
+
+        [Test]
+        public void ThatTestOutputXmlHasBeenAtWorkDirLocation()
+        {
+            var temp = Path.GetTempPath();
+            var context = new FakeRunContext(new FakeRunSettingsForTestOutputAndWorkDir("TestResult", Path.Combine(temp, "NUnit")));
+
+            var executor = TestAdapterUtils.CreateExecutor();
+            executor.RunTests(new[] { _mockAssemblyPath }, context, testLog);
+            var expectedFolder = Path.Combine(Path.GetTempPath(), "NUnit", "TestResult");
+            Assert.That(Directory.Exists(expectedFolder), $"Folder {expectedFolder} not created");
+            var expectedFile = Path.Combine(expectedFolder, "mock-assembly.xml");
+            Assert.That(File.Exists(expectedFile), $"File {expectedFile} not found");
+        }
+
+
     }
+
+
 }
