@@ -34,6 +34,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
         {
         }
 
+
+        public FakeRunContext(FakeRunSettings fakeRunSettings) : base(fakeRunSettings)
+        {
+        }
+
         #region IRunContext Members
 
         bool IRunContext.InIsolation

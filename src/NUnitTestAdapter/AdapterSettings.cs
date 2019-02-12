@@ -250,9 +250,7 @@ namespace NUnit.VisualStudio.TestAdapter
             UseVsKeepEngineRunning = GetInnerTextAsBool(nunitNode, nameof(UseVsKeepEngineRunning), false);
             BasePath = GetInnerTextWithLog(nunitNode, nameof(BasePath));
             PrivateBinPath = GetInnerTextWithLog(nunitNode, nameof(PrivateBinPath));
-            var testOutput = GetInnerTextWithLog(nunitNode, nameof(TestOutputXml));
-            if (!string.IsNullOrEmpty(testOutput))
-                TestOutputXml = ValidatedPath(testOutput, nameof(TestOutputXml));
+            TestOutputXml = GetInnerTextWithLog(nunitNode, nameof(TestOutputXml));
             RandomSeed = GetInnerTextAsNullableInt(nunitNode, nameof(RandomSeed));
             RandomSeedSpecified = RandomSeed.HasValue;
             if (!RandomSeedSpecified)

@@ -16,9 +16,9 @@ var configuration = Argument("configuration", "Release");
 var version = "3.13.0";
 var modifier = "";
 
-var dbgSuffix = configuration == "Debug" ? "-dbg" : "";
+var dbgSuffix = configuration.ToLower() == "debug" ? "-dbg" : "";
 var packageVersion = version + modifier + dbgSuffix;
-
+Information("PackageVersion is "+packageVersion);
 if (BuildSystem.IsRunningOnAppVeyor)
 {
     var tag = AppVeyor.Environment.Repository.Tag;

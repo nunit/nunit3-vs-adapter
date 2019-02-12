@@ -88,6 +88,8 @@ namespace NUnit.VisualStudio.TestAdapter
         // Our logger used to display messages
         protected TestLogger TestLog { get; private set; }
 
+        protected string WorkDir { get; private set; }
+
         private static string exeName;
 
         public static bool IsRunningUnderIDE
@@ -129,7 +131,7 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 Settings.Load(context);
                 TestLog.Verbosity = Settings.Verbosity;
-                CheckDirectories();
+               
             }
             catch (Exception e)
             {
@@ -138,14 +140,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
-        private void CheckDirectories()
-        {
-            if (Settings.UseTestOutputXml)
-            {
-                Directory.CreateDirectory(Settings.TestOutputXml);
-                TestLog.Info($"  Test Output folder checked/created : {Settings.TestOutputXml} ");
-            }
-        }
+        
 
         protected ITestRunner GetRunnerFor(string assemblyName)
         {
@@ -226,7 +221,8 @@ namespace NUnit.VisualStudio.TestAdapter
             if (!Directory.Exists(workDir))
                 Directory.CreateDirectory(workDir);
             package.Settings[PackageSettings.WorkDirectory] = workDir;
-
+            WorkDir = workDir;
+         //   CreateTestOutputFolder(workDir);
             return package;
         }
 

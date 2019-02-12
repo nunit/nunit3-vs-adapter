@@ -56,6 +56,8 @@ namespace NUnit.VisualStudio.TestAdapter
         public IFrameworkHandle FrameworkHandle { get; private set; }
         private TfsTestFilter TfsFilter { get; set; }
 
+        private string TestOutputXmlFolder { get; set; } = "";
+
         // NOTE: an earlier version of this code had a FilterBuilder
         // property. This seemed to make sense, because we instantiate
         // it in two different places. However, the existence of an
@@ -107,7 +109,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
             }
 
-            TestLog.Info(string.Format("NUnit Adapter {0}: Test execution complete", AdapterVersion));
+            TestLog.Info($"NUnit Adapter {AdapterVersion}: Test execution complete");
             Unload();
         }
 
@@ -158,8 +160,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         void ITestExecutor.Cancel()
         {
-            if (_activeRunner != null)
-                _activeRunner.StopRun(true);
+            _activeRunner?.StopRun(true);
         }
 
         #endregion
@@ -230,7 +231,7 @@ namespace NUnit.VisualStudio.TestAdapter
             try
             {
                 _activeRunner = GetRunnerFor(assemblyPath);
-
+                CreateTestOutputFolder();
                 var loadResult = _activeRunner.Explore(TestFilter.Empty);
 #if !NETCOREAPP1_0
                 dumpXml?.AddString(loadResult.AsString());
@@ -344,9 +345,8 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             if (!Settings.UseTestOutputXml)
                 return;
-#if NETCOREAPP1_0
-#else
-            var path = Path.Combine(Settings.TestOutputXml, $"{Path.GetFileNameWithoutExtension(assemblyPath)}.xml");
+#if !NETCOREAPP1_0
+            var path = Path.Combine(TestOutputXmlFolder, $"{Path.GetFileNameWithoutExtension(assemblyPath)}.xml");
             var resultService = TestEngine.Services.GetService<IResultService>();
             // Following null argument should work for nunit3 format. Empty array is OK as well.
             // If you decide to handle other formats in the runsettings, it needs more work.
@@ -363,6 +363,30 @@ namespace NUnit.VisualStudio.TestAdapter
 #else
             return new NUnitTestFilterBuilder(TestEngine.Services.GetService<ITestFilterService>());
 #endif
+        }
+
+
+        private void CreateTestOutputFolder()
+        {
+            if (!Settings.UseTestOutputXml)
+            {
+                return;
+            }
+
+            var path = Path.IsPathRooted(Settings.TestOutputXml)
+                ? Settings.TestOutputXml
+                : Path.Combine(WorkDir, Settings.TestOutputXml);
+            try
+            {
+                Directory.CreateDirectory(path);
+                TestOutputXmlFolder = path;
+                TestLog.Info($"  Test Output folder checked/created : {path} ");
+            }
+            catch (UnauthorizedAccessException)
+            {
+                TestLog.Error($"   Failed creating test output folder at {path}");
+                throw;
+            }
         }
 
         #endregion
