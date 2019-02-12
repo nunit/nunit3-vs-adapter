@@ -251,7 +251,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 .ToList();
             Summary = new ResultSummary(testResults);
         }
-
+#if !NETCOREAPP1_0
         [Test]
         public void ThatTestOutputXmlHasBeenCreatedBelowAssemblyFolder()
         {
@@ -279,7 +279,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var expectedFile = Path.Combine(expectedFolder, "mock-assembly.xml");
             Assert.That(File.Exists(expectedFile), $"File {expectedFile} not found");
         }
-
+#endif
 
     }
 
