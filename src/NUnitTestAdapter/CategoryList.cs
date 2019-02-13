@@ -60,47 +60,44 @@ namespace NUnit.VisualStudio.TestAdapter
                 string propertyValue = propertyNode.GetAttribute("value");
                 if (addToCache)
                     AddTraitsToCache(traitsCache, key, propertyName, propertyValue);
-                if (!IsInternalProperty(propertyName, propertyValue))
+                if (IsInternalProperty(propertyName, propertyValue))
+                    continue;
+                if (propertyName != NunitTestCategoryLabel)
+                    testCase.Traits.Add(new Trait(propertyName, propertyValue));
+                else
                 {
-                    if (propertyName != NunitTestCategoryLabel)
-                        testCase.Traits.Add(new Trait(propertyName, propertyValue));
-                    else
-                    {
-                        categorylist.Add(propertyValue);
-                    }
+                    categorylist.Add(propertyValue);
                 }
             }
 
-            if (testNode.Attributes?["runstate"]?.Value == "Explicit")
+            if (testNode.Attributes?["runstate"]?.Value != "Explicit")
+                return categorylist;
+            // Add UI grouping “Explicit”
+            if (testCase.Traits.All(trait => trait.Name != ExplicitTraitName))
+                testCase.Traits.Add(new Trait(ExplicitTraitName, ExplicitTraitValue));
+
+            // Track whether the test is actually explicit since multiple things result in the same UI grouping
+            testCase.SetPropertyValue(NUnitExplicitProperty, true);
+
+            if (addToCache)
             {
                 // Add UI grouping “Explicit”
-                if (testCase.Traits.All(trait => trait.Name != ExplicitTraitName))
-                    testCase.Traits.Add(new Trait(ExplicitTraitName, ExplicitTraitValue));
+                AddTraitsToCache(traitsCache, key, ExplicitTraitName, ExplicitTraitValue);
 
                 // Track whether the test is actually explicit since multiple things result in the same UI grouping
-                testCase.SetPropertyValue(NUnitExplicitProperty, true);
-
-                if (addToCache)
-                {
-                    // Add UI grouping “Explicit”
-                    AddTraitsToCache(traitsCache, key, ExplicitTraitName, ExplicitTraitValue);
-
-                    // Track whether the test is actually explicit since multiple things result in the same UI grouping
-                    GetCachedInfo(traitsCache, key).Explicit = true;
-                }
+                GetCachedInfo(traitsCache, key).Explicit = true;
             }
 
             return categorylist;
         }
 
         /// <summary>
-        /// List based on https://github.com/nunit/docs/wiki/Attributes
+        /// See https://github.com/nunit/nunit/blob/master/src/NUnitFramework/framework/Internal/PropertyNames.cs
         /// </summary>
-        private readonly List<string> internalProperties = new List<string>
-            { "Timeout", "Repeat", "Apartment", "Author", "Combinatorial", "Culture", "Datapoint",
-              "DatapointSource", "DefaultFloatingPointTolerance", "Description", "LevelOfParallelism",
-              "MaxTime", "NonParallelizable", "Order", "Pairwise", "Platform", "Random", "Range",
-              "RequiresThread", "Retry", "Sequential", "SetCulture", "SetUICulture", "SingleThreaded", "Values", "ValueSource" };
+        private readonly List<string> _internalProperties = new List<string>
+        { "Author", "ApartmentState", "Description", "IgnoreUntilDate","LevelOfParallelism", "MaxTime", "Order", "ParallelScope", "Repeat", "RequiresThread", "SetCulture", "SetUICulture", "TestOf", "Timeout"};
+
+
         private bool IsInternalProperty(string propertyName, string propertyValue)
         {
             if (propertyName == ExplicitTraitName)
@@ -110,9 +107,9 @@ namespace NUnit.VisualStudio.TestAdapter
                 return false;
             }
 
-            // Property names starting with '_' are for internal use only
+            // Property names starting with '_' are for internal use only, but over time this has changed, so we now use a list
             if (!settings.ShowInternalProperties &&
-                internalProperties.Contains(propertyName, StringComparer.OrdinalIgnoreCase))
+                _internalProperties.Contains(propertyName, StringComparer.OrdinalIgnoreCase))
                 return true;
             return string.IsNullOrEmpty(propertyName) || propertyName[0] == '_' || string.IsNullOrEmpty(propertyValue);
         }

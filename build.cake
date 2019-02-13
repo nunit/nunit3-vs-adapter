@@ -14,11 +14,11 @@ var configuration = Argument("configuration", "Release");
 //////////////////////////////////////////////////////////////////////
 
 var version = "3.13.0";
-var modifier = "";
+var modifier = "-b11";
 
 var dbgSuffix = configuration == "Debug" ? "-dbg" : "";
 var packageVersion = version + modifier + dbgSuffix;
-
+Information("Packageversion: "+packageVersion);
 if (BuildSystem.IsRunningOnAppVeyor)
 {
     var tag = AppVeyor.Environment.Repository.Tag;
