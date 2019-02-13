@@ -345,15 +345,19 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             if (!Settings.UseTestOutputXml)
                 return;
-#if !NETCOREAPP1_0
+
             var path = Path.Combine(TestOutputXmlFolder, $"{Path.GetFileNameWithoutExtension(assemblyPath)}.xml");
+#if !NETCOREAPP1_0
             var resultService = TestEngine.Services.GetService<IResultService>();
+#else
+            var resultService = new ResultService();
+#endif
             // Following null argument should work for nunit3 format. Empty array is OK as well.
             // If you decide to handle other formats in the runsettings, it needs more work.
             var resultWriter = resultService.GetResultWriter("nunit3", null);
             resultWriter.WriteResultFile(testResults, path);
             TestLog.Info($"   Test results written to {path}");
-#endif
+
         }
 
         private NUnitTestFilterBuilder CreateTestFilterBuilder()
