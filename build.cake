@@ -168,7 +168,9 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
 
                 // https://github.com/cake-build/cake/issues/2077
                 #tool Microsoft.TestPlatform
-                ToolPath = Context.Tools.Resolve("vstest.console.exe")
+                ToolPath = Context.Tools.Resolve("vstest.console.exe"),
+                Logger = "trx"
+
             });
         });
 
@@ -182,7 +184,8 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
                 Framework = framework,
                 NoBuild = true,
                 TestAdapterPath = adapterDir,
-                Settings = File("DisableAppDomain.runsettings")
+                Settings = File("DisableAppDomain.runsettings"),
+                Logger="trx"
             });
         });
 }
