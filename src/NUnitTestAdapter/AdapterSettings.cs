@@ -81,6 +81,8 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         bool DisableParallelization { get; }
 
+        bool ShowInternalProperties { get; }
+
         void Load(IDiscoveryContext context);
         void Load(string settingsXml);
         void SaveRandomSeed(string dirname);
@@ -180,6 +182,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public string DomainUsage { get; private set; }
 
+        public bool ShowInternalProperties { get; private set; }
+
 
         public VsTestCategoryType VsTestCategoryType { get; private set; } = VsTestCategoryType.NUnit;
 
@@ -256,7 +260,7 @@ namespace NUnit.VisualStudio.TestAdapter
             if (!RandomSeedSpecified)
                 RandomSeed = new Random().Next();
             DefaultTestNamePattern = GetInnerTextWithLog(nunitNode, nameof(DefaultTestNamePattern));
-
+            ShowInternalProperties = GetInnerTextAsBool(nunitNode, nameof(ShowInternalProperties), false);
             DumpXmlTestDiscovery = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestDiscovery), false);
             DumpXmlTestResults = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestResults), false);
             var vsTestCategoryType = GetInnerText(nunitNode, nameof(VsTestCategoryType), Verbosity > 0);
