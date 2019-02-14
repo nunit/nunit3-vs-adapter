@@ -6,7 +6,7 @@ This adapter works with NUnit 3.0 and higher only. Use the NUnit 2 Adapter to ru
 
 ## License ##
 
-The NUnit 3 Test Adapter is Open Source software released under the [MIT license](http://www.nunit.org/nuget/nunit3-license.txt).
+The NUnit 3 Test Adapter is Open Source software released under the [MIT license](https://nunit.org/nuget/nunit3-license.txt).
 
 ## Developing
 
