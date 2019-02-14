@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2017 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2019 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -21,7 +21,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-#define LAUNCHDEBUGGER
+// #define LAUNCHDEBUGGER
 
 using System;
 using System.Collections.Generic;

@@ -107,7 +107,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 // but I'm not sure of the consequences of allowing all empty strings.
                 return false;
             }
-            if ( internalProperties.Contains(propertyName.ToLower()))
+            if ( _internalProperties.Contains(propertyName.ToLower()))
                 return true;
 
             // Property names starting with '_' are for internal use only, but over time this has changed, so we now use a list

@@ -39,7 +39,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Description(
             "This simulates what happens when the adapter is deployed: " +
             "nunit.framework.dll is no longer beside the adapter assembly " +
-            "and we need to make sure the reflection AppDomain wouldn’t fail " +
+            "and we need to make sure the reflection AppDomain wouldn't fail " +
             "to load it.")]
         [TestCase(false, TestName = "AsyncMethodWithAttributeDefinedOutsideAdapterDirectory()")]
         [TestCase(true, TestName = "AsyncMethodWithAttributeDefinedOutsideAdapterDirectory(with binding redirect)")]
@@ -47,6 +47,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             using (var dir = new TempDirectory())
             {
+                TestContext.Out.WriteLine($"Tempdirectory: {dir.Path}");
                 // The tests must run in the same AppDomain as VSTest for DiaSession to work,
                 // but that VSTest has already loaded an old version of S.C.Immutable in this AppDomain.
                 // To avoid MissingMethodException, it’s necessary to only deal with Roslyn in a separate AppDomain.

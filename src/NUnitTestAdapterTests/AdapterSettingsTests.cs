@@ -54,31 +54,31 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             _settings.Load(xml);
             Assert.Multiple(() =>
             {
-                Assert.That(_settings.MaxCpuCount, Is.EqualTo(-1));
-                Assert.Null(_settings.ResultsDirectory);
-                Assert.Null(_settings.TargetFrameworkVersion);
-                Assert.Null(_settings.TargetPlatform);
-                Assert.Null(_settings.TestAdapterPaths);
-                Assert.IsTrue(_settings.CollectSourceInformation);
-                Assert.IsEmpty(_settings.TestProperties);
-                Assert.Null(_settings.InternalTraceLevel);
-                Assert.Null(_settings.WorkDirectory);
-                Assert.That(_settings.NumberOfTestWorkers, Is.EqualTo(-1));
-                Assert.That(_settings.DefaultTimeout, Is.EqualTo(0));
-                Assert.That(_settings.Verbosity, Is.EqualTo(0));
-                Assert.False(_settings.ShadowCopyFiles);
-                Assert.False(_settings.UseVsKeepEngineRunning);
-                Assert.Null(_settings.BasePath);
-                Assert.Null(_settings.PrivateBinPath);
-                Assert.NotNull(_settings.RandomSeed);
-                Assert.False(_settings.SynchronousEvents);
-                Assert.Null(_settings.DomainUsage);
-                Assert.False(_settings.InProcDataCollectorsAvailable);
-                Assert.IsFalse(_settings.DisableAppDomain);
-                Assert.IsFalse(_settings.DisableParallelization);
-                Assert.IsFalse(_settings.DesignMode);
-                Assert.False(_settings.UseTestOutputXml,
-                    Assert.IsFalse(_settings.UseTestCaseFilterConverter);
+                Assert.That(_settings.MaxCpuCount, Is.EqualTo(-1), $"{nameof(IAdapterSettings.MaxCpuCount)}");
+                Assert.Null(_settings.ResultsDirectory, nameof(IAdapterSettings.ResultsDirectory));
+                Assert.Null(_settings.TargetFrameworkVersion, nameof(IAdapterSettings.TargetFrameworkVersion));
+                Assert.Null(_settings.TargetPlatform, nameof(IAdapterSettings.TargetPlatform));
+                Assert.Null(_settings.TestAdapterPaths, nameof(IAdapterSettings.TestAdapterPaths));
+                Assert.IsTrue(_settings.CollectSourceInformation, nameof(IAdapterSettings.CollectSourceInformation));
+                Assert.IsEmpty(_settings.TestProperties, nameof(IAdapterSettings.TestProperties));
+                Assert.Null(_settings.InternalTraceLevel, nameof(IAdapterSettings.InternalTraceLevel));
+                Assert.Null(_settings.WorkDirectory, nameof(IAdapterSettings.WorkDirectory));
+                Assert.That(_settings.NumberOfTestWorkers, Is.EqualTo(-1), nameof(IAdapterSettings.NumberOfTestWorkers));
+                Assert.That(_settings.DefaultTimeout, Is.EqualTo(0), nameof(IAdapterSettings.DefaultTimeout));
+                Assert.That(_settings.Verbosity, Is.EqualTo(0), nameof(IAdapterSettings.Verbosity));
+                Assert.False(_settings.ShadowCopyFiles, nameof(IAdapterSettings.ShadowCopyFiles));
+                Assert.False(_settings.UseVsKeepEngineRunning, nameof(IAdapterSettings.UseVsKeepEngineRunning));
+                Assert.Null(_settings.BasePath, nameof(IAdapterSettings.BasePath));
+                Assert.Null(_settings.PrivateBinPath, nameof(IAdapterSettings.PrivateBinPath));
+                Assert.NotNull(_settings.RandomSeed, nameof(IAdapterSettings.RandomSeed));
+                Assert.False(_settings.SynchronousEvents, nameof(IAdapterSettings.SynchronousEvents));
+                Assert.Null(_settings.DomainUsage, nameof(IAdapterSettings.DomainUsage));
+                Assert.False(_settings.InProcDataCollectorsAvailable, nameof(IAdapterSettings.InProcDataCollectorsAvailable));
+                Assert.IsFalse(_settings.DisableAppDomain, nameof(IAdapterSettings.DisableAppDomain));
+                Assert.IsFalse(_settings.DisableParallelization, nameof(IAdapterSettings.DisableParallelization));
+                Assert.IsFalse(_settings.DesignMode, nameof(IAdapterSettings.DesignMode));
+                Assert.False(_settings.UseTestOutputXml, nameof(IAdapterSettings.UseTestOutputXml));
+                Assert.IsFalse(_settings.UseTestCaseFilterConverter, nameof(IAdapterSettings.UseTestCaseFilterConverter));
             });
         }
 
@@ -364,3 +364,4 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
     }
 }
+

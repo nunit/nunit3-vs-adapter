@@ -37,17 +37,17 @@ namespace NUnit.VisualStudio.TestAdapter
             var filterBuilder = _filterService.GetTestFilterBuilder();
             if (tfsFilter!=null && settings.UseTestCaseFilterConverter)
             {
-                var filtervalue = tfsFilter.TfsTestCaseFilterExpression.TestCaseFilterValue;
-                var nunitfilter = new VsTest2NUnitFilterConverter(filtervalue);
-                var nunitfilterstring = nunitfilter.ToString();
+                var filterValue = tfsFilter.TfsTestCaseFilterExpression.TestCaseFilterValue;
+                var nunitFilter = new VsTest2NUnitFilterConverter(filterValue);
+                var nunitFilterString = nunitFilter.ToString();
                 if (settings?.Verbosity > 4)
                 {
-                    logger.Info($"Converting filter using TestCaseFilterConverter: {filtervalue} => {nunitfilterstring}");
+                    logger.Info($"Converting filter using TestCaseFilterConverter: {filterValue} => {nunitFilterString}");
                 }
 
                 try
                 {
-                    filterBuilder.SelectWhere(nunitfilterstring);
+                    filterBuilder.SelectWhere(nunitFilterString);
                 }
                 catch (NUnit.Engine.TestSelectionParserException e)
                 {
