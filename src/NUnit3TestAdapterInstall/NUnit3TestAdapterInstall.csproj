@@ -1,4 +1,5 @@
 ﻿<Project ToolsVersion="15.0">
+  <Import Project="..\Common.props" />
   <PropertyGroup>
     <MinimumVisualStudioVersion>15.0</MinimumVisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
@@ -18,6 +19,7 @@
     <CopyBuildOutputToOutputDirectory>false</CopyBuildOutputToOutputDirectory>
     <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
     <DeployExtension>False</DeployExtension>
+    <RuntimeIdentifiers>win</RuntimeIdentifiers>
     <IsProductComponent>false</IsProductComponent>
     <OutputPath>..\..\bin\$(Configuration)\</OutputPath>
     <VsixInputFileLocation>..\NUnitTestAdapter\bin\$(Configuration)\net35\</VsixInputFileLocation>
@@ -25,7 +27,6 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
   <ItemGroup>
-    <VsixSourceItem Include="$(VsixInputFileLocation)\Mono.Cecil.dll" />
     <VsixSourceItem Include="$(VsixInputFileLocation)\nunit.engine.api.dll" />
     <VsixSourceItem Include="$(VsixInputFileLocation)\nunit.engine.dll" />
     <VsixSourceItem Include="$(VsixInputFileLocation)\NUnit3.TestAdapter.dll" />

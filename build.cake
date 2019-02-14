@@ -1,3 +1,5 @@
+#load lib.cake
+#load acceptance.cake
 #tool nuget:?package=vswhere
 
 //////////////////////////////////////////////////////////////////////
@@ -11,12 +13,12 @@ var configuration = Argument("configuration", "Release");
 // SET PACKAGE VERSION
 //////////////////////////////////////////////////////////////////////
 
-var version = "3.11.0";
-var modifier = "-d06";
+var version = "3.13.0";
+var modifier = "";
 
 var dbgSuffix = configuration.ToLower() == "debug" ? "-dbg" : "";
 var packageVersion = version + modifier + dbgSuffix;
-
+Information("Packageversion: "+packageVersion);
 if (BuildSystem.IsRunningOnAppVeyor)
 {
     var tag = AppVeyor.Environment.Repository.Tag;
@@ -166,7 +168,9 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
 
                 // https://github.com/cake-build/cake/issues/2077
                 #tool Microsoft.TestPlatform
-                ToolPath = Context.Tools.Resolve("vstest.console.exe")
+                ToolPath = Context.Tools.Resolve("vstest.console.exe"),
+                Logger = "trx"
+
             });
         });
 
@@ -180,7 +184,8 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
                 Framework = framework,
                 NoBuild = true,
                 TestAdapterPath = adapterDir,
-                Settings = File("DisableAppDomain.runsettings")
+                Settings = File("DisableAppDomain.runsettings"),
+                Logger="trx"
             });
         });
 }
@@ -210,8 +215,7 @@ Task("CreateWorkingImage")
             ADAPTER_BIN_DIR_NET35 + "NUnit3.TestAdapter.dll",
             ADAPTER_BIN_DIR_NET35 + "NUnit3.TestAdapter.pdb",
             ADAPTER_BIN_DIR_NET35 + "nunit.engine.dll",
-            ADAPTER_BIN_DIR_NET35 + "nunit.engine.api.dll",
-            ADAPTER_BIN_DIR_NET35 + "Mono.Cecil.dll"
+            ADAPTER_BIN_DIR_NET35 + "nunit.engine.api.dll"
         };
 
         var net35Dir = PACKAGE_IMAGE_DIR + "build/net35";
@@ -258,26 +262,6 @@ Task("PackageVsix")
     });
 
 //////////////////////////////////////////////////////////////////////
-// HELPER METHODS
-//////////////////////////////////////////////////////////////////////
-
-public static T WithRawArgument<T>(this T settings, string rawArgument) where T : Cake.Core.Tooling.ToolSettings
-{
-    if (settings == null) throw new ArgumentNullException(nameof(settings));
-
-    if (!string.IsNullOrEmpty(rawArgument))
-    {
-        var previousCustomizer = settings.ArgumentCustomization;
-        if (previousCustomizer != null)
-            settings.ArgumentCustomization = builder => previousCustomizer.Invoke(builder).Append(rawArgument);
-        else
-            settings.ArgumentCustomization = builder => builder.Append(rawArgument);
-    }
-
-    return settings;
-}
-
-//////////////////////////////////////////////////////////////////////
 // TASK TARGETS
 //////////////////////////////////////////////////////////////////////
 
@@ -299,7 +283,8 @@ Task("Package")
 Task("Appveyor")
     .IsDependentOn("Build")
     .IsDependentOn("Test")
-    .IsDependentOn("Package");
+    .IsDependentOn("Package")
+    .IsDependentOn("Acceptance");
 
 Task("Default")
     .IsDependentOn("Build");

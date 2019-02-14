@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2012 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2012-2019 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -33,9 +33,25 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
             throw new NotImplementedException();
         }
 
-        public string SettingsXml
-        {
-            get { return "<RunSettings/>"; }
-        }
+        public virtual string SettingsXml => "<RunSettings/>";
     }
+
+    class FakeRunSettingsForTestOutput : FakeRunSettings
+    {
+        public override string SettingsXml => "<RunSettings><NUnit><TestOutputXml>TestResults</TestOutputXml></NUnit></RunSettings>";
+    }
+
+    class FakeRunSettingsForTestOutputAndWorkDir : FakeRunSettings
+    {
+        private readonly string _testOutput;
+        private readonly string _workDir;
+
+        public FakeRunSettingsForTestOutputAndWorkDir(string testOutput,string workDir)
+        {
+            _workDir = workDir;
+            _testOutput = testOutput;
+        }
+        public override string SettingsXml => $"<RunSettings><NUnit><WorkDirectory>{_workDir}</WorkDirectory><TestOutputXml>{_testOutput}</TestOutputXml></NUnit></RunSettings>";
+    }
+
 }

@@ -23,6 +23,11 @@
     <Authors>Charlie Poole, Terje Sandstrom</Authors>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net35'">
+    <!-- Suppress errors from https://github.com/dotnet/sdk/issues/1897-->
+    <DisableHandlePackageFileConflicts>false</DisableHandlePackageFileConflicts>
+  </PropertyGroup>
+
   <ItemGroup>
     <Content Include="..\..\LICENSE.txt" Link="LICENSE.txt" />
   </ItemGroup>
@@ -33,19 +38,27 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net35'">
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="11.0.0" PrivateAssets="All" />
-    <PackageReference Include="nunit.engine" Version="3.7.0" />
+    <PackageReference Include="nunit.engine" Version="3.9.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0'">
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.1.2" />
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="15.0.0" PrivateAssets="All" />
-    <PackageReference Include="nunit.engine.netstandard" Version="3.7.0" />
+    <PackageReference Include="nunit.engine.netstandard" Version="3.8.0" />
   </ItemGroup>
 
   <Target Name="PreventTestPlatformObjectModelCopyLocal" AfterTargets="ResolveReferences">
     <ItemGroup>
       <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' == 'Microsoft.VisualStudio.TestPlatform.ObjectModel'" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Before RemoveReferencesToEmbeddedAssembles (our thing in Common.props which disappears the ReferencePath that we need here). -->
+  <Target Name="AddReferencesAsEmbeddedResources" BeforeTargets="RemoveReferencesToEmbeddedAssembles">
+    <ItemGroup>
+      <!-- Add Mono.Cecil.dll as an embedded reference named ‘Assemblies\Mono.Cecil.dll’ -->
+      <EmbeddedResource Include="@(ReferencePath)" Condition="'%(Filename)' == 'Mono.Cecil'" KeepMetadata="x" LogicalName="Assemblies\%(Filename)%(Extension)" />
     </ItemGroup>
   </Target>
 

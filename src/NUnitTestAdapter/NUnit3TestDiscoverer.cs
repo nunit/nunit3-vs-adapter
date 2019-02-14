@@ -8,10 +8,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -46,6 +46,11 @@ namespace NUnit.VisualStudio.TestAdapter
     [Category("managed")]
     public sealed class NUnit3TestDiscoverer : NUnitTestAdapter, ITestDiscoverer
     {
+        public NUnit3TestDiscoverer()
+        {
+            EmbeddedAssemblyResolution.EnsureInitialized();
+        }
+
         private Dump.DumpXml dumpXml;
 
         #region ITestDiscoverer Members
@@ -58,7 +63,7 @@ namespace NUnit.VisualStudio.TestAdapter
 #endif
             Initialize(discoveryContext, messageLogger);
 
-            
+
 
             TestLog.Info($"NUnit Adapter {AdapterVersion}: Test discovery starting");
 
@@ -81,9 +86,9 @@ namespace NUnit.VisualStudio.TestAdapter
                 if (Settings.DumpXmlTestDiscovery)
                 {
                     dumpXml = new DumpXml(sourceAssemblyPath);
-                    
+
                 }
-               
+
                 try
                 {
                     runner = GetRunnerFor(sourceAssemblyPath);
@@ -99,7 +104,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     if (topNode.GetAttribute("runstate") == "Runnable")
                     {
                         int cases;
-                        using (var testConverter = new TestConverter(TestLog, sourceAssemblyPath, Settings.CollectSourceInformation))
+                        using (var testConverter = new TestConverter(TestLog, sourceAssemblyPath, Settings))
                         {
                             cases = ProcessTestCases(topNode, discoverySink, testConverter);
                         }
@@ -108,18 +113,35 @@ namespace NUnit.VisualStudio.TestAdapter
                         // Only save if seed is not specified in runsettings
                         // This allows workaround in case there is no valid
                         // location in which the seed may be saved.
-                        if (cases>0 && !Settings.RandomSeedSpecified)
+                        if (cases > 0 && !Settings.RandomSeedSpecified)
                             Settings.SaveRandomSeed(Path.GetDirectoryName(sourceAssemblyPath));
                     }
                     else
                     {
                         var msgNode = topNode.SelectSingleNode("properties/property[@name='_SKIPREASON']");
-                        if (msgNode != null && (new[] { "contains no tests", "Has no TestFixtures" }).Any(msgNode.GetAttribute("value").Contains))
-                            TestLog.Info("Assembly contains no NUnit 3.0 tests: " + sourceAssembly);
+                        if (msgNode != null &&
+                            (new[] {"contains no tests", "Has no TestFixtures"}).Any(msgNode.GetAttribute("value")
+                                .Contains))
+                        {
+                            if (Settings.Verbosity > 0)
+                                TestLog.Info("Assembly contains no NUnit 3.0 tests: " + sourceAssembly);
+                        }
                         else
                             TestLog.Info("NUnit failed to load " + sourceAssembly);
                     }
-                    
+
+                }
+                catch (NUnitEngineException e)
+                {
+                    if (e.InnerException is BadImageFormatException)
+                    {
+                        // we skip the native c++ binaries that we don't support.
+                        TestLog.Warning("Assembly not supported: " + sourceAssembly);
+                    }
+                    else
+                    {
+                        TestLog.Warning("Exception thrown discovering tests in " + sourceAssembly, e);
+                    }
                 }
                 catch (BadImageFormatException)
                 {
