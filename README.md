@@ -25,7 +25,9 @@ or raise an issue [![](https://img.shields.io/github/issues/nunit/NUnit3-vs-Adap
 
 ## License ##
 
-The NUnit 3 Test Adapter is Open Source software released under the [![](https://img.shields.io/github/license/nunit/nunit3-vs-adapter.svg?style=flat)](http://www.nunit.org/nuget/nunit3-license.txt).
+
+The NUnit 3 Test Adapter is Open Source software released under the [![](https://img.shields.io/github/license/nunit/nunit3-vs-adapter.svg?style=flat)](https://nunit.org/nuget/nunit3-license.txt).
+
 
 ## Developing
 
