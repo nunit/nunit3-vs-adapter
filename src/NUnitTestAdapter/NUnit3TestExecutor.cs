@@ -91,9 +91,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 Unload();
                 return;
             }
-
-
-
+            TestLog.VerboseInfo($"In {nameof(RunTests)} by sources");
             foreach (var assemblyName in sources)
             {
                 try
@@ -126,15 +124,16 @@ namespace NUnit.VisualStudio.TestAdapter
                 Debugger.Launch();
 #endif
             Initialize(runContext, frameworkHandle);
-
+         
             var assemblyGroups = tests.GroupBy(tc => tc.Source);
-            if (Settings.InProcDataCollectorsAvailable && assemblyGroups.Count() > 1)
-            {
-                TestLog.Error("Failed to run tests for multiple assemblies when InProcDataCollectors specified in run configuration.");
-                Unload();
+            if (!CheckInProcDataCollectors(assemblyGroups))
                 return;
+            TestLog.VerboseInfo($"In {nameof(RunTests)} by tests");
+            var tfsTestFilter = new TfsTestFilter(runContext);
+            if (Settings.Verbosity > 4)
+            {
+                TestLog.Info($"Test filter: {tfsTestFilter.TfsTestCaseFilterExpression.TestCaseFilterValue}");
             }
-
             foreach (var assemblyGroup in assemblyGroups)
             {
                 try
@@ -143,7 +142,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     var assemblyPath = Path.IsPathRooted(assemblyName) ? assemblyName : Path.Combine(Directory.GetCurrentDirectory(), assemblyName);
 
                     var filterBuilder = CreateTestFilterBuilder();
-                    var filter = filterBuilder.MakeTestFilter(assemblyGroup);
+                    var filter = filterBuilder.MakeTestFilter(assemblyGroup,tfsTestFilter);
 
                     RunAssembly(assemblyPath, filter);
                 }
@@ -154,8 +153,21 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
             }
 
-            TestLog.Info(string.Format("NUnit Adapter {0}: Test execution complete", AdapterVersion));
+            TestLog.Info($"NUnit Adapter {AdapterVersion}: Test execution complete");
             Unload();
+        }
+
+        private bool CheckInProcDataCollectors(IEnumerable<IGrouping<string, TestCase>> assemblyGroups)
+        {
+            if (Settings.InProcDataCollectorsAvailable && assemblyGroups.Count() > 1)
+            {
+                TestLog.Error(
+                    "Failed to run tests for multiple assemblies when InProcDataCollectors specified in run configuration.");
+                Unload();
+                return false;
+            }
+
+            return true;
         }
 
         void ITestExecutor.Cancel()
@@ -259,6 +271,7 @@ namespace NUnit.VisualStudio.TestAdapter
                         // If we have a TFS Filter, convert it to an nunit filter
                         if (TfsFilter != null && !TfsFilter.IsEmpty)
                         {
+                            TestLog.VerboseInfo("Converting TFS filter to NUnit filter");
                             // NOTE This overwrites filter used in call
                             var filterBuilder = CreateTestFilterBuilder();
                             filter = filterBuilder.ConvertTfsFilterToNUnitFilter(TfsFilter, loadedTestCases);
@@ -363,9 +376,9 @@ namespace NUnit.VisualStudio.TestAdapter
         private NUnitTestFilterBuilder CreateTestFilterBuilder()
         {
 #if NETCOREAPP1_0
-            return new NUnitTestFilterBuilder(new TestFilterService());
+            return new NUnitTestFilterBuilder(new TestFilterService(),Settings,TestLog);
 #else
-            return new NUnitTestFilterBuilder(TestEngine.Services.GetService<ITestFilterService>());
+            return new NUnitTestFilterBuilder(TestEngine.Services.GetService<ITestFilterService>(),Settings,TestLog);
 #endif
         }
 

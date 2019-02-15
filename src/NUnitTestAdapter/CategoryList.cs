@@ -100,12 +100,15 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private bool IsInternalProperty(string propertyName, string propertyValue)
         {
+            
             if (propertyName == ExplicitTraitName)
             {
                 // Otherwise the IsNullOrEmpty check does the wrong thing,
                 // but I'm not sure of the consequences of allowing all empty strings.
                 return false;
             }
+            if ( _internalProperties.Contains(propertyName.ToLower()))
+                return true;
 
             // Property names starting with '_' are for internal use only, but over time this has changed, so we now use a list
             if (!settings.ShowInternalProperties &&

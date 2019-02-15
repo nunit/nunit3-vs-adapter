@@ -131,7 +131,11 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 Settings.Load(context);
                 TestLog.Verbosity = Settings.Verbosity;
-               
+                if (TestLog.Verbosity > 0)
+                {
+                    TestLog.Info($"TestLog verbosity = {TestLog.Verbosity}");
+                }
+                
             }
             catch (Exception e)
             {

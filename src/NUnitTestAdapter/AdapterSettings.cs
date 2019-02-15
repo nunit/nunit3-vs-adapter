@@ -30,7 +30,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-    public interface IAdapterSettings
+    public interface IAdapterSettings : IFeatureFlags
     {
         int MaxCpuCount { get; }
         string ResultsDirectory { get; }
@@ -96,6 +96,18 @@ namespace NUnit.VisualStudio.TestAdapter
     }
 
 
+
+    public interface IFeatureFlags
+    {
+        bool UseTestCaseFilterConverter { get; }
+    }
+
+    public class FeatureFlags : IFeatureFlags
+    {
+        public bool UseTestCaseFilterConverter { get; set; }
+    }
+
+
     public class AdapterSettings : IAdapterSettings
     {
         private const string RANDOM_SEED_FILE = "nunit_random_seed.tmp";
@@ -106,6 +118,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public AdapterSettings(TestLogger logger)
         {
             _logger = logger;
+            featureFlags = new FeatureFlags();
         }
 
         #endregion
@@ -196,6 +209,15 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         public string DefaultTestNamePattern { get; set; }
 
+        private readonly FeatureFlags featureFlags;
+
+        // FeatureFlags
+
+        public bool UseTestCaseFilterConverter => featureFlags.UseTestCaseFilterConverter;
+
+
+
+
         #endregion
 
         #region Public Methods
@@ -234,6 +256,9 @@ namespace NUnit.VisualStudio.TestAdapter
             DesignMode = GetInnerTextAsBool(runConfiguration, nameof(DesignMode), false);
             CollectDataForEachTestSeparately =
                 GetInnerTextAsBool(runConfiguration, nameof(CollectDataForEachTestSeparately), false);
+
+
+
 
             TestProperties = new Dictionary<string, string>();
             foreach (XmlNode node in doc.SelectNodes("RunSettings/TestRunParameters/Parameter"))
@@ -279,6 +304,9 @@ namespace NUnit.VisualStudio.TestAdapter
                         break;
                 }
 
+            var ffNode = nunitNode?.SelectSingleNode("FeatureFlags");
+            featureFlags.UseTestCaseFilterConverter =
+                ffNode == null || GetInnerTextAsBool(ffNode, nameof(UseTestCaseFilterConverter), true);
 
 
 #if SUPPORT_REGISTRY_SETTINGS
