@@ -12,7 +12,18 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
     [Category("Acceptance")]
     public abstract class AcceptanceTests
     {
-        protected static string NuGetPackageId { get; } = "NUnit3TestAdapter";
+        public static string NuGetPackageId { get; } = "NUnit3TestAdapter";
+
+        public static string NuGetPackageVersion => Initialization.Value.nupkgVersion;
+
+        public static string LowestNetfxTarget = "net35";
+        public static string LegacyProjectTargetFrameworkVersion = "v3.5";
+
+        public static IEnumerable<string> TargetFrameworks => new[]
+        {
+            LowestNetfxTarget,
+            "netcoreapp1.0"
+        };
 
         private readonly static Lazy<(IsolatedWorkspaceManager manager, string nupkgVersion)> Initialization = new Lazy<(IsolatedWorkspaceManager, string)>(() =>
         {
@@ -39,8 +50,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         });
 
         private readonly static Dictionary<string, List<IsolatedWorkspace>> WorkspacesByTestId = new Dictionary<string, List<IsolatedWorkspace>>();
-
-        protected static string NuGetPackageVersion => Initialization.Value.nupkgVersion;
 
         protected static IsolatedWorkspace CreateWorkspace()
         {

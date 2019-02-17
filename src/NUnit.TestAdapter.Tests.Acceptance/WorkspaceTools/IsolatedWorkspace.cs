@@ -35,5 +35,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
             File.WriteAllText(Path.Combine(Directory, path), Utils.RemoveIndent(contents));
             return this;
         }
+
+        public void DotNetRestore()
+        {
+            ProcessUtils.Run(Directory, "dotnet", new[] { "restore" });
+        }
     }
 }
