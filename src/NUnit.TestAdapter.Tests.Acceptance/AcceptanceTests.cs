@@ -64,6 +64,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
             return workspace;
         }
 
+        protected static void InconclusiveOnException(Action action)
+        {
+            Assume.That(action.Invoke, Throws.Nothing);
+        }
+
         [TearDown]
         public static void TearDown()
         {
@@ -82,7 +87,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                 else
                 {
                     foreach (var workspace in workspaces)
-                        Directory.Delete(workspace.Directory, recursive: true);
+                        Utils.DeleteDirectoryRobust(workspace.Directory);
                 }
             }
         }
@@ -100,7 +105,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
             {
                 if (File.Exists(Path.Combine(directory, "build.cake")))
                 {
-                    return Path.Combine(directory, ".acceptanceworkspace");
+                    return Path.Combine(directory, ".acceptance");
                 }
             }
 

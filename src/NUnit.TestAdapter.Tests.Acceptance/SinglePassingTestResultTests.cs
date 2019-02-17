@@ -1,11 +1,56 @@
+﻿using System.Linq;
 using NUnit.Framework;
+using NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 {
-    public sealed class DotNetRestoreTests : AcceptanceTests
+    public sealed class SinglePassingTestResultTests : AcceptanceTests
     {
+        // TODO: Get packages.config projects to build. Requires downloading nuget.exe and doing `nuget restore`,
+        //       so ToolLocationFacts will need to become a ToolResolver class with tool cache configured via
+        //       constructor. Need to determine how best to get it to IsolatedWorkspace.
+
+        // TODO: Verify TRX for all tests.
+
+        // TODO: Delete acceptance.cake and make sure this project is picked up in CI
+
+        private static void AddTestsCs(IsolatedWorkspace workspace)
+        {
+            workspace.AddFile("Tests.cs", @"
+                using NUnit.Framework;
+
+                namespace Test
+                {
+                    public class Tests
+                    {
+                        [Test]
+                        public void PassingTest()
+                        {
+                            Assert.Pass();
+                        }
+                    }
+                }");
+        }
+
+        private static void AddTestsVb(IsolatedWorkspace workspace)
+        {
+            workspace.AddFile("Tests.vb", @"
+                Imports NUnit.Framework
+
+                Namespace Test
+                    Public Class Tests
+
+                        <Test>
+                        Public Sub PassingTest()
+                            Assert.Pass()
+                        End Sub
+
+                    End Class
+                End Namespace");
+        }
+
         [TestCaseSource(nameof(TargetFrameworks))]
-        public static void NuGet_package_can_be_restored_for_single_target_csproj(string targetFramework)
+        public static void Single_target_csproj(string targetFramework)
         {
             var workspace = CreateWorkspace()
                 .AddProject("Test.csproj", $@"
@@ -23,11 +68,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
                     </Project>");
 
-            workspace.DotNetRestore();
+            AddTestsCs(workspace);
+
+            workspace.MSBuild(restore: true);
+
+            workspace.VSTest(new[] { $@"bin\Debug\{targetFramework}\Test.dll" });
         }
 
         [TestCaseSource(nameof(TargetFrameworks))]
-        public static void NuGet_package_can_be_restored_for_single_target_vbproj(string targetFramework)
+        public static void Single_target_vbproj(string targetFramework)
         {
             var workspace = CreateWorkspace()
                 .AddProject("Test.vbproj", $@"
@@ -45,11 +94,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
                     </Project>");
 
-            workspace.DotNetRestore();
+            AddTestsVb(workspace);
+
+            workspace.MSBuild(restore: true);
+
+            workspace.VSTest(new[] { $@"bin\Debug\{targetFramework}\Test.dll" });
         }
 
         [Test]
-        public static void NuGet_package_can_be_restored_for_multi_target_csproj()
+        public static void Multi_target_csproj()
         {
             var workspace = CreateWorkspace()
                 .AddProject("Test.csproj", $@"
@@ -67,11 +120,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
                     </Project>");
 
-            workspace.DotNetRestore();
+            AddTestsCs(workspace);
+
+            workspace.MSBuild(restore: true);
+
+            workspace.VSTest(
+                from targetFramework in TargetFrameworks
+                select $@"bin\Debug\{targetFramework}\Test.dll");
         }
 
         [Test]
-        public static void NuGet_package_can_be_restored_for_multi_target_vbproj()
+        public static void Multi_target_vbproj()
         {
             var workspace = CreateWorkspace()
                 .AddProject("Test.vbproj", $@"
@@ -89,11 +148,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
                     </Project>");
 
-            workspace.DotNetRestore();
+            AddTestsVb(workspace);
+
+            workspace.MSBuild(restore: true);
+
+            workspace.VSTest(
+                from targetFramework in TargetFrameworks
+                select $@"bin\Debug\{targetFramework}\Test.dll");
         }
 
         [Test]
-        public static void NuGet_package_can_be_restored_for_legacy_csproj_with_PackageReference()
+        public static void Legacy_csproj_with_PackageReference()
         {
             var workspace = CreateWorkspace()
                 .AddProject("Test.csproj", $@"
@@ -138,6 +203,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                         <Reference Include='System.Xml' />
                       </ItemGroup>
                       <ItemGroup>
+                        <Compile Include='Tests.cs' />
+                      </ItemGroup>
+                      <ItemGroup>
                         <PackageReference Include='Microsoft.NET.Test.Sdk'>
                           <Version>15.9.0</Version>
                         </PackageReference>
@@ -151,11 +219,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                       <Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets' />
                     </Project>");
 
-            workspace.DotNetRestore();
+            AddTestsCs(workspace);
+
+            workspace.MSBuild(restore: true);
+
+            workspace.VSTest(new[] { @"bin\Debug\Test.dll" });
         }
 
         [Test]
-        public static void NuGet_package_can_be_restored_for_legacy_vbproj_with_PackageReference()
+        public static void Legacy_vbproj_with_PackageReference()
         {
             var workspace = CreateWorkspace()
                 .AddProject("Test.vbproj", $@"
@@ -223,6 +295,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                         <Import Include='System.Xml.Linq' />
                       </ItemGroup>
                       <ItemGroup>
+                        <Compile Include='Tests.vb' />
+                      </ItemGroup>
+                      <ItemGroup>
                         <PackageReference Include='Microsoft.NET.Test.Sdk'>
                           <Version>15.9.0</Version>
                         </PackageReference>
@@ -236,11 +311,27 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                       <Import Project='$(MSBuildToolsPath)\Microsoft.VisualBasic.targets' />
                     </Project>");
 
-            workspace.DotNetRestore();
+            AddTestsVb(workspace);
+
+            workspace.MSBuild(restore: true);
+
+            workspace.VSTest(new[] { @"bin\Debug\Test.dll" });
+        }
+
+        private static void AddPackagesConfig(IsolatedWorkspace workspace)
+        {
+            workspace.AddFile("packages.config", $@"
+                <?xml version='1.0' encoding='utf-8'?>
+                <packages>
+                    <package id='Microsoft.CodeCoverage' version='15.9.0' targetFramework='net45' />
+                    <package id='Microsoft.NET.Test.Sdk' version='15.9.0' targetFramework='net45' />
+                    <package id='NUnit' version='3.11.0' targetFramework='net45' />
+                    <package id='NUnit3TestAdapter' version='{NuGetPackageVersion}' targetFramework='net45' />
+                </packages>");
         }
 
         [Test]
-        public static void NuGet_package_can_be_restored_for_legacy_csproj_with_packages_config()
+        public static void Legacy_csproj_with_packages_config()
         {
             var workspace = CreateWorkspace()
                 .AddProject("Test.csproj", $@"
@@ -299,6 +390,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                         <Reference Include='System.Xml' />
                       </ItemGroup>
                       <ItemGroup>
+                        <Compile Include='Tests.cs' />
                         <None Include='packages.config' />
                       </ItemGroup>
                       <Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets' />
@@ -315,21 +407,18 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                       </Target>
                       <Import Project='..\packages\Microsoft.CodeCoverage.15.9.0\build\netstandard1.0\Microsoft.CodeCoverage.targets' Condition=""Exists('..\packages\Microsoft.CodeCoverage.15.9.0\build\netstandard1.0\Microsoft.CodeCoverage.targets')"" />
                       <Import Project='..\packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.targets' Condition=""Exists('..\packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.targets')"" />
-                    </Project>")
-                .AddFile("packages.config", $@"
-                    <?xml version='1.0' encoding='utf-8'?>
-                    <packages>
-                      <package id='Microsoft.CodeCoverage' version='15.9.0' targetFramework='net45' />
-                      <package id='Microsoft.NET.Test.Sdk' version='15.9.0' targetFramework='net45' />
-                      <package id='NUnit' version='3.11.0' targetFramework='net45' />
-                      <package id='NUnit3TestAdapter' version='{NuGetPackageVersion}' targetFramework='net45' />
-                    </packages>");
+                    </Project>");
 
-            workspace.DotNetRestore();
+            AddPackagesConfig(workspace);
+            AddTestsCs(workspace);
+
+            workspace.MSBuild(restore: true);
+
+            workspace.VSTest(new[] { @"bin\Debug\Test.dll" });
         }
 
         [Test]
-        public static void NuGet_package_can_be_restored_for_legacy_vbproj_with_packages_config()
+        public static void Legacy_vbproj_with_packages_config()
         {
             var workspace = CreateWorkspace()
                 .AddProject("Test.vbproj", $@"
@@ -411,6 +500,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                         <Import Include='System.Threading.Tasks' />
                       </ItemGroup>
                       <ItemGroup>
+                        <Compile Include='Tests.vb' />
                         <None Include='packages.config' />
                       </ItemGroup>
                       <Import Project='$(MSBuildToolsPath)\Microsoft.VisualBasic.targets' />
@@ -427,17 +517,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                       </Target>
                       <Import Project='..\packages\Microsoft.CodeCoverage.15.9.0\build\netstandard1.0\Microsoft.CodeCoverage.targets' Condition=""Exists('..\packages\Microsoft.CodeCoverage.15.9.0\build\netstandard1.0\Microsoft.CodeCoverage.targets')"" />
                       <Import Project='..\packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.targets' Condition=""Exists('..\packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.targets')"" />
-                    </Project>")
-                .AddFile("packages.config", $@"
-                    <?xml version='1.0' encoding='utf-8'?>
-                    <packages>
-                      <package id='Microsoft.CodeCoverage' version='15.9.0' targetFramework='net45' />
-                      <package id='Microsoft.NET.Test.Sdk' version='15.9.0' targetFramework='net45' />
-                      <package id='NUnit' version='3.11.0' targetFramework='net45' />
-                      <package id='NUnit3TestAdapter' version='{NuGetPackageVersion}' targetFramework='net45' />
-                    </packages>");
+                    </Project>");
 
-            workspace.DotNetRestore();
+            AddPackagesConfig(workspace);
+            AddTestsVb(workspace);
+
+            workspace.MSBuild(restore: true);
+
+            workspace.VSTest(new[] { @"bin\Debug\Test.dll" });
         }
     }
 }

@@ -8,7 +8,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 {
     public static class ProcessUtils
     {
-        public static void Run(string workingDirectory, string fileName, IEnumerable<string> arguments = null)
+        public static string Run(string workingDirectory, string fileName, IEnumerable<string> arguments = null)
         {
             if (!Path.IsPathRooted(workingDirectory))
                 throw new ArgumentException(nameof(workingDirectory), "Working directory must not be relative.");
@@ -29,31 +29,35 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                 }
             })
             {
-                var output = (StringBuilder)null;
-                var error = (StringBuilder)null;
+                // This is inherited if the test runner was started by the Visual Studio process.
+                // It breaks MSBuild 15’s targets when it tries to build legacy csprojs and vbprojs.
+                process.StartInfo.EnvironmentVariables.Remove("VisualStudioVersion");
+
+                var stdout = (StringBuilder)null;
+                var stderr = (StringBuilder)null;
 
                 process.OutputDataReceived += (sender, e) =>
                 {
                     if (e.Data is null) return;
 
-                    if (output is null)
-                        output = new StringBuilder();
+                    if (stdout is null)
+                        stdout = new StringBuilder();
                     else
-                        output.AppendLine();
+                        stdout.AppendLine();
 
-                    output.Append(e.Data);
+                    stdout.Append(e.Data);
                 };
 
                 process.ErrorDataReceived += (sender, e) =>
                 {
                     if (e.Data is null) return;
 
-                    if (error is null)
-                        error = new StringBuilder();
+                    if (stderr is null)
+                        stderr = new StringBuilder();
                     else
-                        error.AppendLine();
+                        stderr.AppendLine();
 
-                    error.Append(e.Data);
+                    stderr.Append(e.Data);
                 };
 
                 process.Start();
@@ -61,14 +65,16 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                 process.BeginOutputReadLine();
                 process.WaitForExit();
 
-                if (process.ExitCode != 0 || error != null)
+                if (process.ExitCode != 0 || stderr != null)
                 {
                     throw new ProcessErrorException(
                         Path.GetFileName(fileName),
                         process.ExitCode,
-                        output?.ToString(),
-                        error?.ToString());
+                        stdout?.ToString(),
+                        stderr?.ToString());
                 }
+
+                return stdout?.ToString() ?? string.Empty;
             }
         }
 

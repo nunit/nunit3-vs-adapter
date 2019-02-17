@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 {
@@ -76,6 +77,27 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             Directory.CreateDirectory(path);
             return path;
+        }
+
+        public static void DeleteDirectoryRobust(string directory)
+        {
+            for (var attempt = 1; ; attempt++)
+            {
+                try
+                {
+                    Directory.Delete(directory, recursive: true);
+                    break;
+                }
+                catch (IOException ex) when (attempt < 3 && (WinErrorCode)ex.HResult == WinErrorCode.DirNotEmpty)
+                {
+                    TestContext.WriteLine("Another process added files to the directory while its contents were being deleted. Retrying...");
+                }
+            }
+        }
+
+        private enum WinErrorCode : ushort
+        {
+            DirNotEmpty = 145
         }
 
         /// <summary>

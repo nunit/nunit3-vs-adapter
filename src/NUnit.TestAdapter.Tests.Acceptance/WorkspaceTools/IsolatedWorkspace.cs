@@ -6,7 +6,7 @@ using System.IO;
 namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 {
     [DebuggerDisplay("{Directory,nq}")]
-    public sealed class IsolatedWorkspace
+    public sealed partial class IsolatedWorkspace
     {
         private readonly List<string> projectPaths = new List<string>();
 
@@ -38,7 +38,50 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 
         public void DotNetRestore()
         {
-            ProcessUtils.Run(Directory, "dotnet", new[] { "restore" });
+            ConfigureRun("dotnet")
+                .Add("restore")
+                .Run();
         }
+
+        public void DotNetBuild(bool noRestore = false)
+        {
+            ConfigureRun("dotnet")
+                .Add("build")
+                .AddIf(noRestore, "--no-restore")
+                .Run();
+        }
+
+        public void DotNetTest(bool noBuild = false)
+        {
+            ConfigureRun("dotnet")
+                .Add("test")
+                .AddIf(noBuild, "--no-build")
+                .Run();
+        }
+
+        public void DotNetVSTest(IEnumerable<string> testAssemblyPaths)
+        {
+            ConfigureRun("dotnet")
+                .Add("vstest")
+                .AddRange(testAssemblyPaths)
+                .Run();
+        }
+
+        public void MSBuild(string target = null, bool restore = false)
+        {
+            ConfigureRun(ToolLocationFacts.MSBuild)
+                .AddIf(target != null, "/t:" + target)
+                .AddIf(restore, "/restore")
+                .Run();
+        }
+
+        public void VSTest(IEnumerable<string> testAssemblyPaths)
+        {
+            ConfigureRun(ToolLocationFacts.VSTest)
+                .AddRange(testAssemblyPaths)
+                .Run();
+        }
+
+        private RunSettings ConfigureRun(string filename) => new RunSettings(Directory, filename);
     }
 }

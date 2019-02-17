@@ -31,7 +31,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
         public void Dispose()
         {
             reasonFile.Dispose();
-            if (!keep) Directory.Delete(workspaceDirectory, recursive: true);
+            if (!keep) Utils.DeleteDirectoryRobust(workspaceDirectory);
         }
 
         public IsolatedWorkspace CreateWorkspace(string name)
