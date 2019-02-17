@@ -9,12 +9,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
     public sealed partial class IsolatedWorkspace
     {
         private readonly List<string> projectPaths = new List<string>();
+        private readonly ToolResolver toolResolver;
 
         public string Directory { get; }
 
-        public IsolatedWorkspace(string directory)
+        public IsolatedWorkspace(string directory, ToolResolver toolResolver)
         {
             Directory = directory;
+            this.toolResolver = toolResolver ?? throw new ArgumentNullException(nameof(toolResolver));
         }
 
         public IsolatedWorkspace AddProject(string path, string contents)
@@ -67,9 +69,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                 .Run();
         }
 
+        public void NuGetRestore(string packagesDirectory = null)
+        {
+            ConfigureRun(toolResolver.NuGet)
+                .Add("restore")
+                .AddRangeIf(packagesDirectory != null, new[] { "-PackagesDirectory", packagesDirectory })
+                .Run();
+        }
+
         public void MSBuild(string target = null, bool restore = false)
         {
-            ConfigureRun(ToolLocationFacts.MSBuild)
+            ConfigureRun(toolResolver.MSBuild)
                 .AddIf(target != null, "/t:" + target)
                 .AddIf(restore, "/restore")
                 .Run();
@@ -77,7 +87,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 
         public void VSTest(IEnumerable<string> testAssemblyPaths)
         {
-            ConfigureRun(ToolLocationFacts.VSTest)
+            ConfigureRun(toolResolver.VSTest)
                 .AddRange(testAssemblyPaths)
                 .Run();
         }

@@ -48,7 +48,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                         "Runner process: " + Process.GetCurrentProcess().MainModule.FileName),
                     directory,
                     nupkgDirectory,
-                    packageCachePath),
+                    packageCachePath,
+                    downloadCachePath: Path.Combine(directory, ".toolcache")),
                 nupkgVersion);
         });
 

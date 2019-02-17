@@ -41,6 +41,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                 if (condition) arguments.Add(argument);
                 return this;
             }
+
+            public RunSettings AddRangeIf(bool condition, IEnumerable<string> arguments)
+            {
+                if (arguments is null) throw new ArgumentNullException(nameof(arguments));
+                if (condition) this.arguments.AddRange(arguments);
+                return this;
+            }
         }
     }
 }

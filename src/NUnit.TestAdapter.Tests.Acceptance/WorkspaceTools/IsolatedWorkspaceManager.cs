@@ -7,18 +7,22 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
     public sealed class IsolatedWorkspaceManager : IDisposable
     {
         private readonly string workspaceDirectory;
+        private readonly ToolResolver toolResolver;
         private readonly StreamWriter reasonFile;
         private bool keep;
 
-        public IsolatedWorkspaceManager(string reason, string baseDirectory, string testNupkgDirectory, string packageCachePath)
+        public IsolatedWorkspaceManager(string reason, string baseDirectory, string testNupkgDirectory, string packageCachePath, string downloadCachePath)
         {
             baseDirectory = Path.GetFullPath(baseDirectory);
             testNupkgDirectory = Path.GetFullPath(testNupkgDirectory);
             packageCachePath = Path.GetFullPath(packageCachePath);
+            downloadCachePath = Path.GetFullPath(downloadCachePath);
 
             Directory.CreateDirectory(baseDirectory);
 
             workspaceDirectory = Utils.CreateUniqueDirectory(baseDirectory);
+
+            toolResolver = new ToolResolver(downloadCachePath);
 
             reasonFile = File.CreateText(Path.Combine(workspaceDirectory, "Reason.txt"));
             reasonFile.WriteLine(reason);
@@ -36,7 +40,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 
         public IsolatedWorkspace CreateWorkspace(string name)
         {
-            return new IsolatedWorkspace(Utils.CreateUniqueDirectory(workspaceDirectory, name));
+            return new IsolatedWorkspace(
+                Utils.CreateUniqueDirectory(workspaceDirectory, name),
+                toolResolver);
         }
 
         /// <summary>
