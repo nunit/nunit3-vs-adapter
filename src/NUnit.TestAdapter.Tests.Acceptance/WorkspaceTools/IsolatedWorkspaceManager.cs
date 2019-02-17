@@ -57,12 +57,22 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 
         private static void WriteNuGetConfig(string directory, string testNupkgDirectory, string packageCachePath)
         {
+            const string fallbackFolder = @"C:\Program Files\dotnet\sdk\NuGetFallbackFolder";
+
             using (var file = File.CreateText(Path.Combine(directory, "nuget.config")))
             using (var writer = XmlWriter.Create(file, new XmlWriterSettings { Indent = true }))
             {
+                writer.WriteComment(string.Join(Environment.NewLine,
+                    "",
+                    "This file exists so that if any of the projects under this folder are opened by an IDE or restored from the CLI by acceptance tests or by hand,",
+                    " 1. the .nupkg that is being tested can be referenced by these projects, and",
+                    " 2. the .nupkg that is tested does not pollute the global cache in %userprofile%\\.nuget.",
+                    ""));
+
                 writer.WriteStartElement("configuration");
                 writer.WriteStartElement("config");
 
+                writer.WriteComment(" Implements the second point ");
                 writer.WriteStartElement("add");
                 writer.WriteAttributeString("key", "globalPackagesFolder");
                 writer.WriteAttributeString("value", packageCachePath);
@@ -71,19 +81,27 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                 writer.WriteEndElement();
                 writer.WriteStartElement("packageSources");
 
+                writer.WriteComment(" Implements the first point ");
                 writer.WriteStartElement("add");
                 writer.WriteAttributeString("key", "Build script package output");
                 writer.WriteAttributeString("value", testNupkgDirectory);
                 writer.WriteEndElement();
 
+                writer.WriteComment($" Speeds up first-time restore by populating {GetLeafDirectoryName(packageCachePath)} from {GetLeafDirectoryName(fallbackFolder)} rather than nuget.org. ");
                 writer.WriteStartElement("add");
                 writer.WriteAttributeString("key", "Pre-downloaded packages");
-                writer.WriteAttributeString("value", @"C:\Program Files\dotnet\sdk\NuGetFallbackFolder");
+                writer.WriteAttributeString("value", fallbackFolder);
                 writer.WriteEndElement();
 
                 writer.WriteEndElement();
                 writer.WriteEndElement();
             }
+        }
+
+        private static string GetLeafDirectoryName(string directoryPath)
+        {
+            return Path.GetFileName(directoryPath)
+                ?? Path.GetFileName(Path.GetDirectoryName(directoryPath));
         }
     }
 }
