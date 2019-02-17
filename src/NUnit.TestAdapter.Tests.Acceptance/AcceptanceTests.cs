@@ -38,6 +38,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
             var nupkgVersion = TryGetTestNupkgVersion(nupkgDirectory, packageId: NuGetPackageId)
                 ?? throw new InvalidOperationException($"No NuGet package with the ID {NuGetPackageId} was found in {nupkgDirectory}.");
 
+            var packageCachePath = Path.Combine(directory, ".isolatednugetcache");
+            ClearCachedTestNupkgs(packageCachePath);
+
             return (
                 new IsolatedWorkspaceManager(
                     reason: string.Join(Environment.NewLine,
@@ -45,9 +48,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                         "Runner process: " + Process.GetCurrentProcess().MainModule.FileName),
                     directory,
                     nupkgDirectory,
-                    Path.Combine(directory, ".isolatednugetcache")),
+                    packageCachePath),
                 nupkgVersion);
         });
+
+        private static void ClearCachedTestNupkgs(string packageCachePath)
+        {
+            Utils.DeleteDirectoryRobust(Path.Combine(packageCachePath, NuGetPackageId));
+        }
 
         private readonly static Dictionary<string, List<IsolatedWorkspace>> WorkspacesByTestId = new Dictionary<string, List<IsolatedWorkspace>>();
 
