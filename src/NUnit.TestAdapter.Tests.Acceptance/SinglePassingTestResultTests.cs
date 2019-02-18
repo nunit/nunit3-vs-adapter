@@ -6,8 +6,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 {
     public sealed class SinglePassingTestResultTests : AcceptanceTests
     {
-        // TODO: Delete acceptance.cake and make sure this project is picked up in CI
-
         private static void AddTestsCs(IsolatedWorkspace workspace)
         {
             workspace.AddFile("Tests.cs", @"
