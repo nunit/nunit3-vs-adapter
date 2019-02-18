@@ -8,7 +8,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 {
     public static class ProcessUtils
     {
-        public static string Run(string workingDirectory, string fileName, IEnumerable<string> arguments = null)
+        public static ProcessRunResult Run(string workingDirectory, string fileName, IEnumerable<string> arguments = null)
         {
             if (!Path.IsPathRooted(workingDirectory))
                 throw new ArgumentException(nameof(workingDirectory), "Working directory must not be relative.");
@@ -65,16 +65,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                 process.BeginOutputReadLine();
                 process.WaitForExit();
 
-                if (process.ExitCode != 0 || stderr != null)
-                {
-                    throw new ProcessErrorException(
-                        Path.GetFileName(fileName),
-                        process.ExitCode,
-                        stdout?.ToString(),
-                        stderr?.ToString());
-                }
-
-                return stdout?.ToString() ?? string.Empty;
+                return new ProcessRunResult(
+                    fileName,
+                    process.ExitCode,
+                    stdout?.ToString(),
+                    stderr?.ToString());
             }
         }
 

@@ -6,8 +6,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 {
     public sealed class SinglePassingTestResultTests : AcceptanceTests
     {
-        // TODO: Verify TRX for all tests.
-
         // TODO: Delete acceptance.cake and make sure this project is picked up in CI
 
         private static void AddTestsCs(IsolatedWorkspace workspace)
@@ -68,7 +66,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             workspace.MSBuild(restore: true);
 
-            workspace.VSTest(new[] { $@"bin\Debug\{targetFramework}\Test.dll" });
+            workspace.VSTest(new[] { $@"bin\Debug\{targetFramework}\Test.dll" })
+                .AssertSinglePassingTest();
         }
 
         [TestCaseSource(nameof(TargetFrameworks))]
@@ -94,7 +93,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             workspace.MSBuild(restore: true);
 
-            workspace.VSTest(new[] { $@"bin\Debug\{targetFramework}\Test.dll" });
+            workspace.VSTest(new[] { $@"bin\Debug\{targetFramework}\Test.dll" })
+                .AssertSinglePassingTest();
         }
 
         [Test]
@@ -122,7 +122,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             workspace.VSTest(
                 from targetFramework in TargetFrameworks
-                select $@"bin\Debug\{targetFramework}\Test.dll");
+                select $@"bin\Debug\{targetFramework}\Test.dll")
+                .AssertSinglePassingTest();
         }
 
         [Test]
@@ -150,7 +151,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             workspace.VSTest(
                 from targetFramework in TargetFrameworks
-                select $@"bin\Debug\{targetFramework}\Test.dll");
+                select $@"bin\Debug\{targetFramework}\Test.dll")
+                .AssertSinglePassingTest();
         }
 
         [Test]
@@ -219,7 +221,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             workspace.MSBuild(restore: true);
 
-            workspace.VSTest(new[] { @"bin\Debug\Test.dll" });
+            workspace.VSTest(new[] { @"bin\Debug\Test.dll" })
+                .AssertSinglePassingTest();
         }
 
         [Test]
@@ -311,7 +314,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             workspace.MSBuild(restore: true);
 
-            workspace.VSTest(new[] { @"bin\Debug\Test.dll" });
+            workspace.VSTest(new[] { @"bin\Debug\Test.dll" })
+                .AssertSinglePassingTest();
         }
 
         private static void AddPackagesConfig(IsolatedWorkspace workspace)
@@ -412,7 +416,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             workspace.MSBuild();
 
-            workspace.VSTest(new[] { @"bin\Debug\Test.dll" });
+            workspace.VSTest(new[] { @"bin\Debug\Test.dll" })
+                .AssertSinglePassingTest();
         }
 
         [Test]
@@ -524,7 +529,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             workspace.MSBuild();
 
-            workspace.VSTest(new[] { @"bin\Debug\Test.dll" });
+            workspace.VSTest(new[] { @"bin\Debug\Test.dll" })
+                .AssertSinglePassingTest();
         }
     }
 }

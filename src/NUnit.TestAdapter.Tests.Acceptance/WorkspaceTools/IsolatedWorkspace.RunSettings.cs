@@ -18,9 +18,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                 FileName = fileName;
             }
 
-            public void Run()
+            public ProcessRunResult Run(bool throwOnError = true)
             {
-                ProcessUtils.Run(WorkingDirectory, FileName, arguments);
+                var result = ProcessUtils.Run(WorkingDirectory, FileName, arguments);
+                if (throwOnError) result.ThrowIfError();
+                return result;
             }
 
             public RunSettings Add(string argument)

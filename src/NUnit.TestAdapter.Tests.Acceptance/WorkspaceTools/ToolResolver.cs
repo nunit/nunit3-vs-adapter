@@ -81,18 +81,20 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
         {
             var arguments = new[] { "-latest", "-products", "*", "-requires", requiredComponent, "-property", "installationPath" };
 
-            var releaseInstallationPath = ProcessUtils.Run(
-                Environment.CurrentDirectory,
-                VSWhere,
-                arguments);
+            var releaseInstallationPath = ProcessUtils.Run(Environment.CurrentDirectory, VSWhere, arguments)
+                .ThrowIfError()
+                .StdOut;
 
             if (!string.IsNullOrEmpty(releaseInstallationPath))
                 return releaseInstallationPath;
 
-            var prereleaseInstallationPath = ProcessUtils.Run(
-                Environment.CurrentDirectory,
-                VSWhere,
-                arguments.Concat(new[] { "-prerelease" }));
+            var prereleaseInstallationPath =
+                ProcessUtils.Run(
+                    Environment.CurrentDirectory,
+                    VSWhere,
+                    arguments.Concat(new[] { "-prerelease" }))
+                .ThrowIfError()
+                .StdOut;
 
             if (!string.IsNullOrEmpty(prereleaseInstallationPath))
                 return prereleaseInstallationPath;

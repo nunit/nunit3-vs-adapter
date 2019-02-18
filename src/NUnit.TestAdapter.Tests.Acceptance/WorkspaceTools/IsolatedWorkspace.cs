@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Xml.Linq;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 {
@@ -85,11 +86,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                 .Run();
         }
 
-        public void VSTest(IEnumerable<string> testAssemblyPaths)
+        public VSTestResult VSTest(IEnumerable<string> testAssemblyPaths)
         {
-            ConfigureRun(toolResolver.VSTest)
-                .AddRange(testAssemblyPaths)
-                .Run();
+            using (var tempTrxFile = new TempFile())
+            {
+                ConfigureRun(toolResolver.VSTest)
+                    .AddRange(testAssemblyPaths)
+                    .Add("/logger:trx;LogFileName=" + tempTrxFile)
+                    .Run(throwOnError: false);
+
+                return VSTestResult.Load(tempTrxFile);
+            }
         }
 
         private RunSettings ConfigureRun(string filename) => new RunSettings(Directory, filename);
