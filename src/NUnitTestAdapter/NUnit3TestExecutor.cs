@@ -21,7 +21,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-// #define LAUNCHDEBUGGER
+ #define LAUNCHDEBUGGER
 
 using System;
 using System.IO;
@@ -70,7 +70,7 @@ namespace NUnit.VisualStudio.TestAdapter
         #region ITestExecutor Implementation
 
         /// <summary>
-        /// Called by the Visual Studio IDE to run all tests. Also called by TFS Build
+        /// Called by the Visual Studio IDE to run all tests. Also called by command line 
         /// to run either all or selected tests. In the latter case, a filter is provided
         /// as part of the run context.
         /// </summary>
@@ -112,7 +112,9 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         /// <summary>
-        /// Called by the VisualStudio IDE when selected tests are to be run. Never called from TFS Build.
+        /// Called by the VisualStudio IDE when selected tests are to be run. Never called from command line.
+        /// If a filter is given, we don't see that filter, it is processed before we enter here,
+        /// and we see the result as a list of testcases only.
         /// </summary>
         /// <param name="tests">The tests to be run</param>
         /// <param name="runContext">The RunContext</param>
@@ -129,10 +131,9 @@ namespace NUnit.VisualStudio.TestAdapter
             if (!CheckInProcDataCollectors(assemblyGroups))
                 return;
             TestLog.VerboseInfo($"In {nameof(RunTests)} by tests");
-            var tfsTestFilter = new TfsTestFilter(runContext);
-            if (Settings.Verbosity > 4)
+            if (Settings.Verbosity > 4 && !TfsFilter.IsEmpty)
             {
-                TestLog.Info($"Test filter: {tfsTestFilter.TfsTestCaseFilterExpression.TestCaseFilterValue}");
+                TestLog.Info($"Test filter: {TfsFilter.TfsTestCaseFilterExpression.TestCaseFilterValue}");
             }
             foreach (var assemblyGroup in assemblyGroups)
             {
@@ -142,7 +143,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     var assemblyPath = Path.IsPathRooted(assemblyName) ? assemblyName : Path.Combine(Directory.GetCurrentDirectory(), assemblyName);
 
                     var filterBuilder = CreateTestFilterBuilder();
-                    var filter = filterBuilder.MakeTestFilter(assemblyGroup,tfsTestFilter);
+                    var filter = filterBuilder.MakeTestFilter(assemblyGroup,TfsFilter);
 
                     RunAssembly(assemblyPath, filter);
                 }
@@ -192,7 +193,7 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             base.Initialize(runContext, frameworkHandle);
 
-            TestLog.Info(string.Format("NUnit Adapter {0}: Test execution started", AdapterVersion));
+            TestLog.Info($"NUnit Adapter {AdapterVersion}: Test execution started");
 
             RunContext = runContext;
             FrameworkHandle = frameworkHandle;
@@ -236,7 +237,7 @@ namespace NUnit.VisualStudio.TestAdapter
             DumpXml dumpXml = null;
             if (Settings.DumpXmlTestResults)
             {
-                dumpXml = new Dump.DumpXml(assemblyPath);
+                dumpXml = new DumpXml(assemblyPath);
 
             }
 

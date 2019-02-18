@@ -1,5 +1,31 @@
-﻿using System;
+﻿// ***********************************************************************
+// Copyright (c) 2014-2019 Charlie Poole, Terje Sandstrom
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+// 
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// ***********************************************************************
+
+// #define LAUNCHDEBUGGER
+
+
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.Engine;
@@ -25,7 +51,6 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             var filteredTestCases = tfsFilter.CheckFilter(loadedTestCases);
             var testCases = filteredTestCases as TestCase[] ?? filteredTestCases.ToArray();
-            //TestLog.Info(string.Format("TFS Filter detected: LoadedTestCases {0}, Filterered Test Cases {1}", loadedTestCases.Count, testCases.Count()));
             return MakeTestFilter(testCases,tfsFilter);
         }
 
@@ -33,17 +58,18 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             if (!testCases.Any())
                 return NoTestsFound;
-
+#if LAUNCHDEBUGGER
+            if (!Debugger.IsAttached)
+                Debugger.Launch();
+#endif
             var filterBuilder = _filterService.GetTestFilterBuilder();
-            if (tfsFilter!=null && settings.UseTestCaseFilterConverter)
+            if (tfsFilter?.TfsTestCaseFilterExpression != null && !tfsFilter.IsEmpty && settings.UseTestCaseFilterConverter)
             {
                 var filterValue = tfsFilter.TfsTestCaseFilterExpression.TestCaseFilterValue;
                 var nunitFilter = new VsTest2NUnitFilterConverter(filterValue);
                 var nunitFilterString = nunitFilter.ToString();
-                if (settings?.Verbosity > 4)
-                {
-                    logger.Info($"Converting filter using TestCaseFilterConverter: {filterValue} => {nunitFilterString}");
-                }
+                logger.VerboseInfo($"Converting filter using TestCaseFilterConverter: {filterValue} => {nunitFilterString}");
+                
 
                 try
                 {
@@ -51,13 +77,13 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
                 catch (NUnit.Engine.TestSelectionParserException e)
                 {
-                    logger.Error("Invalid filter expression");
+                    logger.Error($"Invalid filter expression: {filterValue}");
                     throw;
                 }
                
                 
             }
-            else
+            else  // Create name filter
             {
                 foreach (var testCase in testCases)
                     filterBuilder.AddTest(testCase.FullyQualifiedName);
