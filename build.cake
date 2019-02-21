@@ -1,6 +1,5 @@
-#load lib.cake
-#load acceptance.cake
 #tool nuget:?package=vswhere
+#tool Microsoft.TestPlatform
 
 //////////////////////////////////////////////////////////////////////
 // ARGUMENTS
@@ -13,12 +12,12 @@ var configuration = Argument("configuration", "Release");
 // SET PACKAGE VERSION
 //////////////////////////////////////////////////////////////////////
 
-var version = "3.11.0";
+var version = "3.13.0";
 var modifier = "";
 
-var dbgSuffix = configuration == "Debug" ? "-dbg" : "";
+var dbgSuffix = configuration.ToLower() == "debug" ? "-dbg" : "";
 var packageVersion = version + modifier + dbgSuffix;
-
+Information("Packageversion: "+packageVersion);
 if (BuildSystem.IsRunningOnAppVeyor)
 {
     var tag = AppVeyor.Environment.Repository.Tag;
@@ -165,10 +164,7 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
                 // Enables the tests to run against the correct version of Microsoft.VisualStudio.TestPlatform.ObjectModel.dll.
                 // (The DLL they are compiled against depends on VS2012 at runtime.)
                 SettingsFile = File("DisableAppDomain.runsettings"),
-
-                // https://github.com/cake-build/cake/issues/2077
-                #tool Microsoft.TestPlatform
-                ToolPath = Context.Tools.Resolve("vstest.console.exe")
+                Logger = "trx"
             });
         });
 
@@ -182,7 +178,8 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
                 Framework = framework,
                 NoBuild = true,
                 TestAdapterPath = adapterDir,
-                Settings = File("DisableAppDomain.runsettings")
+                Settings = File("DisableAppDomain.runsettings"),
+                Logger="trx"
             });
         });
 }
@@ -276,6 +273,15 @@ Task("Package")
     .IsDependentOn("PackageZip")
     .IsDependentOn("PackageNuGet")
     .IsDependentOn("PackageVsix");
+
+Task("Acceptance")
+    .IsDependentOn("Build")
+    .IsDependentOn("PackageNuGet")
+    .Description("Ensures that known project configurations can use the produced NuGet package to restore, build, and run tests.")
+    .Does(() =>
+    {
+        VSTest(SRC_DIR + $"NUnit.TestAdapter.Tests.Acceptance/bin/{configuration}/net472/NUnit.VisualStudio.TestAdapter.Tests.Acceptance.dll");
+    });
 
 Task("Appveyor")
     .IsDependentOn("Build")

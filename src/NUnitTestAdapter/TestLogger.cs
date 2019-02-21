@@ -99,7 +99,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void Info(string message)
         {
-            SendMessage(TestMessageLevel.Informational, message);
+            if (adapterSettings?.Verbosity>= 0)
+                SendMessage(TestMessageLevel.Informational, message);
         }
 
         #endregion
@@ -119,8 +120,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void SendMessage(TestMessageLevel testMessageLevel, string message)
         {
-            if (MessageLogger != null)
-                MessageLogger.SendMessage(testMessageLevel, message);
+            MessageLogger?.SendMessage(testMessageLevel, message);
         }
 
         public void SendMessage(TestMessageLevel testMessageLevel, string message, Exception ex)

@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2015 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2019 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -88,6 +88,8 @@ namespace NUnit.VisualStudio.TestAdapter
         // Our logger used to display messages
         protected TestLogger TestLog { get; private set; }
 
+        protected string WorkDir { get; private set; }
+
         private static string exeName;
 
         public static bool IsRunningUnderIDE
@@ -125,11 +127,11 @@ namespace NUnit.VisualStudio.TestAdapter
             TestLog = new TestLogger(messageLogger);
             Settings = new AdapterSettings(TestLog);
             TestLog.InitSettings(Settings);
-
             try
             {
                 Settings.Load(context);
                 TestLog.Verbosity = Settings.Verbosity;
+               
             }
             catch (Exception e)
             {
@@ -137,6 +139,8 @@ namespace NUnit.VisualStudio.TestAdapter
                 TestLog.Warning(e.ToString());
             }
         }
+
+        
 
         protected ITestRunner GetRunnerFor(string assemblyName)
         {
@@ -217,7 +221,8 @@ namespace NUnit.VisualStudio.TestAdapter
             if (!Directory.Exists(workDir))
                 Directory.CreateDirectory(workDir);
             package.Settings[PackageSettings.WorkDirectory] = workDir;
-
+            WorkDir = workDir;
+         //   CreateTestOutputFolder(workDir);
             return package;
         }
 

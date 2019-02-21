@@ -104,7 +104,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     if (topNode.GetAttribute("runstate") == "Runnable")
                     {
                         int cases;
-                        using (var testConverter = new TestConverter(TestLog, sourceAssemblyPath, Settings.CollectSourceInformation))
+                        using (var testConverter = new TestConverter(TestLog, sourceAssemblyPath, Settings))
                         {
                             cases = ProcessTestCases(topNode, discoverySink, testConverter);
                         }
@@ -113,18 +113,35 @@ namespace NUnit.VisualStudio.TestAdapter
                         // Only save if seed is not specified in runsettings
                         // This allows workaround in case there is no valid
                         // location in which the seed may be saved.
-                        if (cases>0 && !Settings.RandomSeedSpecified)
+                        if (cases > 0 && !Settings.RandomSeedSpecified)
                             Settings.SaveRandomSeed(Path.GetDirectoryName(sourceAssemblyPath));
                     }
                     else
                     {
                         var msgNode = topNode.SelectSingleNode("properties/property[@name='_SKIPREASON']");
-                        if (msgNode != null && (new[] { "contains no tests", "Has no TestFixtures" }).Any(msgNode.GetAttribute("value").Contains))
-                            TestLog.Info("Assembly contains no NUnit 3.0 tests: " + sourceAssembly);
+                        if (msgNode != null &&
+                            (new[] {"contains no tests", "Has no TestFixtures"}).Any(msgNode.GetAttribute("value")
+                                .Contains))
+                        {
+                            if (Settings.Verbosity > 0)
+                                TestLog.Info("Assembly contains no NUnit 3.0 tests: " + sourceAssembly);
+                        }
                         else
                             TestLog.Info("NUnit failed to load " + sourceAssembly);
                     }
 
+                }
+                catch (NUnitEngineException e)
+                {
+                    if (e.InnerException is BadImageFormatException)
+                    {
+                        // we skip the native c++ binaries that we don't support.
+                        TestLog.Warning("Assembly not supported: " + sourceAssembly);
+                    }
+                    else
+                    {
+                        TestLog.Warning("Exception thrown discovering tests in " + sourceAssembly, e);
+                    }
                 }
                 catch (BadImageFormatException)
                 {
