@@ -25,7 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-#if !NETCOREAPP1_0
+#if NET35
 using System.Runtime.Remoting;
 #endif
 using System.Xml;
@@ -124,7 +124,7 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 if (disposing)
                 {
-#if !NETCOREAPP1_0
+#if NET35
                     RemotingServices.Disconnect(this);
 #endif
                 }
