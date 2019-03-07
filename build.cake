@@ -280,7 +280,14 @@ Task("Acceptance")
     .Description("Ensures that known project configurations can use the produced NuGet package to restore, build, and run tests.")
     .Does(() =>
     {
-        VSTest(SRC_DIR + $"NUnit.TestAdapter.Tests.Acceptance/bin/{configuration}/net472/NUnit.VisualStudio.TestAdapter.Tests.Acceptance.dll");
+        var testAssembly = SRC_DIR + $"NUnit.TestAdapter.Tests.Acceptance/bin/{configuration}/net472/NUnit.VisualStudio.TestAdapter.Tests.Acceptance.dll";
+
+        var keepWorkspaces = Argument<bool?>("keep-workspaces", false) ?? true;
+
+        VSTest(testAssembly, new VSTestSettings
+        {
+            SettingsFile = keepWorkspaces ? (FilePath)"KeepWorkspaces.runsettings" : null
+        });
     });
 
 Task("Appveyor")

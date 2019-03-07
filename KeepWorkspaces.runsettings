@@ -1,0 +1,5 @@
+<RunSettings>
+  <TestRunParameters>
+    <Parameter name="KeepWorkspaces" value="true" />
+  </TestRunParameters>
+</RunSettings>

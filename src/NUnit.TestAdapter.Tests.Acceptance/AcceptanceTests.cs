@@ -25,7 +25,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
             "netcoreapp1.0"
         };
 
-        private readonly static Lazy<(IsolatedWorkspaceManager manager, string nupkgVersion)> Initialization = new Lazy<(IsolatedWorkspaceManager, string)>(() =>
+        private readonly static Lazy<(IsolatedWorkspaceManager manager, string nupkgVersion, bool keepWorkspaces)> Initialization = new Lazy<(IsolatedWorkspaceManager, string, bool)>(() =>
         {
             var directory = TestContext.Parameters["ProjectWorkspaceDirectory"]
                 ?? TryAutoDetectProjectWorkspaceDirectory()
@@ -38,19 +38,23 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
             var nupkgVersion = TryGetTestNupkgVersion(nupkgDirectory, packageId: NuGetPackageId)
                 ?? throw new InvalidOperationException($"No NuGet package with the ID {NuGetPackageId} was found in {nupkgDirectory}.");
 
+            var keepWorkspaces = TestContext.Parameters.Get("KeepWorkspaces", defaultValue: false);
+
             var packageCachePath = Path.Combine(directory, ".isolatednugetcache");
             ClearCachedTestNupkgs(packageCachePath);
 
-            return (
-                new IsolatedWorkspaceManager(
-                    reason: string.Join(Environment.NewLine,
-                        "Test assembly: " + typeof(AcceptanceTests).Assembly.Location,
-                        "Runner process: " + Process.GetCurrentProcess().MainModule.FileName),
-                    directory,
-                    nupkgDirectory,
-                    packageCachePath,
-                    downloadCachePath: Path.Combine(directory, ".toolcache")),
-                nupkgVersion);
+            var manager = new IsolatedWorkspaceManager(
+                reason: string.Join(Environment.NewLine,
+                    "Test assembly: " + typeof(AcceptanceTests).Assembly.Location,
+                    "Runner process: " + Process.GetCurrentProcess().MainModule.FileName),
+                directory,
+                nupkgDirectory,
+                packageCachePath,
+                downloadCachePath: Path.Combine(directory, ".toolcache"));
+
+            if (keepWorkspaces) manager.PreserveDirectory("The KeepWorkspaces test parameter was set to true.");
+
+            return (manager, nupkgVersion, keepWorkspaces);
         });
 
         private static void ClearCachedTestNupkgs(string packageCachePath)
@@ -93,7 +97,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                         test.FullName + " failed:" + Environment.NewLine
                         + TestContext.CurrentContext.Result.Message.TrimEnd() + Environment.NewLine);
                 }
-                else
+                else if (!Initialization.Value.keepWorkspaces)
                 {
                     foreach (var workspace in workspaces)
                         Utils.DeleteDirectoryRobust(workspace.Directory);
