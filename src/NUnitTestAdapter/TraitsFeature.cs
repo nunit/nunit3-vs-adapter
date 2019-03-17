@@ -60,11 +60,11 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         public static void AddTraitsFromTestNode(this TestCase testCase, XmlNode testNode,
-            IDictionary<string, CachedTestCaseInfo> traitsCache, ITestLogger logger)
+            IDictionary<string, CachedTestCaseInfo> traitsCache, ITestLogger logger, IAdapterSettings adapterSettings)
         {
             var ancestor = testNode.ParentNode;
             var key = ancestor.Attributes?["id"]?.Value;
-            var categorylist = new CategoryList(testCase);
+            var categorylist = new CategoryList(testCase,adapterSettings);
             // Reading ancestor properties of a test-case node. And adding to the cache.
             while (ancestor != null && key != null)
             {

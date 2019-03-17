@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2017 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2019 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -21,6 +21,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
+using System.IO;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
@@ -29,14 +30,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 {
     public class AdapterSettingsTests
     {
-        private AdapterSettings _settings;
+        private IAdapterSettings _settings;
 
         [SetUp]
         public void SetUp()
         {
-            var testlogger = new TestLogger(new MessageLoggerStub());
-            _settings = new AdapterSettings(testlogger);
-            testlogger.InitSettings(_settings);
+            var testLogger = new TestLogger(new MessageLoggerStub());
+            _settings = new AdapterSettings(testLogger);
+            testLogger.InitSettings(_settings);
         }
 
         [Test]
@@ -51,29 +52,33 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void DefaultSettings(string xml)
         {
             _settings.Load(xml);
-            Assert.That(_settings.MaxCpuCount, Is.EqualTo(-1));
-            Assert.Null(_settings.ResultsDirectory);
-            Assert.Null(_settings.TargetFrameworkVersion);
-            Assert.Null(_settings.TargetPlatform);
-            Assert.Null(_settings.TestAdapterPaths);
-            Assert.IsTrue(_settings.CollectSourceInformation);
-            Assert.IsEmpty(_settings.TestProperties);
-            Assert.Null(_settings.InternalTraceLevel);
-            Assert.Null(_settings.WorkDirectory);
-            Assert.That(_settings.NumberOfTestWorkers, Is.EqualTo(-1));
-            Assert.That(_settings.DefaultTimeout, Is.EqualTo(0));
-            Assert.That(_settings.Verbosity, Is.EqualTo(0));
-            Assert.False(_settings.ShadowCopyFiles);
-            Assert.False(_settings.UseVsKeepEngineRunning);
-            Assert.Null(_settings.BasePath);
-            Assert.Null(_settings.PrivateBinPath);
-            Assert.NotNull(_settings.RandomSeed);
-            Assert.False(_settings.SynchronousEvents);
-            Assert.Null(_settings.DomainUsage);
-            Assert.False(_settings.InProcDataCollectorsAvailable);
-            Assert.IsFalse(_settings.DisableAppDomain);
-            Assert.IsFalse(_settings.DisableParallelization);
-            Assert.IsFalse(_settings.DesignMode);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_settings.MaxCpuCount, Is.EqualTo(-1));
+                Assert.Null(_settings.ResultsDirectory);
+                Assert.Null(_settings.TargetFrameworkVersion);
+                Assert.Null(_settings.TargetPlatform);
+                Assert.Null(_settings.TestAdapterPaths);
+                Assert.IsTrue(_settings.CollectSourceInformation);
+                Assert.IsEmpty(_settings.TestProperties);
+                Assert.Null(_settings.InternalTraceLevel);
+                Assert.Null(_settings.WorkDirectory);
+                Assert.That(_settings.NumberOfTestWorkers, Is.EqualTo(-1));
+                Assert.That(_settings.DefaultTimeout, Is.EqualTo(0));
+                Assert.That(_settings.Verbosity, Is.EqualTo(0));
+                Assert.False(_settings.ShadowCopyFiles);
+                Assert.False(_settings.UseVsKeepEngineRunning);
+                Assert.Null(_settings.BasePath);
+                Assert.Null(_settings.PrivateBinPath);
+                Assert.NotNull(_settings.RandomSeed);
+                Assert.False(_settings.SynchronousEvents);
+                Assert.Null(_settings.DomainUsage);
+                Assert.False(_settings.InProcDataCollectorsAvailable);
+                Assert.IsFalse(_settings.DisableAppDomain);
+                Assert.IsFalse(_settings.DisableParallelization);
+                Assert.IsFalse(_settings.DesignMode);
+                Assert.False(_settings.UseTestOutputXml);
+            });
         }
 
         [Test]
@@ -179,6 +184,40 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(_settings.WorkDirectory, Is.EqualTo("/my/work/dir"));
         }
 
+        /// <summary>
+        /// Workdir not set, TestOutput is relative
+        /// </summary>
+        [Test]
+        public void TestOutputSetting()
+        {
+            _settings.Load("<RunSettings><NUnit><TestOutputXml>/my/work/dir</TestOutputXml></NUnit></RunSettings>");
+            Assert.That(_settings.UseTestOutputXml);
+            Assert.Multiple(() =>
+            {
+                Assert.That(_settings.TestOutputXml, Does.Contain(@"/my/work/dir"));
+            });
+
+        }
+
+        /// <summary>
+        /// Workdir set, and is absolute,  TestOutputXml is relative
+        /// </summary>
+        [Ignore("Is not handled in the test executor, not in the test settings")]
+        [Test]
+        public void TestOutputSettingWithWorkDir()
+        {
+            _settings.Load(@"<RunSettings><NUnit><WorkDirectory>C:\Whatever</WorkDirectory><TestOutputXml>my/testoutput/dir</TestOutputXml></NUnit></RunSettings>");
+            Assert.That(_settings.UseTestOutputXml,"Settings not loaded properly");
+            Assert.Multiple(() =>
+            {
+                Assert.That(_settings.TestOutputXml, Does.Contain(@"\my/testoutput/dir"),"Content not correct");
+                Assert.That(_settings.TestOutputXml, Does.StartWith(@"C:\"),"Not correct start drive");
+                Assert.That(Path.IsPathRooted(_settings.TestOutputXml), Is.True,"Path not properly rooted");
+            });
+
+        }
+
+
         [Test]
         public void NumberOfTestWorkersSetting()
         {
@@ -221,6 +260,22 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(_settings.BasePath, Is.EqualTo(".."));
         }
 
+
+        [Test]
+        public void VsTestCategoryTypeSetting()
+        {
+            _settings.Load("<RunSettings><NUnit><VsTestCategoryType>mstest</VsTestCategoryType></NUnit></RunSettings>");
+            Assert.That(_settings.VsTestCategoryType, Is.EqualTo(VsTestCategoryType.MsTest));
+        }
+
+        [Test]
+        public void VsTestCategoryTypeSettingWithGarbage()
+        {
+            _settings.Load("<RunSettings><NUnit><VsTestCategoryType>garbage</VsTestCategoryType></NUnit></RunSettings>");
+            Assert.That(_settings.VsTestCategoryType, Is.EqualTo(VsTestCategoryType.NUnit));
+        }
+
+
         [Test]
         public void PrivateBinPathSetting()
         {
@@ -239,7 +294,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void DefaultTestNamePattern()
         {
             _settings.Load("<RunSettings><NUnit><DefaultTestNamePattern>{m}{a:1000}</DefaultTestNamePattern></NUnit></RunSettings>");
-            Assert.That(_settings.DefaultTestNamePattern,Is.EqualTo("{m}{a:1000}"));
+            Assert.That(_settings.DefaultTestNamePattern, Is.EqualTo("{m}{a:1000}"));
         }
 
         [Test]

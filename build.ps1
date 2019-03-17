@@ -32,7 +32,8 @@ Param(
 )
 
 $CakeVersion = "0.30.0"
-$DotNetVersion = "2.1.201";
+ $DotNetVersion = "2.1.201";   # This will not work with the tests
+# $DotNetVersion = "1.0.4";
 $DotNetInstallerUri = "https://dot.net/v1/dotnet-install.ps1";
 $NugetUrl = "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe"
 
@@ -80,6 +81,7 @@ if($FoundDotNetCliVersion -ne $DotNetVersion) {
     if (!(Test-Path $InstallPath)) {
         mkdir -Force $InstallPath | Out-Null;
     }
+    [Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
     (New-Object System.Net.WebClient).DownloadFile($DotNetInstallerUri, "$InstallPath\dotnet-install.ps1");
     & $InstallPath\dotnet-install.ps1 -Version $DotNetVersion -InstallDir $InstallPath;
 

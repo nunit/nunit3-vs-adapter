@@ -35,7 +35,7 @@ namespace NUnit.VisualStudio.TestAdapter
     public interface ITestConverter
     {
         TestCase GetCachedTestCase(string id);
-        TestConverter.TestResultSet GetVSTestResults(XmlNode resultNode);
+        TestConverter.TestResultSet GetVSTestResults(XmlNode resultNode, ICollection<XmlNode> outputNodes);
     }
 
     public sealed class TestConverter : IDisposable, ITestConverter
@@ -44,17 +44,19 @@ namespace NUnit.VisualStudio.TestAdapter
         private readonly Dictionary<string, TestCase> _vsTestCaseMap;
         private readonly string _sourceAssembly;
         private readonly NavigationDataProvider _navigationDataProvider;
-        private readonly bool _collectSourceInformation;
+        private bool CollectSourceInformation => adapterSettings.CollectSourceInformation;
+        private readonly IAdapterSettings adapterSettings;
 
-        public TestConverter(ITestLogger logger, string sourceAssembly, bool collectSourceInformation)
+
+        public TestConverter(ITestLogger logger, string sourceAssembly, IAdapterSettings settings)
         {
+            adapterSettings = settings;
             _logger = logger;
             _sourceAssembly = sourceAssembly;
             _vsTestCaseMap = new Dictionary<string, TestCase>();
-            _collectSourceInformation = collectSourceInformation;
             TraitsCache = new Dictionary<string, TraitsFeature.CachedTestCaseInfo>();
 
-            if (_collectSourceInformation)
+            if (CollectSourceInformation)
             {
                 _navigationDataProvider = new NavigationDataProvider(sourceAssembly, logger);
             }
@@ -99,15 +101,15 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         private static readonly string NL = Environment.NewLine;
-
-        public TestResultSet GetVSTestResults(XmlNode resultNode)
+        
+        public TestResultSet GetVSTestResults(XmlNode resultNode, ICollection<XmlNode> outputNodes)
         {
             var results = new List<VSTestResult>();
             XmlNodeList assertions = resultNode.SelectNodes("assertions/assertion");
-            var testcaseResult = GetBasicResult(resultNode);
+            var testcaseResult = GetBasicResult(resultNode, outputNodes);
             foreach (XmlNode assertion in assertions)
             {
-                var oneResult = GetBasicResult(resultNode); // we need a new copy, this is currently the simplest way
+                var oneResult = GetBasicResult(resultNode, outputNodes); // we need a new copy, this is currently the simplest way
                 if (oneResult != null)
                 {
                     oneResult.Outcome = GetAssertionOutcome(assertion);
@@ -122,7 +124,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             if (results.Count == 0)
             {
-                var result = MakeTestResultFromLegacyXmlNode(resultNode);
+                var result = MakeTestResultFromLegacyXmlNode(resultNode, outputNodes);
                 if (result != null)
                     results.Add(result);
             }
@@ -155,7 +157,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 LineNumber = 0
             };
 
-            if (_collectSourceInformation && _navigationDataProvider != null)
+            if (CollectSourceInformation && _navigationDataProvider != null)
             {
                 var className = testNode.GetAttribute("classname");
                 var methodName = testNode.GetAttribute("methodname");
@@ -167,14 +169,14 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
             }
 
-            testCase.AddTraitsFromTestNode(testNode, TraitsCache,_logger);
+            testCase.AddTraitsFromTestNode(testNode, TraitsCache,_logger,adapterSettings);
 
             return testCase;
         }
 
-        private VSTestResult MakeTestResultFromLegacyXmlNode(XmlNode resultNode)
+        private VSTestResult MakeTestResultFromLegacyXmlNode(XmlNode resultNode, IEnumerable<XmlNode> outputNodes)
         {
-            VSTestResult ourResult = GetBasicResult(resultNode);
+            VSTestResult ourResult = GetBasicResult(resultNode, outputNodes);
             if (ourResult != null)
             {
                 var node = resultNode.SelectSingleNode("failure") ?? resultNode.SelectSingleNode("reason");
@@ -195,7 +197,7 @@ namespace NUnit.VisualStudio.TestAdapter
             return ourResult;
         }
 
-        private VSTestResult GetBasicResult(XmlNode resultNode)
+        private VSTestResult GetBasicResult(XmlNode resultNode, IEnumerable<XmlNode> outputNodes)
         {
             var vsTest = GetCachedTestCase(resultNode.GetAttribute("id"));
             if (vsTest == null) return null;
@@ -221,7 +223,10 @@ namespace NUnit.VisualStudio.TestAdapter
 
             vsResult.ComputerName = Environment.MachineName;
 
-            XmlNode outputNode = resultNode.SelectSingleNode("output");
+            FillResultFromOutputNodes(outputNodes, vsResult);
+
+            // Add stdOut messages from TestFinished element to vstest result
+            var outputNode = resultNode.SelectSingleNode("output");
             if (outputNode != null)
                 vsResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, outputNode.InnerText));
 
@@ -230,6 +235,24 @@ namespace NUnit.VisualStudio.TestAdapter
                 vsResult.Attachments.Add(attachmentSet);
 
             return vsResult;
+        }
+
+        private static void FillResultFromOutputNodes(IEnumerable<XmlNode> outputNodes, VSTestResult vsResult)
+        {
+            foreach (var output in outputNodes)
+            {
+                var stream = output.GetAttribute("stream");
+                if (string.IsNullOrEmpty(stream))
+                {
+                    continue;
+                }
+
+                // Add stdErr/Progress messages from TestOutputXml element to vstest result
+                vsResult.Messages.Add(new TestResultMessage(
+                    "error".Equals(stream, StringComparison.OrdinalIgnoreCase)
+                        ? TestResultMessage.StandardErrorCategory
+                        : TestResultMessage.StandardOutCategory, output.InnerText));
+            }
         }
 
         /// <summary>
