@@ -104,12 +104,7 @@ Task("NuGetRestore")
     .Does(() =>
 {
     Information("Restoring NuGet Packages for the Adapter Solution");
-    MSBuild(ADAPTER_SOLUTION, new MSBuildSettings
-    {
-        Configuration = configuration,
-        Verbosity = Verbosity.Minimal,
-        ToolVersion = MSBuildToolVersion.VS2017
-    }.WithTarget("Restore"));
+    DotNetCoreRestore(ADAPTER_SOLUTION);
 });
 
 //////////////////////////////////////////////////////////////////////
@@ -125,6 +120,16 @@ Task("Build")
         FilePath msBuildPathX64 = (vsLatest==null) ? null
                                     : vsLatest.CombineWithFilePath("./MSBuild/15.0/Bin/MSBuild.exe");
 
+        // Find MSBuild for Visual Studio 2019
+        if ( msBuildPathX64 != null && !FileExists(msBuildPathX64))
+            msBuildPathX64 = vsLatest.CombineWithFilePath("./MSBuild/Current/Bin/MSBuild.exe");
+
+        // Have we found MSBuild yet?
+        if ( !FileExists(msBuildPathX64) )
+        {
+            throw new Exception($"Failed to find MSBuild: {msBuildPathX64}");
+        }
+
         Information("Building using MSBuild at " + msBuildPathX64);
         Information("Configuration is:"+configuration);
 
@@ -132,13 +137,25 @@ Task("Build")
         {
             Configuration = configuration,
             ToolPath = msBuildPathX64,
-            ToolVersion = MSBuildToolVersion.VS2017,
             EnvironmentVariables = new Dictionary<string, string>
             {
                 ["PackageVersion"] = packageVersion
             }
         });
     });
+
+MSBuildSettings CreateSettings() => new MSBuildSettings()
+    {
+        EnvironmentVariables = new Dictionary<string, string>
+        {
+            ["PackageVersion"] = packageVersion
+        }
+    }
+    .SetConfiguration(configuration)
+    .WithProperty("DebugType", "pdbonly")
+    .SetVerbosity(Verbosity.Minimal)
+    // Workaround for https://github.com/Microsoft/msbuild/issues/3626
+    .WithProperty("AddSyntheticProjectReferencesForSolutionDependencies", "false");
 
 //////////////////////////////////////////////////////////////////////
 // TEST
