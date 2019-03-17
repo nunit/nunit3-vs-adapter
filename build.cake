@@ -144,19 +144,6 @@ Task("Build")
         });
     });
 
-MSBuildSettings CreateSettings() => new MSBuildSettings()
-    {
-        EnvironmentVariables = new Dictionary<string, string>
-        {
-            ["PackageVersion"] = packageVersion
-        }
-    }
-    .SetConfiguration(configuration)
-    .WithProperty("DebugType", "pdbonly")
-    .SetVerbosity(Verbosity.Minimal)
-    // Workaround for https://github.com/Microsoft/msbuild/issues/3626
-    .WithProperty("AddSyntheticProjectReferencesForSolutionDependencies", "false");
-
 //////////////////////////////////////////////////////////////////////
 // TEST
 //////////////////////////////////////////////////////////////////////
