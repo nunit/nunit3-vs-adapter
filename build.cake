@@ -115,28 +115,27 @@ Task("Build")
     .IsDependentOn("NuGetRestore")
     .Does(() =>
     {
-        // Find MSBuild for Visual Studio 2017
+        // Find MSBuild for Visual Studio 2019 and newer
         DirectoryPath vsLatest  = VSWhereLatest();
-        FilePath msBuildPathX64 = (vsLatest==null) ? null
-                                    : vsLatest.CombineWithFilePath("./MSBuild/15.0/Bin/MSBuild.exe");
+        FilePath msBuildPath = vsLatest?.CombineWithFilePath("./MSBuild/Current/Bin/MSBuild.exe");
 
-        // Find MSBuild for Visual Studio 2019
-        if ( msBuildPathX64 != null && !FileExists(msBuildPathX64))
-            msBuildPathX64 = vsLatest.CombineWithFilePath("./MSBuild/Current/Bin/MSBuild.exe");
+        // Find MSBuild for Visual Studio 2017
+        if (msBuildPath != null && !FileExists(msBuildPath))
+            msBuildPath = vsLatest.CombineWithFilePath("./MSBuild/15.0/Bin/MSBuild.exe");
 
         // Have we found MSBuild yet?
-        if ( !FileExists(msBuildPathX64) )
+        if ( !FileExists(msBuildPath) )
         {
-            throw new Exception($"Failed to find MSBuild: {msBuildPathX64}");
+            throw new Exception($"Failed to find MSBuild: {msBuildPath}");
         }
 
-        Information("Building using MSBuild at " + msBuildPathX64);
+        Information("Building using MSBuild at " + msBuildPath);
         Information("Configuration is:"+configuration);
 
         MSBuild(ADAPTER_SOLUTION, new MSBuildSettings
         {
             Configuration = configuration,
-            ToolPath = msBuildPathX64,
+            ToolPath = msBuildPath,
             EnvironmentVariables = new Dictionary<string, string>
             {
                 ["PackageVersion"] = packageVersion
