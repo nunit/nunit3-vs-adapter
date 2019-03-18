@@ -116,7 +116,7 @@ Task("Build")
     .Does(() =>
     {
         // Find MSBuild for Visual Studio 2019 and newer
-        DirectoryPath vsLatest  = VSWhereLatest();
+        DirectoryPath vsLatest = VSWhereLatest();
         FilePath msBuildPath = vsLatest?.CombineWithFilePath("./MSBuild/Current/Bin/MSBuild.exe");
 
         // Find MSBuild for Visual Studio 2017
