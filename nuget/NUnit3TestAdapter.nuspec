@@ -48,7 +48,8 @@
 
         <file src="build\netcoreapp1.0\NUnit3.TestAdapter.dll" target="build\netcoreapp1.0\NUnit3.TestAdapter.dll" />
         <file src="build\netcoreapp1.0\NUnit3.TestAdapter.pdb" target="build\netcoreapp1.0\NUnit3.TestAdapter.pdb" />
-        <file src="build\netcoreapp1.0\nunit.engine.netstandard.dll" target="build\netcoreapp1.0\nunit.engine.netstandard.dll" />
+        <file src="build\netcoreapp1.0\nunit.engine.dll" target="build\netcoreapp1.0\nunit.engine.dll" />
+        <file src="build\netcoreapp1.0\nunit.engine.api.dll" target="build\netcoreapp1.0\nunit.engine.api.dll" />
         <file src="build\netcoreapp1.0\NUnit3TestAdapter.props" target="build\netcoreapp1.0\NUnit3TestAdapter.props" />
 
     </files>

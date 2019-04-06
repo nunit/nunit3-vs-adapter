@@ -8,7 +8,7 @@ You can download the latest release version ![](https://img.shields.io/github/re
 
 [![NuGet Version](https://img.shields.io/nuget/v/NUnit3TestAdapter.svg)](https://www.nuget.org/packages/NUnit3TestAdapter)  ![](https://img.shields.io/nuget/dt/NUnit3TestAdapter.svg?style=flat)
 
-or the latest pre-release version  
+or the latest pre-release version
 
 [![MyGet version](https://img.shields.io/myget/nunit/vpre/NUnit3TestAdapter.svg?label=Myget%3A%20Latest%20pre-release&style=flat)](https://www.myget.org/feed/nunit/package/nuget/NUnit3TestAdapter)
 
