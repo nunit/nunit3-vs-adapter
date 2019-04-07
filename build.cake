@@ -73,6 +73,7 @@ var ADAPTER_PROJECT = SRC_DIR + "NUnitTestAdapter/NUnit.TestAdapter.csproj";
 
 var ADAPTER_BIN_DIR_NET35 = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/net35/";
 var ADAPTER_BIN_DIR_NETCOREAPP10 = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/netcoreapp1.0/";
+var ADAPTER_BIN_DIR_NETCOREAPP20 = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/netcoreapp2.0/";
 
 var BIN_DIRS = new [] {
     PROJECT_DIR + "src/empty-assembly/bin",
@@ -154,7 +155,8 @@ string GetTestAssemblyPath(string framework)
 
 foreach (var (framework, vstestFramework, adapterDir) in new[] {
     ("net46", "Framework45", ADAPTER_BIN_DIR_NET35),
-    ("netcoreapp1.0", "FrameworkCore10", ADAPTER_BIN_DIR_NETCOREAPP10)
+    ("netcoreapp1.0", "FrameworkCore10", ADAPTER_BIN_DIR_NETCOREAPP10),
+    ("netcoreapp2.0", "FrameworkCore20", ADAPTER_BIN_DIR_NETCOREAPP20)
 })
 {
     Task($"VSTest-{framework}")
@@ -220,14 +222,22 @@ Task("CreateWorkingImage")
         CopyFiles(net35Files, net35Dir);
         CopyFileToDirectory("nuget/net35/NUnit3TestAdapter.props", net35Dir);
 
-        var netcoreDir = PACKAGE_IMAGE_DIR + "build/netcoreapp1.0";
+        var netcore10Dir = PACKAGE_IMAGE_DIR + "build/netcoreapp1.0";
+        var netcore20Dir = PACKAGE_IMAGE_DIR + "build/netcoreapp2.0";
         DotNetCorePublish(ADAPTER_PROJECT, new DotNetCorePublishSettings
         {
             Configuration = configuration,
-            OutputDirectory = netcoreDir,
+            OutputDirectory = netcore10Dir,
             Framework = "netcoreapp1.0"
         });
-        CopyFileToDirectory("nuget/netcoreapp1.0/NUnit3TestAdapter.props", netcoreDir);
+        DotNetCorePublish(ADAPTER_PROJECT, new DotNetCorePublishSettings
+        {
+            Configuration = configuration,
+            OutputDirectory = netcore20Dir,
+            Framework = "netcoreapp2.0"
+        });
+        CopyFileToDirectory("nuget/netcoreapp1.0/NUnit3TestAdapter.props", netcore10Dir);
+        CopyFileToDirectory("nuget/netcoreapp2.0/NUnit3TestAdapter.props", netcore20Dir);
     });
 
 Task("PackageZip")
@@ -269,8 +279,10 @@ Task("Rebuild")
 Task("Test")
     .IsDependentOn("VSTest-net46")
     .IsDependentOn("VSTest-netcoreapp1.0")
+    .IsDependentOn("VSTest-netcoreapp2.0")
     .IsDependentOn("DotnetTest-net46")
-    .IsDependentOn("DotnetTest-netcoreapp1.0");
+    .IsDependentOn("DotnetTest-netcoreapp1.0")
+    .IsDependentOn("DotnetTest-netcoreapp2.0");
 
 Task("Package")
     .IsDependentOn("PackageZip")

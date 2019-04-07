@@ -4,7 +4,7 @@
   <PropertyGroup>
     <RootNamespace>NUnit.VisualStudio.TestAdapter.Tests</RootNamespace>
     <AssemblyName>NUnit.VisualStudio.TestAdapter.Tests</AssemblyName>
-    <TargetFrameworks>net46;netcoreapp1.0</TargetFrameworks>
+    <TargetFrameworks>net46;netcoreapp1.0;netcoreapp2.0</TargetFrameworks>
     <!--<TargetFrameworks>net46</TargetFrameworks>-->     <!-- For testing and debugging-->
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
@@ -20,7 +20,7 @@
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="11.0.0" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' or '$(TargetFramework)' == 'netcoreapp2.0' ">
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="15.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
   </ItemGroup>
