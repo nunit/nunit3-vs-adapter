@@ -287,7 +287,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 .ToList();
             Summary = new ResultSummary(testResults);
         }
-#if !NETCOREAPP1_0
+#if NET35
         [Test]
         public void ThatTestOutputXmlHasBeenCreatedBelowAssemblyFolder()
         {

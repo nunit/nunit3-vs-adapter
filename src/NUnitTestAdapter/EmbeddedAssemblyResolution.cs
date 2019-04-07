@@ -2,7 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
-#if NETCOREAPP1_0
+#if !NET35
 using System.Runtime.Loader;
 #endif
 
@@ -63,7 +63,7 @@ namespace NUnit.VisualStudio.TestAdapter
             if (properCasing == null) return null;
 
             return typeof(EmbeddedAssemblyResolution)
-#if NETCOREAPP1_0
+#if !NET35
                 .GetTypeInfo()
 #endif
                 .Assembly.GetManifestResourceStream(@"Assemblies\" + properCasing + ".dll");

@@ -26,7 +26,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-#if !NETCOREAPP1_0
+#if NET35
 using System.Runtime.Remoting;
 #endif
 using System.Xml;
@@ -150,7 +150,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         #endregion
 
         #region Listener Lifetime Tests
-#if !NETCOREAPP1_0
+#if NET35
         [Test]
         public void Listener_LeaseLifetimeWillNotExpire()
         {

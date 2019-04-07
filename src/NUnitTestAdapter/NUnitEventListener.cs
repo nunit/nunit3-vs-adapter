@@ -25,7 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-#if !NETCOREAPP1_0
+#if NET35
 using System.Runtime.Remoting;
 #endif
 using System.Xml;
@@ -43,7 +43,7 @@ namespace NUnit.VisualStudio.TestAdapter
     /// translates each event into a message for the VS test platform.
     /// </summary>
     public class NUnitEventListener :
-#if !NETCOREAPP1_0
+#if NET35
         MarshalByRefObject, 
 #endif
         ITestEventListener, IDisposable // Public for testing
@@ -53,7 +53,7 @@ namespace NUnit.VisualStudio.TestAdapter
         private readonly ITestConverter _testConverter;
         private readonly Dictionary<string, ICollection<XmlNode>> _outputNodes = new Dictionary<string, ICollection<XmlNode>>();
 
-#if !NETCOREAPP1_0
+#if NET35
         public override object InitializeLifetimeService()
         {
             // Give the listener an infinite lease lifetime by returning null
@@ -76,7 +76,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public void OnTestEvent(string report)
         {
             var node = XmlHelper.CreateXmlNode(report);
-#if !NETCOREAPP1_0
+#if NET35
             dumpXml?.AddTestEvent(node.AsString());
 #endif
             try
@@ -124,7 +124,7 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 if (disposing)
                 {
-#if !NETCOREAPP1_0
+#if NET35
                     RemotingServices.Disconnect(this);
 #endif
                 }

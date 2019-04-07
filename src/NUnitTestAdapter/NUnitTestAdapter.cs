@@ -33,7 +33,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-#if !NETCOREAPP1_0
+#if NET35
 using System.Runtime.Remoting.Channels;
 #endif
 using System.Text;
@@ -65,7 +65,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         protected NUnitTestAdapter()
         {
-#if NETCOREAPP1_0
+#if !NET35
             AdapterVersion = typeof(NUnitTestAdapter).GetTypeInfo().Assembly.GetName().Version.ToString();
 #else
             AdapterVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
@@ -249,7 +249,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         protected static void CleanUpRegisteredChannels()
         {
-#if !NETCOREAPP1_0
+#if NET35
             foreach (IChannel chan in ChannelServices.RegisteredChannels)
                 ChannelServices.UnregisterChannel(chan);
 #endif

@@ -5,7 +5,7 @@
     <AssemblyName>NUnit3.TestAdapter</AssemblyName>
     <RootNamespace>NUnit.VisualStudio.TestAdapter</RootNamespace>
     <!--<TargetFramework>net35</TargetFramework>--><!-- For testing and debugging-->
-    <TargetFrameworks>net35;netcoreapp1.0</TargetFrameworks>
+    <TargetFrameworks>net35;netcoreapp1.0;netcoreapp2.0</TargetFrameworks>
     <CodeAnalysisRuleSet>..\..\Osiris.Extended.ruleset</CodeAnalysisRuleSet>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <SourceLinkOriginUrl>https://github.com/nunit/nunit3-vs-adapter</SourceLinkOriginUrl>
@@ -41,7 +41,7 @@
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="11.0.0" PrivateAssets="All" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0' or '$(TargetFramework)' == 'netcoreapp2.0'">
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.1.2" />
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="15.0.0" PrivateAssets="All" />
