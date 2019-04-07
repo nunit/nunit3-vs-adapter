@@ -36,6 +36,17 @@
             <dependency id="System.Xml.XmlDocument" version="4.3.0" />
             <dependency id="System.Xml.XPath.XmlDocument" version="4.3.0" />
         </group>
+        <group targetFramework="netcoreapp2.0">
+            <dependency id="Microsoft.DotNet.InternalAbstractions" version="1.0.0" />
+            <dependency id="System.ComponentModel.EventBasedAsync" version="4.3.0" />
+            <dependency id="System.ComponentModel.TypeConverter" version="4.3.0" />
+            <dependency id="System.Diagnostics.Process" version="4.3.0" />
+            <dependency id="System.Reflection" version="4.3.0" />
+            <dependency id="System.Runtime.InteropServices.RuntimeInformation" version="4.3.0" />
+            <dependency id="System.Threading.Thread" version="4.3.0" />
+            <dependency id="System.Xml.XmlDocument" version="4.3.0" />
+            <dependency id="System.Xml.XPath.XmlDocument" version="4.3.0" />
+        </group>
         </dependencies>
     </metadata>
     <files>
@@ -51,6 +62,12 @@
         <file src="build\netcoreapp1.0\nunit.engine.dll" target="build\netcoreapp1.0\nunit.engine.dll" />
         <file src="build\netcoreapp1.0\nunit.engine.api.dll" target="build\netcoreapp1.0\nunit.engine.api.dll" />
         <file src="build\netcoreapp1.0\NUnit3TestAdapter.props" target="build\netcoreapp1.0\NUnit3TestAdapter.props" />
+
+        <file src="build\netcoreapp2.0\NUnit3.TestAdapter.dll" target="build\netcoreapp2.0\NUnit3.TestAdapter.dll" />
+        <file src="build\netcoreapp2.0\NUnit3.TestAdapter.pdb" target="build\netcoreapp2.0\NUnit3.TestAdapter.pdb" />
+        <file src="build\netcoreapp2.0\nunit.engine.dll" target="build\netcoreapp2.0\nunit.engine.dll" />
+        <file src="build\netcoreapp2.0\nunit.engine.api.dll" target="build\netcoreapp2.0\nunit.engine.api.dll" />
+        <file src="build\netcoreapp2.0\NUnit3TestAdapter.props" target="build\netcoreapp2.0\NUnit3TestAdapter.props" />
 
     </files>
 </package>
