@@ -37,7 +37,7 @@ using NUnit.VisualStudio.TestAdapter.Dump;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-#if NETCOREAPP1_0
+#if !NET35
     [FileExtension(".appx")]
 #endif
     [FileExtension(".dll")]
@@ -94,7 +94,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     runner = GetRunnerFor(sourceAssemblyPath);
 
                     XmlNode topNode = runner.Explore(TestFilter.Empty);
-#if !NETCOREAPP1_0
+#if NET35
                     dumpXml?.AddString(topNode.AsString());
 #endif
                     // Currently, this will always be the case but it might change
@@ -172,7 +172,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
                 finally
                 {
-#if !NETCOREAPP1_0
+#if NET35
                     dumpXml?.Dump4Discovery();
 #endif
                     if (runner != null)

@@ -21,7 +21,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-#if !NETCOREAPP1_0
+#if NET35
 using System;
 
 namespace NUnit.VisualStudio.TestAdapter.Metadata

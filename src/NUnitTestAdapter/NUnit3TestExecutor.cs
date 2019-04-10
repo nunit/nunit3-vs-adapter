@@ -233,7 +233,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 _activeRunner = GetRunnerFor(assemblyPath);
                 CreateTestOutputFolder();
                 var loadResult = _activeRunner.Explore(TestFilter.Empty);
-#if !NETCOREAPP1_0
+#if NET35
                 dumpXml?.AddString(loadResult.AsString());
 #endif
                 if (loadResult.Name == "test-run")
@@ -322,7 +322,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             finally
             {
-#if !NETCOREAPP1_0
+#if NET35
                 dumpXml?.Dump4Execution();
 #endif
                 try
@@ -347,7 +347,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 return;
 
             var path = Path.Combine(TestOutputXmlFolder, $"{Path.GetFileNameWithoutExtension(assemblyPath)}.xml");
-#if !NETCOREAPP1_0
+#if NET35
             var resultService = TestEngine.Services.GetService<IResultService>();
 #else
             var resultService = new ResultService();
@@ -362,7 +362,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private NUnitTestFilterBuilder CreateTestFilterBuilder()
         {
-#if NETCOREAPP1_0
+#if !NET35
             return new NUnitTestFilterBuilder(new TestFilterService());
 #else
             return new NUnitTestFilterBuilder(TestEngine.Services.GetService<ITestFilterService>());

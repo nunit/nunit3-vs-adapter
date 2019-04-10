@@ -27,7 +27,7 @@ using NUnit.VisualStudio.TestAdapter.Internal;
 
 namespace NUnit.VisualStudio.TestAdapter.Metadata
 {
-#if !NETCOREAPP1_0
+#if NET35
     [Serializable]
 #endif
     public struct TypeInfo
