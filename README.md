@@ -13,8 +13,8 @@ or the latest pre-release version
 [![MyGet version](https://img.shields.io/myget/nunit/vpre/NUnit3TestAdapter.svg?label=Myget%3A%20Latest%20pre-release&style=flat)](https://www.myget.org/feed/nunit/package/nuget/NUnit3TestAdapter)
 
 ##### Builds on master
-[![Cake build](https://img.shields.io/azure-devops/build/nunit/nunit/NUnit3TestAdapter.Github.Cake.CI.svg?label=Cake%20build&style=flat)](https://nunit.visualstudio.com/NUnit/_build?definitionId=12&_a=completed)
-[![VS Build](https://img.shields.io/azure-devops/build/nunit/nunit/4.svg?label=VS%20build&style=flat)](https://nunit.visualstudio.com/NUnit/_build?definitionId=4&_a=completed)
+[![Cake build](https://img.shields.io/azure-devops/build/nunit/9d7ec8eb-1a1a-4fff-a88f-43bcdceb5f33/12.svg)](https://nunit.visualstudio.com/NUnit/_build?definitionId=12&_a=completed)
+[![VS Build](https://img.shields.io/azure-devops/build/nunit/9d7ec8eb-1a1a-4fff-a88f-43bcdceb5f33/4.svg)](https://nunit.visualstudio.com/NUnit/_build?definitionId=4&_a=completed)
 ![Tests](https://img.shields.io/azure-devops/tests/nunit/nunit/4.svg?style=flat)
 ![Coverage](https://img.shields.io/azure-devops/coverage/nunit/nunit/4.svg?style=flat)
 
