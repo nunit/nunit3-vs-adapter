@@ -194,7 +194,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             Assert.AreEqual(Environment.MachineName, ourResult.ComputerName);
             Assert.AreEqual(TestOutcome.Passed, ourResult.Outcome);
-            Assert.AreEqual("It passed!", ourResult.ErrorMessage);
+            Assert.AreEqual(null, ourResult.ErrorMessage);
             Assert.AreEqual(TimeSpan.FromSeconds(1.234), ourResult.Duration);
         }
 

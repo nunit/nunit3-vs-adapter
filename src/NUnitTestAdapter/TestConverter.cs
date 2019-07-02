@@ -101,26 +101,38 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         private static readonly string NL = Environment.NewLine;
-        
+
         public TestResultSet GetVSTestResults(XmlNode resultNode, ICollection<XmlNode> outputNodes)
         {
             var results = new List<VSTestResult>();
-            XmlNodeList assertions = resultNode.SelectNodes("assertions/assertion");
-            var testcaseResult = GetBasicResult(resultNode, outputNodes);
-            foreach (XmlNode assertion in assertions)
-            {
-                var oneResult = GetBasicResult(resultNode, outputNodes); // we need a new copy, this is currently the simplest way
-                if (oneResult != null)
-                {
-                    oneResult.Outcome = GetAssertionOutcome(assertion);
-                    oneResult.ErrorMessage = assertion.SelectSingleNode("message")?.InnerText;
-                    oneResult.ErrorStackTrace = assertion.SelectSingleNode("stack-trace")?.InnerText;
-                    results.Add(oneResult);
-                }
-            }
 
-            if (testcaseResult!=null && testcaseResult.Outcome == TestOutcome.Failed && results.Any() && results.All(o => o.Outcome != TestOutcome.Failed))
-                results.First().Outcome = TestOutcome.Failed;
+            var testcaseResult = GetBasicResult(resultNode, outputNodes);
+
+            if (testcaseResult != null)
+            {
+                if (testcaseResult.Outcome == TestOutcome.Failed || testcaseResult.Outcome == TestOutcome.NotFound)
+                {
+                    testcaseResult.ErrorMessage = resultNode.SelectSingleNode("failure/message")?.InnerText;
+                    testcaseResult.ErrorStackTrace = resultNode.SelectSingleNode("failure/stack-trace")?.InnerText;
+
+                    // find stacktrace in assertion nodes if not defined (seems .netcore2.0 doesn't provide stack-trace for Assert.Fail("abc"))
+                    if (testcaseResult.ErrorStackTrace == null)
+                    {
+                        string stackTrace = string.Empty;
+                        foreach (XmlNode assertionStacktraceNode in resultNode.SelectNodes("assertions/assertion/stack-trace"))
+                        {
+                            stackTrace += assertionStacktraceNode.InnerText;
+                        }
+                        testcaseResult.ErrorStackTrace = stackTrace;
+                    }
+                }
+                else if (testcaseResult.Outcome == TestOutcome.Skipped || testcaseResult.Outcome == TestOutcome.None)
+                {
+                    testcaseResult.ErrorMessage = resultNode.SelectSingleNode("reason/message")?.InnerText;
+                }
+
+                results.Add(testcaseResult);
+            }
 
             if (results.Count == 0)
             {
@@ -129,7 +141,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     results.Add(result);
             }
 
-            return new TestResultSet {TestCaseResult = testcaseResult, TestResults = results};
+            return new TestResultSet { TestCaseResult = testcaseResult, TestResults = results };
         }
 
         public struct TestResultSet
@@ -169,7 +181,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
             }
 
-            testCase.AddTraitsFromTestNode(testNode, TraitsCache,_logger,adapterSettings);
+            testCase.AddTraitsFromTestNode(testNode, TraitsCache, _logger, adapterSettings);
 
             return testCase;
         }
@@ -271,7 +283,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 var path = attachment.SelectSingleNode("filePath")?.InnerText ?? string.Empty;
                 var description = attachment.SelectSingleNode("description")?.InnerText;
 
-                if ( !(string.IsNullOrEmpty(path) || path.StartsWith(fileUriScheme, StringComparison.OrdinalIgnoreCase)))
+                if (!(string.IsNullOrEmpty(path) || path.StartsWith(fileUriScheme, StringComparison.OrdinalIgnoreCase)))
                 {
                     path = fileUriScheme + path;
                 }

@@ -157,7 +157,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 .Count(e => e.EventType == FakeFrameworkHandle.EventType.RecordResult && e.TestResult.Outcome == outcome);
         }
 
-        [TestCase("MockTest3", TestOutcome.Passed, "Succeeded!", false)]
+        [TestCase("MockTest3", TestOutcome.Passed, null, false)]
         [TestCase("FailingTest", TestOutcome.Failed, "Intentional failure", true)]
         [TestCase("TestWithException", TestOutcome.Failed, "System.Exception : Intentional Exception", true)]
         // NOTE: Should Inconclusive be reported as TestOutcome.None?
@@ -174,7 +174,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(testResult.Outcome, Is.EqualTo(outcome));
             Assert.That(testResult.ErrorMessage, Is.EqualTo(message));
             if (hasStackTrace)
-                Assert.NotNull(testResult.ErrorStackTrace);
+                Assert.NotNull(testResult.ErrorStackTrace, "Unable to find error stacktrace");
         }
 
         [Test]
@@ -202,30 +202,30 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var fakeFramework = new FakeFrameworkHandle();
 
             // Find the native exaple dll.
-            var path = Path.Combine( TestContext.CurrentContext.TestDirectory, "NativeTests.dll" );
-            Assert.That( File.Exists( path ) );
+            var path = Path.Combine(TestContext.CurrentContext.TestDirectory, "NativeTests.dll");
+            Assert.That(File.Exists(path));
 
             // Try to execute tests from the dll.
             TestAdapterUtils.CreateExecutor().RunTests(
                 new[] { path },
                 context,
-                fakeFramework );
+                fakeFramework);
 
             // Gather results.
             var testResults = fakeFramework.Events
-               .Where( e => e.EventType == FakeFrameworkHandle.EventType.RecordResult )
-               .Select( e => e.TestResult )
+               .Where(e => e.EventType == FakeFrameworkHandle.EventType.RecordResult)
+               .Select(e => e.TestResult)
                .ToList();
 
             // No tests found.
-            Assert.That( testResults.Count, Is.EqualTo( 0 ) );
+            Assert.That(testResults.Count, Is.EqualTo(0));
 
             // A warning about unsupported assebly format provided.
             var messages = fakeFramework.Events
-                .Where( e=> e.EventType == FakeFrameworkHandle.EventType.SendMessage &&
-                    e.Message.Level == Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging.TestMessageLevel.Warning )
-                .Select( o => o.Message.Text );
-            Assert.That( messages, Has.Some.Contains( "Assembly not supported" ) );
+                .Where(e => e.EventType == FakeFrameworkHandle.EventType.SendMessage &&
+                   e.Message.Level == Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging.TestMessageLevel.Warning)
+                .Select(o => o.Message.Text);
+            Assert.That(messages, Has.Some.Contains("Assembly not supported"));
         }
 #endif
 
@@ -250,8 +250,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                             .Select(e => e.TestResult)
                             .FirstOrDefault();
         }
-
-
     }
 
 

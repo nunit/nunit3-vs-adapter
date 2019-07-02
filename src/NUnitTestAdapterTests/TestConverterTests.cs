@@ -146,7 +146,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             CheckTestCase(testCase);
 
             Assert.That(testResult.Outcome, Is.EqualTo(TestOutcome.Passed));
-            Assert.That(testResult.ErrorMessage, Is.EqualTo("It passed!"));
+            Assert.That(testResult.ErrorMessage, Is.EqualTo(null));
             Assert.That(testResult.Duration, Is.EqualTo(TimeSpan.FromSeconds(1.234)));
         }
 
