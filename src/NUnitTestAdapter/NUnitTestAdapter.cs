@@ -41,6 +41,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Common;
 using NUnit.Engine;
+using System.Linq;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -131,7 +132,7 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 Settings.Load(context);
                 TestLog.Verbosity = Settings.Verbosity;
-               
+                SetCurrentWorkingDirectory();
             }
             catch (Exception e)
             {
@@ -140,7 +141,21 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
-        
+        static readonly List<string> ForbiddenFolders = new List<string> { "windows", "program files (x86)", "program files", "programdata" };
+
+        private static void SetCurrentWorkingDirectory()
+        {
+            var dir = Directory.GetCurrentDirectory();
+            bool ok = CheckDirectory(dir);
+            if (!ok)
+                Directory.SetCurrentDirectory(Path.GetTempPath());
+        }
+
+        public static bool CheckDirectory(string dir)
+        {
+            var split = new List<string>(dir.Split('\\', '/'));
+            return !split.Any(segment => ForbiddenFolders.Contains(segment.ToLower()));
+        }
 
         protected ITestRunner GetRunnerFor(string assemblyName)
         {
@@ -222,7 +237,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 Directory.CreateDirectory(workDir);
             package.Settings[PackageSettings.WorkDirectory] = workDir;
             WorkDir = workDir;
-         //   CreateTestOutputFolder(workDir);
+            //   CreateTestOutputFolder(workDir);
             return package;
         }
 
