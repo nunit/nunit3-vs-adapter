@@ -156,13 +156,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         [TestCase(
             "<test-output stream=\"Progress\" testid=\"0-1001\" testname=\"UnitTests.Test1\"><![CDATA[some text]]></test-output>",
-            "StdOutMsgs:some text")]
+            "")]
 
         [TestCase(
             "<test-output stream=\"Error\" testid=\"0-1001\" testname=\"UnitTests.Test1\"><![CDATA[some stdErr]]></test-output>"
             + ";<test-output stream=\"Progress\" testid=\"0-1001\" testname=\"UnitTests.Test1\"><![CDATA[some text]]></test-output>",
             "StdErrMsgs:some stdErr"
-            + ";StdOutMsgs:some text")]
+            )]
         public void CanMakeTestResultFromNUnitTestResult2(string output, string expectedMessages)
         {
             var cachedTestCase = testConverter.ConvertTestCase(fakeTestNode);
@@ -172,7 +172,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var testResult = testResults.TestResults[0];
             var actualMessages = string.Join(";", testResult.Messages.Select(i => i.Category + ":" + i.Text));
 
-            Assert.AreEqual(actualMessages, expectedMessages);
+            Assert.That(actualMessages, Is.EqualTo(expectedMessages));
         }
 
         #region Attachment tests

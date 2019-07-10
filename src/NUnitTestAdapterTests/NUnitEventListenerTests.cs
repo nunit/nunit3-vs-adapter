@@ -201,14 +201,21 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         #endregion
     }
 
+    /// <summary>
+    /// These tests ensure correct console output, which is what we send to the "recorder"
+    /// </summary>
     public class NUnitEventListenerOutputTests
     {
         private ITestExecutionRecorder recorder;
         private ITestConverter converter;
         private IDumpXml dumpxml;
 
-        private const string Testoutput =
+        private const string TestoutputProgress =
             @"<test-output stream='Progress' testid='0-1001' testname='Something.TestClass.Whatever'><![CDATA[Whatever
+]]></test-output>";
+
+        private const string TestoutputOut =
+            @"<test-output stream='Out' testid='0-1001' testname='Something.TestClass.Whatever'><![CDATA[Whatever
 ]]></test-output>";
 
         private const string TestoutputError =
@@ -233,7 +240,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void ThatNormalTestOutputIsOutput()
         {
             var sut = new NUnitEventListener(recorder, converter, dumpxml);
-            sut.OnTestEvent(Testoutput);
+            sut.OnTestEvent(TestoutputProgress);
             sut.OnTestEvent(TestFinish);
 
             recorder.Received().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Is<string>(x=>x.StartsWith("Whatever")));
