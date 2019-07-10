@@ -254,17 +254,20 @@ namespace NUnit.VisualStudio.TestAdapter
             foreach (var output in outputNodes)
             {
                 var stream = output.GetAttribute("stream");
-                if (string.IsNullOrEmpty(stream))
+                if (string.IsNullOrEmpty(stream) || IsProgressStream(stream))  // Don't add progress streams as output
                 {
                     continue;
                 }
 
                 // Add stdErr/Progress messages from TestOutputXml element to vstest result
                 vsResult.Messages.Add(new TestResultMessage(
-                    "error".Equals(stream, StringComparison.OrdinalIgnoreCase)
+                    IsErrorStream(stream)
                         ? TestResultMessage.StandardErrorCategory
                         : TestResultMessage.StandardOutCategory, output.InnerText));
             }
+
+            bool IsErrorStream(string stream) => "error".Equals(stream, StringComparison.OrdinalIgnoreCase);
+            bool IsProgressStream(string stream) => "progress".Equals(stream, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
