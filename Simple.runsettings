@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+    <!-- 0 = As many processes as possible, limited by number of cores on machine, 1 = Sequential (1 process), 2-> Given number of processes up to limit by number of cores on machine-->
+    <MaxCpuCount>0</MaxCpuCount>
+  </RunConfiguration>
+
+    <!--
+    <TestRunParameters>
+        <Parameter name="webAppUrl" value="http://localhost" />
+        <Parameter name="webAppUserName" value="Admin" />
+    </TestRunParameters>
+-->
+
+    <!-- Adapter Specific sections -->
+
+    <!-- MSTest adapter -->
+    <MSTest>
+        <MapInconclusiveToFailed>True</MapInconclusiveToFailed>
+        <CaptureTraceOutput>false</CaptureTraceOutput>
+        <DeleteDeploymentDirectoryAfterTestRunIsComplete>False</DeleteDeploymentDirectoryAfterTestRunIsComplete>
+        <DeploymentEnabled>False</DeploymentEnabled>
+        <!-- Uncomment and update path for assembly resolution  -->
+        <!--  <AssemblyResolution>    
+             <Directory path="D:\myfolder\bin\" includeSubDirectories="false"/>
+   </AssemblyResolution>  -->
+    </MSTest>
+
+    <!-- NUnit3 adapter, uncomment to set as appropriate, numeric, booleans, enums have their default values below, except RandomSeed -->
+    <!--
+    <NUnit>
+        <BasePath>D:\Dev\NUnit\nunit3-vs-adapter\demo\NUnitTestDemo\bin\Release</BasePath>
+        <PrivateBinPath>extras;more.extras</PrivateBinPath>
+        <DefaultTimeout>0</DefaultTimeout>
+        <WorkDirectory>work</WorkDirectory>
+        <InternalTraceLevel>Off</InternalTraceLevel>
+        <RandomSeed>1234567</RandomSeed>  
+        <NumberOfTestWorkers>-1</NumberOfTestWorkers>
+        <Verbosity>0</Verbosity>
+        <UseVsKeepEngineRunning>false</UseVsKeepEngineRunning>
+        <ShadowCopyFiles>false</ShadowCopyFiles>
+        <DefaultTestNamePattern>{m}{a}</DefaultTestNamePattern>
+    </NUnit>
+    -->
+
+    <NUnit>
+        <Verbosity>0</Verbosity>
+    </NUnit>
+
+
+</RunSettings>
+

@@ -38,7 +38,7 @@ namespace NUnit.VisualStudio.TestAdapter
         private bool _disableMetadataLookup;
 
         public NavigationDataProvider(string assemblyPath, ITestLogger logger)
-#if NETCOREAPP1_0
+#if !NET35
             : this(assemblyPath, logger, new DirectReflectionMetadataProvider())
 #else
             : this(assemblyPath, logger, CreateMetadataProvider(assemblyPath))

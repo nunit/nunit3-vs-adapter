@@ -22,7 +22,10 @@
 // ***********************************************************************
 
 using System;
-#if !NETCOREAPP1_0
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+#if NET35
 using System.Runtime.Remoting;
 #endif
 using System.Xml;
@@ -40,15 +43,17 @@ namespace NUnit.VisualStudio.TestAdapter
     /// translates each event into a message for the VS test platform.
     /// </summary>
     public class NUnitEventListener :
-#if !NETCOREAPP1_0
+#if NET35
         MarshalByRefObject, 
 #endif
         ITestEventListener, IDisposable // Public for testing
     {
+        private static readonly ICollection<XmlNode> EmptyNodes = new List<XmlNode>();
         private readonly ITestExecutionRecorder _recorder;
         private readonly ITestConverter _testConverter;
+        private readonly Dictionary<string, ICollection<XmlNode>> _outputNodes = new Dictionary<string, ICollection<XmlNode>>();
 
-#if !NETCOREAPP1_0
+#if NET35
         public override object InitializeLifetimeService()
         {
             // Give the listener an infinite lease lifetime by returning null
@@ -71,7 +76,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public void OnTestEvent(string report)
         {
             var node = XmlHelper.CreateXmlNode(report);
-#if !NETCOREAPP1_0
+#if NET35
             dumpXml?.AddTestEvent(node.AsString());
 #endif
             try
@@ -119,7 +124,7 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 if (disposing)
                 {
-#if !NETCOREAPP1_0
+#if NET35
                     RemotingServices.Disconnect(this);
 #endif
                 }
@@ -144,7 +149,14 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void TestFinished(XmlNode resultNode)
         {
-            var result = _testConverter.GetVSTestResults(resultNode);
+            ICollection<XmlNode> outputNodes;
+            var testId = resultNode.GetAttribute("id");
+            if (_outputNodes.TryGetValue(testId, out outputNodes))
+            {
+                _outputNodes.Remove(testId);
+            }
+
+            var result = _testConverter.GetVSTestResults(resultNode, outputNodes ?? EmptyNodes);
             _recorder.RecordEnd(result.TestCaseResult.TestCase,result.TestCaseResult.Outcome);
             foreach (var vsResult in result.TestResults)
             {
@@ -192,7 +204,21 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 return;
             }
-           _recorder.SendMessage(TestMessageLevel.Warning, text);
+
+            var testId = outputNode.GetAttribute("testid");
+            if (!string.IsNullOrEmpty(testId))
+            {
+                ICollection<XmlNode> outputNodes;
+                if (!_outputNodes.TryGetValue(testId, out outputNodes))
+                {
+                    outputNodes = new List<XmlNode>();
+                    _outputNodes.Add(testId, outputNodes);
+                }
+
+                outputNodes.Add(outputNode);
+            }
+
+            _recorder.SendMessage(TestMessageLevel.Warning, text);
         }
     }
 }

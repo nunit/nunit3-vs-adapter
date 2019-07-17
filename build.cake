@@ -1,6 +1,5 @@
-#load lib.cake
-#load acceptance.cake
 #tool nuget:?package=vswhere
+#tool Microsoft.TestPlatform
 
 //////////////////////////////////////////////////////////////////////
 // ARGUMENTS
@@ -13,12 +12,12 @@ var configuration = Argument("configuration", "Release");
 // SET PACKAGE VERSION
 //////////////////////////////////////////////////////////////////////
 
-var version = "3.11.0";
+var version = "3.14.0";
 var modifier = "";
 
-var dbgSuffix = configuration == "Debug" ? "-dbg" : "";
+var dbgSuffix = configuration.ToLower() == "debug" ? "-dbg" : "";
 var packageVersion = version + modifier + dbgSuffix;
-
+Information("Packageversion: "+packageVersion);
 if (BuildSystem.IsRunningOnAppVeyor)
 {
     var tag = AppVeyor.Environment.Repository.Tag;
@@ -74,6 +73,7 @@ var ADAPTER_PROJECT = SRC_DIR + "NUnitTestAdapter/NUnit.TestAdapter.csproj";
 
 var ADAPTER_BIN_DIR_NET35 = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/net35/";
 var ADAPTER_BIN_DIR_NETCOREAPP10 = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/netcoreapp1.0/";
+var ADAPTER_BIN_DIR_NETCOREAPP20 = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/netcoreapp2.0/";
 
 var BIN_DIRS = new [] {
     PROJECT_DIR + "src/empty-assembly/bin",
@@ -105,12 +105,7 @@ Task("NuGetRestore")
     .Does(() =>
 {
     Information("Restoring NuGet Packages for the Adapter Solution");
-    MSBuild(ADAPTER_SOLUTION, new MSBuildSettings
-    {
-        Configuration = configuration,
-        Verbosity = Verbosity.Minimal,
-        ToolVersion = MSBuildToolVersion.VS2017
-    }.WithTarget("Restore"));
+    DotNetCoreRestore(ADAPTER_SOLUTION);
 });
 
 //////////////////////////////////////////////////////////////////////
@@ -121,19 +116,27 @@ Task("Build")
     .IsDependentOn("NuGetRestore")
     .Does(() =>
     {
-        // Find MSBuild for Visual Studio 2017
-        DirectoryPath vsLatest  = VSWhereLatest();
-        FilePath msBuildPathX64 = (vsLatest==null) ? null
-                                    : vsLatest.CombineWithFilePath("./MSBuild/15.0/Bin/MSBuild.exe");
+        // Find MSBuild for Visual Studio 2019 and newer
+        DirectoryPath vsLatest = VSWhereLatest();
+        FilePath msBuildPath = vsLatest?.CombineWithFilePath("./MSBuild/Current/Bin/MSBuild.exe");
 
-        Information("Building using MSBuild at " + msBuildPathX64);
+        // Find MSBuild for Visual Studio 2017
+        if (msBuildPath != null && !FileExists(msBuildPath))
+            msBuildPath = vsLatest.CombineWithFilePath("./MSBuild/15.0/Bin/MSBuild.exe");
+
+        // Have we found MSBuild yet?
+        if ( !FileExists(msBuildPath) )
+        {
+            throw new Exception($"Failed to find MSBuild: {msBuildPath}");
+        }
+
+        Information("Building using MSBuild at " + msBuildPath);
         Information("Configuration is:"+configuration);
 
         MSBuild(ADAPTER_SOLUTION, new MSBuildSettings
         {
             Configuration = configuration,
-            ToolPath = msBuildPathX64,
-            ToolVersion = MSBuildToolVersion.VS2017,
+            ToolPath = msBuildPath,
             EnvironmentVariables = new Dictionary<string, string>
             {
                 ["PackageVersion"] = packageVersion
@@ -152,7 +155,8 @@ string GetTestAssemblyPath(string framework)
 
 foreach (var (framework, vstestFramework, adapterDir) in new[] {
     ("net46", "Framework45", ADAPTER_BIN_DIR_NET35),
-    ("netcoreapp1.0", "FrameworkCore10", ADAPTER_BIN_DIR_NETCOREAPP10)
+    ("netcoreapp1.0", "FrameworkCore10", ADAPTER_BIN_DIR_NETCOREAPP10),
+    ("netcoreapp2.0", "FrameworkCore20", ADAPTER_BIN_DIR_NETCOREAPP20)
 })
 {
     Task($"VSTest-{framework}")
@@ -165,10 +169,7 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
                 // Enables the tests to run against the correct version of Microsoft.VisualStudio.TestPlatform.ObjectModel.dll.
                 // (The DLL they are compiled against depends on VS2012 at runtime.)
                 SettingsFile = File("DisableAppDomain.runsettings"),
-
-                // https://github.com/cake-build/cake/issues/2077
-                #tool Microsoft.TestPlatform
-                ToolPath = Context.Tools.Resolve("vstest.console.exe")
+                Logger = "trx"
             });
         });
 
@@ -182,7 +183,8 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
                 Framework = framework,
                 NoBuild = true,
                 TestAdapterPath = adapterDir,
-                Settings = File("DisableAppDomain.runsettings")
+                Settings = File("DisableAppDomain.runsettings"),
+                Logger="trx"
             });
         });
 }
@@ -220,14 +222,22 @@ Task("CreateWorkingImage")
         CopyFiles(net35Files, net35Dir);
         CopyFileToDirectory("nuget/net35/NUnit3TestAdapter.props", net35Dir);
 
-        var netcoreDir = PACKAGE_IMAGE_DIR + "build/netcoreapp1.0";
+        var netcore10Dir = PACKAGE_IMAGE_DIR + "build/netcoreapp1.0";
+        var netcore20Dir = PACKAGE_IMAGE_DIR + "build/netcoreapp2.0";
         DotNetCorePublish(ADAPTER_PROJECT, new DotNetCorePublishSettings
         {
             Configuration = configuration,
-            OutputDirectory = netcoreDir,
+            OutputDirectory = netcore10Dir,
             Framework = "netcoreapp1.0"
         });
-        CopyFileToDirectory("nuget/netcoreapp1.0/NUnit3TestAdapter.props", netcoreDir);
+        DotNetCorePublish(ADAPTER_PROJECT, new DotNetCorePublishSettings
+        {
+            Configuration = configuration,
+            OutputDirectory = netcore20Dir,
+            Framework = "netcoreapp2.0"
+        });
+        CopyFileToDirectory("nuget/netcoreapp1.0/NUnit3TestAdapter.props", netcore10Dir);
+        CopyFileToDirectory("nuget/netcoreapp2.0/NUnit3TestAdapter.props", netcore20Dir);
     });
 
 Task("PackageZip")
@@ -269,13 +279,31 @@ Task("Rebuild")
 Task("Test")
     .IsDependentOn("VSTest-net46")
     .IsDependentOn("VSTest-netcoreapp1.0")
+    .IsDependentOn("VSTest-netcoreapp2.0")
     .IsDependentOn("DotnetTest-net46")
-    .IsDependentOn("DotnetTest-netcoreapp1.0");
+    .IsDependentOn("DotnetTest-netcoreapp1.0")
+    .IsDependentOn("DotnetTest-netcoreapp2.0");
 
 Task("Package")
     .IsDependentOn("PackageZip")
     .IsDependentOn("PackageNuGet")
     .IsDependentOn("PackageVsix");
+
+Task("Acceptance")
+    .IsDependentOn("Build")
+    .IsDependentOn("PackageNuGet")
+    .Description("Ensures that known project configurations can use the produced NuGet package to restore, build, and run tests.")
+    .Does(() =>
+    {
+        var testAssembly = SRC_DIR + $"NUnit.TestAdapter.Tests.Acceptance/bin/{configuration}/net472/NUnit.VisualStudio.TestAdapter.Tests.Acceptance.dll";
+
+        var keepWorkspaces = Argument<bool?>("keep-workspaces", false) ?? true;
+
+        VSTest(testAssembly, new VSTestSettings
+        {
+            SettingsFile = keepWorkspaces ? (FilePath)"KeepWorkspaces.runsettings" : null
+        });
+    });
 
 Task("Appveyor")
     .IsDependentOn("Build")

@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2018 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2019 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -56,6 +56,8 @@ namespace NUnit.VisualStudio.TestAdapter
         public IFrameworkHandle FrameworkHandle { get; private set; }
         private TfsTestFilter TfsFilter { get; set; }
 
+        private string TestOutputXmlFolder { get; set; } = "";
+
         // NOTE: an earlier version of this code had a FilterBuilder
         // property. This seemed to make sense, because we instantiate
         // it in two different places. However, the existence of an
@@ -107,7 +109,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
             }
 
-            TestLog.Info(string.Format("NUnit Adapter {0}: Test execution complete", AdapterVersion));
+            TestLog.Info($"NUnit Adapter {AdapterVersion}: Test execution complete");
             Unload();
         }
 
@@ -158,8 +160,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         void ITestExecutor.Cancel()
         {
-            if (_activeRunner != null)
-                _activeRunner.StopRun(true);
+            _activeRunner?.StopRun(true);
         }
 
         #endregion
@@ -192,7 +193,7 @@ namespace NUnit.VisualStudio.TestAdapter
             TestLog.Debug("UseVsKeepEngineRunning: " + Settings.UseVsKeepEngineRunning);
 
             bool enableShutdown = true;
-            if (Settings.UseVsKeepEngineRunning )
+            if (Settings.UseVsKeepEngineRunning)
             {
                 enableShutdown = !runContext.KeepAlive;
             }
@@ -220,7 +221,7 @@ namespace NUnit.VisualStudio.TestAdapter
             // No need to restore if the seed was in runsettings file
             if (!Settings.RandomSeedSpecified)
                 Settings.RestoreRandomSeed(Path.GetDirectoryName(assemblyPath));
-            DumpXml dumpXml=null;
+            DumpXml dumpXml = null;
             if (Settings.DumpXmlTestResults)
             {
                 dumpXml = new Dump.DumpXml(assemblyPath);
@@ -230,9 +231,9 @@ namespace NUnit.VisualStudio.TestAdapter
             try
             {
                 _activeRunner = GetRunnerFor(assemblyPath, testCases);
-
+                CreateTestOutputFolder();
                 var loadResult = _activeRunner.Explore(filter);
-#if !NETCOREAPP1_0
+#if NET35
                 dumpXml?.AddString(loadResult.AsString());
 #endif
                 if (loadResult.Name == "test-run")
@@ -242,7 +243,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     var nunitTestCases = loadResult.SelectNodes("//test-case");
 
-                    using (var testConverter = new TestConverter(TestLog, assemblyPath, Settings.CollectSourceInformation))
+                    using (var testConverter = new TestConverter(TestLog, assemblyPath, Settings))
                     {
                         var loadedTestCases = new List<TestCase>();
 
@@ -253,7 +254,7 @@ namespace NUnit.VisualStudio.TestAdapter
                             loadedTestCases.Add(testConverter.ConvertTestCase(testNode));
 
 
-                        TestLog.Info($"NUnit3TestExecutor converted {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases");
+                        TestLog.Info($"   NUnit3TestExecutor converted {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases");
 
                         // If we have a TFS Filter, convert it to an nunit filter
                         if (TfsFilter != null && !TfsFilter.IsEmpty)
@@ -265,7 +266,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
                         if (filter == NUnitTestFilterBuilder.NoTestsFound)
                         {
-                            TestLog.Info("Skipping assembly - no matching test cases found");
+                            TestLog.Info("   Skipping assembly - no matching test cases found");
                             return;
                         }
 
@@ -273,12 +274,13 @@ namespace NUnit.VisualStudio.TestAdapter
                         {
                             try
                             {
-                                _activeRunner.Run(listener, filter);
+                                var results = _activeRunner.Run(listener, filter);
+                                GenerateTestOutput(results, assemblyPath);
                             }
                             catch (NullReferenceException)
                             {
                                 // this happens during the run when CancelRun is called.
-                                TestLog.Debug("Nullref caught");
+                                TestLog.Debug("   Nullref caught");
                             }
                         }
                     }
@@ -287,31 +289,40 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     var msgNode = loadResult.SelectSingleNode("properties/property[@name='_SKIPREASON']");
                     if (msgNode != null && (new[] { "contains no tests", "Has no TestFixtures" }).Any(msgNode.GetAttribute("value").Contains))
-                        TestLog.Info("NUnit couldn't find any tests in " + assemblyPath);
+                        TestLog.Info("   NUnit couldn't find any tests in " + assemblyPath);
                     else
-                        TestLog.Info("NUnit failed to load " + assemblyPath);
+                        TestLog.Info("   NUnit failed to load " + assemblyPath);
                 }
 
             }
             catch (BadImageFormatException)
             {
                 // we skip the native c++ binaries that we don't support.
-                TestLog.Warning("Assembly not supported: " + assemblyPath);
+                TestLog.Warning("   Assembly not supported: " + assemblyPath);
+            }
+            catch( NUnitEngineException e )
+            {
+                if( e.InnerException is BadImageFormatException )
+                {
+                    // we skip the native c++ binaries that we don't support.
+                    TestLog.Warning( "   Assembly not supported: " + assemblyPath );
+                }
+                throw;
             }
             catch (FileNotFoundException ex)
             {
                 // Probably from the GetExportedTypes in NUnit.core, attempting to find an assembly, not a problem if it is not NUnit here
-                TestLog.Warning("Dependent Assembly " + ex.FileName + " of " + assemblyPath + " not found. Can be ignored if not a NUnit project.");
+                TestLog.Warning("   Dependent Assembly " + ex.FileName + " of " + assemblyPath + " not found. Can be ignored if not a NUnit project.");
             }
             catch (Exception ex)
             {
                 if (ex is TargetInvocationException)
                     ex = ex.InnerException;
-                TestLog.Warning("Exception thrown executing tests in " + assemblyPath, ex);
+                TestLog.Warning("   Exception thrown executing tests in " + assemblyPath, ex);
             }
             finally
             {
-#if !NETCOREAPP1_0
+#if NET35
                 dumpXml?.Dump4Execution();
 #endif
                 try
@@ -324,18 +335,62 @@ namespace NUnit.VisualStudio.TestAdapter
                     // can happen if CLR throws CannotUnloadAppDomainException, for example
                     // due to a long-lasting operation in a protected region (catch/finally clause).
                     if (ex is TargetInvocationException) { ex = ex.InnerException; }
-                    TestLog.Warning("Exception thrown unloading tests from " + assemblyPath, ex);
+                    TestLog.Warning("   Exception thrown unloading tests from " + assemblyPath, ex);
                 }
             }
         }
 
+
+        private void GenerateTestOutput(XmlNode testResults, string assemblyPath)
+        {
+            if (!Settings.UseTestOutputXml)
+                return;
+
+            var path = Path.Combine(TestOutputXmlFolder, $"{Path.GetFileNameWithoutExtension(assemblyPath)}.xml");
+#if NET35
+            var resultService = TestEngine.Services.GetService<IResultService>();
+#else
+            var resultService = new ResultService();
+#endif
+            // Following null argument should work for nunit3 format. Empty array is OK as well.
+            // If you decide to handle other formats in the runsettings, it needs more work.
+            var resultWriter = resultService.GetResultWriter("nunit3", null);
+            resultWriter.WriteResultFile(testResults, path);
+            TestLog.Info($"   Test results written to {path}");
+
+        }
+
         private NUnitTestFilterBuilder CreateTestFilterBuilder()
         {
-#if NETCOREAPP1_0
+#if !NET35
             return new NUnitTestFilterBuilder(new TestFilterService());
 #else
             return new NUnitTestFilterBuilder(TestEngine.Services.GetService<ITestFilterService>());
 #endif
+        }
+
+
+        private void CreateTestOutputFolder()
+        {
+            if (!Settings.UseTestOutputXml)
+            {
+                return;
+            }
+
+            var path = Path.IsPathRooted(Settings.TestOutputXml)
+                ? Settings.TestOutputXml
+                : Path.Combine(WorkDir, Settings.TestOutputXml);
+            try
+            {
+                Directory.CreateDirectory(path);
+                TestOutputXmlFolder = path;
+                TestLog.Info($"  Test Output folder checked/created : {path} ");
+            }
+            catch (UnauthorizedAccessException)
+            {
+                TestLog.Error($"   Failed creating test output folder at {path}");
+                throw;
+            }
         }
 
         #endregion

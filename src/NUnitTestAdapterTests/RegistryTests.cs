@@ -1,4 +1,4 @@
-﻿#if !NETCOREAPP1_0
+﻿#if NET35
 using Microsoft.Win32;
 using NUnit.Framework;
 

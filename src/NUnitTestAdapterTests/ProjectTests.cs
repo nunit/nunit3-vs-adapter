@@ -31,7 +31,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     [TestFixture]
     public class ProjectTests
     {
-#if !NETCOREAPP1_0
+#if NET35
         [Test]
         public void ThatTheReferenceToMicrosoftTestObjectModelPointsToVS2012Version()
         {

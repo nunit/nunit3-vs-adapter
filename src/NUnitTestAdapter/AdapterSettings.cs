@@ -1,5 +1,5 @@
 // ***********************************************************************
-// Copyright (c) 2014-2017 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2014-2019 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 namespace NUnit.VisualStudio.TestAdapter
@@ -61,11 +62,39 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         string DefaultTestNamePattern { get; }
 
+        VsTestCategoryType VsTestCategoryType { get; }
+        string TestOutputXml { get; }
+        bool UseTestOutputXml { get; }
+
+        /// <summary>
+        /// True if test run is triggered in an IDE/Editor context.
+        /// </summary>
+        bool DesignMode { get; }
+
+        /// <summary>
+        /// If true, an adapter shouldn't create appdomains to run tests
+        /// </summary>
+        bool DisableAppDomain { get; }
+
+        /// <summary>
+        /// If true, an adapter should disable any test case parallelization
+        /// </summary>
+        bool DisableParallelization { get; }
+
+        bool ShowInternalProperties { get; }
+
         void Load(IDiscoveryContext context);
         void Load(string settingsXml);
         void SaveRandomSeed(string dirname);
         void RestoreRandomSeed(string dirname);
     }
+
+    public enum VsTestCategoryType
+    {
+        NUnit,
+        MsTest
+    }
+
 
     public class AdapterSettings : IAdapterSettings
     {
@@ -126,7 +155,8 @@ namespace NUnit.VisualStudio.TestAdapter
         public string InternalTraceLevel { get; private set; }
 
         public string WorkDirectory { get; private set; }
-
+        public string TestOutputXml { get; private set; }
+        public bool UseTestOutputXml => !string.IsNullOrEmpty(TestOutputXml);
         public int DefaultTimeout { get; private set; }
 
         public int NumberOfTestWorkers { get; private set; }
@@ -152,6 +182,10 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public string DomainUsage { get; private set; }
 
+        public bool ShowInternalProperties { get; private set; }
+
+
+        public VsTestCategoryType VsTestCategoryType { get; private set; } = VsTestCategoryType.NUnit;
 
         public bool DumpXmlTestDiscovery { get; private set; }
 
@@ -171,7 +205,7 @@ namespace NUnit.VisualStudio.TestAdapter
             if (context == null)
                 throw new ArgumentNullException(nameof(context), "Load called with null context");
 
-            Load(context?.RunSettings?.SettingsXml);
+            Load(context.RunSettings?.SettingsXml);
         }
 
         public void Load(string settingsXml)
@@ -198,7 +232,8 @@ namespace NUnit.VisualStudio.TestAdapter
             DisableAppDomain = GetInnerTextAsBool(runConfiguration, nameof(DisableAppDomain), false);
             DisableParallelization = GetInnerTextAsBool(runConfiguration, nameof(DisableParallelization), false);
             DesignMode = GetInnerTextAsBool(runConfiguration, nameof(DesignMode), false);
-            CollectDataForEachTestSeparately = GetInnerTextAsBool(runConfiguration, nameof(CollectDataForEachTestSeparately), false);
+            CollectDataForEachTestSeparately =
+                GetInnerTextAsBool(runConfiguration, nameof(CollectDataForEachTestSeparately), false);
 
             TestProperties = new Dictionary<string, string>();
             foreach (XmlNode node in doc.SelectNodes("RunSettings/TestRunParameters/Parameter"))
@@ -210,7 +245,8 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             // NUnit settings
-            InternalTraceLevel = GetInnerTextWithLog(nunitNode, nameof(InternalTraceLevel), "Off", "Error", "Warning", "Info", "Verbose", "Debug");
+            InternalTraceLevel = GetInnerTextWithLog(nunitNode, nameof(InternalTraceLevel), "Off", "Error", "Warning",
+                "Info", "Verbose", "Debug");
             WorkDirectory = GetInnerTextWithLog(nunitNode, nameof(WorkDirectory));
             DefaultTimeout = GetInnerTextAsInt(nunitNode, nameof(DefaultTimeout), 0);
             NumberOfTestWorkers = GetInnerTextAsInt(nunitNode, nameof(NumberOfTestWorkers), -1);
@@ -218,14 +254,30 @@ namespace NUnit.VisualStudio.TestAdapter
             UseVsKeepEngineRunning = GetInnerTextAsBool(nunitNode, nameof(UseVsKeepEngineRunning), false);
             BasePath = GetInnerTextWithLog(nunitNode, nameof(BasePath));
             PrivateBinPath = GetInnerTextWithLog(nunitNode, nameof(PrivateBinPath));
+            TestOutputXml = GetInnerTextWithLog(nunitNode, nameof(TestOutputXml));
             RandomSeed = GetInnerTextAsNullableInt(nunitNode, nameof(RandomSeed));
             RandomSeedSpecified = RandomSeed.HasValue;
             if (!RandomSeedSpecified)
                 RandomSeed = new Random().Next();
             DefaultTestNamePattern = GetInnerTextWithLog(nunitNode, nameof(DefaultTestNamePattern));
-
+            ShowInternalProperties = GetInnerTextAsBool(nunitNode, nameof(ShowInternalProperties), false);
             DumpXmlTestDiscovery = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestDiscovery), false);
             DumpXmlTestResults = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestResults), false);
+            var vsTestCategoryType = GetInnerText(nunitNode, nameof(VsTestCategoryType), Verbosity > 0);
+            if (vsTestCategoryType != null)
+                switch (vsTestCategoryType.ToLower())
+                {
+                    case "nunit":
+                        VsTestCategoryType = VsTestCategoryType.NUnit;
+                        break;
+                    case "mstest":
+                        VsTestCategoryType = VsTestCategoryType.MsTest;
+                        break;
+                    default:
+                        _logger.Warning(
+                            $"Invalid value ({vsTestCategoryType}) for VsTestCategoryType, should be either NUnit or MsTest");
+                        break;
+                }
 
 
 
@@ -245,13 +297,17 @@ namespace NUnit.VisualStudio.TestAdapter
             Verbosity = 1;
 #endif
 
-            var inProcDataCollectorNode = doc.SelectSingleNode("RunSettings/InProcDataCollectionRunSettings/InProcDataCollectors");
-            InProcDataCollectorsAvailable = inProcDataCollectorNode != null && inProcDataCollectorNode.SelectNodes("InProcDataCollector").Count > 0;
+            var inProcDataCollectorNode =
+                doc.SelectSingleNode("RunSettings/InProcDataCollectionRunSettings/InProcDataCollectors");
+            InProcDataCollectorsAvailable = inProcDataCollectorNode != null &&
+                                            inProcDataCollectorNode.SelectNodes("InProcDataCollector").Count > 0;
 
             // Older versions of VS do not pass the CollectDataForEachTestSeparately configuration together with the LiveUnitTesting collector.
             // However, the adapter is expected to run in CollectDataForEachTestSeparately mode.
             // As a result for backwards compatibility reasons enable CollectDataForEachTestSeparately mode whenever LiveUnitTesting collector is being used.
-            var hasLiveUnitTestingDataCollector = inProcDataCollectorNode?.SelectSingleNode("InProcDataCollector[@uri='InProcDataCollector://Microsoft/LiveUnitTesting/1.0']") != null;
+            var hasLiveUnitTestingDataCollector =
+                inProcDataCollectorNode?.SelectSingleNode(
+                    "InProcDataCollector[@uri='InProcDataCollector://Microsoft/LiveUnitTesting/1.0']") != null;
 
             // TestPlatform can opt-in to run tests one at a time so that the InProcDataCollectors can collect the data for each one of them separately.
             // In that case, we need to ensure that tests do not run in parallel and the test started/test ended events are sent synchronously.
@@ -263,7 +319,8 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     if (!InProcDataCollectorsAvailable)
                     {
-                        _logger.Info("CollectDataForEachTestSeparately is set, which is used to make InProcDataCollectors collect data for each test separately. No InProcDataCollectors can be found, thus the tests will run slower unnecessarily.");
+                        _logger.Info(
+                            "CollectDataForEachTestSeparately is set, which is used to make InProcDataCollectors collect data for each test separately. No InProcDataCollectors can be found, thus the tests will run slower unnecessarily.");
                     }
                 }
             }
@@ -276,6 +333,29 @@ namespace NUnit.VisualStudio.TestAdapter
 
             // Update NumberOfTestWorkers based on the DisableParallelization and NumberOfTestWorkers from runsettings.
             UpdateNumberOfTestWorkers();
+
+
+            string ValidatedPath(string path, string purpose)
+            {
+                try
+                {
+                    if (string.IsNullOrEmpty(WorkDirectory))
+                    {
+                        return Path.GetFullPath(path);
+                    }
+
+                    if (Path.IsPathRooted(path))
+                    {
+                        return Path.GetFullPath(path);
+                    }
+                    return Path.GetFullPath(Path.Combine(WorkDirectory, path));
+                }
+                catch (Exception)
+                {
+                    _logger.Error($"   Invalid path for {purpose}: {path}");
+                    throw;
+                }
+            }
         }
 
         public void SaveRandomSeed(string dirname)
@@ -348,8 +428,7 @@ namespace NUnit.VisualStudio.TestAdapter
                         if (string.Compare(valid, val, StringComparison.OrdinalIgnoreCase) == 0)
                             return valid;
 
-                    throw new ArgumentException(string.Format(
-                        "Invalid value {0} passed for element {1}.", val, xpath));
+                    throw new ArgumentException($"Invalid value {val} passed for element {xpath}.");
                 }
 
 

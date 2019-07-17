@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2015 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2019 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -33,7 +33,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-#if !NETCOREAPP1_0
+#if NET35
 using System.Runtime.Remoting.Channels;
 #endif
 using System.Text;
@@ -67,7 +67,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         protected NUnitTestAdapter()
         {
-#if NETCOREAPP1_0
+#if !NET35
             AdapterVersion = typeof(NUnitTestAdapter).GetTypeInfo().Assembly.GetName().Version.ToString();
 #else
             AdapterVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
@@ -89,6 +89,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
         // Our logger used to display messages
         protected TestLogger TestLog { get; private set; }
+
+        protected string WorkDir { get; private set; }
 
         private static string exeName;
 
@@ -127,11 +129,11 @@ namespace NUnit.VisualStudio.TestAdapter
             TestLog = new TestLogger(messageLogger);
             Settings = new AdapterSettings(TestLog);
             TestLog.InitSettings(Settings);
-
             try
             {
                 Settings.Load(context);
                 TestLog.Verbosity = Settings.Verbosity;
+               
             }
             catch (Exception e)
             {
@@ -234,7 +236,8 @@ namespace NUnit.VisualStudio.TestAdapter
             if (!Directory.Exists(workDir))
                 Directory.CreateDirectory(workDir);
             package.Settings[PackageSettings.WorkDirectory] = workDir;
-
+            WorkDir = workDir;
+         //   CreateTestOutputFolder(workDir);
             return package;
         }
 
@@ -261,7 +264,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         protected static void CleanUpRegisteredChannels()
         {
-#if !NETCOREAPP1_0
+#if NET35
             foreach (IChannel chan in ChannelServices.RegisteredChannels)
                 ChannelServices.UnregisterChannel(chan);
 #endif

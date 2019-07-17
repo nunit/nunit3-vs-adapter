@@ -27,7 +27,7 @@ using System.Linq;
 using System.Reflection;
 using NUnit.VisualStudio.TestAdapter.Internal;
 
-#if NETCOREAPP1_0
+#if !NET35
 using System.Runtime.Loader;
 #endif
 
@@ -87,7 +87,7 @@ namespace NUnit.VisualStudio.TestAdapter.Metadata
         {
             try
             {
-#if NETCOREAPP1_0
+#if !NET35
                 var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
 #else
                 var assembly = Assembly.LoadFrom(assemblyPath);

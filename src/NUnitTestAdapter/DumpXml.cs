@@ -114,7 +114,7 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
 
     }
 
-#if !NETCOREAPP1_0
+#if NET35
     public static class XmlNodeExtension
     {
         public static string AsString(this System.Xml.XmlNode node)

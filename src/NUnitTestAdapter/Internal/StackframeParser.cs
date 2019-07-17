@@ -23,7 +23,7 @@ namespace NUnit.VisualStudio.TestAdapter.Internal
 			string wordAt = null;
 			string wordsInLine = null;
 
-#if !NETCOREAPP1_0
+#if NET35
             // TODO: This doesn't work cross platform
             MethodInfo info = typeof(Environment).GetMethod("GetResourceString", BindingFlags.NonPublic | BindingFlags.Static, null, new[] { typeof(string) }, null);
             if (info != null)
