@@ -139,11 +139,19 @@ namespace NUnit.VisualStudio.TestAdapter
                 TestLog.Warning("Error initializing RunSettings. Default settings will be used");
                 TestLog.Warning(e.ToString());
             }
+
+            _forbiddenFolders = new List<string>
+            {
+                Environment.GetFolderPath(Environment.SpecialFolder.Programs),
+                Environment.GetEnvironmentVariable("ProgramFiles(x86)"),
+                Environment.GetEnvironmentVariable("windir"),  
+                Environment.GetFolderPath(Environment.SpecialFolder.System)
+            };
         }
 
-        static readonly List<string> ForbiddenFolders = new List<string> { "windows", "program files (x86)", "program files", "programdata" };
+        private List<string> _forbiddenFolders;
 
-        private static void SetCurrentWorkingDirectory()
+        private void SetCurrentWorkingDirectory()
         {
             var dir = Directory.GetCurrentDirectory();
             bool ok = CheckDirectory(dir);
@@ -151,10 +159,10 @@ namespace NUnit.VisualStudio.TestAdapter
                 Directory.SetCurrentDirectory(Path.GetTempPath());
         }
 
-        public static bool CheckDirectory(string dir)
+        public bool CheckDirectory(string dir)
         {
             var split = new List<string>(dir.Split('\\', '/'));
-            return !split.Any(segment => ForbiddenFolders.Contains(segment.ToLower()));
+            return !split.Any(segment => _forbiddenFolders.Contains(segment.ToLower()));
         }
 
         protected ITestRunner GetRunnerFor(string assemblyName)
