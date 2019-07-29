@@ -112,6 +112,8 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
+        public List<string> ForbiddenFolders { get; private set; }
+
         #endregion
 
         #region Protected Helper Methods
@@ -139,30 +141,34 @@ namespace NUnit.VisualStudio.TestAdapter
                 TestLog.Warning("Error initializing RunSettings. Default settings will be used");
                 TestLog.Warning(e.ToString());
             }
-
-            _forbiddenFolders = new List<string>
-            {
-                Environment.GetFolderPath(Environment.SpecialFolder.Programs),
-                Environment.GetEnvironmentVariable("ProgramFiles(x86)"),
-                Environment.GetEnvironmentVariable("windir"),  
-                Environment.GetFolderPath(Environment.SpecialFolder.System)
-            };
+            InitializeForbiddenFolders();
         }
 
-        private List<string> _forbiddenFolders;
+        public void InitializeForbiddenFolders()
+        {
+            ForbiddenFolders = new List<string>
+            {
+                Environment.GetEnvironmentVariable("ProgramW6432"),
+                Environment.GetEnvironmentVariable("ProgramFiles(x86)"),
+                Environment.GetEnvironmentVariable("windir"),
+            }.Where(o => !string.IsNullOrEmpty(o)).Select(o=>o.ToLower()+@"\").ToList();
+        }
 
         private void SetCurrentWorkingDirectory()
         {
             var dir = Directory.GetCurrentDirectory();
-            bool ok = CheckDirectory(dir);
-            if (!ok)
+            bool foundForbiddenFolder = CheckDirectory(dir);
+            if (foundForbiddenFolder)
                 Directory.SetCurrentDirectory(Path.GetTempPath());
         }
 
+        /// <summary>
+        /// If a directory matches one of the forbidden folders, then we should reroute, so we return true in that case
+        /// </summary>
         public bool CheckDirectory(string dir)
         {
-            var split = new List<string>(dir.Split('\\', '/'));
-            return !split.Any(segment => _forbiddenFolders.Contains(segment.ToLower()));
+            var checkdir = (dir.EndsWith("\\") ? dir : dir + "\\").ToLower();
+            return ForbiddenFolders.Any(o => checkdir.StartsWith(o));
         }
 
         protected ITestRunner GetRunnerFor(string assemblyName)
