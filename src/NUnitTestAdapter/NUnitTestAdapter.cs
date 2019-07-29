@@ -134,6 +134,7 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 Settings.Load(context);
                 TestLog.Verbosity = Settings.Verbosity;
+                InitializeForbiddenFolders();
                 SetCurrentWorkingDirectory();
             }
             catch (Exception e)
@@ -141,7 +142,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 TestLog.Warning("Error initializing RunSettings. Default settings will be used");
                 TestLog.Warning(e.ToString());
             }
-            InitializeForbiddenFolders();
+            
         }
 
         public void InitializeForbiddenFolders()

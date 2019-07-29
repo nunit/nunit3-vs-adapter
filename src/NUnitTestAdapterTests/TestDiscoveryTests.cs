@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2017 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2019 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -165,10 +165,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                     context,
                     messageLoggerStub,
                     this);
-            Assert.That(messageLoggerStub.Count, Is.EqualTo(noOfMessagesFound));
-            Assert.That(messageLoggerStub.LatestTestMessageLevel, Is.EqualTo(TestMessageLevel.Informational));
-            Assert.That(testcaseWasSent, Is.False);
-            Assert.That(!messageLoggerStub.ErrorMessages.Any());
+            Assert.Multiple(() =>
+            {
+                Assert.That(messageLoggerStub.Count, Is.EqualTo(noOfMessagesFound));
+                Assert.That(messageLoggerStub.LatestTestMessageLevel, Is.EqualTo(TestMessageLevel.Informational));
+                Assert.That(testcaseWasSent, Is.False);
+                Assert.That(!messageLoggerStub.ErrorMessages.Any());
+                Assert.That(!messageLoggerStub.WarningMessages.Any());
+            });
         }
 
 #if NET46
