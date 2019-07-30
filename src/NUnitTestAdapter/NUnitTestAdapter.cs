@@ -168,8 +168,8 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         public bool CheckDirectory(string dir)
         {
-            var checkdir = (dir.EndsWith("\\") ? dir : dir + "\\").ToLower();
-            return ForbiddenFolders.Any(o => checkdir.StartsWith(o));
+            var checkdir = (dir.EndsWith("\\") ? dir : dir + "\\");
+            return ForbiddenFolders.Any(o => checkdir.StartsWith(o, StringComparison.OrdinalIgnoreCase));
         }
 
         protected ITestRunner GetRunnerFor(string assemblyName)
