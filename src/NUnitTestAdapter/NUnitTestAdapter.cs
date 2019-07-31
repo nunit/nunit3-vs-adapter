@@ -42,7 +42,9 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Common;
 using NUnit.Engine;
 using System.Linq;
+
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -113,6 +115,8 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
+        public List<string> ForbiddenFolders { get; private set; }
+
         #endregion
 
         #region Protected Helper Methods
@@ -133,16 +137,47 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 Settings.Load(context);
                 TestLog.Verbosity = Settings.Verbosity;
-               
+                InitializeForbiddenFolders();
+                SetCurrentWorkingDirectory();
             }
             catch (Exception e)
             {
                 TestLog.Warning("Error initializing RunSettings. Default settings will be used");
                 TestLog.Warning(e.ToString());
             }
+            
+        }
+
+        public void InitializeForbiddenFolders()
+        {
+            ForbiddenFolders = new []
+            {
+                Environment.GetEnvironmentVariable("ProgramW6432"),
+                Environment.GetEnvironmentVariable("ProgramFiles(x86)"),
+                Environment.GetEnvironmentVariable("windir"),
+            }.Where(o => !string.IsNullOrEmpty(o)).Select(o=>o.ToLower()+@"\").ToList();
+        }
+
+        private void SetCurrentWorkingDirectory()
+        {
+            var dir = Directory.GetCurrentDirectory();
+            bool foundForbiddenFolder = CheckDirectory(dir);
+            if (foundForbiddenFolder)
+                Directory.SetCurrentDirectory(Path.GetTempPath());
+        }
+
+
+        /// <summary>
+        /// If a directory matches one of the forbidden folders, then we should reroute, so we return true in that case
+        /// </summary>
+        public bool CheckDirectory(string dir)
+        {
+            var checkdir = (dir.EndsWith("\\") ? dir : dir + "\\");
+            return ForbiddenFolders.Any(o => checkdir.StartsWith(o, StringComparison.OrdinalIgnoreCase));
         }
 
         protected ITestRunner GetRunnerFor(string assemblyName, IGrouping<string, TestCase> testCases)
+
         {
             var package = CreateTestPackage(assemblyName, testCases);
             return TestEngine.GetRunner(package);
@@ -237,7 +272,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 Directory.CreateDirectory(workDir);
             package.Settings[PackageSettings.WorkDirectory] = workDir;
             WorkDir = workDir;
-         //   CreateTestOutputFolder(workDir);
+            //   CreateTestOutputFolder(workDir);
             return package;
         }
 
