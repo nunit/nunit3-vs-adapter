@@ -100,7 +100,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     var assemblyPath = Path.IsPathRooted(assemblyName) ? assemblyName : Path.Combine(Directory.GetCurrentDirectory(), assemblyName);
 
-                    RunAssembly(assemblyPath, TestFilter.Empty);
+                    RunAssembly(assemblyPath, null, TestFilter.Empty);
                 }
                 catch (Exception ex)
                 {
@@ -145,7 +145,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     var filterBuilder = CreateTestFilterBuilder();
                     var filter = filterBuilder.MakeTestFilter(assemblyGroup);
 
-                    RunAssembly(assemblyPath, filter);
+                    RunAssembly(assemblyPath, assemblyGroup, filter);
                 }
                 catch (Exception ex)
                 {
@@ -207,7 +207,7 @@ namespace NUnit.VisualStudio.TestAdapter
             TestLog.Debug("EnableShutdown: " + enableShutdown.ToString());
         }
 
-        private void RunAssembly(string assemblyPath, TestFilter filter)
+        private void RunAssembly(string assemblyPath, IGrouping<string, TestCase> testCases, TestFilter filter)
         {
 #if LAUNCHDEBUGGER
             if (!Debugger.IsAttached)
@@ -230,9 +230,9 @@ namespace NUnit.VisualStudio.TestAdapter
 
             try
             {
-                _activeRunner = GetRunnerFor(assemblyPath);
+                _activeRunner = GetRunnerFor(assemblyPath, testCases);
                 CreateTestOutputFolder();
-                var loadResult = _activeRunner.Explore(TestFilter.Empty);
+                var loadResult = _activeRunner.Explore(filter);
 #if NET35
                 dumpXml?.AddString(loadResult.AsString());
 #endif
