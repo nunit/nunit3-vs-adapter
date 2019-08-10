@@ -5,7 +5,7 @@
         <version>$version$</version>
         <title>NUnit 3 Test Adapter for Visual Studio</title>
         <authors>Charlie Poole, Terje Sandstrom</authors>
-        <licenseUrl>https://nunit.org/nuget/nunit3-license.txt</licenseUrl>
+        <license type="file">LICENSE.txt</license>
         <projectUrl>https://github.com/nunit/docs/wiki/Visual-Studio-Test-Adapter</projectUrl>
         <repository type="git" url="https://github.com/nunit/nunit3-vs-adapter"/>
         <iconUrl>https://cdn.rawgit.com/nunit/resources/master/images/icon/nunit_256.png</iconUrl>
