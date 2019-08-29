@@ -254,6 +254,20 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
+        public void PreFilterIsDefaultOff()
+        {
+            Assert.That(_settings.PreFilter,Is.False);
+        }
+
+        [Test]
+        public void PreFilterCanBeSet()
+        {
+            _settings.Load("<RunSettings><NUnit><PreFilter>true</PreFilter></NUnit></RunSettings>");
+            Assert.That(_settings.PreFilter);
+        }
+
+
+        [Test]
         public void BasePathSetting()
         {
             _settings.Load("<RunSettings><NUnit><BasePath>..</BasePath></NUnit></RunSettings>");
