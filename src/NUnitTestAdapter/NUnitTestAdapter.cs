@@ -205,7 +205,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     package.Settings[PackageSettings.NumberOfTestWorkers] = workers;
             }
 
-            if (testCases != null)
+            if (Settings.PreFilter && testCases != null)
             {
                 var prefilters = new List<string>();
                 

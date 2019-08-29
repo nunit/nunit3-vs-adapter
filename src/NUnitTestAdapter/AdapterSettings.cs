@@ -57,6 +57,8 @@ namespace NUnit.VisualStudio.TestAdapter
         bool DumpXmlTestDiscovery { get; }
         bool DumpXmlTestResults { get; }
 
+        bool PreFilter { get; }
+
         /// <summary>
         ///  Syntax documentation <see cref="https://github.com/nunit/docs/wiki/Template-Based-Test-Naming"/>
         /// </summary>
@@ -100,7 +102,7 @@ namespace NUnit.VisualStudio.TestAdapter
     {
         private const string RANDOM_SEED_FILE = "nunit_random_seed.tmp";
         private TestLogger _logger;
-
+        
         #region Constructor
 
         public AdapterSettings(TestLogger logger)
@@ -196,6 +198,10 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         public string DefaultTestNamePattern { get; set; }
 
+        public bool PreFilter { get; private set; }
+
+
+
         #endregion
 
         #region Public Methods
@@ -263,6 +269,7 @@ namespace NUnit.VisualStudio.TestAdapter
             ShowInternalProperties = GetInnerTextAsBool(nunitNode, nameof(ShowInternalProperties), false);
             DumpXmlTestDiscovery = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestDiscovery), false);
             DumpXmlTestResults = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestResults), false);
+            PreFilter = GetInnerTextAsBool(nunitNode, nameof(PreFilter), false);
             var vsTestCategoryType = GetInnerText(nunitNode, nameof(VsTestCategoryType), Verbosity > 0);
             if (vsTestCategoryType != null)
                 switch (vsTestCategoryType.ToLower())
