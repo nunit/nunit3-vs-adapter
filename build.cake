@@ -1,5 +1,5 @@
-#tool nuget:?package=vswhere
-#tool Microsoft.TestPlatform
+#tool vswhere&version=2.7.1
+#tool Microsoft.TestPlatform&version=16.3.0
 
 //////////////////////////////////////////////////////////////////////
 // ARGUMENTS
