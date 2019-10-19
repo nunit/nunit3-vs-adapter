@@ -30,6 +30,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
             reasonFile.Flush();
 
             WriteNuGetConfig(baseDirectory, testNupkgDirectory, packageCachePath);
+
+            File.WriteAllText(Path.Combine(baseDirectory, "Directory.Build.props"), "<Project />");
+            File.WriteAllText(Path.Combine(baseDirectory, "Directory.Build.targets"), "<Project />");
         }
 
         public void Dispose()
