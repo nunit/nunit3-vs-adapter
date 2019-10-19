@@ -22,7 +22,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         public static IEnumerable<string> TargetFrameworks => new[]
         {
             LowestNetfxTarget,
-            "netcoreapp1.0"
+            "netcoreapp2.1"
         };
 
         private readonly static Lazy<(IsolatedWorkspaceManager manager, string nupkgVersion, bool keepWorkspaces)> Initialization = new Lazy<(IsolatedWorkspaceManager, string, bool)>(() =>
