@@ -139,7 +139,8 @@ Task("Build")
             EnvironmentVariables = new Dictionary<string, string>
             {
                 ["PackageVersion"] = packageVersion
-            }
+            },
+            Verbosity = Verbosity.Minimal
         });
     });
 
