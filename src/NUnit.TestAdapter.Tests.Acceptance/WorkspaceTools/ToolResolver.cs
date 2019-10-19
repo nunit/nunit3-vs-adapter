@@ -39,7 +39,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                     FindVisualStudio(requiredComponent: "Microsoft.Component.MSBuild")
                     ?? throw new InvalidOperationException("MSBuild is not installed with Visual Studio on this machine.");
 
-                return Path.Combine(vsInstallation, @"MSBuild\15.0\Bin\MSBuild.exe");
+                var path = Path.Combine(vsInstallation, @"MSBuild\Current\Bin\MSBuild.exe");
+                if (File.Exists(path)) return path;
+
+                var oldPath = Path.Combine(vsInstallation, @"MSBuild\15.0\Bin\MSBuild.exe");
+                if (File.Exists(oldPath)) return oldPath;
+
+                throw new FileNotFoundException("Cannot locate MSBuild.exe.");
             });
 
             vsTest = new Lazy<string>(() =>
