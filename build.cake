@@ -71,8 +71,11 @@ var BIN_DIR = PROJECT_DIR + "bin/" + configuration + "/";
 
 var ADAPTER_PROJECT = SRC_DIR + "NUnitTestAdapter/NUnit.TestAdapter.csproj";
 
+var NETCOREAPP_TFM = "netcoreapp2.1";
+var VSTEST_NETCOREAPP_FRAMEWORK = "netcoreapp2.1";
+
 var ADAPTER_BIN_DIR_NET35 = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/net35/";
-var ADAPTER_BIN_DIR_NETCOREAPP = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/netcoreapp2.1/";
+var ADAPTER_BIN_DIR_NETCOREAPP = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/{NETCOREAPP_TFM}/";
 
 var BIN_DIRS = new [] {
     PROJECT_DIR + "src/empty-assembly/bin",
@@ -155,7 +158,7 @@ string GetTestAssemblyPath(string framework)
 
 foreach (var (framework, vstestFramework, adapterDir) in new[] {
     ("net46", "Framework45", ADAPTER_BIN_DIR_NET35),
-    ("netcoreapp", "FrameworkCore21", ADAPTER_BIN_DIR_NETCOREAPP)
+    ("netcoreapp", VSTEST_NETCOREAPP_FRAMEWORK, ADAPTER_BIN_DIR_NETCOREAPP)
 })
 {
     Task($"VSTest-{framework}")
@@ -221,14 +224,14 @@ Task("CreateWorkingImage")
         CopyFiles(net35Files, net35Dir);
         CopyFileToDirectory("nuget/net35/NUnit3TestAdapter.props", net35Dir);
 
-        var netcoreDir = PACKAGE_IMAGE_DIR + "build/netcoreapp2.1";
+        var netcoreDir = PACKAGE_IMAGE_DIR + "build/" + NETCOREAPP_TFM;
         DotNetCorePublish(ADAPTER_PROJECT, new DotNetCorePublishSettings
         {
             Configuration = configuration,
             OutputDirectory = netcoreDir,
-            Framework = "netcoreapp2.1"
+            Framework = NETCOREAPP_TFM
         });
-        CopyFileToDirectory("nuget/netcoreapp2.1/NUnit3TestAdapter.props", netcoreDir);
+        CopyFileToDirectory($"nuget/{NETCOREAPP_TFM}/NUnit3TestAdapter.props", netcoreDir);
     });
 
 Task("PackageZip")
