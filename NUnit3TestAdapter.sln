@@ -4,14 +4,12 @@ VisualStudioVersion = 16.0.28606.126
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7CE30108-5D81-4850-BE6B-C8BCA35D3592}"
 	ProjectSection(SolutionItems) = preProject
-		acceptance.cake = acceptance.cake
 		appveyor.yml = appveyor.yml
 		build.cake = build.cake
 		build.cmd = build.cmd
 		build.ps1 = build.ps1
 		src\Common.props = src\Common.props
 		DisableAppDomain.runsettings = DisableAppDomain.runsettings
-		lib.cake = lib.cake
 		LICENSE.txt = LICENSE.txt
 		src\native-assembly\NativeTests.dll = src\native-assembly\NativeTests.dll
 		NuGet.Config = NuGet.Config
@@ -45,10 +43,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "net35", "net35", "{D41249E3
 		nuget\net35\NUnit3TestAdapter.props = nuget\net35\NUnit3TestAdapter.props
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "netcoreapp1.0", "netcoreapp1.0", "{A9584E41-6ECE-44B4-A504-41795A65DA5F}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "netcoreapp2.1", "netcoreapp2.1", "{A9584E41-6ECE-44B4-A504-41795A65DA5F}"
 	ProjectSection(SolutionItems) = preProject
-		nuget\netcoreapp1.0\NUnit3TestAdapter.props = nuget\netcoreapp1.0\NUnit3TestAdapter.props
+		nuget\netcoreapp2.1\NUnit3TestAdapter.props = nuget\netcoreapp2.1\NUnit3TestAdapter.props
 	EndProjectSection
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NUnit.TestAdapter.Tests.Acceptance", "src\NUnit.TestAdapter.Tests.Acceptance\NUnit.TestAdapter.Tests.Acceptance.csproj", "{3FAC7EE0-664F-4B11-918B-8E0FF865EE4C}"
 EndProject
 Global

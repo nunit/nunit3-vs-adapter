@@ -4,8 +4,7 @@
   <PropertyGroup>
     <AssemblyName>empty-assembly</AssemblyName>
     <RootNamespace>NUnit.Tests</RootNamespace>
-    <TargetFrameworks>net35;netstandard1.6</TargetFrameworks>
-    <DebugType Condition="'$(TargetFramework)' != '' AND '$(TargetFramework)' != 'netstandard1.6'">Full</DebugType>
+    <TargetFrameworks>net35;netcoreapp2.1</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>

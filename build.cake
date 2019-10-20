@@ -1,5 +1,5 @@
-#tool nuget:?package=vswhere
-#tool Microsoft.TestPlatform
+#tool vswhere&version=2.7.1
+#tool Microsoft.TestPlatform&version=16.3.0
 
 //////////////////////////////////////////////////////////////////////
 // ARGUMENTS
@@ -71,9 +71,11 @@ var BIN_DIR = PROJECT_DIR + "bin/" + configuration + "/";
 
 var ADAPTER_PROJECT = SRC_DIR + "NUnitTestAdapter/NUnit.TestAdapter.csproj";
 
+var NETCOREAPP_TFM = "netcoreapp2.1";
+var VSTEST_NETCOREAPP_FRAMEWORK = "netcoreapp2.1";
+
 var ADAPTER_BIN_DIR_NET35 = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/net35/";
-var ADAPTER_BIN_DIR_NETCOREAPP10 = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/netcoreapp1.0/";
-var ADAPTER_BIN_DIR_NETCOREAPP20 = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/netcoreapp2.0/";
+var ADAPTER_BIN_DIR_NETCOREAPP = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/{NETCOREAPP_TFM}/";
 
 var BIN_DIRS = new [] {
     PROJECT_DIR + "src/empty-assembly/bin",
@@ -140,7 +142,8 @@ Task("Build")
             EnvironmentVariables = new Dictionary<string, string>
             {
                 ["PackageVersion"] = packageVersion
-            }
+            },
+            Verbosity = Verbosity.Minimal
         });
     });
 
@@ -155,8 +158,7 @@ string GetTestAssemblyPath(string framework)
 
 foreach (var (framework, vstestFramework, adapterDir) in new[] {
     ("net46", "Framework45", ADAPTER_BIN_DIR_NET35),
-    ("netcoreapp1.0", "FrameworkCore10", ADAPTER_BIN_DIR_NETCOREAPP10),
-    ("netcoreapp2.0", "FrameworkCore20", ADAPTER_BIN_DIR_NETCOREAPP20)
+    ("netcoreapp", VSTEST_NETCOREAPP_FRAMEWORK, ADAPTER_BIN_DIR_NETCOREAPP)
 })
 {
     Task($"VSTest-{framework}")
@@ -222,22 +224,14 @@ Task("CreateWorkingImage")
         CopyFiles(net35Files, net35Dir);
         CopyFileToDirectory("nuget/net35/NUnit3TestAdapter.props", net35Dir);
 
-        var netcore10Dir = PACKAGE_IMAGE_DIR + "build/netcoreapp1.0";
-        var netcore20Dir = PACKAGE_IMAGE_DIR + "build/netcoreapp2.0";
+        var netcoreDir = PACKAGE_IMAGE_DIR + "build/" + NETCOREAPP_TFM;
         DotNetCorePublish(ADAPTER_PROJECT, new DotNetCorePublishSettings
         {
             Configuration = configuration,
-            OutputDirectory = netcore10Dir,
-            Framework = "netcoreapp1.0"
+            OutputDirectory = netcoreDir,
+            Framework = NETCOREAPP_TFM
         });
-        DotNetCorePublish(ADAPTER_PROJECT, new DotNetCorePublishSettings
-        {
-            Configuration = configuration,
-            OutputDirectory = netcore20Dir,
-            Framework = "netcoreapp2.0"
-        });
-        CopyFileToDirectory("nuget/netcoreapp1.0/NUnit3TestAdapter.props", netcore10Dir);
-        CopyFileToDirectory("nuget/netcoreapp2.0/NUnit3TestAdapter.props", netcore20Dir);
+        CopyFileToDirectory($"nuget/{NETCOREAPP_TFM}/NUnit3TestAdapter.props", netcoreDir);
     });
 
 Task("PackageZip")
@@ -278,11 +272,9 @@ Task("Rebuild")
 
 Task("Test")
     .IsDependentOn("VSTest-net46")
-    .IsDependentOn("VSTest-netcoreapp1.0")
-    .IsDependentOn("VSTest-netcoreapp2.0")
+    .IsDependentOn("VSTest-netcoreapp")
     .IsDependentOn("DotnetTest-net46")
-    .IsDependentOn("DotnetTest-netcoreapp1.0")
-    .IsDependentOn("DotnetTest-netcoreapp2.0");
+    .IsDependentOn("DotnetTest-netcoreapp");
 
 Task("Package")
     .IsDependentOn("PackageZip")

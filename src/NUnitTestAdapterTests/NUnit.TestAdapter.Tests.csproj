@@ -4,7 +4,7 @@
   <PropertyGroup>
     <RootNamespace>NUnit.VisualStudio.TestAdapter.Tests</RootNamespace>
     <AssemblyName>NUnit.VisualStudio.TestAdapter.Tests</AssemblyName>
-    <TargetFrameworks>net46;netcoreapp1.0;netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>net46;netcoreapp2.1</TargetFrameworks>
     <!--<TargetFrameworks>net46</TargetFrameworks>-->     <!-- For testing and debugging-->
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
@@ -20,7 +20,7 @@
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="11.0.0" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' or '$(TargetFramework)' == 'netcoreapp2.0' ">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="16.2.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
   </ItemGroup>
@@ -30,10 +30,6 @@
     <ProjectReference Include="..\mock-assembly\mock-assembly.csproj" />
     <ProjectReference Include="..\NUnitTestAdapter\NUnit.TestAdapter.csproj" />
     <ProjectReference Include="..\NUnit3AdapterExternalTests\NUnit3AdapterExternalTests.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
 
   <ItemGroup>
