@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\Common.props" />
   <PropertyGroup>
     <AssemblyName>NUnit3.TestAdapter</AssemblyName>
     <RootNamespace>NUnit.VisualStudio.TestAdapter</RootNamespace>
