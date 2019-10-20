@@ -286,11 +286,14 @@ Task("Acceptance")
         });
     });
 
-Task("Appveyor")
+Task("CI")
     .IsDependentOn("Build")
     .IsDependentOn("Test")
     .IsDependentOn("Package")
     .IsDependentOn("Acceptance");
+
+Task("Appveyor")
+    .IsDependentOn("CI");
 
 Task("Default")
     .IsDependentOn("Build");
