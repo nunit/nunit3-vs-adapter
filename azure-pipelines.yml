@@ -10,13 +10,6 @@ steps:
 - powershell: .\build.ps1 --target=CI --configuration=$(BuildConfiguration)
   displayName: Build, package, and test
 
-- task: PublishTestResults@2
-  displayName: Publish test results
-  inputs:
-    testResultsFormat: VSTest
-    testResultsFiles: '*.trx'
-    searchFolder: 'TestResults'
-
 - task: PublishBuildArtifacts@1
   displayName: Publish bin artifacts
   inputs:

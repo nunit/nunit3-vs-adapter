@@ -161,7 +161,11 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
                 SettingsFile = File("DisableAppDomain.runsettings"),
                 Logger = $"trx;LogFileName=VSTest-{framework}.trx"
             });
+
+            PublishTestResults($"VSTest-{framework}.trx");
         });
+    
+
 
     Task($"DotnetTest-{framework}")
         .IsDependentOn("Build")
@@ -177,7 +181,24 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
                 Logger = $"trx;LogFileName=DotnetTest-{framework}.trx",
                 ResultsDirectory = MakeAbsolute(Directory("TestResults"))
             });
+
+            PublishTestResults($"DotnetTest-{framework}.trx");
         });
+}
+
+void PublishTestResults(string fileName)
+{
+    if (EnvironmentVariable("TF_BUILD", false))
+    {
+        TFBuild.Commands.PublishTestResults(new TFBuildPublishTestResultsData
+        {
+            TestResultsFiles = { @"TestResults\" + fileName },
+            TestRunTitle = fileName,
+            TestRunner = TFTestRunnerType.VSTest,
+            PublishRunAttachments = true,
+            Configuration = configuration
+        });
+    }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -285,6 +306,8 @@ Task("Acceptance")
             SettingsFile = keepWorkspaces ? (FilePath)"KeepWorkspaces.runsettings" : null,
             Logger = "trx;LogFileName=Acceptance.trx"
         });
+
+        PublishTestResults("Acceptance.trx");
     });
 
 Task("CI")
