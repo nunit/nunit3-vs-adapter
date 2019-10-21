@@ -72,7 +72,6 @@ var BIN_DIR = PROJECT_DIR + "bin/" + configuration + "/";
 var ADAPTER_PROJECT = SRC_DIR + "NUnitTestAdapter/NUnit.TestAdapter.csproj";
 
 var NETCOREAPP_TFM = "netcoreapp2.1";
-var VSTEST_NETCOREAPP_FRAMEWORK = "netcoreapp2.1";
 
 var ADAPTER_BIN_DIR_NET35 = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/net35/";
 var ADAPTER_BIN_DIR_NETCOREAPP = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/{NETCOREAPP_TFM}/";
@@ -147,7 +146,7 @@ string GetTestAssemblyPath(string framework)
 
 foreach (var (framework, vstestFramework, adapterDir) in new[] {
     ("net46", "Framework45", ADAPTER_BIN_DIR_NET35),
-    ("netcoreapp", VSTEST_NETCOREAPP_FRAMEWORK, ADAPTER_BIN_DIR_NETCOREAPP)
+    (NETCOREAPP_TFM, NETCOREAPP_TFM, ADAPTER_BIN_DIR_NETCOREAPP)
 })
 {
     Task($"VSTest-{framework}")
@@ -160,9 +159,13 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
                 // Enables the tests to run against the correct version of Microsoft.VisualStudio.TestPlatform.ObjectModel.dll.
                 // (The DLL they are compiled against depends on VS2012 at runtime.)
                 SettingsFile = File("DisableAppDomain.runsettings"),
-                Logger = "trx"
+                Logger = $"trx;LogFileName=VSTest-{framework}.trx"
             });
+
+            PublishTestResults($"VSTest-{framework}.trx");
         });
+    
+
 
     Task($"DotnetTest-{framework}")
         .IsDependentOn("Build")
@@ -175,9 +178,27 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
                 NoBuild = true,
                 TestAdapterPath = adapterDir,
                 Settings = File("DisableAppDomain.runsettings"),
-                Logger="trx"
+                Logger = $"trx;LogFileName=DotnetTest-{framework}.trx",
+                ResultsDirectory = MakeAbsolute(Directory("TestResults"))
             });
+
+            PublishTestResults($"DotnetTest-{framework}.trx");
         });
+}
+
+void PublishTestResults(string fileName)
+{
+    if (EnvironmentVariable("TF_BUILD", false))
+    {
+        TFBuild.Commands.PublishTestResults(new TFBuildPublishTestResultsData
+        {
+            TestResultsFiles = { @"TestResults\" + fileName },
+            TestRunTitle = fileName,
+            TestRunner = TFTestRunnerType.VSTest,
+            PublishRunAttachments = true,
+            Configuration = configuration
+        });
+    }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -261,9 +282,9 @@ Task("Rebuild")
 
 Task("Test")
     .IsDependentOn("VSTest-net46")
-    .IsDependentOn("VSTest-netcoreapp")
+    .IsDependentOn("VSTest-" + NETCOREAPP_TFM)
     .IsDependentOn("DotnetTest-net46")
-    .IsDependentOn("DotnetTest-netcoreapp");
+    .IsDependentOn("DotnetTest-" + NETCOREAPP_TFM);
 
 Task("Package")
     .IsDependentOn("PackageZip")
@@ -282,15 +303,21 @@ Task("Acceptance")
 
         VSTest(testAssembly, new VSTestSettings
         {
-            SettingsFile = keepWorkspaces ? (FilePath)"KeepWorkspaces.runsettings" : null
+            SettingsFile = keepWorkspaces ? (FilePath)"KeepWorkspaces.runsettings" : null,
+            Logger = "trx;LogFileName=Acceptance.trx"
         });
+
+        PublishTestResults("Acceptance.trx");
     });
 
-Task("Appveyor")
+Task("CI")
     .IsDependentOn("Build")
     .IsDependentOn("Test")
     .IsDependentOn("Package")
     .IsDependentOn("Acceptance");
+
+Task("Appveyor")
+    .IsDependentOn("CI");
 
 Task("Default")
     .IsDependentOn("Build");
