@@ -100,22 +100,10 @@ Task("Clean")
 });
 
 //////////////////////////////////////////////////////////////////////
-// INITIALIZE FOR BUILD
-//////////////////////////////////////////////////////////////////////
-
-Task("NuGetRestore")
-    .Does(() =>
-{
-    Information("Restoring NuGet Packages for the Adapter Solution");
-    DotNetCoreRestore(ADAPTER_SOLUTION);
-});
-
-//////////////////////////////////////////////////////////////////////
 // BUILD
 //////////////////////////////////////////////////////////////////////
 
 Task("Build")
-    .IsDependentOn("NuGetRestore")
     .Does(() =>
     {
         // Find MSBuild for Visual Studio 2019 and newer
@@ -143,7 +131,8 @@ Task("Build")
             {
                 ["PackageVersion"] = packageVersion
             },
-            Verbosity = Verbosity.Minimal
+            Verbosity = Verbosity.Minimal,
+            Restore = true
         });
     });
 
