@@ -174,7 +174,8 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
                 NoBuild = true,
                 TestAdapterPath = adapterDir,
                 Settings = File("DisableAppDomain.runsettings"),
-                Logger = $"trx;LogFileName=DotnetTest-{framework}.trx"
+                Logger = $"trx;LogFileName=DotnetTest-{framework}.trx",
+                ResultsDirectory = MakeAbsolute(Directory("TestResults"))
             });
         });
 }
