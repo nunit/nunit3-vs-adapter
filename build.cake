@@ -72,7 +72,6 @@ var BIN_DIR = PROJECT_DIR + "bin/" + configuration + "/";
 var ADAPTER_PROJECT = SRC_DIR + "NUnitTestAdapter/NUnit.TestAdapter.csproj";
 
 var NETCOREAPP_TFM = "netcoreapp2.1";
-var VSTEST_NETCOREAPP_FRAMEWORK = "netcoreapp2.1";
 
 var ADAPTER_BIN_DIR_NET35 = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/net35/";
 var ADAPTER_BIN_DIR_NETCOREAPP = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/{NETCOREAPP_TFM}/";
@@ -147,7 +146,7 @@ string GetTestAssemblyPath(string framework)
 
 foreach (var (framework, vstestFramework, adapterDir) in new[] {
     ("net46", "Framework45", ADAPTER_BIN_DIR_NET35),
-    ("netcoreapp", VSTEST_NETCOREAPP_FRAMEWORK, ADAPTER_BIN_DIR_NETCOREAPP)
+    (NETCOREAPP_TFM, NETCOREAPP_TFM, ADAPTER_BIN_DIR_NETCOREAPP)
 })
 {
     Task($"VSTest-{framework}")
@@ -261,9 +260,9 @@ Task("Rebuild")
 
 Task("Test")
     .IsDependentOn("VSTest-net46")
-    .IsDependentOn("VSTest-netcoreapp")
+    .IsDependentOn("VSTest-" + NETCOREAPP_TFM)
     .IsDependentOn("DotnetTest-net46")
-    .IsDependentOn("DotnetTest-netcoreapp");
+    .IsDependentOn("DotnetTest-" + NETCOREAPP_TFM);
 
 Task("Package")
     .IsDependentOn("PackageZip")
