@@ -282,7 +282,8 @@ Task("Acceptance")
 
         VSTest(testAssembly, new VSTestSettings
         {
-            SettingsFile = keepWorkspaces ? (FilePath)"KeepWorkspaces.runsettings" : null
+            SettingsFile = keepWorkspaces ? (FilePath)"KeepWorkspaces.runsettings" : null,
+            Logger = "trx"
         });
     });
 
