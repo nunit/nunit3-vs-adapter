@@ -160,7 +160,7 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
                 // Enables the tests to run against the correct version of Microsoft.VisualStudio.TestPlatform.ObjectModel.dll.
                 // (The DLL they are compiled against depends on VS2012 at runtime.)
                 SettingsFile = File("DisableAppDomain.runsettings"),
-                Logger = "trx"
+                Logger = $"trx;LogFileName=VSTest-{framework}.trx"
             });
         });
 
@@ -175,7 +175,7 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
                 NoBuild = true,
                 TestAdapterPath = adapterDir,
                 Settings = File("DisableAppDomain.runsettings"),
-                Logger="trx"
+                Logger = $"trx;LogFileName=DotnetTest-{framework}.trx"
             });
         });
 }
@@ -283,7 +283,7 @@ Task("Acceptance")
         VSTest(testAssembly, new VSTestSettings
         {
             SettingsFile = keepWorkspaces ? (FilePath)"KeepWorkspaces.runsettings" : null,
-            Logger = "trx"
+            Logger = "trx;LogFileName=Acceptance.trx"
         });
     });
 
