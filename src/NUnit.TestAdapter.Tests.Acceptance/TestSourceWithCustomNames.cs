@@ -42,7 +42,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                         [TestCase(typeof(IEnumerable<(string oneValue, int twoValue)>))]
                         public void UnitTest_TestCaseWithTuple_TestIsNotExecuted(Type targetType)
                         {
-                            Assert.That(targetType, Is.TypeOf(typeof(IEnumerable<(string oneValue, int twoValue)>)));
+                            Assert.That(targetType, Is.EqualTo(typeof(IEnumerable<(string oneValue, int twoValue)>)));
                         }
 
                         [Test, TestCaseSource(nameof(SourceA))]
