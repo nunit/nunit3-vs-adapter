@@ -160,22 +160,38 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         private TestCase MakeTestCaseFromXmlNode(XmlNode testNode)
         {
+            var fullyQualifiedName = testNode.GetAttribute("fullname");
+            var parentType = testNode.ParentNode.GetAttribute("type");
+            if (parentType == "ParameterizedMethod")
+            {
+                var parameterizedTestFullName = testNode.ParentNode.GetAttribute("fullname");
 
-            var className = testNode.GetAttribute("classname");
-            var methodName = testNode.GetAttribute("methodname");
-           
-            // VS expected FullName to be the actual class+type name,optionally with parameter types
-            // in parenthesis, but they must fit the pattern of a value returned by object.GetType().
-            // It should _not_ include custom name or param values (just their types).
-            // However, the "fullname" from NUnit's file generation is the custom name of the test, so
-            // this code must convert from one to the other.
-            // Reference: https://github.com/microsoft/vstest-docs/blob/master/RFCs/0017-Managed-TestCase-Properties.md
-            var fullname = className + "." + methodName;
+                // VS expected FullyQualifiedName to be the actual class+type name,optionally with parameter types
+                // in parenthesis, but they must fit the pattern of a value returned by object.GetType().
+                // It should _not_ include custom name or param values (just their types).
+                // However, the "fullname" from NUnit's file generation is the custom name of the test, so
+                // this code must convert from one to the other.
+                // Reference: https://github.com/microsoft/vstest-docs/blob/master/RFCs/0017-Managed-TestCase-Properties.md
+
+                // Using the nUnit-provided "fullname" will cause failures at test execution time due to
+                // the FilterExpressionWrapper not being able to parse the test names passed-in as filters.
+
+                // To resolve this issue, for parameterized tests (which are the only tests that allow custom names),
+                // the parent node's "fullname" value is used instead. This is the name of the actual test method
+                // and will allow the filtering to work as expected.
+
+                if (!string.IsNullOrEmpty(parameterizedTestFullName))
+                {
+                    fullyQualifiedName = parameterizedTestFullName;
+                }
+
+            }
+        
 
             var id = testNode.GetAttribute("id");
 
             var testCase = new TestCase(
-                                    fullname,
+                                    fullyQualifiedName,
                                      new Uri(NUnitTestAdapter.ExecutorUri),
                                      _sourceAssembly)
             {
@@ -187,6 +203,9 @@ namespace NUnit.VisualStudio.TestAdapter
 
             if (CollectSourceInformation && _navigationDataProvider != null)
             {
+                var className = testNode.GetAttribute("classname");
+                var methodName = testNode.GetAttribute("methodname");
+
                 var navData = _navigationDataProvider.GetNavigationData(className, methodName);
                 if (navData.IsValid)
                 {
