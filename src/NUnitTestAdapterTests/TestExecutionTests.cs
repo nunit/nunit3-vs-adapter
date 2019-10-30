@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using NUnit.Framework;
@@ -31,7 +32,6 @@ using NUnit.Tests;
 using NUnit.Tests.Assemblies;
 using NUnit.Tests.Singletons;
 using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
-using System.Linq;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {

@@ -21,15 +21,15 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
+using System;
+using System.IO;
+using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using NSubstitute;
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Metadata;
-using System;
-using System.IO;
-using System.Reflection;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {

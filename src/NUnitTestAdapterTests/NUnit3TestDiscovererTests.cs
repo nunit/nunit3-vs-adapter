@@ -21,8 +21,8 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-using NUnit.Framework;
 using System.Reflection;
+using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
