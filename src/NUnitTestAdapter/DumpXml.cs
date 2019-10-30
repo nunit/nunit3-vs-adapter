@@ -114,7 +114,6 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
 
     }
 
-#if NET35
     public static class XmlNodeExtension
     {
         public static string AsString(this System.Xml.XmlNode node)
@@ -132,5 +131,5 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
             }
         }
     }
-#endif
+
 }
