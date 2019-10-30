@@ -241,7 +241,7 @@ $CAKE_EXE_INVOCATION = if ($IsLinux -or $IsMacOS) {
 }
 
 # Build Cake arguments
-$cakeArguments = ""
+$cakeArguments = @()
 If ($Script) {
     $cakeArguments += @("`"$Script`"");
 }

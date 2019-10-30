@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2017 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2019 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -61,10 +61,7 @@ namespace NUnit.VisualStudio.TestAdapter
             if (!Debugger.IsAttached)
                 Debugger.Launch();
 #endif
-            Initialize(discoveryContext, messageLogger);
-
-
-
+            Initialize(discoveryContext,messageLogger);
             TestLog.Info($"NUnit Adapter {AdapterVersion}: Test discovery starting");
 
             // Ensure any channels registered by other adapters are unregistered

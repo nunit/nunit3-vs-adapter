@@ -79,11 +79,13 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <param name="frameworkHandle">Test log to send results and messages through</param>
         public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
-#if LAUNCHDEBUGGER
+#if LAUNCHDEBUGGER 
             if (!Debugger.IsAttached)
                 Debugger.Launch();
 #endif
             Initialize(runContext, frameworkHandle);
+            TestLog.Debug("RunTests by IEnumerable<TestCase>");
+            InitializeForExecution(runContext, frameworkHandle);
 
             if (Settings.InProcDataCollectorsAvailable && sources.Count() > 1)
             {
@@ -91,9 +93,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 Unload();
                 return;
             }
-
-
-
+            
             foreach (var assemblyName in sources)
             {
                 try
@@ -125,8 +125,10 @@ namespace NUnit.VisualStudio.TestAdapter
             if (!Debugger.IsAttached)
                 Debugger.Launch();
 #endif
-            Initialize(runContext, frameworkHandle);
-
+            base.Initialize(runContext, frameworkHandle);
+            TestLog.Debug("RunTests by IEnumerable<TestCase>");
+            InitializeForExecution(runContext, frameworkHandle);
+            
             var assemblyGroups = tests.GroupBy(tc => tc.Source);
             if (Settings.InProcDataCollectorsAvailable && assemblyGroups.Count() > 1)
             {
@@ -176,11 +178,9 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region Helper Methods
 
-        public void Initialize(IRunContext runContext, IFrameworkHandle frameworkHandle)
+        public void InitializeForExecution(IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
-            base.Initialize(runContext, frameworkHandle);
-
-            TestLog.Info(string.Format("NUnit Adapter {0}: Test execution started", AdapterVersion));
+            TestLog.Info($"NUnit Adapter {AdapterVersion}: Test execution started");
 
             RunContext = runContext;
             FrameworkHandle = frameworkHandle;
@@ -233,9 +233,9 @@ namespace NUnit.VisualStudio.TestAdapter
                 _activeRunner = GetRunnerFor(assemblyPath, testCases);
                 CreateTestOutputFolder();
                 var loadResult = _activeRunner.Explore(filter);
-#if NET35
+//#if NET35
                 dumpXml?.AddString(loadResult.AsString());
-#endif
+//#endif
                 if (loadResult.Name == "test-run")
                     loadResult = loadResult.FirstChild;
 
@@ -322,9 +322,9 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             finally
             {
-#if NET35
+//#if NET35
                 dumpXml?.Dump4Execution();
-#endif
+//#endif
                 try
                 {
                     _activeRunner?.Dispose();
