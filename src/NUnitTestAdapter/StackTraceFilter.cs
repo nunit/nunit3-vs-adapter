@@ -8,10 +8,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -32,33 +32,33 @@ namespace NUnit.VisualStudio.TestAdapter
 	/// </summary>
 	public static class StackTraceFilter
 	{
-		public static string Filter(string stack) 
+		public static string Filter(string stack)
 		{
 			if(stack == null) return null;
 			var sw = new StringWriter();
 			var sr = new StringReader(stack);
 
-			try 
+			try
 			{
 				string line;
-				while ((line = sr.ReadLine()) != null) 
+				while ((line = sr.ReadLine()) != null)
 				{
 					if (!FilterLine(line))
 						sw.WriteLine(line.Trim());
 				}
-			} 
-			catch (Exception) 
+			}
+			catch (Exception)
 			{
 				return stack;
 			}
 			return sw.ToString();
 		}
 
-		static bool FilterLine(string line) 
+		static bool FilterLine(string line)
 		{
 			var patterns = new[]
 			{
-				"NUnit.Framework.Assertion", 
+				"NUnit.Framework.Assertion",
 				"NUnit.Framework.Assert",
                 "System.Reflection.MonoMethod"
 			};

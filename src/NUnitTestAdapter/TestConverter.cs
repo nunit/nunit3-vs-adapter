@@ -186,7 +186,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
 
             }
-        
+
 
             var id = testNode.GetAttribute("id");
 

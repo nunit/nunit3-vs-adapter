@@ -145,7 +145,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 TestLog.Warning("Error initializing RunSettings. Default settings will be used");
                 TestLog.Warning(e.ToString());
             }
-            
+
         }
 
         public void InitializeForbiddenFolders()
@@ -208,7 +208,7 @@ namespace NUnit.VisualStudio.TestAdapter
             if (Settings.PreFilter && testCases != null)
             {
                 var prefilters = new List<string>();
-                
+
                 foreach (TestCase testCase in testCases)
                 {
                     int end = testCase.FullyQualifiedName.IndexOfAny(new char[] { '(', '<' });

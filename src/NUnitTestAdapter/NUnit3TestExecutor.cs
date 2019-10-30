@@ -79,7 +79,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <param name="frameworkHandle">Test log to send results and messages through</param>
         public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
-#if LAUNCHDEBUGGER 
+#if LAUNCHDEBUGGER
             if (!Debugger.IsAttached)
                 Debugger.Launch();
 #endif

@@ -58,7 +58,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
 
         bool IFrameworkHandle.EnableShutdownAfterTestRun
         {
-            get; set; 
+            get; set;
         }
 
         int IFrameworkHandle.LaunchProcessWithDebuggerAttached(string filePath, string workingDirectory, string arguments, IDictionary<string, string> environmentVariables)
@@ -82,9 +82,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
         void ITestExecutionRecorder.RecordResult(TestResult testResult)
         {
             Events.Add(new Event
-            { 
-                EventType = EventType.RecordResult, 
-                TestResult = testResult 
+            {
+                EventType = EventType.RecordResult,
+                TestResult = testResult
             });
         }
 
