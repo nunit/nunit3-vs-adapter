@@ -54,4 +54,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
         public override string SettingsXml => $"<RunSettings><NUnit><WorkDirectory>{_workDir}</WorkDirectory><TestOutputXml>{_testOutput}</TestOutputXml></NUnit></RunSettings>";
     }
 
+    class FakeRunSettingsForWhere : FakeRunSettings
+    {
+        private readonly string _where;
+
+        public FakeRunSettingsForWhere(string where)
+        {
+            _where = where;
+        }
+        public override string SettingsXml => $"<RunSettings><NUnit><Where>{_where}</Where></NUnit></RunSettings>";
+    }
+
 }

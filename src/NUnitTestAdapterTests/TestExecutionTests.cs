@@ -62,6 +62,48 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     }
 
 
+    [Category("TestExecution")]
+    public class TestFilteringTests
+    {
+        private string MockAssemblyPath;
+        [OneTimeSetUp]
+        public void LoadMockassembly()
+        {
+            MockAssemblyPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "mock-assembly.dll");
+
+            // Sanity check to be sure we have the correct version of mock-assembly.dll
+            Assert.That(MockAssembly.TestsAtRuntime, Is.EqualTo(MockAssembly.Tests),
+                "The reference to mock-assembly.dll appears to be the wrong version");
+        }
+
+        [TestCase("", 35)]
+        [TestCase(null, 35)]
+        [TestCase("cat == Special", 1)]
+        [TestCase("cat == MockCategory", 2)]
+        [TestCase("method =~ MockTest?", 5)]
+        [TestCase("method =~ MockTest? and cat != MockCategory", 3)]
+        [TestCase("namespace == ThisNamespaceDoesNotExist", 0)]
+        [TestCase("test==NUnit.Tests.Assemblies.MockTestFixture", MockTestFixture.Tests, TestName = "{m}_MockTestFixture")]
+        [TestCase("test==NUnit.Tests.IgnoredFixture and method == Test2", 1, TestName = "{m}_IgnoredFixture")]
+        [TestCase("class==NUnit.Tests.Assemblies.MockTestFixture", MockTestFixture.Tests)]
+        [TestCase("name==MockTestFixture", MockTestFixture.Tests + NUnit.Tests.TestAssembly.MockTestFixture.Tests)]
+        [TestCase("cat==FixtureCategory", MockTestFixture.Tests)]
+        public void TestsWhereShouldFilter(string filter, int expectedCount)
+        {
+            // Create a fake environment.
+            var context = new FakeRunContext(new FakeRunSettingsForWhere(filter));
+            var fakeFramework = new FakeFrameworkHandle();
+
+            var executor = TestAdapterUtils.CreateExecutor();
+            executor.RunTests(new[] { MockAssemblyPath }, context, fakeFramework);
+
+            var completedRuns = fakeFramework.Events.Where(e => e.EventType == FakeFrameworkHandle.EventType.RecordEnd);
+
+            Assert.That(completedRuns, Has.Exactly(expectedCount).Items);
+
+        }
+
+    }
 
     [Category("TestExecution")]
     public class TestExecutionTests
