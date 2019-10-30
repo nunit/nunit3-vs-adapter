@@ -29,9 +29,9 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
+    using NUnit.VisualStudio.TestAdapter.Internal;
     using System.Collections;
     using System.Reflection;
-    using NUnit.VisualStudio.TestAdapter.Internal;
 
     public interface ITfsTestFilter
     {
@@ -138,7 +138,7 @@ namespace NUnit.VisualStudio.TestAdapter
             var testTrait = TraitProvider(propertyName);
             if (testTrait != null)
             {
-                var val = traitContains(currentTest, testTrait.Name);
+                var val = CachedTraitContainsDelegate(currentTest, testTrait.Name);
                 if (val.Length == 0) return null;
                 if (val.Length == 1) // Contains a single string
                     return val[0];  // return that string
@@ -147,7 +147,7 @@ namespace NUnit.VisualStudio.TestAdapter
             return null;
         }
 
-        static readonly Func<TestCase, string, string[]> traitContains = TraitContains();
+        static readonly Func<TestCase, string, string[]> CachedTraitContainsDelegate = TraitContains();
 
         /// <summary>
         /// TestCase:  To be checked

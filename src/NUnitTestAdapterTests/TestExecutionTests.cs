@@ -140,7 +140,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 Is.EqualTo(MockAssembly.ResultCount));
         }
 
-        static readonly TestCaseData[] outcomes =
+        static readonly TestCaseData[] Outcomes =
         {
             // NOTE: One inconclusive test is reported as None
             new TestCaseData(TestOutcome.Passed).Returns(MockAssembly.Success),
@@ -150,7 +150,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             new TestCaseData(TestOutcome.NotFound).Returns(0)
         };
 
-        [TestCaseSource("outcomes")]
+        [TestCaseSource(nameof(Outcomes))]
         public int TestOutcomeTotalsAreCorrect(TestOutcome outcome)
         {
             return testLog.Events

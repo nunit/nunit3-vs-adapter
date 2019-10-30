@@ -23,25 +23,28 @@
 
 // #define VERBOSE
 
+// We use an alias so that we don't accidentally make
+// references to engine internals, except for creating
+// the engine object in the Initialize method.
+using TestEngineClass = NUnit.Engine.TestEngine;
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-// We use an alias so that we don't accidentally make
-// references to engine internals, except for creating
-// the engine object in the Initialize method.
-using TestEngineClass = NUnit.Engine.TestEngine;
 #if NET35
 using System.Runtime.Remoting.Channels;
 #endif
-using System.Linq;
 using System.Text;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Common;
 using NUnit.Engine;
+using System.Linq;
+
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+
 
 namespace NUnit.VisualStudio.TestAdapter
 {

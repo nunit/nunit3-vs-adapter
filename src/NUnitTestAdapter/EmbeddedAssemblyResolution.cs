@@ -10,14 +10,14 @@ namespace NUnit.VisualStudio.TestAdapter
 {
     internal static class EmbeddedAssemblyResolution
     {
-        private static readonly object lockObj = new object();
+        private static readonly object LockObj = new object();
         private static bool isInitialized;
 
         public static void EnsureInitialized()
         {
             if (isInitialized) return;
 
-            lock (lockObj)
+            lock (LockObj)
             {
                 if (isInitialized) return;
 
