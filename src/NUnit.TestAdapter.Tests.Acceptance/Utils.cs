@@ -51,7 +51,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
                 i = replaceIndex + 1;
                 replaceIndex = arbitraryString.IndexOfAny(invalidChars, i);
-            } while (replaceIndex != -1);
+            }
+            while (replaceIndex != -1);
 
             r.Append(arbitraryString, i, arbitraryString.Length - i);
 
