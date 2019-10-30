@@ -63,7 +63,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 "System.Reflection.MonoMethod"
             };
 
-            return patterns.Any(t => line.IndexOf(t,StringComparison.OrdinalIgnoreCase) > 0);
+            return patterns.Any(t => line.IndexOf(t, StringComparison.OrdinalIgnoreCase) > 0);
         }
 
     }

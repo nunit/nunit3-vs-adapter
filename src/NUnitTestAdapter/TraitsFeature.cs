@@ -64,7 +64,7 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             var ancestor = testNode.ParentNode;
             var key = ancestor.Attributes?["id"]?.Value;
-            var categorylist = new CategoryList(testCase,adapterSettings);
+            var categorylist = new CategoryList(testCase, adapterSettings);
             // Reading ancestor properties of a test-case node. And adding to the cache.
             while (ancestor != null && key != null)
             {
@@ -81,7 +81,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
                 else
                 {
-                    categorylist.ProcessTestCaseProperties(ancestor,true,key,traitsCache);
+                    categorylist.ProcessTestCaseProperties(ancestor, true, key, traitsCache);
                     // Adding entry to dictionary, so that we will not make SelectNodes call again.
                     if (categorylist.LastNodeListCount == 0 && !traitsCache.ContainsKey(key))
                     {
@@ -93,7 +93,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             // No Need to store test-case properties in cache.
-            categorylist.ProcessTestCaseProperties(testNode,false);
+            categorylist.ProcessTestCaseProperties(testNode, false);
             categorylist.UpdateCategoriesToVs();
         }
 

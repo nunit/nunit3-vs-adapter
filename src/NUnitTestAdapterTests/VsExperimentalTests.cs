@@ -51,12 +51,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             };
             var settings = Substitute.For<IAdapterSettings>();
             settings.VsTestCategoryType.Returns(VsTestCategoryType.NUnit);
-            var cl = new CategoryList(testCase,settings);
-            cl.AddRange(new List<string> {"one","one","two","two"});
+            var cl = new CategoryList(testCase, settings);
+            cl.AddRange(new List<string> {"one", "one", "two", "two"});
             cl.UpdateCategoriesToVs();
 
             var returnedCategoryList = testCase.GetCategories();
-            Assert.That(returnedCategoryList.Count(),Is.EqualTo(2),$"Found {testCase.GetCategories().Count()} category entries");
+            Assert.That(returnedCategoryList.Count(), Is.EqualTo(2), $"Found {testCase.GetCategories().Count()} category entries");
 
         }
     }

@@ -46,7 +46,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
         private readonly string _testOutput;
         private readonly string _workDir;
 
-        public FakeRunSettingsForTestOutputAndWorkDir(string testOutput,string workDir)
+        public FakeRunSettingsForTestOutputAndWorkDir(string testOutput, string workDir)
         {
             _workDir = workDir;
             _testOutput = testOutput;

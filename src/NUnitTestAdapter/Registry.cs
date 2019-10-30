@@ -31,14 +31,14 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public bool Exist(string property)
         {
-            var value = Registry.GetValue(BaseKey + SubKeyName, property,null);
+            var value = Registry.GetValue(BaseKey + SubKeyName, property, null);
             return value != null;
 
         }
 
         public void Write<T>(string property, T val)
         {
-            Registry.SetValue(BaseKey+SubKeyName,property, val);
+            Registry.SetValue(BaseKey+SubKeyName, property, val);
         }
     }
 

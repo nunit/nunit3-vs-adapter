@@ -116,7 +116,7 @@ namespace NUnit.Tests
 
             [Test]
             [Category("MockCategory")]
-            [Property("Severity","Critical")]
+            [Property("Severity", "Critical")]
             [Description("This is a really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really long description")]
             public void MockTest2()
             {}
@@ -221,7 +221,7 @@ namespace NUnit.Tests
         public void Test3() { }
     }
 
-    [TestFixture,Explicit]
+    [TestFixture, Explicit]
     public class ExplicitFixture
     {
         public const int Tests = 2;
@@ -338,9 +338,9 @@ namespace NUnit.Tests
         {
             var filepath1 = Path.Combine(TestContext.CurrentContext.WorkDirectory, Attachment1Name);
             var filepath2 = Path.Combine(TestContext.CurrentContext.WorkDirectory, Attachment2Name);
-            Assert.That(File.Exists(filepath1),$"Could not find {filepath1}");
+            Assert.That(File.Exists(filepath1), $"Could not find {filepath1}");
             TestContext.AddTestAttachment(filepath1, Attachment1Description);
-            Assert.That(File.Exists(filepath2),$"Could not find {filepath2}");
+            Assert.That(File.Exists(filepath2), $"Could not find {filepath2}");
             TestContext.AddTestAttachment(filepath2, Attachment2Description);
         }
     }

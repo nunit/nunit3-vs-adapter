@@ -46,7 +46,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             var sut = new TestAdapter.NUnit3TestExecutor();
             sut.InitializeForbiddenFolders();
-            Assert.That(sut.CheckDirectory(folder),Is.False);
+            Assert.That(sut.CheckDirectory(folder), Is.False);
         }
 
         [Test]
@@ -55,7 +55,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var sut = new TestAdapter.NUnit3TestExecutor();
             sut.InitializeForbiddenFolders();
             var sutunique = sut.ForbiddenFolders.Distinct();
-            Assert.That(sutunique.Count(),Is.EqualTo(sut.ForbiddenFolders.Count),"There are duplicate entries in ForbiddenFolders");
+            Assert.That(sutunique.Count(), Is.EqualTo(sut.ForbiddenFolders.Count), "There are duplicate entries in ForbiddenFolders");
         }
     }
 }

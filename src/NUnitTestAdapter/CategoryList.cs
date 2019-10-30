@@ -95,7 +95,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// See https://github.com/nunit/nunit/blob/master/src/NUnitFramework/framework/Internal/PropertyNames.cs
         /// </summary>
         private readonly List<string> _internalProperties = new List<string>
-        { "Author", "ApartmentState", "Description", "IgnoreUntilDate","LevelOfParallelism", "MaxTime", "Order", "ParallelScope", "Repeat", "RequiresThread", "SetCulture", "SetUICulture", "TestOf", "Timeout"};
+        { "Author", "ApartmentState", "Description", "IgnoreUntilDate", "LevelOfParallelism", "MaxTime", "Order", "ParallelScope", "Repeat", "RequiresThread", "SetCulture", "SetUICulture", "TestOf", "Timeout"};
 
 
         private bool IsInternalProperty(string propertyName, string propertyValue)

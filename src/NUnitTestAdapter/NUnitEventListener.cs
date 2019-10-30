@@ -102,7 +102,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             catch (Exception ex)
             {
-                _recorder.SendMessage(TestMessageLevel.Warning,$"Error processing {node.Name} event for {node.GetAttribute("fullname")}");
+                _recorder.SendMessage(TestMessageLevel.Warning, $"Error processing {node.Name} event for {node.GetAttribute("fullname")}");
                 _recorder.SendMessage(TestMessageLevel.Warning, ex.ToString());
             }
         }
@@ -157,7 +157,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             var result = _testConverter.GetVSTestResults(resultNode, outputNodes ?? EmptyNodes);
-            _recorder.RecordEnd(result.TestCaseResult.TestCase,result.TestCaseResult.Outcome);
+            _recorder.RecordEnd(result.TestCaseResult.TestCase, result.TestCaseResult.Outcome);
             foreach (var vsResult in result.TestResults)
             {
                _recorder.RecordResult(vsResult);

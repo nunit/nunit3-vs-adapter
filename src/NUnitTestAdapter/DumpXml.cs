@@ -18,7 +18,7 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
     {
         public void WriteAllText(string path, string txt)
         {
-            System.IO.File.WriteAllText(path,txt);
+            System.IO.File.WriteAllText(path, txt);
         }
 
         public bool DirectoryExist(string path)
@@ -63,7 +63,7 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
         {
             EnsurePathExist(path);
             txt.Append(Rootend);
-            file.WriteAllText(path,txt.ToString());
+            file.WriteAllText(path, txt.ToString());
             txt = new StringBuilder();
         }
 

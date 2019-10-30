@@ -239,7 +239,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             var traitList = testCase.GetTraits().Select(trait => trait.Name + ":" + trait.Value).ToList();
             Assert.That(traitList, Is.EquivalentTo(new[] { "Priority:medium" }));
-            Assert.That(testCase.GetCategories(),Is.EquivalentTo(new [] { "super", "cat1", }));
+            Assert.That(testCase.GetCategories(), Is.EquivalentTo(new [] { "super", "cat1", }));
         }
 
         private void CheckNodesWithNoProperties(IDictionary<string, TraitsFeature.CachedTestCaseInfo> cache)
@@ -257,7 +257,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(!cache.ContainsKey("0-1001"));
         }
 
-        private void CheckNodeProperties(IDictionary<string, TraitsFeature.CachedTestCaseInfo> cache, string id, KeyValuePair<string,string>[] kps)
+        private void CheckNodeProperties(IDictionary<string, TraitsFeature.CachedTestCaseInfo> cache, string id, KeyValuePair<string, string>[] kps)
         {
             Assert.That(cache.ContainsKey(id));
             Assert.That(cache[id].Traits.Count, Is.EqualTo(kps.Count()));

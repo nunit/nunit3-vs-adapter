@@ -54,7 +54,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             testLog = new FakeFrameworkHandle();
             var settings = Substitute.For<IAdapterSettings>();
             settings.CollectSourceInformation.Returns(true);
-            using (var testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath,settings))
+            using (var testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings))
             {
                 fakeTestNode = FakeTestData.GetTestNode();
 

@@ -207,12 +207,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void TestOutputSettingWithWorkDir()
         {
             _settings.Load(@"<RunSettings><NUnit><WorkDirectory>C:\Whatever</WorkDirectory><TestOutputXml>my/testoutput/dir</TestOutputXml></NUnit></RunSettings>");
-            Assert.That(_settings.UseTestOutputXml,"Settings not loaded properly");
+            Assert.That(_settings.UseTestOutputXml, "Settings not loaded properly");
             Assert.Multiple(() =>
             {
-                Assert.That(_settings.TestOutputXml, Does.Contain(@"\my/testoutput/dir"),"Content not correct");
-                Assert.That(_settings.TestOutputXml, Does.StartWith(@"C:\"),"Not correct start drive");
-                Assert.That(Path.IsPathRooted(_settings.TestOutputXml), Is.True,"Path not properly rooted");
+                Assert.That(_settings.TestOutputXml, Does.Contain(@"\my/testoutput/dir"), "Content not correct");
+                Assert.That(_settings.TestOutputXml, Does.StartWith(@"C:\"), "Not correct start drive");
+                Assert.That(Path.IsPathRooted(_settings.TestOutputXml), Is.True, "Path not properly rooted");
             });
 
         }
@@ -256,7 +256,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void PreFilterIsDefaultOff()
         {
-            Assert.That(_settings.PreFilter,Is.False);
+            Assert.That(_settings.PreFilter, Is.False);
         }
 
         [Test]
