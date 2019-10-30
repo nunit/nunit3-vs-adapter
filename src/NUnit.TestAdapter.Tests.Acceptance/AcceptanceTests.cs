@@ -16,8 +16,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
         public static string NuGetPackageVersion => Initialization.Value.nupkgVersion;
 
-        public static string LowestNetfxTarget = "net35";
-        public static string LegacyProjectTargetFrameworkVersion = "v3.5";
+        public const string LowestNetfxTarget = "net35";
+        public const string LegacyProjectTargetFrameworkVersion = "v3.5";
 
         public static IEnumerable<string> TargetFrameworks => new[]
         {

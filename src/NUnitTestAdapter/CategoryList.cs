@@ -18,8 +18,8 @@ namespace NUnit.VisualStudio.TestAdapter
             VsTestCategoryLabel, typeof(string[]), TestPropertyAttributes.Hidden | TestPropertyAttributes.Trait,
             typeof(TestCase));
 
-        internal TestProperty
-            MsTestCategoryProperty; // = TestProperty.Register(MSTestCategoryName, VsTestCategoryLabel, typeof(string[]), TestPropertyAttributes.Hidden | TestPropertyAttributes.Trait, typeof(TestCase));
+        private TestProperty
+            msTestCategoryProperty; // = TestProperty.Register(MSTestCategoryName, VsTestCategoryLabel, typeof(string[]), TestPropertyAttributes.Hidden | TestPropertyAttributes.Trait, typeof(TestCase));
 
         internal static readonly TestProperty NUnitExplicitProperty = TestProperty.Register(
             "NUnit.Explicit",
@@ -138,7 +138,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 testCase.SetPropertyValue(
                     settings.VsTestCategoryType == VsTestCategoryType.NUnit
                         ? NUnitTestCategoryProperty
-                        : MsTestCategoryProperty, categorylist.Distinct().ToArray());
+                        : msTestCategoryProperty, categorylist.Distinct().ToArray());
             }
         }
 
