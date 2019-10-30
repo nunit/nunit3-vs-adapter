@@ -6,6 +6,10 @@
     <AssemblyOriginatorKeyFile>..\NUnitAdapter.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.66" PrivateAssets="all" />
+  </ItemGroup>
+
   <Target Name="RemoveReferencesToEmbeddedAssembles" AfterTargets="ResolveAssemblyReferences">
     <ItemGroup>
       <!-- Don’t copy Mono.Cecil to the output directory. Useful for debugging the embedded loading mechanism. -->
