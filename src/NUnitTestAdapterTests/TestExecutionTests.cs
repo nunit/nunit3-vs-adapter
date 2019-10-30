@@ -66,7 +66,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     [Category("TestExecution")]
     public class TestExecutionTests
     {
-        private string MockAssemblyPath;
+        private string mockAssemblyPath;
         static readonly IRunContext Context = new FakeRunContext();
 
         private FakeFrameworkHandle testLog;
@@ -76,7 +76,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [OneTimeSetUp]
         public void LoadMockassembly()
         {
-            MockAssemblyPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "mock-assembly.dll");
+            mockAssemblyPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "mock-assembly.dll");
 
             // Sanity check to be sure we have the correct version of mock-assembly.dll
             Assert.That(MockAssembly.TestsAtRuntime, Is.EqualTo(MockAssembly.Tests),
@@ -85,7 +85,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             // Load the NUnit mock-assembly.dll once for this test, saving
             // the list of test cases sent to the discovery sink
-            TestAdapterUtils.CreateExecutor().RunTests(new[] { MockAssemblyPath }, Context, testLog);
+            TestAdapterUtils.CreateExecutor().RunTests(new[] { mockAssemblyPath }, Context, testLog);
 
             var testResults = testLog.Events
                .Where(e => e.EventType == FakeFrameworkHandle.EventType.RecordResult)
