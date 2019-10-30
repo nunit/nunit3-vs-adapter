@@ -122,16 +122,16 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             VerifyTestResult(testLog.Events[1].TestResult);
         }
 
-        //[TestCase(ResultState.Success, TestOutcome.Passed, null)]
-        //[TestCase(ResultState.Failure, TestOutcome.Failed, "My failure message")]
-        //[TestCase(ResultState.Error, TestOutcome.Failed, "Error!")]
-        //[TestCase(ResultState.Cancelled, TestOutcome.None, null)]
-        //[TestCase(ResultState.Inconclusive, TestOutcome.None, null)]
-        //[TestCase(ResultState.NotRunnable, TestOutcome.Failed, "No constructor")]
-        //[TestCase(ResultState.Skipped, TestOutcome.Skipped, null)]
-        //[TestCase(ResultState.Ignored, TestOutcome.Skipped, "my reason")]
-        //public void TestFinished_OutcomesAreCorrectlyTranslated(ResultState resultState, TestOutcome outcome, string message)
-        //{
+        // [TestCase(ResultState.Success, TestOutcome.Passed, null)]
+        // [TestCase(ResultState.Failure, TestOutcome.Failed, "My failure message")]
+        // [TestCase(ResultState.Error, TestOutcome.Failed, "Error!")]
+        // [TestCase(ResultState.Cancelled, TestOutcome.None, null)]
+        // [TestCase(ResultState.Inconclusive, TestOutcome.None, null)]
+        // [TestCase(ResultState.NotRunnable, TestOutcome.Failed, "No constructor")]
+        // [TestCase(ResultState.Skipped, TestOutcome.Skipped, null)]
+        // [TestCase(ResultState.Ignored, TestOutcome.Skipped, "my reason")]
+        // public void TestFinished_OutcomesAreCorrectlyTranslated(ResultState resultState, TestOutcome outcome, string message)
+        // {
         //    fakeNUnitResult.SetResult(resultState, message, null);
         //    listener.TestFinished(fakeNUnitResult);
         //    Assume.That(testLog.Events.Count, Is.EqualTo(2));
@@ -142,10 +142,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         //        testLog.Events[1].EventType,
         //        Is.EqualTo(FakeFrameworkHandle.EventType.RecordResult));
 
-        //    Assert.AreEqual(outcome, testLog.Events[0].TestOutcome);
+        // Assert.AreEqual(outcome, testLog.Events[0].TestOutcome);
         //    Assert.AreEqual(outcome, testLog.Events[1].TestResult.Outcome);
         //    Assert.AreEqual(message, testLog.Events[1].TestResult.ErrorMessage);
-        //}
+        // }
 
         #endregion
 

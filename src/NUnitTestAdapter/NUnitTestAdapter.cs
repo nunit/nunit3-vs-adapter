@@ -21,7 +21,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-//#define VERBOSE
+// #define VERBOSE
 
 // We use an alias so that we don't accidentally make
 // references to engine internals, except for creating
@@ -272,7 +272,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 Directory.CreateDirectory(workDir);
             package.Settings[PackageSettings.WorkDirectory] = workDir;
             WorkDir = workDir;
-            //   CreateTestOutputFolder(workDir);
+            // CreateTestOutputFolder(workDir);
             return package;
         }
 

@@ -83,7 +83,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         }
 
         [Test]
-        [TestCase("net47")] //test code requires ValueTuple support, so can't got to net35
+        [TestCase("net47")] // test code requires ValueTuple support, so can't got to net35
         [TestCase("netcoreapp2.1")]
         public static void Single_target_csproj(string targetFramework)
         {
@@ -109,7 +109,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             var results = workspace.VSTest(new[] { $@"bin\Debug\{targetFramework}\Test.dll" });
 
-            //Total Tests =
+            // Total Tests =
             //              3 from PassingTestStr/TestCaseSourceMethod
             //              1 from UnitTest_TestCaseWithTuple_TestIsNotExecuted
             //              1 from TestA/SourceA

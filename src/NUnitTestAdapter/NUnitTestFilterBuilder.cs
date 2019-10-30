@@ -25,7 +25,7 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             var filteredTestCases = tfsFilter.CheckFilter(loadedTestCases);
             var testCases = filteredTestCases as TestCase[] ?? filteredTestCases.ToArray();
-            //TestLog.Info(string.Format("TFS Filter detected: LoadedTestCases {0}, Filterered Test Cases {1}", loadedTestCases.Count, testCases.Count()));
+            // TestLog.Info(string.Format("TFS Filter detected: LoadedTestCases {0}, Filterered Test Cases {1}", loadedTestCases.Count, testCases.Count()));
             return MakeTestFilter(testCases);
         }
 
