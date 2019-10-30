@@ -192,8 +192,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
             var testCase = new TestCase(
                                     fullyQualifiedName,
-                                     new Uri(NUnitTestAdapter.ExecutorUri),
-                                     _sourceAssembly)
+                                    new Uri(NUnitTestAdapter.ExecutorUri),
+                                    _sourceAssembly)
             {
                 DisplayName = testNode.GetAttribute("name"),
                 CodeFilePath = null,

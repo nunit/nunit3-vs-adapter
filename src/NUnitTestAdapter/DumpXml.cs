@@ -93,7 +93,7 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
             var guid = Guid.NewGuid();
             var res = Convert.ToBase64String(guid.ToByteArray());
             var res2 = Regex.Replace(res, @"[^a-zA-Z0-9]", "");
-             return res2 + ".dump";
+            return res2 + ".dump";
         }
 
         public void AddTestEvent(string text)

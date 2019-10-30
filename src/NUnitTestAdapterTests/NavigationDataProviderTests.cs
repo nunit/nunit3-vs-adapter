@@ -107,7 +107,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 {
                     File.WriteAllText(
                         assemblyPath + ".config",
-@"<?xml version=""1.0"" encoding=""utf-8""?>
+                        @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <runtime>
     <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
