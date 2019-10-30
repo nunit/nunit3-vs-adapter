@@ -25,7 +25,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
             "netcoreapp2.1"
         };
 
-        private readonly static Lazy<(IsolatedWorkspaceManager manager, string nupkgVersion, bool keepWorkspaces)> Initialization = new Lazy<(IsolatedWorkspaceManager, string, bool)>(() =>
+        private static readonly Lazy<(IsolatedWorkspaceManager manager, string nupkgVersion, bool keepWorkspaces)> Initialization = new Lazy<(IsolatedWorkspaceManager, string, bool)>(() =>
         {
             var directory = TestContext.Parameters["ProjectWorkspaceDirectory"]
                 ?? TryAutoDetectProjectWorkspaceDirectory()
@@ -63,7 +63,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
             Utils.DeleteDirectoryRobust(Path.Combine(packageCachePath, NuGetPackageId));
         }
 
-        private readonly static Dictionary<string, List<IsolatedWorkspace>> WorkspacesByTestId = new Dictionary<string, List<IsolatedWorkspace>>();
+        private static readonly Dictionary<string, List<IsolatedWorkspace>> WorkspacesByTestId = new Dictionary<string, List<IsolatedWorkspace>>();
 
         protected static IsolatedWorkspace CreateWorkspace()
         {
