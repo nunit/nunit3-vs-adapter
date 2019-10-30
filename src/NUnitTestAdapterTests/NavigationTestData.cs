@@ -113,7 +113,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             public string SimpleMethod_ReturnsString_OneArg(int i)
             { // expectedLineDebug
-                return s + x * i; // expectedLineRelease
+                return s + (x * i); // expectedLineRelease
             }
         }
 
