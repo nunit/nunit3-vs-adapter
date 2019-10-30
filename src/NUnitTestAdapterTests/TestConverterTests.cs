@@ -238,7 +238,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             var traitList = testCase.GetTraits().Select(trait => trait.Name + ":" + trait.Value).ToList();
             Assert.That(traitList, Is.EquivalentTo(new[] { "Priority:medium" }));
-            Assert.That(testCase.GetCategories(), Is.EquivalentTo(new [] { "super", "cat1", }));
+            Assert.That(testCase.GetCategories(), Is.EquivalentTo(new[] { "super", "cat1", }));
         }
 
         private void CheckNodesWithNoProperties(IDictionary<string, TraitsFeature.CachedTestCaseInfo> cache)

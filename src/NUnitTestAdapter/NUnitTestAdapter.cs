@@ -150,7 +150,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void InitializeForbiddenFolders()
         {
-            ForbiddenFolders = new []
+            ForbiddenFolders = new[]
             {
                 Environment.GetEnvironmentVariable("ProgramW6432"),
                 Environment.GetEnvironmentVariable("ProgramFiles(x86)"),
