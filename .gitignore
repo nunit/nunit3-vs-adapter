@@ -330,3 +330,5 @@ tools/
 # VisualStudioCode Patch
 # Ignore all local history of files
 .history
+/Dump
+/src/NUnitTestAdapterTests/Dump
