@@ -23,18 +23,18 @@
 
 // #define LAUNCHDEBUGGER
 
-using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using NUnit.Engine;
 using NUnit.Engine.Services;
 using NUnit.VisualStudio.TestAdapter.Dump;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Xml;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -84,7 +84,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 Debugger.Launch();
 #endif
             Initialize(runContext, frameworkHandle);
-            TestLog.Debug("RunTests by IEnumerable<TestCase>");
+            TestLog.Debug("RunTests by IEnumerable<string>");
             InitializeForExecution(runContext, frameworkHandle);
 
             if (Settings.InProcDataCollectorsAvailable && sources.Count() > 1)
@@ -93,7 +93,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 Unload();
                 return;
             }
-            
+
             foreach (var assemblyName in sources)
             {
                 try
@@ -128,7 +128,7 @@ namespace NUnit.VisualStudio.TestAdapter
             base.Initialize(runContext, frameworkHandle);
             TestLog.Debug("RunTests by IEnumerable<TestCase>");
             InitializeForExecution(runContext, frameworkHandle);
-            
+
             var assemblyGroups = tests.GroupBy(tc => tc.Source);
             if (Settings.InProcDataCollectorsAvailable && assemblyGroups.Count() > 1)
             {
@@ -233,9 +233,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 _activeRunner = GetRunnerFor(assemblyPath, testCases);
                 CreateTestOutputFolder();
                 var loadResult = _activeRunner.Explore(filter);
-//#if NET35
                 dumpXml?.AddString(loadResult.AsString());
-//#endif
                 if (loadResult.Name == "test-run")
                     loadResult = loadResult.FirstChild;
 
@@ -300,12 +298,12 @@ namespace NUnit.VisualStudio.TestAdapter
                 // we skip the native c++ binaries that we don't support.
                 TestLog.Warning("   Assembly not supported: " + assemblyPath);
             }
-            catch( NUnitEngineException e )
+            catch (NUnitEngineException e)
             {
-                if( e.InnerException is BadImageFormatException )
+                if (e.InnerException is BadImageFormatException)
                 {
                     // we skip the native c++ binaries that we don't support.
-                    TestLog.Warning( "   Assembly not supported: " + assemblyPath );
+                    TestLog.Warning("   Assembly not supported: " + assemblyPath);
                 }
                 throw;
             }
@@ -322,9 +320,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             finally
             {
-//#if NET35
                 dumpXml?.Dump4Execution();
-//#endif
                 try
                 {
                     _activeRunner?.Dispose();
@@ -335,7 +331,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     // can happen if CLR throws CannotUnloadAppDomainException, for example
                     // due to a long-lasting operation in a protected region (catch/finally clause).
                     if (ex is TargetInvocationException) { ex = ex.InnerException; }
-                    TestLog.Warning("   Exception thrown unloading tests from " + assemblyPath, ex);
+                    TestLog.Warning($"   Exception thrown unloading tests from {assemblyPath}", ex);
                 }
             }
         }

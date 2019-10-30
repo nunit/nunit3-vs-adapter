@@ -61,7 +61,7 @@ namespace NUnit.VisualStudio.TestAdapter
             if (!Debugger.IsAttached)
                 Debugger.Launch();
 #endif
-            Initialize(discoveryContext,messageLogger);
+            Initialize(discoveryContext, messageLogger);
             TestLog.Info($"NUnit Adapter {AdapterVersion}: Test discovery starting");
 
             // Ensure any channels registered by other adapters are unregistered
@@ -83,17 +83,14 @@ namespace NUnit.VisualStudio.TestAdapter
                 if (Settings.DumpXmlTestDiscovery)
                 {
                     dumpXml = new DumpXml(sourceAssemblyPath);
-
                 }
 
                 try
                 {
                     runner = GetRunnerFor(sourceAssemblyPath, null);
-
-                    XmlNode topNode = runner.Explore(TestFilter.Empty);
-#if NET35
+                    var topNode = runner.Explore(TestFilter.Empty);
                     dumpXml?.AddString(topNode.AsString());
-#endif
+
                     // Currently, this will always be the case but it might change
                     if (topNode.Name == "test-run")
                         topNode = topNode.FirstChild;
@@ -117,7 +114,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     {
                         var msgNode = topNode.SelectSingleNode("properties/property[@name='_SKIPREASON']");
                         if (msgNode != null &&
-                            (new[] {"contains no tests", "Has no TestFixtures"}).Any(msgNode.GetAttribute("value")
+                            (new[] { "contains no tests", "Has no TestFixtures" }).Any(msgNode.GetAttribute("value")
                                 .Contains))
                         {
                             if (Settings.Verbosity > 0)
@@ -169,9 +166,8 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
                 finally
                 {
-#if NET35
                     dumpXml?.Dump4Discovery();
-#endif
+
                     if (runner != null)
                     {
                         if (runner.IsTestRunning)
