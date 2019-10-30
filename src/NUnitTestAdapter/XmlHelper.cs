@@ -130,7 +130,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             return attr == null
                 ? defaultValue
-                : Int32.Parse(attr.Value, CultureInfo.InvariantCulture);
+                : int.Parse(attr.Value, CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -146,7 +146,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             return attr == null
                 ? defaultValue
-                : Double.Parse(attr.Value, CultureInfo.InvariantCulture);
+                : double.Parse(attr.Value, CultureInfo.InvariantCulture);
         }
 
         /// <summary>
