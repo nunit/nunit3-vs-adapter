@@ -148,12 +148,12 @@ namespace NUnit.Tests
             {}
 
             [Test, Explicit]
-            [Category( "Special" )]
+            [Category("Special" )]
             public void ExplicitlyRunTest()
             {}
 
             [Test]
-            public void NotRunnableTest( int a, int b)
+            public void NotRunnableTest(int a, int b)
             {
             }
 

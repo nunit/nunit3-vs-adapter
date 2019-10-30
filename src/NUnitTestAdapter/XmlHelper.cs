@@ -41,7 +41,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public static XmlNode CreateTopLevelElement(string name)
         {
             XmlDocument doc = new XmlDocument();
-            doc.LoadXml( "<" + name + "/>" );
+            doc.LoadXml("<" + name + "/>" );
             return doc.FirstChild;
         }
 
