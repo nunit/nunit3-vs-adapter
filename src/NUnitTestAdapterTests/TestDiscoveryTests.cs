@@ -51,7 +51,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         static readonly string MockAssemblyPath =
             Path.Combine(TestContext.CurrentContext.TestDirectory, "mock-assembly.dll");
 
-        private List<TestCase> testCases;
+        private readonly List<TestCase> testCases = new List<TestCase>();
 
         private readonly IDiscoveryContext _context;
 
@@ -67,7 +67,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(NUnit.Tests.Assemblies.MockAssembly.TestsAtRuntime, Is.EqualTo(NUnit.Tests.Assemblies.MockAssembly.Tests),
                 "The reference to mock-assembly.dll appears to be the wrong version");
             Assert.That(File.Exists(MockAssemblyPath), $"Can't locate mock-assembly.dll at {MockAssemblyPath}");
-            testCases = new List<TestCase>();
 
             // Load the NUnit mock-assembly.dll once for this test, saving
             // the list of test cases sent to the discovery sink
