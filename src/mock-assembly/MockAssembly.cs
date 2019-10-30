@@ -112,14 +112,14 @@ namespace NUnit.Tests
 
             [Test(Description="Mock Test #1")]
             public void MockTest1()
-            {}
+            { }
 
             [Test]
             [Category("MockCategory")]
             [Property("Severity", "Critical")]
             [Description("This is a really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really long description")]
             public void MockTest2()
-            {}
+            { }
 
             [Test]
             [Category("MockCategory")]
@@ -129,7 +129,7 @@ namespace NUnit.Tests
 
             [Test]
             protected static void MockTest5()
-            {}
+            { }
 
             [Test]
             public void FailingTest()
@@ -139,18 +139,18 @@ namespace NUnit.Tests
 
             [Test, Property("TargetMethod", "SomeClassName"), Property("Size", 5), /*Property("TargetType", typeof( System.Threading.Thread ))*/]
             public void TestWithManyProperties()
-            {}
+            { }
 
             [Test]
             [Ignore("ignoring this test method for now")]
             [Category("Foo")]
             public void MockTest4()
-            {}
+            { }
 
             [Test, Explicit]
             [Category("Special")]
             public void ExplicitlyRunTest()
-            {}
+            { }
 
             [Test]
             public void NotRunnableTest(int a, int b)
@@ -186,7 +186,7 @@ namespace NUnit.Tests
 
             [Test]
             public virtual void TestCase()
-            {}
+            { }
         }
     }
 

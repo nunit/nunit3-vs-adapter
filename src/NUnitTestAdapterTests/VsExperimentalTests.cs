@@ -52,7 +52,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var settings = Substitute.For<IAdapterSettings>();
             settings.VsTestCategoryType.Returns(VsTestCategoryType.NUnit);
             var cl = new CategoryList(testCase, settings);
-            cl.AddRange(new List<string> {"one", "one", "two", "two"});
+            cl.AddRange(new List<string> { "one", "one", "two", "two"});
             cl.UpdateCategoriesToVs();
 
             var returnedCategoryList = testCase.GetCategories();
