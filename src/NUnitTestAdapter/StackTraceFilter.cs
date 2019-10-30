@@ -34,7 +34,7 @@ namespace NUnit.VisualStudio.TestAdapter
     {
         public static string Filter(string stack)
         {
-            if(stack == null) return null;
+            if (stack == null) return null;
             var sw = new StringWriter();
             var sr = new StringReader(stack);
 

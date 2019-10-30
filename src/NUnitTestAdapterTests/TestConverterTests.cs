@@ -82,7 +82,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             var xmlNodeList = FakeTestData.GetTestNodes();
 
-            foreach(XmlNode node in xmlNodeList)
+            foreach (XmlNode node in xmlNodeList)
             {
                 var testCase = testConverter.ConvertTestCase(node);
             }
@@ -263,7 +263,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(cache[id].Traits.Count, Is.EqualTo(kps.Count()));
             var info = cache[id];
 
-            foreach(var kp in kps)
+            foreach (var kp in kps)
             {
                 Assert.That(info.Traits.Any(t => t.Name == kp.Key && t.Value == kp.Value));
             }

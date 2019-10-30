@@ -100,7 +100,7 @@ namespace NUnit.VisualStudio.TestAdapter
                         break;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _recorder.SendMessage(TestMessageLevel.Warning,$"Error processing {node.Name} event for {node.GetAttribute("fullname")}");
                 _recorder.SendMessage(TestMessageLevel.Warning, ex.ToString());
