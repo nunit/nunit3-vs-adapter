@@ -38,7 +38,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void Write<T>(string property, T val)
         {
-            Registry.SetValue(BaseKey+SubKeyName, property, val);
+            Registry.SetValue(BaseKey + SubKeyName, property, val);
         }
     }
 

@@ -99,7 +99,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void Info(string message)
         {
-            if (adapterSettings?.Verbosity>= 0)
+            if (adapterSettings?.Verbosity >= 0)
                 SendMessage(TestMessageLevel.Informational, message);
         }
 

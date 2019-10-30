@@ -65,11 +65,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             var vsixManifest = XDocument.Parse(vsixManifestTxt);
             var desc = vsixManifest.Descendants();
-            var assets = desc.FirstOrDefault(o=>o.Name.LocalName=="Assets");
+            var assets = desc.FirstOrDefault(o => o.Name.LocalName == "Assets");
             Assert.That(assets, Is.Not.Null, "Missing Assets");
             var assetItems = vsixManifest.Descendants().Where(o => o.Name.LocalName == "Asset").ToList();
             Assert.That(assetItems.Count, Is.GreaterThanOrEqualTo(1), "Missing asset items");
-            var unitTestAsset = assetItems.FirstOrDefault(o => o.Attribute("Type") != null && o.Attribute("Type").Value!=null &&
+            var unitTestAsset = assetItems.FirstOrDefault(o => o.Attribute("Type") != null && o.Attribute("Type").Value != null &&
                                                       o.Attribute("Type").Value == "UnitTestExtension");
             Assert.That(unitTestAsset, Is.Not.Null, "No asset with type UnitTestExtension found");
             var path = unitTestAsset.Attribute("Path");
@@ -97,7 +97,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             var grandParent = di;
             for (int i = 0; i < noOfLevels; i++)
-                grandParent= grandParent?.Parent;
+                grandParent = grandParent?.Parent;
             return grandParent;
         }
     }

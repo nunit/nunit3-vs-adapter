@@ -257,7 +257,7 @@ namespace NUnit.Tests
         [TestCase(9, 11, ExpectedResult=20)]
         public int MethodWithParameters(int x, int y)
         {
-            return x+y;
+            return x + y;
         }
 
         [TestCase(2, 4)]

@@ -43,8 +43,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
                 .GetConstructor(new[] { typeof(string) })
                 .Invoke(new object[] { filter });
 
-            return (ITestCaseFilterExpression)
-                Type.GetType("Microsoft.VisualStudio.TestPlatform.Common.Filtering.TestCaseFilterExpression, Microsoft.VisualStudio.TestPlatform.Common", throwOnError: true).GetTypeInfo()
+            return (ITestCaseFilterExpression)Type.GetType("Microsoft.VisualStudio.TestPlatform.Common.Filtering.TestCaseFilterExpression, Microsoft.VisualStudio.TestPlatform.Common", throwOnError: true).GetTypeInfo()
                 .GetConstructor(new[] { filterExpressionWrapperType })
                 .Invoke(new object[] { filterExpressionWrapper });
         }

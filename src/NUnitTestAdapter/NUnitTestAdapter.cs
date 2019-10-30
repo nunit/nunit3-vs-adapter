@@ -155,7 +155,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 Environment.GetEnvironmentVariable("ProgramW6432"),
                 Environment.GetEnvironmentVariable("ProgramFiles(x86)"),
                 Environment.GetEnvironmentVariable("windir"),
-            }.Where(o => !string.IsNullOrEmpty(o)).Select(o=>o.ToLower()+@"\").ToList();
+            }.Where(o => !string.IsNullOrEmpty(o)).Select(o => o.ToLower() + @"\").ToList();
         }
 
         private void SetCurrentWorkingDirectory()
