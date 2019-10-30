@@ -148,7 +148,7 @@ namespace NUnit.Tests
             {}
 
             [Test, Explicit]
-            [Category("Special" )]
+            [Category("Special")]
             public void ExplicitlyRunTest()
             {}
 
@@ -293,7 +293,7 @@ namespace NUnit.Tests
     [TestFixture(11.5)]
     public class GenericFixture<T>
     {
-        public GenericFixture(T num){ }
+        public GenericFixture(T num) { }
 
         [Test]
         public void Test1() { }

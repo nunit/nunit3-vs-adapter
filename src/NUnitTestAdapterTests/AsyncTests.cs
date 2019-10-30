@@ -37,7 +37,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.AreEqual(1, result);
         }
 
-        [TestCase(ExpectedResult = 1 )]
+        [TestCase(ExpectedResult = 1)]
         public async Task<int> TaskTTestCaseWithResultCheckSuccess()
         {
             return await ReturnOne();

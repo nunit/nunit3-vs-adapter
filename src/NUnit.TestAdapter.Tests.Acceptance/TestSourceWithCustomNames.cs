@@ -121,7 +121,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
 
 
-            Assert.That(results.Counters.Total, Is.EqualTo(9), "Total tests counter did not match expectation" );
+            Assert.That(results.Counters.Total, Is.EqualTo(9), "Total tests counter did not match expectation");
             Assert.That(results.Counters.Executed, Is.EqualTo(9), "Executed tests counter did not match expectation");
             Assert.That(results.Counters.Passed, Is.EqualTo(9), "Passed tests counter did not match expectation");
         }

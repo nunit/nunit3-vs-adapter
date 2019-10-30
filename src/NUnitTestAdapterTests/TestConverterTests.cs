@@ -161,8 +161,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase(
             "<test-output stream=\"Error\" testid=\"0-1001\" testname=\"UnitTests.Test1\"><![CDATA[some stdErr]]></test-output>"
             + ";<test-output stream=\"Progress\" testid=\"0-1001\" testname=\"UnitTests.Test1\"><![CDATA[some text]]></test-output>",
-            "StdErrMsgs:some stdErr"
-            )]
+            "StdErrMsgs:some stdErr")]
         public void CanMakeTestResultFromNUnitTestResult2(string output, string expectedMessages)
         {
             var cachedTestCase = testConverter.ConvertTestCase(fakeTestNode);
