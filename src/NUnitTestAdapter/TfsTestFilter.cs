@@ -29,9 +29,9 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-    using NUnit.VisualStudio.TestAdapter.Internal;
     using System.Collections;
     using System.Reflection;
+    using NUnit.VisualStudio.TestAdapter.Internal;
 
     public interface ITfsTestFilter
     {

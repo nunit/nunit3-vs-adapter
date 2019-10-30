@@ -23,11 +23,6 @@
 
 // #define LAUNCHDEBUGGER
 
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using NUnit.Engine;
-using NUnit.Engine.Services;
-using NUnit.VisualStudio.TestAdapter.Dump;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -35,6 +30,11 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
+using NUnit.Engine;
+using NUnit.Engine.Services;
+using NUnit.VisualStudio.TestAdapter.Dump;
 
 namespace NUnit.VisualStudio.TestAdapter
 {

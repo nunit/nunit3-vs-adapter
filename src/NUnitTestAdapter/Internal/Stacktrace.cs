@@ -8,8 +8,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using System.Linq;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 namespace NUnit.VisualStudio.TestAdapter.Internal
 {
