@@ -13,30 +13,30 @@ using System.Linq;
 
 namespace NUnit.VisualStudio.TestAdapter.Internal
 {
-	internal class Stacktrace
-	{
-		private readonly List<StackFrame> stackFrames;
+    internal class Stacktrace
+    {
+        private readonly List<StackFrame> stackFrames;
 
-		public Stacktrace(string stackTrace)
-		{
-			ValidateArg.NotNullOrEmpty(stackTrace, "stackTrace");
+        public Stacktrace(string stackTrace)
+        {
+            ValidateArg.NotNullOrEmpty(stackTrace, "stackTrace");
 
-			var stackFrameParser = StackFrameParser.CreateStackFrameParser();
+            var stackFrameParser = StackFrameParser.CreateStackFrameParser();
 
-			var lines = stackTrace.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            var lines = stackTrace.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
 
-			stackFrames = lines.Select(stackFrameParser.GetStackFrame).Where(stackFrame => stackFrame != null).ToList();
-		}
+            stackFrames = lines.Select(stackFrameParser.GetStackFrame).Where(stackFrame => stackFrame != null).ToList();
+        }
 
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-		public ReadOnlyCollection<StackFrame> StackFrames
-		{
-			get { return stackFrames.AsReadOnly(); }
-		}
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        public ReadOnlyCollection<StackFrame> StackFrames
+        {
+            get { return stackFrames.AsReadOnly(); }
+        }
 
-		public StackFrame GetTopStackFrame()
-		{
-			return stackFrames.FirstOrDefault(stackframe => !string.IsNullOrEmpty(stackframe.FileName));
-		}
-	}
+        public StackFrame GetTopStackFrame()
+        {
+            return stackFrames.FirstOrDefault(stackframe => !string.IsNullOrEmpty(stackframe.FileName));
+        }
+    }
 }

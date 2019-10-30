@@ -13,15 +13,15 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 namespace NUnit.VisualStudio.TestAdapter.Internal
 {
-	internal class StackFrameParser
-	{
-		private readonly Regex frameWithFileInfoRegex;
-		private readonly Regex frameWithoutFileInfoRegex;
+    internal class StackFrameParser
+    {
+        private readonly Regex frameWithFileInfoRegex;
+        private readonly Regex frameWithoutFileInfoRegex;
 
-		public static StackFrameParser CreateStackFrameParser()
-		{
-			string wordAt = null;
-			string wordsInLine = null;
+        public static StackFrameParser CreateStackFrameParser()
+        {
+            string wordAt = null;
+            string wordsInLine = null;
 
 #if NET35
             // TODO: This doesn't work cross platform
@@ -34,46 +34,46 @@ namespace NUnit.VisualStudio.TestAdapter.Internal
 #endif
 
             return new StackFrameParser(wordAt ?? "at", wordsInLine ?? "in {0}:line {1}");
-		}
+        }
 
-		private StackFrameParser(string wordAtFormat, string wordsInLineFormat)
-		{
-			string methodName = string.Format(CultureInfo.InvariantCulture, @"(\s*({0})) (?<methodName>[^\\]+)", wordAtFormat);
-			frameWithoutFileInfoRegex = new Regex("^" + methodName + "$");
+        private StackFrameParser(string wordAtFormat, string wordsInLineFormat)
+        {
+            string methodName = string.Format(CultureInfo.InvariantCulture, @"(\s*({0})) (?<methodName>[^\\]+)", wordAtFormat);
+            frameWithoutFileInfoRegex = new Regex("^" + methodName + "$");
 
-			string wordsInLine = string.Format(CultureInfo.InvariantCulture, wordsInLineFormat, "(?<fileName>.+)", @"(?<lineNumber>\d+)");
+            string wordsInLine = string.Format(CultureInfo.InvariantCulture, wordsInLineFormat, "(?<fileName>.+)", @"(?<lineNumber>\d+)");
 
-			string pattern = methodName + " " + wordsInLine;
-			frameWithFileInfoRegex = new Regex("^" + pattern + "$");
-		}
+            string pattern = methodName + " " + wordsInLine;
+            frameWithFileInfoRegex = new Regex("^" + pattern + "$");
+        }
 
-		public StackFrame GetStackFrame(string line)
-		{
-			ValidateArg.NotNullOrEmpty(line, "line");
+        public StackFrame GetStackFrame(string line)
+        {
+            ValidateArg.NotNullOrEmpty(line, "line");
 
-			Match match = frameWithFileInfoRegex.Match(line);
-			if (match.Success)
-			{
-				string methodName = match.Groups["methodName"].Value;
-				string fileName = match.Groups["fileName"].Value;
+            Match match = frameWithFileInfoRegex.Match(line);
+            if (match.Success)
+            {
+                string methodName = match.Groups["methodName"].Value;
+                string fileName = match.Groups["fileName"].Value;
 
-				int lineNumber;
-				if (!int.TryParse(match.Groups["lineNumber"].Value, out lineNumber))
-				{
-					lineNumber = 0;
-				}
+                int lineNumber;
+                if (!int.TryParse(match.Groups["lineNumber"].Value, out lineNumber))
+                {
+                    lineNumber = 0;
+                }
 
-				return new StackFrame(methodName, fileName, lineNumber);
-			}
+                return new StackFrame(methodName, fileName, lineNumber);
+            }
 
-			match = frameWithoutFileInfoRegex.Match(line);
-			if (match.Success)
-			{
-				string methodName = match.Groups["methodName"].Value;
-				return new StackFrame(methodName);
-			}
+            match = frameWithoutFileInfoRegex.Match(line);
+            if (match.Success)
+            {
+                string methodName = match.Groups["methodName"].Value;
+                return new StackFrame(methodName);
+            }
 
-			return null;
-		}
-	}
+            return null;
+        }
+    }
 }
