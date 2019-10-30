@@ -35,25 +35,25 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 			</test-suite>";
 
         /// <summary>
-        ///[Category("BaseClass")]
-        ///public class Class1
-        ///{
+        /// [Category("BaseClass")]
+        /// public class Class1
+        /// {
         ///    [Category("Base")]
         ///    [Test]
         ///    public void nUnitTest()
         ///    {
         ///
         ///    }
-        ///}
+        /// }
         ///
-        ///[Category("DerivedClass")]
-        ///public class ClassD : Class1
-        ///{
+        /// [Category("DerivedClass")]
+        /// public class ClassD : Class1
+        /// {
         ///    [Category("Derived")]
         ///    [Test]
         ///    public void dNunitTest()
         ///    { }
-        ///}
+        /// }
         /// </summary>
         const string XmlHierarchyOfClasses = @"<test-run id='2' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' testcasecount='5'>
 	<test-suite type='Assembly' id='0-1009' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' runstate='Runnable' testcasecount='5'>
@@ -93,9 +93,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 </test-run>";
 
         /// <summary>
-        ///[Category("NS1")]
-        ///public class NestedClasses
-        ///{
+        /// [Category("NS1")]
+        /// public class NestedClasses
+        /// {
         ///    [Category("NS11")]
         ///    [Test]
         ///    public void NC11()
@@ -111,7 +111,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         ///        {
         ///        }
         ///    }
-        ///}
+        /// }
         /// </summary>
         const string XmlNestedClasses = @"<test-run id='2' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' testcasecount='5'>
 	<test-suite type='Assembly' id='0-1009' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' runstate='Runnable' testcasecount='5'>
@@ -146,8 +146,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         /// <summary>
         /// [Category("ClassLevel")]
-        ///public class ManyTests
-        ///{
+        /// public class ManyTests
+        /// {
         ///    [TestCase(1), Category("TestCase level")]
         ///   [TestCase(2)]
         ///    [Category("MethodLevel")]
@@ -155,7 +155,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         ///    {
         ///        Assert.IsTrue(true);
         ///    }
-        ///}
+        /// }
         /// </summary>
         const string TestXmlParametrizedData =
             @"<test-suite type='Assembly' id='4-1004' name='ClassLibrary11.dll' fullname='C:\Users\Terje\documents\visual studio 2017\Projects\ClassLibrary11\ClassLibrary11\bin\Debug\ClassLibrary11.dll' runstate='Runnable' testcasecount='2'>
@@ -182,15 +182,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         /// <summary>
         /// [Category("ClassLevel")]
-        ///public class StandardClass
-        ///{
+        /// public class StandardClass
+        /// {
         ///   [Category("MethodLevel")]
         ///   [Test]
         ///   public void ThatWeExist()
         ///   {
         ///       Assert.IsTrue(true);
         ///   }
-        ///}
+        /// }
         /// </summary>
         private const string TestXmlStandardClass =
             @"<test-suite type='Assembly' id='5-1002' name='ClassLibrary11.dll' fullname='C:\Users\Terje\documents\visual studio 2017\Projects\ClassLibrary11\ClassLibrary11\bin\Debug\ClassLibrary11.dll' runstate='Runnable' testcasecount='1'>
@@ -225,7 +225,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         ///    var sut = new Calculator();
         ///
         ///    return sut.Sum(a, b);
-        ///}
+        /// }
         /// </summary>
         private const string TestCaseWithCategory =
             @"<test-suite type='Assembly' id='3-1005' name='ClassLibrary11.dll' fullname='C:\Users\Terje\documents\visual studio 2017\Projects\ClassLibrary11\ClassLibrary11\bin\Debug\ClassLibrary11.dll' runstate='Runnable' testcasecount='3'>
@@ -248,26 +248,26 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
    </test-suite>
 </test-suite>";
 
-        ///[Category("BaseClass")]
-        ///public class TestBase
-        ///{
-        ///    [Category("BaseMethod")]
-        ///    [Test]
-        ///    public void TestItBase()
-        ///    {
-        ///        Assert.That(true);
-        ///    }
-        ///}
-        ///[Category("DerivedClass")]
-        ///public class Derived : TestBase
-        ///{
-        ///    [Category("DerivedMethod")]
-        ///    [Test]
-        ///    public void TestItDerived()
-        ///    {
-        ///        Assert.That(true);
-        ///    }
-        ///}
+        /// [Category("BaseClass")]
+        /// public class TestBase
+        /// {
+        /// [Category("BaseMethod")]
+        /// [Test]
+        /// public void TestItBase()
+        /// {
+        /// Assert.That(true);
+        /// }
+        /// }
+        /// [Category("DerivedClass")]
+        /// public class Derived : TestBase
+        /// {
+        /// [Category("DerivedMethod")]
+        /// [Test]
+        /// public void TestItDerived()
+        /// {
+        /// Assert.That(true);
+        /// }
+        /// }
         private const string TestCaseWithInheritedTestsInSameAssembly =
             @"<test-suite type='Assembly' id='0-1005' name='ClassLibrary11.dll' fullname='C:\Users\Terje\documents\visual studio 2017\Projects\ClassLibrary11\ClassLibrary11\bin\Debug\ClassLibrary11.dll' runstate='Runnable' testcasecount='3'>
 	  <properties>
@@ -304,26 +304,26 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 	  </test-suite>
    </test-suite>";
 
-        ///[Category("BaseClass")]
-        ///public abstract class TestBase
-        ///{
-        ///    [Category("BaseMethod")]
-        ///    [Test]
-        ///    public void TestItBase()
-        ///    {
-        ///        Assert.That(true);
-        ///    }
-        ///}
-        ///[Category("DerivedClass")]
-        ///public class Derived : TestBase
-        ///{
-        ///    [Category("DerivedMethod")]
-        ///    [Test]
-        ///    public void TestItDerived()
-        ///    {
-        ///        Assert.That(true);
-        ///    }
-        ///}
+        /// [Category("BaseClass")]
+        /// public abstract class TestBase
+        /// {
+        /// [Category("BaseMethod")]
+        /// [Test]
+        /// public void TestItBase()
+        /// {
+        /// Assert.That(true);
+        /// }
+        /// }
+        /// [Category("DerivedClass")]
+        /// public class Derived : TestBase
+        /// {
+        /// [Category("DerivedMethod")]
+        /// [Test]
+        /// public void TestItDerived()
+        /// {
+        /// Assert.That(true);
+        /// }
+        /// }
         private const string TestCaseWithAbstractInheritedTestsInSameAssembly =
             @"<test-suite type='Assembly' id='0-1003' name='ClassLibrary11.dll' fullname='C:\Users\Terje\documents\visual studio 2017\Projects\ClassLibrary11\ClassLibrary11\bin\Debug\ClassLibrary11.dll' runstate='Runnable' testcasecount='2'>
 	  <properties>
