@@ -44,7 +44,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
             ClearCachedTestNupkgs(packageCachePath);
 
             var manager = new IsolatedWorkspaceManager(
-                reason: string.Join(Environment.NewLine,
+                reason: string.Join(
+                    Environment.NewLine,
                     "Test assembly: " + typeof(AcceptanceTests).Assembly.Location,
                     "Runner process: " + Process.GetCurrentProcess().MainModule.FileName),
                 directory,

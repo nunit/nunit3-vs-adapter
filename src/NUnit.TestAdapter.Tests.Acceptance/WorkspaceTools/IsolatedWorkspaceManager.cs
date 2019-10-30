@@ -71,7 +71,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
             using (var file = File.CreateText(Path.Combine(directory, "nuget.config")))
             using (var writer = XmlWriter.Create(file, new XmlWriterSettings { Indent = true }))
             {
-                writer.WriteComment(string.Join(Environment.NewLine,
+                writer.WriteComment(string.Join(
+                    Environment.NewLine,
                     "",
                     "This file exists so that if any of the projects under this folder are opened by an IDE or restored from the CLI by acceptance tests or by hand,",
                     " 1. the .nupkg that is being tested can be referenced by these projects, and",
