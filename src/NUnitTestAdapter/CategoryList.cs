@@ -64,7 +64,9 @@ namespace NUnit.VisualStudio.TestAdapter
                 if (IsInternalProperty(propertyName, propertyValue))
                     continue;
                 if (propertyName != NunitTestCategoryLabel)
+                {
                     testCase.Traits.Add(new Trait(propertyName, propertyValue));
+                }
                 else
                 {
                     categorylist.Add(propertyValue);

@@ -121,7 +121,9 @@ namespace NUnit.VisualStudio.TestAdapter
                                 TestLog.Info("Assembly contains no NUnit 3.0 tests: " + sourceAssembly);
                         }
                         else
+                        {
                             TestLog.Info("NUnit failed to load " + sourceAssembly);
+                        }
                     }
                 }
                 catch (NUnitEngineException e)
