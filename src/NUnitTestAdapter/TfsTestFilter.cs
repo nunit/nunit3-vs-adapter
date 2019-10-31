@@ -46,8 +46,7 @@ namespace NUnit.VisualStudio.TestAdapter
     {
         /// <summary>
         /// Supported properties for filtering
-
-        // </summary>
+        /// </summary>
         private static readonly Dictionary<string, TestProperty> SupportedPropertiesCache;
         private static readonly Dictionary<string, NTrait> SupportedTraitCache;
         private static readonly Dictionary<NTrait, TestProperty> TraitPropertyMap;
