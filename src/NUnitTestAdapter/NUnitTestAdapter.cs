@@ -172,7 +172,6 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         protected ITestRunner GetRunnerFor(string assemblyName, IGrouping<string, TestCase> testCases)
-
         {
             var package = CreateTestPackage(assemblyName, testCases);
             return TestEngine.GetRunner(package);
