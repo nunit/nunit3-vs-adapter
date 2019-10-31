@@ -27,9 +27,6 @@ namespace NUnit.VisualStudio.TestAdapter
     using System.IO;
     using System.Linq;
 
-    /// <summary>
-    /// Summary description for StackTraceFilter.
-    /// </summary>
     public static class StackTraceFilter
     {
         public static string Filter(string stack)
