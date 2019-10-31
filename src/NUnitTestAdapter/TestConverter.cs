@@ -71,6 +71,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public IDictionary<string, TraitsFeature.CachedTestCaseInfo> TraitsCache { get; }
 
         #region Public Methods
+
         /// <summary>
         /// Converts an NUnit test into a TestCase for Visual Studio,
         /// using the best method available according to the exact
@@ -154,6 +155,7 @@ namespace NUnit.VisualStudio.TestAdapter
         #endregion
 
         #region Helper Methods
+
         /// <summary>
         /// Makes a TestCase from an NUnit test, adding
         /// navigation data if it can be found.
