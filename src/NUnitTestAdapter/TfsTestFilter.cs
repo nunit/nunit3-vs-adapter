@@ -122,11 +122,9 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         public static object PropertyValueProvider(TestCase currentTest, string propertyName)
         {
-
             var testProperty = LocalPropertyProvider(propertyName);
             if (testProperty != null)
             {
-
                 // Test case might not have defined this property. In that case GetPropertyValue()
                 // would return default value. For filtering, if property is not defined return null.
                 if (currentTest.Properties.Contains(testProperty))
@@ -156,7 +154,6 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <returns>Value of trait</returns>
         private static Func<TestCase, string, string[]> TraitContains()
         {
-
             return (testCase, traitName) =>
             {
                 var testCaseType = typeof(TestCase);
@@ -210,7 +207,6 @@ namespace NUnit.VisualStudio.TestAdapter
 
     public class NTraitNameComparer : IEqualityComparer<NTrait>
     {
-
         public bool Equals(NTrait n, NTrait y)
         {
             return n.Name == y.Name;

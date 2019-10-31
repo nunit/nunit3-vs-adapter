@@ -29,7 +29,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     [TestFixture]
     public class NUnit3TestDiscovererTests
     {
-
         [Test]
         public void VerifyNunit3TestDiscovererHasCategoryAttribute()
         {

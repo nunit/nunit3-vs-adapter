@@ -5,7 +5,6 @@ using System.Text.RegularExpressions;
 
 namespace NUnit.VisualStudio.TestAdapter.Dump
 {
-
     public interface IFile
     {
         void WriteAllText(string path, string txt);

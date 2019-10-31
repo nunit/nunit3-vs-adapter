@@ -65,7 +65,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void CanMakeTestCaseFromTestWithCache()
         {
-
             var testCase = testConverter.ConvertTestCase(fakeTestNode);
 
             CheckTestCase(testCase);

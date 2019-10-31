@@ -20,8 +20,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         public void EmptyMethod_LotsOfLines()
         { // expectedLineDebug
-
-
         } // expectedLineRelease
 
         public void SimpleMethod_Void_NoArgs()

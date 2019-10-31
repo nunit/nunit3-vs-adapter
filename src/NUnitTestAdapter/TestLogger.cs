@@ -56,7 +56,6 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public TestLogger(IMessageLogger messageLogger)
         {
-
             MessageLogger = messageLogger;
         }
 
