@@ -135,7 +135,7 @@ namespace NUnit.Common
         public const string RunAsX86 = "RunAsX86";
 
         /// <summary>
-        /// Indicates that test runners should be disposed after the tests are executed
+        /// Indicates that test runners should be disposed after the tests are executed.
         /// </summary>
         public const string DisposeRunners = "DisposeRunners";
 
@@ -194,7 +194,7 @@ namespace NUnit.Common
         public const string SynchronousEvents = "SynchronousEvents";
 
         /// <summary>
-        /// Set default pattern used to generate test case names
+        /// Set default pattern used to generate test case names.
         /// </summary>
         public const string DefaultTestNamePattern = "DefaultTestNamePattern";
 
@@ -232,7 +232,7 @@ namespace NUnit.Common
         public const string ImageRequiresDefaultAppDomainAssemblyResolver = "ImageRequiresDefaultAppDomainAssemblyResolver";
 
         /// <summary>
-        /// The FrameworkName specified on a TargetFrameworkAttribute for the assembly
+        /// The FrameworkName specified on a TargetFrameworkAttribute for the assembly.
         /// </summary>
         public const string ImageTargetFrameworkName = "ImageTargetFrameworkName";
 

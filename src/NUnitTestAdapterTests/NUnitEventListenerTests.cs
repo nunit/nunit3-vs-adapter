@@ -202,7 +202,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     }
 
     /// <summary>
-    /// These tests ensure correct console output, which is what we send to the "recorder"
+    /// These tests ensure correct console output, which is what we send to the "recorder".
     /// </summary>
     public class NUnitEventListenerOutputTests
     {

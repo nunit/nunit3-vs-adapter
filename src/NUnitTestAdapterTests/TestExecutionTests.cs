@@ -36,7 +36,7 @@ using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
     /// <summary>
-    /// ResultSummary Helper Class
+    /// ResultSummary Helper Class.
     /// </summary>
     public class ResultSummary
     {
@@ -239,10 +239,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         /// <summary>
-        /// Tries to get the <see cref="TestResult"/> with the specified DisplayName
+        /// Tries to get the <see cref="TestResult"/> with the specified DisplayName.
         /// </summary>
-        /// <param name="displayName">DisplayName to search for</param>
-        /// <returns>The first testresult with the specified DisplayName, or <c>null</c> if none where found</returns>
+        /// <param name="displayName">DisplayName to search for.</param>
+        /// <returns>The first testresult with the specified DisplayName, or <c>null</c> if none where found.</returns>
         private TestResult GetTestResult(string displayName)
         {
             return testLog.Events

@@ -60,7 +60,7 @@ namespace NUnit.VisualStudio.TestAdapter
         bool PreFilter { get; }
 
         /// <summary>
-        ///  Syntax documentation <see cref="https://github.com/nunit/docs/wiki/Template-Based-Test-Naming"/>
+        ///  Syntax documentation <see cref="https://github.com/nunit/docs/wiki/Template-Based-Test-Naming"/>.
         /// </summary>
         string DefaultTestNamePattern { get; }
 
@@ -74,12 +74,12 @@ namespace NUnit.VisualStudio.TestAdapter
         bool DesignMode { get; }
 
         /// <summary>
-        /// If true, an adapter shouldn't create appdomains to run tests
+        /// If true, an adapter shouldn't create appdomains to run tests.
         /// </summary>
         bool DisableAppDomain { get; }
 
         /// <summary>
-        /// If true, an adapter should disable any test case parallelization
+        /// If true, an adapter should disable any test case parallelization.
         /// </summary>
         bool DisableParallelization { get; }
 
@@ -125,17 +125,17 @@ namespace NUnit.VisualStudio.TestAdapter
         public string TestAdapterPaths { get; private set; }
 
         /// <summary>
-        /// If false, an adapter need not parse symbols to provide test case file, line number
+        /// If false, an adapter need not parse symbols to provide test case file, line number.
         /// </summary>
         public bool CollectSourceInformation { get; private set; }
 
         /// <summary>
-        /// If true, an adapter shouldn't create appdomains to run tests
+        /// If true, an adapter shouldn't create appdomains to run tests.
         /// </summary>
         public bool DisableAppDomain { get; private set; }
 
         /// <summary>
-        /// If true, an adapter should disable any test case parallelization
+        /// If true, an adapter should disable any test case parallelization.
         /// </summary>
         public bool DisableParallelization { get; private set; }
 
@@ -194,7 +194,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public bool DumpXmlTestResults { get; private set; }
 
         /// <summary>
-        ///  Syntax documentation <see cref="https://github.com/nunit/docs/wiki/Template-Based-Test-Naming"/>
+        ///  Syntax documentation <see cref="https://github.com/nunit/docs/wiki/Template-Based-Test-Naming"/>.
         /// </summary>
         public string DefaultTestNamePattern { get; set; }
 

@@ -53,7 +53,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         ///    [Test]
         ///    public void dNunitTest()
         ///    { }
-        /// }
+        /// }.
         /// </summary>
         const string XmlHierarchyOfClasses = @"<test-run id='2' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' testcasecount='5'>
 	<test-suite type='Assembly' id='0-1009' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' runstate='Runnable' testcasecount='5'>
@@ -111,7 +111,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         ///        {
         ///        }
         ///    }
-        /// }
+        /// }.
         /// </summary>
         const string XmlNestedClasses = @"<test-run id='2' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' testcasecount='5'>
 	<test-suite type='Assembly' id='0-1009' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' runstate='Runnable' testcasecount='5'>
@@ -155,7 +155,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         ///    {
         ///        Assert.IsTrue(true);
         ///    }
-        /// }
+        /// }.
         /// </summary>
         const string TestXmlParametrizedData =
             @"<test-suite type='Assembly' id='4-1004' name='ClassLibrary11.dll' fullname='C:\Users\Terje\documents\visual studio 2017\Projects\ClassLibrary11\ClassLibrary11\bin\Debug\ClassLibrary11.dll' runstate='Runnable' testcasecount='2'>
@@ -190,7 +190,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         ///   {
         ///       Assert.IsTrue(true);
         ///   }
-        /// }
+        /// }.
         /// </summary>
         private const string TestXmlStandardClass =
             @"<test-suite type='Assembly' id='5-1002' name='ClassLibrary11.dll' fullname='C:\Users\Terje\documents\visual studio 2017\Projects\ClassLibrary11\ClassLibrary11\bin\Debug\ClassLibrary11.dll' runstate='Runnable' testcasecount='1'>
@@ -225,7 +225,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         ///    var sut = new Calculator();
         ///
         ///    return sut.Sum(a, b);
-        /// }
+        /// }.
         /// </summary>
         private const string TestCaseWithCategory =
             @"<test-suite type='Assembly' id='3-1005' name='ClassLibrary11.dll' fullname='C:\Users\Terje\documents\visual studio 2017\Projects\ClassLibrary11\ClassLibrary11\bin\Debug\ClassLibrary11.dll' runstate='Runnable' testcasecount='3'>

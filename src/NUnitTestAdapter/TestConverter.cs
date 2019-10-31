@@ -306,10 +306,10 @@ namespace NUnit.VisualStudio.TestAdapter
 
         /// <summary>
         /// Looks for attachments in a results node and if any attachments are found they
-        /// are returned"/>
+        /// are returned"/>.
         /// </summary>
-        /// <param name="resultNode">xml node for test result</param>
-        /// <returns>attachments to be added to the test, it will be empty if no attachments are found</returns>
+        /// <param name="resultNode">xml node for test result.</param>
+        /// <returns>attachments to be added to the test, it will be empty if no attachments are found.</returns>
         private AttachmentSet ParseAttachments(XmlNode resultNode)
         {
             const string fileUriScheme = "file://";

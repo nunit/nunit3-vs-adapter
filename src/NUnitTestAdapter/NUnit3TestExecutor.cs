@@ -76,7 +76,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         /// <param name="sources">Sources to be run.</param>
         /// <param name="runContext">Context to use when executing the tests.</param>
-        /// <param name="frameworkHandle">Test log to send results and messages through</param>
+        /// <param name="frameworkHandle">Test log to send results and messages through.</param>
         public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
 #if LAUNCHDEBUGGER
@@ -116,9 +116,9 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <summary>
         /// Called by the VisualStudio IDE when selected tests are to be run. Never called from TFS Build.
         /// </summary>
-        /// <param name="tests">The tests to be run</param>
-        /// <param name="runContext">The RunContext</param>
-        /// <param name="frameworkHandle">The FrameworkHandle</param>
+        /// <param name="tests">The tests to be run.</param>
+        /// <param name="runContext">The RunContext.</param>
+        /// <param name="frameworkHandle">The FrameworkHandle.</param>
         public void RunTests(IEnumerable<TestCase> tests, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
 #if LAUNCHDEBUGGER

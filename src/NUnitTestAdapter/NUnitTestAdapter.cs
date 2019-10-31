@@ -54,7 +54,7 @@ namespace NUnit.VisualStudio.TestAdapter
         #region Constants
 
         /// <summary>
-        /// The Uri used to identify the NUnitExecutor
+        /// The Uri used to identify the NUnitExecutor.
         /// </summary>
         public const string ExecutorUri = "executor://NUnit3TestExecutor";
 
@@ -163,7 +163,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
 
         /// <summary>
-        /// If a directory matches one of the forbidden folders, then we should reroute, so we return true in that case
+        /// If a directory matches one of the forbidden folders, then we should reroute, so we return true in that case.
         /// </summary>
         public bool CheckDirectory(string dir)
         {

@@ -185,7 +185,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         /// <summary>
-        /// Workdir not set, TestOutput is relative
+        /// Workdir not set, TestOutput is relative.
         /// </summary>
         [Test]
         public void TestOutputSetting()
@@ -199,7 +199,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         /// <summary>
-        /// Workdir set, and is absolute,  TestOutputXml is relative
+        /// Workdir set, and is absolute,  TestOutputXml is relative.
         /// </summary>
         [Ignore("Is not handled in the test executor, not in the test settings")]
         [Test]

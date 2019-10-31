@@ -8,7 +8,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
 {
     /// <summary>
     /// FakeFrameworkHandle is used in all tests that require an
-    /// IFrameworkHandle, ITestExecutionRecorder or IMessageLogger
+    /// IFrameworkHandle, ITestExecutionRecorder or IMessageLogger.
     /// </summary>
     class FakeFrameworkHandle : IFrameworkHandle
     {

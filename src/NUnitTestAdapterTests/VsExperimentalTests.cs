@@ -33,7 +33,7 @@ using NUnit.Framework;
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
     /// <summary>
-    /// Experimental tests used to deduce functionality of VSTest
+    /// Experimental tests used to deduce functionality of VSTest.
     /// </summary>
     public class VsExperimentalTests
     {

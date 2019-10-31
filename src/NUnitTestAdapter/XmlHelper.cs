@@ -37,7 +37,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// Creates a new top level element node.
         /// </summary>
         /// <param name="name">The element name.</param>
-        /// <returns>A new XmlNode</returns>
+        /// <returns>A new XmlNode.</returns>
         public static XmlNode CreateTopLevelElement(string name)
         {
             XmlDocument doc = new XmlDocument();
@@ -79,7 +79,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         /// <param name="node">The node to which the element should be added.</param>
         /// <param name="name">The element name.</param>
-        /// <returns>The newly created child element</returns>
+        /// <returns>The newly created child element.</returns>
         public static XmlNode AddElement(this XmlNode node, string name)
         {
             XmlNode childNode = node.OwnerDocument.CreateElement(name);

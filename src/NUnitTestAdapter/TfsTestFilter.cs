@@ -45,7 +45,7 @@ namespace NUnit.VisualStudio.TestAdapter
     public class TfsTestFilter : ITfsTestFilter
     {
         /// <summary>
-        /// Supported properties for filtering
+        /// Supported properties for filtering.
         /// </summary>
         private static readonly Dictionary<string, TestProperty> SupportedPropertiesCache;
         private static readonly Dictionary<string, NTrait> SupportedTraitCache;
@@ -117,7 +117,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         /// <summary>
         /// Provides value of TestProperty corresponding to property name 'propertyName' as used in filter.
-        /// Return value should be a string for single valued property or array of strings for multi valued property (e.g. TestCategory)
+        /// Return value should be a string for single valued property or array of strings for multi valued property (e.g. TestCategory).
         /// </summary>
         public static object PropertyValueProvider(TestCase currentTest, string propertyName)
         {
@@ -148,9 +148,9 @@ namespace NUnit.VisualStudio.TestAdapter
 
         /// <summary>
         /// TestCase:  To be checked
-        /// traitName: Name of trait to be checked against
+        /// traitName: Name of trait to be checked against.
         /// </summary>
-        /// <returns>Value of trait</returns>
+        /// <returns>Value of trait.</returns>
         private static Func<TestCase, string, string[]> TraitContains()
         {
             return (testCase, traitName) =>

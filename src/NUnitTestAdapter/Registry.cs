@@ -54,7 +54,7 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         /// <summary>
-        /// Used for test mocking only
+        /// Used for test mocking only.
         /// </summary>
         public void SetCurrentUser(RegistryCurrentUser user)
         {
