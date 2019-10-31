@@ -16,4 +16,3 @@ namespace NUnit.VisualStudio.TestAdapter.Internal
         }
     }
 }
-
