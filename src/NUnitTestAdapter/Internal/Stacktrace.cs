@@ -7,7 +7,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
@@ -26,12 +25,6 @@ namespace NUnit.VisualStudio.TestAdapter.Internal
             var lines = stackTrace.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
 
             stackFrames = lines.Select(stackFrameParser.GetStackFrame).Where(stackFrame => stackFrame != null).ToList();
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        public ReadOnlyCollection<StackFrame> StackFrames
-        {
-            get { return stackFrames.AsReadOnly(); }
         }
 
         public StackFrame GetTopStackFrame()
