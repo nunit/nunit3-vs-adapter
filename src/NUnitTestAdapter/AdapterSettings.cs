@@ -272,6 +272,7 @@ namespace NUnit.VisualStudio.TestAdapter
             PreFilter = GetInnerTextAsBool(nunitNode, nameof(PreFilter), false);
             var vsTestCategoryType = GetInnerText(nunitNode, nameof(VsTestCategoryType), Verbosity > 0);
             if (vsTestCategoryType != null)
+            {
                 switch (vsTestCategoryType.ToLower())
                 {
                     case "nunit":
@@ -285,6 +286,7 @@ namespace NUnit.VisualStudio.TestAdapter
                             $"Invalid value ({vsTestCategoryType}) for VsTestCategoryType, should be either NUnit or MsTest");
                         break;
                 }
+            }
 
 
 
@@ -432,8 +434,10 @@ namespace NUnit.VisualStudio.TestAdapter
                 if (validValues != null && validValues.Length > 0)
                 {
                     foreach (string valid in validValues)
+                    {
                         if (string.Compare(valid, val, StringComparison.OrdinalIgnoreCase) == 0)
                             return valid;
+                    }
 
                     throw new ArgumentException($"Invalid value {val} passed for element {xpath}.");
                 }
