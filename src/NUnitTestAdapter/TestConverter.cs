@@ -184,7 +184,6 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     fullyQualifiedName = parameterizedTestFullName;
                 }
-
             }
 
 

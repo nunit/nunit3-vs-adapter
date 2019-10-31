@@ -71,7 +71,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             sut.AddString("whatever");
             sut.Dump4Discovery();
             file.Received().WriteAllText(Arg.Is<string>(o => o.StartsWith(expected)), Arg.Any<string>());
-
         }
 
 

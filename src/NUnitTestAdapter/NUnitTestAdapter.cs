@@ -102,7 +102,6 @@ namespace NUnit.VisualStudio.TestAdapter
                     Assembly entryAssembly = Assembly.GetEntryAssembly();
                     if (entryAssembly != null)
                         exeName = entryAssembly.Location;
-
                 }
 
                 return exeName != null && (
@@ -142,7 +141,6 @@ namespace NUnit.VisualStudio.TestAdapter
                 TestLog.Warning("Error initializing RunSettings. Default settings will be used");
                 TestLog.Warning(e.ToString());
             }
-
         }
 
         public void InitializeForbiddenFolders()

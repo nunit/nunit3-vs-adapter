@@ -41,7 +41,6 @@ namespace NUnit.VisualStudio.TestAdapter
             settings = adapterSettings;
             this.testCase = testCase;
             // MsTestCategoryProperty = TestProperty.Register(MSTestCategoryName, VsTestCategoryLabel, typeof(string[]), TestPropertyAttributes.Hidden | TestPropertyAttributes.Trait, typeof(TestCase));
-
         }
 
         public void AddRange(IEnumerable<string> categories)
@@ -141,8 +140,5 @@ namespace NUnit.VisualStudio.TestAdapter
                         : msTestCategoryProperty, categorylist.Distinct().ToArray());
             }
         }
-
-
-
     }
 }

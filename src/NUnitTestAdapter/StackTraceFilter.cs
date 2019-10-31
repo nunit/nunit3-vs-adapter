@@ -65,6 +65,5 @@ namespace NUnit.VisualStudio.TestAdapter
 
             return patterns.Any(t => line.IndexOf(t, StringComparison.OrdinalIgnoreCase) > 0);
         }
-
     }
 }

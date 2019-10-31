@@ -110,7 +110,6 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
         {
             txt.Append(text);
         }
-
     }
 
     public static class XmlNodeExtension
@@ -130,5 +129,4 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
             }
         }
     }
-
 }

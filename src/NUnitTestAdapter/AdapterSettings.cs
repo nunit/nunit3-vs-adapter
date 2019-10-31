@@ -437,8 +437,6 @@ namespace NUnit.VisualStudio.TestAdapter
 
                     throw new ArgumentException($"Invalid value {val} passed for element {xpath}.");
                 }
-
-
             }
             if (log)
                 Log(xpath, val);

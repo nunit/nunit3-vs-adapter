@@ -316,6 +316,4 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 #endif
 
     }
-
-
 }

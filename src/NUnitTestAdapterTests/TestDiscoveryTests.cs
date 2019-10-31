@@ -200,5 +200,4 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             testcaseWasSent = true;
         }
     }
-
 }

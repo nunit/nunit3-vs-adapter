@@ -123,7 +123,6 @@ namespace NUnit.VisualStudio.TestAdapter
                         else
                             TestLog.Info("NUnit failed to load " + sourceAssembly);
                     }
-
                 }
                 catch (NUnitEngineException e)
                 {

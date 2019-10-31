@@ -57,7 +57,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             var returnedCategoryList = testCase.GetCategories();
             Assert.That(returnedCategoryList.Count(), Is.EqualTo(2), $"Found {testCase.GetCategories().Count()} category entries");
-
         }
     }
 }

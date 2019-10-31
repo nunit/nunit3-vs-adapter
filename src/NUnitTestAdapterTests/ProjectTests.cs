@@ -76,7 +76,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var path = unitTestAsset.Attribute("Path");
             Assert.That(path, Is.Not.Null, "UnitTestAsset must have path");
             Assert.That(path.Value.EndsWith("NUnit3.TestAdapter.dll"), "UnitTestAsset path must contain the NUNit3TestAdapter.dll");
-
         }
 
 
@@ -87,9 +86,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var filesNotToExist = Directory.EnumerateFiles(dir, "Microsoft", SearchOption.TopDirectoryOnly);
             Assert.IsTrue(!filesNotToExist.Any(), "The reference of NUnitTestAdapter - Microsoft.VisualStudio.TestPlatform.ObjectModel must be set Copy Local to false");
         }
-
-
-
     }
 
     public static class DirectoryInfoExtensions
@@ -102,7 +98,4 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             return grandParent;
         }
     }
-
-
-
 }

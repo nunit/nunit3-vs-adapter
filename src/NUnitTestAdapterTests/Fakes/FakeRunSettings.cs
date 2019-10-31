@@ -53,5 +53,4 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
         }
         public override string SettingsXml => $"<RunSettings><NUnit><WorkDirectory>{_workDir}</WorkDirectory><TestOutputXml>{_testOutput}</TestOutputXml></NUnit></RunSettings>";
     }
-
 }

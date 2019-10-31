@@ -110,7 +110,6 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             if (adapterSettings?.Verbosity >= 5)
                 SendMessage(TestMessageLevel.Informational, message);
-
         }
 
         #endregion

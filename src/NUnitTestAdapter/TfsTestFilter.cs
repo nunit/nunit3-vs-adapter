@@ -200,9 +200,6 @@ namespace NUnit.VisualStudio.TestAdapter
             SupportedTraitCache.TryGetValue(traitName, out testTrait);
             return testTrait;
         }
-
-
-
     }
 
     public class NTraitNameComparer : IEqualityComparer<NTrait>

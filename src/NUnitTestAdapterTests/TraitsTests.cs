@@ -362,7 +362,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         public XmlNode XmlForTestCaseWithInheritedTestsInSameAssembly => XmlHelper.CreateXmlNode(TestCaseWithInheritedTestsInSameAssembly);
         public XmlNode XmlForTestCaseWithAbstractInheritedTestsInSameAssembly => XmlHelper.CreateXmlNode(TestCaseWithAbstractInheritedTestsInSameAssembly);
-
     }
 
     [Category(nameof(TestTraits))]
@@ -409,7 +408,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var testcase2 = testcaselist.FirstOrDefault(o => o.DisplayName == "ThatWeExist(2)");
             Assert.That(testcase2, Is.Not.Null, "Didn't find the second testcase");
             Assert.That(testcase2.GetCategories().Count(), Is.EqualTo(3), "Wrong number of categories for second test case");
-
         }
 
         [Test]
@@ -450,7 +448,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             string searchTrait = "BaseClass";
             var tcWithTrait = TcWithTrait(searchTrait);
             Assert.That(tcWithTrait.Count(), Is.EqualTo(3), $"Wrong number of testcases found for trait={searchTrait}");
-
         }
 
         private IEnumerable<TestCase> TcWithTrait(string searchTrait)
@@ -481,7 +478,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             string searchTrait = "BaseClass";
             var tcWithTrait = TcWithTrait(searchTrait);
             Assert.That(tcWithTrait.Count(), Is.EqualTo(2), $"Wrong number of testcases found for trait={searchTrait}");
-
         }
 
 
@@ -523,7 +519,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var tc = testcasesWithCategories.FirstOrDefault();
             VerifyCategoriesOnly(tc, 1, "simple");
             Assert.That(tc.GetCategories().First(), Is.EqualTo("Single"));
-
         }
 
 

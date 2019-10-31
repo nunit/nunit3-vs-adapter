@@ -109,7 +109,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             // Checking Nested class attributes.
             CheckNodeProperties(traitsCache, "0-1005", new[] { new KeyValuePair<string, string>("Category", "NS1") });
             CheckNodeProperties(traitsCache, "0-1007", new[] { new KeyValuePair<string, string>("Category", "NS2") });
-
         }
 
         [Test]

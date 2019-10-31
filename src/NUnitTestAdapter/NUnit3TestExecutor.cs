@@ -225,7 +225,6 @@ namespace NUnit.VisualStudio.TestAdapter
             if (Settings.DumpXmlTestResults)
             {
                 dumpXml = new Dump.DumpXml(assemblyPath);
-
             }
 
             try
@@ -291,7 +290,6 @@ namespace NUnit.VisualStudio.TestAdapter
                     else
                         TestLog.Info("   NUnit failed to load " + assemblyPath);
                 }
-
             }
             catch (BadImageFormatException)
             {
@@ -353,7 +351,6 @@ namespace NUnit.VisualStudio.TestAdapter
             var resultWriter = resultService.GetResultWriter("nunit3", null);
             resultWriter.WriteResultFile(testResults, path);
             TestLog.Info($"   Test results written to {path}");
-
         }
 
         private NUnitTestFilterBuilder CreateTestFilterBuilder()

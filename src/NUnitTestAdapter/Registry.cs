@@ -31,7 +31,6 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             var value = Registry.GetValue(BaseKey + SubKeyName, property, null);
             return value != null;
-
         }
 
         public void Write<T>(string property, T val)

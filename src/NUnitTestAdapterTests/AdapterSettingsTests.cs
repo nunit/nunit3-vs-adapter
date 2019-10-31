@@ -196,7 +196,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             {
                 Assert.That(_settings.TestOutputXml, Does.Contain(@"/my/work/dir"));
             });
-
         }
 
         /// <summary>
@@ -214,7 +213,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 Assert.That(_settings.TestOutputXml, Does.StartWith(@"C:\"), "Not correct start drive");
                 Assert.That(Path.IsPathRooted(_settings.TestOutputXml), Is.True, "Path not properly rooted");
             });
-
         }
 
 
