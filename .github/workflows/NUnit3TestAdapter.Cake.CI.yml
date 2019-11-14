@@ -1,0 +1,14 @@
+name: NUnit3TestAdapter.Cake.CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build with cake
+      run: .\build.ps1
+      shell: pwsh
