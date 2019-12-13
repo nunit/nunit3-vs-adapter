@@ -26,18 +26,30 @@ namespace NUnit.VisualStudio.TestAdapter
             var filteredTestCases = tfsFilter.CheckFilter(loadedTestCases);
             var testCases = filteredTestCases as TestCase[] ?? filteredTestCases.ToArray();
             //TestLog.Info(string.Format("TFS Filter detected: LoadedTestCases {0}, Filterered Test Cases {1}", loadedTestCases.Count, testCases.Count()));
-            return MakeTestFilter(testCases);
+            return FilterByList(testCases);
         }
 
-        public TestFilter MakeTestFilter(IEnumerable<TestCase> testCases)
+        public TestFilter FilterByWhere(string where)
         {
-            if (testCases.Count() == 0)
-                return NoTestsFound;
+            ITestFilterBuilder filterBuilder = _filterService.GetTestFilterBuilder();
+            
+            if(!string.IsNullOrEmpty(where))
+            {
+                filterBuilder.SelectWhere(where);
+            }
+            
+            return filterBuilder.GetFilter();
 
+        }
+
+        public TestFilter FilterByList(IEnumerable<TestCase> testCases)
+        {
             ITestFilterBuilder filterBuilder = _filterService.GetTestFilterBuilder();
 
             foreach (TestCase testCase in testCases)
+            {
                 filterBuilder.AddTest(testCase.FullyQualifiedName);
+            }
 
             return filterBuilder.GetFilter();
         }

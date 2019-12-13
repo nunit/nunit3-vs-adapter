@@ -41,6 +41,7 @@ namespace NUnit.VisualStudio.TestAdapter
         IDictionary<string, string> TestProperties { get; }
         string InternalTraceLevel { get; }
         string WorkDirectory { get; }
+        string Where { get; }
         int DefaultTimeout { get; }
         int NumberOfTestWorkers { get; }
         bool ShadowCopyFiles { get; }
@@ -157,6 +158,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public string InternalTraceLevel { get; private set; }
 
         public string WorkDirectory { get; private set; }
+        public string Where { get; private set; }
         public string TestOutputXml { get; private set; }
         public bool UseTestOutputXml => !string.IsNullOrEmpty(TestOutputXml);
         public int DefaultTimeout { get; private set; }
@@ -254,6 +256,7 @@ namespace NUnit.VisualStudio.TestAdapter
             InternalTraceLevel = GetInnerTextWithLog(nunitNode, nameof(InternalTraceLevel), "Off", "Error", "Warning",
                 "Info", "Verbose", "Debug");
             WorkDirectory = GetInnerTextWithLog(nunitNode, nameof(WorkDirectory));
+            Where = GetInnerTextWithLog(nunitNode, nameof(Where));
             DefaultTimeout = GetInnerTextAsInt(nunitNode, nameof(DefaultTimeout), 0);
             NumberOfTestWorkers = GetInnerTextAsInt(nunitNode, nameof(NumberOfTestWorkers), -1);
             ShadowCopyFiles = GetInnerTextAsBool(nunitNode, nameof(ShadowCopyFiles), false);
