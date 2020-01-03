@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="NUnit.NUnit3TestAdapter" Version="3.15.1.0" Language="en-US" Publisher="Charlie Poole, Terje Sandstrom" />
+        <Identity Id="NUnit.NUnit3TestAdapter" Version="3.16.0" Language="en-US" Publisher="Charlie Poole, Terje Sandstrom" />
         <DisplayName>NUnit 3 Test Adapter</DisplayName>
         <Description xml:space="preserve">NUnit 3 adapter for running tests in Visual Studio. Works with NUnit 3.x.
 For running NUnit 2 tests, use the NUnit 2 adapter.</Description>
