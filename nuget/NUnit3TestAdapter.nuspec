@@ -19,9 +19,9 @@
 
             The package works with Visual Studio 2012 and newer.</description>
         <releaseNotes>This release works with NUnit 3.0 and higher only.  Also see  https://github.com/nunit/docs/wiki/Adapter-Release-Notes  </releaseNotes>
-        <copyright>Copyright (c) 2011-2019 Charlie Poole, 2014-2019 Terje Sandstrom</copyright>
+        <copyright>Copyright (c) 2011-2020 Charlie Poole, 2014-2020 Terje Sandstrom</copyright>
         <language>en-US</language>
-        <tags>test visualstudio testadapter nunit nunit3</tags>
+        <tags>test visualstudio testadapter nunit nunit3 dotnet</tags>
 
         <developmentDependency>true</developmentDependency>
         <dependencies>
