@@ -39,10 +39,8 @@ To create a package use `.\build -t package`
 
 To run and debug tests on .NET Framework, load `DisableAppDomain.runsettings`.
 
-Visual Studio’s Test Explorer only allows you to run tests against the first target in the test project
-[(upvote)](https://developercommunity.visualstudio.com/content/problem/150864/running-tests-in-a-csproj-with-multiple-targetfram.html).
-That makes command line is the easiest way to run .NET Core tests for now. If you need to frequently debug into .NET Core tests,
-you can temporarily switch the order of the `<TargetFrameworks>` in `NUnit.TestAdapter.Tests.csproj`.
+From Visual Studio 2019 version 16.2 preview 4 it is possible to run tests against a selected target framework in the test project, so one can use this to run .NET Core tests.
+An alternative approach is to make use of the command line. If you need to frequently debug into .NET Core tests, you can temporarily switch the order of the `<TargetFrameworks>` in `NUnit.TestAdapter.Tests.csproj`.
 
 The `mock-assembly` tests are not for direct running.
 
