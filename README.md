@@ -12,6 +12,8 @@ or the latest pre-release version
 
 [![MyGet version](https://img.shields.io/myget/nunit/vpre/NUnit3TestAdapter.svg?label=Myget%3A%20Latest%20pre-release&style=flat)](https://www.myget.org/feed/nunit/package/nuget/NUnit3TestAdapter)
 
+
+
 ##### Builds on master
 [![Cake build](https://img.shields.io/azure-devops/build/nunit/9d7ec8eb-1a1a-4fff-a88f-43bcdceb5f33/12.svg)](https://nunit.visualstudio.com/NUnit/_build?definitionId=12&_a=completed)
 [![VS Build](https://img.shields.io/azure-devops/build/nunit/9d7ec8eb-1a1a-4fff-a88f-43bcdceb5f33/4.svg)](https://nunit.visualstudio.com/NUnit/_build?definitionId=4&_a=completed)
@@ -22,6 +24,14 @@ or the latest pre-release version
 
 Ask support questions [![Chat](https://img.shields.io/gitter/room/nunit/nunit.svg?style=flat)](https://gitter.im/nunit/nunit)
 or raise an issue [![](https://img.shields.io/github/issues/nunit/NUnit3-vs-Adapter.svg?style=flat)](https://github.com/nunit/nunit3-vs-adapter/issues)
+
+## Documentation
+
+The [NUnit3TestAdapter wiki](https://github.com/nunit/docs/wiki/Visual-Studio-Test-Adapter) is the best place to start.
+
+Also check the [release notes](https://github.com/nunit/docs/wiki/Adapter-Release-Notes).
+
+
 
 ## License ##
 
