@@ -21,12 +21,12 @@ namespace NUnit.VisualStudio.TestAdapter
             _filterService = filterService;
         }
 
-        public TestFilter ConvertTfsFilterToNUnitFilter(TfsTestFilter tfsFilter, List<TestCase> loadedTestCases)
+        public TestFilter ConvertTfsFilterToNUnitFilter(ITfsTestFilter tfsFilter, List<TestCase> loadedTestCases)
         {
             var filteredTestCases = tfsFilter.CheckFilter(loadedTestCases);
             var testCases = filteredTestCases as TestCase[] ?? filteredTestCases.ToArray();
             //TestLog.Info(string.Format("TFS Filter detected: LoadedTestCases {0}, Filterered Test Cases {1}", loadedTestCases.Count, testCases.Count()));
-            return FilterByList(testCases);
+            return testCases.Any() ? FilterByList(testCases) : NoTestsFound;
         }
 
         public TestFilter FilterByWhere(string where)
