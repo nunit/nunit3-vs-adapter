@@ -22,12 +22,7 @@
 // ***********************************************************************
 
 
-
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using NSubstitute;
 using NUnit.Engine;
@@ -46,6 +41,18 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
             var tfsFilter = Substitute.For<ITfsTestFilter>();
             var results = sut.ConvertTfsFilterToNUnitFilter(tfsFilter, loadedTestCases);
             Assert.That(results, Is.EqualTo(NUnitTestFilterBuilder.NoTestsFound));
+        }
+
+        [Test]
+        public void ThatWhereFilterIsAdded()
+        {
+            var filterService = Substitute.For<ITestFilterService>();
+            var sut = new NUnitTestFilterBuilder(filterService);
+            string where = "name='abc'";
+            var testFilterBuilder = Substitute.For<ITestFilterBuilder>();
+            filterService.GetTestFilterBuilder().Returns(testFilterBuilder);
+            sut.FilterByWhere(where);
+            testFilterBuilder.Received().SelectWhere(Arg.Is<string>(x=>x==where));
         }
     }
 }
