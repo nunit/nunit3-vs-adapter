@@ -1,5 +1,5 @@
 // ***********************************************************************
-// Copyright (c) 2014-2019 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2014-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -85,6 +85,10 @@ namespace NUnit.VisualStudio.TestAdapter
         bool DisableParallelization { get; }
 
         bool ShowInternalProperties { get; }
+
+        bool UseParentFQNForParametrizedTests { get; }
+
+        bool UseNUnitIdforTestCaseId { get;  }
 
         void Load(IDiscoveryContext context);
         void Load(string settingsXml);
@@ -187,6 +191,8 @@ namespace NUnit.VisualStudio.TestAdapter
         public string DomainUsage { get; private set; }
 
         public bool ShowInternalProperties { get; private set; }
+        public bool UseParentFQNForParametrizedTests { get; private set; }  // Default is false.  True can fix certain test name patterns, but may have side effects. 
+        public bool UseNUnitIdforTestCaseId { get; private set; }  // default is false. 
 
 
         public VsTestCategoryType VsTestCategoryType { get; private set; } = VsTestCategoryType.NUnit;
@@ -270,6 +276,8 @@ namespace NUnit.VisualStudio.TestAdapter
                 RandomSeed = new Random().Next();
             DefaultTestNamePattern = GetInnerTextWithLog(nunitNode, nameof(DefaultTestNamePattern));
             ShowInternalProperties = GetInnerTextAsBool(nunitNode, nameof(ShowInternalProperties), false);
+            UseParentFQNForParametrizedTests = GetInnerTextAsBool(nunitNode, nameof(UseParentFQNForParametrizedTests), false);
+            UseNUnitIdforTestCaseId = GetInnerTextAsBool(nunitNode, nameof(UseNUnitIdforTestCaseId), false);
             DumpXmlTestDiscovery = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestDiscovery), false);
             DumpXmlTestResults = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestResults), false);
             PreFilter = GetInnerTextAsBool(nunitNode, nameof(PreFilter), false);

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.Engine;
 
@@ -21,32 +22,28 @@ namespace NUnit.VisualStudio.TestAdapter
             _filterService = filterService;
         }
 
-        public TestFilter ConvertTfsFilterToNUnitFilter(ITfsTestFilter tfsFilter, List<TestCase> loadedTestCases)
+        public TestFilter ConvertTfsFilterToNUnitFilter(ITfsTestFilter tfsFilter, IList<TestCase> loadedTestCases)
         {
             var filteredTestCases = tfsFilter.CheckFilter(loadedTestCases);
             var testCases = filteredTestCases as TestCase[] ?? filteredTestCases.ToArray();
-            //TestLog.Info(string.Format("TFS Filter detected: LoadedTestCases {0}, Filterered Test Cases {1}", loadedTestCases.Count, testCases.Count()));
+            //TestLog.Info(string.Format("TFS Filter detected: LoadedTestCases {0}, Filtered Test Cases {1}", loadedTestCases.Count, testCases.Count()));
             return testCases.Any() ? FilterByList(testCases) : NoTestsFound;
         }
 
         public TestFilter FilterByWhere(string where)
         {
-            ITestFilterBuilder filterBuilder = _filterService.GetTestFilterBuilder();
-            
-            if(!string.IsNullOrEmpty(where))
-            {
-                filterBuilder.SelectWhere(where);
-            }
-            
+            if (string.IsNullOrEmpty(where)) 
+                return TestFilter.Empty;
+            var filterBuilder = _filterService.GetTestFilterBuilder();
+            filterBuilder.SelectWhere(where);
             return filterBuilder.GetFilter();
-
         }
 
         public TestFilter FilterByList(IEnumerable<TestCase> testCases)
         {
-            ITestFilterBuilder filterBuilder = _filterService.GetTestFilterBuilder();
+            var filterBuilder = _filterService.GetTestFilterBuilder();
 
-            foreach (TestCase testCase in testCases)
+            foreach (var testCase in testCases)
             {
                 filterBuilder.AddTest(testCase.FullyQualifiedName);
             }
