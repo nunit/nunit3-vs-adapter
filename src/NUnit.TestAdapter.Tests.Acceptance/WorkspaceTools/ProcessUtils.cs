@@ -16,6 +16,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
             if (string.IsNullOrWhiteSpace(fileName))
                 throw new ArgumentException(nameof(fileName), "File name must be specified.");
 
+            var escapedArguments = arguments is null ? null : EscapeProcessArguments(arguments, alwaysQuote: false);
+
             using (var process = new Process
             {
                 StartInfo =
@@ -23,7 +25,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                     UseShellExecute = false,
                     WorkingDirectory = workingDirectory,
                     FileName = fileName,
-                    Arguments = arguments is null ? null : EscapeProcessArguments(arguments, alwaysQuote: false),
+                    Arguments = escapedArguments,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true
                 }
@@ -67,6 +69,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 
                 return new ProcessRunResult(
                     fileName,
+                    escapedArguments,
                     process.ExitCode,
                     stdout?.ToString(),
                     stderr?.ToString());
