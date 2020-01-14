@@ -25,10 +25,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                 builder.AppendLine().Append("Arguments: ").Append(result.Arguments);
             }
 
-            if (result.StdErr != null || result.StdOut != null)
+            var hasStdErr = !string.IsNullOrWhiteSpace(result.StdErr);
+
+            if (hasStdErr || !string.IsNullOrWhiteSpace(result.StdOut))
             {
-                builder.AppendLine().Append(result.StdErr != null ? "Stderr:" : "Stdout:");
-                builder.AppendLine().Append(result.StdErr ?? result.StdOut);
+                builder.AppendLine().Append(hasStdErr ? "Stderr:" : "Stdout:");
+                builder.AppendLine().Append(hasStdErr ? result.StdErr : result.StdOut);
             }
 
             return builder.ToString();
