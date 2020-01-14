@@ -156,8 +156,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         [Test]
         public static void Legacy_csproj_with_PackageReference()
         {
-            var workspace = CreateWorkspace()
-                .AddProject("Test.csproj", $@"
+            var workspace = CreateWorkspace();
+            var nuvers = NuGetPackageVersion;
+            workspace.AddProject("Test.csproj", $@"
                     <?xml version='1.0' encoding='utf-8'?>
                     <Project ToolsVersion='15.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                       <Import Project='$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props' Condition=""Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"" />
@@ -209,7 +210,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                           <Version>3.11.0</Version>
                         </PackageReference>
                         <PackageReference Include='NUnit3TestAdapter'>
-                          <Version>{NuGetPackageVersion}</Version>
+                          <Version>{nuvers}</Version>
                         </PackageReference>
                       </ItemGroup>
                       <Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets' />

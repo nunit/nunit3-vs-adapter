@@ -319,7 +319,9 @@ Task("CI")
     .IsDependentOn("Acceptance");
 
 Task("Appveyor")
-    .IsDependentOn("CI");
+     .IsDependentOn("Build")
+    .IsDependentOn("Package");
+
 
 Task("Default")
     .IsDependentOn("Build");
