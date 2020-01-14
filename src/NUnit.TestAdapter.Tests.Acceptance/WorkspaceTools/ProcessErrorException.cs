@@ -5,30 +5,32 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 {
     public sealed class ProcessErrorException : Exception
     {
-        public ProcessErrorException(string processName, int exitCode, string stdOut, string stdErr)
-            : base(BuildMessage(processName, exitCode, stdOut, stdErr))
+        public ProcessErrorException(ProcessRunResult result)
+            : base(BuildMessage(result))
         {
-            ProcessName = processName;
-            ExitCode = exitCode;
-            StdOut = stdOut;
-            StdErr = stdErr;
+            Result = result;
         }
 
-        public string ProcessName { get; }
-        public int ExitCode { get; }
-        public string StdOut { get; }
-        public string StdErr { get; }
+        public ProcessRunResult Result { get; }
 
-        private static string BuildMessage(string processName, int exitCode, string stdOut, string stdErr)
+        private static string BuildMessage(ProcessRunResult result)
         {
             var builder = new StringBuilder();
-            builder.Append("Process ‘").Append(processName);
-            builder.Append("’ exited with code ").Append(exitCode).Append('.');
+            builder.Append("Process ‘").Append(result.ProcessName);
+            builder.Append("’ exited with code ").Append(result.ExitCode).Append('.');
+            builder.AppendLine().Append("Executable: ").Append(result.FileName);
 
-            if (stdErr != null || stdOut != null)
+            if (!string.IsNullOrWhiteSpace(result.Arguments))
             {
-                builder.AppendLine(stdErr != null ? " Stderr:" : " Stdout:");
-                builder.Append(stdErr ?? stdOut);
+                builder.AppendLine().Append("Arguments: ").Append(result.Arguments);
+            }
+
+            var hasStdErr = !string.IsNullOrWhiteSpace(result.StdErr);
+
+            if (hasStdErr || !string.IsNullOrWhiteSpace(result.StdOut))
+            {
+                builder.AppendLine().Append(hasStdErr ? "Stderr:" : "Stdout:");
+                builder.AppendLine().Append(hasStdErr ? result.StdErr : result.StdOut);
             }
 
             return builder.ToString();
