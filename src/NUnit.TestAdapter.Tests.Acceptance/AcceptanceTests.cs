@@ -70,9 +70,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             var workspace = Initialization.Value.manager.CreateWorkspace(test.Name);
 
-            if (!WorkspacesByTestId.TryGetValue(test.ID, out var workspaces))
-                WorkspacesByTestId.Add(test.ID, workspaces = new List<IsolatedWorkspace>());
-            workspaces.Add(workspace);
+            lock (WorkspacesByTestId)
+            {
+                if (!WorkspacesByTestId.TryGetValue(test.ID, out var workspaces))
+                    WorkspacesByTestId.Add(test.ID, workspaces = new List<IsolatedWorkspace>());
+                workspaces.Add(workspace);
+            }
 
             return workspace;
         }
@@ -87,21 +90,25 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         {
             var test = TestContext.CurrentContext?.Test ?? throw new InvalidOperationException("There is no current test.");
 
-            if (WorkspacesByTestId.TryGetValue(test.ID, out var workspaces))
+            List<IsolatedWorkspace> workspaces;
+            lock (WorkspacesByTestId)
             {
-                WorkspacesByTestId.Remove(test.ID);
+                if (!WorkspacesByTestId.TryGetValue(test.ID, out workspaces))
+                    return;
 
-                if (TestContext.CurrentContext.Result.Outcome.Status == TestStatus.Failed)
-                {
-                    Initialization.Value.manager.PreserveDirectory(
-                        test.FullName + " failed:" + Environment.NewLine
-                        + TestContext.CurrentContext.Result.Message.TrimEnd() + Environment.NewLine);
-                }
-                else if (!Initialization.Value.keepWorkspaces)
-                {
-                    foreach (var workspace in workspaces)
-                        Utils.DeleteDirectoryRobust(workspace.Directory);
-                }
+                WorkspacesByTestId.Remove(test.ID);
+            }
+
+            if (TestContext.CurrentContext.Result.Outcome.Status == TestStatus.Failed)
+            {
+                Initialization.Value.manager.PreserveDirectory(
+                    test.FullName + " failed:" + Environment.NewLine
+                    + TestContext.CurrentContext.Result.Message.TrimEnd() + Environment.NewLine);
+            }
+            else if (!Initialization.Value.keepWorkspaces)
+            {
+                foreach (var workspace in workspaces)
+                    Utils.DeleteDirectoryRobust(workspace.Directory);
             }
         }
 
