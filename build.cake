@@ -98,6 +98,12 @@ Task("Clean")
         CleanDirectory(dir);
 });
 
+Task("CleanPackages")
+    .Does(()=>
+    {
+    CleanDirectory(PACKAGE_DIR);
+    });
+
 //////////////////////////////////////////////////////////////////////
 // BUILD
 //////////////////////////////////////////////////////////////////////
@@ -293,6 +299,19 @@ Task("Package")
     .IsDependentOn("PackageNuGet")
     .IsDependentOn("PackageVsix");
 
+Task("QuickRelease")
+    .IsDependentOn("Build")
+    .IsDependentOn("Package");
+
+Task("Release")
+    .IsDependentOn("Clean")
+    .IsDependentOn("Build")
+    .IsDependentOn("Test")
+    .IsDependentOn("CleanPackages")
+    .IsDependentOn("Package")
+    .IsDependentOn("Acceptance");
+
+
 Task("Acceptance")
     .IsDependentOn("Build")
     .IsDependentOn("PackageNuGet")
@@ -320,7 +339,9 @@ Task("CI")
 
 Task("Appveyor")
      .IsDependentOn("Build")
-    .IsDependentOn("Package");
+     .IsDependentOn("Test")
+    .IsDependentOn("Package")
+    .IsDependentOn("Acceptance");
 
 
 Task("Default")

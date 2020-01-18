@@ -1,5 +1,5 @@
 // ***********************************************************************
-// Copyright (c) 2011-2018 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -24,7 +24,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
