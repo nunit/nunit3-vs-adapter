@@ -65,11 +65,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     [Category("TestExecution")]
     public class TestFilteringTests
     {
-        private string MockAssemblyPath;
+        private string mockAssemblyPath;
         [OneTimeSetUp]
         public void LoadMockassembly()
         {
-            MockAssemblyPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "mock-assembly.dll");
+            mockAssemblyPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "mock-assembly.dll");
 
             // Sanity check to be sure we have the correct version of mock-assembly.dll
             Assert.That(MockAssembly.TestsAtRuntime, Is.EqualTo(MockAssembly.Tests),
@@ -95,14 +95,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var fakeFramework = new FakeFrameworkHandle();
 
             var executor = TestAdapterUtils.CreateExecutor();
-            executor.RunTests(new[] { MockAssemblyPath }, context, fakeFramework);
+            executor.RunTests(new[] { mockAssemblyPath }, context, fakeFramework);
 
             var completedRuns = fakeFramework.Events.Where(e => e.EventType == FakeFrameworkHandle.EventType.RecordEnd);
 
             Assert.That(completedRuns, Has.Exactly(expectedCount).Items);
-
         }
-
     }
 
     [Category("TestExecution")]

@@ -365,7 +365,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(_settings.NumberOfTestWorkers, Is.Zero);
             Assert.True(_settings.InProcDataCollectorsAvailable);
         }
-        
+
         [Test]
         public void WhereCanBeSet()
         {

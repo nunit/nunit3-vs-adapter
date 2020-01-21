@@ -64,5 +64,4 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
         }
         public override string SettingsXml => $"<RunSettings><NUnit><Where>{_where}</Where></NUnit></RunSettings>";
     }
-
 }

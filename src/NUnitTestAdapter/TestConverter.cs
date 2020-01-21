@@ -154,6 +154,7 @@ namespace NUnit.VisualStudio.TestAdapter
         #endregion
 
         #region Helper Methods
+
         /// <summary>
         /// Makes a TestCase from an NUnit test, adding
         /// navigation data if it can be found.
@@ -189,10 +190,9 @@ namespace NUnit.VisualStudio.TestAdapter
                     {
                         fullyQualifiedName = parameterizedTestFullName;
                     }
-
                 }
             }
-            
+
             var testCase = new TestCase(
                                     fullyQualifiedName,
                                     new Uri(NUnitTestAdapter.ExecutorUri),
@@ -305,8 +305,9 @@ namespace NUnit.VisualStudio.TestAdapter
                         : TestResultMessage.StandardOutCategory, output.InnerText));
             }
 
-            bool IsErrorStream(string stream) => "error".Equals(stream, StringComparison.OrdinalIgnoreCase);
-            bool IsProgressStream(string stream) => "progress".Equals(stream, StringComparison.OrdinalIgnoreCase);
+            static bool IsErrorStream(string stream) => "error".Equals(stream, StringComparison.OrdinalIgnoreCase);
+
+            static bool IsProgressStream(string stream) => "progress".Equals(stream, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -353,21 +354,16 @@ namespace NUnit.VisualStudio.TestAdapter
         // Public for testing
         public static TestOutcome GetTestOutcome(XmlNode resultNode)
         {
-            switch (resultNode.GetAttribute("result"))
+            return resultNode.GetAttribute("result") switch
             {
-                case "Passed":
-                    return TestOutcome.Passed;
-                case "Failed":
-                    return TestOutcome.Failed;
-                case "Skipped":
-                    return resultNode.GetAttribute("label") == "Ignored"
-                        ? TestOutcome.Skipped
-                        : TestOutcome.None;
-                case "Warning":
-                    return TestOutcome.Skipped;
-                default:
-                    return TestOutcome.None;
-            }
+                "Passed" => TestOutcome.Passed,
+                "Failed" => TestOutcome.Failed,
+                "Skipped" => resultNode.GetAttribute("label") == "Ignored"
+? TestOutcome.Skipped
+: TestOutcome.None,
+                "Warning" => TestOutcome.Skipped,
+                _ => TestOutcome.None,
+            };
         }
 
         TestOutcome GetAssertionOutcome(XmlNode assertion)

@@ -106,7 +106,7 @@ namespace NUnit.VisualStudio.TestAdapter
     public class AdapterSettings : IAdapterSettings
     {
         private const string RANDOM_SEED_FILE = "nunit_random_seed.tmp";
-        private TestLogger _logger;
+        private readonly TestLogger _logger;
 
         #region Constructor
 
@@ -191,8 +191,8 @@ namespace NUnit.VisualStudio.TestAdapter
         public string DomainUsage { get; private set; }
 
         public bool ShowInternalProperties { get; private set; }
-        public bool UseParentFQNForParametrizedTests { get; private set; }  // Default is false.  True can fix certain test name patterns, but may have side effects. 
-        public bool UseNUnitIdforTestCaseId { get; private set; }  // default is false. 
+        public bool UseParentFQNForParametrizedTests { get; private set; }  // Default is false.  True can fix certain test name patterns, but may have side effects.
+        public bool UseNUnitIdforTestCaseId { get; private set; }  // default is false.
 
 
         public VsTestCategoryType VsTestCategoryType { get; private set; } = VsTestCategoryType.NUnit;
