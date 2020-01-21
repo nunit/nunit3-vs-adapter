@@ -52,7 +52,8 @@ namespace NUnit.VisualStudio.TestAdapter
         int? RandomSeed { get; }
         bool RandomSeedSpecified { get; }
         bool InProcDataCollectorsAvailable { get; }
-        bool CollectDataForEachTestSeparately { get; }
+        // ReSharper disable once UnusedMemberInSuper.Global
+        bool CollectDataForEachTestSeparately { get; }  // Used implicitly by MS
         bool SynchronousEvents { get; }
         string DomainUsage { get; }
         bool DumpXmlTestDiscovery { get; }
@@ -298,24 +299,6 @@ namespace NUnit.VisualStudio.TestAdapter
                         break;
                 }
             }
-
-
-
-#if SUPPORT_REGISTRY_SETTINGS
-            // Legacy (CTP) registry settings override defaults
-            var registry = RegistryCurrentUser.OpenRegistryCurrentUser(@"Software\nunit.org\VSAdapter");
-            if (registry.Exist("ShadowCopy") && (registry.Read<int>("ShadowCopy") == 1))
-                ShadowCopyFiles = true;
-            if (registry.Exist("Verbosity"))
-                Verbosity = registry.Read<int>("Verbosity");
-            if (registry.Exist("UseVsKeepEngineRunning") && (registry.Read<int>("UseVsKeepEngineRunning") == 1)
-                UseVsKeepEngineRunning = true;
-#endif
-
-#if DEBUG && VERBOSE
-            // Force Verbosity to 1 under Debug
-            Verbosity = 1;
-#endif
 
             var inProcDataCollectorNode =
                 doc.SelectSingleNode("RunSettings/InProcDataCollectionRunSettings/InProcDataCollectors");
