@@ -79,7 +79,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region Properties
 
-        public AdapterSettings Settings { get; private set; }
+        public IAdapterSettings Settings { get; private set; }
 
         // The adapter version
         protected string AdapterVersion { get; set; }

@@ -365,5 +365,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(_settings.NumberOfTestWorkers, Is.Zero);
             Assert.True(_settings.InProcDataCollectorsAvailable);
         }
+        
+        [Test]
+        public void WhereCanBeSet()
+        {
+            _settings.Load("<RunSettings><NUnit><Where>cat == SomeCategory and namespace == SomeNamespace or cat != SomeOtherCategory</Where></NUnit></RunSettings>");
+            Assert.That(_settings.Where, Is.EqualTo("cat == SomeCategory and namespace == SomeNamespace or cat != SomeOtherCategory"));
+        }
     }
 }

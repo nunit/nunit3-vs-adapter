@@ -1,5 +1,5 @@
 // ***********************************************************************
-// Copyright (c) 2011-2018 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -24,7 +24,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -155,7 +154,6 @@ namespace NUnit.VisualStudio.TestAdapter
         #endregion
 
         #region Helper Methods
-
         /// <summary>
         /// Makes a TestCase from an NUnit test, adding
         /// navigation data if it can be found.
@@ -163,34 +161,38 @@ namespace NUnit.VisualStudio.TestAdapter
         private TestCase MakeTestCaseFromXmlNode(XmlNode testNode)
         {
             var fullyQualifiedName = testNode.GetAttribute("fullname");
-            var parentType = testNode.ParentNode.GetAttribute("type");
-            if (parentType == "ParameterizedMethod")
+            if (adapterSettings.UseParentFQNForParametrizedTests)
             {
-                var parameterizedTestFullName = testNode.ParentNode.GetAttribute("fullname");
-
-                // VS expected FullyQualifiedName to be the actual class+type name,optionally with parameter types
-                // in parenthesis, but they must fit the pattern of a value returned by object.GetType().
-                // It should _not_ include custom name or param values (just their types).
-                // However, the "fullname" from NUnit's file generation is the custom name of the test, so
-                // this code must convert from one to the other.
-                // Reference: https://github.com/microsoft/vstest-docs/blob/master/RFCs/0017-Managed-TestCase-Properties.md
-
-                // Using the nUnit-provided "fullname" will cause failures at test execution time due to
-                // the FilterExpressionWrapper not being able to parse the test names passed-in as filters.
-
-                // To resolve this issue, for parameterized tests (which are the only tests that allow custom names),
-                // the parent node's "fullname" value is used instead. This is the name of the actual test method
-                // and will allow the filtering to work as expected.
-
-                if (!string.IsNullOrEmpty(parameterizedTestFullName))
+                var parentType = testNode.ParentNode.GetAttribute("type");
+                if (parentType == "ParameterizedMethod")
                 {
-                    fullyQualifiedName = parameterizedTestFullName;
+                    var parameterizedTestFullName = testNode.ParentNode.GetAttribute("fullname");
+
+                    // VS expected FullyQualifiedName to be the actual class+type name,optionally with parameter types
+                    // in parenthesis, but they must fit the pattern of a value returned by object.GetType().
+                    // It should _not_ include custom name or param values (just their types).
+                    // However, the "fullname" from NUnit's file generation is the custom name of the test, so
+                    // this code must convert from one to the other.
+                    // Reference: https://github.com/microsoft/vstest-docs/blob/master/RFCs/0017-Managed-TestCase-Properties.md
+
+                    // Using the nUnit-provided "fullname" will cause failures at test execution time due to
+                    // the FilterExpressionWrapper not being able to parse the test names passed-in as filters.
+
+                    // To resolve this issue, for parameterized tests (which are the only tests that allow custom names),
+                    // the parent node's "fullname" value is used instead. This is the name of the actual test method
+                    // and will allow the filtering to work as expected.
+
+                    // Note that this also means you can no longer select a single tests of these to run.
+                    // When you do that, all tests within the parent node will be executed
+
+                    if (!string.IsNullOrEmpty(parameterizedTestFullName))
+                    {
+                        fullyQualifiedName = parameterizedTestFullName;
+                    }
+
                 }
             }
-
-
-            var id = testNode.GetAttribute("id");
-
+            
             var testCase = new TestCase(
                                     fullyQualifiedName,
                                     new Uri(NUnitTestAdapter.ExecutorUri),
@@ -199,9 +201,12 @@ namespace NUnit.VisualStudio.TestAdapter
                 DisplayName = testNode.GetAttribute("name"),
                 CodeFilePath = null,
                 LineNumber = 0,
-                Id = EqtHash.GuidFromString(id)
             };
-
+            if (adapterSettings.UseNUnitIdforTestCaseId)
+            {
+                var id = testNode.GetAttribute("id");
+                testCase.Id = EqtHash.GuidFromString(id);
+            }
             if (CollectSourceInformation && _navigationDataProvider != null)
             {
                 var className = testNode.GetAttribute("classname");

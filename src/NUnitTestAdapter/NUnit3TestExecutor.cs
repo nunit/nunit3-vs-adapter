@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2019 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -99,8 +99,9 @@ namespace NUnit.VisualStudio.TestAdapter
                 try
                 {
                     var assemblyPath = Path.IsPathRooted(assemblyName) ? assemblyName : Path.Combine(Directory.GetCurrentDirectory(), assemblyName);
+                    var filter = CreateTestFilterBuilder().FilterByWhere(Settings.Where);
 
-                    RunAssembly(assemblyPath, null, TestFilter.Empty);
+                    RunAssembly(assemblyPath, null, filter);
                 }
                 catch (Exception ex)
                 {
@@ -145,7 +146,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     var assemblyPath = Path.IsPathRooted(assemblyName) ? assemblyName : Path.Combine(Directory.GetCurrentDirectory(), assemblyName);
 
                     var filterBuilder = CreateTestFilterBuilder();
-                    var filter = filterBuilder.MakeTestFilter(assemblyGroup);
+                    var filter = filterBuilder.FilterByList(assemblyGroup);
 
                     RunAssembly(assemblyPath, assemblyGroup, filter);
                 }

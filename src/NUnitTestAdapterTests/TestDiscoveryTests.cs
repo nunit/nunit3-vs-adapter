@@ -57,7 +57,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         public TestDiscoveryTests(IDiscoveryContext context)
         {
-            _context = context;
+            _context = Substitute.For<IDiscoveryContext>();
         }
 
         [OneTimeSetUp]
@@ -67,10 +67,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(NUnit.Tests.Assemblies.MockAssembly.TestsAtRuntime, Is.EqualTo(NUnit.Tests.Assemblies.MockAssembly.Tests),
                 "The reference to mock-assembly.dll appears to be the wrong version");
             Assert.That(File.Exists(MockAssemblyPath), $"Can't locate mock-assembly.dll at {MockAssemblyPath}");
-
+            var runsettings = "<RunSettings><NUnit><UseParentFQNForParametrizedTests>True</UseParentFQNForParametrizedTests></NUnit></RunSettings>";
+            var rs = Substitute.For<IRunSettings>();
+            rs.SettingsXml.Returns(runsettings);
+            _context.RunSettings.Returns(rs);
             // Load the NUnit mock-assembly.dll once for this test, saving
             // the list of test cases sent to the discovery sink
-            TestAdapterUtils.CreateDiscoverer().DiscoverTests(
+            var discoverer = TestAdapterUtils.CreateDiscoverer();
+            discoverer.DiscoverTests(
                 new[] { MockAssemblyPath },
                 _context,
                 new MessageLoggerStub(),
@@ -86,8 +90,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase("MockTest3", "NUnit.Tests.Assemblies.MockTestFixture.MockTest3")]
         [TestCase("MockTest4", "NUnit.Tests.Assemblies.MockTestFixture.MockTest4")]
         [TestCase("ExplicitlyRunTest", "NUnit.Tests.Assemblies.MockTestFixture.ExplicitlyRunTest")]
-        [TestCase("MethodWithParameters(9,11)", "NUnit.Tests.FixtureWithTestCases.MethodWithParameters")]
-        public void VerifyTestCaseIsFound(string name, string fullName)
+        [TestCase("MethodWithParameters(9,11)", "NUnit.Tests.FixtureWithTestCases.MethodWithParameters",true)]
+        public void VerifyTestCaseIsFound(string name, string fullName,bool parentFQN = false)
         {
             var testCase = testCases.Find(tc => tc.DisplayName == name);
             Assert.That(testCase.FullyQualifiedName, Is.EqualTo(fullName));
