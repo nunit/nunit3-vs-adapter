@@ -93,13 +93,13 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private static string exeName;
 
-        public static bool IsRunningUnderIDE
+        public static bool IsRunningUnderIde
         {
             get
             {
                 if (exeName == null)
                 {
-                    Assembly entryAssembly = Assembly.GetEntryAssembly();
+                    var entryAssembly = Assembly.GetEntryAssembly();
                     if (entryAssembly != null)
                         exeName = entryAssembly.Location;
                 }
@@ -155,7 +155,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private void SetCurrentWorkingDirectory()
         {
-            var dir = Directory.GetCurrentDirectory();
+            string dir = Directory.GetCurrentDirectory();
             bool foundForbiddenFolder = CheckDirectory(dir);
             if (foundForbiddenFolder)
                 Directory.SetCurrentDirectory(Path.GetTempPath());
@@ -167,8 +167,8 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         public bool CheckDirectory(string dir)
         {
-            var checkdir = (dir.EndsWith("\\") ? dir : dir + "\\");
-            return ForbiddenFolders.Any(o => checkdir.StartsWith(o, StringComparison.OrdinalIgnoreCase));
+            string checkDir = (dir.EndsWith("\\") ? dir : dir + "\\");
+            return ForbiddenFolders.Any(o => checkDir.StartsWith(o, StringComparison.OrdinalIgnoreCase));
         }
 
         protected ITestRunner GetRunnerFor(string assemblyName, IGrouping<string, TestCase> testCases)
@@ -203,13 +203,10 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 var prefilters = new List<string>();
 
-                foreach (TestCase testCase in testCases)
+                foreach (var testCase in testCases)
                 {
-                    int end = testCase.FullyQualifiedName.IndexOfAny(new char[] { '(', '<' });
-                    if (end > 0)
-                        prefilters.Add(testCase.FullyQualifiedName.Substring(0, end));
-                    else
-                        prefilters.Add(testCase.FullyQualifiedName);
+                    int end = testCase.FullyQualifiedName.IndexOfAny(new[] { '(', '<' });
+                    prefilters.Add(end > 0 ? testCase.FullyQualifiedName.Substring(0, end) : testCase.FullyQualifiedName);
                 }
                 package.Settings[PackageSettings.LOAD] = prefilters;
             }
@@ -257,7 +254,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             // Set the work directory to the assembly location unless a setting is provided
-            var workDir = Settings.WorkDirectory;
+            string workDir = Settings.WorkDirectory;
             if (workDir == null)
                 workDir = Path.GetDirectoryName(assemblyName);
             else if (!Path.IsPathRooted(workDir))
@@ -277,35 +274,33 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             runSettings[PackageSettings.TestParametersDictionary] = testParameters;
 
-            if (testParameters.Count != 0)
-            {
-                // Kept for backwards compatibility with old frameworks.
-                // Reserializes the way old frameworks understand, even if the parsing above is changed.
-                // This reserialization cannot be changed without breaking compatibility with old frameworks.
+            if (testParameters.Count == 0) 
+                return;
+            // Kept for backwards compatibility with old frameworks.
+            // Reserializes the way old frameworks understand, even if the parsing above is changed.
+            // This reserialization cannot be changed without breaking compatibility with old frameworks.
 
-                var oldFrameworkSerializedParameters = new StringBuilder();
-                foreach (var parameter in testParameters)
-                    oldFrameworkSerializedParameters.Append(parameter.Key).Append('=').Append(parameter.Value).Append(';');
+            var oldFrameworkSerializedParameters = new StringBuilder();
+            foreach (var parameter in testParameters)
+                oldFrameworkSerializedParameters.Append(parameter.Key).Append('=').Append(parameter.Value).Append(';');
 
-                runSettings[PackageSettings.TestParameters] = oldFrameworkSerializedParameters.ToString(0, oldFrameworkSerializedParameters.Length - 1);
-            }
+            runSettings[PackageSettings.TestParameters] = oldFrameworkSerializedParameters.ToString(0, oldFrameworkSerializedParameters.Length - 1);
         }
 
         protected static void CleanUpRegisteredChannels()
         {
 #if NET35
-            foreach (IChannel chan in ChannelServices.RegisteredChannels)
+            foreach (var chan in ChannelServices.RegisteredChannels)
                 ChannelServices.UnregisterChannel(chan);
 #endif
         }
 
         protected void Unload()
         {
-            if (TestEngine != null)
-            {
-                TestEngine.Dispose();
-                TestEngine = null;
-            }
+            if (TestEngine == null) 
+                return;
+            TestEngine.Dispose();
+            TestEngine = null;
         }
 
         #endregion

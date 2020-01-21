@@ -235,7 +235,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 string message = node?.SelectSingleNode("message")?.InnerText;
                 // If we're running in the IDE, remove any caret line from the message
                 // since it will be displayed using a variable font and won't make sense.
-                if (!string.IsNullOrEmpty(message) && NUnitTestAdapter.IsRunningUnderIDE)
+                if (!string.IsNullOrEmpty(message) && NUnitTestAdapter.IsRunningUnderIde)
                 {
                     string pattern = NL + "  -*\\^" + NL;
                     message = Regex.Replace(message, pattern, NL, RegexOptions.Multiline);
