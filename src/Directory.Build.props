@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>preview</LangVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\NUnitAdapter.snk</AssemblyOriginatorKeyFile>
     <CodeAnalysisRuleSet>..\..\Osiris.Extended.ruleset</CodeAnalysisRuleSet>
