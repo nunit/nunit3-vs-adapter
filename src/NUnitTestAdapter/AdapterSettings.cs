@@ -446,7 +446,7 @@ namespace NUnit.VisualStudio.TestAdapter
         private int GetInnerTextAsInt(XmlNode startNode, string xpath, int defaultValue)
         {
             var temp = GetInnerTextAsNullableInt(startNode, xpath, false);
-            var res = defaultValue;
+            int res = defaultValue;
             if (temp != null)
                 res = temp.Value;
             Log(xpath, res);

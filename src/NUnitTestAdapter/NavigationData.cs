@@ -21,11 +21,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace NUnit.VisualStudio.TestAdapter
 {
     public class NavigationData
@@ -38,13 +33,10 @@ namespace NUnit.VisualStudio.TestAdapter
             LineNumber = lineNumber;
         }
 
-        public string FilePath { get; private set; }
+        public string FilePath { get; }
 
-        public int LineNumber { get; private set; }
+        public int LineNumber { get; }
 
-        public bool IsValid
-        {
-            get { return !string.IsNullOrEmpty(FilePath); }
-        }
+        public bool IsValid => !string.IsNullOrEmpty(FilePath);
     }
 }

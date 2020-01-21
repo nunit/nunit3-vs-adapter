@@ -77,7 +77,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             foreach (string sourceAssembly in sources)
             {
-                var sourceAssemblyPath = Path.IsPathRooted(sourceAssembly) ? sourceAssembly : Path.Combine(Directory.GetCurrentDirectory(), sourceAssembly);
+                string sourceAssemblyPath = Path.IsPathRooted(sourceAssembly) ? sourceAssembly : Path.Combine(Directory.GetCurrentDirectory(), sourceAssembly);
                 TestLog.Debug("Processing " + sourceAssembly);
                 ITestRunner runner = null;
 
@@ -96,6 +96,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     if (topNode.Name == "test-run")
                         topNode = topNode.FirstChild;
 
+                    // ReSharper disable once StringLiteralTypo
                     if (topNode.GetAttribute("runstate") == "Runnable")
                     {
                         int cases;

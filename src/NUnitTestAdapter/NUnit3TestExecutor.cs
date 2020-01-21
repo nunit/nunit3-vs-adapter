@@ -190,7 +190,7 @@ namespace NUnit.VisualStudio.TestAdapter
             // Ensure any channels registered by other adapters are unregistered
             CleanUpRegisteredChannels();
 
-            TestLog.Debug("Keepalive: " + runContext.KeepAlive);
+            TestLog.Debug("KeepAlive: " + runContext.KeepAlive);
             TestLog.Debug("UseVsKeepEngineRunning: " + Settings.UseVsKeepEngineRunning);
 
             bool enableShutdown = true;
@@ -237,6 +237,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 if (loadResult.Name == "test-run")
                     loadResult = loadResult.FirstChild;
 
+                // ReSharper disable once StringLiteralTypo
                 if (loadResult.GetAttribute("runstate") == "Runnable")
                 {
                     var nunitTestCases = loadResult.SelectNodes("//test-case");
@@ -282,7 +283,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 else
                 {
                     var msgNode = loadResult.SelectSingleNode("properties/property[@name='_SKIPREASON']");
-                    if (msgNode != null && (new[] { "contains no tests", "Has no TestFixtures" }).Any(msgNode.GetAttribute("value").Contains))
+                    if (msgNode != null && new[] { "contains no tests", "Has no TestFixtures" }.Any(msgNode.GetAttribute("value").Contains))
                         TestLog.Info("   NUnit couldn't find any tests in " + assemblyPath);
                     else
                         TestLog.Info("   NUnit failed to load " + assemblyPath);
