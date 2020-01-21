@@ -210,19 +210,19 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         private ITestConverter converter;
         private IDumpXml dumpxml;
 
-        private const string TestoutputProgress =
+        private const string TestOutputProgress =
             @"<test-output stream='Progress' testid='0-1001' testname='Something.TestClass.Whatever'><![CDATA[Whatever
 ]]></test-output>";
 
-        private const string TestoutputOut =
+        private const string TestOutputOut =
             @"<test-output stream='Out' testid='0-1001' testname='Something.TestClass.Whatever'><![CDATA[Whatever
 ]]></test-output>";
 
-        private const string TestoutputError =
+        private const string TestOutputError =
             @"<test-output stream='Error' testid='0-1001' testname='Something.TestClass.Whatever'><![CDATA[Whatever
 ]]></test-output>";
 
-        private const string BlankTestoutput =
+        private const string BlankTestOutput =
             @"<test-output stream='Progress' testid='0-1001' testname='Something.TestClass.Whatever'><![CDATA[   ]]></test-output>";
 
         private const string TestFinish =
@@ -240,22 +240,22 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void ThatNormalTestOutputIsOutput()
         {
             var sut = new NUnitEventListener(recorder, converter, dumpxml);
-            sut.OnTestEvent(TestoutputProgress);
+            sut.OnTestEvent(TestOutputProgress);
             sut.OnTestEvent(TestFinish);
 
             recorder.Received().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Is<string>(x => x.StartsWith("Whatever")));
-            converter.Received().GetVSTestResults(Arg.Any<XmlElement>(), Arg.Is<ICollection<XmlNode>>(x => x.Count == 1));
+            converter.Received().GetVsTestResults(Arg.Any<XmlElement>(), Arg.Is<ICollection<XmlNode>>(x => x.Count == 1));
         }
 
         [Test]
         public void ThatNormalTestOutputIsError()
         {
             var sut = new NUnitEventListener(recorder, converter, dumpxml);
-            sut.OnTestEvent(TestoutputError);
+            sut.OnTestEvent(TestOutputError);
             sut.OnTestEvent(TestFinish);
 
             recorder.Received().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Is<string>(x => x.StartsWith("Whatever")));
-            converter.Received().GetVSTestResults(Arg.Any<XmlElement>(), Arg.Is<ICollection<XmlNode>>(x => x.Count == 1));
+            converter.Received().GetVsTestResults(Arg.Any<XmlElement>(), Arg.Is<ICollection<XmlNode>>(x => x.Count == 1));
         }
 
         [Test]
@@ -263,7 +263,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             var sut = new NUnitEventListener(recorder, converter, dumpxml);
 
-            sut.OnTestEvent(BlankTestoutput);
+            sut.OnTestEvent(BlankTestOutput);
 
             recorder.DidNotReceive().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Any<string>());
         }

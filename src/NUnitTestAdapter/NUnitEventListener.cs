@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2018 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -23,8 +23,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
 #if NET35
 using System.Runtime.Remoting;
 #endif
@@ -149,14 +147,13 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void TestFinished(XmlNode resultNode)
         {
-            ICollection<XmlNode> outputNodes;
             var testId = resultNode.GetAttribute("id");
-            if (_outputNodes.TryGetValue(testId, out outputNodes))
+            if (_outputNodes.TryGetValue(testId, out var outputNodes))
             {
                 _outputNodes.Remove(testId);
             }
 
-            var result = _testConverter.GetVSTestResults(resultNode, outputNodes ?? EmptyNodes);
+            var result = _testConverter.GetVsTestResults(resultNode, outputNodes ?? EmptyNodes);
             _recorder.RecordEnd(result.TestCaseResult.TestCase, result.TestCaseResult.Outcome);
             foreach (var vsResult in result.TestResults)
             {
@@ -205,11 +202,11 @@ namespace NUnit.VisualStudio.TestAdapter
                 return;
             }
 
+            // ReSharper disable once StringLiteralTypo
             var testId = outputNode.GetAttribute("testid");
             if (!string.IsNullOrEmpty(testId))
             {
-                ICollection<XmlNode> outputNodes;
-                if (!_outputNodes.TryGetValue(testId, out outputNodes))
+                if (!_outputNodes.TryGetValue(testId, out var outputNodes))
                 {
                     outputNodes = new List<XmlNode>();
                     _outputNodes.Add(testId, outputNodes);

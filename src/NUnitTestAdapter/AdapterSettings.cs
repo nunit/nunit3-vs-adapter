@@ -320,7 +320,7 @@ namespace NUnit.VisualStudio.TestAdapter
             var inProcDataCollectorNode =
                 doc.SelectSingleNode("RunSettings/InProcDataCollectionRunSettings/InProcDataCollectors");
             InProcDataCollectorsAvailable = inProcDataCollectorNode != null &&
-                                            inProcDataCollectorNode.SelectNodes("InProcDataCollector").Count > 0;
+                                            inProcDataCollectorNode.SelectNodes("InProcDataCollector")?.Count > 0;
 
             // Older versions of VS do not pass the CollectDataForEachTestSeparately configuration together with the LiveUnitTesting collector.
             // However, the adapter is expected to run in CollectDataForEachTestSeparately mode.
@@ -393,12 +393,12 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void RestoreRandomSeed(string dirname)
         {
-            var fullpath = Path.Combine(dirname, RANDOM_SEED_FILE);
-            if (!File.Exists(fullpath))
+            var fullPath = Path.Combine(dirname, RANDOM_SEED_FILE);
+            if (!File.Exists(fullPath))
                 return;
             try
             {
-                string value = File.ReadAllText(fullpath);
+                var value = File.ReadAllText(fullPath);
                 RandomSeed = int.Parse(value);
             }
             catch (Exception ex)
@@ -422,7 +422,8 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 if (_logger.Verbosity > 0)
                 {
-                    _logger.Warning(string.Format("DisableParallelization:{0} & NumberOfTestWorkers:{1} are conflicting settings, hence not running in parallel", DisableParallelization, NumberOfTestWorkers));
+                    _logger.Warning(
+                        $"DisableParallelization:{DisableParallelization} & NumberOfTestWorkers:{NumberOfTestWorkers} are conflicting settings, hence not running in parallel");
                 }
                 NumberOfTestWorkers = 0;
             }

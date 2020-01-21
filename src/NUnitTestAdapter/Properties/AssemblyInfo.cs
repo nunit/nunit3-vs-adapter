@@ -1,5 +1,5 @@
 ﻿// ****************************************************************
-// Copyright (c) 2011-2019 Charlie Poole, Terje Sandstrom.
+// Copyright (c) 2011-2020 Charlie Poole, Terje Sandstrom.
 // ****************************************************************
 
 using System;

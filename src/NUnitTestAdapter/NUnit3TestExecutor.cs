@@ -216,7 +216,7 @@ namespace NUnit.VisualStudio.TestAdapter
 #endif
 
             var actionText = Debugger.IsAttached ? "Debugging " : "Running ";
-            var selectionText = filter == null || filter == TestFilter.Empty ? "all" : "selected";
+            string selectionText = filter == null || filter == TestFilter.Empty ? "all" : "selected";
             TestLog.Info(actionText + selectionText + " tests in " + assemblyPath);
 
             // No need to restore if the seed was in runsettings file
@@ -225,7 +225,7 @@ namespace NUnit.VisualStudio.TestAdapter
             DumpXml dumpXml = null;
             if (Settings.DumpXmlTestResults)
             {
-                dumpXml = new Dump.DumpXml(assemblyPath);
+                dumpXml = new DumpXml(assemblyPath);
             }
 
             try
@@ -241,46 +241,42 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     var nunitTestCases = loadResult.SelectNodes("//test-case");
 
-                    using (var testConverter = new TestConverter(TestLog, assemblyPath, Settings))
+                    using var testConverter = new TestConverter(TestLog, assemblyPath, Settings);
+                    var loadedTestCases = new List<TestCase>();
+
+                    // As a side effect of calling TestConverter.ConvertTestCase,
+                    // the converter's cache of all test cases is populated as well.
+                    // All future calls to convert a test case may now use the cache.
+                    foreach (XmlNode testNode in nunitTestCases)
+                        loadedTestCases.Add(testConverter.ConvertTestCase(testNode));
+
+
+                    TestLog.Info($"   NUnit3TestExecutor converted {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases");
+
+                    // If we have a TFS Filter, convert it to an nunit filter
+                    if (TfsFilter != null && !TfsFilter.IsEmpty)
                     {
-                        var loadedTestCases = new List<TestCase>();
+                        // NOTE This overwrites filter used in call
+                        var filterBuilder = CreateTestFilterBuilder();
+                        filter = filterBuilder.ConvertTfsFilterToNUnitFilter(TfsFilter, loadedTestCases);
+                    }
 
-                        // As a side effect of calling TestConverter.ConvertTestCase,
-                        // the converter's cache of all test cases is populated as well.
-                        // All future calls to convert a test case may now use the cache.
-                        foreach (XmlNode testNode in nunitTestCases)
-                            loadedTestCases.Add(testConverter.ConvertTestCase(testNode));
+                    if (filter == NUnitTestFilterBuilder.NoTestsFound)
+                    {
+                        TestLog.Info("   Skipping assembly - no matching test cases found");
+                        return;
+                    }
 
-
-                        TestLog.Info($"   NUnit3TestExecutor converted {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases");
-
-                        // If we have a TFS Filter, convert it to an nunit filter
-                        if (TfsFilter != null && !TfsFilter.IsEmpty)
-                        {
-                            // NOTE This overwrites filter used in call
-                            var filterBuilder = CreateTestFilterBuilder();
-                            filter = filterBuilder.ConvertTfsFilterToNUnitFilter(TfsFilter, loadedTestCases);
-                        }
-
-                        if (filter == NUnitTestFilterBuilder.NoTestsFound)
-                        {
-                            TestLog.Info("   Skipping assembly - no matching test cases found");
-                            return;
-                        }
-
-                        using (var listener = new NUnitEventListener(FrameworkHandle, testConverter, dumpXml))
-                        {
-                            try
-                            {
-                                var results = _activeRunner.Run(listener, filter);
-                                GenerateTestOutput(results, assemblyPath);
-                            }
-                            catch (NullReferenceException)
-                            {
-                                // this happens during the run when CancelRun is called.
-                                TestLog.Debug("   Nullref caught");
-                            }
-                        }
+                    using var listener = new NUnitEventListener(FrameworkHandle, testConverter, dumpXml);
+                    try
+                    {
+                        var results = _activeRunner.Run(listener, filter);
+                        GenerateTestOutput(results, assemblyPath);
+                    }
+                    catch (NullReferenceException)
+                    {
+                        // this happens during the run when CancelRun is called.
+                        TestLog.Debug("   Null ref caught");
                     }
                 }
                 else

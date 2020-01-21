@@ -52,7 +52,7 @@ namespace NUnit.VisualStudio.TestAdapter
             EmbeddedAssemblyResolution.EnsureInitialized();
         }
 
-        private Dump.DumpXml dumpXml;
+        private DumpXml dumpXml;
 
         #region ITestDiscoverer Members
 

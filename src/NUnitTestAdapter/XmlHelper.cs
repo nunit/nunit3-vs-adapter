@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2010-2014 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2010-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -22,7 +22,6 @@
 // ***********************************************************************
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Xml;
 
@@ -40,14 +39,14 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <returns>A new XmlNode.</returns>
         public static XmlNode CreateTopLevelElement(string name)
         {
-            XmlDocument doc = new XmlDocument();
+            var doc = new XmlDocument();
             doc.LoadXml("<" + name + "/>");
             return doc.FirstChild;
         }
 
         public static XmlNode CreateXmlNode(string xml)
         {
-            XmlDocument doc = new XmlDocument();
+            var doc = new XmlDocument();
             doc.LoadXml(xml);
             return doc.FirstChild;
         }
@@ -69,7 +68,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <param name="value">The value of the attribute.</param>
         public static void AddAttribute(this XmlNode node, string name, string value)
         {
-            XmlAttribute attr = node.OwnerDocument.CreateAttribute(name);
+            var attr = node.OwnerDocument.CreateAttribute(name);
             attr.Value = value;
             node.Attributes.Append(attr);
         }
@@ -96,7 +95,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <param name="data">The data for the CDataSection.</param>
         public static XmlNode AddElementWithCDataSection(this XmlNode node, string name, string data)
         {
-            XmlNode childNode = node.AddElement(name);
+            var childNode = node.AddElement(name);
             childNode.AppendChild(node.OwnerDocument.CreateCDataSection(data));
             return childNode;
         }
@@ -110,9 +109,9 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <param name="name">The name.</param>
         public static string GetAttribute(this XmlNode result, string name)
         {
-            XmlAttribute attr = result.Attributes[name];
+            var attr = result.Attributes[name];
 
-            return attr == null ? null : attr.Value;
+            return attr?.Value;
         }
 
         /// <summary>
@@ -123,7 +122,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <param name="defaultValue">The default value.</param>
         public static int GetAttribute(this XmlNode result, string name, int defaultValue)
         {
-            XmlAttribute attr = result.Attributes[name];
+            var attr = result.Attributes[name];
 
             return attr == null
                 ? defaultValue
@@ -138,7 +137,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <param name="defaultValue">The default value.</param>
         public static double GetAttribute(this XmlNode result, string name, double defaultValue)
         {
-            XmlAttribute attr = result.Attributes[name];
+            var attr = result.Attributes[name];
 
             return attr == null
                 ? defaultValue
@@ -157,11 +156,9 @@ namespace NUnit.VisualStudio.TestAdapter
             if (dateStr == null)
                 return defaultValue;
 
-            DateTime date;
-            if (!DateTime.TryParse(dateStr, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AllowWhiteSpaces, out date))
-                return defaultValue;
-
-            return date;
+            return !DateTime.TryParse(dateStr, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AllowWhiteSpaces, out var date)
+                ? defaultValue
+                : date;
         }
 
         #endregion

@@ -124,7 +124,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void CannotMakeTestResultWhenTestCaseIsNotInCache()
         {
             var fakeResultNode = FakeTestData.GetResultNode();
-            var results = testConverter.GetVSTestResults(fakeResultNode, Enumerable.Empty<XmlNode>().ToList());
+            var results = testConverter.GetVsTestResults(fakeResultNode, Enumerable.Empty<XmlNode>().ToList());
             Assert.That(results.TestResults.Count, Is.EqualTo(0));
         }
 
@@ -135,7 +135,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var cachedTestCase = testConverter.ConvertTestCase(fakeTestNode);
             var fakeResultNode = FakeTestData.GetResultNode();
 
-            var testResults = testConverter.GetVSTestResults(fakeResultNode, Enumerable.Empty<XmlNode>().ToList());
+            var testResults = testConverter.GetVsTestResults(fakeResultNode, Enumerable.Empty<XmlNode>().ToList());
             var testResult = testResults.TestResults[0];
             var testCase = testResult.TestCase;
 
@@ -165,7 +165,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var cachedTestCase = testConverter.ConvertTestCase(fakeTestNode);
             var fakeResultNode = FakeTestData.GetResultNode();
             var outputNodes = output.Split(';').Select(i => XmlHelper.CreateXmlNode(i.Trim())).ToList();
-            var testResults = testConverter.GetVSTestResults(fakeResultNode, outputNodes);
+            var testResults = testConverter.GetVsTestResults(fakeResultNode, outputNodes);
             var testResult = testResults.TestResults[0];
             var actualMessages = string.Join(";", testResult.Messages.Select(i => i.Category + ":" + i.Text));
 
@@ -180,7 +180,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var cachedTestCase = testConverter.ConvertTestCase(fakeTestNode);
             var fakeResultNode = FakeTestData.GetResultNode();
 
-            var testResults = testConverter.GetVSTestResults(fakeResultNode, Enumerable.Empty<XmlNode>().ToList());
+            var testResults = testConverter.GetVsTestResults(fakeResultNode, Enumerable.Empty<XmlNode>().ToList());
 
             var fakeAttachments = fakeResultNode.SelectNodes("attachments/attachment")
                 .OfType<XmlNode>()
@@ -207,7 +207,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var cachedTestCase = testConverter.ConvertTestCase(fakeTestNode);
             var fakeResultNode = FakeTestData.GetResultNode();
 
-            var testResults = testConverter.GetVSTestResults(fakeResultNode, Enumerable.Empty<XmlNode>().ToList());
+            var testResults = testConverter.GetVsTestResults(fakeResultNode, Enumerable.Empty<XmlNode>().ToList());
 
             var convertedAttachments = testResults.TestResults
                 .SelectMany(tr => tr.Attachments.SelectMany(ats => ats.Attachments))

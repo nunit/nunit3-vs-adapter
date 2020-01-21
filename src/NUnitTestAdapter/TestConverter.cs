@@ -35,7 +35,7 @@ namespace NUnit.VisualStudio.TestAdapter
     public interface ITestConverter
     {
         TestCase GetCachedTestCase(string id);
-        TestConverter.TestResultSet GetVSTestResults(XmlNode resultNode, ICollection<XmlNode> outputNodes);
+        TestConverter.TestResultSet GetVsTestResults(XmlNode resultNode, ICollection<XmlNode> outputNodes);
     }
 
     public sealed class TestConverter : IDisposable, ITestConverter
@@ -103,7 +103,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private static readonly string NL = Environment.NewLine;
 
-        public TestResultSet GetVSTestResults(XmlNode resultNode, ICollection<XmlNode> outputNodes)
+        public TestResultSet GetVsTestResults(XmlNode resultNode, ICollection<XmlNode> outputNodes)
         {
             var results = new List<VSTestResult>();
 
@@ -359,8 +359,8 @@ namespace NUnit.VisualStudio.TestAdapter
                 "Passed" => TestOutcome.Passed,
                 "Failed" => TestOutcome.Failed,
                 "Skipped" => resultNode.GetAttribute("label") == "Ignored"
-? TestOutcome.Skipped
-: TestOutcome.None,
+                    ? TestOutcome.Skipped
+                    : TestOutcome.None,
                 "Warning" => TestOutcome.Skipped,
                 _ => TestOutcome.None,
             };

@@ -32,6 +32,7 @@ namespace NUnit.VisualStudio.TestAdapter
     {
         private readonly ITestFilterService _filterService;
 
+        // ReSharper disable once StringLiteralTypo
         public static readonly TestFilter NoTestsFound = new TestFilter("<notestsfound/>");
 
         public NUnitTestFilterBuilder(ITestFilterService filterService)

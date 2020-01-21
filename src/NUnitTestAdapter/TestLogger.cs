@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2013-2018 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2013-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -50,7 +50,7 @@ namespace NUnit.VisualStudio.TestAdapter
         private IAdapterSettings adapterSettings;
         private const string EXCEPTION_FORMAT = "Exception {0}, {1}";
 
-        private IMessageLogger MessageLogger { get; set; }
+        private IMessageLogger MessageLogger { get; }
 
         public int Verbosity { get; set; }
 
@@ -132,7 +132,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     SendMessage(testMessageLevel, ex.StackTrace);
                     if (ex.InnerException != null)
                     {
-                        SendMessage(testMessageLevel, $"Innerexception: {ex.InnerException.ToString()}");
+                        SendMessage(testMessageLevel, $"InnerException: {ex.InnerException}");
                     }
                     break;
 
