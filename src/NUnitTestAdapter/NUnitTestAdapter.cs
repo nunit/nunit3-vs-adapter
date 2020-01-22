@@ -42,6 +42,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Common;
 using NUnit.Engine;
+using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -171,10 +172,12 @@ namespace NUnit.VisualStudio.TestAdapter
             return ForbiddenFolders.Any(o => checkDir.StartsWith(o, StringComparison.OrdinalIgnoreCase));
         }
 
-        protected ITestRunner GetRunnerFor(string assemblyName, IGrouping<string, TestCase> testCases)
+        protected INUnitEngineAdapter GetRunnerFor(string assemblyName, IGrouping<string, TestCase> testCases)
         {
             var package = CreateTestPackage(assemblyName, testCases);
-            return TestEngine.GetRunner(package);
+            var engineAdapter = new NUnitEngineAdapter(package, Settings, TestLog);
+            return engineAdapter;
+            // return TestEngine.GetRunner(package);
         }
 
         private TestPackage CreateTestPackage(string assemblyName, IGrouping<string, TestCase> testCases)
@@ -274,7 +277,7 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             runSettings[PackageSettings.TestParametersDictionary] = testParameters;
 
-            if (testParameters.Count == 0) 
+            if (testParameters.Count == 0)
                 return;
             // Kept for backwards compatibility with old frameworks.
             // Reserializes the way old frameworks understand, even if the parsing above is changed.
@@ -297,7 +300,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         protected void Unload()
         {
-            if (TestEngine == null) 
+            if (TestEngine == null)
                 return;
             TestEngine.Dispose();
             TestEngine = null;

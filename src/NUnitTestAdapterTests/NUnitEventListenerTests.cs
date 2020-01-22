@@ -36,6 +36,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NSubstitute;
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Dump;
+using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
 using VSTestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
@@ -46,7 +47,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     {
         private NUnitEventListener listener;
         private FakeFrameworkHandle testLog;
-        private XmlNode fakeTestNode;
+        private NUnitTestCase fakeTestNode;
 
         [SetUp]
         public void SetUp()
@@ -56,7 +57,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             settings.CollectSourceInformation.Returns(true);
             using (var testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings))
             {
-                fakeTestNode = FakeTestData.GetTestNode();
+                fakeTestNode = new NUnitTestCase(FakeTestData.GetTestNode());
 
                 // Ensure that the converted testcase is cached
                 testConverter.ConvertTestCase(fakeTestNode);

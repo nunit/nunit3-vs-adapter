@@ -1,5 +1,5 @@
 // ***********************************************************************
-// Copyright (c) 2011-2018 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -29,6 +29,7 @@ using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NSubstitute;
 using NUnit.Framework;
+using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
@@ -37,13 +38,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     [Category("TestConverter")]
     public class TestConverterTests
     {
-        private XmlNode fakeTestNode;
+        private NUnitTestCase fakeTestNode;
         private TestConverter testConverter;
 
         [SetUp]
         public void SetUp()
         {
-            fakeTestNode = FakeTestData.GetTestNode();
+            fakeTestNode = new NUnitTestCase(FakeTestData.GetTestNode());
             var settings = Substitute.For<IAdapterSettings>();
             settings.CollectSourceInformation.Returns(true);
             testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings);
@@ -83,7 +84,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             foreach (XmlNode node in xmlNodeList)
             {
-                var testCase = testConverter.ConvertTestCase(node);
+                var testCase = testConverter.ConvertTestCase(new NUnitTestCase(node));
             }
 
             var traitsCache = testConverter.TraitsCache;

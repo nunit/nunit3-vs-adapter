@@ -35,6 +35,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using NUnit.Engine;
 using NUnit.Engine.Services;
 using NUnit.VisualStudio.TestAdapter.Dump;
+using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -47,7 +48,8 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         // Fields related to the currently executing assembly
-        private ITestRunner _activeRunner;
+        // private ITestRunner _activeRunner;
+        private INUnitEngineAdapter nunitEngineAdapter;
 
         #region Properties
 
@@ -94,11 +96,11 @@ namespace NUnit.VisualStudio.TestAdapter
                 return;
             }
 
-            foreach (var assemblyName in sources)
+            foreach (string assemblyName in sources)
             {
                 try
                 {
-                    var assemblyPath = Path.IsPathRooted(assemblyName) ? assemblyName : Path.Combine(Directory.GetCurrentDirectory(), assemblyName);
+                    string assemblyPath = Path.IsPathRooted(assemblyName) ? assemblyName : Path.Combine(Directory.GetCurrentDirectory(), assemblyName);
                     var filter = CreateTestFilterBuilder().FilterByWhere(Settings.Where);
 
                     RunAssembly(assemblyPath, null, filter);
@@ -142,8 +144,8 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 try
                 {
-                    var assemblyName = assemblyGroup.Key;
-                    var assemblyPath = Path.IsPathRooted(assemblyName) ? assemblyName : Path.Combine(Directory.GetCurrentDirectory(), assemblyName);
+                    string assemblyName = assemblyGroup.Key;
+                    string assemblyPath = Path.IsPathRooted(assemblyName) ? assemblyName : Path.Combine(Directory.GetCurrentDirectory(), assemblyName);
 
                     var filterBuilder = CreateTestFilterBuilder();
                     var filter = filterBuilder.FilterByList(assemblyGroup);
@@ -157,13 +159,14 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
             }
 
-            TestLog.Info(string.Format("NUnit Adapter {0}: Test execution complete", AdapterVersion));
+            TestLog.Info($"NUnit Adapter {AdapterVersion}: Test execution complete");
             Unload();
         }
 
         void ITestExecutor.Cancel()
         {
-            _activeRunner?.StopRun(true);
+            // _activeRunner?.StopRun(true);
+            nunitEngineAdapter?.StopRun();
         }
 
         #endregion
@@ -205,7 +208,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     frameworkHandle.EnableShutdownAfterTestRun = enableShutdown;
             }
 
-            TestLog.Debug("EnableShutdown: " + enableShutdown.ToString());
+            TestLog.Debug("EnableShutdown: " + enableShutdown);
         }
 
         private void RunAssembly(string assemblyPath, IGrouping<string, TestCase> testCases, TestFilter filter)
@@ -215,7 +218,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 Debugger.Launch();
 #endif
 
-            var actionText = Debugger.IsAttached ? "Debugging " : "Running ";
+            string actionText = Debugger.IsAttached ? "Debugging " : "Running ";
             string selectionText = filter == null || filter == TestFilter.Empty ? "all" : "selected";
             TestLog.Info(actionText + selectionText + " tests in " + assemblyPath);
 
@@ -230,17 +233,14 @@ namespace NUnit.VisualStudio.TestAdapter
 
             try
             {
-                _activeRunner = GetRunnerFor(assemblyPath, testCases);
+                nunitEngineAdapter = GetRunnerFor(assemblyPath, testCases);
                 CreateTestOutputFolder();
-                var loadResult = _activeRunner.Explore(filter);
-                dumpXml?.AddString(loadResult.AsString());
-                if (loadResult.Name == "test-run")
-                    loadResult = loadResult.FirstChild;
+                var discoveryResults = nunitEngineAdapter.Explore(filter); // _activeRunner.Explore(filter);
+                dumpXml?.AddString(discoveryResults.AsString());
 
-                // ReSharper disable once StringLiteralTypo
-                if (loadResult.GetAttribute("runstate") == "Runnable")
+                if (discoveryResults.IsRunnable)
                 {
-                    var nunitTestCases = loadResult.SelectNodes("//test-case");
+                    var nunitTestCases = discoveryResults.TestCases();
 
                     using (var testConverter = new TestConverter(TestLog, assemblyPath, Settings))
                     {
@@ -250,11 +250,10 @@ namespace NUnit.VisualStudio.TestAdapter
                         // the converter's cache of all test cases is populated as well.
                         // All future calls to convert a test case may now use the cache.
                         foreach (XmlNode testNode in nunitTestCases)
-                            loadedTestCases.Add(testConverter.ConvertTestCase(testNode));
+                            loadedTestCases.Add(testConverter.ConvertTestCase(new NUnitTestCase(testNode)));
 
 
-                        TestLog.Info(
-                            $"   NUnit3TestExecutor converted {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases");
+                        TestLog.Info($"   NUnit3TestExecutor converted {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases");
 
 
                         // If we have a TFS Filter, convert it to an nunit filter
@@ -275,8 +274,8 @@ namespace NUnit.VisualStudio.TestAdapter
                         {
                             try
                             {
-                                var results = _activeRunner.Run(listener, filter);
-                                GenerateTestOutput(results, assemblyPath);
+                                var results = nunitEngineAdapter.Run(listener, filter);
+                                GenerateTestOutput(results.TopNode, assemblyPath);
                             }
                             catch (NullReferenceException)
                             {
@@ -288,11 +287,9 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
                 else
                 {
-                    var msgNode = loadResult.SelectSingleNode("properties/property[@name='_SKIPREASON']");
-                    if (msgNode != null && new[] { "contains no tests", "Has no TestFixtures" }.Any(msgNode.GetAttribute("value").Contains))
-                        TestLog.Info("   NUnit couldn't find any tests in " + assemblyPath);
-                    else
-                        TestLog.Info("   NUnit failed to load " + assemblyPath);
+                    TestLog.Info(discoveryResults.HasNoNUnitTests
+                            ? "   NUnit couldn't find any tests in " + assemblyPath
+                            : "   NUnit failed to load " + assemblyPath);
                 }
             }
             catch (BadImageFormatException)
@@ -325,8 +322,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 dumpXml?.Dump4Execution();
                 try
                 {
-                    _activeRunner?.Dispose();
-                    _activeRunner = null;
+                    nunitEngineAdapter?.Close();
                 }
                 catch (Exception ex)
                 {
@@ -344,7 +340,7 @@ namespace NUnit.VisualStudio.TestAdapter
             if (!Settings.UseTestOutputXml)
                 return;
 
-            var path = Path.Combine(TestOutputXmlFolder, $"{Path.GetFileNameWithoutExtension(assemblyPath)}.xml");
+            string path = Path.Combine(TestOutputXmlFolder, $"{Path.GetFileNameWithoutExtension(assemblyPath)}.xml");
 #if NET35
             var resultService = TestEngine.Services.GetService<IResultService>();
 #else
@@ -374,7 +370,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 return;
             }
 
-            var path = Path.IsPathRooted(Settings.TestOutputXml)
+            string path = Path.IsPathRooted(Settings.TestOutputXml)
                 ? Settings.TestOutputXml
                 : Path.Combine(WorkDir, Settings.TestOutputXml);
             try

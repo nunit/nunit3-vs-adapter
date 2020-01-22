@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NSubstitute;
 using NUnit.Framework;
+using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
@@ -485,7 +486,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             foreach (XmlNode node in xml.SelectNodes("//test-case"))
             {
-                var testcase = testconverter.ConvertTestCase(node);
+                var testcase = testconverter.ConvertTestCase(new NUnitTestCase(node));
                 testcaselist.Add(testcase);
             }
         }

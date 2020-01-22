@@ -28,6 +28,7 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
+using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 using VSTestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
 
 namespace NUnit.VisualStudio.TestAdapter
@@ -76,13 +77,13 @@ namespace NUnit.VisualStudio.TestAdapter
         /// using the best method available according to the exact
         /// type passed and caching results for efficiency.
         /// </summary>
-        public TestCase ConvertTestCase(XmlNode testNode)
+        public TestCase ConvertTestCase(NUnitTestCase testNode)
         {
-            if (testNode == null || testNode.Name != "test-case")
+            if (!testNode.IsTestCase)
                 throw new ArgumentException("The argument must be a test case", nameof(testNode));
 
             // Return cached value if we have one
-            string id = testNode.GetAttribute("id");
+            string id = testNode.Id;
             if (_vsTestCaseMap.ContainsKey(id))
                 return _vsTestCaseMap[id];
 
@@ -159,15 +160,15 @@ namespace NUnit.VisualStudio.TestAdapter
         /// Makes a TestCase from an NUnit test, adding
         /// navigation data if it can be found.
         /// </summary>
-        private TestCase MakeTestCaseFromXmlNode(XmlNode testNode)
+        private TestCase MakeTestCaseFromXmlNode(NUnitTestCase testNode)
         {
-            var fullyQualifiedName = testNode.GetAttribute("fullname");
+            string fullyQualifiedName = testNode.FullName;
             if (adapterSettings.UseParentFQNForParametrizedTests)
             {
-                var parentType = testNode.ParentNode.GetAttribute("type");
-                if (parentType == "ParameterizedMethod")
+                var parent = testNode.Parent();
+                if (parent.IsParameterizedMethod)
                 {
-                    var parameterizedTestFullName = testNode.ParentNode.GetAttribute("fullname");
+                    var parameterizedTestFullName = parent.FullName;
 
                     // VS expected FullyQualifiedName to be the actual class+type name,optionally with parameter types
                     // in parenthesis, but they must fit the pattern of a value returned by object.GetType().
@@ -198,19 +199,19 @@ namespace NUnit.VisualStudio.TestAdapter
                                     new Uri(NUnitTestAdapter.ExecutorUri),
                                     _sourceAssembly)
             {
-                DisplayName = testNode.GetAttribute("name"),
+                DisplayName = testNode.Name,
                 CodeFilePath = null,
                 LineNumber = 0,
             };
             if (adapterSettings.UseNUnitIdforTestCaseId)
             {
-                var id = testNode.GetAttribute("id");
+                var id = testNode.Id;
                 testCase.Id = EqtHash.GuidFromString(id);
             }
             if (CollectSourceInformation && _navigationDataProvider != null)
             {
-                var className = testNode.GetAttribute("classname");
-                var methodName = testNode.GetAttribute("methodname");
+                var className = testNode.ClassName;
+                var methodName = testNode.MethodName;
 
                 var navData = _navigationDataProvider.GetNavigationData(className, methodName);
                 if (navData.IsValid)
