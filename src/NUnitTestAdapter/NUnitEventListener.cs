@@ -33,6 +33,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Engine;
 using NUnit.VisualStudio.TestAdapter.Dump;
 using NUnit.VisualStudio.TestAdapter.Internal;
+using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -73,34 +74,38 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void OnTestEvent(string report)
         {
-            var node = XmlHelper.CreateXmlNode(report);
+            var node = new NUnitTestEventHeader(report);
 #if NET35
             dumpXml?.AddTestEvent(node.AsString());
 #endif
             try
             {
-                switch (node.Name)
+                switch (node.Type)
                 {
-                    case "start-test":
-                        TestStarted(node);
+                    case NUnitTestEventHeader.EventType.StartTest:
+                        var startNode = new NUnitTestEventStartTest(node);
+                        TestStarted(startNode);
                         break;
 
-                    case "test-case":
-                        TestFinished(node);
+                    case NUnitTestEventHeader.EventType.TestCase:
+                        var testFinishedNode = new NUnitTestEventTestCase(node);
+                        TestFinished(testFinishedNode);
                         break;
 
-                    case "test-suite":
-                        SuiteFinished(node);
+                    case NUnitTestEventHeader.EventType.TestSuite:
+                        var suiteFinishedNode = new NUnitTestEventTestFinished(node);
+                        SuiteFinished(suiteFinishedNode);
                         break;
 
-                    case "test-output":
-                        TestOutput(node);
+                    case NUnitTestEventHeader.EventType.TestOutput:
+                        var outputNode = new NUnitTestEventTestOutput(node);
+                        TestOutput(outputNode);
                         break;
                 }
             }
             catch (Exception ex)
             {
-                _recorder.SendMessage(TestMessageLevel.Warning, $"Error processing {node.Name} event for {node.GetAttribute("fullname")}");
+                _recorder.SendMessage(TestMessageLevel.Warning, $"Error processing {node.Name} event for {node.FullName}");
                 _recorder.SendMessage(TestMessageLevel.Warning, ex.ToString());
             }
         }
@@ -136,18 +141,18 @@ namespace NUnit.VisualStudio.TestAdapter
         }
         #endregion
 
-        public void TestStarted(XmlNode testNode)
+        public void TestStarted(NUnitTestEvent testNode)
         {
-            TestCase ourCase = _testConverter.GetCachedTestCase(testNode.GetAttribute("id"));
+            var ourCase = _testConverter.GetCachedTestCase(testNode.Id);
 
             // Simply ignore any TestCase not found in the cache
             if (ourCase != null)
                 _recorder.RecordStart(ourCase);
         }
 
-        public void TestFinished(XmlNode resultNode)
+        public void TestFinished(NUnitTestEvent resultNode)
         {
-            var testId = resultNode.GetAttribute("id");
+            var testId = resultNode.Id;
             if (_outputNodes.TryGetValue(testId, out var outputNodes))
             {
                 _outputNodes.Remove(testId);
@@ -161,37 +166,31 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
-        public void SuiteFinished(XmlNode resultNode)
+        public void SuiteFinished(NUnitTestEvent resultNode)
         {
-            var result = resultNode.GetAttribute("result");
-            var site = resultNode.GetAttribute("site");
+            if (!resultNode.IsFailed)
+                return;
+            var site = resultNode.Site();
+            if (site != NUnitTestEvent.SiteType.Setup && site != NUnitTestEvent.SiteType.TearDown)
+                return;
+            _recorder.SendMessage(TestMessageLevel.Warning, $"{site} failed for test fixture {resultNode.FullName}");
 
-            if (result == "Failed")
-            {
-                if (site == "SetUp" || site == "TearDown")
-                {
-                    _recorder.SendMessage(
-                        TestMessageLevel.Warning,
-                        $"{site} failed for test fixture {resultNode.GetAttribute("fullname")}");
+            string message = resultNode.FailureMessage;
+            if (!string.IsNullOrEmpty(message))
+                _recorder.SendMessage(TestMessageLevel.Warning, message);
 
-                    var messageNode = resultNode.SelectSingleNode("failure/message");
-                    if (messageNode != null)
-                        _recorder.SendMessage(TestMessageLevel.Warning, messageNode.InnerText);
-
-                    var stackNode = resultNode.SelectSingleNode("failure/stack-trace");
-                    if (stackNode != null)
-                        _recorder.SendMessage(TestMessageLevel.Warning, stackNode.InnerText);
-                }
-            }
+            var stackNode = resultNode.FailureStackTrace;
+            if (!string.IsNullOrEmpty(stackNode))
+                _recorder.SendMessage(TestMessageLevel.Warning, stackNode);
         }
 
         private static readonly string NL = Environment.NewLine;
         private static readonly int NL_LENGTH = NL.Length;
         private readonly IDumpXml dumpXml;
 
-        public void TestOutput(XmlNode outputNode)
+        public void TestOutput(NUnitTestEventTestOutput outputNode)
         {
-            var text = outputNode.InnerText;
+            string text = outputNode.Content;
 
             // Remove final newline since logger will add one
             if (text.EndsWith(NL))
@@ -203,7 +202,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             // ReSharper disable once StringLiteralTypo
-            var testId = outputNode.GetAttribute("testid");
+            var testId = outputNode.TestId;
             if (!string.IsNullOrEmpty(testId))
             {
                 if (!_outputNodes.TryGetValue(testId, out var outputNodes))
@@ -212,7 +211,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     _outputNodes.Add(testId, outputNodes);
                 }
 
-                outputNodes.Add(outputNode);
+                outputNodes.Add(outputNode.Node);
             }
 
             _recorder.SendMessage(TestMessageLevel.Warning, text);

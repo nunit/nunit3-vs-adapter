@@ -23,9 +23,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
 #if NET35
 using System.Runtime.Remoting;
 #endif
@@ -88,11 +85,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void TestFinished_CallsRecordEnd_Then_RecordResult()
         {
-            listener.TestFinished(FakeTestData.GetResultNode());
-            Assert.AreEqual(2, testLog.Events.Count);
-            Assert.AreEqual(
-                FakeFrameworkHandle.EventType.RecordEnd,
-                testLog.Events[0].EventType);
+            listener.TestFinished(new NUnitTestEventTestCase(FakeTestData.GetResultNode().AsString()));
+            Assert.That(testLog.Events.Count, Is.EqualTo(2));
+            Assert.That(testLog.Events[0].EventType, Is.EqualTo(FakeFrameworkHandle.EventType.RecordEnd));
             Assert.AreEqual(
                 FakeFrameworkHandle.EventType.RecordResult,
                 testLog.Events[1].EventType);
@@ -101,11 +96,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void TestFinished_CallsRecordEndCorrectly()
         {
-            listener.TestFinished(FakeTestData.GetResultNode());
+            listener.TestFinished(new NUnitTestEventTestCase(FakeTestData.GetResultNode().AsString()));
             Assume.That(testLog.Events.Count, Is.EqualTo(2));
-            Assume.That(
-                testLog.Events[0].EventType,
-                Is.EqualTo(FakeFrameworkHandle.EventType.RecordEnd));
+            Assume.That(testLog.Events[0].EventType, Is.EqualTo(FakeFrameworkHandle.EventType.RecordEnd));
 
             VerifyTestCase(testLog.Events[0].TestCase);
             Assert.AreEqual(TestOutcome.Passed, testLog.Events[0].TestOutcome);
@@ -114,11 +107,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void TestFinished_CallsRecordResultCorrectly()
         {
-            listener.TestFinished(FakeTestData.GetResultNode());
+            listener.TestFinished(new NUnitTestEventTestCase(FakeTestData.GetResultNode().AsString()));
             Assume.That(testLog.Events.Count, Is.EqualTo(2));
-            Assume.That(
-                testLog.Events[1].EventType,
-                Is.EqualTo(FakeFrameworkHandle.EventType.RecordResult));
+            Assume.That(testLog.Events[1].EventType, Is.EqualTo(FakeFrameworkHandle.EventType.RecordResult));
 
             VerifyTestResult(testLog.Events[1].TestResult);
         }
@@ -245,7 +236,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             sut.OnTestEvent(TestFinish);
 
             recorder.Received().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Is<string>(x => x.StartsWith("Whatever")));
-            converter.Received().GetVsTestResults(Arg.Any<XmlElement>(), Arg.Is<ICollection<XmlNode>>(x => x.Count == 1));
+            converter.Received().GetVsTestResults(Arg.Any<NUnitTestEvent>(), Arg.Is<ICollection<XmlNode>>(x => x.Count == 1));
         }
 
         [Test]
@@ -256,7 +247,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             sut.OnTestEvent(TestFinish);
 
             recorder.Received().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Is<string>(x => x.StartsWith("Whatever")));
-            converter.Received().GetVsTestResults(Arg.Any<XmlElement>(), Arg.Is<ICollection<XmlNode>>(x => x.Count == 1));
+            converter.Received().GetVsTestResults(Arg.Any<NUnitTestEvent>(), Arg.Is<ICollection<XmlNode>>(x => x.Count == 1));
         }
 
         [Test]

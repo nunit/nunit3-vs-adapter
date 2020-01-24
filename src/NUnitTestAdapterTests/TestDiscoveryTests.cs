@@ -191,11 +191,16 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 context,
                 messageLoggerStub,
                 this);
-            Assert.That(testcaseWasSent, Is.False);
-            Assert.That(messageLoggerStub.WarningMessages.Count(), Is.EqualTo(1));
-            Assert.That(!messageLoggerStub.ErrorMessages.Any());
-            var warningmsg = messageLoggerStub.WarningMessages.Select(o => o.Item2).Single();
-            Assert.That(warningmsg, Does.Contain("Assembly not supported"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(testcaseWasSent, Is.False);
+                Assert.That(messageLoggerStub.WarningMessages.Count(), Is.EqualTo(1));
+                Assert.That(!messageLoggerStub.ErrorMessages.Any());
+                string warningmsg = messageLoggerStub.WarningMessages.Select(o => o.Item2).FirstOrDefault();
+                Assert.That(warningmsg, Is.Not.Null);
+                if (!string.IsNullOrEmpty(warningmsg))
+                    Assert.That(warningmsg, Does.Contain("Assembly not supported"));
+            });
         }
 #endif
 

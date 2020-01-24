@@ -47,34 +47,4 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             return TopNode.SelectNodes("//test-case");
         }
     }
-
-    public class NUnitTestCase
-    {
-        public XmlNode Node { get; }
-
-        public bool IsNull => Node == null;
-
-        public bool IsTestCase => !IsNull && Node.Name == "test-case";
-
-        public bool IsParameterizedMethod => Type == "ParameterizedMethod";
-
-        public string Id => Node.GetAttribute("id");
-
-        public string FullName => Node.GetAttribute("fullname");
-
-        public string Type => Node.GetAttribute("type");
-
-        public string Name => Node.GetAttribute("name");
-
-        public string ClassName => Node.GetAttribute("classname");
-
-        public string MethodName => Node.GetAttribute("methodname");
-
-        public NUnitTestCase(XmlNode testCase)
-        {
-            Node = testCase;
-        }
-
-        public NUnitTestCase Parent() => new NUnitTestCase(Node.ParentNode);
-    }
 }

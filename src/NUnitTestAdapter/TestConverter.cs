@@ -36,7 +36,7 @@ namespace NUnit.VisualStudio.TestAdapter
     public interface ITestConverter
     {
         TestCase GetCachedTestCase(string id);
-        TestConverter.TestResultSet GetVsTestResults(XmlNode resultNode, ICollection<XmlNode> outputNodes);
+        TestConverter.TestResultSet GetVsTestResults(NUnitTestEvent resultNode, ICollection<XmlNode> outputNodes);
     }
 
     public sealed class TestConverter : IDisposable, ITestConverter
@@ -104,36 +104,36 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private static readonly string NL = Environment.NewLine;
 
-        public TestResultSet GetVsTestResults(XmlNode resultNode, ICollection<XmlNode> outputNodes)
+        public TestResultSet GetVsTestResults(NUnitTestEvent resultNode, ICollection<XmlNode> outputNodes)
         {
             var results = new List<VSTestResult>();
 
-            var testcaseResult = GetBasicResult(resultNode, outputNodes);
+            var testCaseResult = GetBasicResult(resultNode, outputNodes);
 
-            if (testcaseResult != null)
+            if (testCaseResult != null)
             {
-                if (testcaseResult.Outcome == TestOutcome.Failed || testcaseResult.Outcome == TestOutcome.NotFound)
+                if (testCaseResult.Outcome == TestOutcome.Failed || testCaseResult.Outcome == TestOutcome.NotFound)
                 {
-                    testcaseResult.ErrorMessage = resultNode.SelectSingleNode("failure/message")?.InnerText;
-                    testcaseResult.ErrorStackTrace = resultNode.SelectSingleNode("failure/stack-trace")?.InnerText;
+                    testCaseResult.ErrorMessage = resultNode.FailureMessage;
+                    testCaseResult.ErrorStackTrace = resultNode.FailureStackTrace;
 
                     // find stacktrace in assertion nodes if not defined (seems .netcore2.0 doesn't provide stack-trace for Assert.Fail("abc"))
-                    if (testcaseResult.ErrorStackTrace == null)
+                    if (testCaseResult.ErrorStackTrace == null)
                     {
                         string stackTrace = string.Empty;
-                        foreach (XmlNode assertionStacktraceNode in resultNode.SelectNodes("assertions/assertion/stack-trace"))
+                        foreach (XmlNode assertionStacktraceNode in resultNode.Node.SelectNodes("assertions/assertion/stack-trace"))
                         {
                             stackTrace += assertionStacktraceNode.InnerText;
                         }
-                        testcaseResult.ErrorStackTrace = stackTrace;
+                        testCaseResult.ErrorStackTrace = stackTrace;
                     }
                 }
-                else if (testcaseResult.Outcome == TestOutcome.Skipped || testcaseResult.Outcome == TestOutcome.None)
+                else if (testCaseResult.Outcome == TestOutcome.Skipped || testCaseResult.Outcome == TestOutcome.None)
                 {
-                    testcaseResult.ErrorMessage = resultNode.SelectSingleNode("reason/message")?.InnerText;
+                    testCaseResult.ErrorMessage = resultNode.ReasonMessage;
                 }
 
-                results.Add(testcaseResult);
+                results.Add(testCaseResult);
             }
 
             if (results.Count == 0)
@@ -143,7 +143,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     results.Add(result);
             }
 
-            return new TestResultSet { TestCaseResult = testcaseResult, TestResults = results };
+            return new TestResultSet { TestCaseResult = testCaseResult, TestResults = results };
         }
 
         public struct TestResultSet
@@ -226,48 +226,49 @@ namespace NUnit.VisualStudio.TestAdapter
             return testCase;
         }
 
-        private VSTestResult MakeTestResultFromLegacyXmlNode(XmlNode resultNode, IEnumerable<XmlNode> outputNodes)
+        private VSTestResult MakeTestResultFromLegacyXmlNode(NUnitTestEvent resultNode, IEnumerable<XmlNode> outputNodes)
         {
-            VSTestResult ourResult = GetBasicResult(resultNode, outputNodes);
-            if (ourResult != null)
+            var ourResult = GetBasicResult(resultNode, outputNodes);
+            if (ourResult == null)
+                return null;
+ 
+            var node = resultNode.Node.SelectSingleNode("failure") ?? resultNode.Node.SelectSingleNode("reason");
+
+            string message = node?.SelectSingleNode("message")?.InnerText;
+            // If we're running in the IDE, remove any caret line from the message
+            // since it will be displayed using a variable font and won't make sense.
+            if (!string.IsNullOrEmpty(message) && NUnitTestAdapter.IsRunningUnderIde)
             {
-                var node = resultNode.SelectSingleNode("failure") ?? resultNode.SelectSingleNode("reason");
-
-                string message = node?.SelectSingleNode("message")?.InnerText;
-                // If we're running in the IDE, remove any caret line from the message
-                // since it will be displayed using a variable font and won't make sense.
-                if (!string.IsNullOrEmpty(message) && NUnitTestAdapter.IsRunningUnderIde)
-                {
-                    string pattern = NL + "  -*\\^" + NL;
-                    message = Regex.Replace(message, pattern, NL, RegexOptions.Multiline);
-                }
-
-                ourResult.ErrorMessage = message;
-                ourResult.ErrorStackTrace = node?.SelectSingleNode("stack-trace")?.InnerText;
+                string pattern = NL + "  -*\\^" + NL;
+                message = Regex.Replace(message, pattern, NL, RegexOptions.Multiline);
             }
+
+            ourResult.ErrorMessage = message;
+            ourResult.ErrorStackTrace = node?.SelectSingleNode("stack-trace")?.InnerText;
 
             return ourResult;
         }
 
-        private VSTestResult GetBasicResult(XmlNode resultNode, IEnumerable<XmlNode> outputNodes)
+        private VSTestResult GetBasicResult(NUnitTestEvent resultNode, IEnumerable<XmlNode> outputNodes)
         {
-            var vsTest = GetCachedTestCase(resultNode.GetAttribute("id"));
-            if (vsTest == null) return null;
+            var vsTest = GetCachedTestCase(resultNode.Id);
+            if (vsTest == null)
+                return null;
 
             var vsResult = new VSTestResult(vsTest)
             {
                 DisplayName = vsTest.DisplayName,
                 Outcome = GetTestOutcome(resultNode),
-                Duration = TimeSpan.FromSeconds(resultNode.GetAttribute("duration", 0.0))
+                Duration = resultNode.Duration
             };
 
-            var startTime = resultNode.GetAttribute("start-time");
-            if (startTime != null)
-                vsResult.StartTime = DateTimeOffset.Parse(startTime, CultureInfo.InvariantCulture);
+            var startTime = resultNode.StartTime();
+            if (startTime.Ok)
+                vsResult.StartTime = startTime.Time;
 
-            var endTime = resultNode.GetAttribute("end-time");
-            if (endTime != null)
-                vsResult.EndTime = DateTimeOffset.Parse(endTime, CultureInfo.InvariantCulture);
+            var endTime = resultNode.EndTime();
+            if (endTime.Ok)
+                vsResult.EndTime = endTime.Time;
 
             // TODO: Remove this when NUnit provides a better duration
             if (vsResult.Duration == TimeSpan.Zero && (vsResult.Outcome == TestOutcome.Passed || vsResult.Outcome == TestOutcome.Failed))
@@ -278,11 +279,11 @@ namespace NUnit.VisualStudio.TestAdapter
             FillResultFromOutputNodes(outputNodes, vsResult);
 
             // Add stdOut messages from TestFinished element to vstest result
-            var outputNode = resultNode.SelectSingleNode("output");
-            if (outputNode != null)
-                vsResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, outputNode.InnerText));
+            var output = resultNode.Output;
+            if (!string.IsNullOrEmpty(output))
+                vsResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, output));
 
-            var attachmentSet = ParseAttachments(resultNode);
+            var attachmentSet = ParseAttachments(resultNode.Node);
             if (attachmentSet.Attachments.Count > 0)
                 vsResult.Attachments.Add(attachmentSet);
 
@@ -353,17 +354,17 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         // Public for testing
-        public static TestOutcome GetTestOutcome(XmlNode resultNode)
+        public static TestOutcome GetTestOutcome(NUnitTestEvent resultNode)
         {
-            switch (resultNode.GetAttribute("result"))
+            switch (resultNode.Result())
             {
-                case "Passed":
+                case NUnitTestEvent.ResultType.Success:
                     return TestOutcome.Passed;
-                case "Failed":
+                case NUnitTestEvent.ResultType.Failed:
                     return TestOutcome.Failed;
-                case "Skipped":
-                    return resultNode.GetAttribute("label") == "Ignored" ? TestOutcome.Skipped : TestOutcome.None;
-                case "Warning":
+                case NUnitTestEvent.ResultType.Skipped:
+                    return resultNode.IsIgnored ? TestOutcome.Skipped : TestOutcome.None;
+                case NUnitTestEvent.ResultType.Warning:
                     return TestOutcome.Skipped;
                 default:
                     return TestOutcome.None;

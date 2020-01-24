@@ -24,6 +24,7 @@
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.Framework;
+using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
@@ -41,7 +42,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase("<test-case result='Warning'/>", ExpectedResult = TestOutcome.Skipped)]
         public TestOutcome ResultStateToTestOutcome(string result)
         {
-            var resultNode = XmlHelper.CreateXmlNode(result);
+            var resultNode = new NUnitTestEventTestCase(XmlHelper.CreateXmlNode(result));
             return TestConverter.GetTestOutcome(resultNode);
         }
     }
