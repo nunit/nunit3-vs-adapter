@@ -47,9 +47,7 @@ namespace NUnit.VisualStudio.TestAdapter
             EmbeddedAssemblyResolution.EnsureInitialized();
         }
 
-        // Fields related to the currently executing assembly
-        // private ITestRunner _activeRunner;
-        private INUnitEngineAdapter nunitEngineAdapter;
+        
 
         #region Properties
 
@@ -166,7 +164,7 @@ namespace NUnit.VisualStudio.TestAdapter
         void ITestExecutor.Cancel()
         {
             // _activeRunner?.StopRun(true);
-            nunitEngineAdapter?.StopRun();
+            NUnitEngineAdapter?.StopRun();
         }
 
         #endregion
@@ -233,9 +231,11 @@ namespace NUnit.VisualStudio.TestAdapter
 
             try
             {
-                nunitEngineAdapter = GetRunnerFor(assemblyPath, testCases);
+                var package = CreateTestPackage(assemblyPath, testCases);
+                NUnitEngineAdapter.CreateRunner(package);
+                // return TestEngine.GetRunner(package);
                 CreateTestOutputFolder();
-                var discoveryResults = nunitEngineAdapter.Explore(filter); // _activeRunner.Explore(filter);
+                var discoveryResults = NUnitEngineAdapter.Explore(filter); // _activeRunner.Explore(filter);
                 dumpXml?.AddString(discoveryResults.AsString());
 
                 if (discoveryResults.IsRunnable)
@@ -274,7 +274,7 @@ namespace NUnit.VisualStudio.TestAdapter
                         {
                             try
                             {
-                                var results = nunitEngineAdapter.Run(listener, filter);
+                                var results = NUnitEngineAdapter.Run(listener, filter);
                                 GenerateTestOutput(results.TopNode, assemblyPath);
                             }
                             catch (NullReferenceException)
@@ -322,7 +322,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 dumpXml?.Dump4Execution();
                 try
                 {
-                    nunitEngineAdapter?.Close();
+                    NUnitEngineAdapter?.CloseRunner();
                 }
                 catch (Exception ex)
                 {
@@ -342,7 +342,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             string path = Path.Combine(TestOutputXmlFolder, $"{Path.GetFileNameWithoutExtension(assemblyPath)}.xml");
 #if NET35
-            var resultService = TestEngine.Services.GetService<IResultService>();
+            var resultService = NUnitEngineAdapter.GetService<IResultService>();
 #else
             var resultService = new ResultService();
 #endif
@@ -358,7 +358,7 @@ namespace NUnit.VisualStudio.TestAdapter
 #if !NET35
             return new NUnitTestFilterBuilder(new TestFilterService());
 #else
-            return new NUnitTestFilterBuilder(TestEngine.Services.GetService<ITestFilterService>());
+            return new NUnitTestFilterBuilder(NUnitEngineAdapter.GetService<ITestFilterService>());
 #endif
         }
 

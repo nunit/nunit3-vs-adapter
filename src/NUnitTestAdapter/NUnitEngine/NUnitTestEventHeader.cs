@@ -8,10 +8,12 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public enum EventType
         {
             NoIdea,
-            StartTest,
-            TestCase,
-            TestSuite,
-            TestOutput
+            StartTest,  // Match: A test was started
+            TestCase,   // Match: A test was finished
+            TestSuite,  // Match: A suite was finished
+            TestOutput, // Match: Test output, not part of test results, but should be added to it
+            StartRun,  // Currently not used
+            StartSuite // Currently not used
         }
         public XmlNode Node { get; }
         public string AsString() => Node.AsString();
@@ -34,6 +36,12 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                     break;
                 case "test-output":
                     Type = EventType.TestOutput;
+                    break;
+                case "start-run":
+                    Type = EventType.StartRun;
+                    break;
+                case "start-suite":
+                    Type = EventType.StartSuite;
                     break;
                 default:
                     Type = EventType.NoIdea;

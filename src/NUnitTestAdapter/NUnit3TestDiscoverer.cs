@@ -80,8 +80,6 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 string sourceAssemblyPath = Path.IsPathRooted(sourceAssembly) ? sourceAssembly : Path.Combine(Directory.GetCurrentDirectory(), sourceAssembly);
                 TestLog.Debug("Processing " + sourceAssembly);
-                INUnitEngineAdapter runner = null;
-
                 if (Settings.DumpXmlTestDiscovery)
                 {
                     dumpXml = new DumpXml(sourceAssemblyPath);
@@ -89,8 +87,9 @@ namespace NUnit.VisualStudio.TestAdapter
 
                 try
                 {
-                    runner = GetRunnerFor(sourceAssemblyPath, null);
-                    var results = runner.Explore();
+                    var package = CreateTestPackage(sourceAssemblyPath, null);
+                    NUnitEngineAdapter.CreateRunner(package);
+                    var results = NUnitEngineAdapter.Explore();
                     dumpXml?.AddString(results.AsString());
 
                     if (results.IsRunnable)
@@ -163,7 +162,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 finally
                 {
                     dumpXml?.Dump4Discovery();
-                    runner?.Close();
+                    NUnitEngineAdapter?.CloseRunner();
                 }
             }
 

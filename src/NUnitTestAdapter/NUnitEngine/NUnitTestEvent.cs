@@ -176,9 +176,12 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
     public class NUnitTestEventTestCase : NUnitTestEvent
     {
         public NUnitTestEventTestCase(INUnitTestEvent node) : this(node.Node)
-        { }
+        {
+        }
+
         public NUnitTestEventTestCase(string testEvent) : this(XmlHelper.CreateXmlNode(testEvent))
-        { }
+        {
+        }
 
         public NUnitTestEventTestCase(XmlNode node) : base(node)
         {
@@ -188,19 +191,19 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
     }
 
     /// <summary>
-    /// Handles the NUnit 'test-finished' event.
+    /// Handles the NUnit 'test-suite' event.
     /// </summary>
-    public class NUnitTestEventTestFinished : NUnitTestEvent
+    public class NUnitTestEventSuiteFinished : NUnitTestEvent
     {
-        public NUnitTestEventTestFinished(INUnitTestEvent node) : this(node.Node)
+        public NUnitTestEventSuiteFinished(INUnitTestEvent node) : this(node.Node)
         { }
-        public NUnitTestEventTestFinished(string testEvent) : this(XmlHelper.CreateXmlNode(testEvent))
+        public NUnitTestEventSuiteFinished(string testEvent) : this(XmlHelper.CreateXmlNode(testEvent))
         { }
 
-        public NUnitTestEventTestFinished(XmlNode node) : base(node)
+        public NUnitTestEventSuiteFinished(XmlNode node) : base(node)
         {
-            if (node.Name != "test-finished")
-                throw new NUnitEventWrongTypeException($"Expected 'test-finished', got {node.Name}");
+            if (node.Name != "test-suite")
+                throw new NUnitEventWrongTypeException($"Expected 'test-suite', got {node.Name}");
         }
     }
 

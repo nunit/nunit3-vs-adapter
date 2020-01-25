@@ -93,7 +93,7 @@ namespace NUnit.VisualStudio.TestAdapter
                         break;
 
                     case NUnitTestEventHeader.EventType.TestSuite:
-                        var suiteFinishedNode = new NUnitTestEventTestFinished(node);
+                        var suiteFinishedNode = new NUnitTestEventSuiteFinished(node);
                         SuiteFinished(suiteFinishedNode);
                         break;
 

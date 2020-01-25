@@ -76,8 +76,6 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #endregion
 
-        internal event Action<TestEngineClass> InternalEngineCreated;
-
         #region Properties
 
         public IAdapterSettings Settings { get; private set; }
@@ -85,7 +83,7 @@ namespace NUnit.VisualStudio.TestAdapter
         // The adapter version
         protected string AdapterVersion { get; set; }
 
-        protected ITestEngine TestEngine { get; private set; }
+        protected NUnitEngineAdapter NUnitEngineAdapter { get; private set; }
 
         // Our logger used to display messages
         protected TestLogger TestLog { get; private set; }
@@ -124,11 +122,13 @@ namespace NUnit.VisualStudio.TestAdapter
         // Discover or Execute method must call this method.
         protected void Initialize(IDiscoveryContext context, IMessageLogger messageLogger)
         {
-            var engine = new TestEngineClass();
-            InternalEngineCreated?.Invoke(engine);
-            TestEngine = engine;
+            NUnitEngineAdapter = new NUnitEngineAdapter();
+            //var engine = new TestEngineClass();
+            //InternalEngineCreated?.Invoke(engine);
+            //TestEngine = engine;
             TestLog = new TestLogger(messageLogger);
             Settings = new AdapterSettings(TestLog);
+            NUnitEngineAdapter.InitializeSettingsAndLogging(Settings, TestLog);
             TestLog.InitSettings(Settings);
             try
             {
@@ -172,15 +172,7 @@ namespace NUnit.VisualStudio.TestAdapter
             return ForbiddenFolders.Any(o => checkDir.StartsWith(o, StringComparison.OrdinalIgnoreCase));
         }
 
-        protected INUnitEngineAdapter GetRunnerFor(string assemblyName, IGrouping<string, TestCase> testCases)
-        {
-            var package = CreateTestPackage(assemblyName, testCases);
-            var engineAdapter = new NUnitEngineAdapter(package, Settings, TestLog);
-            return engineAdapter;
-            // return TestEngine.GetRunner(package);
-        }
-
-        private TestPackage CreateTestPackage(string assemblyName, IGrouping<string, TestCase> testCases)
+        protected TestPackage CreateTestPackage(string assemblyName, IGrouping<string, TestCase> testCases)
         {
             var package = new TestPackage(assemblyName);
 
@@ -300,10 +292,10 @@ namespace NUnit.VisualStudio.TestAdapter
 
         protected void Unload()
         {
-            if (TestEngine == null)
+            if (NUnitEngineAdapter == null)
                 return;
-            TestEngine.Dispose();
-            TestEngine = null;
+            NUnitEngineAdapter.Dispose();
+            NUnitEngineAdapter = null;
         }
 
         #endregion

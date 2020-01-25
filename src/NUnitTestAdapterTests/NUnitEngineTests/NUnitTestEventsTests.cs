@@ -29,15 +29,20 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
     public class NUnitTestEventsTests
     {
         private string startSuite = @"<start-suite id = '0-1073' parentId='0-1141' name='SimpleTests' fullname='NUnitTestDemo.SimpleTests' type='TestFixture' />";
+        private string testSuite = @"<test-suite type='TestFixture' id='0-1073' name='SimpleTests' fullname='NUnitTestDemo.SimpleTests' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' testcasecount='20' result='Failed' site='Child' start-time='2020-01-24 13:02:55Z' end-time='2020-01-24 13:02:55Z' duration='0.032827' total='15' passed='6' failed='8' warnings='0' inconclusive='1' skipped='0' asserts='11' parentId='0-1141'>
+   <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+   </failure>
+</test-suite>";
 
         [Test]
-        public void ThatTestEventIsParsedForStartSuite()
+        public void ThatTestEventIsParsedForTestSuite()
         {
-            var sut = new NUnitTestEventStartTest(startSuite);
+            var sut = new NUnitTestEventSuiteFinished(testSuite);
             Assert.Multiple(() =>
             {
                 Assert.That(sut.FullName, Is.EqualTo("NUnitTestDemo.SimpleTests"));
-                Assert.That(sut.TestType(), Is.EqualTo(NUnitTestEventStartTest.TestTypes.TestFixture));
+                Assert.That(sut.TestType(), Is.EqualTo(NUnitTestEvent.TestTypes.TestFixture));
                 Assert.That(sut.Name, Is.EqualTo("SimpleTests"));
                 Assert.That(sut.TestType, Is.EqualTo(NUnitTestEvent.TestTypes.TestFixture));
                 Assert.That(sut.Id, Is.EqualTo("0-1073"));
@@ -53,7 +58,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
             Assert.Multiple(() =>
             {
                 Assert.That(sut.FullName, Is.EqualTo("NUnitTestDemo.SetUpFixture.TestFixture2.Test2"));
-                Assert.That(sut.TestType(), Is.EqualTo(NUnitTestEventStartTest.TestTypes.TestMethod));
+                Assert.That(sut.TestType(), Is.EqualTo(NUnitTestEvent.TestTypes.TestMethod));
                 Assert.That(sut.Name, Is.EqualTo("Test2"));
                 Assert.That(sut.TestType, Is.EqualTo(NUnitTestEvent.TestTypes.TestMethod));
                 Assert.That(sut.Id, Is.EqualTo("0-1139"));
@@ -93,7 +98,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
                 Assert.That(sut.Name, Is.EqualTo("TestFails"));
                 Assert.That(sut.Id, Is.EqualTo("0-1076"));
                 Assert.That(sut.Result, Is.EqualTo(NUnitTestEvent.ResultType.Failed));
-                Assert.That(sut.Duration, Is.GreaterThan(0.001));
+                Assert.That(sut.Duration.TotalMilliseconds, Is.GreaterThanOrEqualTo(1.0));
                 Assert.That(sut.StartTime().Ok);
                 Assert.That(sut.EndTime().Ok);
             });
@@ -126,7 +131,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         [Test]
         public void ThatTestEventIsParsedForFinishSuite()
         {
-            var sut = new NUnitTestEventTestFinished(testSuiteFinished);
+            var sut = new NUnitTestEventSuiteFinished(testSuiteFinished);
             Assert.Multiple(() =>
             {
                 Assert.That(sut.FullName, Is.EqualTo("NUnitTestDemo.TextOutputTests"));

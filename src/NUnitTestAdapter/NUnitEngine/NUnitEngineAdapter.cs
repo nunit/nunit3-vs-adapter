@@ -33,7 +33,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
     public interface INUnitEngineAdapter
     {
         NUnitResults Explore();
-        void Close();
+        void CloseRunner();
         NUnitResults Explore(TestFilter filter);
         NUnitResults Run(ITestEventListener listener, TestFilter filter);
         void StopRun();
@@ -41,63 +41,73 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
     public class NUnitEngineAdapter : INUnitEngineAdapter, IDisposable
     {
-        private readonly IAdapterSettings settings;
-        private readonly ITestLogger logger;
-        private readonly TestPackage package;
+        private IAdapterSettings settings;
+        private ITestLogger logger;
+        private TestPackage package;
         private TestEngineClass TestEngine { get; }
-        private readonly ITestRunner runner;
+        private ITestRunner Runner { get; set; }
 
         internal event Action<TestEngineClass> InternalEngineCreated;
 
-        private NUnitEngineAdapter(IAdapterSettings settings, ITestLogger logger)
+        public NUnitEngineAdapter()
         {
-            this.logger = logger;
-            this.settings = settings;
-        }
-
-        public NUnitEngineAdapter(TestPackage package, IAdapterSettings settings, ITestLogger testLog) : this(settings, testLog)
-        {
-            this.package = package;
             var engine = new TestEngineClass();
             InternalEngineCreated?.Invoke(engine);
             TestEngine = engine;
-            runner = TestEngine.GetRunner(package);
+        }
+
+        public void InitializeSettingsAndLogging(IAdapterSettings setting, ITestLogger testLog)
+        {
+            logger = testLog;
+            settings = setting;
+        }
+
+        public void CreateRunner(TestPackage testPackage)
+        {
+            this.package = testPackage;
+            Runner = TestEngine.GetRunner(package);
         }
 
         public NUnitResults Explore()
         {
-            return new NUnitResults(runner.Explore(TestFilter.Empty));
+            return new NUnitResults(Runner.Explore(TestFilter.Empty));
         }
 
         public NUnitResults Explore(TestFilter filter)
         {
-            return new NUnitResults(runner.Explore(filter));
+            return new NUnitResults(Runner.Explore(filter));
         }
 
         public NUnitResults Run(ITestEventListener listener, TestFilter filter)
         {
-            return new NUnitResults(runner.Run(listener, filter));
+            return new NUnitResults(Runner.Run(listener, filter));
+        }
+
+        public T GetService<T>()
+            where T : class
+        {
+            return TestEngine.Services.GetService<T>();
         }
 
         public void StopRun()
         {
-            runner?.StopRun(true);
+            Runner?.StopRun(true);
         }
 
-        public void Close()
+        public void CloseRunner()
         {
-            if (runner == null)
+            if (Runner == null)
                 return;
-            if (runner.IsTestRunning)
-                runner.StopRun(true);
+            if (Runner.IsTestRunning)
+                Runner.StopRun(true);
 
-            runner.Unload();
-            runner.Dispose();
+            Runner.Unload();
+            Runner.Dispose();
         }
 
         public void Dispose()
         {
-            Close();
+            CloseRunner();
             TestEngine?.Dispose();
         }
     }
