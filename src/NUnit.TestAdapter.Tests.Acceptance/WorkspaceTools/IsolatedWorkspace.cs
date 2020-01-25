@@ -60,11 +60,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
         {
             using var tempTrxFile = new TempFile();
 
-            ConfigureRun("dotnet")
+            var result = ConfigureRun("dotnet")
                 .Add("test")
                 .AddIf(noBuild, "--no-build")
                 .Add("--logger").Add("trx;LogFileName=" + tempTrxFile)
                 .Run(throwOnError: false);
+
+            if (new FileInfo(tempTrxFile).Length == 0)
+                result.ThrowIfError();
 
             return VSTestResult.Load(tempTrxFile);
         }
@@ -95,15 +98,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 
         public VSTestResult VSTest(IEnumerable<string> testAssemblyPaths)
         {
-            using (var tempTrxFile = new TempFile())
-            {
-                ConfigureRun(toolResolver.VSTest)
-                    .AddRange(testAssemblyPaths)
-                    .Add("/logger:trx;LogFileName=" + tempTrxFile)
-                    .Run(throwOnError: false);
+            using var tempTrxFile = new TempFile();
 
-                return VSTestResult.Load(tempTrxFile);
-            }
+            var result = ConfigureRun(toolResolver.VSTest)
+                .AddRange(testAssemblyPaths)
+                .Add("/logger:trx;LogFileName=" + tempTrxFile)
+                .Run(throwOnError: false);
+
+            if (new FileInfo(tempTrxFile).Length == 0)
+                result.ThrowIfError();
+
+            return VSTestResult.Load(tempTrxFile);
         }
 
         private RunSettings ConfigureRun(string filename) => new RunSettings(Directory, filename);
