@@ -23,6 +23,7 @@
 
 using System;
 using NUnit.Engine;
+using NUnit.Engine.Services;
 // We use an alias so that we don't accidentally make
 // references to engine internals, except for creating
 // the engine object in the Initialize method.
@@ -48,6 +49,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         private ITestRunner Runner { get; set; }
 
         internal event Action<TestEngineClass> InternalEngineCreated;
+
 
         public NUnitEngineAdapter()
         {

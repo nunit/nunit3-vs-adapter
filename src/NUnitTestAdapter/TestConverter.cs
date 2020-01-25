@@ -231,7 +231,7 @@ namespace NUnit.VisualStudio.TestAdapter
             var ourResult = GetBasicResult(resultNode, outputNodes);
             if (ourResult == null)
                 return null;
- 
+
             var node = resultNode.Node.SelectSingleNode("failure") ?? resultNode.Node.SelectSingleNode("reason");
 
             string message = node?.SelectSingleNode("message")?.InnerText;

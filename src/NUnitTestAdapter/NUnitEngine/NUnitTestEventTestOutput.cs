@@ -45,8 +45,5 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         /// Returns the output information.
         /// </summary>
         public string Content => Node.InnerText;
-
-
-
     }
 }

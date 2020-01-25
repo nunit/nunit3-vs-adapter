@@ -139,7 +139,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public CheckedTime EndTime()
         {
             string endTime = Node.GetAttribute("end-time");
-            return endTime != null 
+            return endTime != null
                 ? new CheckedTime { Ok = true, Time = DateTimeOffset.Parse(endTime, CultureInfo.InvariantCulture) }
                 : new CheckedTime { Ok = false, Time = DateTimeOffset.Now };
         }
@@ -149,8 +149,6 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             public bool Ok;
             public DateTimeOffset Time;
         }
-
-
     }
 
     /// <summary>

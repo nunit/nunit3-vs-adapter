@@ -44,6 +44,7 @@ using NUnit.Common;
 using NUnit.Engine;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
+
 namespace NUnit.VisualStudio.TestAdapter
 {
     /// <summary>
@@ -83,7 +84,7 @@ namespace NUnit.VisualStudio.TestAdapter
         // The adapter version
         protected string AdapterVersion { get; set; }
 
-        protected NUnitEngineAdapter NUnitEngineAdapter { get; private set; }
+        public NUnitEngineAdapter NUnitEngineAdapter { get; private set; }
 
         // Our logger used to display messages
         protected TestLogger TestLog { get; private set; }
@@ -123,9 +124,9 @@ namespace NUnit.VisualStudio.TestAdapter
         protected void Initialize(IDiscoveryContext context, IMessageLogger messageLogger)
         {
             NUnitEngineAdapter = new NUnitEngineAdapter();
-            //var engine = new TestEngineClass();
-            //InternalEngineCreated?.Invoke(engine);
-            //TestEngine = engine;
+            // var engine = new TestEngineClass();
+            // InternalEngineCreated?.Invoke(engine);
+            // TestEngine = engine;
             TestLog = new TestLogger(messageLogger);
             Settings = new AdapterSettings(TestLog);
             NUnitEngineAdapter.InitializeSettingsAndLogging(Settings, TestLog);
