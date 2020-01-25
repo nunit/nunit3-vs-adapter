@@ -48,8 +48,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 
         public void AssertSinglePassingTest()
         {
-            Assert.That(Counters.Total, Is.EqualTo(1));
-            Assert.That(Counters.Passed, Is.EqualTo(1));
+            Assert.That(Counters.Total, Is.EqualTo(1), "There should be a single test in the test results.");
+            Assert.That(Counters.Passed, Is.EqualTo(1), "There should be a single test passing in the test results.");
         }
 
         public override string ToString()
