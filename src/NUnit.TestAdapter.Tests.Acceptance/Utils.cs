@@ -1,5 +1,7 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using NUnit.Framework;
 
@@ -58,6 +60,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
             return r.ToString();
         }
 
+        /// <summary>
+        /// Returns a path to a directory that did not exist until this call created it.
+        /// </summary>
         public static string CreateUniqueDirectory(string parentDirectory, string name = null)
         {
             parentDirectory = Path.GetFullPath(parentDirectory);
@@ -66,17 +71,50 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             var path = Path.Combine(parentDirectory, safeName ?? "1");
 
-            if (Directory.Exists(path))
+            if (!CreateNewDirectory(path))
             {
                 for (var id = 2; ; id++)
                 {
                     path = Path.Combine(parentDirectory, safeName is null ? id.ToString() : safeName + "_" + id);
-                    if (!Directory.Exists(path)) break;
+                    if (CreateNewDirectory(path)) break;
                 }
             }
 
-            Directory.CreateDirectory(path);
             return path;
+        }
+
+        /// <summary>
+        /// Returns <see langword="true"/> if the directory was created and <see langword="false"/> if the directory
+        /// already existed. Otherwise, throws <see cref="Win32Exception"/>.
+        /// </summary>
+        /// <exception cref="Win32Exception">Thrown when the directory did not exist and creation failed.</exception>
+        public static bool CreateNewDirectory(string path)
+        {
+            path = TrimTrailingSlashes(Path.GetFullPath(path));
+
+            if (Path.GetDirectoryName(path) is { } parentDirectory)
+            {
+                // Take care of creating all but the leaf directory. (This can require a series of calls to
+                // CreateDirectoryW.)
+                Directory.CreateDirectory(parentDirectory);
+            }
+
+            if (!NativeMethods.CreateDirectory(path, IntPtr.Zero))
+            {
+                var error = Marshal.GetLastWin32Error();
+
+                const int ERROR_ALREADY_EXISTS = 0xB7;
+                if (error == ERROR_ALREADY_EXISTS) return false;
+
+                throw new Win32Exception(error);
+            }
+
+            return true;
+        }
+
+        public static string TrimTrailingSlashes(string path)
+        {
+            return path.TrimEnd(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar });
         }
 
         public static void DeleteDirectoryRobust(string directory)
