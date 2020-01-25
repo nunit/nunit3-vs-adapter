@@ -3,15 +3,8 @@ trigger:
     include: [ '*' ]
     exclude: [ 'refs/tags/*' ]
 
-strategy:
-  matrix:
-    linux:
-      imageName: 'ubuntu-latest'
-    windows:
-      imageName: 'windows-latest'
-
 pool:
-  vmImage: $(imageName)
+  vmImage: windows-latest
 
 steps:
 - powershell: .\build.ps1 --target=CI --configuration=$(BuildConfiguration)
