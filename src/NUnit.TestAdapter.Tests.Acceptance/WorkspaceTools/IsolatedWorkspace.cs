@@ -56,12 +56,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                 .Run();
         }
 
-        public void DotNetTest(bool noBuild = false)
+        public VSTestResult DotNetTest(bool noBuild = false)
         {
+            using var tempTrxFile = new TempFile();
+
             ConfigureRun("dotnet")
                 .Add("test")
                 .AddIf(noBuild, "--no-build")
-                .Run();
+                .Add("--logger").Add("trx;LogFileName=" + tempTrxFile)
+                .Run(throwOnError: false);
+
+            return VSTestResult.Load(tempTrxFile);
         }
 
         public void DotNetVSTest(IEnumerable<string> testAssemblyPaths)

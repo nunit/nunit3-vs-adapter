@@ -68,6 +68,30 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                 .AssertSinglePassingTest();
         }
 
+        [TestCaseSource(nameof(DotNetCliTargetFrameworks))]
+        public static void Single_target_csproj_dotnet_CLI(string targetFramework)
+        {
+            var workspace = CreateWorkspace()
+                .AddProject("Test.csproj", $@"
+                    <Project Sdk='Microsoft.NET.Sdk'>
+
+                      <PropertyGroup>
+                        <TargetFramework>{targetFramework}</TargetFramework>
+                      </PropertyGroup>
+
+                      <ItemGroup>
+                        <PackageReference Include='Microsoft.NET.Test.Sdk' Version='*' />
+                        <PackageReference Include='NUnit' Version='*' />
+                        <PackageReference Include='NUnit3TestAdapter' Version='{NuGetPackageVersion}' />
+                      </ItemGroup>
+
+                    </Project>");
+
+            AddTestsCs(workspace);
+
+            workspace.DotNetTest().AssertSinglePassingTest();
+        }
+
         [TestCaseSource(nameof(TargetFrameworks)), Platform("Win")]
         public static void Single_target_vbproj(string targetFramework)
         {
@@ -93,6 +117,30 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             workspace.VSTest(new[] { $@"bin\Debug\{targetFramework}\Test.dll" })
                 .AssertSinglePassingTest();
+        }
+
+        [TestCaseSource(nameof(DotNetCliTargetFrameworks))]
+        public static void Single_target_vbproj_dotnet_CLI(string targetFramework)
+        {
+            var workspace = CreateWorkspace()
+                .AddProject("Test.vbproj", $@"
+                    <Project Sdk='Microsoft.NET.Sdk'>
+
+                      <PropertyGroup>
+                        <TargetFramework>{targetFramework}</TargetFramework>
+                      </PropertyGroup>
+
+                      <ItemGroup>
+                        <PackageReference Include='Microsoft.NET.Test.Sdk' Version='*' />
+                        <PackageReference Include='NUnit' Version='*' />
+                        <PackageReference Include='NUnit3TestAdapter' Version='{NuGetPackageVersion}' />
+                      </ItemGroup>
+
+                    </Project>");
+
+            AddTestsVb(workspace);
+
+            workspace.DotNetTest().AssertSinglePassingTest();
         }
 
         [Test, Platform("Win")]
@@ -124,6 +172,30 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                 .AssertSinglePassingTest();
         }
 
+        [Test]
+        public static void Multi_target_csproj_dotnet_CLI()
+        {
+            var workspace = CreateWorkspace()
+                .AddProject("Test.csproj", $@"
+                    <Project Sdk='Microsoft.NET.Sdk'>
+
+                      <PropertyGroup>
+                        <TargetFrameworks>{string.Join(";", DotNetCliTargetFrameworks)}</TargetFrameworks>
+                      </PropertyGroup>
+
+                      <ItemGroup>
+                        <PackageReference Include='Microsoft.NET.Test.Sdk' Version='*' />
+                        <PackageReference Include='NUnit' Version='*' />
+                        <PackageReference Include='NUnit3TestAdapter' Version='{NuGetPackageVersion}' />
+                      </ItemGroup>
+
+                    </Project>");
+
+            AddTestsCs(workspace);
+
+            workspace.DotNetTest().AssertSinglePassingTest();
+        }
+
         [Test, Platform("Win")]
         public static void Multi_target_vbproj()
         {
@@ -151,6 +223,30 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                 from targetFramework in TargetFrameworks
                 select $@"bin\Debug\{targetFramework}\Test.dll")
                 .AssertSinglePassingTest();
+        }
+
+        [Test]
+        public static void Multi_target_vbproj_dotnet_CLI()
+        {
+            var workspace = CreateWorkspace()
+                .AddProject("Test.vbproj", $@"
+                    <Project Sdk='Microsoft.NET.Sdk'>
+
+                      <PropertyGroup>
+                        <TargetFrameworks>{string.Join(";", DotNetCliTargetFrameworks)}</TargetFrameworks>
+                      </PropertyGroup>
+
+                      <ItemGroup>
+                        <PackageReference Include='Microsoft.NET.Test.Sdk' Version='*' />
+                        <PackageReference Include='NUnit' Version='*' />
+                        <PackageReference Include='NUnit3TestAdapter' Version='{NuGetPackageVersion}' />
+                      </ItemGroup>
+
+                    </Project>");
+
+            AddTestsVb(workspace);
+
+            workspace.DotNetTest().AssertSinglePassingTest();
         }
 
         [Test, Platform("Win")]

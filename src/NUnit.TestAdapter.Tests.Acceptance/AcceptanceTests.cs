@@ -25,9 +25,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
             "netcoreapp2.1"
         };
 
-        public static IEnumerable<string> LinuxTargetFrameworks => new[]
+        public static IEnumerable<string> DotNetCliTargetFrameworks => new[]
         {
-            "netcoreapp2.1"
+            "netcoreapp2.1",
+            "netcoreapp3.1"
         };
 
         private static readonly Lazy<(IsolatedWorkspaceManager manager, string nupkgVersion, bool keepWorkspaces)> Initialization = new Lazy<(IsolatedWorkspaceManager, string, bool)>(() =>
