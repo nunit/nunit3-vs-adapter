@@ -3,23 +3,31 @@ trigger:
     include: [ '*' ]
     exclude: [ 'refs/tags/*' ]
 
-pool:
-  vmImage: windows-latest
+jobs:
+  - job: Windows
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - powershell: .\build.ps1 --target=CI --configuration=$(BuildConfiguration)
+      displayName: Build, package, and test
 
-steps:
-- powershell: .\build.ps1 --target=CI --configuration=$(BuildConfiguration)
-  displayName: Build, package, and test
+    - task: PublishBuildArtifacts@1
+      displayName: Publish bin artifacts
+      inputs:
+        PathtoPublish: $(build.sourcesdirectory)\bin\$(BuildConfiguration)
+        ArtifactName: Bin
+      condition: succeededOrFailed()
 
-- task: PublishBuildArtifacts@1
-  displayName: Publish bin artifacts
-  inputs:
-    PathtoPublish: $(build.sourcesdirectory)\bin\$(BuildConfiguration)
-    ArtifactName: Bin
-  condition: succeededOrFailed()
+    - task: PublishBuildArtifacts@1
+      displayName: Publish package artifacts
+      inputs:
+        PathtoPublish: $(build.sourcesdirectory)\package
+        ArtifactName: Package
+      condition: succeededOrFailed()
 
-- task: PublishBuildArtifacts@1
-  displayName: Publish package artifacts
-  inputs:
-    PathtoPublish: $(build.sourcesdirectory)\package
-    ArtifactName: Package
-  condition: succeededOrFailed()
+  - job: Linux
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - powershell: .\build.ps1 --target=Acceptance --configuration=$(BuildConfiguration)
+      displayName: Build and test

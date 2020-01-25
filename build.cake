@@ -111,36 +111,53 @@ Task("CleanPackages")
 Task("Build")
     .Does(() =>
     {
-        // Workaround for https://github.com/cake-build/cake/issues/2128
-        // cannot find pure preview installations of visual studio
-        var vsInstallation =
-            VSWhereLatest(new VSWhereLatestSettings { Requires = "Microsoft.Component.MSBuild" })
-            ?? VSWhereLatest(new VSWhereLatestSettings { Requires = "Microsoft.Component.MSBuild", IncludePrerelease = true });
-        if(vsInstallation == null)
+        if (IsRunningOnWindows())
         {
-            throw new Exception($"Failed to find any Visual Studio version");
-        }
-        
-        FilePath msBuildPath = vsInstallation.CombineWithFilePath(@"MSBuild\Current\Bin\MSBuild.exe");
-        if (!FileExists(msBuildPath))
-        {
-            msBuildPath = vsInstallation.CombineWithFilePath(@"MSBuild\15.0\Bin\MSBuild.exe");
-        }
-
-        Information("Building using MSBuild at " + msBuildPath);
-        Information("Configuration is:"+configuration);
-
-        MSBuild(ADAPTER_SOLUTION, new MSBuildSettings
-        {
-            Configuration = configuration,
-            ToolPath = msBuildPath,
-            EnvironmentVariables = new Dictionary<string, string>
+            // Workaround for https://github.com/cake-build/cake/issues/2128
+            // cannot find pure preview installations of visual studio
+            var vsInstallation =
+                VSWhereLatest(new VSWhereLatestSettings { Requires = "Microsoft.Component.MSBuild" })
+                ?? VSWhereLatest(new VSWhereLatestSettings { Requires = "Microsoft.Component.MSBuild", IncludePrerelease = true });
+            if(vsInstallation == null)
             {
-                ["PackageVersion"] = packageVersion
-            },
-            Verbosity = Verbosity.Minimal,
-            Restore = true
-        });
+                throw new Exception($"Failed to find any Visual Studio version");
+            }
+            
+            FilePath msBuildPath = vsInstallation.CombineWithFilePath(@"MSBuild\Current\Bin\MSBuild.exe");
+            if (!FileExists(msBuildPath))
+            {
+                msBuildPath = vsInstallation.CombineWithFilePath(@"MSBuild\15.0\Bin\MSBuild.exe");
+            }
+
+            Information("Building using MSBuild at " + msBuildPath);
+            Information("Configuration is:"+configuration);
+
+            MSBuild(ADAPTER_SOLUTION, new MSBuildSettings
+            {
+                Configuration = configuration,
+                ToolPath = msBuildPath,
+                EnvironmentVariables = new Dictionary<string, string>
+                {
+                    ["PackageVersion"] = packageVersion
+                },
+                Verbosity = Verbosity.Minimal,
+                Restore = true
+            });
+        }
+        else
+        {
+            var settings = new DotNetCoreBuildSettings
+            {
+                Configuration = configuration,
+                EnvironmentVariables = new Dictionary<string, string>
+                {
+                    ["PackageVersion"] = packageVersion
+                }
+            };
+
+            DotNetCoreBuild(@"src\NUnitTestAdapterTests", settings);
+            DotNetCoreBuild(@"src\NUnit.TestAdapter.Tests.Acceptance", settings);
+        }
     });
 
 //////////////////////////////////////////////////////////////////////
