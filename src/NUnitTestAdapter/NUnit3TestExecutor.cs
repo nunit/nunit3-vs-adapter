@@ -47,8 +47,6 @@ namespace NUnit.VisualStudio.TestAdapter
             EmbeddedAssemblyResolution.EnsureInitialized();
         }
 
-        
-
         #region Properties
 
         // Properties set when either of the RunTests methods is called
@@ -233,7 +231,6 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 var package = CreateTestPackage(assemblyPath, testCases);
                 NUnitEngineAdapter.CreateRunner(package);
-                // return TestEngine.GetRunner(package);
                 CreateTestOutputFolder();
                 var discoveryResults = NUnitEngineAdapter.Explore(filter); // _activeRunner.Explore(filter);
                 dumpXml?.AddString(discoveryResults.AsString());

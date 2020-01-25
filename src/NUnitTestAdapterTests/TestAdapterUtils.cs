@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2018 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2018-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -46,7 +46,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         private static void InitializeForTesting(NUnitTestAdapter adapter)
         {
 #if NET46
-            adapter.InternalEngineCreated += engine =>
+            adapter.NUnitEngineAdapter.InternalEngineCreated += engine =>
             {
                 engine.Services.Add(new SettingsService(true));
                 engine.Services.Add(new DomainManager());

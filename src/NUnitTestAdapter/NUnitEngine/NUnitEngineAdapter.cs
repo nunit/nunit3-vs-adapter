@@ -64,7 +64,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public void CreateRunner(TestPackage testPackage)
         {
-            this.package = testPackage;
+            package = testPackage;
             Runner = TestEngine.GetRunner(package);
         }
 
@@ -103,6 +103,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
             Runner.Unload();
             Runner.Dispose();
+            Runner = null;
         }
 
         public void Dispose()
