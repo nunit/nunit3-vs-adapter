@@ -58,25 +58,31 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
             return r.ToString();
         }
 
-        public static string CreateUniqueDirectory(string parentDirectory, string name = null)
+        public static DirectoryMutex CreateMutexDirectory(string parentDirectory, string name = null)
         {
             parentDirectory = Path.GetFullPath(parentDirectory);
 
             var safeName = name is null ? null : GetSafeFilename(name);
 
-            var path = Path.Combine(parentDirectory, safeName ?? "1");
-
-            if (Directory.Exists(path))
+            for (var id = 1; ; id++)
             {
-                for (var id = 2; ; id++)
+                var path = Path.Combine(parentDirectory,
+                    safeName is null ? id.ToString() :
+                    id == 1 ? safeName :
+                    safeName + "_" + id);
+
+                if (!Directory.Exists(path))
                 {
-                    path = Path.Combine(parentDirectory, safeName is null ? id.ToString() : safeName + "_" + id);
-                    if (!Directory.Exists(path)) break;
+                    Directory.CreateDirectory(path);
+                    if (DirectoryMutex.TryAcquire(path) is { } mutex)
+                    {
+                        // Make sure that the directory is still empty (besides the mutex file) at this point so that a
+                        // non-empty directory is not used.
+                        if (Directory.GetFileSystemEntries(path).Length == 1)
+                            return mutex;
+                    }
                 }
             }
-
-            Directory.CreateDirectory(path);
-            return path;
         }
 
         public static void DeleteDirectoryRobust(string directory)

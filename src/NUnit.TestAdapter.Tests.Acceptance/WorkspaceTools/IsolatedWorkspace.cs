@@ -2,23 +2,25 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Xml.Linq;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 {
     [DebuggerDisplay("{Directory,nq}")]
-    public sealed partial class IsolatedWorkspace
+    public sealed partial class IsolatedWorkspace : IDisposable
     {
         private readonly List<string> projectPaths = new List<string>();
         private readonly ToolResolver toolResolver;
+        private readonly DirectoryMutex directoryMutex;
 
-        public string Directory { get; }
+        public string Directory => directoryMutex.DirectoryPath;
 
-        public IsolatedWorkspace(string directory, ToolResolver toolResolver)
+        public IsolatedWorkspace(DirectoryMutex directoryMutex, ToolResolver toolResolver)
         {
-            Directory = directory;
+            this.directoryMutex = directoryMutex ?? throw new ArgumentNullException(nameof(toolResolver)); ;
             this.toolResolver = toolResolver ?? throw new ArgumentNullException(nameof(toolResolver));
         }
+
+        public void Dispose() => directoryMutex.Dispose();
 
         public IsolatedWorkspace AddProject(string path, string contents)
         {
