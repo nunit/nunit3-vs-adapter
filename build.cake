@@ -314,7 +314,6 @@ Task("Release")
 
 Task("Acceptance")
     .IsDependentOn("Build")
-    .IsDependentOn("CleanPackages")
     .IsDependentOn("PackageNuGet")
     .Description("Ensures that known project configurations can use the produced NuGet package to restore, build, and run tests.")
     .Does(() =>
