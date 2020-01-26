@@ -11,7 +11,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         {
             var mutexFilePath = Path.Combine(directoryPath, ".mutex");
 
-            Stream stream;
+            FileStream stream;
             try
             {
                 stream = new FileStream(mutexFilePath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 1, FileOptions.DeleteOnClose);
