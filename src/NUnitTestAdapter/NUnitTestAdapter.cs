@@ -73,6 +73,7 @@ namespace NUnit.VisualStudio.TestAdapter
 #else
             AdapterVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 #endif
+            NUnitEngineAdapter = new NUnitEngineAdapter();
         }
 
         #endregion
@@ -123,10 +124,7 @@ namespace NUnit.VisualStudio.TestAdapter
         // Discover or Execute method must call this method.
         protected void Initialize(IDiscoveryContext context, IMessageLogger messageLogger)
         {
-            NUnitEngineAdapter = new NUnitEngineAdapter();
-            // var engine = new TestEngineClass();
-            // InternalEngineCreated?.Invoke(engine);
-            // TestEngine = engine;
+            NUnitEngineAdapter.Initialize();
             TestLog = new TestLogger(messageLogger);
             Settings = new AdapterSettings(TestLog);
             NUnitEngineAdapter.InitializeSettingsAndLogging(Settings, TestLog);

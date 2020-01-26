@@ -127,7 +127,8 @@ namespace NUnit.VisualStudio.TestAdapter
             Initialize(runContext, frameworkHandle);
             TestLog.Debug("RunTests by IEnumerable<TestCase>");
             InitializeForExecution(runContext, frameworkHandle);
-
+            Debug.Assert(NUnitEngineAdapter != null, "NUnitEngineAdapter is null");
+            Debug.Assert(NUnitEngineAdapter.EngineEnabled, "NUnitEngineAdapter TestEngine is null");
             var assemblyGroups = tests.GroupBy(tc => tc.Source);
             if (Settings.InProcDataCollectorsAvailable && assemblyGroups.Count() > 1)
             {

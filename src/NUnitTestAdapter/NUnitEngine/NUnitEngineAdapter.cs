@@ -45,17 +45,25 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         private IAdapterSettings settings;
         private ITestLogger logger;
         private TestPackage package;
-        private TestEngineClass TestEngine { get; }
+        private ITestEngine TestEngine { get; set; }
         private ITestRunner Runner { get; set; }
 
         internal event Action<TestEngineClass> InternalEngineCreated;
 
+        public bool EngineEnabled => TestEngine != null;
 
         public NUnitEngineAdapter()
         {
-            var engine = new TestEngineClass();
-            InternalEngineCreated?.Invoke(engine);
-            TestEngine = engine;
+
+
+        }
+
+
+        public void Initialize()
+        {
+            var engineX = new TestEngineClass();
+            InternalEngineCreated?.Invoke(engineX);
+            TestEngine = engineX;
         }
 
         public void InitializeSettingsAndLogging(IAdapterSettings setting, ITestLogger testLog)
@@ -88,7 +96,12 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public T GetService<T>()
             where T : class
         {
-            return TestEngine.Services.GetService<T>();
+            var service = TestEngine.Services.GetService<T>();
+            if (service == null)
+            {
+                logger.Warning($"Engine GetService can't create service {typeof(T)}.");
+            }
+            return service;
         }
 
         public void StopRun()
