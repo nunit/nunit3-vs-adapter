@@ -99,6 +99,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                 WorkspacesByTestId.Remove(test.ID);
             }
 
+            foreach (var workspace in workspaces)
+                workspace.Dispose();
+
             if (TestContext.CurrentContext.Result.Outcome.Status == TestStatus.Failed)
             {
                 Initialization.Value.manager.PreserveDirectory(
