@@ -233,6 +233,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 var package = CreateTestPackage(assemblyPath, testCases);
                 NUnitEngineAdapter.CreateRunner(package);
                 CreateTestOutputFolder();
+                dumpXml?.AddString($"<NUnitDiscoveryInExecution>{assemblyPath}</NUnitExecution>\r\n\r\n");
                 var discoveryResults = NUnitEngineAdapter.Explore(filter); // _activeRunner.Explore(filter);
                 dumpXml?.AddString(discoveryResults.AsString());
 
@@ -267,7 +268,7 @@ namespace NUnit.VisualStudio.TestAdapter
                             TestLog.Info("   Skipping assembly - no matching test cases found");
                             return;
                         }
-
+                        dumpXml?.AddString($"<NUnitExecution>{assemblyPath}</NUnitExecution>\r\n");
                         using (var listener = new NUnitEventListener(FrameworkHandle, testConverter, dumpXml))
                         {
                             try

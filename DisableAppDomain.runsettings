@@ -3,4 +3,9 @@
   <RunConfiguration>
     <DisableAppDomain>true</DisableAppDomain>
   </RunConfiguration>
+  <NUnit>
+    <Verbosity>5</Verbosity>
+    <DumpXmlTestResults>true</DumpXmlTestResults>
+    <DumpXmlTestDiscovery>true</DumpXmlTestDiscovery>
+  </NUnit>
 </RunSettings>

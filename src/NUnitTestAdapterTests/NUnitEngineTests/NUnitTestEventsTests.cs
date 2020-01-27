@@ -21,6 +21,8 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
+using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
@@ -47,6 +49,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
                 Assert.That(sut.TestType, Is.EqualTo(NUnitTestEvent.TestTypes.TestFixture));
                 Assert.That(sut.Id, Is.EqualTo("0-1073"));
             });
+            Assert.That(sut.HasFailure);
+            Assert.That(sut.FailureMessage, Is.EqualTo("One or more child tests had errors"));
+
         }
 
         private string startTest = @"<start-test id='0-1139' parentId='0-1138' name='Test2' fullname='NUnitTestDemo.SetUpFixture.TestFixture2.Test2' type='TestMethod' />";
@@ -104,6 +109,32 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
             });
         }
 
+        [Test]
+        public void ThatTestCasePropertiesAreParsedWhenFailing()
+        {
+            var sut = new NUnitTestEventTestCase(testCaseFailing);
+            Assert.That(sut.Properties, Is.Not.Null);
+            Assert.That(sut.Properties.Count, Is.EqualTo(1));
+            var property = sut.Properties.FirstOrDefault();
+            Assert.That(property, Is.Not.Null);
+            Assert.That(property.Name, Is.EqualTo("Expect"));
+            Assert.That(property.Value, Is.EqualTo("Failure"));
+        }
+
+        [Test]
+        public void ThatTestCaseFailureIsParsedWhenFailing()
+        {
+            var sut = new NUnitTestEventTestCase(testCaseFailing);
+            var failure = sut.Failure;
+            Assert.That(failure, Is.Not.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(failure.Message, Is.EqualTo("  Expected: 5\r\n  But was:  4\r\n"));
+                Assert.That(failure.Stacktrace.StartsWith("   at NUnitTestDemo.SimpleTests.TestFails()"), $"Stacktrace:{failure.Stacktrace}");
+            });
+        }
+
+
         private string testCaseSucceeds = @"<test-case id='0-1006' name='AsyncTaskTestSucceeds' fullname='NUnitTestDemo.AsyncTests.AsyncTaskTestSucceeds' methodname='AsyncTaskTestSucceeds' classname='NUnitTestDemo.AsyncTests' runstate='Runnable' seed='1350317088' result='Passed' start-time='2020-01-23 18:07:42Z' end-time='2020-01-23 18:07:42Z' duration='0.001131' asserts='1' parentId='0-1004'>
    <properties>
       <property name='Expect' value='Pass' />
@@ -123,7 +154,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
             });
         }
 
-        private string testSuiteFinished = @"<test-suite type='TestFixture' id='0-1094' name='TextOutputTests' fullname='NUnitTestDemo.TextOutputTests' classname='NUnitTestDemo.TextOutputTests' runstate='Runnable' testcasecount='9' result='Passed' start-time='2020-01-23 18:07:42Z' end-time='2020-01-23 18:07:42Z' duration='0.018222' total='9' passed='9' failed='0' warnings='0' inconclusive='0' skipped='0' asserts='0' parentId='0-1141'>
+        private readonly string testSuiteFinished = @"<test-suite type='TestFixture' id='0-1094' name='TextOutputTests' fullname='NUnitTestDemo.TextOutputTests' classname='NUnitTestDemo.TextOutputTests' runstate='Runnable' testcasecount='9' result='Passed' start-time='2020-01-23 18:07:42Z' end-time='2020-01-23 18:07:42Z' duration='0.018222' total='9' passed='9' failed='0' warnings='0' inconclusive='0' skipped='0' asserts='0' parentId='0-1141'>
    <properties>
       <property name='Expect' value='Pass' />
    </properties>
@@ -141,6 +172,41 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
                 Assert.That(sut.Result, Is.EqualTo(NUnitTestEvent.ResultType.Success));
             });
         }
+
+        private string testSuiteFinishedWithReason =
+            @"<test-suite type='ParameterizedMethod' id='0-1043' name='TestCaseWarns' fullname='NUnitTestDemo.ParameterizedTests.TestCaseWarns' classname='NUnitTestDemo.ParameterizedTests' runstate='Runnable' testcasecount='1' result='Warning' site='Child' start-time='2020-01-26 12:45:23Z' end-time='2020-01-26 12:45:23Z' duration='0.001552' total='0' passed='0' failed='0' warnings='1' inconclusive='0' skipped='0' asserts='1' parentId='0-1031'>
+   <properties>
+      <property name='Expect' value='Warning' />
+   </properties>
+   <reason>
+      <message><![CDATA[One or more child tests had warnings]]></message>
+   </reason>
+</test-suite>";
+
+        [Test]
+        public void ThatTestEventIsParsedForFinishSuiteWithReason()
+        {
+            var sut = new NUnitTestEventSuiteFinished(testSuiteFinishedWithReason);
+            Assert.That(sut.HasReason);
+            Assert.That(sut.ReasonMessage, Is.EqualTo("One or more child tests had warnings"));
+            Assert.That(sut.HasFailure, Is.False);
+        }
+
+        private string testSuiteFinishedWithFailure = @"<test-suite type='ParameterizedMethod' id='0-1072' name='TestCaseWithRandomParameterWithFixedNaming' fullname='NUnitTestDemo.ParameterizedTests.TestCaseWithRandomParameterWithFixedNaming' classname='NUnitTestDemo.ParameterizedTests' runstate='Runnable' testcasecount='2' result='Failed' site='Child' start-time='2020-01-26 12:45:23Z' end-time='2020-01-26 12:45:23Z' duration='0.000101' total='2' passed='1' failed='1' warnings='0' inconclusive='0' skipped='0' asserts='0' parentId='0-1031'>
+   <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+   </failure>
+</test-suite>";
+
+        [Test]
+        public void ThatTestEventIsParsedForFinishSuiteWithFailure()
+        {
+            var sut = new NUnitTestEventSuiteFinished(testSuiteFinishedWithFailure);
+            Assert.That(sut.HasFailure);
+            Assert.That(sut.FailureMessage, Is.EqualTo("One or more child tests had errors"));
+        }
+
+
 
         private readonly string testCaseSucceedsWithOutput = @"<test-case id='0-1074' name='TestSucceeds' fullname='NUnitTestDemo.SimpleTests.TestSucceeds' methodname='TestSucceeds' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' seed='1232497275' result='Passed' start-time='2020-01-24 11:18:32Z' end-time='2020-01-24 11:18:32Z' duration='0.016868' asserts='1' parentId='0-1073'>
    <properties>
@@ -163,6 +229,58 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
                 Assert.That(sut.MethodName, Is.EqualTo("TestSucceeds"));
                 Assert.That(sut.ClassName, Is.EqualTo("NUnitTestDemo.SimpleTests"));
             });
+        }
+
+        private string testCaseFails = @"<test-case id='0-1076' name='TestFails' fullname='NUnitTestDemo.SimpleTests.TestFails' methodname='TestFails' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' seed='299199212' result='Failed' start-time='2020-01-26 12:45:23Z' end-time='2020-01-26 12:45:23Z' duration='0.000959' asserts='1' parentId='0-1073'>
+   <properties>
+      <property name='Expect' value='Failure' />
+   </properties>
+   <failure>
+      <message><![CDATA[  Expected: 5
+  But was:  4
+]]></message>
+      <stack-trace><![CDATA[   at NUnitTestDemo.SimpleTests.TestFails() in D:\repos\NUnit\nunit3-vs-adapter-demo\src\csharp\SimpleTests.cs:line 29
+]]></stack-trace>
+   </failure>
+   <assertions>
+      <assertion result='Failed'>
+         <message><![CDATA[  Expected: 5
+  But was:  4
+]]></message>
+         <stack-trace><![CDATA[   at NUnitTestDemo.SimpleTests.TestFails() in D:\repos\NUnit\nunit3-vs-adapter-demo\src\csharp\SimpleTests.cs:line 29
+]]></stack-trace>
+      </assertion>
+   </assertions>
+</test-case>";
+
+        [Test]
+        public void ThatTestCaseFailsCanBeParsed()
+        {
+            var sut = new NUnitTestEventTestCase(testCaseFails);
+            Assert.That(sut.Properties.Count, Is.EqualTo(1));
+            Assert.That(sut.HasFailure);
+            Assert.Multiple(() =>
+            {
+                Assert.That(sut.Failure.Message, Is.EqualTo("  Expected: 5\r\n  But was:  4\r\n"));
+                Assert.That(sut.Failure.Stacktrace.StartsWith("   at NUnitTestDemo.SimpleTests.TestFails()"));
+            });
+        }
+
+        private string testCaseFailsWithReason = @"<test-case id='0-1086' name='TestIsIgnored_Assert' fullname='NUnitTestDemo.SimpleTests.TestIsIgnored_Assert' methodname='TestIsIgnored_Assert' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' seed='202557333' result='Skipped' label='Ignored' start-time='2020-01-26 12:45:23Z' end-time='2020-01-26 12:45:23Z' duration='0.000540' asserts='0' parentId='0-1073'>
+   <properties>
+      <property name='Expect' value='Ignore' />
+   </properties>
+   <reason>
+      <message><![CDATA[Ignoring this test deliberately]]></message>
+   </reason>
+</test-case>";
+
+        [Test]
+        public void ThatTestCaseFailsCanBeParsedWithReason()
+        {
+            var sut = new NUnitTestEventTestCase(testCaseFailsWithReason);
+            Assert.That(sut.ReasonMessage, Is.EqualTo("Ignoring this test deliberately"));
+
         }
     }
 }

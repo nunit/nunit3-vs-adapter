@@ -26,22 +26,6 @@ using NUnit.VisualStudio.TestAdapter.Dump;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
-    public abstract class NUnitTestNode
-    {
-        public XmlNode Node { get; protected set; }
-        public string Id => Node.GetAttribute("id");
-        public string FullName => Node.GetAttribute("fullname");
-        public string Name => Node.GetAttribute("name");
-        public bool IsNull => Node == null;
-
-        protected NUnitTestNode(XmlNode node)
-        {
-            Node = node;
-        }
-    }
-
-
-
     public class NUnitTestCase : NUnitTestNode
     {
         public bool IsTestCase => !IsNull && Node.Name == "test-case";

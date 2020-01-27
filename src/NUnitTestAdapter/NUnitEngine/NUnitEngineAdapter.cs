@@ -52,13 +52,6 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public bool EngineEnabled => TestEngine != null;
 
-        public NUnitEngineAdapter()
-        {
-
-
-        }
-
-
         public void Initialize()
         {
             var engineX = new TestEngineClass();

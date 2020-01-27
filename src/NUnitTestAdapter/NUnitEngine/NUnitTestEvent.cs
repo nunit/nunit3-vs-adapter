@@ -22,9 +22,12 @@
 // ***********************************************************************
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.Serialization;
 using System.Xml;
+using NUnit.VisualStudio.TestAdapter.Internal;
+using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
@@ -110,8 +113,6 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public string Label => Node.GetAttribute("label");
 
         public bool IsIgnored => Label == "Ignored";
-        public string FailureMessage => Node.SelectSingleNode("failure/message")?.InnerText;
-        public string FailureStackTrace => Node.SelectSingleNode("failure/stack-trace")?.InnerText;
 
         public TimeSpan Duration => TimeSpan.FromSeconds(Node.GetAttribute("duration", 0.0));
 
@@ -126,14 +127,13 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public string ClassName => Node.GetAttribute("classname");
         public string Output => Node.SelectSingleNode("output")?.InnerText;
 
-        public string ReasonMessage => Node.SelectSingleNode("reason/message")?.InnerText;
 
         public CheckedTime StartTime()
         {
-            var startTime = Node.GetAttribute("start-time");
-            if (startTime != null)
-                return new CheckedTime { Ok = true, Time = DateTimeOffset.Parse(startTime, CultureInfo.InvariantCulture) };
-            return new CheckedTime { Ok = false, Time = DateTimeOffset.Now };
+            string startTime = Node.GetAttribute("start-time");
+            return startTime != null
+                ? new CheckedTime { Ok = true, Time = DateTimeOffset.Parse(startTime, CultureInfo.InvariantCulture) }
+                : new CheckedTime { Ok = false, Time = DateTimeOffset.Now };
         }
 
         public CheckedTime EndTime()
@@ -181,12 +181,52 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         {
         }
 
+        public NUnitFailure Failure { get; }
+
         public NUnitTestEventTestCase(XmlNode node) : base(node)
         {
             if (node.Name != "test-case")
                 throw new NUnitEventWrongTypeException($"Expected 'test-case', got {node.Name}");
+            var failureNode = Node.SelectSingleNode("failure");
+            if (failureNode != null)
+            {
+                Failure = new NUnitFailure(
+                    failureNode.SelectSingleNode("message")?.InnerText,
+                    failureNode.SelectSingleNode("stack-trace")?.InnerText);
+            }
+            ReasonMessage = Node.SelectSingleNode("reason/message")?.InnerText;
+        }
+
+        public string ReasonMessage { get; }
+
+        public bool HasReason => string.IsNullOrEmpty(ReasonMessage);
+        public bool HasFailure => Failure != null;
+    }
+
+    public class NUnitProperty
+    {
+        public string Name { get; }
+        public string Value { get; }
+
+        public NUnitProperty(string name, string value)
+        {
+            Name = name;
+            Value = value;
         }
     }
+
+    public class NUnitFailure
+    {
+        public string Message { get; }
+        public string Stacktrace { get; }
+
+        public NUnitFailure(string message, string stacktrace)
+        {
+            Message = message;
+            Stacktrace = stacktrace;
+        }
+    }
+
 
     /// <summary>
     /// Handles the NUnit 'test-suite' event.
@@ -202,7 +242,20 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         {
             if (node.Name != "test-suite")
                 throw new NUnitEventWrongTypeException($"Expected 'test-suite', got {node.Name}");
+            var failureNode = Node.SelectSingleNode("failure");
+            if (failureNode != null)
+            {
+                FailureMessage = failureNode.SelectSingleNode("message")?.InnerText;
+            }
+            ReasonMessage = Node.SelectSingleNode("reason/message")?.InnerText;
         }
+
+        public string ReasonMessage { get; }
+
+        public bool HasReason => !string.IsNullOrEmpty(ReasonMessage);
+        public string FailureMessage { get; }
+
+        public bool HasFailure => !string.IsNullOrEmpty(FailureMessage);
     }
 
     [Serializable]

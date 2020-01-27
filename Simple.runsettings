@@ -44,7 +44,9 @@
     -->
 
     <NUnit>
-        <Verbosity>0</Verbosity>
+        <Verbosity>5</Verbosity>
+      <DumpXmlTestResults>true</DumpXmlTestResults>
+      <DumpXmlTestDiscovery>true</DumpXmlTestDiscovery>
     </NUnit>
 
 

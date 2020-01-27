@@ -75,9 +75,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public void OnTestEvent(string report)
         {
             var node = new NUnitTestEventHeader(report);
-#if NET35
             dumpXml?.AddTestEvent(node.AsString());
-#endif
             try
             {
                 switch (node.Type)
@@ -141,7 +139,7 @@ namespace NUnit.VisualStudio.TestAdapter
         }
         #endregion
 
-        public void TestStarted(NUnitTestEvent testNode)
+        public void TestStarted(NUnitTestEventStartTest testNode)
         {
             var ourCase = _testConverter.GetCachedTestCase(testNode.Id);
 
@@ -150,7 +148,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 _recorder.RecordStart(ourCase);
         }
 
-        public void TestFinished(NUnitTestEvent resultNode)
+        public void TestFinished(NUnitTestEventTestCase resultNode)
         {
             var testId = resultNode.Id;
             if (_outputNodes.TryGetValue(testId, out var outputNodes))
@@ -162,11 +160,11 @@ namespace NUnit.VisualStudio.TestAdapter
             _recorder.RecordEnd(result.TestCaseResult.TestCase, result.TestCaseResult.Outcome);
             foreach (var vsResult in result.TestResults)
             {
-               _recorder.RecordResult(vsResult);
+                _recorder.RecordResult(vsResult);
             }
         }
 
-        public void SuiteFinished(NUnitTestEvent resultNode)
+        public void SuiteFinished(NUnitTestEventSuiteFinished resultNode)
         {
             if (!resultNode.IsFailed)
                 return;
@@ -175,13 +173,13 @@ namespace NUnit.VisualStudio.TestAdapter
                 return;
             _recorder.SendMessage(TestMessageLevel.Warning, $"{site} failed for test fixture {resultNode.FullName}");
 
-            string message = resultNode.FailureMessage;
-            if (!string.IsNullOrEmpty(message))
-                _recorder.SendMessage(TestMessageLevel.Warning, message);
+            if (resultNode.HasFailure)
+                _recorder.SendMessage(TestMessageLevel.Warning, resultNode.FailureMessage);
 
-            var stackNode = resultNode.FailureStackTrace;
-            if (!string.IsNullOrEmpty(stackNode))
-                _recorder.SendMessage(TestMessageLevel.Warning, stackNode);
+            // Should not be any stacktrace on Suite-finished
+            // var stackNode = resultNode.Failure.StackTrace;
+            // if (!string.IsNullOrEmpty(stackNode))
+            //    _recorder.SendMessage(TestMessageLevel.Warning, stackNode);
         }
 
         private static readonly string NL = Environment.NewLine;
@@ -201,8 +199,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 return;
             }
 
-            // ReSharper disable once StringLiteralTypo
-            var testId = outputNode.TestId;
+            string testId = outputNode.TestId;
             if (!string.IsNullOrEmpty(testId))
             {
                 if (!_outputNodes.TryGetValue(testId, out var outputNodes))

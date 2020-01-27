@@ -36,7 +36,7 @@ namespace NUnit.VisualStudio.TestAdapter
     public interface ITestConverter
     {
         TestCase GetCachedTestCase(string id);
-        TestConverter.TestResultSet GetVsTestResults(NUnitTestEvent resultNode, ICollection<XmlNode> outputNodes);
+        TestConverter.TestResultSet GetVsTestResults(NUnitTestEventTestCase resultNode, ICollection<XmlNode> outputNodes);
     }
 
     public sealed class TestConverter : IDisposable, ITestConverter
@@ -104,7 +104,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private static readonly string NL = Environment.NewLine;
 
-        public TestResultSet GetVsTestResults(NUnitTestEvent resultNode, ICollection<XmlNode> outputNodes)
+        public TestResultSet GetVsTestResults(NUnitTestEventTestCase resultNode, ICollection<XmlNode> outputNodes)
         {
             var results = new List<VSTestResult>();
 
@@ -114,8 +114,8 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 if (testCaseResult.Outcome == TestOutcome.Failed || testCaseResult.Outcome == TestOutcome.NotFound)
                 {
-                    testCaseResult.ErrorMessage = resultNode.FailureMessage;
-                    testCaseResult.ErrorStackTrace = resultNode.FailureStackTrace;
+                    testCaseResult.ErrorMessage = resultNode.Failure?.Message;
+                    testCaseResult.ErrorStackTrace = resultNode.Failure?.Stacktrace;
 
                     // find stacktrace in assertion nodes if not defined (seems .netcore2.0 doesn't provide stack-trace for Assert.Fail("abc"))
                     if (testCaseResult.ErrorStackTrace == null)
@@ -136,12 +136,11 @@ namespace NUnit.VisualStudio.TestAdapter
                 results.Add(testCaseResult);
             }
 
-            if (results.Count == 0)
-            {
-                var result = MakeTestResultFromLegacyXmlNode(resultNode, outputNodes);
-                if (result != null)
-                    results.Add(result);
-            }
+            if (results.Count != 0)
+                return new TestResultSet {TestCaseResult = testCaseResult, TestResults = results};
+            var result = MakeTestResultFromLegacyXmlNode(resultNode, outputNodes);
+            if (result != null)
+                results.Add(result);
 
             return new TestResultSet { TestCaseResult = testCaseResult, TestResults = results };
         }
@@ -226,15 +225,18 @@ namespace NUnit.VisualStudio.TestAdapter
             return testCase;
         }
 
-        private VSTestResult MakeTestResultFromLegacyXmlNode(NUnitTestEvent resultNode, IEnumerable<XmlNode> outputNodes)
+        private VSTestResult MakeTestResultFromLegacyXmlNode(NUnitTestEventTestCase resultNode, IEnumerable<XmlNode> outputNodes)
         {
             var ourResult = GetBasicResult(resultNode, outputNodes);
             if (ourResult == null)
                 return null;
 
-            var node = resultNode.Node.SelectSingleNode("failure") ?? resultNode.Node.SelectSingleNode("reason");
-
-            string message = node?.SelectSingleNode("message")?.InnerText;
+            string message = resultNode.HasFailure
+                ? resultNode.Failure.Message
+                : resultNode.HasReason
+                    ? resultNode.ReasonMessage
+                    : null;
+            
             // If we're running in the IDE, remove any caret line from the message
             // since it will be displayed using a variable font and won't make sense.
             if (!string.IsNullOrEmpty(message) && NUnitTestAdapter.IsRunningUnderIde)
@@ -244,7 +246,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             ourResult.ErrorMessage = message;
-            ourResult.ErrorStackTrace = node?.SelectSingleNode("stack-trace")?.InnerText;
+            ourResult.ErrorStackTrace = resultNode.Failure?.Stacktrace;
 
             return ourResult;
         }
