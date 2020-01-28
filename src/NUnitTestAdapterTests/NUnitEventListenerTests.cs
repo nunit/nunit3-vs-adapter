@@ -23,9 +23,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
 #if NET35
 using System.Runtime.Remoting;
 #endif
@@ -36,6 +33,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NSubstitute;
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Dump;
+using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
 using VSTestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
@@ -46,7 +44,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     {
         private NUnitEventListener listener;
         private FakeFrameworkHandle testLog;
-        private XmlNode fakeTestNode;
+        private NUnitTestCase fakeTestNode;
 
         [SetUp]
         public void SetUp()
@@ -56,13 +54,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             settings.CollectSourceInformation.Returns(true);
             using (var testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings))
             {
-                fakeTestNode = FakeTestData.GetTestNode();
+                fakeTestNode = new NUnitTestCase(FakeTestData.GetTestNode());
 
                 // Ensure that the converted testcase is cached
                 testConverter.ConvertTestCase(fakeTestNode);
                 Assert.NotNull(testConverter.GetCachedTestCase("123"));
 
-                listener = new NUnitEventListener(testLog, testConverter, null);
+                listener = new NUnitEventListener(testLog, testConverter, null, settings);
             }
         }
 
@@ -87,11 +85,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void TestFinished_CallsRecordEnd_Then_RecordResult()
         {
-            listener.TestFinished(FakeTestData.GetResultNode());
-            Assert.AreEqual(2, testLog.Events.Count);
-            Assert.AreEqual(
-                FakeFrameworkHandle.EventType.RecordEnd,
-                testLog.Events[0].EventType);
+            listener.TestFinished(new NUnitTestEventTestCase(FakeTestData.GetResultNode().AsString()));
+            Assert.That(testLog.Events.Count, Is.EqualTo(2));
+            Assert.That(testLog.Events[0].EventType, Is.EqualTo(FakeFrameworkHandle.EventType.RecordEnd));
             Assert.AreEqual(
                 FakeFrameworkHandle.EventType.RecordResult,
                 testLog.Events[1].EventType);
@@ -100,11 +96,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void TestFinished_CallsRecordEndCorrectly()
         {
-            listener.TestFinished(FakeTestData.GetResultNode());
+            listener.TestFinished(new NUnitTestEventTestCase(FakeTestData.GetResultNode().AsString()));
             Assume.That(testLog.Events.Count, Is.EqualTo(2));
-            Assume.That(
-                testLog.Events[0].EventType,
-                Is.EqualTo(FakeFrameworkHandle.EventType.RecordEnd));
+            Assume.That(testLog.Events[0].EventType, Is.EqualTo(FakeFrameworkHandle.EventType.RecordEnd));
 
             VerifyTestCase(testLog.Events[0].TestCase);
             Assert.AreEqual(TestOutcome.Passed, testLog.Events[0].TestOutcome);
@@ -113,11 +107,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void TestFinished_CallsRecordResultCorrectly()
         {
-            listener.TestFinished(FakeTestData.GetResultNode());
+            listener.TestFinished(new NUnitTestEventTestCase(FakeTestData.GetResultNode().AsString()));
             Assume.That(testLog.Events.Count, Is.EqualTo(2));
-            Assume.That(
-                testLog.Events[1].EventType,
-                Is.EqualTo(FakeFrameworkHandle.EventType.RecordResult));
+            Assume.That(testLog.Events[1].EventType, Is.EqualTo(FakeFrameworkHandle.EventType.RecordResult));
 
             VerifyTestResult(testLog.Events[1].TestResult);
         }
@@ -209,6 +201,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         private ITestExecutionRecorder recorder;
         private ITestConverter converter;
         private IDumpXml dumpxml;
+        private IAdapterSettings settings;
 
         private const string TestOutputProgress =
             @"<test-output stream='Progress' testid='0-1001' testname='Something.TestClass.Whatever'><![CDATA[Whatever
@@ -234,34 +227,35 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             recorder = Substitute.For<ITestExecutionRecorder>();
             converter = Substitute.For<ITestConverter>();
             dumpxml = Substitute.For<IDumpXml>();
+            settings = Substitute.For<IAdapterSettings>();
         }
 
         [Test]
         public void ThatNormalTestOutputIsOutput()
         {
-            var sut = new NUnitEventListener(recorder, converter, dumpxml);
+            var sut = new NUnitEventListener(recorder, converter, dumpxml, settings);
             sut.OnTestEvent(TestOutputProgress);
             sut.OnTestEvent(TestFinish);
 
             recorder.Received().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Is<string>(x => x.StartsWith("Whatever")));
-            converter.Received().GetVsTestResults(Arg.Any<XmlElement>(), Arg.Is<ICollection<XmlNode>>(x => x.Count == 1));
+            converter.Received().GetVsTestResults(Arg.Any<NUnitTestEventTestCase>(), Arg.Is<ICollection<XmlNode>>(x => x.Count == 1));
         }
 
         [Test]
         public void ThatNormalTestOutputIsError()
         {
-            var sut = new NUnitEventListener(recorder, converter, dumpxml);
+            var sut = new NUnitEventListener(recorder, converter, dumpxml, settings);
             sut.OnTestEvent(TestOutputError);
             sut.OnTestEvent(TestFinish);
 
             recorder.Received().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Is<string>(x => x.StartsWith("Whatever")));
-            converter.Received().GetVsTestResults(Arg.Any<XmlElement>(), Arg.Is<ICollection<XmlNode>>(x => x.Count == 1));
+            converter.Received().GetVsTestResults(Arg.Any<NUnitTestEventTestCase>(), Arg.Is<ICollection<XmlNode>>(x => x.Count == 1));
         }
 
         [Test]
         public void ThatTestOutputWithWhiteSpaceIsNotOutput()
         {
-            var sut = new NUnitEventListener(recorder, converter, dumpxml);
+            var sut = new NUnitEventListener(recorder, converter, dumpxml, settings);
 
             sut.OnTestEvent(BlankTestOutput);
 

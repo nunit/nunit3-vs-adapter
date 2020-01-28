@@ -42,6 +42,8 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Common;
 using NUnit.Engine;
+using NUnit.VisualStudio.TestAdapter.NUnitEngine;
+
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -71,11 +73,10 @@ namespace NUnit.VisualStudio.TestAdapter
 #else
             AdapterVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 #endif
+            NUnitEngineAdapter = new NUnitEngineAdapter();
         }
 
         #endregion
-
-        internal event Action<TestEngineClass> InternalEngineCreated;
 
         #region Properties
 
@@ -84,7 +85,7 @@ namespace NUnit.VisualStudio.TestAdapter
         // The adapter version
         protected string AdapterVersion { get; set; }
 
-        protected ITestEngine TestEngine { get; private set; }
+        public NUnitEngineAdapter NUnitEngineAdapter { get; private set; }
 
         // Our logger used to display messages
         protected TestLogger TestLog { get; private set; }
@@ -123,11 +124,10 @@ namespace NUnit.VisualStudio.TestAdapter
         // Discover or Execute method must call this method.
         protected void Initialize(IDiscoveryContext context, IMessageLogger messageLogger)
         {
-            var engine = new TestEngineClass();
-            InternalEngineCreated?.Invoke(engine);
-            TestEngine = engine;
+            NUnitEngineAdapter.Initialize();
             TestLog = new TestLogger(messageLogger);
             Settings = new AdapterSettings(TestLog);
+            NUnitEngineAdapter.InitializeSettingsAndLogging(Settings, TestLog);
             TestLog.InitSettings(Settings);
             try
             {
@@ -171,13 +171,7 @@ namespace NUnit.VisualStudio.TestAdapter
             return ForbiddenFolders.Any(o => checkDir.StartsWith(o, StringComparison.OrdinalIgnoreCase));
         }
 
-        protected ITestRunner GetRunnerFor(string assemblyName, IGrouping<string, TestCase> testCases)
-        {
-            var package = CreateTestPackage(assemblyName, testCases);
-            return TestEngine.GetRunner(package);
-        }
-
-        private TestPackage CreateTestPackage(string assemblyName, IGrouping<string, TestCase> testCases)
+        protected TestPackage CreateTestPackage(string assemblyName, IGrouping<string, TestCase> testCases)
         {
             var package = new TestPackage(assemblyName);
 
@@ -274,7 +268,7 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             runSettings[PackageSettings.TestParametersDictionary] = testParameters;
 
-            if (testParameters.Count == 0) 
+            if (testParameters.Count == 0)
                 return;
             // Kept for backwards compatibility with old frameworks.
             // Reserializes the way old frameworks understand, even if the parsing above is changed.
@@ -297,10 +291,10 @@ namespace NUnit.VisualStudio.TestAdapter
 
         protected void Unload()
         {
-            if (TestEngine == null) 
+            if (NUnitEngineAdapter == null)
                 return;
-            TestEngine.Dispose();
-            TestEngine = null;
+            NUnitEngineAdapter.Dispose();
+            NUnitEngineAdapter = null;
         }
 
         #endregion

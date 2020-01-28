@@ -1,5 +1,5 @@
 // ***********************************************************************
-// Copyright (c) 2011-2018 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -29,6 +29,8 @@ using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NSubstitute;
 using NUnit.Framework;
+using NUnit.VisualStudio.TestAdapter.Dump;
+using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
@@ -37,13 +39,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     [Category("TestConverter")]
     public class TestConverterTests
     {
-        private XmlNode fakeTestNode;
+        private NUnitTestCase fakeTestNode;
         private TestConverter testConverter;
 
         [SetUp]
         public void SetUp()
         {
-            fakeTestNode = FakeTestData.GetTestNode();
+            fakeTestNode = new NUnitTestCase(FakeTestData.GetTestNode());
             var settings = Substitute.For<IAdapterSettings>();
             settings.CollectSourceInformation.Returns(true);
             testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings);
@@ -83,7 +85,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             foreach (XmlNode node in xmlNodeList)
             {
-                var testCase = testConverter.ConvertTestCase(node);
+                var testCase = testConverter.ConvertTestCase(new NUnitTestCase(node));
             }
 
             var traitsCache = testConverter.TraitsCache;
@@ -123,7 +125,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void CannotMakeTestResultWhenTestCaseIsNotInCache()
         {
-            var fakeResultNode = FakeTestData.GetResultNode();
+            var fakeResultNode = new NUnitTestEventTestCase(FakeTestData.GetResultNode());
             var results = testConverter.GetVsTestResults(fakeResultNode, Enumerable.Empty<XmlNode>().ToList());
             Assert.That(results.TestResults.Count, Is.EqualTo(0));
         }
@@ -133,7 +135,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             // This should put the TestCase in the cache
             var cachedTestCase = testConverter.ConvertTestCase(fakeTestNode);
-            var fakeResultNode = FakeTestData.GetResultNode();
+            var fakeResultNode = new NUnitTestEventTestCase(FakeTestData.GetResultNode());
 
             var testResults = testConverter.GetVsTestResults(fakeResultNode, Enumerable.Empty<XmlNode>().ToList());
             var testResult = testResults.TestResults[0];
@@ -163,7 +165,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void CanMakeTestResultFromNUnitTestResult2(string output, string expectedMessages)
         {
             var cachedTestCase = testConverter.ConvertTestCase(fakeTestNode);
-            var fakeResultNode = FakeTestData.GetResultNode();
+            var fakeResultNode = new NUnitTestEventTestCase(FakeTestData.GetResultNode());
             var outputNodes = output.Split(';').Select(i => XmlHelper.CreateXmlNode(i.Trim())).ToList();
             var testResults = testConverter.GetVsTestResults(fakeResultNode, outputNodes);
             var testResult = testResults.TestResults[0];
@@ -178,11 +180,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void Attachments_CorrectAmountOfConvertedAttachments()
         {
             var cachedTestCase = testConverter.ConvertTestCase(fakeTestNode);
-            var fakeResultNode = FakeTestData.GetResultNode();
+            var fakeResultNode = new NUnitTestEventTestCase(FakeTestData.GetResultNode());
 
             var testResults = testConverter.GetVsTestResults(fakeResultNode, Enumerable.Empty<XmlNode>().ToList());
 
-            var fakeAttachments = fakeResultNode.SelectNodes("attachments/attachment")
+            var fakeAttachments = fakeResultNode.Node.SelectNodes("attachments/attachment")
                 .OfType<XmlNode>()
                 .Where(n => !string.IsNullOrEmpty(n.SelectSingleNode("filePath")?.InnerText))
                 .ToArray();
@@ -205,7 +207,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             const string errorMessage = "Path must start with file:// uri scheme";
 
             var cachedTestCase = testConverter.ConvertTestCase(fakeTestNode);
-            var fakeResultNode = FakeTestData.GetResultNode();
+            var fakeResultNode = new NUnitTestEventTestCase(FakeTestData.GetResultNode().AsString());
 
             var testResults = testConverter.GetVsTestResults(fakeResultNode, Enumerable.Empty<XmlNode>().ToList());
 

@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -59,9 +60,10 @@ namespace NUnit.VisualStudio.TestAdapter
             // an immutable struct. (https://github.com/nunit/nunit3-vs-adapter/pull/457)
         }
 
-        public static void AddTraitsFromTestNode(this TestCase testCase, XmlNode testNode,
+        public static void AddTraitsFromTestNode(this TestCase testCase, NUnitTestCase testNCase,
             IDictionary<string, CachedTestCaseInfo> traitsCache, ITestLogger logger, IAdapterSettings adapterSettings)
         {
+            var testNode = testNCase.Node;
             var ancestor = testNode.ParentNode;
             var key = ancestor?.Attributes?["id"]?.Value;
             var categoryList = new CategoryList(testCase, adapterSettings);

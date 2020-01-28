@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2016-2020 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2020-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -21,22 +21,14 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-namespace NUnit.VisualStudio.TestAdapter
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
 {
-    public class NavigationData
-    {
-        public static readonly NavigationData Invalid = new NavigationData(null, 0);
-
-        public NavigationData(string filePath, int lineNumber)
-        {
-            FilePath = filePath;
-            LineNumber = lineNumber;
-        }
-
-        public string FilePath { get; }
-
-        public int LineNumber { get; }
-
-        public bool IsValid => !string.IsNullOrEmpty(FilePath);
-    }
+    public class NUnitResultsTests
+    { }
 }

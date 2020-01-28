@@ -220,8 +220,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             workspace.MSBuild(restore: true);
 
-            workspace.VSTest(new[] { @"bin\Debug\Test.dll" })
-                .AssertSinglePassingTest();
+            var result = workspace.VSTest(new[] { @"bin\Debug\Test.dll" });
+            result.AssertSinglePassingTest();
         }
 
         [Test]

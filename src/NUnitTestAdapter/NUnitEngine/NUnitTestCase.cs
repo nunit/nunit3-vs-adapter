@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2016-2020 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2020-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -21,22 +21,23 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-namespace NUnit.VisualStudio.TestAdapter
-{
-    public class NavigationData
-    {
-        public static readonly NavigationData Invalid = new NavigationData(null, 0);
+using System.Xml;
+using NUnit.VisualStudio.TestAdapter.Dump;
 
-        public NavigationData(string filePath, int lineNumber)
+namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
+{
+    public class NUnitTestCase : NUnitTestNode
+    {
+        public bool IsTestCase => !IsNull && Node.Name == "test-case";
+        public bool IsParameterizedMethod => Type == "ParameterizedMethod";
+        public string Type => Node.GetAttribute("type");
+        public string ClassName => Node.GetAttribute("classname");
+        public string MethodName => Node.GetAttribute("methodname");
+
+        public NUnitTestCase(XmlNode testCase) : base(testCase)
         {
-            FilePath = filePath;
-            LineNumber = lineNumber;
         }
 
-        public string FilePath { get; }
-
-        public int LineNumber { get; }
-
-        public bool IsValid => !string.IsNullOrEmpty(FilePath);
+        public NUnitTestCase Parent() => new NUnitTestCase(Node.ParentNode);
     }
 }

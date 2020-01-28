@@ -6,7 +6,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 {
     public sealed class IsolatedWorkspaceManager : IDisposable
     {
-        private readonly string workspaceDirectory;
+        private readonly DirectoryMutex workspaceDirectory;
         private readonly ToolResolver toolResolver;
         private readonly StreamWriter reasonFile;
         private bool keep;
@@ -20,11 +20,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 
             Directory.CreateDirectory(baseDirectory);
 
-            workspaceDirectory = Utils.CreateUniqueDirectory(baseDirectory);
+            workspaceDirectory = Utils.CreateMutexDirectory(baseDirectory);
 
             toolResolver = new ToolResolver(downloadCachePath);
 
-            reasonFile = File.CreateText(Path.Combine(workspaceDirectory, "Reason.txt"));
+            reasonFile = File.CreateText(Path.Combine(workspaceDirectory.DirectoryPath, "Reason.txt"));
             reasonFile.WriteLine(reason);
             reasonFile.WriteLine();
             reasonFile.Flush();
@@ -37,14 +37,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 
         public void Dispose()
         {
+            workspaceDirectory.Dispose();
             reasonFile.Dispose();
-            if (!keep) Utils.DeleteDirectoryRobust(workspaceDirectory);
+            if (!keep) Utils.DeleteDirectoryRobust(workspaceDirectory.DirectoryPath);
         }
 
         public IsolatedWorkspace CreateWorkspace(string name)
         {
             return new IsolatedWorkspace(
-                Utils.CreateUniqueDirectory(workspaceDirectory, name),
+                Utils.CreateMutexDirectory(workspaceDirectory.DirectoryPath, name),
                 toolResolver);
         }
 
