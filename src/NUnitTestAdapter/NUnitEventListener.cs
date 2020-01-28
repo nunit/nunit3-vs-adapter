@@ -160,7 +160,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             var result = _testConverter.GetVsTestResults(resultNode, outputNodes ?? EmptyNodes);
-            if (_settings.ConsoleOut == 1)
+            if (_settings.ConsoleOut == 1 && !string.IsNullOrEmpty(result.ConsoleOutput))
                 _recorder.SendMessage(TestMessageLevel.Informational, result.ConsoleOutput);
             _recorder.RecordEnd(result.TestCaseResult.TestCase, result.TestCaseResult.Outcome);
             foreach (var vsResult in result.TestResults)
