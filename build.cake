@@ -13,7 +13,7 @@ var configuration = Argument("configuration", "Release");
 //////////////////////////////////////////////////////////////////////
 
 var version = "3.17.0";
-var modifier = ".16";
+var modifier = "-a16";
 
 var dbgSuffix = configuration.ToLower() == "debug" ? "-dbg" : "";
 var packageVersion = version + modifier + dbgSuffix;
@@ -260,7 +260,6 @@ Task("PackageZip")
     });
 
 Task("PackageNuGet")
-    .IsDependentOn("CleanPackages")
     .IsDependentOn("CreateWorkingImage")
     .Does(() =>
     {
