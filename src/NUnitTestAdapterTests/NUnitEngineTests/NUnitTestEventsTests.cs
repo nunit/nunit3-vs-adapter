@@ -51,7 +51,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
             });
             Assert.That(sut.HasFailure);
             Assert.That(sut.FailureMessage, Is.EqualTo("One or more child tests had errors"));
-
         }
 
         private string startTest = @"<start-test id='0-1139' parentId='0-1138' name='Test2' fullname='NUnitTestDemo.SetUpFixture.TestFixture2.Test2' type='TestMethod' />";
@@ -280,7 +279,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         {
             var sut = new NUnitTestEventTestCase(testCaseFailsWithReason);
             Assert.That(sut.ReasonMessage, Is.EqualTo("Ignoring this test deliberately"));
-
         }
     }
 }

@@ -260,7 +260,7 @@ Task("PackageZip")
     });
 
 Task("PackageNuGet")
-    .IsDependantOn("CleanPackages")
+    .IsDependentOn("CleanPackages")
     .IsDependentOn("CreateWorkingImage")
     .Does(() =>
     {

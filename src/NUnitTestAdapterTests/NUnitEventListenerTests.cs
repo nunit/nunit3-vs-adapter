@@ -233,7 +233,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void ThatNormalTestOutputIsOutput()
         {
-            var sut = new NUnitEventListener(recorder, converter, dumpxml,settings);
+            var sut = new NUnitEventListener(recorder, converter, dumpxml, settings);
             sut.OnTestEvent(TestOutputProgress);
             sut.OnTestEvent(TestFinish);
 
@@ -244,7 +244,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void ThatNormalTestOutputIsError()
         {
-            var sut = new NUnitEventListener(recorder, converter, dumpxml,settings);
+            var sut = new NUnitEventListener(recorder, converter, dumpxml, settings);
             sut.OnTestEvent(TestOutputError);
             sut.OnTestEvent(TestFinish);
 
@@ -255,7 +255,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void ThatTestOutputWithWhiteSpaceIsNotOutput()
         {
-            var sut = new NUnitEventListener(recorder, converter, dumpxml,settings);
+            var sut = new NUnitEventListener(recorder, converter, dumpxml, settings);
 
             sut.OnTestEvent(BlankTestOutput);
 

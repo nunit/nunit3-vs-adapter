@@ -64,7 +64,7 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 #endif
 
-        public NUnitEventListener(ITestExecutionRecorder recorder, ITestConverter testConverter,IDumpXml dumpXml, IAdapterSettings settings)
+        public NUnitEventListener(ITestExecutionRecorder recorder, ITestConverter testConverter, IDumpXml dumpXml, IAdapterSettings settings)
         {
             this.dumpXml = dumpXml;
             _settings = settings;
