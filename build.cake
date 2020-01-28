@@ -260,6 +260,7 @@ Task("PackageZip")
     });
 
 Task("PackageNuGet")
+    .IsDependantOn("CleanPackages")
     .IsDependentOn("CreateWorkingImage")
     .Does(() =>
     {
@@ -307,14 +308,12 @@ Task("Release")
     .IsDependentOn("Clean")
     .IsDependentOn("Build")
     .IsDependentOn("Test")
-    .IsDependentOn("CleanPackages")
     .IsDependentOn("Package")
     .IsDependentOn("Acceptance");
 
 
 Task("Acceptance")
     .IsDependentOn("Build")
-    .IsDependentOn("CleanPackages")
     .IsDependentOn("PackageNuGet")
     .Description("Ensures that known project configurations can use the produced NuGet package to restore, build, and run tests.")
     .Does(() =>
