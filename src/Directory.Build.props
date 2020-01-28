@@ -4,7 +4,12 @@
     <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\NUnitAdapter.snk</AssemblyOriginatorKeyFile>
+    <CodeAnalysisRuleSet>..\..\Osiris.Extended.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.66" PrivateAssets="all" />
+  </ItemGroup>
 
   <Target Name="RemoveReferencesToEmbeddedAssembles" AfterTargets="ResolveAssemblyReferences">
     <ItemGroup>

@@ -1,4 +1,26 @@
-﻿using System;
+﻿// ***********************************************************************
+// Copyright (c) 2014-2020 Charlie Poole, Terje Sandstrom
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+//
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// ***********************************************************************
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
@@ -13,14 +35,16 @@ namespace NUnit.VisualStudio.TestAdapter
         private const string VsTestCategoryLabel = "TestCategory";
         private const string MSTestCategoryName = "MSTestDiscoverer.TestCategory";
 
-        internal static readonly TestProperty NUnitTestCategoryProperty = TestProperty.Register(NUnitCategoryName,
+        internal static readonly TestProperty NUnitTestCategoryProperty = TestProperty.Register(
+            NUnitCategoryName,
             VsTestCategoryLabel, typeof(string[]), TestPropertyAttributes.Hidden | TestPropertyAttributes.Trait,
             typeof(TestCase));
 
-        internal TestProperty
-            MsTestCategoryProperty; // = TestProperty.Register(MSTestCategoryName, VsTestCategoryLabel, typeof(string[]), TestPropertyAttributes.Hidden | TestPropertyAttributes.Trait, typeof(TestCase));
+        private TestProperty
+            msTestCategoryProperty; // = TestProperty.Register(MSTestCategoryName, VsTestCategoryLabel, typeof(string[]), TestPropertyAttributes.Hidden | TestPropertyAttributes.Trait, typeof(TestCase));
 
-        internal static readonly TestProperty NUnitExplicitProperty = TestProperty.Register("NUnit.Explicit",
+        internal static readonly TestProperty NUnitExplicitProperty = TestProperty.Register(
+            "NUnit.Explicit",
             "Explicit", typeof(bool), TestPropertyAttributes.Hidden, typeof(TestCase));
 
         private const string ExplicitTraitName = "Explicit";
@@ -39,7 +63,6 @@ namespace NUnit.VisualStudio.TestAdapter
             settings = adapterSettings;
             this.testCase = testCase;
             // MsTestCategoryProperty = TestProperty.Register(MSTestCategoryName, VsTestCategoryLabel, typeof(string[]), TestPropertyAttributes.Hidden | TestPropertyAttributes.Trait, typeof(TestCase));
-
         }
 
         public void AddRange(IEnumerable<string> categories)
@@ -63,7 +86,9 @@ namespace NUnit.VisualStudio.TestAdapter
                 if (IsInternalProperty(propertyName, propertyValue))
                     continue;
                 if (propertyName != NunitTestCategoryLabel)
+                {
                     testCase.Traits.Add(new Trait(propertyName, propertyValue));
+                }
                 else
                 {
                     categorylist.Add(propertyValue);
@@ -92,10 +117,10 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         /// <summary>
-        /// See https://github.com/nunit/nunit/blob/master/src/NUnitFramework/framework/Internal/PropertyNames.cs
+        /// See https://github.com/nunit/nunit/blob/master/src/NUnitFramework/framework/Internal/PropertyNames.cs.
         /// </summary>
         private readonly List<string> _internalProperties = new List<string>
-        { "Author", "ApartmentState", "Description", "IgnoreUntilDate","LevelOfParallelism", "MaxTime", "Order", "ParallelScope", "Repeat", "RequiresThread", "SetCulture", "SetUICulture", "TestOf", "Timeout"};
+        { "Author", "ApartmentState", "Description", "IgnoreUntilDate", "LevelOfParallelism", "MaxTime", "Order", "ParallelScope", "Repeat", "RequiresThread", "SetCulture", "SetUICulture", "TestOf", "Timeout" };
 
 
         private bool IsInternalProperty(string propertyName, string propertyValue)
@@ -136,11 +161,8 @@ namespace NUnit.VisualStudio.TestAdapter
                 testCase.SetPropertyValue(
                     settings.VsTestCategoryType == VsTestCategoryType.NUnit
                         ? NUnitTestCategoryProperty
-                        : MsTestCategoryProperty, categorylist.Distinct().ToArray());
+                        : msTestCategoryProperty, categorylist.Distinct().ToArray());
             }
         }
-
-
-
     }
 }

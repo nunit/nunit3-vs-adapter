@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2013-2018 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2013-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -59,31 +60,32 @@ namespace NUnit.VisualStudio.TestAdapter
             // an immutable struct. (https://github.com/nunit/nunit3-vs-adapter/pull/457)
         }
 
-        public static void AddTraitsFromTestNode(this TestCase testCase, XmlNode testNode,
+        public static void AddTraitsFromTestNode(this TestCase testCase, NUnitTestCase testNCase,
             IDictionary<string, CachedTestCaseInfo> traitsCache, ITestLogger logger, IAdapterSettings adapterSettings)
         {
+            var testNode = testNCase.Node;
             var ancestor = testNode.ParentNode;
-            var key = ancestor.Attributes?["id"]?.Value;
-            var categorylist = new CategoryList(testCase,adapterSettings);
+            var key = ancestor?.Attributes?["id"]?.Value;
+            var categoryList = new CategoryList(testCase, adapterSettings);
             // Reading ancestor properties of a test-case node. And adding to the cache.
             while (ancestor != null && key != null)
             {
                 if (traitsCache.ContainsKey(key))
                 {
-                    categorylist.AddRange(traitsCache[key].Traits.Where(o => o.Name == NunitTestCategoryLabel).Select(prop => prop.Value).ToList());
+                    categoryList.AddRange(traitsCache[key].Traits.Where(o => o.Name == NunitTestCategoryLabel).Select(prop => prop.Value).ToList());
 
                     if (traitsCache[key].Explicit)
                         testCase.SetPropertyValue(CategoryList.NUnitExplicitProperty, true);
 
-                    var traitslist = traitsCache[key].Traits.Where(o => o.Name != NunitTestCategoryLabel).ToList();
-                    if (traitslist.Count > 0)
-                        testCase.Traits.AddRange(traitslist);
+                    var traitsList = traitsCache[key].Traits.Where(o => o.Name != NunitTestCategoryLabel).ToList();
+                    if (traitsList.Count > 0)
+                        testCase.Traits.AddRange(traitsList);
                 }
                 else
                 {
-                    categorylist.ProcessTestCaseProperties(ancestor,true,key,traitsCache);
+                    categoryList.ProcessTestCaseProperties(ancestor, true, key, traitsCache);
                     // Adding entry to dictionary, so that we will not make SelectNodes call again.
-                    if (categorylist.LastNodeListCount == 0 && !traitsCache.ContainsKey(key))
+                    if (categoryList.LastNodeListCount == 0 && !traitsCache.ContainsKey(key))
                     {
                         traitsCache[key] = new CachedTestCaseInfo();
                     }
@@ -93,8 +95,8 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             // No Need to store test-case properties in cache.
-            categorylist.ProcessTestCaseProperties(testNode,false);
-            categorylist.UpdateCategoriesToVs();
+            categoryList.ProcessTestCaseProperties(testNode, false);
+            categoryList.UpdateCategoriesToVs();
         }
 
 

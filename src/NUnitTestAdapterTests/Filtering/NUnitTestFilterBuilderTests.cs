@@ -21,12 +21,11 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-
 using System.Collections.Generic;
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NSubstitute;
 using NUnit.Engine;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
 {
@@ -52,7 +51,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
             var testFilterBuilder = Substitute.For<ITestFilterBuilder>();
             filterService.GetTestFilterBuilder().Returns(testFilterBuilder);
             sut.FilterByWhere(where);
-            testFilterBuilder.Received().SelectWhere(Arg.Is<string>(x=>x==where));
+            testFilterBuilder.Received().SelectWhere(Arg.Is<string>(x => x == where));
         }
     }
 }

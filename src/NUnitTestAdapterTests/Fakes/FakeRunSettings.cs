@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2012-2019 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2012-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -8,10 +8,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -46,7 +46,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
         private readonly string _testOutput;
         private readonly string _workDir;
 
-        public FakeRunSettingsForTestOutputAndWorkDir(string testOutput,string workDir)
+        public FakeRunSettingsForTestOutputAndWorkDir(string testOutput, string workDir)
         {
             _workDir = workDir;
             _testOutput = testOutput;
@@ -64,5 +64,4 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
         }
         public override string SettingsXml => $"<RunSettings><NUnit><Where>{_where}</Where></NUnit></RunSettings>";
     }
-
 }

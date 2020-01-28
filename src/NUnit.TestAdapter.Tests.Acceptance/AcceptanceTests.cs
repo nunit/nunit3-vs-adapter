@@ -16,8 +16,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
         public static string NuGetPackageVersion => Initialization.Value.nupkgVersion;
 
-        public static string LowestNetfxTarget = "net35";
-        public static string LegacyProjectTargetFrameworkVersion = "v3.5";
+        public const string LowestNetfxTarget = "net35";
+        public const string LegacyProjectTargetFrameworkVersion = "v3.5";
 
         public static IEnumerable<string> TargetFrameworks => new[]
         {
@@ -25,7 +25,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
             "netcoreapp2.1"
         };
 
-        private readonly static Lazy<(IsolatedWorkspaceManager manager, string nupkgVersion, bool keepWorkspaces)> Initialization = new Lazy<(IsolatedWorkspaceManager, string, bool)>(() =>
+        private static readonly Lazy<(IsolatedWorkspaceManager manager, string nupkgVersion, bool keepWorkspaces)> Initialization = new Lazy<(IsolatedWorkspaceManager, string, bool)>(() =>
         {
             var directory = TestContext.Parameters["ProjectWorkspaceDirectory"]
                 ?? TryAutoDetectProjectWorkspaceDirectory()
@@ -44,7 +44,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
             ClearCachedTestNupkgs(packageCachePath);
 
             var manager = new IsolatedWorkspaceManager(
-                reason: string.Join(Environment.NewLine,
+                reason: string.Join(
+                    Environment.NewLine,
                     "Test assembly: " + typeof(AcceptanceTests).Assembly.Location,
                     "Runner process: " + Process.GetCurrentProcess().MainModule.FileName),
                 directory,
@@ -62,7 +63,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
             Utils.DeleteDirectoryRobust(Path.Combine(packageCachePath, NuGetPackageId));
         }
 
-        private readonly static Dictionary<string, List<IsolatedWorkspace>> WorkspacesByTestId = new Dictionary<string, List<IsolatedWorkspace>>();
+        private static readonly Dictionary<string, List<IsolatedWorkspace>> WorkspacesByTestId = new Dictionary<string, List<IsolatedWorkspace>>();
 
         protected static IsolatedWorkspace CreateWorkspace()
         {

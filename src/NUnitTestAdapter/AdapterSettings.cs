@@ -8,10 +8,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -52,7 +52,8 @@ namespace NUnit.VisualStudio.TestAdapter
         int? RandomSeed { get; }
         bool RandomSeedSpecified { get; }
         bool InProcDataCollectorsAvailable { get; }
-        bool CollectDataForEachTestSeparately { get; }
+        // ReSharper disable once UnusedMemberInSuper.Global
+        bool CollectDataForEachTestSeparately { get; }  // Used implicitly by MS
         bool SynchronousEvents { get; }
         string DomainUsage { get; }
         bool DumpXmlTestDiscovery { get; }
@@ -61,7 +62,7 @@ namespace NUnit.VisualStudio.TestAdapter
         bool PreFilter { get; }
 
         /// <summary>
-        ///  Syntax documentation <see cref="https://github.com/nunit/docs/wiki/Template-Based-Test-Naming"/>
+        ///  Syntax documentation <see cref="https://github.com/nunit/docs/wiki/Template-Based-Test-Naming"/>.
         /// </summary>
         string DefaultTestNamePattern { get; }
 
@@ -75,12 +76,12 @@ namespace NUnit.VisualStudio.TestAdapter
         bool DesignMode { get; }
 
         /// <summary>
-        /// If true, an adapter shouldn't create appdomains to run tests
+        /// If true, an adapter shouldn't create appdomains to run tests.
         /// </summary>
         bool DisableAppDomain { get; }
 
         /// <summary>
-        /// If true, an adapter should disable any test case parallelization
+        /// If true, an adapter should disable any test case parallelization.
         /// </summary>
         bool DisableParallelization { get; }
 
@@ -89,6 +90,8 @@ namespace NUnit.VisualStudio.TestAdapter
         bool UseParentFQNForParametrizedTests { get; }
 
         bool UseNUnitIdforTestCaseId { get;  }
+
+        int ConsoleOut { get; }
 
         void Load(IDiscoveryContext context);
         void Load(string settingsXml);
@@ -106,8 +109,8 @@ namespace NUnit.VisualStudio.TestAdapter
     public class AdapterSettings : IAdapterSettings
     {
         private const string RANDOM_SEED_FILE = "nunit_random_seed.tmp";
-        private TestLogger _logger;
-        
+        private readonly TestLogger _logger;
+
         #region Constructor
 
         public AdapterSettings(TestLogger logger)
@@ -130,17 +133,17 @@ namespace NUnit.VisualStudio.TestAdapter
         public string TestAdapterPaths { get; private set; }
 
         /// <summary>
-        /// If false, an adapter need not parse symbols to provide test case file, line number
+        /// If false, an adapter need not parse symbols to provide test case file, line number.
         /// </summary>
         public bool CollectSourceInformation { get; private set; }
 
         /// <summary>
-        /// If true, an adapter shouldn't create appdomains to run tests
+        /// If true, an adapter shouldn't create appdomains to run tests.
         /// </summary>
         public bool DisableAppDomain { get; private set; }
 
         /// <summary>
-        /// If true, an adapter should disable any test case parallelization
+        /// If true, an adapter should disable any test case parallelization.
         /// </summary>
         public bool DisableParallelization { get; private set; }
 
@@ -191,8 +194,9 @@ namespace NUnit.VisualStudio.TestAdapter
         public string DomainUsage { get; private set; }
 
         public bool ShowInternalProperties { get; private set; }
-        public bool UseParentFQNForParametrizedTests { get; private set; }  // Default is false.  True can fix certain test name patterns, but may have side effects. 
-        public bool UseNUnitIdforTestCaseId { get; private set; }  // default is false. 
+        public bool UseParentFQNForParametrizedTests { get; private set; }  // Default is false.  True can fix certain test name patterns, but may have side effects.
+        public bool UseNUnitIdforTestCaseId { get; private set; }  // default is false.
+        public int ConsoleOut { get; private set; }
 
 
         public VsTestCategoryType VsTestCategoryType { get; private set; } = VsTestCategoryType.NUnit;
@@ -202,7 +206,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public bool DumpXmlTestResults { get; private set; }
 
         /// <summary>
-        ///  Syntax documentation <see cref="https://github.com/nunit/docs/wiki/Template-Based-Test-Naming"/>
+        ///  Syntax documentation <see cref="https://github.com/nunit/docs/wiki/Template-Based-Test-Naming"/>.
         /// </summary>
         public string DefaultTestNamePattern { get; set; }
 
@@ -278,11 +282,13 @@ namespace NUnit.VisualStudio.TestAdapter
             ShowInternalProperties = GetInnerTextAsBool(nunitNode, nameof(ShowInternalProperties), false);
             UseParentFQNForParametrizedTests = GetInnerTextAsBool(nunitNode, nameof(UseParentFQNForParametrizedTests), false);
             UseNUnitIdforTestCaseId = GetInnerTextAsBool(nunitNode, nameof(UseNUnitIdforTestCaseId), false);
+            ConsoleOut = GetInnerTextAsInt(nunitNode, nameof(ConsoleOut), 1);  // 0 no output to console, 1 : output to console
             DumpXmlTestDiscovery = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestDiscovery), false);
             DumpXmlTestResults = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestResults), false);
             PreFilter = GetInnerTextAsBool(nunitNode, nameof(PreFilter), false);
             var vsTestCategoryType = GetInnerText(nunitNode, nameof(VsTestCategoryType), Verbosity > 0);
             if (vsTestCategoryType != null)
+            {
                 switch (vsTestCategoryType.ToLower())
                 {
                     case "nunit":
@@ -296,29 +302,12 @@ namespace NUnit.VisualStudio.TestAdapter
                             $"Invalid value ({vsTestCategoryType}) for VsTestCategoryType, should be either NUnit or MsTest");
                         break;
                 }
-
-
-
-#if SUPPORT_REGISTRY_SETTINGS
-            // Legacy (CTP) registry settings override defaults
-            var registry = RegistryCurrentUser.OpenRegistryCurrentUser(@"Software\nunit.org\VSAdapter");
-            if (registry.Exist("ShadowCopy") && (registry.Read<int>("ShadowCopy") == 1))
-                ShadowCopyFiles = true;
-            if (registry.Exist("Verbosity"))
-                Verbosity = registry.Read<int>("Verbosity");
-            if (registry.Exist("UseVsKeepEngineRunning") && (registry.Read<int>("UseVsKeepEngineRunning") == 1)
-                UseVsKeepEngineRunning = true;
-#endif
-
-#if DEBUG && VERBOSE
-            // Force Verbosity to 1 under Debug
-            Verbosity = 1;
-#endif
+            }
 
             var inProcDataCollectorNode =
                 doc.SelectSingleNode("RunSettings/InProcDataCollectionRunSettings/InProcDataCollectors");
             InProcDataCollectorsAvailable = inProcDataCollectorNode != null &&
-                                            inProcDataCollectorNode.SelectNodes("InProcDataCollector").Count > 0;
+                                            inProcDataCollectorNode.SelectNodes("InProcDataCollector")?.Count > 0;
 
             // Older versions of VS do not pass the CollectDataForEachTestSeparately configuration together with the LiveUnitTesting collector.
             // However, the adapter is expected to run in CollectDataForEachTestSeparately mode.
@@ -391,12 +380,12 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void RestoreRandomSeed(string dirname)
         {
-            var fullpath = Path.Combine(dirname, RANDOM_SEED_FILE);
-            if (!File.Exists(fullpath))
+            var fullPath = Path.Combine(dirname, RANDOM_SEED_FILE);
+            if (!File.Exists(fullPath))
                 return;
             try
             {
-                string value = File.ReadAllText(fullpath);
+                var value = File.ReadAllText(fullPath);
                 RandomSeed = int.Parse(value);
             }
             catch (Exception ex)
@@ -420,7 +409,8 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 if (_logger.Verbosity > 0)
                 {
-                    _logger.Warning(string.Format("DisableParallelization:{0} & NumberOfTestWorkers:{1} are conflicting settings, hence not running in parallel", DisableParallelization, NumberOfTestWorkers));
+                    _logger.Warning(
+                        $"DisableParallelization:{DisableParallelization} & NumberOfTestWorkers:{NumberOfTestWorkers} are conflicting settings, hence not running in parallel");
                 }
                 NumberOfTestWorkers = 0;
             }
@@ -443,13 +433,13 @@ namespace NUnit.VisualStudio.TestAdapter
                 if (validValues != null && validValues.Length > 0)
                 {
                     foreach (string valid in validValues)
+                    {
                         if (string.Compare(valid, val, StringComparison.OrdinalIgnoreCase) == 0)
                             return valid;
+                    }
 
                     throw new ArgumentException($"Invalid value {val} passed for element {xpath}.");
                 }
-
-
             }
             if (log)
                 Log(xpath, val);
@@ -460,7 +450,7 @@ namespace NUnit.VisualStudio.TestAdapter
         private int GetInnerTextAsInt(XmlNode startNode, string xpath, int defaultValue)
         {
             var temp = GetInnerTextAsNullableInt(startNode, xpath, false);
-            var res = defaultValue;
+            int res = defaultValue;
             if (temp != null)
                 res = temp.Value;
             Log(xpath, res);

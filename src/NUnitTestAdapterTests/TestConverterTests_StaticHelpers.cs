@@ -8,10 +8,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -24,6 +24,7 @@
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.Framework;
+using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
@@ -41,7 +42,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase("<test-case result='Warning'/>", ExpectedResult = TestOutcome.Skipped)]
         public TestOutcome ResultStateToTestOutcome(string result)
         {
-            var resultNode = XmlHelper.CreateXmlNode(result);
+            var resultNode = new NUnitTestEventTestCase(XmlHelper.CreateXmlNode(result));
             return TestConverter.GetTestOutcome(resultNode);
         }
     }

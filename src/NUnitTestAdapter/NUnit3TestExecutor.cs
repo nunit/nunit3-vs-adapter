@@ -23,11 +23,6 @@
 
 // #define LAUNCHDEBUGGER
 
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using NUnit.Engine;
-using NUnit.Engine.Services;
-using NUnit.VisualStudio.TestAdapter.Dump;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -35,6 +30,12 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
+using NUnit.Engine;
+using NUnit.Engine.Services;
+using NUnit.VisualStudio.TestAdapter.Dump;
+using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -45,9 +46,6 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             EmbeddedAssemblyResolution.EnsureInitialized();
         }
-
-        // Fields related to the currently executing assembly
-        private ITestRunner _activeRunner;
 
         #region Properties
 
@@ -76,10 +74,10 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         /// <param name="sources">Sources to be run.</param>
         /// <param name="runContext">Context to use when executing the tests.</param>
-        /// <param name="frameworkHandle">Test log to send results and messages through</param>
+        /// <param name="frameworkHandle">Test log to send results and messages through.</param>
         public void RunTests(IEnumerable<string> sources, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
-#if LAUNCHDEBUGGER 
+#if LAUNCHDEBUGGER
             if (!Debugger.IsAttached)
                 Debugger.Launch();
 #endif
@@ -94,11 +92,11 @@ namespace NUnit.VisualStudio.TestAdapter
                 return;
             }
 
-            foreach (var assemblyName in sources)
+            foreach (string assemblyName in sources)
             {
                 try
                 {
-                    var assemblyPath = Path.IsPathRooted(assemblyName) ? assemblyName : Path.Combine(Directory.GetCurrentDirectory(), assemblyName);
+                    string assemblyPath = Path.IsPathRooted(assemblyName) ? assemblyName : Path.Combine(Directory.GetCurrentDirectory(), assemblyName);
                     var filter = CreateTestFilterBuilder().FilterByWhere(Settings.Where);
 
                     RunAssembly(assemblyPath, null, filter);
@@ -117,19 +115,20 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <summary>
         /// Called by the VisualStudio IDE when selected tests are to be run. Never called from TFS Build.
         /// </summary>
-        /// <param name="tests">The tests to be run</param>
-        /// <param name="runContext">The RunContext</param>
-        /// <param name="frameworkHandle">The FrameworkHandle</param>
+        /// <param name="tests">The tests to be run.</param>
+        /// <param name="runContext">The RunContext.</param>
+        /// <param name="frameworkHandle">The FrameworkHandle.</param>
         public void RunTests(IEnumerable<TestCase> tests, IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
 #if LAUNCHDEBUGGER
             if (!Debugger.IsAttached)
                 Debugger.Launch();
 #endif
-            base.Initialize(runContext, frameworkHandle);
+            Initialize(runContext, frameworkHandle);
             TestLog.Debug("RunTests by IEnumerable<TestCase>");
             InitializeForExecution(runContext, frameworkHandle);
-
+            Debug.Assert(NUnitEngineAdapter != null, "NUnitEngineAdapter is null");
+            Debug.Assert(NUnitEngineAdapter.EngineEnabled, "NUnitEngineAdapter TestEngine is null");
             var assemblyGroups = tests.GroupBy(tc => tc.Source);
             if (Settings.InProcDataCollectorsAvailable && assemblyGroups.Count() > 1)
             {
@@ -142,8 +141,8 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 try
                 {
-                    var assemblyName = assemblyGroup.Key;
-                    var assemblyPath = Path.IsPathRooted(assemblyName) ? assemblyName : Path.Combine(Directory.GetCurrentDirectory(), assemblyName);
+                    string assemblyName = assemblyGroup.Key;
+                    string assemblyPath = Path.IsPathRooted(assemblyName) ? assemblyName : Path.Combine(Directory.GetCurrentDirectory(), assemblyName);
 
                     var filterBuilder = CreateTestFilterBuilder();
                     var filter = filterBuilder.FilterByList(assemblyGroup);
@@ -157,13 +156,14 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
             }
 
-            TestLog.Info(string.Format("NUnit Adapter {0}: Test execution complete", AdapterVersion));
+            TestLog.Info($"NUnit Adapter {AdapterVersion}: Test execution complete");
             Unload();
         }
 
         void ITestExecutor.Cancel()
         {
-            _activeRunner?.StopRun(true);
+            // _activeRunner?.StopRun(true);
+            NUnitEngineAdapter?.StopRun();
         }
 
         #endregion
@@ -190,7 +190,7 @@ namespace NUnit.VisualStudio.TestAdapter
             // Ensure any channels registered by other adapters are unregistered
             CleanUpRegisteredChannels();
 
-            TestLog.Debug("Keepalive: " + runContext.KeepAlive);
+            TestLog.Debug("KeepAlive: " + runContext.KeepAlive);
             TestLog.Debug("UseVsKeepEngineRunning: " + Settings.UseVsKeepEngineRunning);
 
             bool enableShutdown = true;
@@ -205,7 +205,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     frameworkHandle.EnableShutdownAfterTestRun = enableShutdown;
             }
 
-            TestLog.Debug("EnableShutdown: " + enableShutdown.ToString());
+            TestLog.Debug("EnableShutdown: " + enableShutdown);
         }
 
         private void RunAssembly(string assemblyPath, IGrouping<string, TestCase> testCases, TestFilter filter)
@@ -215,8 +215,8 @@ namespace NUnit.VisualStudio.TestAdapter
                 Debugger.Launch();
 #endif
 
-            var actionText = Debugger.IsAttached ? "Debugging " : "Running ";
-            var selectionText = filter == null || filter == TestFilter.Empty ? "all" : "selected";
+            string actionText = Debugger.IsAttached ? "Debugging " : "Running ";
+            string selectionText = filter == null || filter == TestFilter.Empty ? "all" : "selected";
             TestLog.Info(actionText + selectionText + " tests in " + assemblyPath);
 
             // No need to restore if the seed was in runsettings file
@@ -225,22 +225,21 @@ namespace NUnit.VisualStudio.TestAdapter
             DumpXml dumpXml = null;
             if (Settings.DumpXmlTestResults)
             {
-                dumpXml = new Dump.DumpXml(assemblyPath);
-
+                dumpXml = new DumpXml(assemblyPath);
             }
 
             try
             {
-                _activeRunner = GetRunnerFor(assemblyPath, testCases);
+                var package = CreateTestPackage(assemblyPath, testCases);
+                NUnitEngineAdapter.CreateRunner(package);
                 CreateTestOutputFolder();
-                var loadResult = _activeRunner.Explore(filter);
-                dumpXml?.AddString(loadResult.AsString());
-                if (loadResult.Name == "test-run")
-                    loadResult = loadResult.FirstChild;
+                dumpXml?.AddString($"<NUnitDiscoveryInExecution>{assemblyPath}</NUnitExecution>\r\n\r\n");
+                var discoveryResults = NUnitEngineAdapter.Explore(filter); // _activeRunner.Explore(filter);
+                dumpXml?.AddString(discoveryResults.AsString());
 
-                if (loadResult.GetAttribute("runstate") == "Runnable")
+                if (discoveryResults.IsRunnable)
                 {
-                    var nunitTestCases = loadResult.SelectNodes("//test-case");
+                    var nunitTestCases = discoveryResults.TestCases();
 
                     using (var testConverter = new TestConverter(TestLog, assemblyPath, Settings))
                     {
@@ -250,10 +249,11 @@ namespace NUnit.VisualStudio.TestAdapter
                         // the converter's cache of all test cases is populated as well.
                         // All future calls to convert a test case may now use the cache.
                         foreach (XmlNode testNode in nunitTestCases)
-                            loadedTestCases.Add(testConverter.ConvertTestCase(testNode));
+                            loadedTestCases.Add(testConverter.ConvertTestCase(new NUnitTestCase(testNode)));
 
 
                         TestLog.Info($"   NUnit3TestExecutor converted {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases");
+
 
                         // If we have a TFS Filter, convert it to an nunit filter
                         if (TfsFilter != null && !TfsFilter.IsEmpty)
@@ -268,31 +268,28 @@ namespace NUnit.VisualStudio.TestAdapter
                             TestLog.Info("   Skipping assembly - no matching test cases found");
                             return;
                         }
-
-                        using (var listener = new NUnitEventListener(FrameworkHandle, testConverter, dumpXml))
+                        dumpXml?.AddString($"<NUnitExecution>{assemblyPath}</NUnitExecution>\r\n");
+                        using (var listener = new NUnitEventListener(FrameworkHandle, testConverter, dumpXml, Settings))
                         {
                             try
                             {
-                                var results = _activeRunner.Run(listener, filter);
-                                GenerateTestOutput(results, assemblyPath);
+                                var results = NUnitEngineAdapter.Run(listener, filter);
+                                GenerateTestOutput(results.TopNode, assemblyPath);
                             }
                             catch (NullReferenceException)
                             {
                                 // this happens during the run when CancelRun is called.
-                                TestLog.Debug("   Nullref caught");
+                                TestLog.Debug("   Null ref caught");
                             }
                         }
                     }
                 }
                 else
                 {
-                    var msgNode = loadResult.SelectSingleNode("properties/property[@name='_SKIPREASON']");
-                    if (msgNode != null && (new[] { "contains no tests", "Has no TestFixtures" }).Any(msgNode.GetAttribute("value").Contains))
-                        TestLog.Info("   NUnit couldn't find any tests in " + assemblyPath);
-                    else
-                        TestLog.Info("   NUnit failed to load " + assemblyPath);
+                    TestLog.Info(discoveryResults.HasNoNUnitTests
+                            ? "   NUnit couldn't find any tests in " + assemblyPath
+                            : "   NUnit failed to load " + assemblyPath);
                 }
-
             }
             catch (BadImageFormatException)
             {
@@ -324,8 +321,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 dumpXml?.Dump4Execution();
                 try
                 {
-                    _activeRunner?.Dispose();
-                    _activeRunner = null;
+                    NUnitEngineAdapter?.CloseRunner();
                 }
                 catch (Exception ex)
                 {
@@ -343,9 +339,9 @@ namespace NUnit.VisualStudio.TestAdapter
             if (!Settings.UseTestOutputXml)
                 return;
 
-            var path = Path.Combine(TestOutputXmlFolder, $"{Path.GetFileNameWithoutExtension(assemblyPath)}.xml");
+            string path = Path.Combine(TestOutputXmlFolder, $"{Path.GetFileNameWithoutExtension(assemblyPath)}.xml");
 #if NET35
-            var resultService = TestEngine.Services.GetService<IResultService>();
+            var resultService = NUnitEngineAdapter.GetService<IResultService>();
 #else
             var resultService = new ResultService();
 #endif
@@ -354,7 +350,6 @@ namespace NUnit.VisualStudio.TestAdapter
             var resultWriter = resultService.GetResultWriter("nunit3", null);
             resultWriter.WriteResultFile(testResults, path);
             TestLog.Info($"   Test results written to {path}");
-
         }
 
         private NUnitTestFilterBuilder CreateTestFilterBuilder()
@@ -362,7 +357,7 @@ namespace NUnit.VisualStudio.TestAdapter
 #if !NET35
             return new NUnitTestFilterBuilder(new TestFilterService());
 #else
-            return new NUnitTestFilterBuilder(TestEngine.Services.GetService<ITestFilterService>());
+            return new NUnitTestFilterBuilder(NUnitEngineAdapter.GetService<ITestFilterService>());
 #endif
         }
 
@@ -374,7 +369,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 return;
             }
 
-            var path = Path.IsPathRooted(Settings.TestOutputXml)
+            string path = Path.IsPathRooted(Settings.TestOutputXml)
                 ? Settings.TestOutputXml
                 : Path.Combine(WorkDir, Settings.TestOutputXml);
             try

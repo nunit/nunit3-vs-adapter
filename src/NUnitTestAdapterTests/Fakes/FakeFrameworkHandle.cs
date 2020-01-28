@@ -1,14 +1,14 @@
-﻿using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
-using System;
-using System.Collections.Generic;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
 {
     /// <summary>
     /// FakeFrameworkHandle is used in all tests that require an
-    /// IFrameworkHandle, ITestExecutionRecorder or IMessageLogger
+    /// IFrameworkHandle, ITestExecutionRecorder or IMessageLogger.
     /// </summary>
     class FakeFrameworkHandle : IFrameworkHandle
     {
@@ -58,7 +58,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
 
         bool IFrameworkHandle.EnableShutdownAfterTestRun
         {
-            get; set; 
+            get; set;
         }
 
         int IFrameworkHandle.LaunchProcessWithDebuggerAttached(string filePath, string workingDirectory, string arguments, IDictionary<string, string> environmentVariables)
@@ -82,9 +82,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
         void ITestExecutionRecorder.RecordResult(TestResult testResult)
         {
             Events.Add(new Event
-            { 
-                EventType = EventType.RecordResult, 
-                TestResult = testResult 
+            {
+                EventType = EventType.RecordResult,
+                TestResult = testResult
             });
         }
 

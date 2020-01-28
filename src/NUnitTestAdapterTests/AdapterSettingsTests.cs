@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2019 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -8,10 +8,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -185,7 +185,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         /// <summary>
-        /// Workdir not set, TestOutput is relative
+        /// Workdir not set, TestOutput is relative.
         /// </summary>
         [Test]
         public void TestOutputSetting()
@@ -196,25 +196,23 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             {
                 Assert.That(_settings.TestOutputXml, Does.Contain(@"/my/work/dir"));
             });
-
         }
 
         /// <summary>
-        /// Workdir set, and is absolute,  TestOutputXml is relative
+        /// Workdir set, and is absolute,  TestOutputXml is relative.
         /// </summary>
         [Ignore("Is not handled in the test executor, not in the test settings")]
         [Test]
         public void TestOutputSettingWithWorkDir()
         {
             _settings.Load(@"<RunSettings><NUnit><WorkDirectory>C:\Whatever</WorkDirectory><TestOutputXml>my/testoutput/dir</TestOutputXml></NUnit></RunSettings>");
-            Assert.That(_settings.UseTestOutputXml,"Settings not loaded properly");
+            Assert.That(_settings.UseTestOutputXml, "Settings not loaded properly");
             Assert.Multiple(() =>
             {
-                Assert.That(_settings.TestOutputXml, Does.Contain(@"\my/testoutput/dir"),"Content not correct");
-                Assert.That(_settings.TestOutputXml, Does.StartWith(@"C:\"),"Not correct start drive");
-                Assert.That(Path.IsPathRooted(_settings.TestOutputXml), Is.True,"Path not properly rooted");
+                Assert.That(_settings.TestOutputXml, Does.Contain(@"\my/testoutput/dir"), "Content not correct");
+                Assert.That(_settings.TestOutputXml, Does.StartWith(@"C:\"), "Not correct start drive");
+                Assert.That(Path.IsPathRooted(_settings.TestOutputXml), Is.True, "Path not properly rooted");
             });
-
         }
 
 
@@ -256,7 +254,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void PreFilterIsDefaultOff()
         {
-            Assert.That(_settings.PreFilter,Is.False);
+            Assert.That(_settings.PreFilter, Is.False);
         }
 
         [Test]
@@ -367,7 +365,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(_settings.NumberOfTestWorkers, Is.Zero);
             Assert.True(_settings.InProcDataCollectorsAvailable);
         }
-        
+
         [Test]
         public void WhereCanBeSet()
         {

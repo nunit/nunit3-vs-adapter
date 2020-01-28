@@ -35,6 +35,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Engine;
 using NUnit.VisualStudio.TestAdapter.Dump;
+using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -52,7 +53,7 @@ namespace NUnit.VisualStudio.TestAdapter
             EmbeddedAssemblyResolution.EnsureInitialized();
         }
 
-        private Dump.DumpXml dumpXml;
+        private DumpXml dumpXml;
 
         #region ITestDiscoverer Members
 
@@ -77,10 +78,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
             foreach (string sourceAssembly in sources)
             {
-                var sourceAssemblyPath = Path.IsPathRooted(sourceAssembly) ? sourceAssembly : Path.Combine(Directory.GetCurrentDirectory(), sourceAssembly);
+                string sourceAssemblyPath = Path.IsPathRooted(sourceAssembly) ? sourceAssembly : Path.Combine(Directory.GetCurrentDirectory(), sourceAssembly);
                 TestLog.Debug("Processing " + sourceAssembly);
-                ITestRunner runner = null;
-
                 if (Settings.DumpXmlTestDiscovery)
                 {
                     dumpXml = new DumpXml(sourceAssemblyPath);
@@ -88,20 +87,17 @@ namespace NUnit.VisualStudio.TestAdapter
 
                 try
                 {
-                    runner = GetRunnerFor(sourceAssemblyPath, null);
-                    var topNode = runner.Explore(TestFilter.Empty);
-                    dumpXml?.AddString(topNode.AsString());
+                    var package = CreateTestPackage(sourceAssemblyPath, null);
+                    NUnitEngineAdapter.CreateRunner(package);
+                    var results = NUnitEngineAdapter.Explore();
+                    dumpXml?.AddString(results.AsString());
 
-                    // Currently, this will always be the case but it might change
-                    if (topNode.Name == "test-run")
-                        topNode = topNode.FirstChild;
-
-                    if (topNode.GetAttribute("runstate") == "Runnable")
+                    if (results.IsRunnable)
                     {
                         int cases;
                         using (var testConverter = new TestConverter(TestLog, sourceAssemblyPath, Settings))
                         {
-                            cases = ProcessTestCases(topNode, discoverySink, testConverter);
+                            cases = ProcessTestCases(results, discoverySink, testConverter);
                         }
 
                         TestLog.Debug($"Discovered {cases} test cases");
@@ -113,18 +109,16 @@ namespace NUnit.VisualStudio.TestAdapter
                     }
                     else
                     {
-                        var msgNode = topNode.SelectSingleNode("properties/property[@name='_SKIPREASON']");
-                        if (msgNode != null &&
-                            (new[] { "contains no tests", "Has no TestFixtures" }).Any(msgNode.GetAttribute("value")
-                                .Contains))
+                        if (results.HasNoNUnitTests)
                         {
                             if (Settings.Verbosity > 0)
                                 TestLog.Info("Assembly contains no NUnit 3.0 tests: " + sourceAssembly);
                         }
                         else
+                        {
                             TestLog.Info("NUnit failed to load " + sourceAssembly);
+                        }
                     }
-
                 }
                 catch (NUnitEngineException e)
                 {
@@ -168,15 +162,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 finally
                 {
                     dumpXml?.Dump4Discovery();
-
-                    if (runner != null)
-                    {
-                        if (runner.IsTestRunning)
-                            runner.StopRun(true);
-
-                        runner.Unload();
-                        runner.Dispose();
-                    }
+                    NUnitEngineAdapter?.CloseRunner();
                 }
             }
 
@@ -189,10 +175,10 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region Helper Methods
 
-        private int ProcessTestCases(XmlNode topNode, ITestCaseDiscoverySink discoverySink, TestConverter testConverter)
+        private int ProcessTestCases(NUnitResults results, ITestCaseDiscoverySink discoverySink, TestConverter testConverter)
         {
             int cases = 0;
-            foreach (XmlNode testNode in topNode.SelectNodes("//test-case"))
+            foreach (XmlNode testNode in results.TestCases())
             {
                 try
                 {
@@ -200,7 +186,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     if (!Debugger.IsAttached)
                         Debugger.Launch();
 #endif
-                    TestCase testCase = testConverter.ConvertTestCase(testNode);
+                    var testCase = testConverter.ConvertTestCase(new NUnitTestCase(testNode));
                     discoverySink.SendTestCase(testCase);
                     cases += 1;
                 }

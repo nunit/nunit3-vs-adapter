@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2013-2018 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2013-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -8,10 +8,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -50,13 +50,12 @@ namespace NUnit.VisualStudio.TestAdapter
         private IAdapterSettings adapterSettings;
         private const string EXCEPTION_FORMAT = "Exception {0}, {1}";
 
-        private IMessageLogger MessageLogger { get; set; }
+        private IMessageLogger MessageLogger { get; }
 
         public int Verbosity { get; set; }
 
         public TestLogger(IMessageLogger messageLogger)
         {
-
             MessageLogger = messageLogger;
         }
 
@@ -99,7 +98,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void Info(string message)
         {
-            if (adapterSettings?.Verbosity>= 0)
+            if (adapterSettings?.Verbosity >= 0)
                 SendMessage(TestMessageLevel.Informational, message);
         }
 
@@ -111,7 +110,6 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             if (adapterSettings?.Verbosity >= 5)
                 SendMessage(TestMessageLevel.Informational, message);
-
         }
 
         #endregion
@@ -134,7 +132,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     SendMessage(testMessageLevel, ex.StackTrace);
                     if (ex.InnerException != null)
                     {
-                        SendMessage(testMessageLevel, $"Innerexception: {ex.InnerException.ToString()}");
+                        SendMessage(testMessageLevel, $"InnerException: {ex.InnerException}");
                     }
                     break;
 

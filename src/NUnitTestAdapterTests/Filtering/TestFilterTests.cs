@@ -118,9 +118,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
             var testFilter = new TfsTestFilter(null);
             var obj = TfsTestFilter.PropertyValueProvider(tc, "TestCategory") as string[];
             Assert.IsNotNull(obj);
-            Assert.AreEqual(obj.Length,2);
+            Assert.AreEqual(obj.Length, 2);
             Assert.AreSame("CI", obj[0]);
-            Assert.AreSame("MyOwn",obj[1]);
+            Assert.AreSame("MyOwn", obj[1]);
         }
 
         [Test]

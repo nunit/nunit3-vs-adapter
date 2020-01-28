@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2015 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2020-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -20,40 +20,24 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
-using System;
-using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using NUnit.Framework;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests
+using System.Xml;
+using NUnit.VisualStudio.TestAdapter.Dump;
+
+namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
-    public class AsyncTests
+    public class NUnitTestCase : NUnitTestNode
     {
-        [Test]
-        public async Task TaskTestSuccess()
-        {
-            var result = await ReturnOne();
+        public bool IsTestCase => !IsNull && Node.Name == "test-case";
+        public bool IsParameterizedMethod => Type == "ParameterizedMethod";
+        public string Type => Node.GetAttribute("type");
+        public string ClassName => Node.GetAttribute("classname");
+        public string MethodName => Node.GetAttribute("methodname");
 
-            Assert.AreEqual(1, result);
+        public NUnitTestCase(XmlNode testCase) : base(testCase)
+        {
         }
 
-        [TestCase(ExpectedResult = 1)]
-        public async Task<int> TaskTTestCaseWithResultCheckSuccess()
-        {
-            return await ReturnOne();
-        }
-
-        private static Task<int> ReturnOne()
-        {
-            return Task.Run(() => 1);
-        }
-
-        private static Task ThrowException()
-        {
-            return Task.Run(() =>
-            {
-                throw new InvalidOperationException();
-            });
-        }
+        public NUnitTestCase Parent() => new NUnitTestCase(Node.ParentNode);
     }
 }

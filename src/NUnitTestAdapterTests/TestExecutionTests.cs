@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2012-2019 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2012-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -8,10 +8,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using NUnit.Framework;
@@ -31,12 +32,11 @@ using NUnit.Tests;
 using NUnit.Tests.Assemblies;
 using NUnit.Tests.Singletons;
 using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
-using System.Linq;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
     /// <summary>
-    /// ResultSummary Helper Class
+    /// ResultSummary Helper Class.
     /// </summary>
     public class ResultSummary
     {
@@ -65,11 +65,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     [Category("TestExecution")]
     public class TestFilteringTests
     {
-        private string MockAssemblyPath;
+        private string mockAssemblyPath;
         [OneTimeSetUp]
         public void LoadMockassembly()
         {
-            MockAssemblyPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "mock-assembly.dll");
+            mockAssemblyPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "mock-assembly.dll");
 
             // Sanity check to be sure we have the correct version of mock-assembly.dll
             Assert.That(MockAssembly.TestsAtRuntime, Is.EqualTo(MockAssembly.Tests),
@@ -95,20 +95,18 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var fakeFramework = new FakeFrameworkHandle();
 
             var executor = TestAdapterUtils.CreateExecutor();
-            executor.RunTests(new[] { MockAssemblyPath }, context, fakeFramework);
+            executor.RunTests(new[] { mockAssemblyPath }, context, fakeFramework);
 
             var completedRuns = fakeFramework.Events.Where(e => e.EventType == FakeFrameworkHandle.EventType.RecordEnd);
 
             Assert.That(completedRuns, Has.Exactly(expectedCount).Items);
-
         }
-
     }
 
     [Category("TestExecution")]
     public class TestExecutionTests
     {
-        private string MockAssemblyPath;
+        private string mockAssemblyPath;
         static readonly IRunContext Context = new FakeRunContext();
 
         private FakeFrameworkHandle testLog;
@@ -118,7 +116,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [OneTimeSetUp]
         public void LoadMockassembly()
         {
-            MockAssemblyPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "mock-assembly.dll");
+            mockAssemblyPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "mock-assembly.dll");
 
             // Sanity check to be sure we have the correct version of mock-assembly.dll
             Assert.That(MockAssembly.TestsAtRuntime, Is.EqualTo(MockAssembly.Tests),
@@ -127,7 +125,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             // Load the NUnit mock-assembly.dll once for this test, saving
             // the list of test cases sent to the discovery sink
-            TestAdapterUtils.CreateExecutor().RunTests(new[] { MockAssemblyPath }, Context, testLog);
+            TestAdapterUtils.CreateExecutor().RunTests(new[] { mockAssemblyPath }, Context, testLog);
 
             var testResults = testLog.Events
                .Where(e => e.EventType == FakeFrameworkHandle.EventType.RecordResult)
@@ -182,7 +180,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 Is.EqualTo(MockAssembly.ResultCount));
         }
 
-        static readonly TestCaseData[] outcomes =
+        static readonly TestCaseData[] Outcomes =
         {
             // NOTE: One inconclusive test is reported as None
             new TestCaseData(TestOutcome.Passed).Returns(MockAssembly.Success),
@@ -192,7 +190,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             new TestCaseData(TestOutcome.NotFound).Returns(0)
         };
 
-        [TestCaseSource("outcomes")]
+        [TestCaseSource(nameof(Outcomes))]
         public int TestOutcomeTotalsAreCorrect(TestOutcome outcome)
         {
             return testLog.Events
@@ -281,10 +279,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         /// <summary>
-        /// Tries to get the <see cref="TestResult"/> with the specified DisplayName
+        /// Tries to get the <see cref="TestResult"/> with the specified DisplayName.
         /// </summary>
-        /// <param name="displayName">DisplayName to search for</param>
-        /// <returns>The first testresult with the specified DisplayName, or <c>null</c> if none where found</returns>
+        /// <param name="displayName">DisplayName to search for.</param>
+        /// <returns>The first testresult with the specified DisplayName, or <c>null</c> if none where found.</returns>
         private TestResult GetTestResult(string displayName)
         {
             return testLog.Events
@@ -358,6 +356,4 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 #endif
 
     }
-
-
 }

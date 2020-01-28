@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2016 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2016-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -8,10 +8,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -20,11 +20,6 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -38,13 +33,10 @@ namespace NUnit.VisualStudio.TestAdapter
             LineNumber = lineNumber;
         }
 
-        public string FilePath { get; private set; }
+        public string FilePath { get; }
 
-        public int LineNumber { get; private set; }
+        public int LineNumber { get; }
 
-        public bool IsValid
-        {
-            get { return !string.IsNullOrEmpty(FilePath); }
-        }
+        public bool IsValid => !string.IsNullOrEmpty(FilePath);
     }
 }

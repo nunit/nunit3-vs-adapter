@@ -83,7 +83,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         }
 
         [Test]
-        [TestCase("net48")] //test code requires ValueTuple support, so can't got to net35
+        [TestCase("net48")] // test code requires ValueTuple support, so can't got to net35
         [TestCase("netcoreapp2.1")]
         public static void Single_target_csproj(string targetFramework)
         {
@@ -109,7 +109,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             var results = workspace.VSTest(new[] { $@"bin\Debug\{targetFramework}\Test.dll" });
 
-            //Total Tests =
+            // Total Tests =
             //              3 from PassingTestStr/TestCaseSourceMethod
             //              1 from UnitTest_TestCaseWithTuple_TestIsNotExecuted
             //              1 from TestA/SourceA
@@ -121,10 +121,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
 
 
-            Assert.That(results.Counters.Total, Is.EqualTo(9), "Total tests counter did not match expectation" );
+            Assert.That(results.Counters.Total, Is.EqualTo(9), "Total tests counter did not match expectation");
             Assert.That(results.Counters.Executed, Is.EqualTo(9), "Executed tests counter did not match expectation");
             Assert.That(results.Counters.Passed, Is.EqualTo(9), "Passed tests counter did not match expectation");
         }
-
     }
 }

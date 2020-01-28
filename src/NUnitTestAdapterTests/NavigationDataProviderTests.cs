@@ -21,15 +21,15 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
+using System;
+using System.IO;
+using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using NSubstitute;
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Metadata;
-using System;
-using System.IO;
-using System.Reflection;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
@@ -52,7 +52,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 // To avoid MissingMethodException, it’s necessary to only deal with Roslyn in a separate AppDomain.
                 using (var compileInvoker = new AppDomainInvoker())
                 {
-                    compileInvoker.Invoke(marshalled =>
+                    compileInvoker.Invoke(
+                        marshalled =>
                     {
                         var baseCompilation = CSharpCompilation.Create(null)
                             .AddReferences(MetadataReference.CreateFromFile(typeof(object).GetTypeInfo().Assembly.Location))
@@ -104,8 +105,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 var assemblyPath = Path.Combine(dir, "DependentAssembly.dll");
                 if (withBindingRedirect)
                 {
-                    File.WriteAllText(assemblyPath + ".config",
-@"<?xml version=""1.0"" encoding=""utf-8""?>
+                    File.WriteAllText(
+                        assemblyPath + ".config",
+                        @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <runtime>
     <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">

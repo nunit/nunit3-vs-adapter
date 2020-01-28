@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2018 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2018-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -83,17 +83,16 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private TypeInfo? DoWithBreaker(Func<string, string, string, TypeInfo?> method, string declaringTypeName, string methodName)
         {
-            if (!_disableMetadataLookup)
+            if (_disableMetadataLookup)
+                return null;
+            try
             {
-                try
-                {
-                    return method.Invoke(_assemblyPath, declaringTypeName, methodName);
-                }
-                catch (Exception ex)
-                {
-                    _disableMetadataLookup = true;
-                    _logger.Warning($"Disabling navigation data lookup for \"{_assemblyPath}\".", ex);
-                }
+                return method.Invoke(_assemblyPath, declaringTypeName, methodName);
+            }
+            catch (Exception ex)
+            {
+                _disableMetadataLookup = true;
+                _logger.Warning($"Disabling navigation data lookup for \"{_assemblyPath}\".", ex);
             }
             return null;
         }

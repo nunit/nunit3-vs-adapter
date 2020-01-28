@@ -8,10 +8,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -23,9 +23,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
 #if NET35
 using System.Runtime.Remoting;
 #endif
@@ -36,6 +33,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NSubstitute;
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Dump;
+using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
 using VSTestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
@@ -46,7 +44,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     {
         private NUnitEventListener listener;
         private FakeFrameworkHandle testLog;
-        private XmlNode fakeTestNode;
+        private NUnitTestCase fakeTestNode;
 
         [SetUp]
         public void SetUp()
@@ -54,15 +52,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             testLog = new FakeFrameworkHandle();
             var settings = Substitute.For<IAdapterSettings>();
             settings.CollectSourceInformation.Returns(true);
-            using (var testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath,settings))
+            using (var testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings))
             {
-                fakeTestNode = FakeTestData.GetTestNode();
+                fakeTestNode = new NUnitTestCase(FakeTestData.GetTestNode());
 
                 // Ensure that the converted testcase is cached
                 testConverter.ConvertTestCase(fakeTestNode);
                 Assert.NotNull(testConverter.GetCachedTestCase("123"));
 
-                listener = new NUnitEventListener(testLog, testConverter, null);
+                listener = new NUnitEventListener(testLog, testConverter, null, settings);
             }
         }
 
@@ -87,11 +85,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void TestFinished_CallsRecordEnd_Then_RecordResult()
         {
-            listener.TestFinished(FakeTestData.GetResultNode());
-            Assert.AreEqual(2, testLog.Events.Count);
-            Assert.AreEqual(
-                FakeFrameworkHandle.EventType.RecordEnd,
-                testLog.Events[0].EventType);
+            listener.TestFinished(new NUnitTestEventTestCase(FakeTestData.GetResultNode().AsString()));
+            Assert.That(testLog.Events.Count, Is.EqualTo(2));
+            Assert.That(testLog.Events[0].EventType, Is.EqualTo(FakeFrameworkHandle.EventType.RecordEnd));
             Assert.AreEqual(
                 FakeFrameworkHandle.EventType.RecordResult,
                 testLog.Events[1].EventType);
@@ -100,11 +96,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void TestFinished_CallsRecordEndCorrectly()
         {
-            listener.TestFinished(FakeTestData.GetResultNode());
+            listener.TestFinished(new NUnitTestEventTestCase(FakeTestData.GetResultNode().AsString()));
             Assume.That(testLog.Events.Count, Is.EqualTo(2));
-            Assume.That(
-                testLog.Events[0].EventType,
-                Is.EqualTo(FakeFrameworkHandle.EventType.RecordEnd));
+            Assume.That(testLog.Events[0].EventType, Is.EqualTo(FakeFrameworkHandle.EventType.RecordEnd));
 
             VerifyTestCase(testLog.Events[0].TestCase);
             Assert.AreEqual(TestOutcome.Passed, testLog.Events[0].TestOutcome);
@@ -113,25 +107,23 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void TestFinished_CallsRecordResultCorrectly()
         {
-            listener.TestFinished(FakeTestData.GetResultNode());
+            listener.TestFinished(new NUnitTestEventTestCase(FakeTestData.GetResultNode().AsString()));
             Assume.That(testLog.Events.Count, Is.EqualTo(2));
-            Assume.That(
-                testLog.Events[1].EventType,
-                Is.EqualTo(FakeFrameworkHandle.EventType.RecordResult));
+            Assume.That(testLog.Events[1].EventType, Is.EqualTo(FakeFrameworkHandle.EventType.RecordResult));
 
             VerifyTestResult(testLog.Events[1].TestResult);
         }
 
-        //[TestCase(ResultState.Success, TestOutcome.Passed, null)]
-        //[TestCase(ResultState.Failure, TestOutcome.Failed, "My failure message")]
-        //[TestCase(ResultState.Error, TestOutcome.Failed, "Error!")]
-        //[TestCase(ResultState.Cancelled, TestOutcome.None, null)]
-        //[TestCase(ResultState.Inconclusive, TestOutcome.None, null)]
-        //[TestCase(ResultState.NotRunnable, TestOutcome.Failed, "No constructor")]
-        //[TestCase(ResultState.Skipped, TestOutcome.Skipped, null)]
-        //[TestCase(ResultState.Ignored, TestOutcome.Skipped, "my reason")]
-        //public void TestFinished_OutcomesAreCorrectlyTranslated(ResultState resultState, TestOutcome outcome, string message)
-        //{
+        // [TestCase(ResultState.Success, TestOutcome.Passed, null)]
+        // [TestCase(ResultState.Failure, TestOutcome.Failed, "My failure message")]
+        // [TestCase(ResultState.Error, TestOutcome.Failed, "Error!")]
+        // [TestCase(ResultState.Cancelled, TestOutcome.None, null)]
+        // [TestCase(ResultState.Inconclusive, TestOutcome.None, null)]
+        // [TestCase(ResultState.NotRunnable, TestOutcome.Failed, "No constructor")]
+        // [TestCase(ResultState.Skipped, TestOutcome.Skipped, null)]
+        // [TestCase(ResultState.Ignored, TestOutcome.Skipped, "my reason")]
+        // public void TestFinished_OutcomesAreCorrectlyTranslated(ResultState resultState, TestOutcome outcome, string message)
+        // {
         //    fakeNUnitResult.SetResult(resultState, message, null);
         //    listener.TestFinished(fakeNUnitResult);
         //    Assume.That(testLog.Events.Count, Is.EqualTo(2));
@@ -142,10 +134,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         //        testLog.Events[1].EventType,
         //        Is.EqualTo(FakeFrameworkHandle.EventType.RecordResult));
 
-        //    Assert.AreEqual(outcome, testLog.Events[0].TestOutcome);
+        // Assert.AreEqual(outcome, testLog.Events[0].TestOutcome);
         //    Assert.AreEqual(outcome, testLog.Events[1].TestResult.Outcome);
         //    Assert.AreEqual(message, testLog.Events[1].TestResult.ErrorMessage);
-        //}
+        // }
 
         #endregion
 
@@ -202,30 +194,31 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     }
 
     /// <summary>
-    /// These tests ensure correct console output, which is what we send to the "recorder"
+    /// These tests ensure correct console output, which is what we send to the "recorder".
     /// </summary>
     public class NUnitEventListenerOutputTests
     {
         private ITestExecutionRecorder recorder;
         private ITestConverter converter;
         private IDumpXml dumpxml;
+        private IAdapterSettings settings;
 
-        private const string TestoutputProgress =
+        private const string TestOutputProgress =
             @"<test-output stream='Progress' testid='0-1001' testname='Something.TestClass.Whatever'><![CDATA[Whatever
 ]]></test-output>";
 
-        private const string TestoutputOut =
+        private const string TestOutputOut =
             @"<test-output stream='Out' testid='0-1001' testname='Something.TestClass.Whatever'><![CDATA[Whatever
 ]]></test-output>";
 
-        private const string TestoutputError =
+        private const string TestOutputError =
             @"<test-output stream='Error' testid='0-1001' testname='Something.TestClass.Whatever'><![CDATA[Whatever
 ]]></test-output>";
 
-        private const string BlankTestoutput =
+        private const string BlankTestOutput =
             @"<test-output stream='Progress' testid='0-1001' testname='Something.TestClass.Whatever'><![CDATA[   ]]></test-output>";
 
-        private const string TestFinish = 
+        private const string TestFinish =
             @"<test-case id='0-1001' name='Test1' fullname='UnitTests.Test1' methodname='Test1' classname='UnitTests' runstate='Runnable' seed='108294034' result='Passed' start-time='2018-10-15 09:41:24Z' end-time='2018-10-15 09:41:24Z' duration='0.000203' asserts='0' parentId='0-1000' />";
 
         [SetUp]
@@ -234,36 +227,37 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             recorder = Substitute.For<ITestExecutionRecorder>();
             converter = Substitute.For<ITestConverter>();
             dumpxml = Substitute.For<IDumpXml>();
+            settings = Substitute.For<IAdapterSettings>();
         }
 
         [Test]
         public void ThatNormalTestOutputIsOutput()
         {
-            var sut = new NUnitEventListener(recorder, converter, dumpxml);
-            sut.OnTestEvent(TestoutputProgress);
+            var sut = new NUnitEventListener(recorder, converter, dumpxml, settings);
+            sut.OnTestEvent(TestOutputProgress);
             sut.OnTestEvent(TestFinish);
 
-            recorder.Received().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Is<string>(x=>x.StartsWith("Whatever")));
-            converter.Received().GetVSTestResults(Arg.Any<XmlElement>(), Arg.Is<ICollection<XmlNode>>(x => x.Count == 1));
+            recorder.Received().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Is<string>(x => x.StartsWith("Whatever")));
+            converter.Received().GetVsTestResults(Arg.Any<NUnitTestEventTestCase>(), Arg.Is<ICollection<XmlNode>>(x => x.Count == 1));
         }
 
         [Test]
         public void ThatNormalTestOutputIsError()
         {
-            var sut = new NUnitEventListener(recorder, converter, dumpxml);
-            sut.OnTestEvent(TestoutputError);
+            var sut = new NUnitEventListener(recorder, converter, dumpxml, settings);
+            sut.OnTestEvent(TestOutputError);
             sut.OnTestEvent(TestFinish);
 
-            recorder.Received().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Is<string>(x=>x.StartsWith("Whatever")));
-            converter.Received().GetVSTestResults(Arg.Any<XmlElement>(), Arg.Is<ICollection<XmlNode>>(x => x.Count == 1));
+            recorder.Received().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Is<string>(x => x.StartsWith("Whatever")));
+            converter.Received().GetVsTestResults(Arg.Any<NUnitTestEventTestCase>(), Arg.Is<ICollection<XmlNode>>(x => x.Count == 1));
         }
 
         [Test]
         public void ThatTestOutputWithWhiteSpaceIsNotOutput()
         {
-            var sut = new NUnitEventListener(recorder, converter, dumpxml);
+            var sut = new NUnitEventListener(recorder, converter, dumpxml, settings);
 
-            sut.OnTestEvent(BlankTestoutput);
+            sut.OnTestEvent(BlankTestOutput);
 
             recorder.DidNotReceive().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Any<string>());
         }

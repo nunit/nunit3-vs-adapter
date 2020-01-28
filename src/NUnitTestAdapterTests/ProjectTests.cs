@@ -8,10 +8,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -56,26 +56,26 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             var location = TestContext.CurrentContext.TestDirectory;
             var di = new DirectoryInfo(location).MoveUp(4);
-            Assert.That(di,Is.Not.Null,"Invalid parent");
+            Assert.That(di, Is.Not.Null, "Invalid parent");
             var installDir = di.EnumerateDirectories("NUnit3TestAdapterInstall").SingleOrDefault();
-            Assert.That(installDir,Is.Not.Null,$"Didn't find NUnit3TestAdapterInstall folder at {di.Name}");            var vsixManifestFile = installDir.EnumerateFiles("*.vsixmanifest").SingleOrDefault();
-            Assert.That(vsixManifestFile,Is.Not.Null,$"Didn't find any vsixmanifestfile at folder {installDir.Name}");
+            Assert.That(installDir, Is.Not.Null, $"Didn't find NUnit3TestAdapterInstall folder at {di.Name}");
+            var vsixManifestFile = installDir.EnumerateFiles("*.vsixmanifest").SingleOrDefault();
+            Assert.That(vsixManifestFile, Is.Not.Null, $"Didn't find any vsixmanifestfile at folder {installDir.Name}");
             var vsixManifestTxt = File.ReadAllText(vsixManifestFile.FullName);
-            Assert.That(vsixManifestTxt.Length,Is.GreaterThan(0),"No content in vsixmanifestfile");
+            Assert.That(vsixManifestTxt.Length, Is.GreaterThan(0), "No content in vsixmanifestfile");
 
             var vsixManifest = XDocument.Parse(vsixManifestTxt);
             var desc = vsixManifest.Descendants();
-            var assets = desc.FirstOrDefault(o=>o.Name.LocalName=="Assets");
-            Assert.That(assets,Is.Not.Null,"Missing Assets");
+            var assets = desc.FirstOrDefault(o => o.Name.LocalName == "Assets");
+            Assert.That(assets, Is.Not.Null, "Missing Assets");
             var assetItems = vsixManifest.Descendants().Where(o => o.Name.LocalName == "Asset").ToList();
-            Assert.That(assetItems.Count,Is.GreaterThanOrEqualTo(1),"Missing asset items");
-            var unitTestAsset = assetItems.FirstOrDefault(o => o.Attribute("Type") != null && o.Attribute("Type").Value!=null &&
+            Assert.That(assetItems.Count, Is.GreaterThanOrEqualTo(1), "Missing asset items");
+            var unitTestAsset = assetItems.FirstOrDefault(o => o.Attribute("Type") != null && o.Attribute("Type").Value != null &&
                                                       o.Attribute("Type").Value == "UnitTestExtension");
-            Assert.That(unitTestAsset,Is.Not.Null, "No asset with type UnitTestExtension found");
+            Assert.That(unitTestAsset, Is.Not.Null, "No asset with type UnitTestExtension found");
             var path = unitTestAsset.Attribute("Path");
-            Assert.That(path,Is.Not.Null,"UnitTestAsset must have path");
+            Assert.That(path, Is.Not.Null, "UnitTestAsset must have path");
             Assert.That(path.Value.EndsWith("NUnit3.TestAdapter.dll"), "UnitTestAsset path must contain the NUNit3TestAdapter.dll");
-
         }
 
 
@@ -84,11 +84,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             var dir = TestContext.CurrentContext.TestDirectory;
             var filesNotToExist = Directory.EnumerateFiles(dir, "Microsoft", SearchOption.TopDirectoryOnly);
-            Assert.IsTrue(!filesNotToExist.Any(),"The reference of NUnitTestAdapter - Microsoft.VisualStudio.TestPlatform.ObjectModel must be set Copy Local to false");
+            Assert.IsTrue(!filesNotToExist.Any(), "The reference of NUnitTestAdapter - Microsoft.VisualStudio.TestPlatform.ObjectModel must be set Copy Local to false");
         }
-
-       
-
     }
 
     public static class DirectoryInfoExtensions
@@ -97,11 +94,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             var grandParent = di;
             for (int i = 0; i < noOfLevels; i++)
-                grandParent= grandParent?.Parent;
+                grandParent = grandParent?.Parent;
             return grandParent;
         }
     }
-
-    
-
 }

@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2019 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -51,7 +51,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         static readonly string MockAssemblyPath =
             Path.Combine(TestContext.CurrentContext.TestDirectory, "mock-assembly.dll");
 
-        private List<TestCase> testCases;
+        private readonly List<TestCase> testCases = new List<TestCase>();
 
         private readonly IDiscoveryContext _context;
 
@@ -67,7 +67,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(NUnit.Tests.Assemblies.MockAssembly.TestsAtRuntime, Is.EqualTo(NUnit.Tests.Assemblies.MockAssembly.Tests),
                 "The reference to mock-assembly.dll appears to be the wrong version");
             Assert.That(File.Exists(MockAssemblyPath), $"Can't locate mock-assembly.dll at {MockAssemblyPath}");
-            testCases = new List<TestCase>();
             var runsettings = "<RunSettings><NUnit><UseParentFQNForParametrizedTests>True</UseParentFQNForParametrizedTests></NUnit></RunSettings>";
             var rs = Substitute.For<IRunSettings>();
             rs.SettingsXml.Returns(runsettings);
@@ -91,8 +90,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase("MockTest3", "NUnit.Tests.Assemblies.MockTestFixture.MockTest3")]
         [TestCase("MockTest4", "NUnit.Tests.Assemblies.MockTestFixture.MockTest4")]
         [TestCase("ExplicitlyRunTest", "NUnit.Tests.Assemblies.MockTestFixture.ExplicitlyRunTest")]
-        [TestCase("MethodWithParameters(9,11)", "NUnit.Tests.FixtureWithTestCases.MethodWithParameters",true)]
-        public void VerifyTestCaseIsFound(string name, string fullName,bool parentFQN = false)
+        [TestCase("MethodWithParameters(9,11)", "NUnit.Tests.FixtureWithTestCases.MethodWithParameters", true)]
+        public void VerifyTestCaseIsFound(string name, string fullName, bool parentFQN = false)
         {
             var testCase = testCases.Find(tc => tc.DisplayName == name);
             Assert.That(testCase.FullyQualifiedName, Is.EqualTo(fullName));
@@ -192,11 +191,16 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 context,
                 messageLoggerStub,
                 this);
-            Assert.That(testcaseWasSent, Is.False);
-            Assert.That(messageLoggerStub.WarningMessages.Count(), Is.EqualTo(1));
-            Assert.That(!messageLoggerStub.ErrorMessages.Any());
-            var warningmsg = messageLoggerStub.WarningMessages.Select(o => o.Item2).Single();
-            Assert.That(warningmsg, Does.Contain("Assembly not supported"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(testcaseWasSent, Is.False);
+                Assert.That(messageLoggerStub.WarningMessages.Count(), Is.EqualTo(1));
+                Assert.That(!messageLoggerStub.ErrorMessages.Any());
+                string warningmsg = messageLoggerStub.WarningMessages.Select(o => o.Item2).FirstOrDefault();
+                Assert.That(warningmsg, Is.Not.Null);
+                if (!string.IsNullOrEmpty(warningmsg))
+                    Assert.That(warningmsg, Does.Contain("Assembly not supported"));
+            });
         }
 #endif
 
@@ -205,5 +209,4 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             testcaseWasSent = true;
         }
     }
-
 }

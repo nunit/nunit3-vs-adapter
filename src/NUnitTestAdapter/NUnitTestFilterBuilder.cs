@@ -30,8 +30,9 @@ namespace NUnit.VisualStudio.TestAdapter
 {
     public class NUnitTestFilterBuilder
     {
-        private ITestFilterService _filterService;
+        private readonly ITestFilterService _filterService;
 
+        // ReSharper disable once StringLiteralTypo
         public static readonly TestFilter NoTestsFound = new TestFilter("<notestsfound/>");
 
         public NUnitTestFilterBuilder(ITestFilterService filterService)
@@ -43,13 +44,13 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             var filteredTestCases = tfsFilter.CheckFilter(loadedTestCases);
             var testCases = filteredTestCases as TestCase[] ?? filteredTestCases.ToArray();
-            //TestLog.Info(string.Format("TFS Filter detected: LoadedTestCases {0}, Filtered Test Cases {1}", loadedTestCases.Count, testCases.Count()));
+            // TestLog.Info(string.Format("TFS Filter detected: LoadedTestCases {0}, Filtered Test Cases {1}", loadedTestCases.Count, testCases.Count()));
             return testCases.Any() ? FilterByList(testCases) : NoTestsFound;
         }
 
         public TestFilter FilterByWhere(string where)
         {
-            if (string.IsNullOrEmpty(where)) 
+            if (string.IsNullOrEmpty(where))
                 return TestFilter.Empty;
             var filterBuilder = _filterService.GetTestFilterBuilder();
             filterBuilder.SelectWhere(where);

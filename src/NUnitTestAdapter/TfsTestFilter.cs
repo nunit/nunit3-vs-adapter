@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2013 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2013-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -29,9 +29,10 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-    using NUnit.VisualStudio.TestAdapter.Internal;
     using System.Collections;
-    using System.Reflection;
+    // ReSharper disable once RedundantUsingDirective
+    using System.Reflection;  // Needed for .net core 2.1
+    using NUnit.VisualStudio.TestAdapter.Internal;
 
     public interface ITfsTestFilter
     {
@@ -45,9 +46,8 @@ namespace NUnit.VisualStudio.TestAdapter
     public class TfsTestFilter : ITfsTestFilter
     {
         /// <summary>
-        /// Supported properties for filtering
-
-        ///</summary>
+        /// Supported properties for filtering.
+        /// </summary>
         private static readonly Dictionary<string, TestProperty> SupportedPropertiesCache;
         private static readonly Dictionary<string, NTrait> SupportedTraitCache;
         private static readonly Dictionary<NTrait, TestProperty> TraitPropertyMap;
@@ -56,18 +56,20 @@ namespace NUnit.VisualStudio.TestAdapter
         static TfsTestFilter()
         {
             // Initialize the property cache
-            SupportedPropertiesCache = new Dictionary<string, TestProperty>(StringComparer.OrdinalIgnoreCase);
-            SupportedPropertiesCache["FullyQualifiedName"] = TestCaseProperties.FullyQualifiedName;
-            SupportedPropertiesCache["Name"] = TestCaseProperties.DisplayName;
-            SupportedPropertiesCache["TestCategory"] = CategoryList.NUnitTestCategoryProperty;
-            SupportedPropertiesCache["Category"] = CategoryList.NUnitTestCategoryProperty;
+            SupportedPropertiesCache = new Dictionary<string, TestProperty>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["FullyQualifiedName"] = TestCaseProperties.FullyQualifiedName,
+                ["Name"] = TestCaseProperties.DisplayName,
+                ["TestCategory"] = CategoryList.NUnitTestCategoryProperty,
+                ["Category"] = CategoryList.NUnitTestCategoryProperty
+            };
             // Initialize the trait cache
             var priorityTrait = new NTrait("Priority", "");
             var categoryTrait = new NTrait("Category", "");
-            SupportedTraitCache = new Dictionary<string, NTrait>(StringComparer.OrdinalIgnoreCase);
-            SupportedTraitCache["Priority"] = priorityTrait;
-            SupportedTraitCache["TestCategory"] = categoryTrait;
-            SupportedTraitCache["Category"] = categoryTrait;
+            SupportedTraitCache = new Dictionary<string, NTrait>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Priority"] = priorityTrait, ["TestCategory"] = categoryTrait, ["Category"] = categoryTrait
+            };
             // Initialize the trait property map, since TFS doesnt know about traits
             TraitPropertyMap = new Dictionary<NTrait, TestProperty>(new NTraitNameComparer());
             var priorityProperty = TestProperty.Find("Priority") ??
@@ -90,19 +92,11 @@ namespace NUnit.VisualStudio.TestAdapter
 
 
         private ITestCaseFilterExpression testCaseFilterExpression;
-        public ITestCaseFilterExpression TfsTestCaseFilterExpression
-        {
-            get
-            {
-                return testCaseFilterExpression ??
-                       (testCaseFilterExpression = runContext.GetTestCaseFilter(SupportedProperties, PropertyProvider));
-            }
-        }
+        public ITestCaseFilterExpression TfsTestCaseFilterExpression =>
+            testCaseFilterExpression ??
+            (testCaseFilterExpression = runContext.GetTestCaseFilter(SupportedProperties, PropertyProvider));
 
-        public bool IsEmpty
-        {
-            get { return TfsTestCaseFilterExpression == null || TfsTestCaseFilterExpression.TestCaseFilterValue == string.Empty; }
-        }
+        public bool IsEmpty => TfsTestCaseFilterExpression == null || TfsTestCaseFilterExpression.TestCaseFilterValue == string.Empty;
 
         public IEnumerable<TestCase> CheckFilter(IEnumerable<TestCase> tests)
         {
@@ -118,15 +112,13 @@ namespace NUnit.VisualStudio.TestAdapter
 
         /// <summary>
         /// Provides value of TestProperty corresponding to property name 'propertyName' as used in filter.
-        /// Return value should be a string for single valued property or array of strings for multi valued property (e.g. TestCategory)
+        /// Return value should be a string for single valued property or array of strings for multi valued property (e.g. TestCategory).
         /// </summary>
         public static object PropertyValueProvider(TestCase currentTest, string propertyName)
         {
-
             var testProperty = LocalPropertyProvider(propertyName);
             if (testProperty != null)
             {
-
                 // Test case might not have defined this property. In that case GetPropertyValue()
                 // would return default value. For filtering, if property is not defined return null.
                 if (currentTest.Properties.Contains(testProperty))
@@ -138,7 +130,7 @@ namespace NUnit.VisualStudio.TestAdapter
             var testTrait = TraitProvider(propertyName);
             if (testTrait != null)
             {
-                var val = traitContains(currentTest, testTrait.Name);
+                var val = CachedTraitContainsDelegate(currentTest, testTrait.Name);
                 if (val.Length == 0) return null;
                 if (val.Length == 1) // Contains a single string
                     return val[0];  // return that string
@@ -147,16 +139,15 @@ namespace NUnit.VisualStudio.TestAdapter
             return null;
         }
 
-        static readonly Func<TestCase, string, string[]> traitContains = TraitContains();
+        static readonly Func<TestCase, string, string[]> CachedTraitContainsDelegate = TraitContains();
 
         /// <summary>
         /// TestCase:  To be checked
-        /// traitName: Name of trait to be checked against
+        /// traitName: Name of trait to be checked against.
         /// </summary>
-        /// <returns>Value of trait</returns>
+        /// <returns>Value of trait.</returns>
         private static Func<TestCase, string, string[]> TraitContains()
         {
-
             return (testCase, traitName) =>
             {
                 var testCaseType = typeof(TestCase);
@@ -173,8 +164,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         public static TestProperty LocalPropertyProvider(string propertyName)
         {
-            TestProperty testProperty;
-            SupportedPropertiesCache.TryGetValue(propertyName, out testProperty);
+            SupportedPropertiesCache.TryGetValue(propertyName, out var testProperty);
             return testProperty;
         }
 
@@ -186,31 +176,20 @@ namespace NUnit.VisualStudio.TestAdapter
                 return testProperty;
             }
             var testTrait = TraitProvider(propertyName);
-            if (testTrait != null)
-            {
-                TestProperty tp;
-                if (TraitPropertyMap.TryGetValue(testTrait, out tp))
-                {
-                    return tp;
-                }
-            }
-            return null;
+            if (testTrait == null)
+                return null;
+            return TraitPropertyMap.TryGetValue(testTrait, out var tp) ? tp : null;
         }
 
         public static NTrait TraitProvider(string traitName)
         {
-            NTrait testTrait;
-            SupportedTraitCache.TryGetValue(traitName, out testTrait);
+            SupportedTraitCache.TryGetValue(traitName, out var testTrait);
             return testTrait;
         }
-
-
-
     }
 
     public class NTraitNameComparer : IEqualityComparer<NTrait>
     {
-
         public bool Equals(NTrait n, NTrait y)
         {
             return n.Name == y.Name;

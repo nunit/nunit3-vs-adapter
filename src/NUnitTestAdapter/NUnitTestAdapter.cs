@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2019 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -21,29 +21,28 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-//#define VERBOSE
-
-// We use an alias so that we don't accidentally make
-// references to engine internals, except for creating
-// the engine object in the Initialize method.
-using TestEngineClass = NUnit.Engine.TestEngine;
+// #define VERBOSE
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+// We use an alias so that we don't accidentally make
+// references to engine internals, except for creating
+// the engine object in the Initialize method.
+using TestEngineClass = NUnit.Engine.TestEngine;
 #if NET35
 using System.Runtime.Remoting.Channels;
 #endif
+using System.Linq;
 using System.Text;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Common;
 using NUnit.Engine;
-using System.Linq;
-
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
 
 namespace NUnit.VisualStudio.TestAdapter
@@ -56,9 +55,9 @@ namespace NUnit.VisualStudio.TestAdapter
     {
         #region Constants
 
-        ///<summary>
-        /// The Uri used to identify the NUnitExecutor
-        ///</summary>
+        /// <summary>
+        /// The Uri used to identify the NUnitExecutor.
+        /// </summary>
         public const string ExecutorUri = "executor://NUnit3TestExecutor";
 
         public const string SettingsName = "NUnitAdapterSettings";
@@ -74,11 +73,10 @@ namespace NUnit.VisualStudio.TestAdapter
 #else
             AdapterVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 #endif
+            NUnitEngineAdapter = new NUnitEngineAdapter();
         }
 
         #endregion
-
-        internal event Action<TestEngineClass> InternalEngineCreated;
 
         #region Properties
 
@@ -87,7 +85,7 @@ namespace NUnit.VisualStudio.TestAdapter
         // The adapter version
         protected string AdapterVersion { get; set; }
 
-        protected ITestEngine TestEngine { get; private set; }
+        public NUnitEngineAdapter NUnitEngineAdapter { get; private set; }
 
         // Our logger used to display messages
         protected TestLogger TestLog { get; private set; }
@@ -96,16 +94,15 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private static string exeName;
 
-        public static bool IsRunningUnderIDE
+        public static bool IsRunningUnderIde
         {
             get
             {
                 if (exeName == null)
                 {
-                    Assembly entryAssembly = Assembly.GetEntryAssembly();
+                    var entryAssembly = Assembly.GetEntryAssembly();
                     if (entryAssembly != null)
                         exeName = entryAssembly.Location;
-
                 }
 
                 return exeName != null && (
@@ -127,11 +124,10 @@ namespace NUnit.VisualStudio.TestAdapter
         // Discover or Execute method must call this method.
         protected void Initialize(IDiscoveryContext context, IMessageLogger messageLogger)
         {
-            var engine = new TestEngineClass();
-            InternalEngineCreated?.Invoke(engine);
-            TestEngine = engine;
+            NUnitEngineAdapter.Initialize();
             TestLog = new TestLogger(messageLogger);
             Settings = new AdapterSettings(TestLog);
+            NUnitEngineAdapter.InitializeSettingsAndLogging(Settings, TestLog);
             TestLog.InitSettings(Settings);
             try
             {
@@ -145,22 +141,21 @@ namespace NUnit.VisualStudio.TestAdapter
                 TestLog.Warning("Error initializing RunSettings. Default settings will be used");
                 TestLog.Warning(e.ToString());
             }
-            
         }
 
         public void InitializeForbiddenFolders()
         {
-            ForbiddenFolders = new []
+            ForbiddenFolders = new[]
             {
                 Environment.GetEnvironmentVariable("ProgramW6432"),
                 Environment.GetEnvironmentVariable("ProgramFiles(x86)"),
                 Environment.GetEnvironmentVariable("windir"),
-            }.Where(o => !string.IsNullOrEmpty(o)).Select(o=>o.ToLower()+@"\").ToList();
+            }.Where(o => !string.IsNullOrEmpty(o)).Select(o => o.ToLower() + @"\").ToList();
         }
 
         private void SetCurrentWorkingDirectory()
         {
-            var dir = Directory.GetCurrentDirectory();
+            string dir = Directory.GetCurrentDirectory();
             bool foundForbiddenFolder = CheckDirectory(dir);
             if (foundForbiddenFolder)
                 Directory.SetCurrentDirectory(Path.GetTempPath());
@@ -168,22 +163,15 @@ namespace NUnit.VisualStudio.TestAdapter
 
 
         /// <summary>
-        /// If a directory matches one of the forbidden folders, then we should reroute, so we return true in that case
+        /// If a directory matches one of the forbidden folders, then we should reroute, so we return true in that case.
         /// </summary>
         public bool CheckDirectory(string dir)
         {
-            var checkdir = (dir.EndsWith("\\") ? dir : dir + "\\");
-            return ForbiddenFolders.Any(o => checkdir.StartsWith(o, StringComparison.OrdinalIgnoreCase));
+            string checkDir = (dir.EndsWith("\\") ? dir : dir + "\\");
+            return ForbiddenFolders.Any(o => checkDir.StartsWith(o, StringComparison.OrdinalIgnoreCase));
         }
 
-        protected ITestRunner GetRunnerFor(string assemblyName, IGrouping<string, TestCase> testCases)
-
-        {
-            var package = CreateTestPackage(assemblyName, testCases);
-            return TestEngine.GetRunner(package);
-        }
-
-        private TestPackage CreateTestPackage(string assemblyName, IGrouping<string, TestCase> testCases)
+        protected TestPackage CreateTestPackage(string assemblyName, IGrouping<string, TestCase> testCases)
         {
             var package = new TestPackage(assemblyName);
 
@@ -208,14 +196,11 @@ namespace NUnit.VisualStudio.TestAdapter
             if (Settings.PreFilter && testCases != null)
             {
                 var prefilters = new List<string>();
-                
-                foreach (TestCase testCase in testCases)
+
+                foreach (var testCase in testCases)
                 {
-                    int end = testCase.FullyQualifiedName.IndexOfAny(new char[] { '(', '<' });
-                    if (end > 0)
-                        prefilters.Add(testCase.FullyQualifiedName.Substring(0, end));
-                    else
-                        prefilters.Add(testCase.FullyQualifiedName);
+                    int end = testCase.FullyQualifiedName.IndexOfAny(new[] { '(', '<' });
+                    prefilters.Add(end > 0 ? testCase.FullyQualifiedName.Substring(0, end) : testCase.FullyQualifiedName);
                 }
                 package.Settings[PackageSettings.LOAD] = prefilters;
             }
@@ -263,7 +248,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             // Set the work directory to the assembly location unless a setting is provided
-            var workDir = Settings.WorkDirectory;
+            string workDir = Settings.WorkDirectory;
             if (workDir == null)
                 workDir = Path.GetDirectoryName(assemblyName);
             else if (!Path.IsPathRooted(workDir))
@@ -272,7 +257,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 Directory.CreateDirectory(workDir);
             package.Settings[PackageSettings.WorkDirectory] = workDir;
             WorkDir = workDir;
-            //   CreateTestOutputFolder(workDir);
+            // CreateTestOutputFolder(workDir);
             return package;
         }
 
@@ -283,35 +268,33 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             runSettings[PackageSettings.TestParametersDictionary] = testParameters;
 
-            if (testParameters.Count != 0)
-            {
-                // Kept for backwards compatibility with old frameworks.
-                // Reserializes the way old frameworks understand, even if the parsing above is changed.
-                // This reserialization cannot be changed without breaking compatibility with old frameworks.
+            if (testParameters.Count == 0)
+                return;
+            // Kept for backwards compatibility with old frameworks.
+            // Reserializes the way old frameworks understand, even if the parsing above is changed.
+            // This reserialization cannot be changed without breaking compatibility with old frameworks.
 
-                var oldFrameworkSerializedParameters = new StringBuilder();
-                foreach (var parameter in testParameters)
-                    oldFrameworkSerializedParameters.Append(parameter.Key).Append('=').Append(parameter.Value).Append(';');
+            var oldFrameworkSerializedParameters = new StringBuilder();
+            foreach (var parameter in testParameters)
+                oldFrameworkSerializedParameters.Append(parameter.Key).Append('=').Append(parameter.Value).Append(';');
 
-                runSettings[PackageSettings.TestParameters] = oldFrameworkSerializedParameters.ToString(0, oldFrameworkSerializedParameters.Length - 1);
-            }
+            runSettings[PackageSettings.TestParameters] = oldFrameworkSerializedParameters.ToString(0, oldFrameworkSerializedParameters.Length - 1);
         }
 
         protected static void CleanUpRegisteredChannels()
         {
 #if NET35
-            foreach (IChannel chan in ChannelServices.RegisteredChannels)
+            foreach (var chan in ChannelServices.RegisteredChannels)
                 ChannelServices.UnregisterChannel(chan);
 #endif
         }
 
         protected void Unload()
         {
-            if (TestEngine != null)
-            {
-                TestEngine.Dispose();
-                TestEngine = null;
-            }
+            if (NUnitEngineAdapter == null)
+                return;
+            NUnitEngineAdapter.Dispose();
+            NUnitEngineAdapter = null;
         }
 
         #endregion

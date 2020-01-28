@@ -20,8 +20,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         public void EmptyMethod_LotsOfLines()
         { // expectedLineDebug
-
-
         } // expectedLineRelease
 
         public void SimpleMethod_Void_NoArgs()
@@ -113,7 +111,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             public string SimpleMethod_ReturnsString_OneArg(int i)
             { // expectedLineDebug
-                return s + x * i; // expectedLineRelease
+                return s + (x * i); // expectedLineRelease
             }
         }
 
@@ -133,37 +131,37 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             public class DoublyNested
             {
-                public T1 X;
-                public T2 Y;
+                private T1 x;
+                private T2 y;
 
                 public DoublyNested(T1 x, T2 y)
                 {
-                    X = x;
-                    Y = y;
+                    this.x = x;
+                    this.y = y;
                 }
 
                 public void WriteBoth()
                 { // expectedLineDebug
-                    Console.Write(X + Y.ToString()); // expectedLineRelease
+                    Console.Write(x + y.ToString()); // expectedLineRelease
                 }
             }
 
             public class DoublyNested<T3>
             {
-                public T1 X;
-                public T2 Y;
-                public T3 Z;
+                private T1 x;
+                private T2 y;
+                private T3 z;
 
                 public DoublyNested(T1 x, T2 y, T3 z)
                 {
-                    X = x;
-                    Y = y;
-                    Z = z;
+                    this.x = x;
+                    this.y = y;
+                    this.z = z;
                 }
 
                 public void WriteAllThree()
                 { // expectedLineDebug
-                    Console.Write(X + Y.ToString() + Z); // expectedLineRelease
+                    Console.Write(x + y.ToString() + z); // expectedLineRelease
                 }
             }
         }

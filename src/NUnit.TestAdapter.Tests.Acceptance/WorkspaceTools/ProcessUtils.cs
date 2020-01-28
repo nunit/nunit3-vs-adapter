@@ -81,7 +81,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 
         /// <summary>
         /// Escapes arbitrary values so that the process receives the exact string you intend and injection is impossible.
-        /// Spec: https://msdn.microsoft.com/en-us/library/bb776391.aspx
+        /// Spec: https://msdn.microsoft.com/en-us/library/bb776391.aspx.
         /// </summary>
         public static string EscapeProcessArguments(IEnumerable<string> literalValues, bool alwaysQuote = false)
         {

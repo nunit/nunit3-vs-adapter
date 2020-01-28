@@ -5,7 +5,6 @@ using System.Text.RegularExpressions;
 
 namespace NUnit.VisualStudio.TestAdapter.Dump
 {
-
     public interface IFile
     {
         void WriteAllText(string path, string txt);
@@ -18,7 +17,7 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
     {
         public void WriteAllText(string path, string txt)
         {
-            System.IO.File.WriteAllText(path,txt);
+            System.IO.File.WriteAllText(path, txt);
         }
 
         public bool DirectoryExist(string path)
@@ -49,7 +48,7 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
         private readonly string filename;
         private StringBuilder txt;
 
-        public DumpXml(string path, IFile file=null)
+        public DumpXml(string path, IFile file = null)
         {
             directory = Path.GetDirectoryName(path);
             filename = Path.GetFileName(path);
@@ -63,7 +62,7 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
         {
             EnsurePathExist(path);
             txt.Append(Rootend);
-            file.WriteAllText(path,txt.ToString());
+            file.WriteAllText(path, txt.ToString());
             txt = new StringBuilder();
         }
 
@@ -93,7 +92,7 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
             var guid = Guid.NewGuid();
             var res = Convert.ToBase64String(guid.ToByteArray());
             var res2 = Regex.Replace(res, @"[^a-zA-Z0-9]", "");
-             return res2+".dump";
+            return res2 + ".dump";
         }
 
         public void AddTestEvent(string text)
@@ -111,7 +110,6 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
         {
             txt.Append(text);
         }
-
     }
 
     public static class XmlNodeExtension
@@ -131,5 +129,4 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
             }
         }
     }
-
 }

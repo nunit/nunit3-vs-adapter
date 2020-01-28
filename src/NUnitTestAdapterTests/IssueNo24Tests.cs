@@ -1,10 +1,10 @@
-﻿using NUnit.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
@@ -13,24 +13,25 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     [Category("LongRunning")]
     class IssueNo24Tests
     {
+        [Explicit]
         [Test]
         public void Quick()
         {
             Thread.Sleep(1);
         }
-
+        [Explicit]
         [Test]
         public void Slow()
         {
             Thread.Sleep(150000);
         }
-
+        [Explicit]
         [Test]
         public void Slower()
         {
             Thread.Sleep(250000);
         }
-
+        [Explicit]
         [Test]
         public void TooLateButFast()
         {

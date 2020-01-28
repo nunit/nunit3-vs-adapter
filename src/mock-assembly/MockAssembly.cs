@@ -8,10 +8,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -38,7 +38,7 @@ namespace NUnit.Tests
             public const int Classes = 10;
             public const int NamespaceSuites = 6; // assembly, NUnit, Tests, Assemblies, Singletons, TestAssembly
 
-            // While const values are copied to other projects at compile time, 
+            // While const values are copied to other projects at compile time,
             // readonly are taken from assembly loaded at runtime
             // We can check the difference to see if value has changed since compilation
             public static readonly int TestsAtRuntime = Tests;
@@ -54,9 +54,9 @@ namespace NUnit.Tests
                         + ParentClass.Tests
                         + FixtureWithAttachment.Tests;
 
-            public const int Suites = MockTestFixture.Suites 
+            public const int Suites = MockTestFixture.Suites
                         + Singletons.OneTestCase.Suites
-                        + TestAssembly.MockTestFixture.Suites 
+                        + TestAssembly.MockTestFixture.Suites
                         + IgnoredFixture.Suites
                         + ExplicitFixture.Suites
                         + BadFixture.Suites
@@ -64,9 +64,9 @@ namespace NUnit.Tests
                         + ParameterizedFixture.Suites
                         + GenericFixtureConstants.Suites
                         + NamespaceSuites;
-            
+
             public const int Nodes = Tests + Suites;
-            
+
             public const int ExplicitFixtures = 1;
             public const int SuitesRun = Suites - ExplicitFixtures;
 
@@ -112,14 +112,14 @@ namespace NUnit.Tests
 
             [Test(Description="Mock Test #1")]
             public void MockTest1()
-            {}
+            { }
 
             [Test]
             [Category("MockCategory")]
-            [Property("Severity","Critical")]
+            [Property("Severity", "Critical")]
             [Description("This is a really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really, really long description")]
             public void MockTest2()
-            {}
+            { }
 
             [Test]
             [Category("MockCategory")]
@@ -129,7 +129,7 @@ namespace NUnit.Tests
 
             [Test]
             protected static void MockTest5()
-            {}
+            { }
 
             [Test]
             public void FailingTest()
@@ -139,21 +139,21 @@ namespace NUnit.Tests
 
             [Test, Property("TargetMethod", "SomeClassName"), Property("Size", 5), /*Property("TargetType", typeof( System.Threading.Thread ))*/]
             public void TestWithManyProperties()
-            {}
+            { }
 
             [Test]
             [Ignore("ignoring this test method for now")]
             [Category("Foo")]
             public void MockTest4()
-            {}
+            { }
 
             [Test, Explicit]
-            [Category( "Special" )]
+            [Category("Special")]
             public void ExplicitlyRunTest()
-            {}
+            { }
 
             [Test]
-            public void NotRunnableTest( int a, int b)
+            public void NotRunnableTest(int a, int b)
             {
             }
 
@@ -182,11 +182,11 @@ namespace NUnit.Tests
         public class OneTestCase
         {
             public const int Tests = 1;
-            public const int Suites = 1;		
+            public const int Suites = 1;
 
             [Test]
-            public virtual void TestCase() 
-            {}
+            public virtual void TestCase()
+            { }
         }
     }
 
@@ -216,12 +216,12 @@ namespace NUnit.Tests
 
         [Test]
         public void Test2() { }
-        
+
         [Test]
         public void Test3() { }
     }
 
-    [TestFixture,Explicit]
+    [TestFixture, Explicit]
     public class ExplicitFixture
     {
         public const int Tests = 2;
@@ -246,27 +246,27 @@ namespace NUnit.Tests
         [Test]
         public void SomeTest() { }
     }
-    
+
     [TestFixture]
     public class FixtureWithTestCases
     {
         public const int Tests = 4;
         public const int Suites = 3;
-        
+
         [TestCase(2, 2, ExpectedResult=4)]
         [TestCase(9, 11, ExpectedResult=20)]
         public int MethodWithParameters(int x, int y)
         {
-            return x+y;
+            return x + y;
         }
-        
+
         [TestCase(2, 4)]
         [TestCase(9.2, 11.7)]
         public void GenericMethod<T>(T x, T y)
         {
         }
     }
-    
+
     [TestFixture(5)]
     [TestFixture(42)]
     public class ParameterizedFixture
@@ -275,29 +275,29 @@ namespace NUnit.Tests
         public const int Suites = 3;
 
         public ParameterizedFixture(int num) { }
-        
+
         [Test]
         public void Test1() { }
-        
+
         [Test]
         public void Test2() { }
     }
-    
+
     public class GenericFixtureConstants
     {
         public const int Tests = 4;
         public const int Suites = 3;
     }
-    
+
     [TestFixture(5)]
     [TestFixture(11.5)]
     public class GenericFixture<T>
     {
-        public GenericFixture(T num){ }
-        
+        public GenericFixture(T num) { }
+
         [Test]
         public void Test1() { }
-        
+
         [Test]
         public void Test2() { }
     }
@@ -338,9 +338,9 @@ namespace NUnit.Tests
         {
             var filepath1 = Path.Combine(TestContext.CurrentContext.WorkDirectory, Attachment1Name);
             var filepath2 = Path.Combine(TestContext.CurrentContext.WorkDirectory, Attachment2Name);
-            Assert.That(File.Exists(filepath1),$"Could not find {filepath1}");
+            Assert.That(File.Exists(filepath1), $"Could not find {filepath1}");
             TestContext.AddTestAttachment(filepath1, Attachment1Description);
-            Assert.That(File.Exists(filepath2),$"Could not find {filepath2}");
+            Assert.That(File.Exists(filepath2), $"Could not find {filepath2}");
             TestContext.AddTestAttachment(filepath2, Attachment2Description);
         }
     }

@@ -21,11 +21,12 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using System;
 using System.Collections.Generic;
 using System.Xml;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NSubstitute;
+using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
@@ -49,7 +50,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var testCases = new TestCase[testCaseNodes.Count];
 
             for (var i = 0; i < testCases.Length; i++)
-                testCases[i] = testConverter.ConvertTestCase(testCaseNodes[i]);
+                testCases[i] = testConverter.ConvertTestCase(new NUnitTestCase(testCaseNodes[i]));
 
             return testCases;
         }

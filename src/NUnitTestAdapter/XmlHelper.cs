@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2010-2014 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2010-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -8,10 +8,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -22,7 +22,6 @@
 // ***********************************************************************
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Xml;
 
@@ -37,17 +36,17 @@ namespace NUnit.VisualStudio.TestAdapter
         /// Creates a new top level element node.
         /// </summary>
         /// <param name="name">The element name.</param>
-        /// <returns>A new XmlNode</returns>
+        /// <returns>A new XmlNode.</returns>
         public static XmlNode CreateTopLevelElement(string name)
         {
-            XmlDocument doc = new XmlDocument();
-            doc.LoadXml( "<" + name + "/>" );
+            var doc = new XmlDocument();
+            doc.LoadXml("<" + name + "/>");
             return doc.FirstChild;
         }
 
         public static XmlNode CreateXmlNode(string xml)
         {
-            XmlDocument doc = new XmlDocument();
+            var doc = new XmlDocument();
             doc.LoadXml(xml);
             return doc.FirstChild;
         }
@@ -69,7 +68,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <param name="value">The value of the attribute.</param>
         public static void AddAttribute(this XmlNode node, string name, string value)
         {
-            XmlAttribute attr = node.OwnerDocument.CreateAttribute(name);
+            var attr = node.OwnerDocument.CreateAttribute(name);
             attr.Value = value;
             node.Attributes.Append(attr);
         }
@@ -79,7 +78,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         /// <param name="node">The node to which the element should be added.</param>
         /// <param name="name">The element name.</param>
-        /// <returns>The newly created child element</returns>
+        /// <returns>The newly created child element.</returns>
         public static XmlNode AddElement(this XmlNode node, string name)
         {
             XmlNode childNode = node.OwnerDocument.CreateElement(name);
@@ -94,10 +93,9 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <param name="node">The node to which the element should be added.</param>
         /// <param name="name">The element name.</param>
         /// <param name="data">The data for the CDataSection.</param>
-        /// <returns></returns>
         public static XmlNode AddElementWithCDataSection(this XmlNode node, string name, string data)
         {
-            XmlNode childNode = node.AddElement(name);
+            var childNode = node.AddElement(name);
             childNode.AppendChild(node.OwnerDocument.CreateCDataSection(data));
             return childNode;
         }
@@ -109,12 +107,11 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         /// <param name="result">The result.</param>
         /// <param name="name">The name.</param>
-        /// <returns></returns>
         public static string GetAttribute(this XmlNode result, string name)
         {
-            XmlAttribute attr = result.Attributes[name];
+            var attr = result.Attributes[name];
 
-            return attr == null ? null : attr.Value;
+            return attr?.Value;
         }
 
         /// <summary>
@@ -123,14 +120,13 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <param name="result">The result.</param>
         /// <param name="name">The name.</param>
         /// <param name="defaultValue">The default value.</param>
-        /// <returns></returns>
         public static int GetAttribute(this XmlNode result, string name, int defaultValue)
         {
-            XmlAttribute attr = result.Attributes[name];
+            var attr = result.Attributes[name];
 
             return attr == null
                 ? defaultValue
-                : Int32.Parse(attr.Value, CultureInfo.InvariantCulture);
+                : int.Parse(attr.Value, CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -139,14 +135,13 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <param name="result">The result.</param>
         /// <param name="name">The name.</param>
         /// <param name="defaultValue">The default value.</param>
-        /// <returns></returns>
         public static double GetAttribute(this XmlNode result, string name, double defaultValue)
         {
-            XmlAttribute attr = result.Attributes[name];
+            var attr = result.Attributes[name];
 
             return attr == null
                 ? defaultValue
-                : Double.Parse(attr.Value, CultureInfo.InvariantCulture);
+                : double.Parse(attr.Value, CultureInfo.InvariantCulture);
         }
 
         /// <summary>
@@ -155,18 +150,15 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <param name="result">The result.</param>
         /// <param name="name">The name.</param>
         /// <param name="defaultValue">The default value.</param>
-        /// <returns></returns>
         public static DateTime GetAttribute(this XmlNode result, string name, DateTime defaultValue)
         {
             string dateStr = GetAttribute(result, name);
             if (dateStr == null)
                 return defaultValue;
 
-            DateTime date;
-            if (!DateTime.TryParse(dateStr, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AllowWhiteSpaces, out date))
-                return defaultValue;
-
-            return date;
+            return !DateTime.TryParse(dateStr, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AllowWhiteSpaces, out var date)
+                ? defaultValue
+                : date;
         }
 
         #endregion

@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2015 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2020-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -20,40 +20,15 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
+
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using NUnit.Framework;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests
+namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
 {
-    public class AsyncTests
-    {
-        [Test]
-        public async Task TaskTestSuccess()
-        {
-            var result = await ReturnOne();
-
-            Assert.AreEqual(1, result);
-        }
-
-        [TestCase(ExpectedResult = 1)]
-        public async Task<int> TaskTTestCaseWithResultCheckSuccess()
-        {
-            return await ReturnOne();
-        }
-
-        private static Task<int> ReturnOne()
-        {
-            return Task.Run(() => 1);
-        }
-
-        private static Task ThrowException()
-        {
-            return Task.Run(() =>
-            {
-                throw new InvalidOperationException();
-            });
-        }
-    }
+    public class NUnitResultsTests
+    { }
 }
