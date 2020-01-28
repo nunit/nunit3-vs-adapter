@@ -136,19 +136,21 @@ namespace NUnit.VisualStudio.TestAdapter
                 results.Add(testCaseResult);
             }
 
-            if (results.Count != 0)
-                return new TestResultSet {TestCaseResult = testCaseResult, TestResults = results};
-            var result = MakeTestResultFromLegacyXmlNode(resultNode, outputNodes);
-            if (result != null)
-                results.Add(result);
-
-            return new TestResultSet { TestCaseResult = testCaseResult, TestResults = results };
+            if (results.Count == 0)
+            {
+                var result = MakeTestResultFromLegacyXmlNode(resultNode, outputNodes);
+                if (result != null)
+                    results.Add(result);
+            }
+            return new TestResultSet { TestCaseResult = testCaseResult, TestResults = results, ConsoleOutput = resultNode.Output };
         }
 
         public struct TestResultSet
         {
             public IList<VSTestResult> TestResults { get; set; }
             public TestResult TestCaseResult { get; set; }
+
+            public string ConsoleOutput { get; set; }
         }
 
         #endregion
@@ -236,7 +238,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 : resultNode.HasReason
                     ? resultNode.ReasonMessage
                     : null;
-            
+
             // If we're running in the IDE, remove any caret line from the message
             // since it will be displayed using a variable font and won't make sense.
             if (!string.IsNullOrEmpty(message) && NUnitTestAdapter.IsRunningUnderIde)

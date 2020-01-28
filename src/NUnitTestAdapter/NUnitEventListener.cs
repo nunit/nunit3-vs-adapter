@@ -50,6 +50,7 @@ namespace NUnit.VisualStudio.TestAdapter
         private static readonly ICollection<XmlNode> EmptyNodes = new List<XmlNode>();
         private readonly ITestExecutionRecorder _recorder;
         private readonly ITestConverter _testConverter;
+        private readonly IAdapterSettings _settings;
         private readonly Dictionary<string, ICollection<XmlNode>> _outputNodes = new Dictionary<string, ICollection<XmlNode>>();
 
 #if NET35
@@ -63,11 +64,13 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 #endif
 
-        public NUnitEventListener(ITestExecutionRecorder recorder, ITestConverter testConverter, IDumpXml dumpXml)
+        public NUnitEventListener(ITestExecutionRecorder recorder, ITestConverter testConverter,IDumpXml dumpXml, IAdapterSettings settings)
         {
             this.dumpXml = dumpXml;
+            _settings = settings;
             _recorder = recorder;
             _testConverter = testConverter;
+            _settings = settings;
         }
 
         #region ITestEventListener
@@ -157,6 +160,8 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             var result = _testConverter.GetVsTestResults(resultNode, outputNodes ?? EmptyNodes);
+            if (_settings.ConsoleOut == 1)
+                _recorder.SendMessage(TestMessageLevel.Informational, result.ConsoleOutput);
             _recorder.RecordEnd(result.TestCaseResult.TestCase, result.TestCaseResult.Outcome);
             foreach (var vsResult in result.TestResults)
             {

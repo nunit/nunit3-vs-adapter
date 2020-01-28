@@ -269,7 +269,7 @@ namespace NUnit.VisualStudio.TestAdapter
                             return;
                         }
                         dumpXml?.AddString($"<NUnitExecution>{assemblyPath}</NUnitExecution>\r\n");
-                        using (var listener = new NUnitEventListener(FrameworkHandle, testConverter, dumpXml))
+                        using (var listener = new NUnitEventListener(FrameworkHandle, testConverter, dumpXml, Settings))
                         {
                             try
                             {

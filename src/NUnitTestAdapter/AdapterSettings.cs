@@ -91,6 +91,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
         bool UseNUnitIdforTestCaseId { get;  }
 
+        int ConsoleOut { get; }
+
         void Load(IDiscoveryContext context);
         void Load(string settingsXml);
         void SaveRandomSeed(string dirname);
@@ -194,6 +196,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public bool ShowInternalProperties { get; private set; }
         public bool UseParentFQNForParametrizedTests { get; private set; }  // Default is false.  True can fix certain test name patterns, but may have side effects.
         public bool UseNUnitIdforTestCaseId { get; private set; }  // default is false.
+        public int ConsoleOut { get; private set; }
 
 
         public VsTestCategoryType VsTestCategoryType { get; private set; } = VsTestCategoryType.NUnit;
@@ -279,6 +282,7 @@ namespace NUnit.VisualStudio.TestAdapter
             ShowInternalProperties = GetInnerTextAsBool(nunitNode, nameof(ShowInternalProperties), false);
             UseParentFQNForParametrizedTests = GetInnerTextAsBool(nunitNode, nameof(UseParentFQNForParametrizedTests), false);
             UseNUnitIdforTestCaseId = GetInnerTextAsBool(nunitNode, nameof(UseNUnitIdforTestCaseId), false);
+            ConsoleOut = GetInnerTextAsInt(nunitNode, nameof(ConsoleOut), 1);  // 0 no output to console, 1 : output to console
             DumpXmlTestDiscovery = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestDiscovery), false);
             DumpXmlTestResults = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestResults), false);
             PreFilter = GetInnerTextAsBool(nunitNode, nameof(PreFilter), false);
