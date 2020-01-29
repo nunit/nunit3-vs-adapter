@@ -39,9 +39,19 @@ using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-    [ExtensionUri(ExecutorUri)]
-    public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDisposable
+    public interface INUnit3TestExecutor
     {
+        void StopRun();
+        IDumpXml Dump { get; }
+        IAdapterSettings Settings { get; }
+    }
+
+
+    [ExtensionUri(ExecutorUri)]
+    public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDisposable, INUnit3TestExecutor
+    {
+        private DumpXml executionDumpXml;
+
         public NUnit3TestExecutor()
         {
             EmbeddedAssemblyResolution.EnsureInitialized();
@@ -162,8 +172,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         void ITestExecutor.Cancel()
         {
-            // _activeRunner?.StopRun(true);
-            NUnitEngineAdapter?.StopRun();
+            StopRun();
         }
 
         #endregion
@@ -222,10 +231,10 @@ namespace NUnit.VisualStudio.TestAdapter
             // No need to restore if the seed was in runsettings file
             if (!Settings.RandomSeedSpecified)
                 Settings.RestoreRandomSeed(Path.GetDirectoryName(assemblyPath));
-            DumpXml dumpXml = null;
+            executionDumpXml = null;
             if (Settings.DumpXmlTestResults)
             {
-                dumpXml = new DumpXml(assemblyPath);
+                executionDumpXml = new DumpXml(assemblyPath);
             }
 
             try
@@ -233,9 +242,9 @@ namespace NUnit.VisualStudio.TestAdapter
                 var package = CreateTestPackage(assemblyPath, testCases);
                 NUnitEngineAdapter.CreateRunner(package);
                 CreateTestOutputFolder();
-                dumpXml?.AddString($"<NUnitDiscoveryInExecution>{assemblyPath}</NUnitExecution>\r\n\r\n");
+                executionDumpXml?.AddString($"<NUnitDiscoveryInExecution>{assemblyPath}</NUnitExecution>\r\n\r\n");
                 var discoveryResults = NUnitEngineAdapter.Explore(filter); // _activeRunner.Explore(filter);
-                dumpXml?.AddString(discoveryResults.AsString());
+                executionDumpXml?.AddString(discoveryResults.AsString());
 
                 if (discoveryResults.IsRunnable)
                 {
@@ -268,8 +277,8 @@ namespace NUnit.VisualStudio.TestAdapter
                             TestLog.Info("   Skipping assembly - no matching test cases found");
                             return;
                         }
-                        dumpXml?.AddString($"<NUnitExecution>{assemblyPath}</NUnitExecution>\r\n");
-                        using (var listener = new NUnitEventListener(FrameworkHandle, testConverter, dumpXml, Settings))
+                        executionDumpXml?.AddString($"<NUnitExecution>{assemblyPath}</NUnitExecution>\r\n");
+                        using (var listener = new NUnitEventListener(FrameworkHandle, testConverter, this))
                         {
                             try
                             {
@@ -318,7 +327,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             finally
             {
-                dumpXml?.Dump4Execution();
+                executionDumpXml?.Dump4Execution();
                 try
                 {
                     NUnitEngineAdapter?.CloseRunner();
@@ -386,5 +395,12 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         #endregion
+
+        public void StopRun()
+        {
+            NUnitEngineAdapter?.StopRun();
+        }
+
+        public IDumpXml Dump => executionDumpXml;
     }
 }

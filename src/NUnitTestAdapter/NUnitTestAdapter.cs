@@ -226,6 +226,9 @@ namespace NUnit.VisualStudio.TestAdapter
             if (Settings.TestProperties.Count > 0)
                 SetTestParameters(package.Settings, Settings.TestProperties);
 
+            if (Settings.StopOnError)
+                package.Settings[PackageSettings.StopOnError] = true;
+
             // Always run one assembly at a time in process in its own domain
             package.Settings[PackageSettings.ProcessModel] = "InProcess";
 

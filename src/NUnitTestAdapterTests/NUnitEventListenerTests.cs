@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2012-2017 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2012-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -45,12 +45,16 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         private NUnitEventListener listener;
         private FakeFrameworkHandle testLog;
         private NUnitTestCase fakeTestNode;
+        private INUnit3TestExecutor executor;
+        private IAdapterSettings settings;
 
         [SetUp]
         public void SetUp()
         {
             testLog = new FakeFrameworkHandle();
-            var settings = Substitute.For<IAdapterSettings>();
+            settings = Substitute.For<IAdapterSettings>();
+            executor = Substitute.For<INUnit3TestExecutor>();
+            executor.Settings.Returns(settings);
             settings.CollectSourceInformation.Returns(true);
             using (var testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings))
             {
@@ -60,7 +64,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 testConverter.ConvertTestCase(fakeTestNode);
                 Assert.NotNull(testConverter.GetCachedTestCase("123"));
 
-                listener = new NUnitEventListener(testLog, testConverter, null, settings);
+                listener = new NUnitEventListener(testLog, testConverter, executor);
             }
         }
 
@@ -202,6 +206,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         private ITestConverter converter;
         private IDumpXml dumpxml;
         private IAdapterSettings settings;
+        private INUnit3TestExecutor executor;
+
 
         private const string TestOutputProgress =
             @"<test-output stream='Progress' testid='0-1001' testname='Something.TestClass.Whatever'><![CDATA[Whatever
@@ -228,12 +234,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             converter = Substitute.For<ITestConverter>();
             dumpxml = Substitute.For<IDumpXml>();
             settings = Substitute.For<IAdapterSettings>();
+            executor = Substitute.For<INUnit3TestExecutor>();
+            executor.Settings.Returns(settings);
         }
 
         [Test]
         public void ThatNormalTestOutputIsOutput()
         {
-            var sut = new NUnitEventListener(recorder, converter, dumpxml, settings);
+            var sut = new NUnitEventListener(recorder, converter, executor);
             sut.OnTestEvent(TestOutputProgress);
             sut.OnTestEvent(TestFinish);
 
@@ -244,7 +252,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void ThatNormalTestOutputIsError()
         {
-            var sut = new NUnitEventListener(recorder, converter, dumpxml, settings);
+            var sut = new NUnitEventListener(recorder, converter, executor);
             sut.OnTestEvent(TestOutputError);
             sut.OnTestEvent(TestFinish);
 
@@ -255,7 +263,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void ThatTestOutputWithWhiteSpaceIsNotOutput()
         {
-            var sut = new NUnitEventListener(recorder, converter, dumpxml, settings);
+            var sut = new NUnitEventListener(recorder, converter, executor);
 
             sut.OnTestEvent(BlankTestOutput);
 
