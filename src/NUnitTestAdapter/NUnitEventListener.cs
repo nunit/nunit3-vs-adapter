@@ -64,13 +64,15 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 #endif
 
-        public NUnitEventListener(ITestExecutionRecorder recorder, ITestConverter testConverter, IDumpXml dumpXml, IAdapterSettings settings)
+        private INUnit3TestExecutor executor;
+
+        public NUnitEventListener(ITestExecutionRecorder recorder, ITestConverter testConverter, INUnit3TestExecutor executor)
         {
-            this.dumpXml = dumpXml;
-            _settings = settings;
+            this.executor = executor;
+            dumpXml = executor.Dump;
+            _settings = executor.Settings;
             _recorder = recorder;
             _testConverter = testConverter;
-            _settings = settings;
         }
 
         #region ITestEventListener
@@ -166,6 +168,11 @@ namespace NUnit.VisualStudio.TestAdapter
             foreach (var vsResult in result.TestResults)
             {
                 _recorder.RecordResult(vsResult);
+            }
+
+            if (result.TestCaseResult.Outcome == TestOutcome.Failed && _settings.StopOnError)
+            {
+                executor.StopRun();
             }
         }
 
