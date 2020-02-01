@@ -39,7 +39,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         public void Dispose()
         {
-            Directory.Delete(Path, recursive: true);
+            Utils.DeleteDirectoryRobust(Path);
         }
 
         public static implicit operator string(TempDirectory tempDirectory) => tempDirectory.Path;
