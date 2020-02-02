@@ -13,12 +13,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
         public string Outcome { get; }
         public VSTestResultCounters Counters { get; }
         public IReadOnlyList<string> RunErrors { get; }
+        public IReadOnlyList<string> RunWarnings { get; }
 
-        public VSTestResult(string outcome, VSTestResultCounters counters, IReadOnlyList<string> runErrors = null)
+        public VSTestResult(string outcome, VSTestResultCounters counters, IReadOnlyList<string> runErrors = null, IReadOnlyList<string> runWarnings = null)
         {
             Outcome = outcome;
             Counters = counters;
             RunErrors = runErrors ?? Array.Empty<string>();
+            RunWarnings = runWarnings ?? Array.Empty<string>();
         }
 
         public static VSTestResult Load(string trxFilePath)
@@ -29,6 +31,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 
             var resultSummary = trx.Root.Element(ns + "ResultSummary");
             var counters = resultSummary.Element(ns + "Counters");
+
+            var runInfos = resultSummary.Element(ns + "RunInfos")?.Elements().Select(runInfo => (
+                Outcome: runInfo.Attribute("outcome")?.Value,
+                Text: runInfo.Element(ns + "Text")?.Value ?? string.Empty));
 
             return new VSTestResult(
                 (string)resultSummary.Attribute("outcome"),
@@ -49,16 +55,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                     (int)counters.Attribute("completed"),
                     (int)counters.Attribute("inProgress"),
                     (int)counters.Attribute("pending")),
-                runErrors: resultSummary.Element(ns + "RunInfos")
-                    ?.Elements()
-                    .Where(runInfo => runInfo.Attribute("outcome")?.Value == "Error")
-                    .Select(runInfo => runInfo.Element(ns + "Text")?.Value ?? string.Empty)
-                    .ToList());
+                runErrors: runInfos?.Where(i => i.Outcome == "Error").Select(i => i.Text).ToList(),
+                runWarnings: runInfos?.Where(i => i.Outcome == "Warning").Select(i => i.Text).ToList());
         }
 
         public void AssertSinglePassingTest()
         {
             Assert.That(RunErrors, Is.Empty);
+
+            foreach (var warning in RunWarnings)
+                TestContext.WriteLine("Test run warning: " + warning);
+
             Assert.That(Counters.Total, Is.EqualTo(1), "There should be a single test in the test results.");
             Assert.That(Counters.Passed, Is.EqualTo(1), "There should be a single test passing in the test results.");
         }
