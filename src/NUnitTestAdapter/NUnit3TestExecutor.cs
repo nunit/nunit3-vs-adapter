@@ -317,7 +317,7 @@ namespace NUnit.VisualStudio.TestAdapter
             catch (FileNotFoundException ex)
             {
                 // Probably from the GetExportedTypes in NUnit.core, attempting to find an assembly, not a problem if it is not NUnit here
-                TestLog.Warning("   Dependent Assembly " + ex.FileName + " of " + assemblyPath + " not found. Can be ignored if not a NUnit project.");
+                TestLog.Warning("   Dependent Assembly " + ex.FileName + " of " + assemblyPath + " not found. Can be ignored if not an NUnit project.");
             }
             catch (Exception ex)
             {
