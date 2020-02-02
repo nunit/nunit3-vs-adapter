@@ -67,8 +67,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 
         private static void WriteNuGetConfig(string directory, string testNupkgDirectory, string packageCachePath)
         {
-            const string fallbackFolder = @"C:\Program Files\dotnet\sdk\NuGetFallbackFolder";
-
             using (var file = File.CreateText(Path.Combine(directory, "nuget.config")))
             using (var writer = XmlWriter.Create(file, new XmlWriterSettings { Indent = true }))
             {
@@ -98,21 +96,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                 writer.WriteAttributeString("value", testNupkgDirectory);
                 writer.WriteEndElement();
 
-                writer.WriteComment($" Speeds up first-time restore by populating {GetLeafDirectoryName(packageCachePath)} from {GetLeafDirectoryName(fallbackFolder)} rather than nuget.org. ");
-                writer.WriteStartElement("add");
-                writer.WriteAttributeString("key", "Pre-downloaded packages");
-                writer.WriteAttributeString("value", fallbackFolder);
-                writer.WriteEndElement();
-
                 writer.WriteEndElement();
                 writer.WriteEndElement();
             }
-        }
-
-        private static string GetLeafDirectoryName(string directoryPath)
-        {
-            return Path.GetFileName(directoryPath)
-                ?? Path.GetFileName(Path.GetDirectoryName(directoryPath));
         }
     }
 }

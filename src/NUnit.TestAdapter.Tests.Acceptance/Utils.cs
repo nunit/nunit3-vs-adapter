@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using NUnit.Framework;
 
@@ -7,10 +8,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 {
     internal static class Utils
     {
+        private static readonly char[] InvalidFileNameChars = Path.GetInvalidFileNameChars()
+            .Concat(new[] { '"' }) // VSTest strips quotes from the test assembly path and fails to locate the .deps.json in the same directory
+            .Distinct().ToArray();
+
         public static string GetSafeFilename(string arbitraryString, bool allowDirectorySeparators = false)
         {
-            var invalidChars = Path.GetInvalidFileNameChars();
-            var replaceIndex = arbitraryString.IndexOfAny(invalidChars, 0);
+            var replaceIndex = arbitraryString.IndexOfAny(InvalidFileNameChars, 0);
             if (replaceIndex == -1) return arbitraryString;
 
             var r = new StringBuilder();
@@ -22,9 +26,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
                 switch (arbitraryString[replaceIndex])
                 {
-                    case '"':
-                        r.Append("''");
-                        break;
                     case '<':
                     case '>':
                     case '|':
@@ -37,6 +38,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                     case '\0':
                     case '\f':
                     case '?':
+                    case '"':
                         break;
                     case '\t':
                     case '\n':
@@ -50,7 +52,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                 }
 
                 i = replaceIndex + 1;
-                replaceIndex = arbitraryString.IndexOfAny(invalidChars, i);
+                replaceIndex = arbitraryString.IndexOfAny(InvalidFileNameChars, i);
             }
             while (replaceIndex != -1);
 

@@ -5,7 +5,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 {
     public sealed class BundledDependencyTests : AcceptanceTests
     {
-        [Test]
+        [Test, Platform("Win")]
         public static void User_tests_get_the_version_of_Mono_Cecil_referenced_from_the_test_project()
         {
             var workspace = CreateWorkspace()
@@ -57,7 +57,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                 select $@"bin\Debug\{targetFramework}\Test.dll");
         }
 
-        [Test]
+        [Test, Platform("Win")]
         public static void Engine_uses_its_bundled_version_of_Mono_Cecil_instead_of_the_version_referenced_by_the_test_project()
         {
             var workspace = CreateWorkspace()

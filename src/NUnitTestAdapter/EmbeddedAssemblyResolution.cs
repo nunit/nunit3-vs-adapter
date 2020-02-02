@@ -88,7 +88,7 @@ namespace NUnit.VisualStudio.TestAdapter
 #if !NET35
                 .GetTypeInfo()
 #endif
-                .Assembly.GetManifestResourceStream(@"Assemblies\" + properCasing + ".dll");
+                .Assembly.GetManifestResourceStream(@"Assemblies/" + properCasing + ".dll");
         }
 
 #if NET35

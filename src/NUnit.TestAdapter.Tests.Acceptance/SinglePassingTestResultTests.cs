@@ -41,7 +41,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                 End Namespace");
         }
 
-        [TestCaseSource(nameof(TargetFrameworks))]
+        [TestCaseSource(nameof(TargetFrameworks)), Platform("Win")]
         public static void Single_target_csproj(string targetFramework)
         {
             var workspace = CreateWorkspace()
@@ -68,7 +68,31 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                 .AssertSinglePassingTest();
         }
 
-        [TestCaseSource(nameof(TargetFrameworks))]
+        [TestCaseSource(nameof(DotNetCliTargetFrameworks))]
+        public static void Single_target_csproj_dotnet_CLI(string targetFramework)
+        {
+            var workspace = CreateWorkspace()
+                .AddProject("Test.csproj", $@"
+                    <Project Sdk='Microsoft.NET.Sdk'>
+
+                      <PropertyGroup>
+                        <TargetFramework>{targetFramework}</TargetFramework>
+                      </PropertyGroup>
+
+                      <ItemGroup>
+                        <PackageReference Include='Microsoft.NET.Test.Sdk' Version='*' />
+                        <PackageReference Include='NUnit' Version='*' />
+                        <PackageReference Include='NUnit3TestAdapter' Version='{NuGetPackageVersion}' />
+                      </ItemGroup>
+
+                    </Project>");
+
+            AddTestsCs(workspace);
+
+            workspace.DotNetTest().AssertSinglePassingTest();
+        }
+
+        [TestCaseSource(nameof(TargetFrameworks)), Platform("Win")]
         public static void Single_target_vbproj(string targetFramework)
         {
             var workspace = CreateWorkspace()
@@ -95,7 +119,31 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                 .AssertSinglePassingTest();
         }
 
-        [Test]
+        [TestCaseSource(nameof(DotNetCliTargetFrameworks))]
+        public static void Single_target_vbproj_dotnet_CLI(string targetFramework)
+        {
+            var workspace = CreateWorkspace()
+                .AddProject("Test.vbproj", $@"
+                    <Project Sdk='Microsoft.NET.Sdk'>
+
+                      <PropertyGroup>
+                        <TargetFramework>{targetFramework}</TargetFramework>
+                      </PropertyGroup>
+
+                      <ItemGroup>
+                        <PackageReference Include='Microsoft.NET.Test.Sdk' Version='*' />
+                        <PackageReference Include='NUnit' Version='*' />
+                        <PackageReference Include='NUnit3TestAdapter' Version='{NuGetPackageVersion}' />
+                      </ItemGroup>
+
+                    </Project>");
+
+            AddTestsVb(workspace);
+
+            workspace.DotNetTest().AssertSinglePassingTest();
+        }
+
+        [Test, Platform("Win")]
         public static void Multi_target_csproj()
         {
             var workspace = CreateWorkspace()
@@ -125,6 +173,30 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         }
 
         [Test]
+        public static void Multi_target_csproj_dotnet_CLI()
+        {
+            var workspace = CreateWorkspace()
+                .AddProject("Test.csproj", $@"
+                    <Project Sdk='Microsoft.NET.Sdk'>
+
+                      <PropertyGroup>
+                        <TargetFrameworks>{string.Join(";", DotNetCliTargetFrameworks)}</TargetFrameworks>
+                      </PropertyGroup>
+
+                      <ItemGroup>
+                        <PackageReference Include='Microsoft.NET.Test.Sdk' Version='*' />
+                        <PackageReference Include='NUnit' Version='*' />
+                        <PackageReference Include='NUnit3TestAdapter' Version='{NuGetPackageVersion}' />
+                      </ItemGroup>
+
+                    </Project>");
+
+            AddTestsCs(workspace);
+
+            workspace.DotNetTest().AssertSinglePassingTest();
+        }
+
+        [Test, Platform("Win")]
         public static void Multi_target_vbproj()
         {
             var workspace = CreateWorkspace()
@@ -154,6 +226,30 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         }
 
         [Test]
+        public static void Multi_target_vbproj_dotnet_CLI()
+        {
+            var workspace = CreateWorkspace()
+                .AddProject("Test.vbproj", $@"
+                    <Project Sdk='Microsoft.NET.Sdk'>
+
+                      <PropertyGroup>
+                        <TargetFrameworks>{string.Join(";", DotNetCliTargetFrameworks)}</TargetFrameworks>
+                      </PropertyGroup>
+
+                      <ItemGroup>
+                        <PackageReference Include='Microsoft.NET.Test.Sdk' Version='*' />
+                        <PackageReference Include='NUnit' Version='*' />
+                        <PackageReference Include='NUnit3TestAdapter' Version='{NuGetPackageVersion}' />
+                      </ItemGroup>
+
+                    </Project>");
+
+            AddTestsVb(workspace);
+
+            workspace.DotNetTest().AssertSinglePassingTest();
+        }
+
+        [Test, Platform("Win")]
         public static void Legacy_csproj_with_PackageReference()
         {
             var workspace = CreateWorkspace();
@@ -224,7 +320,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
             result.AssertSinglePassingTest();
         }
 
-        [Test]
+        [Test, Platform("Win")]
         public static void Legacy_vbproj_with_PackageReference()
         {
             var workspace = CreateWorkspace()
@@ -329,7 +425,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                 </packages>");
         }
 
-        [Test]
+        [Test, Platform("Win")]
         public static void Legacy_csproj_with_packages_config()
         {
             var workspace = CreateWorkspace()
@@ -419,7 +515,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                 .AssertSinglePassingTest();
         }
 
-        [Test]
+        [Test, Platform("Win")]
         public static void Legacy_vbproj_with_packages_config()
         {
             var workspace = CreateWorkspace()
