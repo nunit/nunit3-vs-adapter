@@ -1,4 +1,7 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Xml.Linq;
 using NUnit.Framework;
 
@@ -9,11 +12,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
     {
         public string Outcome { get; }
         public VSTestResultCounters Counters { get; }
+        public IReadOnlyList<string> RunErrors { get; }
 
-        public VSTestResult(string outcome, VSTestResultCounters counters)
+        public VSTestResult(string outcome, VSTestResultCounters counters, IReadOnlyList<string> runErrors = null)
         {
             Outcome = outcome;
             Counters = counters;
+            RunErrors = runErrors ?? Array.Empty<string>();
         }
 
         public static VSTestResult Load(string trxFilePath)
@@ -43,11 +48,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                     (int)counters.Attribute("warning"),
                     (int)counters.Attribute("completed"),
                     (int)counters.Attribute("inProgress"),
-                    (int)counters.Attribute("pending")));
+                    (int)counters.Attribute("pending")),
+                runErrors: resultSummary.Element(ns + "RunInfos")
+                    ?.Elements()
+                    .Where(runInfo => runInfo.Attribute("outcome")?.Value == "Error")
+                    .Select(runInfo => runInfo.Element(ns + "Text")?.Value ?? string.Empty)
+                    .ToList());
         }
 
         public void AssertSinglePassingTest()
         {
+            Assert.That(RunErrors, Is.Empty);
             Assert.That(Counters.Total, Is.EqualTo(1), "There should be a single test in the test results.");
             Assert.That(Counters.Passed, Is.EqualTo(1), "There should be a single test passing in the test results.");
         }
