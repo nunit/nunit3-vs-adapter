@@ -26,9 +26,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
                 switch (arbitraryString[replaceIndex])
                 {
-                    case '"':
-                        r.Append("''");
-                        break;
                     case '<':
                     case '>':
                     case '|':
@@ -41,6 +38,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                     case '\0':
                     case '\f':
                     case '?':
+                    case '"':
                         break;
                     case '\t':
                     case '\n':
