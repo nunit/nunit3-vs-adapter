@@ -141,7 +141,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     // Either the NUnit framework was not referenced by the test assembly
                     // or some other error occured. Not a problem if not an NUnit assembly.
-                    TestLog.Warning("Dependent Assembly " + ex.FileName + " of " + sourceAssembly + " not found. Can be ignored if not a NUnit project.");
+                    TestLog.Warning("Dependent Assembly " + ex.FileName + " of " + sourceAssembly + " not found. Can be ignored if not an NUnit project.");
                 }
                 catch (FileLoadException ex)
                 {
