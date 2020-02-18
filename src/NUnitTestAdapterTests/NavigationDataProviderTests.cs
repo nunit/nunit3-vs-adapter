@@ -36,6 +36,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     public static class NavigationDataProviderTests
     {
 #if NET46
+        [Ignore("Joseph: This doesn't really work!")]
         [Description(
             "This simulates what happens when the adapter is deployed: " +
             "nunit.framework.dll is no longer beside the adapter assembly " +
