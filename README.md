@@ -17,8 +17,10 @@ or the latest pre-release version
 ##### Builds on master
 [![Cake build](https://img.shields.io/azure-devops/build/nunit/9d7ec8eb-1a1a-4fff-a88f-43bcdceb5f33/12.svg)](https://nunit.visualstudio.com/NUnit/_build?definitionId=12&_a=completed)
 [![VS Build](https://img.shields.io/azure-devops/build/nunit/9d7ec8eb-1a1a-4fff-a88f-43bcdceb5f33/4.svg)](https://nunit.visualstudio.com/NUnit/_build?definitionId=4&_a=completed)
-![Tests](https://img.shields.io/azure-devops/tests/nunit/nunit/4.svg?style=flat)
-![Coverage](https://img.shields.io/azure-devops/coverage/nunit/nunit/4.svg?style=flat)
+[![Tests](https://img.shields.io/azure-devops/tests/nunit/nunit/4)](https://nunit.visualstudio.com/NUnit/_build?definitionId=4&_a=completed)
+[![Coverage](https://img.shields.io/azure-devops/coverage/nunit/nunit/4.svg)](https://nunit.visualstudio.com/NUnit/_build?definitionId=4&_a=completed)
+
+
 
 ##### Support
 
