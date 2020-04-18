@@ -23,7 +23,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -211,14 +211,24 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             if (CollectSourceInformation && _navigationDataProvider != null)
             {
-                var className = testNode.ClassName;
-                var methodName = testNode.MethodName;
-
-                var navData = _navigationDataProvider.GetNavigationData(className, methodName);
-                if (navData.IsValid)
+                var codeFilePath = testNode.Properties.FirstOrDefault(p => p.Name == "CodeFilePath");
+                if (codeFilePath != null)
                 {
-                    testCase.CodeFilePath = navData.FilePath;
-                    testCase.LineNumber = navData.LineNumber;
+                    testCase.CodeFilePath = codeFilePath.Value;
+                    var lineNumber = testNode.Properties.FirstOrDefault(p => p.Name == "LineNumber");
+                    testCase.LineNumber = lineNumber != null ? Convert.ToInt32(lineNumber.Value) : 1;
+                }
+                else
+                {
+                    var className = testNode.ClassName;
+                    var methodName = testNode.MethodName;
+
+                    var navData = _navigationDataProvider.GetNavigationData(className, methodName);
+                    if (navData.IsValid)
+                    {
+                        testCase.CodeFilePath = navData.FilePath;
+                        testCase.LineNumber = navData.LineNumber;
+                    }
                 }
             }
 
