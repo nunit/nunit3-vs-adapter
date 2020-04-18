@@ -211,14 +211,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             if (CollectSourceInformation && _navigationDataProvider != null)
             {
-                var codeFilePath = testNode.Properties.FirstOrDefault(p => p.Name == "CodeFilePath");
-                if (codeFilePath != null)
-                {
-                    testCase.CodeFilePath = codeFilePath.Value;
-                    var lineNumber = testNode.Properties.FirstOrDefault(p => p.Name == "LineNumber");
-                    testCase.LineNumber = lineNumber != null ? Convert.ToInt32(lineNumber.Value) : 1;
-                }
-                else
+                if (!CheckCodeFilePathOverride())
                 {
                     var className = testNode.ClassName;
                     var methodName = testNode.MethodName;
@@ -231,10 +224,28 @@ namespace NUnit.VisualStudio.TestAdapter
                     }
                 }
             }
+            else
+            {
+                _ = CheckCodeFilePathOverride();
+            }
 
             testCase.AddTraitsFromTestNode(testNode, TraitsCache, _logger, adapterSettings);
 
             return testCase;
+
+            bool CheckCodeFilePathOverride()
+            {
+                var codeFilePath = testNode.Properties.FirstOrDefault(p => p.Name == "_CodeFilePath");
+                if (codeFilePath != null)
+                {
+                    testCase.CodeFilePath = codeFilePath.Value;
+                    var lineNumber = testNode.Properties.FirstOrDefault(p => p.Name == "_LineNumber");
+                    testCase.LineNumber = lineNumber != null ? Convert.ToInt32(lineNumber.Value) : 1;
+                    return true;
+                }
+                return false;
+            }
+
         }
 
         private VSTestResult MakeTestResultFromLegacyXmlNode(NUnitTestEventTestCase resultNode, IEnumerable<XmlNode> outputNodes)
