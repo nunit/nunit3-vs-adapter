@@ -26,7 +26,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+#if LAUNCHDEBUGGER
 using System.Diagnostics;
+#endif
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -55,7 +57,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private DumpXml dumpXml;
 
-        #region ITestDiscoverer Members
+#region ITestDiscoverer Members
 
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger messageLogger, ITestCaseDiscoverySink discoverySink)
         {
@@ -171,9 +173,9 @@ namespace NUnit.VisualStudio.TestAdapter
             Unload();
         }
 
-        #endregion
+#endregion
 
-        #region Helper Methods
+#region Helper Methods
 
         private int ProcessTestCases(NUnitResults results, ITestCaseDiscoverySink discoverySink, TestConverter testConverter)
         {
@@ -199,6 +201,6 @@ namespace NUnit.VisualStudio.TestAdapter
             return cases;
         }
 
-        #endregion
+#endregion
     }
 }
