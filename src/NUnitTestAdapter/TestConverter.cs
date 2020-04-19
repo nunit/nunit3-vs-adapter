@@ -23,7 +23,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -211,20 +211,41 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             if (CollectSourceInformation && _navigationDataProvider != null)
             {
-                var className = testNode.ClassName;
-                var methodName = testNode.MethodName;
-
-                var navData = _navigationDataProvider.GetNavigationData(className, methodName);
-                if (navData.IsValid)
+                if (!CheckCodeFilePathOverride())
                 {
-                    testCase.CodeFilePath = navData.FilePath;
-                    testCase.LineNumber = navData.LineNumber;
+                    var className = testNode.ClassName;
+                    var methodName = testNode.MethodName;
+
+                    var navData = _navigationDataProvider.GetNavigationData(className, methodName);
+                    if (navData.IsValid)
+                    {
+                        testCase.CodeFilePath = navData.FilePath;
+                        testCase.LineNumber = navData.LineNumber;
+                    }
                 }
+            }
+            else
+            {
+                _ = CheckCodeFilePathOverride();
             }
 
             testCase.AddTraitsFromTestNode(testNode, TraitsCache, _logger, adapterSettings);
 
             return testCase;
+
+            bool CheckCodeFilePathOverride()
+            {
+                var codeFilePath = testNode.Properties.FirstOrDefault(p => p.Name == "_CodeFilePath");
+                if (codeFilePath != null)
+                {
+                    testCase.CodeFilePath = codeFilePath.Value;
+                    var lineNumber = testNode.Properties.FirstOrDefault(p => p.Name == "_LineNumber");
+                    testCase.LineNumber = lineNumber != null ? Convert.ToInt32(lineNumber.Value) : 1;
+                    return true;
+                }
+                return false;
+            }
+
         }
 
         private VSTestResult MakeTestResultFromLegacyXmlNode(NUnitTestEventTestCase resultNode, IEnumerable<XmlNode> outputNodes)
