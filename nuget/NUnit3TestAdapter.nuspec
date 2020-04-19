@@ -23,7 +23,7 @@
         <language>en-US</language>
         <tags>test visualstudio testadapter nunit nunit3 dotnet</tags>
 
-        <developmentDependency>true</developmentDependency>
+        <developmentDependency>false</developmentDependency>
         <dependencies>
             <group targetFramework="netcoreapp2.1">
                 <dependency id="Microsoft.DotNet.InternalAbstractions" version="1.0.0" />
