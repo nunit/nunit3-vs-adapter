@@ -217,8 +217,6 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public TestOutcome MapWarningTo { get; private set; }
 
-
-
         #endregion
 
         #region Public Methods

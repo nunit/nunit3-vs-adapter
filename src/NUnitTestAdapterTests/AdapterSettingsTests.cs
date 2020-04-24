@@ -396,6 +396,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void MapWarningToTestsDefault()
         {
+            _settings.Load("");
             Assert.That(_settings.MapWarningTo, Is.EqualTo(TestOutcome.Skipped));
         }
     }
