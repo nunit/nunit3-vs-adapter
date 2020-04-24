@@ -379,38 +379,29 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         // Public for testing
-        public static TestOutcome GetTestOutcome(NUnitTestEvent resultNode)
+        public TestOutcome GetTestOutcome(NUnitTestEvent resultNode)
         {
-            switch (resultNode.Result())
+            return resultNode.Result() switch
             {
-                case NUnitTestEvent.ResultType.Success:
-                    return TestOutcome.Passed;
-                case NUnitTestEvent.ResultType.Failed:
-                    return TestOutcome.Failed;
-                case NUnitTestEvent.ResultType.Skipped:
-                    return resultNode.IsIgnored ? TestOutcome.Skipped : TestOutcome.None;
-                case NUnitTestEvent.ResultType.Warning:
-                    return TestOutcome.Skipped;
-                default:
-                    return TestOutcome.None;
-            }
+                NUnitTestEvent.ResultType.Success => TestOutcome.Passed,
+                NUnitTestEvent.ResultType.Failed => TestOutcome.Failed,
+                NUnitTestEvent.ResultType.Skipped => (resultNode.IsIgnored ? TestOutcome.Skipped : TestOutcome.None),
+                NUnitTestEvent.ResultType.Warning => adapterSettings.MapWarningTo,
+                _ => TestOutcome.None
+            };
         }
 
         TestOutcome GetAssertionOutcome(XmlNode assertion)
         {
-            switch (assertion.GetAttribute("result"))
+            return assertion.GetAttribute("result") switch
             {
-                case "Passed":
-                    return TestOutcome.Passed;
-                case "Failed":
-                case "Error":
-                    return TestOutcome.Failed;
-                case "Warning":
-                    return TestOutcome.Skipped;
-                case "Inconclusive":
-                default:
-                    return TestOutcome.None;
-            }
+                "Passed" => TestOutcome.Passed,
+                "Failed" => TestOutcome.Failed,
+                "Error" => TestOutcome.Failed,
+                "Warning" => adapterSettings.MapWarningTo,
+                "Inconclusive" => TestOutcome.None,
+                _ => TestOutcome.None
+            };
         }
 
         #endregion

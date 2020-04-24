@@ -25,7 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
-
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 namespace NUnit.VisualStudio.TestAdapter
@@ -89,10 +89,11 @@ namespace NUnit.VisualStudio.TestAdapter
 
         bool UseParentFQNForParametrizedTests { get; }
 
-        bool UseNUnitIdforTestCaseId { get;  }
+        bool UseNUnitIdforTestCaseId { get; }
 
         int ConsoleOut { get; }
         bool StopOnError { get; }
+        TestOutcome MapWarningTo { get; }
 
         void Load(IDiscoveryContext context);
         void Load(string settingsXml);
@@ -214,6 +215,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public bool PreFilter { get; private set; }
 
+        public TestOutcome MapWarningTo { get; private set; }
+
 
 
         #endregion
@@ -292,21 +295,10 @@ namespace NUnit.VisualStudio.TestAdapter
             var vsTestCategoryType = GetInnerText(nunitNode, nameof(VsTestCategoryType), Verbosity > 0);
             if (vsTestCategoryType != null)
             {
-                switch (vsTestCategoryType.ToLower())
-                {
-                    case "nunit":
-                        VsTestCategoryType = VsTestCategoryType.NUnit;
-                        break;
-                    case "mstest":
-                        VsTestCategoryType = VsTestCategoryType.MsTest;
-                        break;
-                    default:
-                        _logger.Warning(
-                            $"Invalid value ({vsTestCategoryType}) for VsTestCategoryType, should be either NUnit or MsTest");
-                        break;
-                }
+                MapTestCategory(vsTestCategoryType);
             }
 
+            MapWarningTo = MapWarningOutcome(GetInnerText(nunitNode, nameof(MapWarningTo), Verbosity > 0));
             var inProcDataCollectorNode =
                 doc.SelectSingleNode("RunSettings/InProcDataCollectionRunSettings/InProcDataCollectors");
             InProcDataCollectorsAvailable = inProcDataCollectorNode != null &&
@@ -365,6 +357,23 @@ namespace NUnit.VisualStudio.TestAdapter
                     _logger.Error($"   Invalid path for {purpose}: {path}");
                     throw;
                 }
+            }
+        }
+
+        private void MapTestCategory(string vsTestCategoryType)
+        {
+            switch (vsTestCategoryType.ToLower())
+            {
+                case "nunit":
+                    VsTestCategoryType = VsTestCategoryType.NUnit;
+                    break;
+                case "mstest":
+                    VsTestCategoryType = VsTestCategoryType.MsTest;
+                    break;
+                default:
+                    _logger.Warning(
+                        $"Invalid value ({vsTestCategoryType}) for VsTestCategoryType, should be either NUnit or MsTest");
+                    break;
             }
         }
 
@@ -487,6 +496,29 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 _logger.Info($"Setting: {xpath} = {res}");
             }
+        }
+
+        public TestOutcome MapWarningOutcome(string outcome)
+        {
+            if (outcome == null)
+                return TestOutcome.Skipped;
+            var testOutcome = outcome.ToLower() switch
+            {
+                "skipped" => TestOutcome.Skipped,
+                "failed" => TestOutcome.Failed,
+                "passed" => TestOutcome.Passed,
+                "none" => TestOutcome.None,
+                _ => TestOutcome.NotFound,
+            };
+            if (testOutcome == TestOutcome.NotFound)
+            {
+                _logger.Warning(
+                    $"Invalid value ({outcome}) for MapWarningTo, should be either Skipped,Failed,Passed or None");
+                return TestOutcome.Skipped;
+            }
+
+            return testOutcome;
+
         }
         #endregion
     }

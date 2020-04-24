@@ -22,6 +22,7 @@
 // ***********************************************************************
 
 using System.IO;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
@@ -325,9 +326,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 </RunSettings>");
 
             Assert.Null(_settings.DomainUsage);
-            Assert.True(_settings.SynchronousEvents);
+            Assert.That(_settings.SynchronousEvents);
             Assert.That(_settings.NumberOfTestWorkers, Is.Zero);
-            Assert.True(_settings.InProcDataCollectorsAvailable);
+            Assert.That(_settings.InProcDataCollectorsAvailable);
         }
 
         [Test]
@@ -371,6 +372,31 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             _settings.Load("<RunSettings><NUnit><Where>cat == SomeCategory and namespace == SomeNamespace or cat != SomeOtherCategory</Where></NUnit></RunSettings>");
             Assert.That(_settings.Where, Is.EqualTo("cat == SomeCategory and namespace == SomeNamespace or cat != SomeOtherCategory"));
+        }
+
+        [TestCase("None", TestOutcome.None)]
+        [TestCase("Passed", TestOutcome.Passed)]
+        [TestCase("Failed", TestOutcome.Failed)]
+        [TestCase("Skipped", TestOutcome.Skipped)]
+        public void MapWarningToTests(string setting, TestOutcome outcome)
+        {
+            var runsettings = $"<RunSettings><NUnit><MapWarningTo>{setting}</MapWarningTo></NUnit></RunSettings>";
+            _settings.Load(runsettings);
+            Assert.That(_settings.MapWarningTo, Is.EqualTo(outcome));
+        }
+
+        [TestCase("garbage")]
+        public void MapWarningToTestsFailing(string setting)
+        {
+            var runsettings = $"<RunSettings><NUnit><MapWarningTo>{setting}</MapWarningTo></NUnit></RunSettings>";
+            _settings.Load(runsettings);
+            Assert.That(_settings.MapWarningTo, Is.EqualTo(TestOutcome.Skipped));
+        }
+
+        [Test]
+        public void MapWarningToTestsDefault()
+        {
+            Assert.That(_settings.MapWarningTo, Is.EqualTo(TestOutcome.Skipped));
         }
     }
 }
