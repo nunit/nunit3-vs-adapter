@@ -69,17 +69,18 @@ namespace NUnit.VisualStudio.TestAdapter.Metadata
                     for (var i = 0; i < parameters.Length; i++)
                     {
                         if (parameters[i].Name != "stateMachineType") continue;
-                        var argument = attributeData.ConstructorArguments[i].Value as Type;
-                        if (argument != null)
+                        if (attributeData.ConstructorArguments[i].Value is Type argument)
                         {
-                            if (candidate != null) return null;
+                            if (candidate != null)
+                                return null;
                             candidate = argument;
                         }
                     }
                 }
             }
 
-            if (candidate == null) return null;
+            if (candidate == null)
+                return null;
             return new TypeInfo(candidate);
         }
 

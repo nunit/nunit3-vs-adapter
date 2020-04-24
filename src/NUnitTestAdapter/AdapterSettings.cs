@@ -518,7 +518,6 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             return testOutcome;
-
         }
         #endregion
     }

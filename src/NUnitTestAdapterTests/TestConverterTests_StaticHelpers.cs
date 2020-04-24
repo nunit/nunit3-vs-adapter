@@ -42,7 +42,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase("<test-case result='Skipped'/>", TestOutcome.None)]
         [TestCase("<test-case result='Passed'/>", TestOutcome.Passed)]
         [TestCase("<test-case result='Warning'/>", TestOutcome.Skipped)]
-        public void ResultStateToTestOutcome(string result,TestOutcome expected)
+        public void ResultStateToTestOutcome(string result, TestOutcome expected)
         {
             var resultNode = new NUnitTestEventTestCase(XmlHelper.CreateXmlNode(result));
             var logger = Substitute.For<ITestLogger>();

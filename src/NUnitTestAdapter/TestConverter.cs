@@ -245,7 +245,6 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
                 return false;
             }
-
         }
 
         private VSTestResult MakeTestResultFromLegacyXmlNode(NUnitTestEventTestCase resultNode, IEnumerable<XmlNode> outputNodes)
