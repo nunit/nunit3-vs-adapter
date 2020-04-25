@@ -131,6 +131,13 @@ namespace NUnit.VisualStudio.TestAdapter
                 else if (testCaseResult.Outcome == TestOutcome.Skipped || testCaseResult.Outcome == TestOutcome.None)
                 {
                     testCaseResult.ErrorMessage = resultNode.ReasonMessage;
+                    testCaseResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, resultNode.ReasonMessage));
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(resultNode.ReasonMessage))
+                        testCaseResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, resultNode.ReasonMessage));
+
                 }
 
                 results.Add(testCaseResult);
