@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Xml;
 using NUnit.VisualStudio.TestAdapter.Internal;
@@ -188,8 +189,25 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public string ReasonMessage { get; }
 
-        public bool HasReason => string.IsNullOrEmpty(ReasonMessage);
+        public bool HasReason => !string.IsNullOrEmpty(ReasonMessage);
         public bool HasFailure => Failure != null;
+
+        /// <summary>
+        /// Find stacktrace in assertion nodes if not defined (seems .netcore2.0 doesn't provide stack-trace for Assert.Fail("abc"))
+        /// </summary>
+        public string StackTrace
+        {
+            get
+            {
+                string stackTrace = string.Empty;
+                foreach (XmlNode assertionStacktraceNode in Node.SelectNodes("assertions/assertion/stack-trace"))
+                {
+                    stackTrace += assertionStacktraceNode.InnerText;
+                }
+
+                return stackTrace;
+            }
+        }
     }
 
     public class NUnitProperty

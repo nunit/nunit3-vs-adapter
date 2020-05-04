@@ -118,19 +118,9 @@ namespace NUnit.VisualStudio.TestAdapter
                     case TestOutcome.NotFound:
                     {
                         testCaseResult.ErrorMessage = resultNode.Failure?.Message;
-                        testCaseResult.ErrorStackTrace = resultNode.Failure?.Stacktrace;
+                        testCaseResult.ErrorStackTrace = resultNode.Failure?.Stacktrace ?? resultNode.StackTrace;
 
-                        // find stacktrace in assertion nodes if not defined (seems .netcore2.0 doesn't provide stack-trace for Assert.Fail("abc"))
-                        if (testCaseResult.ErrorStackTrace == null)
-                        {
-                            string stackTrace = string.Empty;
-                            foreach (XmlNode assertionStacktraceNode in resultNode.Node.SelectNodes("assertions/assertion/stack-trace"))
-                            {
-                                stackTrace += assertionStacktraceNode.InnerText;
-                            }
-                            testCaseResult.ErrorStackTrace = stackTrace;
-                        }
-
+                        
                         break;
                     }
                     case TestOutcome.Skipped:
