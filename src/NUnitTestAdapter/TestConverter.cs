@@ -140,7 +140,7 @@ namespace NUnit.VisualStudio.TestAdapter
                         break;
                     default:
                     {
-                        if (!string.IsNullOrEmpty(resultNode.ReasonMessage))
+                        if (adapterSettings.ConsoleOut > 0 && !string.IsNullOrEmpty(resultNode.ReasonMessage))
                             testCaseResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, resultNode.ReasonMessage));
                         break;
                     }
