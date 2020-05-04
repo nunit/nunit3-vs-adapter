@@ -94,6 +94,7 @@ namespace NUnit.VisualStudio.TestAdapter
         int ConsoleOut { get; }
         bool StopOnError { get; }
         TestOutcome MapWarningTo { get; }
+        bool UseTestNameInConsoleOutput { get; }
 
         void Load(IDiscoveryContext context);
         void Load(string settingsXml);
@@ -217,6 +218,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public TestOutcome MapWarningTo { get; private set; }
 
+        public bool UseTestNameInConsoleOutput { get; private set; }
+
         #endregion
 
         #region Public Methods
@@ -257,13 +260,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 GetInnerTextAsBool(runConfiguration, nameof(CollectDataForEachTestSeparately), false);
 
             TestProperties = new Dictionary<string, string>();
-            foreach (XmlNode node in doc.SelectNodes("RunSettings/TestRunParameters/Parameter"))
-            {
-                var key = node.GetAttribute("name");
-                var value = node.GetAttribute("value");
-                if (key != null && value != null)
-                    TestProperties.Add(key, value);
-            }
+            UpdateTestProperties();
 
             // NUnit settings
             InternalTraceLevel = GetInnerTextWithLog(nunitNode, nameof(InternalTraceLevel), "Off", "Error", "Warning",
@@ -290,13 +287,9 @@ namespace NUnit.VisualStudio.TestAdapter
             DumpXmlTestDiscovery = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestDiscovery), false);
             DumpXmlTestResults = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestResults), false);
             PreFilter = GetInnerTextAsBool(nunitNode, nameof(PreFilter), false);
-            var vsTestCategoryType = GetInnerText(nunitNode, nameof(VsTestCategoryType), Verbosity > 0);
-            if (vsTestCategoryType != null)
-            {
-                MapTestCategory(vsTestCategoryType);
-            }
-
+            MapTestCategory(GetInnerText(nunitNode, nameof(VsTestCategoryType), Verbosity > 0));
             MapWarningTo = MapWarningOutcome(GetInnerText(nunitNode, nameof(MapWarningTo), Verbosity > 0));
+            UseTestNameInConsoleOutput = GetInnerTextAsBool(nunitNode, nameof(UseTestNameInConsoleOutput), false);
             var inProcDataCollectorNode =
                 doc.SelectSingleNode("RunSettings/InProcDataCollectionRunSettings/InProcDataCollectors");
             InProcDataCollectorsAvailable = inProcDataCollectorNode != null &&
@@ -356,10 +349,23 @@ namespace NUnit.VisualStudio.TestAdapter
                     throw;
                 }
             }
+
+            void UpdateTestProperties()
+            {
+                foreach (XmlNode node in doc.SelectNodes("RunSettings/TestRunParameters/Parameter"))
+                {
+                    var key = node.GetAttribute("name");
+                    var value = node.GetAttribute("value");
+                    if (key != null && value != null)
+                        TestProperties.Add(key, value);
+                }
+            }
         }
 
         private void MapTestCategory(string vsTestCategoryType)
         {
+            if (vsTestCategoryType == null)
+                return;
             switch (vsTestCategoryType.ToLower())
             {
                 case "nunit":

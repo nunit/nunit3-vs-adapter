@@ -50,18 +50,12 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         }
         public NUnitTestEventTestOutput(XmlNode node) : base(node)
         {
-            switch (node.GetAttribute("stream"))
+            Stream = node.GetAttribute("stream") switch
             {
-                case "Error":
-                    Stream = Streams.Error;
-                    break;
-                case "Progress":
-                    Stream = Streams.Progress;
-                    break;
-                default:
-                    Stream = Streams.NoIdea;
-                    break;
-            }
+                "Error" => Streams.Error,
+                "Progress" => Streams.Progress,
+                _ => Streams.NoIdea
+            };
         }
 
         /// <summary>

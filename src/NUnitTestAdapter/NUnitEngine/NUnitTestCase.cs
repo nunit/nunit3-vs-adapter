@@ -22,7 +22,6 @@
 // ***********************************************************************
 
 using System.Xml;
-using NUnit.VisualStudio.TestAdapter.Dump;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {

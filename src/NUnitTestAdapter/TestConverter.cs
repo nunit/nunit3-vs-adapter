@@ -112,32 +112,38 @@ namespace NUnit.VisualStudio.TestAdapter
 
             if (testCaseResult != null)
             {
-                if (testCaseResult.Outcome == TestOutcome.Failed || testCaseResult.Outcome == TestOutcome.NotFound)
+                switch (testCaseResult.Outcome)
                 {
-                    testCaseResult.ErrorMessage = resultNode.Failure?.Message;
-                    testCaseResult.ErrorStackTrace = resultNode.Failure?.Stacktrace;
-
-                    // find stacktrace in assertion nodes if not defined (seems .netcore2.0 doesn't provide stack-trace for Assert.Fail("abc"))
-                    if (testCaseResult.ErrorStackTrace == null)
+                    case TestOutcome.Failed:
+                    case TestOutcome.NotFound:
                     {
-                        string stackTrace = string.Empty;
-                        foreach (XmlNode assertionStacktraceNode in resultNode.Node.SelectNodes("assertions/assertion/stack-trace"))
-                        {
-                            stackTrace += assertionStacktraceNode.InnerText;
-                        }
-                        testCaseResult.ErrorStackTrace = stackTrace;
-                    }
-                }
-                else if (testCaseResult.Outcome == TestOutcome.Skipped || testCaseResult.Outcome == TestOutcome.None)
-                {
-                    testCaseResult.ErrorMessage = resultNode.ReasonMessage;
-                    testCaseResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, resultNode.ReasonMessage));
-                }
-                else
-                {
-                    if (!string.IsNullOrEmpty(resultNode.ReasonMessage))
-                        testCaseResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, resultNode.ReasonMessage));
+                        testCaseResult.ErrorMessage = resultNode.Failure?.Message;
+                        testCaseResult.ErrorStackTrace = resultNode.Failure?.Stacktrace;
 
+                        // find stacktrace in assertion nodes if not defined (seems .netcore2.0 doesn't provide stack-trace for Assert.Fail("abc"))
+                        if (testCaseResult.ErrorStackTrace == null)
+                        {
+                            string stackTrace = string.Empty;
+                            foreach (XmlNode assertionStacktraceNode in resultNode.Node.SelectNodes("assertions/assertion/stack-trace"))
+                            {
+                                stackTrace += assertionStacktraceNode.InnerText;
+                            }
+                            testCaseResult.ErrorStackTrace = stackTrace;
+                        }
+
+                        break;
+                    }
+                    case TestOutcome.Skipped:
+                    case TestOutcome.None:
+                        testCaseResult.ErrorMessage = resultNode.ReasonMessage;
+                        testCaseResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, resultNode.ReasonMessage));
+                        break;
+                    default:
+                    {
+                        if (!string.IsNullOrEmpty(resultNode.ReasonMessage))
+                            testCaseResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, resultNode.ReasonMessage));
+                        break;
+                    }
                 }
 
                 results.Add(testCaseResult);
@@ -243,14 +249,12 @@ namespace NUnit.VisualStudio.TestAdapter
             bool CheckCodeFilePathOverride()
             {
                 var codeFilePath = testNode.Properties.FirstOrDefault(p => p.Name == "_CodeFilePath");
-                if (codeFilePath != null)
-                {
-                    testCase.CodeFilePath = codeFilePath.Value;
-                    var lineNumber = testNode.Properties.FirstOrDefault(p => p.Name == "_LineNumber");
-                    testCase.LineNumber = lineNumber != null ? Convert.ToInt32(lineNumber.Value) : 1;
-                    return true;
-                }
-                return false;
+                if (codeFilePath == null)
+                    return false;
+                testCase.CodeFilePath = codeFilePath.Value;
+                var lineNumber = testNode.Properties.FirstOrDefault(p => p.Name == "_LineNumber");
+                testCase.LineNumber = lineNumber != null ? Convert.ToInt32(lineNumber.Value) : 1;
+                return true;
             }
         }
 
