@@ -366,20 +366,13 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             if (vsTestCategoryType == null)
                 return;
-            switch (vsTestCategoryType.ToLower())
-            {
-                case "nunit":
-                    VsTestCategoryType = VsTestCategoryType.NUnit;
-                    break;
-                case "mstest":
-                    VsTestCategoryType = VsTestCategoryType.MsTest;
-                    break;
-                default:
-                    _logger.Warning(
-                        $"Invalid value ({vsTestCategoryType}) for VsTestCategoryType, should be either NUnit or MsTest");
-                    break;
-            }
+            var ok = TryParse.EnumTryParse(vsTestCategoryType, out VsTestCategoryType result);
+            if (ok)
+                VsTestCategoryType = result;
+            else
+                _logger.Warning($"Invalid value ({vsTestCategoryType}) for VsTestCategoryType, should be either NUnit or MsTest");
         }
+
 
         public void SaveRandomSeed(string dirname)
         {
@@ -506,22 +499,16 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             if (outcome == null)
                 return TestOutcome.Skipped;
-            var testOutcome = outcome.ToLower() switch
-            {
-                "skipped" => TestOutcome.Skipped,
-                "failed" => TestOutcome.Failed,
-                "passed" => TestOutcome.Passed,
-                "none" => TestOutcome.None,
-                _ => TestOutcome.NotFound,
-            };
-            if (testOutcome == TestOutcome.NotFound)
+
+            bool ok = TryParse.EnumTryParse(outcome, out TestOutcome testoutcome);
+
+            if (!ok)
             {
                 _logger.Warning(
                     $"Invalid value ({outcome}) for MapWarningTo, should be either Skipped,Failed,Passed or None");
                 return TestOutcome.Skipped;
             }
-
-            return testOutcome;
+            return testoutcome;
         }
         #endregion
     }
