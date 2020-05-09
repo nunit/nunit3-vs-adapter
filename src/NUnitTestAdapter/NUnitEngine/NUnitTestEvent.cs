@@ -22,13 +22,9 @@
 // ***********************************************************************
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Runtime.Serialization;
 using System.Xml;
-using NUnit.VisualStudio.TestAdapter.Internal;
-using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {

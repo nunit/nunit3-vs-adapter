@@ -119,8 +119,6 @@ namespace NUnit.VisualStudio.TestAdapter
                     {
                         testCaseResult.ErrorMessage = resultNode.Failure?.Message;
                         testCaseResult.ErrorStackTrace = resultNode.Failure?.Stacktrace ?? resultNode.StackTrace;
-
-                        
                         break;
                     }
                     case TestOutcome.Skipped:
