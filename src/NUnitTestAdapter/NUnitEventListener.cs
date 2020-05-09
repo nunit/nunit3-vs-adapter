@@ -168,9 +168,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             if (_settings.ConsoleOut == 1 && !string.IsNullOrEmpty(resultNode.ReasonMessage))
             {
-                var msg = resultNode.ReasonMessage;
-                var msg2 = $"{resultNode.Name}: {msg}";
-                _recorder.SendMessage(TestMessageLevel.Informational, msg2);
+                _recorder.SendMessage(TestMessageLevel.Informational, $"{resultNode.Name}: {resultNode.ReasonMessage}");
             }
 
             _recorder.RecordEnd(result.TestCaseResult.TestCase, result.TestCaseResult.Outcome);
