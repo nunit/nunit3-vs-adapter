@@ -189,7 +189,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public bool HasFailure => Failure != null;
 
         /// <summary>
-        /// Find stacktrace in assertion nodes if not defined (seems .netcore2.0 doesn't provide stack-trace for Assert.Fail("abc"))
+        /// Find stacktrace in assertion nodes if not defined.
         /// </summary>
         public string StackTrace
         {
