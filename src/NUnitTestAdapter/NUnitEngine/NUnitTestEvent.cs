@@ -22,6 +22,7 @@
 // ***********************************************************************
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.Serialization;
 using System.Xml;
@@ -135,6 +136,41 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             public bool Ok;
             public DateTimeOffset Time;
         }
+
+        private List<NUnitAttachment> nUnitAttachments;
+
+
+        public IEnumerable<NUnitAttachment> NUnitAttachments
+        {
+            get
+            {
+                if (nUnitAttachments != null) 
+                    return nUnitAttachments;
+                nUnitAttachments = new List<NUnitAttachment>();
+                foreach (XmlNode attachment in Node.SelectNodes("attachments/attachment"))
+                {
+                    var path = attachment.SelectSingleNode("filePath")?.InnerText ?? string.Empty;
+                    var description = attachment.SelectSingleNode("description")?.InnerText;
+                    nUnitAttachments.Add(new NUnitAttachment(path, description));
+                }
+                return nUnitAttachments;
+            }
+        }
+
+    }
+
+
+    public class NUnitAttachment
+    {
+        public NUnitAttachment(string path, string description)
+        {
+            FilePath = path;
+            Description = description;
+        }
+
+        public string FilePath { get;  }
+
+        public string Description { get;  }
     }
 
     /// <summary>

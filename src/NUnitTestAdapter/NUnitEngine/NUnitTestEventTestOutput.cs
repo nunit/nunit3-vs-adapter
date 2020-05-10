@@ -25,10 +25,22 @@ using System.Xml;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
+    public interface INUnitTestEventTestOutput
+    {
+        NUnitTestEventTestOutput.Streams Stream { get; }
+        string TestId { get; }
+        string TestName { get; }
+
+        /// <summary>
+        /// Returns the output information.
+        /// </summary>
+        string Content { get; }
+    }
+
     /// <summary>
     /// Handles the 'test-output' event.
     /// </summary>
-    public class NUnitTestEventTestOutput : NUnitTestEvent
+    public class NUnitTestEventTestOutput : NUnitTestEvent, INUnitTestEventTestOutput
     {
         public enum Streams
         {

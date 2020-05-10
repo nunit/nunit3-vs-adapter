@@ -23,8 +23,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -72,15 +72,15 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public int LastNodeListCount { get; private set; }
 
-        public IEnumerable<string> ProcessTestCaseProperties(XmlNode testNode, bool addToCache, string key = null,
+        public IEnumerable<string> ProcessTestCaseProperties(NUnitTestCase testNode, bool addToCache, string key = null,
             IDictionary<string, TraitsFeature.CachedTestCaseInfo> traitsCache = null)
         {
-            var nodelist = testNode.SelectNodes("properties/property");
+            var nodelist = testNode.Properties;
             LastNodeListCount = nodelist.Count;
-            foreach (XmlNode propertyNode in nodelist)
+            foreach (var propertyNode in nodelist)
             {
-                string propertyName = propertyNode.GetAttribute("name");
-                string propertyValue = propertyNode.GetAttribute("value");
+                string propertyName = propertyNode.Name;
+                string propertyValue = propertyNode.Value;
                 if (addToCache)
                     AddTraitsToCache(traitsCache, key, propertyName, propertyValue);
                 if (IsInternalProperty(propertyName, propertyValue))
@@ -95,7 +95,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
             }
 
-            if (testNode.Attributes?["runstate"]?.Value != "Explicit")
+            if (testNode.RunState != NUnitTestCase.eRunState.Explicit) // Attributes?["runstate"]?.Value != "Explicit")
                 return categorylist;
             // Add UI grouping “Explicit”
             if (testCase.Traits.All(trait => trait.Name != ExplicitTraitName))

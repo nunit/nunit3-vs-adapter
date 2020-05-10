@@ -167,8 +167,8 @@ namespace NUnit.VisualStudio.TestAdapter
             string fullyQualifiedName = testNode.FullName;
             if (adapterSettings.UseParentFQNForParametrizedTests)
             {
-                var parent = testNode.Parent();
-                if (parent.IsParameterizedMethod)
+                var parent = testNode.Parent;
+                if (parent != null && parent.IsParameterizedMethod)
                 {
                     var parameterizedTestFullName = parent.FullName;
 
@@ -306,7 +306,7 @@ namespace NUnit.VisualStudio.TestAdapter
             if (!string.IsNullOrEmpty(output))
                 vsResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, output));
 
-            var attachmentSet = ParseAttachments(resultNode.Node);
+            var attachmentSet = ParseAttachments(resultNode);
             if (attachmentSet.Attachments.Count > 0)
                 vsResult.Attachments.Add(attachmentSet);
 
@@ -341,15 +341,15 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         /// <param name="resultNode">xml node for test result.</param>
         /// <returns>attachments to be added to the test, it will be empty if no attachments are found.</returns>
-        private AttachmentSet ParseAttachments(XmlNode resultNode)
+        private AttachmentSet ParseAttachments(NUnitTestEvent resultNode)
         {
             const string fileUriScheme = "file://";
             var attachmentSet = new AttachmentSet(new Uri(NUnitTestAdapter.ExecutorUri), "Attachments");
 
-            foreach (XmlNode attachment in resultNode.SelectNodes("attachments/attachment"))
+            foreach (var attachment in resultNode.NUnitAttachments ) // AttSelectNodes("attachments/attachment"))
             {
-                var path = attachment.SelectSingleNode("filePath")?.InnerText ?? string.Empty;
-                var description = attachment.SelectSingleNode("description")?.InnerText;
+                var path = attachment.FilePath; // SelectSingleNode("filePath")?.InnerText ?? string.Empty;
+                var description = attachment.Description; // SelectSingleNode("description")?.InnerText;
 
                 if (!(string.IsNullOrEmpty(path) || path.StartsWith(fileUriScheme, StringComparison.OrdinalIgnoreCase)))
                 {

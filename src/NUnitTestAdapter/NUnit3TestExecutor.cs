@@ -226,7 +226,6 @@ namespace NUnit.VisualStudio.TestAdapter
             string actionText = Debugger.IsAttached ? "Debugging " : "Running ";
             string selectionText = filter == null || filter == TestFilter.Empty ? "all" : "selected";
             TestLog.Info(actionText + selectionText + " tests in " + assemblyPath);
-
             // No need to restore if the seed was in runsettings file
             if (!Settings.RandomSeedSpecified)
                 Settings.RestoreRandomSeed(Path.GetDirectoryName(assemblyPath));
@@ -234,6 +233,10 @@ namespace NUnit.VisualStudio.TestAdapter
             if (Settings.DumpXmlTestResults)
             {
                 executionDumpXml = new DumpXml(assemblyPath);
+                string runningBy = testCases == null
+                    ? "<RunningBy>Sources</RunningBy>"
+                    : "<RunningBy>TestCases</RunningBy>";
+                executionDumpXml?.AddString($"\n{runningBy}\n");
             }
 
             try
@@ -241,7 +244,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 var package = CreateTestPackage(assemblyPath, testCases);
                 NUnitEngineAdapter.CreateRunner(package);
                 CreateTestOutputFolder();
-                executionDumpXml?.AddString($"<NUnitDiscoveryInExecution>{assemblyPath}</NUnitExecution>\r\n\r\n");
+                executionDumpXml?.AddString($"<NUnitDiscoveryInExecution>{assemblyPath}</NUnitExecution>\n\n");
                 var discoveryResults = NUnitEngineAdapter.Explore(filter); // _activeRunner.Explore(filter);
                 executionDumpXml?.AddString(discoveryResults.AsString());
 
@@ -275,7 +278,7 @@ namespace NUnit.VisualStudio.TestAdapter
                         TestLog.Info("   Skipping assembly - no matching test cases found");
                         return;
                     }
-                    executionDumpXml?.AddString($"<NUnitExecution>{assemblyPath}</NUnitExecution>\r\n");
+                    executionDumpXml?.AddString($"\n\n<NUnitExecution>{assemblyPath}</NUnitExecution>\n\n");
                     using (var listener = new NUnitEventListener(FrameworkHandle, testConverter, this))
                     {
                         try

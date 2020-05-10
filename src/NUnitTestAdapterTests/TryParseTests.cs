@@ -8,7 +8,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             Something,
             Nothing
-        };
+        }
 
         [TestCase("1", true, Whatever.Nothing)]
         [TestCase("Nothing", true, Whatever.Nothing)]

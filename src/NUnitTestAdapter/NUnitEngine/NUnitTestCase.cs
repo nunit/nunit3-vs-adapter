@@ -27,16 +27,44 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
     public class NUnitTestCase : NUnitTestNode
     {
+        public enum eRunState
+        {
+            NA,
+            Runnable,
+            Explicit
+        };
+
         public bool IsTestCase => !IsNull && Node.Name == "test-case";
         public bool IsParameterizedMethod => Type == "ParameterizedMethod";
         public string Type => Node.GetAttribute("type");
         public string ClassName => Node.GetAttribute("classname");
         public string MethodName => Node.GetAttribute("methodname");
 
-        public NUnitTestCase(XmlNode testCase) : base(testCase)
+        eRunState runState = NUnitTestCase.eRunState.NA;
+
+        public eRunState RunState
         {
+            get
+            {
+                if (runState == eRunState.NA)
+                {
+                    runState = Node.GetAttribute("runstate") switch
+                    {
+                        "Runnable" => eRunState.Runnable,
+                        "Explicit" => eRunState.Explicit,
+                        _ => runState
+                    };
+                }
+                return runState;
+            }
         }
 
-        public NUnitTestCase Parent() => new NUnitTestCase(Node.ParentNode);
+        public NUnitTestCase(XmlNode testCase) : base(testCase)
+        {
+            if (Node.ParentNode != null)
+                Parent = new NUnitTestCase(Node.ParentNode);
+        }
+
+        public NUnitTestCase Parent { get; }
     }
 }
