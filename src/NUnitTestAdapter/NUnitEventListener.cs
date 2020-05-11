@@ -26,7 +26,6 @@ using System.Collections.Generic;
 #if NET35
 using System.Runtime.Remoting;
 #endif
-using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
