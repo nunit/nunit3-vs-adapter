@@ -83,5 +83,10 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         /// Returns the output information.
         /// </summary>
         public string Content => Node.InnerText;
+
+        // Notes:
+        // The input doesnt have any id, but used testid instead.
+        // Properties FullName and Name is not in use
+
     }
 }

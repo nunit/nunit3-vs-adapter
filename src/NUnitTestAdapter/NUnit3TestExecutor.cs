@@ -194,7 +194,6 @@ namespace NUnit.VisualStudio.TestAdapter
             FrameworkHandle = frameworkHandle;
             TfsFilter = new TfsTestFilter(runContext);
 
-            // Ensure any channels registered by other adapters are unregistered
             CleanUpRegisteredChannels();
 
             TestLog.Debug("KeepAlive: " + runContext.KeepAlive);

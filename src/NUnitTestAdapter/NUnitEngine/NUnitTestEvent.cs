@@ -158,7 +158,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         {
             get
             {
-                if (nUnitAttachments != null) 
+                if (nUnitAttachments != null)
                     return nUnitAttachments;
                 nUnitAttachments = new List<NUnitAttachment>();
                 foreach (XmlNode attachment in Node.SelectNodes("attachments/attachment"))

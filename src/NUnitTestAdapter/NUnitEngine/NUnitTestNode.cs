@@ -9,13 +9,12 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         string FullName { get; }
         string Name { get; }
         List<NUnitProperty> Properties { get; }
-        
     }
 
     public abstract class NUnitTestNode : INUnitTestNode
     {
         public XmlNode Node { get; protected set; }  // Need to be protected, but still the outputnodes are XmlNode
-        public string Id => Node.GetAttribute("id");
+        public virtual string Id => Node.GetAttribute("id");
         public string FullName => Node.GetAttribute("fullname");
         public string Name => Node.GetAttribute("name");
         public bool IsNull => Node == null;

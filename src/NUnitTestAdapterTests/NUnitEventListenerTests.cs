@@ -261,7 +261,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
-        public void ThatTestOutputWithWhiteSpaceIsNotOutput()
+        public void ThatTestOutputWithOnlyWhiteSpaceIsNotOutput()
         {
             var sut = new NUnitEventListener(recorder, converter, executor);
 
