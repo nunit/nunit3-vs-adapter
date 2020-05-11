@@ -47,6 +47,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             fakeTestNode = new NUnitTestCase(FakeTestData.GetTestNode());
             var settings = Substitute.For<IAdapterSettings>();
+            settings.ConsoleOut.Returns(0);
+            settings.UseTestNameInConsoleOutput.Returns(false);
             settings.CollectSourceInformation.Returns(true);
             testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings);
         }

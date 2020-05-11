@@ -22,12 +22,9 @@
 // ***********************************************************************
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.Serialization;
 using System.Xml;
-using NUnit.VisualStudio.TestAdapter.Internal;
-using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
@@ -65,33 +62,25 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public TestTypes TestType()
         {
             string type = Node.GetAttribute("type");
-            switch (type)
+            return type switch
             {
-                case "TestFixture":
-                    return TestTypes.TestFixture;
-                case "TestMethod":
-                    return TestTypes.TestMethod;
-                default:
-                    return TestTypes.NoIdea;
-            }
+                "TestFixture" => TestTypes.TestFixture,
+                "TestMethod" => TestTypes.TestMethod,
+                _ => TestTypes.NoIdea
+            };
         }
 
         public ResultType Result()
         {
             string res = Node.GetAttribute("result");
-            switch (res)
+            return res switch
             {
-                case "Failed":
-                    return ResultType.Failed;
-                case "Passed":
-                    return ResultType.Success;
-                case "Skipped":
-                    return ResultType.Skipped;
-                case "Warning":
-                    return ResultType.Warning;
-                default:
-                    return ResultType.NoIdea;
-            }
+                "Failed" => ResultType.Failed,
+                "Passed" => ResultType.Success,
+                "Skipped" => ResultType.Skipped,
+                "Warning" => ResultType.Warning,
+                _ => ResultType.NoIdea
+            };
         }
 
         public bool IsFailed => Result() == ResultType.Failed;
@@ -99,15 +88,12 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public SiteType Site()
         {
             string site = Node.GetAttribute("site");
-            switch (site)
+            return site switch
             {
-                case "SetUp":
-                    return SiteType.Setup;
-                case "TearDown":
-                    return SiteType.TearDown;
-                default:
-                    return SiteType.NoIdea;
-            }
+                "SetUp" => SiteType.Setup,
+                "TearDown" => SiteType.TearDown,
+                _ => SiteType.NoIdea
+            };
         }
 
         public string Label => Node.GetAttribute("label");
@@ -199,8 +185,25 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public string ReasonMessage { get; }
 
-        public bool HasReason => string.IsNullOrEmpty(ReasonMessage);
+        public bool HasReason => !string.IsNullOrEmpty(ReasonMessage);
         public bool HasFailure => Failure != null;
+
+        /// <summary>
+        /// Find stacktrace in assertion nodes if not defined.
+        /// </summary>
+        public string StackTrace
+        {
+            get
+            {
+                string stackTrace = string.Empty;
+                foreach (XmlNode assertionStacktraceNode in Node.SelectNodes("assertions/assertion/stack-trace"))
+                {
+                    stackTrace += assertionStacktraceNode.InnerText;
+                }
+
+                return stackTrace;
+            }
+        }
     }
 
     public class NUnitProperty

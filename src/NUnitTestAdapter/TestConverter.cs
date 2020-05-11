@@ -112,25 +112,26 @@ namespace NUnit.VisualStudio.TestAdapter
 
             if (testCaseResult != null)
             {
-                if (testCaseResult.Outcome == TestOutcome.Failed || testCaseResult.Outcome == TestOutcome.NotFound)
+                switch (testCaseResult.Outcome)
                 {
-                    testCaseResult.ErrorMessage = resultNode.Failure?.Message;
-                    testCaseResult.ErrorStackTrace = resultNode.Failure?.Stacktrace;
-
-                    // find stacktrace in assertion nodes if not defined (seems .netcore2.0 doesn't provide stack-trace for Assert.Fail("abc"))
-                    if (testCaseResult.ErrorStackTrace == null)
+                    case TestOutcome.Failed:
+                    case TestOutcome.NotFound:
                     {
-                        string stackTrace = string.Empty;
-                        foreach (XmlNode assertionStacktraceNode in resultNode.Node.SelectNodes("assertions/assertion/stack-trace"))
-                        {
-                            stackTrace += assertionStacktraceNode.InnerText;
-                        }
-                        testCaseResult.ErrorStackTrace = stackTrace;
+                        testCaseResult.ErrorMessage = resultNode.Failure?.Message;
+                        testCaseResult.ErrorStackTrace = resultNode.Failure?.Stacktrace ?? resultNode.StackTrace;
+                        break;
                     }
-                }
-                else if (testCaseResult.Outcome == TestOutcome.Skipped || testCaseResult.Outcome == TestOutcome.None)
-                {
-                    testCaseResult.ErrorMessage = resultNode.ReasonMessage;
+                    case TestOutcome.Skipped:
+                    case TestOutcome.None:
+                        testCaseResult.ErrorMessage = resultNode.ReasonMessage;
+                        testCaseResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, resultNode.ReasonMessage));
+                        break;
+                    default:
+                    {
+                        if (adapterSettings.ConsoleOut > 0 && !string.IsNullOrEmpty(resultNode.ReasonMessage))
+                            testCaseResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, resultNode.ReasonMessage));
+                        break;
+                    }
                 }
 
                 results.Add(testCaseResult);
@@ -236,16 +237,13 @@ namespace NUnit.VisualStudio.TestAdapter
             bool CheckCodeFilePathOverride()
             {
                 var codeFilePath = testNode.Properties.FirstOrDefault(p => p.Name == "_CodeFilePath");
-                if (codeFilePath != null)
-                {
-                    testCase.CodeFilePath = codeFilePath.Value;
-                    var lineNumber = testNode.Properties.FirstOrDefault(p => p.Name == "_LineNumber");
-                    testCase.LineNumber = lineNumber != null ? Convert.ToInt32(lineNumber.Value) : 1;
-                    return true;
-                }
-                return false;
+                if (codeFilePath == null)
+                    return false;
+                testCase.CodeFilePath = codeFilePath.Value;
+                var lineNumber = testNode.Properties.FirstOrDefault(p => p.Name == "_LineNumber");
+                testCase.LineNumber = lineNumber != null ? Convert.ToInt32(lineNumber.Value) : 1;
+                return true;
             }
-
         }
 
         private VSTestResult MakeTestResultFromLegacyXmlNode(NUnitTestEventTestCase resultNode, IEnumerable<XmlNode> outputNodes)
@@ -379,38 +377,29 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         // Public for testing
-        public static TestOutcome GetTestOutcome(NUnitTestEvent resultNode)
+        public TestOutcome GetTestOutcome(NUnitTestEvent resultNode)
         {
-            switch (resultNode.Result())
+            return resultNode.Result() switch
             {
-                case NUnitTestEvent.ResultType.Success:
-                    return TestOutcome.Passed;
-                case NUnitTestEvent.ResultType.Failed:
-                    return TestOutcome.Failed;
-                case NUnitTestEvent.ResultType.Skipped:
-                    return resultNode.IsIgnored ? TestOutcome.Skipped : TestOutcome.None;
-                case NUnitTestEvent.ResultType.Warning:
-                    return TestOutcome.Skipped;
-                default:
-                    return TestOutcome.None;
-            }
+                NUnitTestEvent.ResultType.Success => TestOutcome.Passed,
+                NUnitTestEvent.ResultType.Failed => TestOutcome.Failed,
+                NUnitTestEvent.ResultType.Skipped => (resultNode.IsIgnored ? TestOutcome.Skipped : TestOutcome.None),
+                NUnitTestEvent.ResultType.Warning => adapterSettings.MapWarningTo,
+                _ => TestOutcome.None
+            };
         }
 
         TestOutcome GetAssertionOutcome(XmlNode assertion)
         {
-            switch (assertion.GetAttribute("result"))
+            return assertion.GetAttribute("result") switch
             {
-                case "Passed":
-                    return TestOutcome.Passed;
-                case "Failed":
-                case "Error":
-                    return TestOutcome.Failed;
-                case "Warning":
-                    return TestOutcome.Skipped;
-                case "Inconclusive":
-                default:
-                    return TestOutcome.None;
-            }
+                "Passed" => TestOutcome.Passed,
+                "Failed" => TestOutcome.Failed,
+                "Error" => TestOutcome.Failed,
+                "Warning" => adapterSettings.MapWarningTo,
+                "Inconclusive" => TestOutcome.None,
+                _ => TestOutcome.None
+            };
         }
 
         #endregion

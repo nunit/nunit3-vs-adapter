@@ -190,6 +190,27 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
             Assert.That(sut.ReasonMessage, Is.EqualTo("One or more child tests had warnings"));
             Assert.That(sut.HasFailure, Is.False);
         }
+        private readonly string testCaseSucceedsWithOutputAndReason = @"<test-case id='0-1074' name='TestSucceeds' fullname='NUnitTestDemo.SimpleTests.TestSucceeds' methodname='TestSucceeds' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' seed='1232497275' result='Passed' start-time='2020-01-24 11:18:32Z' end-time='2020-01-24 11:18:32Z' duration='0.016868' asserts='1' parentId='0-1073'>
+   <properties>
+      <property name='Expect' value='Pass' />
+   </properties>
+    <reason>
+      <message><![CDATA[One or more child tests had warnings]]></message>
+   </reason>
+   <output><![CDATA[Simple test running
+]]></output>
+</test-case>";
+
+        [Test]
+        public void ThatTestEventIsParsedForTestCaseWithReason()
+        {
+            var sut = new NUnitTestEventTestCase(testCaseSucceedsWithOutputAndReason);
+            Assert.That(sut.HasReason);
+            Assert.That(sut.ReasonMessage, Is.EqualTo("One or more child tests had warnings"));
+
+        }
+
+
 
         private string testSuiteFinishedWithFailure = @"<test-suite type='ParameterizedMethod' id='0-1072' name='TestCaseWithRandomParameterWithFixedNaming' fullname='NUnitTestDemo.ParameterizedTests.TestCaseWithRandomParameterWithFixedNaming' classname='NUnitTestDemo.ParameterizedTests' runstate='Runnable' testcasecount='2' result='Failed' site='Child' start-time='2020-01-26 12:45:23Z' end-time='2020-01-26 12:45:23Z' duration='0.000101' total='2' passed='1' failed='1' warnings='0' inconclusive='0' skipped='0' asserts='0' parentId='0-1031'>
    <failure>

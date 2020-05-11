@@ -25,7 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
-
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 namespace NUnit.VisualStudio.TestAdapter
@@ -89,10 +89,12 @@ namespace NUnit.VisualStudio.TestAdapter
 
         bool UseParentFQNForParametrizedTests { get; }
 
-        bool UseNUnitIdforTestCaseId { get;  }
+        bool UseNUnitIdforTestCaseId { get; }
 
         int ConsoleOut { get; }
         bool StopOnError { get; }
+        TestOutcome MapWarningTo { get; }
+        bool UseTestNameInConsoleOutput { get; }
 
         void Load(IDiscoveryContext context);
         void Load(string settingsXml);
@@ -214,7 +216,9 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public bool PreFilter { get; private set; }
 
+        public TestOutcome MapWarningTo { get; private set; }
 
+        public bool UseTestNameInConsoleOutput { get; private set; }
 
         #endregion
 
@@ -256,13 +260,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 GetInnerTextAsBool(runConfiguration, nameof(CollectDataForEachTestSeparately), false);
 
             TestProperties = new Dictionary<string, string>();
-            foreach (XmlNode node in doc.SelectNodes("RunSettings/TestRunParameters/Parameter"))
-            {
-                var key = node.GetAttribute("name");
-                var value = node.GetAttribute("value");
-                if (key != null && value != null)
-                    TestProperties.Add(key, value);
-            }
+            UpdateTestProperties();
 
             // NUnit settings
             InternalTraceLevel = GetInnerTextWithLog(nunitNode, nameof(InternalTraceLevel), "Off", "Error", "Warning",
@@ -289,24 +287,9 @@ namespace NUnit.VisualStudio.TestAdapter
             DumpXmlTestDiscovery = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestDiscovery), false);
             DumpXmlTestResults = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestResults), false);
             PreFilter = GetInnerTextAsBool(nunitNode, nameof(PreFilter), false);
-            var vsTestCategoryType = GetInnerText(nunitNode, nameof(VsTestCategoryType), Verbosity > 0);
-            if (vsTestCategoryType != null)
-            {
-                switch (vsTestCategoryType.ToLower())
-                {
-                    case "nunit":
-                        VsTestCategoryType = VsTestCategoryType.NUnit;
-                        break;
-                    case "mstest":
-                        VsTestCategoryType = VsTestCategoryType.MsTest;
-                        break;
-                    default:
-                        _logger.Warning(
-                            $"Invalid value ({vsTestCategoryType}) for VsTestCategoryType, should be either NUnit or MsTest");
-                        break;
-                }
-            }
-
+            MapTestCategory(GetInnerText(nunitNode, nameof(VsTestCategoryType), Verbosity > 0));
+            MapWarningTo = MapWarningOutcome(GetInnerText(nunitNode, nameof(MapWarningTo), Verbosity > 0));
+            UseTestNameInConsoleOutput = GetInnerTextAsBool(nunitNode, nameof(UseTestNameInConsoleOutput), false);
             var inProcDataCollectorNode =
                 doc.SelectSingleNode("RunSettings/InProcDataCollectionRunSettings/InProcDataCollectors");
             InProcDataCollectorsAvailable = inProcDataCollectorNode != null &&
@@ -366,7 +349,30 @@ namespace NUnit.VisualStudio.TestAdapter
                     throw;
                 }
             }
+
+            void UpdateTestProperties()
+            {
+                foreach (XmlNode node in doc.SelectNodes("RunSettings/TestRunParameters/Parameter"))
+                {
+                    var key = node.GetAttribute("name");
+                    var value = node.GetAttribute("value");
+                    if (key != null && value != null)
+                        TestProperties.Add(key, value);
+                }
+            }
         }
+
+        private void MapTestCategory(string vsTestCategoryType)
+        {
+            if (vsTestCategoryType == null)
+                return;
+            var ok = TryParse.EnumTryParse(vsTestCategoryType, out VsTestCategoryType result);
+            if (ok)
+                VsTestCategoryType = result;
+            else
+                _logger.Warning($"Invalid value ({vsTestCategoryType}) for VsTestCategoryType, should be either NUnit or MsTest");
+        }
+
 
         public void SaveRandomSeed(string dirname)
         {
@@ -487,6 +493,22 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 _logger.Info($"Setting: {xpath} = {res}");
             }
+        }
+
+        public TestOutcome MapWarningOutcome(string outcome)
+        {
+            if (outcome == null)
+                return TestOutcome.Skipped;
+
+            bool ok = TryParse.EnumTryParse(outcome, out TestOutcome testoutcome);
+
+            if (!ok)
+            {
+                _logger.Warning(
+                    $"Invalid value ({outcome}) for MapWarningTo, should be either Skipped,Failed,Passed or None");
+                return TestOutcome.Skipped;
+            }
+            return testoutcome;
         }
         #endregion
     }
