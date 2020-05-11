@@ -25,7 +25,18 @@ using System.Xml;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
-    public class NUnitTestCase : NUnitTestNode
+    public interface INUnitTestCase : INUnitTestNode
+    {
+        bool IsTestCase { get; }
+        bool IsParameterizedMethod { get; }
+        string Type { get; }
+        string ClassName { get; }
+        string MethodName { get; }
+        NUnitTestCase.eRunState RunState { get; }
+        NUnitTestCase Parent { get; }
+    }
+
+    public class NUnitTestCase : NUnitTestNode, INUnitTestCase
     {
         public enum eRunState
         {
@@ -40,7 +51,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public string ClassName => Node.GetAttribute("classname");
         public string MethodName => Node.GetAttribute("methodname");
 
-        eRunState runState = NUnitTestCase.eRunState.NA;
+        eRunState runState = eRunState.NA;
 
         public eRunState RunState
         {

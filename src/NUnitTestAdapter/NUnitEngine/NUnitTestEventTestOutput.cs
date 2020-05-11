@@ -35,6 +35,10 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         /// Returns the output information.
         /// </summary>
         string Content { get; }
+
+        bool IsProgressStream { get; }
+        bool IsErrorStream { get; }
+        bool IsNullOrEmptyStream { get; }
     }
 
     /// <summary>
@@ -55,7 +59,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public string TestName => Node.GetAttribute("testname");
 
 
-        public NUnitTestEventTestOutput(INUnitTestEvent theEvent) : this(theEvent.Node)
+        public NUnitTestEventTestOutput(INUnitTestEventForXml theEvent) : this(theEvent.Node)
         {
             if (theEvent.Node.Name != "test-output")
                 throw new NUnitEventWrongTypeException($"Expected 'test-output', got {theEvent.Node.Name}");
@@ -69,6 +73,11 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                 _ => Streams.NoIdea
             };
         }
+
+        public bool IsProgressStream => Stream == Streams.Progress;
+        public bool IsErrorStream => Stream == Streams.Error;
+
+        public bool IsNullOrEmptyStream => Stream == Streams.NoIdea;
 
         /// <summary>
         /// Returns the output information.

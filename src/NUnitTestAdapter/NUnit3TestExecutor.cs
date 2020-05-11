@@ -29,7 +29,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using NUnit.Engine;
@@ -63,7 +62,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public IFrameworkHandle FrameworkHandle { get; private set; }
         private TfsTestFilter TfsFilter { get; set; }
 
-        private string TestOutputXmlFolder { get; set; } = "";
+        public string TestOutputXmlFolder { get; set; } = "";
 
         // NOTE: an earlier version of this code had a FilterBuilder
         // property. This seemed to make sense, because we instantiate
@@ -250,20 +249,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
                 if (discoveryResults.IsRunnable)
                 {
-                    var nunitTestCases = discoveryResults.TestCases();
-
-                    using var testConverter = new TestConverter(TestLog, assemblyPath, Settings);
-                    var loadedTestCases = new List<TestCase>();
-
-                    // As a side effect of calling TestConverter.ConvertTestCase,
-                    // the converter's cache of all test cases is populated as well.
-                    // All future calls to convert a test case may now use the cache.
-                    foreach (XmlNode testNode in nunitTestCases)
-                        loadedTestCases.Add(testConverter.ConvertTestCase(new NUnitTestCase(testNode)));
-
-
-                    TestLog.Info($"   NUnit3TestExecutor converted {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases");
-
+                    var discovery = new DiscoveryExtensions();
+                    var loadedTestCases = discovery.Load(discoveryResults,TestLog, assemblyPath, Settings);
 
                     // If we have a TFS Filter, convert it to an nunit filter
                     if (TfsFilter != null && !TfsFilter.IsEmpty)
@@ -279,12 +266,12 @@ namespace NUnit.VisualStudio.TestAdapter
                         return;
                     }
                     executionDumpXml?.AddString($"\n\n<NUnitExecution>{assemblyPath}</NUnitExecution>\n\n");
-                    using (var listener = new NUnitEventListener(FrameworkHandle, testConverter, this))
+                    using (var listener = new NUnitEventListener(FrameworkHandle, discovery.TestConverter, this))
                     {
                         try
                         {
                             var results = NUnitEngineAdapter.Run(listener, filter);
-                            GenerateTestOutput(results.TopNode, assemblyPath);
+                            NUnitEngineAdapter.GenerateTestOutput(results, assemblyPath, this);
                         }
                         catch (NullReferenceException)
                         {
@@ -342,21 +329,6 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
-
-        private void GenerateTestOutput(XmlNode testResults, string assemblyPath)
-        {
-            if (!Settings.UseTestOutputXml)
-                return;
-
-            string path = Path.Combine(TestOutputXmlFolder, $"{Path.GetFileNameWithoutExtension(assemblyPath)}.xml");
-            var resultService = NUnitEngineAdapter.GetService<IResultService>();
-
-            // Following null argument should work for nunit3 format. Empty array is OK as well.
-            // If you decide to handle other formats in the runsettings, it needs more work.
-            var resultWriter = resultService.GetResultWriter("nunit3", null);
-            resultWriter.WriteResultFile(testResults, path);
-            TestLog.Info($"   Test results written to {path}");
-        }
 
         private NUnitTestFilterBuilder CreateTestFilterBuilder()
         {

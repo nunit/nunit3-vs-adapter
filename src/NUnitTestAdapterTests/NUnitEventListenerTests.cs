@@ -246,7 +246,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             sut.OnTestEvent(TestFinish);
 
             recorder.Received().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Is<string>(x => x.StartsWith("Whatever")));
-            converter.Received().GetVsTestResults(Arg.Any<NUnitTestEventTestCase>(), Arg.Is<ICollection<XmlNode>>(x => x.Count == 1));
+            converter.Received().GetVsTestResults(Arg.Any<NUnitTestEventTestCase>(), Arg.Is<ICollection<INUnitTestEventTestOutput>>(x => x.Count == 1));
         }
 
         [Test]
@@ -257,7 +257,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             sut.OnTestEvent(TestFinish);
 
             recorder.Received().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Is<string>(x => x.StartsWith("Whatever")));
-            converter.Received().GetVsTestResults(Arg.Any<NUnitTestEventTestCase>(), Arg.Is<ICollection<XmlNode>>(x => x.Count == 1));
+            converter.Received().GetVsTestResults(Arg.Any<NUnitTestEventTestCase>(), Arg.Is<ICollection<INUnitTestEventTestOutput>>(x => x.Count == 1));
         }
 
         [Test]

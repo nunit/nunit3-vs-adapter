@@ -26,7 +26,7 @@ using NUnit.VisualStudio.TestAdapter.Dump;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
-    public class NUnitTestEventHeader : INUnitTestEvent
+    public class NUnitTestEventHeader : INUnitTestEventForXml
     {
         public enum EventType
         {

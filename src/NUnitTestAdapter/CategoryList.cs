@@ -54,6 +54,8 @@ namespace NUnit.VisualStudio.TestAdapter
         // If it's not empty, it shows up as “Explicit [value]” in Test Explorer.
         private const string ExplicitTraitValue = "";
 
+        private readonly NUnitProperty explicitTrait = new NUnitProperty(ExplicitTraitName, ExplicitTraitValue);
+
         private readonly List<string> categorylist = new List<string>();
         private readonly TestCase testCase;
         private readonly IAdapterSettings settings;
@@ -72,26 +74,24 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public int LastNodeListCount { get; private set; }
 
-        public IEnumerable<string> ProcessTestCaseProperties(NUnitTestCase testNode, bool addToCache, string key = null,
+        public IEnumerable<string> ProcessTestCaseProperties(INUnitTestCase testNode, bool addToCache, string key = null,
             IDictionary<string, TraitsFeature.CachedTestCaseInfo> traitsCache = null)
         {
             var nodelist = testNode.Properties;
             LastNodeListCount = nodelist.Count;
             foreach (var propertyNode in nodelist)
             {
-                string propertyName = propertyNode.Name;
-                string propertyValue = propertyNode.Value;
                 if (addToCache)
-                    AddTraitsToCache(traitsCache, key, propertyName, propertyValue);
-                if (IsInternalProperty(propertyName, propertyValue))
+                    AddTraitsToCache(traitsCache, key, propertyNode);
+                if (IsInternalProperty(propertyNode))
                     continue;
-                if (propertyName != NunitTestCategoryLabel)
+                if (propertyNode.Name != NunitTestCategoryLabel)
                 {
-                    testCase.Traits.Add(new Trait(propertyName, propertyValue));
+                    testCase.Traits.Add(new Trait(propertyNode.Name, propertyNode.Value));
                 }
                 else
                 {
-                    categorylist.Add(propertyValue);
+                    categorylist.Add(propertyNode.Value);
                 }
             }
 
@@ -107,7 +107,7 @@ namespace NUnit.VisualStudio.TestAdapter
             if (addToCache)
             {
                 // Add UI grouping “Explicit”
-                AddTraitsToCache(traitsCache, key, ExplicitTraitName, ExplicitTraitValue);
+                AddTraitsToCache(traitsCache, key, explicitTrait);
 
                 // Track whether the test is actually explicit since multiple things result in the same UI grouping
                 GetCachedInfo(traitsCache, key).Explicit = true;
@@ -123,9 +123,9 @@ namespace NUnit.VisualStudio.TestAdapter
         { "Author", "ApartmentState", "Description", "IgnoreUntilDate", "LevelOfParallelism", "MaxTime", "Order", "ParallelScope", "Repeat", "RequiresThread", "SetCulture", "SetUICulture", "TestOf", "Timeout" };
 
 
-        private bool IsInternalProperty(string propertyName, string propertyValue)
+        private bool IsInternalProperty(NUnitProperty property)
         {
-            if (propertyName == ExplicitTraitName)
+            if (property.Name == ExplicitTraitName)
             {
                 // Otherwise the IsNullOrEmpty check does the wrong thing,
                 // but I'm not sure of the consequences of allowing all empty strings.
@@ -134,17 +134,17 @@ namespace NUnit.VisualStudio.TestAdapter
 
             // Property names starting with '_' are for internal use only, but over time this has changed, so we now use a list
             if (!settings.ShowInternalProperties &&
-                _internalProperties.Contains(propertyName, StringComparer.OrdinalIgnoreCase))
+                _internalProperties.Contains(property.Name, StringComparer.OrdinalIgnoreCase))
                 return true;
-            return string.IsNullOrEmpty(propertyName) || propertyName[0] == '_' || string.IsNullOrEmpty(propertyValue);
+            return string.IsNullOrEmpty(property.Name) || property.Name[0] == '_' || string.IsNullOrEmpty(property.Value);
         }
 
-        private void AddTraitsToCache(IDictionary<string, TraitsFeature.CachedTestCaseInfo> traitsCache, string key, string propertyName, string propertyValue)
+        private void AddTraitsToCache(IDictionary<string, TraitsFeature.CachedTestCaseInfo> traitsCache, string key, NUnitProperty property)
         {
-            if (IsInternalProperty(propertyName, propertyValue)) return;
+            if (IsInternalProperty(property)) return;
 
             var info = GetCachedInfo(traitsCache, key);
-            info.Traits.Add(new Trait(propertyName, propertyValue));
+            info.Traits.Add(new Trait(property.Name, property.Value));
         }
 
         private static TraitsFeature.CachedTestCaseInfo GetCachedInfo(IDictionary<string, TraitsFeature.CachedTestCaseInfo> traitsCache, string key)
