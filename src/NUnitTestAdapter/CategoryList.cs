@@ -40,7 +40,7 @@ namespace NUnit.VisualStudio.TestAdapter
             VsTestCategoryLabel, typeof(string[]), TestPropertyAttributes.Hidden | TestPropertyAttributes.Trait,
             typeof(TestCase));
 
-        private TestProperty
+        private readonly TestProperty
             msTestCategoryProperty; // = TestProperty.Register(MSTestCategoryName, VsTestCategoryLabel, typeof(string[]), TestPropertyAttributes.Hidden | TestPropertyAttributes.Trait, typeof(TestCase));
 
         internal static readonly TestProperty NUnitExplicitProperty = TestProperty.Register(

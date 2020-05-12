@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
 //using System.Xml;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -187,9 +188,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             var testResults = testConverter.GetVsTestResults(fakeResultNode, Enumerable.Empty<INUnitTestEventTestOutput>().ToList());
 
-            var fakeAttachments = fakeResultNode.Node.SelectNodes("attachments/attachment")
-                .OfType<XmlNode>()
-                .Where(n => !string.IsNullOrEmpty(n.SelectSingleNode("filePath")?.InnerText))
+            var fakeAttachments = fakeResultNode.NUnitAttachments
+                .Where(n => !string.IsNullOrEmpty(n.FilePath))
                 .ToArray();
 
             var convertedAttachments = testResults.TestResults

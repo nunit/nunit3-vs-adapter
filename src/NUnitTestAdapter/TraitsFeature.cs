@@ -62,9 +62,8 @@ namespace NUnit.VisualStudio.TestAdapter
         public static void AddTraitsFromTestNode(this TestCase testCase, NUnitTestCase testNCase,
             IDictionary<string, CachedTestCaseInfo> traitsCache, ITestLogger logger, IAdapterSettings adapterSettings)
         {
-            //var testNode = testNCase.Node;
             var ancestor = testNCase.Parent;
-            var key = ancestor?.Id; // Attributes?["id"]?.Value;
+            var key = ancestor?.Id;
             var categoryList = new CategoryList(testCase, adapterSettings);
             // Reading ancestor properties of a test-case node. And adding to the cache.
             while (ancestor != null && key != null)
@@ -90,7 +89,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     }
                 }
                 ancestor = ancestor.Parent;
-                key = ancestor?.Id; // Attributes?["id"]?.Value;
+                key = ancestor?.Id;
             }
 
             // No Need to store test-case properties in cache.
