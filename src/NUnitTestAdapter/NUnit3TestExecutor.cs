@@ -227,15 +227,7 @@ namespace NUnit.VisualStudio.TestAdapter
             // No need to restore if the seed was in runsettings file
             if (!Settings.RandomSeedSpecified)
                 Settings.RestoreRandomSeed(Path.GetDirectoryName(assemblyPath));
-            executionDumpXml = null;
-            if (Settings.DumpXmlTestResults)
-            {
-                executionDumpXml = new DumpXml(assemblyPath);
-                string runningBy = testCases == null
-                    ? "<RunningBy>Sources</RunningBy>"
-                    : "<RunningBy>TestCases</RunningBy>";
-                executionDumpXml?.AddString($"\n{runningBy}\n");
-            }
+            SetupDump(assemblyPath, testCases);
 
             try
             {
@@ -243,13 +235,13 @@ namespace NUnit.VisualStudio.TestAdapter
                 NUnitEngineAdapter.CreateRunner(package);
                 CreateTestOutputFolder();
                 executionDumpXml?.AddString($"<NUnitDiscoveryInExecution>{assemblyPath}</NUnitExecution>\n\n");
-                var discoveryResults = NUnitEngineAdapter.Explore(filter); // _activeRunner.Explore(filter);
+                var discoveryResults = NUnitEngineAdapter.Explore(filter);
                 executionDumpXml?.AddString(discoveryResults.AsString());
 
                 if (discoveryResults.IsRunnable)
                 {
                     var discovery = new DiscoveryExtensions();
-                    var loadedTestCases = discovery.Load(discoveryResults,TestLog, assemblyPath, Settings);
+                    var loadedTestCases = discovery.Convert(discoveryResults,TestLog, assemblyPath, Settings);
 
                     // If we have a TFS Filter, convert it to an nunit filter
                     if (TfsFilter != null && !TfsFilter.IsEmpty)
@@ -325,6 +317,19 @@ namespace NUnit.VisualStudio.TestAdapter
                     if (ex is TargetInvocationException) { ex = ex.InnerException; }
                     TestLog.Warning($"   Exception thrown unloading tests from {assemblyPath}", ex);
                 }
+            }
+        }
+
+        private void SetupDump(string assemblyPath, IGrouping<string, TestCase> testCases)
+        {
+            executionDumpXml = null;
+            if (Settings.DumpXmlTestResults)
+            {
+                executionDumpXml = new DumpXml(assemblyPath);
+                string runningBy = testCases == null
+                    ? "<RunningBy>Sources</RunningBy>"
+                    : "<RunningBy>TestCases</RunningBy>";
+                executionDumpXml?.AddString($"\n{runningBy}\n");
             }
         }
 

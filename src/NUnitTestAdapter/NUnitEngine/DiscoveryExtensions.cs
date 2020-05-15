@@ -10,9 +10,10 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
     public class DiscoveryExtensions
     {
+
         public TestConverter TestConverter { get; private set; }
 
-        public IList<TestCase> Load(NUnitResults discoveryResults, ITestLogger logger, string assemblyPath, IAdapterSettings settings)
+        public IList<TestCase> Convert(NUnitResults discoveryResults, ITestLogger logger, string assemblyPath, IAdapterSettings settings)
         {
             var nunitTestCases = discoveryResults.TestCases();
 
