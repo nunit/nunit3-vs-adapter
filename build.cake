@@ -251,7 +251,8 @@ Task("CreateWorkingImage")
             ADAPTER_BIN_DIR_NET35 + "NUnit3.TestAdapter.dll",
             ADAPTER_BIN_DIR_NET35 + "NUnit3.TestAdapter.pdb",
             ADAPTER_BIN_DIR_NET35 + "nunit.engine.dll",
-            ADAPTER_BIN_DIR_NET35 + "nunit.engine.api.dll"
+            ADAPTER_BIN_DIR_NET35 + "nunit.engine.api.dll",
+            ADAPTER_BIN_DIR_NET35 + "nunit.engine.core.dll"
         };
 
         var net35Dir = PACKAGE_IMAGE_DIR + "build/net35";
