@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -200,7 +201,7 @@ namespace NUnit.VisualStudio.TestAdapter
                                     new Uri(NUnitTestAdapter.ExecutorUri),
                                     _sourceAssembly)
             {
-                DisplayName = testNode.Name,
+                DisplayName = CreateDisplayName(fullyQualifiedName,testNode.Name), // .Replace(".",":"), //"N:Name -> MS:DisplayName", // testNode.Name,
                 CodeFilePath = null,
                 LineNumber = 0,
             };
@@ -243,6 +244,19 @@ namespace NUnit.VisualStudio.TestAdapter
                 testCase.LineNumber = lineNumber != null ? Convert.ToInt32(lineNumber.Value) : 1;
                 return true;
             }
+        }
+
+        private string CreateDisplayName(string fullyQualifiedName, string testNodeName)
+        {
+            if (adapterSettings.FreakMode)
+                return "N:Name -> MS:DisplayName (default)";
+            return adapterSettings.DisplayName switch
+            {
+                DisplayNameOptions.Name => testNodeName,
+                DisplayNameOptions.FullName => fullyQualifiedName,
+                DisplayNameOptions.FullNameSep => fullyQualifiedName.Replace('.', adapterSettings.FullnameSeparator),
+                _ => throw new ArgumentOutOfRangeException(),
+            };
         }
 
         private VSTestResult MakeTestResultFromLegacyXmlNode(INUnitTestEventTestCase resultNode, IEnumerable<INUnitTestEventTestOutput> outputNodes)
