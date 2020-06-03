@@ -177,7 +177,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             if (Settings.ShadowCopyFiles)
             {
-                package.Settings[PackageSettings.ShadowCopyFiles] = "true";
+                package.Settings[PackageSettings.ShadowCopyFiles] = true;
                 TestLog.Debug("    Setting ShadowCopyFiles to true");
             }
 
