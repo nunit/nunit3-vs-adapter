@@ -26,7 +26,7 @@ using NUnit.VisualStudio.TestAdapter.Dump;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
-    public class NUnitTestEventHeader : INUnitTestEvent
+    public class NUnitTestEventHeader : INUnitTestEventForXml
     {
         public enum EventType
         {
@@ -46,30 +46,16 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public NUnitTestEventHeader(string sNode)
         {
             Node = XmlHelper.CreateXmlNode(sNode);
-            switch (Node.Name)
+            Type = Node.Name switch
             {
-                case "start-test":
-                    Type = EventType.StartTest;
-                    break;
-                case "test-case":
-                    Type = EventType.TestCase;
-                    break;
-                case "test-suite":
-                    Type = EventType.TestSuite;
-                    break;
-                case "test-output":
-                    Type = EventType.TestOutput;
-                    break;
-                case "start-run":
-                    Type = EventType.StartRun;
-                    break;
-                case "start-suite":
-                    Type = EventType.StartSuite;
-                    break;
-                default:
-                    Type = EventType.NoIdea;
-                    break;
-            }
+                "start-test" => EventType.StartTest,
+                "test-case" => EventType.TestCase,
+                "test-suite" => EventType.TestSuite,
+                "test-output" => EventType.TestOutput,
+                "start-run" => EventType.StartRun,
+                "start-suite" => EventType.StartSuite,
+                _ => EventType.NoIdea
+            };
         }
     }
 }

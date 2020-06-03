@@ -29,7 +29,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using NUnit.Engine;
@@ -63,7 +62,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public IFrameworkHandle FrameworkHandle { get; private set; }
         private TfsTestFilter TfsFilter { get; set; }
 
-        private string TestOutputXmlFolder { get; set; } = "";
+        public string TestOutputXmlFolder { get; set; } = "";
 
         // NOTE: an earlier version of this code had a FilterBuilder
         // property. This seemed to make sense, because we instantiate
@@ -195,7 +194,6 @@ namespace NUnit.VisualStudio.TestAdapter
             FrameworkHandle = frameworkHandle;
             TfsFilter = new TfsTestFilter(runContext);
 
-            // Ensure any channels registered by other adapters are unregistered
             CleanUpRegisteredChannels();
 
             TestLog.Debug("KeepAlive: " + runContext.KeepAlive);
@@ -226,41 +224,24 @@ namespace NUnit.VisualStudio.TestAdapter
             string actionText = Debugger.IsAttached ? "Debugging " : "Running ";
             string selectionText = filter == null || filter == TestFilter.Empty ? "all" : "selected";
             TestLog.Info(actionText + selectionText + " tests in " + assemblyPath);
-
             // No need to restore if the seed was in runsettings file
             if (!Settings.RandomSeedSpecified)
                 Settings.RestoreRandomSeed(Path.GetDirectoryName(assemblyPath));
-            executionDumpXml = null;
-            if (Settings.DumpXmlTestResults)
-            {
-                executionDumpXml = new DumpXml(assemblyPath);
-            }
+            SetupDump(assemblyPath, testCases);
 
             try
             {
                 var package = CreateTestPackage(assemblyPath, testCases);
                 NUnitEngineAdapter.CreateRunner(package);
                 CreateTestOutputFolder();
-                executionDumpXml?.AddString($"<NUnitDiscoveryInExecution>{assemblyPath}</NUnitExecution>\r\n\r\n");
-                var discoveryResults = NUnitEngineAdapter.Explore(filter); // _activeRunner.Explore(filter);
+                executionDumpXml?.AddString($"<NUnitDiscoveryInExecution>{assemblyPath}</NUnitExecution>\n\n");
+                var discoveryResults = NUnitEngineAdapter.Explore(filter);
                 executionDumpXml?.AddString(discoveryResults.AsString());
 
                 if (discoveryResults.IsRunnable)
                 {
-                    var nunitTestCases = discoveryResults.TestCases();
-
-                    using var testConverter = new TestConverter(TestLog, assemblyPath, Settings);
-                    var loadedTestCases = new List<TestCase>();
-
-                    // As a side effect of calling TestConverter.ConvertTestCase,
-                    // the converter's cache of all test cases is populated as well.
-                    // All future calls to convert a test case may now use the cache.
-                    foreach (XmlNode testNode in nunitTestCases)
-                        loadedTestCases.Add(testConverter.ConvertTestCase(new NUnitTestCase(testNode)));
-
-
-                    TestLog.Info($"   NUnit3TestExecutor converted {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases");
-
+                    var discovery = new DiscoveryExtensions();
+                    var loadedTestCases = discovery.Convert(discoveryResults, TestLog, assemblyPath, Settings);
 
                     // If we have a TFS Filter, convert it to an nunit filter
                     if (TfsFilter != null && !TfsFilter.IsEmpty)
@@ -275,13 +256,13 @@ namespace NUnit.VisualStudio.TestAdapter
                         TestLog.Info("   Skipping assembly - no matching test cases found");
                         return;
                     }
-                    executionDumpXml?.AddString($"<NUnitExecution>{assemblyPath}</NUnitExecution>\r\n");
-                    using (var listener = new NUnitEventListener(FrameworkHandle, testConverter, this))
+                    executionDumpXml?.AddString($"\n\n<NUnitExecution>{assemblyPath}</NUnitExecution>\n\n");
+                    using (var listener = new NUnitEventListener(FrameworkHandle, discovery.TestConverter, this))
                     {
                         try
                         {
                             var results = NUnitEngineAdapter.Run(listener, filter);
-                            GenerateTestOutput(results.TopNode, assemblyPath);
+                            NUnitEngineAdapter.GenerateTestOutput(results, assemblyPath, this);
                         }
                         catch (NullReferenceException)
                         {
@@ -339,21 +320,19 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
-
-        private void GenerateTestOutput(XmlNode testResults, string assemblyPath)
+        private void SetupDump(string assemblyPath, IGrouping<string, TestCase> testCases)
         {
-            if (!Settings.UseTestOutputXml)
-                return;
-
-            string path = Path.Combine(TestOutputXmlFolder, $"{Path.GetFileNameWithoutExtension(assemblyPath)}.xml");
-            var resultService = NUnitEngineAdapter.GetService<IResultService>();
-
-            // Following null argument should work for nunit3 format. Empty array is OK as well.
-            // If you decide to handle other formats in the runsettings, it needs more work.
-            var resultWriter = resultService.GetResultWriter("nunit3", null);
-            resultWriter.WriteResultFile(testResults, path);
-            TestLog.Info($"   Test results written to {path}");
+            executionDumpXml = null;
+            if (Settings.DumpXmlTestResults)
+            {
+                executionDumpXml = new DumpXml(assemblyPath);
+                string runningBy = testCases == null
+                    ? "<RunningBy>Sources</RunningBy>"
+                    : "<RunningBy>TestCases</RunningBy>";
+                executionDumpXml?.AddString($"\n{runningBy}\n");
+            }
         }
+
 
         private NUnitTestFilterBuilder CreateTestFilterBuilder()
         {

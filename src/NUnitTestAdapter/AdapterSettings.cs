@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+using System.Xml.Schema;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
@@ -95,6 +96,9 @@ namespace NUnit.VisualStudio.TestAdapter
         bool StopOnError { get; }
         TestOutcome MapWarningTo { get; }
         bool UseTestNameInConsoleOutput { get; }
+        bool FreakMode { get; }
+        DisplayNameOptions DisplayName { get; }
+        char FullnameSeparator { get; }
 
         void Load(IDiscoveryContext context);
         void Load(string settingsXml);
@@ -108,6 +112,12 @@ namespace NUnit.VisualStudio.TestAdapter
         MsTest
     }
 
+    public enum DisplayNameOptions
+    {
+        Name,
+        FullName,
+        FullNameSep
+    }
 
     public class AdapterSettings : IAdapterSettings
     {
@@ -205,10 +215,6 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public VsTestCategoryType VsTestCategoryType { get; private set; } = VsTestCategoryType.NUnit;
 
-        public bool DumpXmlTestDiscovery { get; private set; }
-
-        public bool DumpXmlTestResults { get; private set; }
-
         /// <summary>
         ///  Syntax documentation <see cref="https://github.com/nunit/docs/wiki/Template-Based-Test-Naming"/>.
         /// </summary>
@@ -219,6 +225,24 @@ namespace NUnit.VisualStudio.TestAdapter
         public TestOutcome MapWarningTo { get; private set; }
 
         public bool UseTestNameInConsoleOutput { get; private set; }
+
+        public DisplayNameOptions DisplayName { get; private set; } = DisplayNameOptions.Name;
+
+        public char FullnameSeparator { get; private set; } = ':';
+
+
+
+
+        #region  NUnit Diagnostic properties
+        public bool DumpXmlTestDiscovery { get; private set; }
+
+        public bool DumpXmlTestResults { get; private set; }
+
+        public bool FreakMode { get; private set; }
+
+        #endregion
+
+
 
         #endregion
 
@@ -284,8 +308,21 @@ namespace NUnit.VisualStudio.TestAdapter
             UseNUnitIdforTestCaseId = GetInnerTextAsBool(nunitNode, nameof(UseNUnitIdforTestCaseId), false);
             ConsoleOut = GetInnerTextAsInt(nunitNode, nameof(ConsoleOut), 1);  // 0 no output to console, 1 : output to console
             StopOnError = GetInnerTextAsBool(nunitNode, nameof(StopOnError), false);
+
+            // Adapter Diagnostics
             DumpXmlTestDiscovery = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestDiscovery), false);
             DumpXmlTestResults = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestResults), false);
+            FreakMode = GetInnerTextAsBool(nunitNode, nameof(FreakMode), false);
+            // End Diagnostics
+
+            // Adapter Display Options
+            MapDisplayName(GetInnerText(nunitNode, nameof(DisplayName), Verbosity > 0));
+            FullnameSeparator = GetInnerText(nunitNode, nameof(FullnameSeparator), Verbosity > 0)?[0] ?? ':';
+
+            // EndDisplay
+
+
+
             PreFilter = GetInnerTextAsBool(nunitNode, nameof(PreFilter), false);
             MapTestCategory(GetInnerText(nunitNode, nameof(VsTestCategoryType), Verbosity > 0));
             MapWarningTo = MapWarningOutcome(GetInnerText(nunitNode, nameof(MapWarningTo), Verbosity > 0));
@@ -371,6 +408,17 @@ namespace NUnit.VisualStudio.TestAdapter
                 VsTestCategoryType = result;
             else
                 _logger.Warning($"Invalid value ({vsTestCategoryType}) for VsTestCategoryType, should be either NUnit or MsTest");
+        }
+
+        private void MapDisplayName(string displaynameoptions)
+        {
+            if (displaynameoptions == null)
+                return;
+            var ok = TryParse.EnumTryParse(displaynameoptions, out DisplayNameOptions result);
+            if (ok)
+                DisplayName = result;
+            else
+                _logger.Warning($"Invalid value ({displaynameoptions}) for DisplayNameOptions, should be either Name, Fullname or FullnameSep");
         }
 
 

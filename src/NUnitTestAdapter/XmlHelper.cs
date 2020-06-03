@@ -109,7 +109,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <param name="name">The name.</param>
         public static string GetAttribute(this XmlNode result, string name)
         {
-            var attr = result.Attributes[name];
+            var attr = result.Attributes?[name];
 
             return attr?.Value;
         }

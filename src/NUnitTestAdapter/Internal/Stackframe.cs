@@ -9,10 +9,6 @@ namespace NUnit.VisualStudio.TestAdapter.Internal
 {
     internal class StackFrame
     {
-        private readonly string fileName;
-        private readonly int lineNumber;
-        private readonly string methodName;
-
         public StackFrame(string methodName)
             : this(methodName, null, 0)
         {
@@ -20,15 +16,15 @@ namespace NUnit.VisualStudio.TestAdapter.Internal
 
         public StackFrame(string methodName, string fileName, int lineNumber)
         {
-            this.methodName = methodName;
-            this.fileName = fileName;
-            this.lineNumber = lineNumber;
+            MethodName = methodName;
+            FileName = fileName;
+            LineNumber = lineNumber;
         }
 
-        public string FileName { get { return fileName; } }
+        public string FileName { get; }
 
-        public int LineNumber { get { return lineNumber; } }
+        public int LineNumber { get; }
 
-        public string MethodName { get { return methodName; } }
+        public string MethodName { get; }
     }
 }

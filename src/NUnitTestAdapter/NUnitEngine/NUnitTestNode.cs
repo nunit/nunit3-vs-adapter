@@ -3,14 +3,23 @@ using System.Xml;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
-    public abstract class NUnitTestNode
+    public interface INUnitTestNode
     {
-        public XmlNode Node { get; protected set; }
-        public string Id => Node.GetAttribute("id");
+        string Id { get; }
+        string FullName { get; }
+        string Name { get; }
+        List<NUnitProperty> Properties { get; }
+    }
+
+    public abstract class NUnitTestNode : INUnitTestNode
+    {
+        protected XmlNode Node { get; set; }  // Need to be protected, but still the outputnodes are XmlNode
+        public virtual string Id => Node.GetAttribute("id");
         public string FullName => Node.GetAttribute("fullname");
         public string Name => Node.GetAttribute("name");
         public bool IsNull => Node == null;
         public List<NUnitProperty> Properties { get; } = new List<NUnitProperty>();
+
         protected NUnitTestNode(XmlNode node)
         {
             Node = node;

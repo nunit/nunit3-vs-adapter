@@ -22,19 +22,34 @@
 // ***********************************************************************
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.Serialization;
 using System.Xml;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
-    public interface INUnitTestEvent
+    public interface INUnitTestEventForXml
     {
         XmlNode Node { get; }
     }
 
 
-    public abstract class NUnitTestEvent : NUnitTestNode
+    public interface INUnitTestEvent : INUnitTestNode
+    {
+        string Output { get; }
+        TimeSpan Duration { get; }
+        IEnumerable<NUnitAttachment> NUnitAttachments { get; }
+        NUnitTestEvent.CheckedTime StartTime();
+        NUnitTestEvent.CheckedTime EndTime();
+
+        bool IsIgnored { get; }
+        NUnitTestEvent.ResultType Result();
+        bool IsFailed { get; }
+        NUnitTestEvent.SiteType Site();
+    }
+
+    public abstract class NUnitTestEvent : NUnitTestNode, INUnitTestEvent
     {
         public enum ResultType
         {
@@ -135,75 +150,41 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             public bool Ok;
             public DateTimeOffset Time;
         }
-    }
 
-    /// <summary>
-    /// Handles the NUnit 'start-test' event.
-    /// </summary>
-    public class NUnitTestEventStartTest : NUnitTestEvent
-    {
-        public NUnitTestEventStartTest(INUnitTestEvent node) : this(node.Node)
-        { }
-        public NUnitTestEventStartTest(string testEvent) : this(XmlHelper.CreateXmlNode(testEvent))
-        { }
+        private List<NUnitAttachment> nUnitAttachments;
 
-        public NUnitTestEventStartTest(XmlNode node) : base(node)
-        {
-            if (node.Name != "start-test")
-                throw new NUnitEventWrongTypeException($"Expected 'start-test', got {node.Name}");
-        }
-    }
 
-    /// <summary>
-    /// Handles the NUnit 'test-case' event.
-    /// </summary>
-    public class NUnitTestEventTestCase : NUnitTestEvent
-    {
-        public NUnitTestEventTestCase(INUnitTestEvent node) : this(node.Node)
-        {
-        }
-
-        public NUnitTestEventTestCase(string testEvent) : this(XmlHelper.CreateXmlNode(testEvent))
-        {
-        }
-
-        public NUnitFailure Failure { get; }
-
-        public NUnitTestEventTestCase(XmlNode node) : base(node)
-        {
-            if (node.Name != "test-case")
-                throw new NUnitEventWrongTypeException($"Expected 'test-case', got {node.Name}");
-            var failureNode = Node.SelectSingleNode("failure");
-            if (failureNode != null)
-            {
-                Failure = new NUnitFailure(
-                    failureNode.SelectSingleNode("message")?.InnerText,
-                    failureNode.SelectSingleNode("stack-trace")?.InnerText);
-            }
-            ReasonMessage = Node.SelectSingleNode("reason/message")?.InnerText;
-        }
-
-        public string ReasonMessage { get; }
-
-        public bool HasReason => !string.IsNullOrEmpty(ReasonMessage);
-        public bool HasFailure => Failure != null;
-
-        /// <summary>
-        /// Find stacktrace in assertion nodes if not defined.
-        /// </summary>
-        public string StackTrace
+        public IEnumerable<NUnitAttachment> NUnitAttachments
         {
             get
             {
-                string stackTrace = string.Empty;
-                foreach (XmlNode assertionStacktraceNode in Node.SelectNodes("assertions/assertion/stack-trace"))
+                if (nUnitAttachments != null)
+                    return nUnitAttachments;
+                nUnitAttachments = new List<NUnitAttachment>();
+                foreach (XmlNode attachment in Node.SelectNodes("attachments/attachment"))
                 {
-                    stackTrace += assertionStacktraceNode.InnerText;
+                    var path = attachment.SelectSingleNode("filePath")?.InnerText ?? string.Empty;
+                    var description = attachment.SelectSingleNode("description")?.InnerText;
+                    nUnitAttachments.Add(new NUnitAttachment(path, description));
                 }
-
-                return stackTrace;
+                return nUnitAttachments;
             }
         }
+
+    }
+
+
+    public class NUnitAttachment
+    {
+        public NUnitAttachment(string path, string description)
+        {
+            FilePath = path;
+            Description = description;
+        }
+
+        public string FilePath { get;  }
+
+        public string Description { get;  }
     }
 
     public class NUnitProperty
@@ -230,36 +211,6 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         }
     }
 
-
-    /// <summary>
-    /// Handles the NUnit 'test-suite' event.
-    /// </summary>
-    public class NUnitTestEventSuiteFinished : NUnitTestEvent
-    {
-        public NUnitTestEventSuiteFinished(INUnitTestEvent node) : this(node.Node)
-        { }
-        public NUnitTestEventSuiteFinished(string testEvent) : this(XmlHelper.CreateXmlNode(testEvent))
-        { }
-
-        public NUnitTestEventSuiteFinished(XmlNode node) : base(node)
-        {
-            if (node.Name != "test-suite")
-                throw new NUnitEventWrongTypeException($"Expected 'test-suite', got {node.Name}");
-            var failureNode = Node.SelectSingleNode("failure");
-            if (failureNode != null)
-            {
-                FailureMessage = failureNode.SelectSingleNode("message")?.InnerText;
-            }
-            ReasonMessage = Node.SelectSingleNode("reason/message")?.InnerText;
-        }
-
-        public string ReasonMessage { get; }
-
-        public bool HasReason => !string.IsNullOrEmpty(ReasonMessage);
-        public string FailureMessage { get; }
-
-        public bool HasFailure => !string.IsNullOrEmpty(FailureMessage);
-    }
 
     [Serializable]
     public class NUnitEventWrongTypeException : Exception
