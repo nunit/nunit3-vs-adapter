@@ -99,6 +99,7 @@ namespace NUnit.VisualStudio.TestAdapter
         bool FreakMode { get; }
         DisplayNameOptions DisplayName { get; }
         char FullnameSeparator { get; }
+        DiscoveryMethod DiscoveryMethod { get; }
 
         void Load(IDiscoveryContext context);
         void Load(string settingsXml);
@@ -117,6 +118,13 @@ namespace NUnit.VisualStudio.TestAdapter
         Name,
         FullName,
         FullNameSep
+    }
+
+    public enum DiscoveryMethod
+    {
+        Classic,
+        Modern,
+        Both
     }
 
     public class AdapterSettings : IAdapterSettings
@@ -212,6 +220,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public int ConsoleOut { get; private set; }
         public bool StopOnError { get; private set; }
 
+        public DiscoveryMethod DiscoveryMethod { get; private set; } = DiscoveryMethod.Classic;
 
         public VsTestCategoryType VsTestCategoryType { get; private set; } = VsTestCategoryType.NUnit;
 

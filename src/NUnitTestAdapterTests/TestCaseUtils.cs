@@ -50,7 +50,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var testCases = new TestCase[testCaseNodes.Count];
 
             for (var i = 0; i < testCases.Length; i++)
-                testCases[i] = testConverter.ConvertTestCase(new NUnitTestCase(testCaseNodes[i]));
+                testCases[i] = testConverter.ConvertTestCase(new NUnitEventTestCase(testCaseNodes[i]));
 
             return testCases;
         }

@@ -59,7 +59,7 @@ namespace NUnit.VisualStudio.TestAdapter
             // an immutable struct. (https://github.com/nunit/nunit3-vs-adapter/pull/457)
         }
 
-        public static void AddTraitsFromTestNode(this TestCase testCase, NUnitTestCase testNCase,
+        public static void AddTraitsFromTestNode(this TestCase testCase, NUnitEventTestCase testNCase,
             IDictionary<string, CachedTestCaseInfo> traitsCache, ITestLogger logger, IAdapterSettings adapterSettings)
         {
             var ancestor = testNCase.Parent;

@@ -238,6 +238,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.True(_settings.ShadowCopyFiles);
         }
 
+
+        [Test]
+        public void ShadowCopySettingDefault()
+        {
+            _settings.Load("");
+            Assert.That(_settings.ShadowCopyFiles, Is.False);
+        }
+
         [Test]
         public void VerbositySetting()
         {

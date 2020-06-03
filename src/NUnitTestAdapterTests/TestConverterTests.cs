@@ -40,13 +40,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     [Category("TestConverter")]
     public class TestConverterTests
     {
-        private NUnitTestCase fakeTestNode;
+        private NUnitEventTestCase fakeTestNode;
         private TestConverter testConverter;
 
         [SetUp]
         public void SetUp()
         {
-            fakeTestNode = new NUnitTestCase(FakeTestData.GetTestNode());
+            fakeTestNode = new NUnitEventTestCase(FakeTestData.GetTestNode());
             var settings = Substitute.For<IAdapterSettings>();
             settings.ConsoleOut.Returns(0);
             settings.UseTestNameInConsoleOutput.Returns(false);
@@ -88,7 +88,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             foreach (XmlNode node in xmlNodeList)
             {
-                var testCase = testConverter.ConvertTestCase(new NUnitTestCase(node));
+                var testCase = testConverter.ConvertTestCase(new NUnitEventTestCase(node));
             }
 
             var traitsCache = testConverter.TraitsCache;

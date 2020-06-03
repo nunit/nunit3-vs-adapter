@@ -44,7 +44,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     {
         private NUnitEventListener listener;
         private FakeFrameworkHandle testLog;
-        private NUnitTestCase fakeTestNode;
+        private NUnitEventTestCase fakeTestNode;
         private INUnit3TestExecutor executor;
         private IAdapterSettings settings;
 
@@ -58,7 +58,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             settings.CollectSourceInformation.Returns(true);
             using (var testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings))
             {
-                fakeTestNode = new NUnitTestCase(FakeTestData.GetTestNode());
+                fakeTestNode = new NUnitEventTestCase(FakeTestData.GetTestNode());
 
                 // Ensure that the converted testcase is cached
                 testConverter.ConvertTestCase(fakeTestNode);

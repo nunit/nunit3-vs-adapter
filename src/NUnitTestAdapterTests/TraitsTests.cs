@@ -486,7 +486,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             foreach (XmlNode node in xml.SelectNodes("//test-case"))
             {
-                var testcase = testconverter.ConvertTestCase(new NUnitTestCase(node));
+                var testcase = testconverter.ConvertTestCase(new NUnitEventTestCase(node));
                 testcaselist.Add(testcase);
             }
         }

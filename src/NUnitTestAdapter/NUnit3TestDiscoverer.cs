@@ -188,7 +188,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     if (!Debugger.IsAttached)
                         Debugger.Launch();
 #endif
-                    var testCase = testConverter.ConvertTestCase(new NUnitTestCase(testNode));
+                    var testCase = testConverter.ConvertTestCase(new NUnitEventTestCase(testNode));
                     discoverySink.SendTestCase(testCase);
                     cases += 1;
                 }

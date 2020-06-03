@@ -32,11 +32,11 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         string Type { get; }
         string ClassName { get; }
         string MethodName { get; }
-        NUnitTestCase.eRunState RunState { get; }
-        NUnitTestCase Parent { get; }
+        NUnitEventTestCase.eRunState RunState { get; }
+        NUnitEventTestCase Parent { get; }
     }
 
-    public class NUnitTestCase : NUnitTestNode, INUnitTestCase
+    public class NUnitEventTestCase : NUnitTestNode, INUnitTestCase
     {
         public enum eRunState
         {
@@ -70,12 +70,12 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             }
         }
 
-        public NUnitTestCase(XmlNode testCase) : base(testCase)
+        public NUnitEventTestCase(XmlNode testCase) : base(testCase)
         {
             if (Node.ParentNode != null)
-                Parent = new NUnitTestCase(Node.ParentNode);
+                Parent = new NUnitEventTestCase(Node.ParentNode);
         }
 
-        public NUnitTestCase Parent { get; }
+        public NUnitEventTestCase Parent { get; }
     }
 }

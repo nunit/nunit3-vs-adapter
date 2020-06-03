@@ -23,7 +23,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -77,7 +76,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// using the best method available according to the exact
         /// type passed and caching results for efficiency.
         /// </summary>
-        public TestCase ConvertTestCase(NUnitTestCase testNode)
+        public TestCase ConvertTestCase(NUnitEventTestCase testNode)
         {
             if (!testNode.IsTestCase)
                 throw new ArgumentException("The argument must be a test case", nameof(testNode));
@@ -162,7 +161,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// Makes a TestCase from an NUnit test, adding
         /// navigation data if it can be found.
         /// </summary>
-        private TestCase MakeTestCaseFromXmlNode(NUnitTestCase testNode)
+        private TestCase MakeTestCaseFromXmlNode(NUnitEventTestCase testNode)
         {
             string fullyQualifiedName = testNode.FullName;
             if (adapterSettings.UseParentFQNForParametrizedTests)
@@ -201,7 +200,7 @@ namespace NUnit.VisualStudio.TestAdapter
                                     new Uri(NUnitTestAdapter.ExecutorUri),
                                     _sourceAssembly)
             {
-                DisplayName = CreateDisplayName(fullyQualifiedName,testNode.Name), // .Replace(".",":"), //"N:Name -> MS:DisplayName", // testNode.Name,
+                DisplayName = CreateDisplayName(fullyQualifiedName, testNode.Name), // .Replace(".",":"), //"N:Name -> MS:DisplayName", // testNode.Name,
                 CodeFilePath = null,
                 LineNumber = 0,
             };
