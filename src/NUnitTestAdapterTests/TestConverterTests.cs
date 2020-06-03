@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+//using System.Xml;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NSubstitute;
@@ -128,7 +129,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void CannotMakeTestResultWhenTestCaseIsNotInCache()
         {
             var fakeResultNode = new NUnitTestEventTestCase(FakeTestData.GetResultNode());
-            var results = testConverter.GetVsTestResults(fakeResultNode, Enumerable.Empty<XmlNode>().ToList());
+            var results = testConverter.GetVsTestResults(fakeResultNode, Enumerable.Empty<INUnitTestEventTestOutput>().ToList());
             Assert.That(results.TestResults.Count, Is.EqualTo(0));
         }
 
@@ -139,7 +140,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var cachedTestCase = testConverter.ConvertTestCase(fakeTestNode);
             var fakeResultNode = new NUnitTestEventTestCase(FakeTestData.GetResultNode());
 
-            var testResults = testConverter.GetVsTestResults(fakeResultNode, Enumerable.Empty<XmlNode>().ToList());
+            var testResults = testConverter.GetVsTestResults(fakeResultNode, Enumerable.Empty<INUnitTestEventTestOutput>().ToList());
             var testResult = testResults.TestResults[0];
             var testCase = testResult.TestCase;
 
@@ -168,8 +169,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             var cachedTestCase = testConverter.ConvertTestCase(fakeTestNode);
             var fakeResultNode = new NUnitTestEventTestCase(FakeTestData.GetResultNode());
-            var outputNodes = output.Split(';').Select(i => XmlHelper.CreateXmlNode(i.Trim())).ToList();
-            var testResults = testConverter.GetVsTestResults(fakeResultNode, outputNodes);
+            var outputNodes = output.Split(';').Select(i => new NUnitTestEventTestOutput(XmlHelper.CreateXmlNode(i.Trim()))).ToList();
+            var outputNodesCollection = new List<INUnitTestEventTestOutput>(outputNodes);
+            var testResults = testConverter.GetVsTestResults(fakeResultNode, outputNodesCollection);
             var testResult = testResults.TestResults[0];
             var actualMessages = string.Join(";", testResult.Messages.Select(i => i.Category + ":" + i.Text));
 
@@ -184,11 +186,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var cachedTestCase = testConverter.ConvertTestCase(fakeTestNode);
             var fakeResultNode = new NUnitTestEventTestCase(FakeTestData.GetResultNode());
 
-            var testResults = testConverter.GetVsTestResults(fakeResultNode, Enumerable.Empty<XmlNode>().ToList());
+            var testResults = testConverter.GetVsTestResults(fakeResultNode, Enumerable.Empty<INUnitTestEventTestOutput>().ToList());
 
-            var fakeAttachments = fakeResultNode.Node.SelectNodes("attachments/attachment")
-                .OfType<XmlNode>()
-                .Where(n => !string.IsNullOrEmpty(n.SelectSingleNode("filePath")?.InnerText))
+            var fakeAttachments = fakeResultNode.NUnitAttachments
+                .Where(n => !string.IsNullOrEmpty(n.FilePath))
                 .ToArray();
 
             var convertedAttachments = testResults.TestResults
@@ -211,7 +212,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var cachedTestCase = testConverter.ConvertTestCase(fakeTestNode);
             var fakeResultNode = new NUnitTestEventTestCase(FakeTestData.GetResultNode().AsString());
 
-            var testResults = testConverter.GetVsTestResults(fakeResultNode, Enumerable.Empty<XmlNode>().ToList());
+            var testResults = testConverter.GetVsTestResults(fakeResultNode, Enumerable.Empty<INUnitTestEventTestOutput>().ToList());
 
             var convertedAttachments = testResults.TestResults
                 .SelectMany(tr => tr.Attachments.SelectMany(ats => ats.Attachments))

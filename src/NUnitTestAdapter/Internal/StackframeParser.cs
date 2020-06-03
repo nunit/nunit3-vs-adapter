@@ -57,8 +57,7 @@ namespace NUnit.VisualStudio.TestAdapter.Internal
                 string methodName = match.Groups["methodName"].Value;
                 string fileName = match.Groups["fileName"].Value;
 
-                int lineNumber;
-                if (!int.TryParse(match.Groups["lineNumber"].Value, out lineNumber))
+                if (!int.TryParse(match.Groups["lineNumber"].Value, out int lineNumber))
                 {
                     lineNumber = 0;
                 }

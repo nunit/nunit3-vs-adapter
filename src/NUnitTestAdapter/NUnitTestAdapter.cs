@@ -284,6 +284,9 @@ namespace NUnit.VisualStudio.TestAdapter
             runSettings[PackageSettings.TestParameters] = oldFrameworkSerializedParameters.ToString(0, oldFrameworkSerializedParameters.Length - 1);
         }
 
+        /// <summary>
+        /// Ensure any channels registered by other adapters are unregistered.
+        /// </summary>
         protected static void CleanUpRegisteredChannels()
         {
 #if NET35

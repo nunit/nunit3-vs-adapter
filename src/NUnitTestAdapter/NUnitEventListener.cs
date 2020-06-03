@@ -26,7 +26,6 @@ using System.Collections.Generic;
 #if NET35
 using System.Runtime.Remoting;
 #endif
-using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
@@ -47,11 +46,11 @@ namespace NUnit.VisualStudio.TestAdapter
 #endif
         ITestEventListener, IDisposable // Public for testing
     {
-        private static readonly ICollection<XmlNode> EmptyNodes = new List<XmlNode>();
+        private static readonly ICollection<INUnitTestEventTestOutput> EmptyNodes = new List<INUnitTestEventTestOutput>();
         private readonly ITestExecutionRecorder _recorder;
         private readonly ITestConverter _testConverter;
         private readonly IAdapterSettings _settings;
-        private readonly Dictionary<string, ICollection<XmlNode>> _outputNodes = new Dictionary<string, ICollection<XmlNode>>();
+        private readonly Dictionary<string, ICollection<INUnitTestEventTestOutput>> _outputNodes = new Dictionary<string, ICollection<INUnitTestEventTestOutput>>();
 
 #if NET35
         public override object InitializeLifetimeService()
@@ -64,7 +63,7 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 #endif
 
-        private INUnit3TestExecutor executor;
+        private readonly INUnit3TestExecutor executor;
 
         public NUnitEventListener(ITestExecutionRecorder recorder, ITestConverter testConverter, INUnit3TestExecutor executor)
         {
@@ -86,23 +85,19 @@ namespace NUnit.VisualStudio.TestAdapter
                 switch (node.Type)
                 {
                     case NUnitTestEventHeader.EventType.StartTest:
-                        var startNode = new NUnitTestEventStartTest(node);
-                        TestStarted(startNode);
+                        TestStarted(new NUnitTestEventStartTest(node));
                         break;
 
                     case NUnitTestEventHeader.EventType.TestCase:
-                        var testFinishedNode = new NUnitTestEventTestCase(node);
-                        TestFinished(testFinishedNode);
+                        TestFinished(new NUnitTestEventTestCase(node));
                         break;
 
                     case NUnitTestEventHeader.EventType.TestSuite:
-                        var suiteFinishedNode = new NUnitTestEventSuiteFinished(node);
-                        SuiteFinished(suiteFinishedNode);
+                        SuiteFinished(new NUnitTestEventSuiteFinished(node));
                         break;
 
                     case NUnitTestEventHeader.EventType.TestOutput:
-                        var outputNode = new NUnitTestEventTestOutput(node);
-                        TestOutput(outputNode);
+                        TestOutput(new NUnitTestEventTestOutput(node));
                         break;
                 }
             }
@@ -144,7 +139,7 @@ namespace NUnit.VisualStudio.TestAdapter
         }
         #endregion
 
-        public void TestStarted(NUnitTestEventStartTest testNode)
+        public void TestStarted(INUnitTestEventStartTest testNode)
         {
             var ourCase = _testConverter.GetCachedTestCase(testNode.Id);
 
@@ -153,7 +148,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 _recorder.RecordStart(ourCase);
         }
 
-        public void TestFinished(NUnitTestEventTestCase resultNode)
+        public void TestFinished(INUnitTestEventTestCase resultNode)
         {
             var testId = resultNode.Id;
             if (_outputNodes.TryGetValue(testId, out var outputNodes))
@@ -183,7 +178,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
-        public void SuiteFinished(NUnitTestEventSuiteFinished resultNode)
+        public void SuiteFinished(INUnitTestEventSuiteFinished resultNode)
         {
             if (!resultNode.IsFailed)
                 return;
@@ -205,9 +200,9 @@ namespace NUnit.VisualStudio.TestAdapter
         private static readonly int NL_LENGTH = NL.Length;
         private readonly IDumpXml dumpXml;
 
-        public void TestOutput(NUnitTestEventTestOutput outputNode)
+        public void TestOutput(INUnitTestEventTestOutput outputNodeEvent)
         {
-            string text = outputNode.Content;
+            string text = outputNodeEvent.Content;
 
             // Remove final newline since logger will add one
             if (text.EndsWith(NL))
@@ -218,16 +213,16 @@ namespace NUnit.VisualStudio.TestAdapter
                 return;
             }
 
-            string testId = outputNode.TestId;
+            string testId = outputNodeEvent.TestId;
             if (!string.IsNullOrEmpty(testId))
             {
                 if (!_outputNodes.TryGetValue(testId, out var outputNodes))
                 {
-                    outputNodes = new List<XmlNode>();
+                    outputNodes = new List<INUnitTestEventTestOutput>();
                     _outputNodes.Add(testId, outputNodes);
                 }
 
-                outputNodes.Add(outputNode.Node);
+                outputNodes.Add(outputNodeEvent);
             }
 
             _recorder.SendMessage(TestMessageLevel.Warning, text);

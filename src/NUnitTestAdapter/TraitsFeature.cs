@@ -23,7 +23,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
@@ -63,9 +62,8 @@ namespace NUnit.VisualStudio.TestAdapter
         public static void AddTraitsFromTestNode(this TestCase testCase, NUnitTestCase testNCase,
             IDictionary<string, CachedTestCaseInfo> traitsCache, ITestLogger logger, IAdapterSettings adapterSettings)
         {
-            var testNode = testNCase.Node;
-            var ancestor = testNode.ParentNode;
-            var key = ancestor?.Attributes?["id"]?.Value;
+            var ancestor = testNCase.Parent;
+            var key = ancestor?.Id;
             var categoryList = new CategoryList(testCase, adapterSettings);
             // Reading ancestor properties of a test-case node. And adding to the cache.
             while (ancestor != null && key != null)
@@ -90,12 +88,12 @@ namespace NUnit.VisualStudio.TestAdapter
                         traitsCache[key] = new CachedTestCaseInfo();
                     }
                 }
-                ancestor = ancestor.ParentNode;
-                key = ancestor?.Attributes?["id"]?.Value;
+                ancestor = ancestor.Parent;
+                key = ancestor?.Id;
             }
 
             // No Need to store test-case properties in cache.
-            categoryList.ProcessTestCaseProperties(testNode, false);
+            categoryList.ProcessTestCaseProperties(testNCase, false);
             categoryList.UpdateCategoriesToVs();
         }
 

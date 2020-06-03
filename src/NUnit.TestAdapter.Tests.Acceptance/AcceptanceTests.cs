@@ -165,7 +165,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
         private static string TryGetTestNupkgVersion(string directory, string packageId)
         {
-            var path = Directory.GetFileSystemEntries(directory, packageId + ".*.nupkg").SingleOrDefault();
+            var dir = new DirectoryInfo(directory);
+            var packages = dir.EnumerateFiles(packageId + ".*.nupkg").ToList();
+            var selected = packages.Count > 1 ? packages.OrderByDescending(f => f.LastWriteTime).First() : packages.SingleOrDefault();
+
+            var path = selected?.FullName;
 
             return path is null ? null :
                 Path.GetFileNameWithoutExtension(path).Substring(packageId.Length + 1);

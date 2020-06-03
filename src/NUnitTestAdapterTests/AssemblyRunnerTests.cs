@@ -22,10 +22,6 @@
 // ***********************************************************************
 
 using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Xml;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests

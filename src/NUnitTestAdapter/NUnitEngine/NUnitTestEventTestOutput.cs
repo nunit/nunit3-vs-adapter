@@ -25,10 +25,26 @@ using System.Xml;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
+    public interface INUnitTestEventTestOutput
+    {
+        NUnitTestEventTestOutput.Streams Stream { get; }
+        string TestId { get; }
+        string TestName { get; }
+
+        /// <summary>
+        /// Returns the output information.
+        /// </summary>
+        string Content { get; }
+
+        bool IsProgressStream { get; }
+        bool IsErrorStream { get; }
+        bool IsNullOrEmptyStream { get; }
+    }
+
     /// <summary>
     /// Handles the 'test-output' event.
     /// </summary>
-    public class NUnitTestEventTestOutput : NUnitTestEvent
+    public class NUnitTestEventTestOutput : NUnitTestEvent, INUnitTestEventTestOutput
     {
         public enum Streams
         {
@@ -43,7 +59,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public string TestName => Node.GetAttribute("testname");
 
 
-        public NUnitTestEventTestOutput(INUnitTestEvent theEvent) : this(theEvent.Node)
+        public NUnitTestEventTestOutput(INUnitTestEventForXml theEvent) : this(theEvent.Node)
         {
             if (theEvent.Node.Name != "test-output")
                 throw new NUnitEventWrongTypeException($"Expected 'test-output', got {theEvent.Node.Name}");
@@ -58,9 +74,19 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             };
         }
 
+        public bool IsProgressStream => Stream == Streams.Progress;
+        public bool IsErrorStream => Stream == Streams.Error;
+
+        public bool IsNullOrEmptyStream => Stream == Streams.NoIdea;
+
         /// <summary>
         /// Returns the output information.
         /// </summary>
         public string Content => Node.InnerText;
+
+        // Notes:
+        // The input doesnt have any id, but used testid instead.
+        // Properties FullName and Name is not in use
+
     }
 }

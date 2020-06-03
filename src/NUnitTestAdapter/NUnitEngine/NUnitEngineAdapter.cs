@@ -22,6 +22,8 @@
 // ***********************************************************************
 
 using System;
+using System.IO;
+using System.Xml;
 using NUnit.Engine;
 using NUnit.Engine.Services;
 // We use an alias so that we don't accidentally make
@@ -118,6 +120,21 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         {
             CloseRunner();
             TestEngine?.Dispose();
+        }
+
+        public void GenerateTestOutput(NUnitResults testResults, string assemblyPath, NUnit3TestExecutor nUnit3TestExecutor)
+        {
+            if (!settings.UseTestOutputXml)
+                return;
+
+            string path = Path.Combine(nUnit3TestExecutor.TestOutputXmlFolder, $"{Path.GetFileNameWithoutExtension(assemblyPath)}.xml");
+            var resultService = GetService<IResultService>();
+
+            // Following null argument should work for nunit3 format. Empty array is OK as well.
+            // If you decide to handle other formats in the runsettings, it needs more work.
+            var resultWriter = resultService.GetResultWriter("nunit3", null);
+            resultWriter.WriteResultFile(testResults.TopNode, path);
+            logger.Info($"   Test results written to {path}");
         }
     }
 }

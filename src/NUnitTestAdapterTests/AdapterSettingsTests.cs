@@ -397,7 +397,44 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void MapWarningToTestsDefault()
         {
             _settings.Load("");
-            Assert.That(_settings.MapWarningTo, Is.EqualTo(TestOutcome.Skipped));
+           
         }
+
+        [TestCase("Name", DisplayNameOptions.Name)]
+        [TestCase("Fullname", DisplayNameOptions.FullName)]
+        [TestCase("FullnameSep", DisplayNameOptions.FullNameSep)]
+        [TestCase("invalid", DisplayNameOptions.Name)]
+        public void MapDisplayNameTests(string setting, DisplayNameOptions outcome)
+        {
+            var runsettings = $"<RunSettings><NUnit><DisplayName>{setting}</DisplayName></NUnit></RunSettings>";
+            _settings.Load(runsettings);
+            Assert.That(_settings.DisplayName, Is.EqualTo(outcome));
+        }
+
+        [TestCase(":")]
+        [TestCase("-")]
+        [TestCase(".")]
+        public void FullNameSeparatorTest(string setting)
+        {
+            var expected = setting[0];
+            var runsettings = $"<RunSettings><NUnit><FullnameSeparator>{setting}</FullnameSeparator></NUnit></RunSettings>";
+            _settings.Load(runsettings);
+            Assert.That(_settings.FullnameSeparator, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void TestDefaults()
+        {
+            _settings.Load("");
+            Assert.Multiple(() =>
+            {
+                Assert.That(_settings.FullnameSeparator, Is.EqualTo(':'));
+                Assert.That(_settings.DisplayName, Is.EqualTo(DisplayNameOptions.Name));
+                Assert.That(_settings.MapWarningTo, Is.EqualTo(TestOutcome.Skipped));
+            });
+            
+        }
+
+
     }
 }

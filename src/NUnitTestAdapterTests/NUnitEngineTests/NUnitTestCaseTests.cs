@@ -21,15 +21,39 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using NUnit.Framework;
+using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
 {
     public class NUnitTestCaseTests
     {
+        private string xml_runnable =
+            @"<test-case id='0-1007' name='Test2M' fullname='TestWarnings.Test4.Test2M' methodname='Test2M' classname='TestWarnings.Test4' runstate='Runnable' seed='882017471' />";
+
+        private string xml_explicit = @"<test-case id='0-1007' name='Test2M' fullname='TestWarnings.Test4.Test2M' methodname='Test2M' classname='TestWarnings.Test4' runstate='Explicit' seed='882017471' />";
+
+        private string xml_none = @"<test-case id='0-1007' name='Test2M' fullname='TestWarnings.Test4.Test2M' methodname='Test2M' classname='TestWarnings.Test4' seed='882017471' />";
+
+
+        [Test]
+        public void ThatRunStateIsHandledForRunnable()
+        {
+            var sut = new NUnitTestCase(XmlHelper.CreateXmlNode(xml_runnable));
+            Assert.That(sut.RunState, Is.EqualTo(NUnitTestCase.eRunState.Runnable));
+        }
+        [Test]
+        public void ThatRunStateIsHandledForExplicit()
+        {
+            var sut = new NUnitTestCase(XmlHelper.CreateXmlNode(xml_explicit));
+            Assert.That(sut.RunState, Is.EqualTo(NUnitTestCase.eRunState.Explicit));
+        }
+
+        [Test]
+        public void ThatRunStateIsHandledForNone()
+        {
+            var sut = new NUnitTestCase(XmlHelper.CreateXmlNode(xml_none));
+            Assert.That(sut.RunState, Is.EqualTo(NUnitTestCase.eRunState.NA));
+        }
     }
 }
