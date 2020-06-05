@@ -545,9 +545,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
                 // Special count checks for some 
                 Assert.That(topLevelSuite.GenericFixtures.Sum(o => o.NoOfActualTestCases), Is.EqualTo(3),
                     "Generic fixtures counts fails in itself");
-
-
-
+                
                 // Test Case count checks
                 Assert.That(actualCount, Is.EqualTo(count), "Actual count doesn't match given count");
                 Assert.That(
