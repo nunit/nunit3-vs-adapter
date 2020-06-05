@@ -45,12 +45,14 @@
         <file src="build\net35\NUnit3.TestAdapter.pdb" target="build\net35\NUnit3.TestAdapter.pdb" />
         <file src="build\net35\nunit.engine.dll" target="build\net35\nunit.engine.dll" />
         <file src="build\net35\nunit.engine.api.dll" target="build\net35\nunit.engine.api.dll" />
+        <file src="build\net35\nunit.engine.core.dll" target="build\net35\nunit.engine.core.dll" />
         <file src="build\net35\NUnit3TestAdapter.props" target="build\net35\NUnit3TestAdapter.props" />
 
         <file src="build\netcoreapp2.1\NUnit3.TestAdapter.dll" target="build\netcoreapp2.1\NUnit3.TestAdapter.dll" />
         <file src="build\netcoreapp2.1\NUnit3.TestAdapter.pdb" target="build\netcoreapp2.1\NUnit3.TestAdapter.pdb" />
         <file src="build\netcoreapp2.1\nunit.engine.dll" target="build\netcoreapp2.1\nunit.engine.dll" />
         <file src="build\netcoreapp2.1\nunit.engine.api.dll" target="build\netcoreapp2.1\nunit.engine.api.dll" />
+        <file src="build\netcoreapp2.1\nunit.engine.core.dll" target="build\netcoreapp2.1\nunit.engine.core.dll" />
         <file src="build\netcoreapp2.1\NUnit3TestAdapter.props" target="build\netcoreapp2.1\NUnit3TestAdapter.props" />
 
     </files>
