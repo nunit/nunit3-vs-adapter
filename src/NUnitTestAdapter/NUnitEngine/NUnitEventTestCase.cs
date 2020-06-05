@@ -42,8 +42,9 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         {
             NA,
             Runnable,
-            Explicit
-        };
+            Explicit,
+            NotRunnable
+        }
 
         public bool IsTestCase => !IsNull && Node.Name == "test-case";
         public bool IsParameterizedMethod => Type == "ParameterizedMethod";
@@ -63,6 +64,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                     {
                         "Runnable" => eRunState.Runnable,
                         "Explicit" => eRunState.Explicit,
+                        "NotRunnable" => eRunState.NotRunnable,
                         _ => runState
                     };
                 }

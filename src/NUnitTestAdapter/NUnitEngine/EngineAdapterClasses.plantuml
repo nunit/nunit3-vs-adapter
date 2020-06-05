@@ -1,0 +1,55 @@
+@startuml
+title NUnitEngineAdapterClasses for discovery
+   CanHaveFixtures <|-- TestSuite
+   SuiteBase <|-- CanHaveTestCases
+   SuiteBase <|-- CanHaveFixtures
+   CanHaveTestCases <|-- Fixture
+   SuiteBase <|-- TestCase
+   CanHaveTestCases <|-- ParametrizedMethod
+   CanHaveFixtures <|-- GenericFixture
+   CanHaveFixtures <|-- SetUpFixture
+   CanHaveTestCases <|-- Theory
+   TestSuite o-- GenericFixture
+   TestSuite o-- TestSuite
+   Fixture o-- ParametrizedMethod
+   CanHaveTestCases o-- TestCase
+   CanHaveFixtures o-- Fixture
+   CanHaveFixtures <|-- ParametrizedFixture
+   TestSuite o-- ParametrizedFixture
+   TestSuite o-- SetUpFixture
+   SuiteBase <|-- Assembly
+   Assembly o-- TestSuite
+   Fixture o-- Theory
+   
+abstract class SuiteBase {
+   Property collection,
+   Fixed properties
+}
+
+abstract class CanHaveTestCases {
+   
+
+}
+
+abstract class CanHaveFixtures {
+   Name:test-suite
+}
+
+class Assembly
+{
+   Name:test-suite
+   Type:Assembly
+}
+
+class TestSuite{
+   Type:TestSuite
+}
+
+class Fixture{
+   Name:test-suite
+   Type:TestFixture
+}
+
+
+   
+@enduml
