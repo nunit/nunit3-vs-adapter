@@ -22,6 +22,7 @@
 // ***********************************************************************
 
 using System.Collections.Generic;
+using System.Linq;
 // ***********************************************************************
 // Copyright (c) 2020-2020 Charlie Poole, Terje Sandstrom
 //
@@ -50,12 +51,20 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
-    public class DiscoveryExtensions
+    public class Discovery
     {
 
         public TestConverter TestConverter { get; private set; }
 
         public NUnitDiscoveryTestRun  TestRun { get; private set; }
+
+        public NUnitDiscoveryTestAssembly CurrentTestAssembly => TestRun.TestAssembly;
+
+        public NUnitDiscoveryTestSuite TopLevelTestSuite => CurrentTestAssembly.TestSuites.FirstOrDefault();
+
+        public IEnumerable<NUnitDiscoveryTestCase> AllTestCases => CurrentTestAssembly.AllTestCases;
+
+        public bool IsExplicitRun => CurrentTestAssembly.IsExplicit;
 
         public IList<TestCase> Convert(NUnitResults discoveryResults, ITestLogger logger, string assemblyPath, IAdapterSettings settings)
         {

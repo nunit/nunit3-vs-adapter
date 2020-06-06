@@ -53,16 +53,16 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             var type = node.Attribute("test-suite")?.Value;
             if (type != null)
                 throw new DiscoveryException();
-            var topLevelSuite = ExtractTestSuiteForAssembly(node);
+            var topLevelSuite = ExtractTestSuiteForAssembly(node, testassembly);
             testassembly.AddTestSuite(topLevelSuite);
             ExtractAllFixtures(topLevelSuite, node);
             return testrun;
         }
 
-        private NUnitDiscoveryTestSuite ExtractTestSuiteForAssembly(XElement node)
+        private NUnitDiscoveryTestSuite ExtractTestSuiteForAssembly(XElement node, NUnitDiscoverySuiteBase parent)
         {
             var b = ExtractSuiteBasePropertiesClass(node);
-            var ts = new NUnitDiscoveryTestSuite(b);
+            var ts = new NUnitDiscoveryTestSuite(b, parent);
             return ts;
         }
 
@@ -104,7 +104,6 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         private static void ExtractTestFixtures(NUnitDiscoveryCanHaveTestFixture parent, XElement node)
         {
-
             foreach (var child in node.Elements())
             {
                 var type = child.Attribute("type").Value;
@@ -112,7 +111,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                 var btf = ExtractSuiteBasePropertiesClass(child);
                 if (type != "TestFixture")
                     throw new DiscoveryException($"Not a TestFixture, but {type}");
-                var tf = new NUnitDiscoveryTestFixture(btf, className);
+                var tf = new NUnitDiscoveryTestFixture(btf, className, parent);
                 parent.AddTestFixture(tf);
                 ExtractTestCases(tf, child);
                 ExtractParameterizedMethodsAndTheories(tf, child);
@@ -131,13 +130,13 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                 var btf = ExtractSuiteBasePropertiesClass(child);
                 if (type == ParameterizedMethod)
                 {
-                    var tc = new NUnitDiscoveryParametrizedMethod(btf, className);
+                    var tc = new NUnitDiscoveryParameterizedMethod(btf, className, tf);
                     ExtractTestCases(tc, child);
                     tf.AddParametrizedMethod(tc);
                 }
                 else
                 {
-                    var tc = new NUnitDiscoveryTheory(btf, className);
+                    var tc = new NUnitDiscoveryTheory(btf, className, tf);
                     tf.AddTheory(tc);
                     ExtractTestCases(tc, child);
                 }
@@ -148,13 +147,11 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         {
             foreach (var child in node.Elements("test-case"))
             {
-                var type = child.Attribute("type")?.Value;
                 var className = child.Attribute(classname)?.Value;
                 var methodName = child.Attribute(methodname)?.Value;
                 var seed = long.Parse(child.Attribute("seed").Value);
                 var btf = ExtractSuiteBasePropertiesClass(child);
-                var tc = new NUnitDiscoveryTestCase(btf, methodName, seed);
-                tc.ClassName = className;
+                var tc = new NUnitDiscoveryTestCase(btf, tf, methodName, seed) { ClassName = className };
                 tf.AddTestCase(tc);
             }
         }
@@ -164,29 +161,31 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             string className)
         {
             var b = ExtractSuiteBasePropertiesClass(node);
-            var ts = new NUnitDiscoveryTestFixture(b, className);
+            var ts = new NUnitDiscoveryTestFixture(b, className, parent);
             return ts;
         }
 
-        private static NUnitDiscoveryGenericFixture ExtractGenericTestFixture(NUnitDiscoveryCanHaveTestFixture parent,
+        private static NUnitDiscoveryGenericFixture ExtractGenericTestFixture(
+            NUnitDiscoveryCanHaveTestFixture parent,
             XElement node, string className)
         {
             var b = ExtractSuiteBasePropertiesClass(node);
             var ts = new NUnitDiscoveryGenericFixture(b);
             return ts;
         }
-        private static NUnitDiscoverySetUpFixture ExtractSetUpTestFixture(NUnitDiscoveryCanHaveTestFixture parent,
+        private static NUnitDiscoverySetUpFixture ExtractSetUpTestFixture(
+            NUnitDiscoveryCanHaveTestFixture parent,
             XElement node, string className)
         {
             var b = ExtractSuiteBasePropertiesClass(node);
-            var ts = new NUnitDiscoverySetUpFixture(b, className);
+            var ts = new NUnitDiscoverySetUpFixture(b, className, parent);
             return ts;
         }
         private static NUnitDiscoveryParameterizedTestFixture ExtractParametrizedTestFixture(
             NUnitDiscoveryCanHaveTestFixture parent, XElement node, string className)
         {
             var b = ExtractSuiteBasePropertiesClass(node);
-            var ts = new NUnitDiscoveryParameterizedTestFixture(b);
+            var ts = new NUnitDiscoveryParameterizedTestFixture(b,  parent);
             return ts;
         }
 
