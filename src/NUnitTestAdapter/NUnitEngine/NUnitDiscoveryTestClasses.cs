@@ -67,7 +67,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             Runstate = runstate;
         }
 
-        public virtual bool IsExplicit => Runstate == NUnitEventTestCase.RunStateEnum.Explicit;
+        public virtual bool IsExplicit => Runstate == NUnitEventTestCase.eRunState.Explicit;
 
         public virtual void AddToAllTestCases(NUnitDiscoveryTestCase  tc)
         {
@@ -195,6 +195,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         }
     }
 
+    }
 
     public sealed class NUnitDiscoveryTestFixture : NUnitDiscoveryCanHaveTestCases
     {
