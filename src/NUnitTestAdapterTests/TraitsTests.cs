@@ -368,7 +368,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     [Category(nameof(TestTraits))]
     public class TestTraits
     {
-        private TestConverter testconverter;
+        private TestConverterForXml testconverter;
         private List<TestCase> testcaselist;
         private TestDataForTraits testDataForTraits;
 
@@ -384,7 +384,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             testlogger.InitSettings(adaptersettings);
             var settings = Substitute.For<IAdapterSettings>();
             settings.CollectSourceInformation.Returns(false);
-            testconverter = new TestConverter(testlogger, "whatever", settings);
+            testconverter = new TestConverterForXml(testlogger, "whatever", settings);
             testcaselist = new List<TestCase>();
         }
 
@@ -537,7 +537,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             var settings = Substitute.For<IAdapterSettings>();
             settings.CollectSourceInformation.Returns(false);
-            using (var converter = new TestConverter(
+            using (var converter = new TestConverterForXml(
                 new TestLogger(new MessageLoggerStub()),
                 sourceAssembly: "unused",
                 settings))

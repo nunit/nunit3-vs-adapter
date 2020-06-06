@@ -32,13 +32,13 @@ using VSTestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-    //public interface ITestConverter
-    //{
-    //    TestCase GetCachedTestCase(string id);
-    //    TestConverterForXml.TestResultSet GetVsTestResults(INUnitTestEventTestCase resultNode, ICollection<INUnitTestEventTestOutput> outputNodes);
-    //}
+    public interface ITestConverter
+    {
+        TestCase GetCachedTestCase(string id);
+        TestConverterForXml.TestResultSet GetVsTestResults(INUnitTestEventTestCase resultNode, ICollection<INUnitTestEventTestOutput> outputNodes);
+    }
 
-    public sealed class TestConverter : IDisposable, ITestConverter
+    public sealed class TestConverterForXml : IDisposable, ITestConverter
     {
         private readonly ITestLogger _logger;
         private readonly Dictionary<string, TestCase> _vsTestCaseMap;
@@ -48,7 +48,7 @@ namespace NUnit.VisualStudio.TestAdapter
         private readonly IAdapterSettings adapterSettings;
 
 
-        public TestConverter(ITestLogger logger, string sourceAssembly, IAdapterSettings settings)
+        public TestConverterForXml(ITestLogger logger, string sourceAssembly, IAdapterSettings settings)
         {
             adapterSettings = settings;
             _logger = logger;
@@ -76,15 +76,18 @@ namespace NUnit.VisualStudio.TestAdapter
         /// using the best method available according to the exact
         /// type passed and caching results for efficiency.
         /// </summary>
-        public TestCase ConvertTestCase(NUnitDiscoveryTestCase testNode)
+        public TestCase ConvertTestCase(NUnitEventTestCase testNode)
         {
+            if (!testNode.IsTestCase)
+                throw new ArgumentException("The argument must be a test case", nameof(testNode));
+
             // Return cached value if we have one
             string id = testNode.Id;
             if (_vsTestCaseMap.ContainsKey(id))
                 return _vsTestCaseMap[id];
 
             // Convert to VS TestCase and cache the result
-            var testCase = MakeTestCaseFromDiscoveryNode(testNode);
+            var testCase = MakeTestCaseFromXmlNode(testNode);
             _vsTestCaseMap.Add(id, testCase);
             return testCase;
         }
@@ -100,7 +103,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private static readonly string NL = Environment.NewLine;
 
-        public TestConverterForXml.TestResultSet GetVsTestResults(INUnitTestEventTestCase resultNode, ICollection<INUnitTestEventTestOutput> outputNodes)
+        public TestResultSet GetVsTestResults(INUnitTestEventTestCase resultNode, ICollection<INUnitTestEventTestOutput> outputNodes)
         {
             var results = new List<VSTestResult>();
 
@@ -139,7 +142,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 if (result != null)
                     results.Add(result);
             }
-            return new TestConverterForXml.TestResultSet { TestCaseResult = testCaseResult, TestResults = results, ConsoleOutput = resultNode.Output };
+            return new TestResultSet { TestCaseResult = testCaseResult, TestResults = results, ConsoleOutput = resultNode.Output };
         }
 
         public struct TestResultSet
@@ -158,7 +161,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// Makes a TestCase from an NUnit test, adding
         /// navigation data if it can be found.
         /// </summary>
-        private TestCase MakeTestCaseFromDiscoveryNode(NUnitDiscoveryTestCase testNode)
+        private TestCase MakeTestCaseFromXmlNode(NUnitEventTestCase testNode)
         {
             string fullyQualifiedName = testNode.FullName;
             if (adapterSettings.UseParentFQNForParametrizedTests)
@@ -226,7 +229,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 _ = CheckCodeFilePathOverride();
             }
 
-            testCase.AddTraitsFromTestNode(testNode, TraitsCache, _logger, adapterSettings);
+            testCase.AddTraitsFromXmlTestNode(testNode, TraitsCache, _logger, adapterSettings);
 
             return testCase;
 

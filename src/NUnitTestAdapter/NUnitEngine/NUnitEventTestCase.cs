@@ -21,6 +21,8 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
+using System.Collections;
+using System.Collections.Generic;
 using System.Xml;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
@@ -32,20 +34,26 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         string Type { get; }
         string ClassName { get; }
         string MethodName { get; }
-        NUnitEventTestCase.RunStateEnum RunState { get; }
+        RunStateEnum RunState { get; }
         NUnitEventTestCase Parent { get; }
     }
 
-    public class NUnitEventTestCase : NUnitTestNode, INUnitTestCase
+    public enum RunStateEnum
     {
-        public enum RunStateEnum
-        {
-            NA,
-            Runnable,
-            Explicit,
-            NotRunnable
-        }
+        NA,
+        Runnable,
+        Explicit,
+        NotRunnable
+    }
 
+    public interface INUnitTestCasePropertyInfo
+    {
+        RunStateEnum RunState { get; }
+        IEnumerable<NUnitProperty> Properties { get; }
+    }
+
+    public class NUnitEventTestCase : NUnitTestNode, INUnitTestCase, INUnitTestCasePropertyInfo
+    {
         public bool IsTestCase => !IsNull && Node.Name == "test-case";
         public bool IsParameterizedMethod => Type == "ParameterizedMethod";
         public string Type => Node.GetAttribute("type");

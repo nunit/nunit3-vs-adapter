@@ -39,9 +39,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         /// <summary>
         /// Knows how to convert an entire XML fragment.
         /// </summary>
-        public static IReadOnlyList<TestCase> ConvertTestCases(this TestConverter testConverter, string xml)
+        public static IReadOnlyList<TestCase> ConvertTestCases(this TestConverterForXml testConverterForXml, string xml)
         {
-            if (testConverter == null) throw new ArgumentNullException(nameof(testConverter));
+            if (testConverterForXml == null) throw new ArgumentNullException(nameof(testConverterForXml));
 
             var fragment = new XmlDocument().CreateDocumentFragment();
             fragment.InnerXml = xml;
@@ -50,7 +50,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var testCases = new TestCase[testCaseNodes.Count];
 
             for (var i = 0; i < testCases.Length; i++)
-                testCases[i] = testConverter.ConvertTestCase(new NUnitEventTestCase(testCaseNodes[i]));
+                testCases[i] = testConverterForXml.ConvertTestCase(new NUnitEventTestCase(testCaseNodes[i]));
 
             return testCases;
         }
@@ -59,7 +59,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             var settings = Substitute.For<IAdapterSettings>();
             settings.CollectSourceInformation.Returns(false);
-            using (var testConverter = new TestConverter(
+            using (var testConverter = new TestConverterForXml(
                 new TestLogger(new MessageLoggerStub()),
                 FakeTestData.AssemblyPath,
                 settings))

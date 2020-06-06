@@ -59,7 +59,45 @@ namespace NUnit.VisualStudio.TestAdapter
             // an immutable struct. (https://github.com/nunit/nunit3-vs-adapter/pull/457)
         }
 
-        public static void AddTraitsFromTestNode(this TestCase testCase, NUnitEventTestCase testNCase,
+        public static void AddTraitsFromTestNode(this TestCase testCase, NUnitDiscoveryTestCase testNCase,
+            IDictionary<string, CachedTestCaseInfo> traitsCache, ITestLogger logger, IAdapterSettings adapterSettings)
+        {
+            var ancestor = testNCase.Parent;
+            var key = ancestor?.Id;
+            var categoryList = new CategoryList(testCase, adapterSettings);
+            // Reading ancestor properties of a test-case node. And adding to the cache.
+            while (ancestor != null && key != null)
+            {
+                if (traitsCache.ContainsKey(key))
+                {
+                    categoryList.AddRange(traitsCache[key].Traits.Where(o => o.Name == NunitTestCategoryLabel).Select(prop => prop.Value).ToList());
+
+                    if (traitsCache[key].Explicit)
+                        testCase.SetPropertyValue(CategoryList.NUnitExplicitProperty, true);
+
+                    var traitsList = traitsCache[key].Traits.Where(o => o.Name != NunitTestCategoryLabel).ToList();
+                    if (traitsList.Count > 0)
+                        testCase.Traits.AddRange(traitsList);
+                }
+                else
+                {
+                    categoryList.ProcessTestCaseProperties(ancestor, true, key, traitsCache);
+                    // Adding entry to dictionary, so that we will not make SelectNodes call again.
+                    if (categoryList.LastNodeListCount == 0 && !traitsCache.ContainsKey(key))
+                    {
+                        traitsCache[key] = new CachedTestCaseInfo();
+                    }
+                }
+                ancestor = ancestor.Parent;
+                key = ancestor?.Id;
+            }
+
+            // No Need to store test-case properties in cache.
+            categoryList.ProcessTestCaseProperties(testNCase, false);
+            categoryList.UpdateCategoriesToVs();
+        }
+
+        public static void AddTraitsFromXmlTestNode(this TestCase testCase, NUnitEventTestCase testNCase,
             IDictionary<string, CachedTestCaseInfo> traitsCache, ITestLogger logger, IAdapterSettings adapterSettings)
         {
             var ancestor = testNCase.Parent;

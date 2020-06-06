@@ -97,7 +97,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     if (results.IsRunnable)
                     {
                         int cases;
-                        using (var testConverter = new TestConverter(TestLog, sourceAssemblyPath, Settings))
+                        using (var testConverter = new TestConverterForXml(TestLog, sourceAssemblyPath, Settings))
                         {
                             cases = ProcessTestCases(results, discoverySink, testConverter);
                         }
@@ -177,7 +177,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
 #region Helper Methods
 
-        private int ProcessTestCases(NUnitResults results, ITestCaseDiscoverySink discoverySink, TestConverter testConverter)
+        private int ProcessTestCases(NUnitResults results, ITestCaseDiscoverySink discoverySink, TestConverterForXml testConverterForXml)
         {
             int cases = 0;
             foreach (XmlNode testNode in results.TestCases())
@@ -188,7 +188,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     if (!Debugger.IsAttached)
                         Debugger.Launch();
 #endif
-                    var testCase = testConverter.ConvertTestCase(new NUnitEventTestCase(testNode));
+                    var testCase = testConverterForXml.ConvertTestCase(new NUnitEventTestCase(testNode));
                     discoverySink.SendTestCase(testCase);
                     cases += 1;
                 }

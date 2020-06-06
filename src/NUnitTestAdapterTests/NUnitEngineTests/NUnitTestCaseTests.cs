@@ -40,20 +40,20 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         public void ThatRunStateIsHandledForRunnable()
         {
             var sut = new NUnitEventTestCase(XmlHelper.CreateXmlNode(xml_runnable));
-            Assert.That(sut.RunState, Is.EqualTo(NUnitEventTestCase.RunStateEnum.Runnable));
+            Assert.That(sut.RunState, Is.EqualTo(RunStateEnum.Runnable));
         }
         [Test]
         public void ThatRunStateIsHandledForExplicit()
         {
             var sut = new NUnitEventTestCase(XmlHelper.CreateXmlNode(xml_explicit));
-            Assert.That(sut.RunState, Is.EqualTo(NUnitEventTestCase.RunStateEnum.Explicit));
+            Assert.That(sut.RunState, Is.EqualTo(RunStateEnum.Explicit));
         }
 
         [Test]
         public void ThatRunStateIsHandledForNone()
         {
             var sut = new NUnitEventTestCase(XmlHelper.CreateXmlNode(xml_none));
-            Assert.That(sut.RunState, Is.EqualTo(NUnitEventTestCase.RunStateEnum.NA));
+            Assert.That(sut.RunState, Is.EqualTo(RunStateEnum.NA));
         }
     }
 }

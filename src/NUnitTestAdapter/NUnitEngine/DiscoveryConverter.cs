@@ -41,7 +41,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
 #pragma warning restore SA1303 // Const field names should begin with upper-case letter
 
-        public NUnitDiscoveryTestRun Convert(NUnitResults discovery, TestConverter converter)
+        public NUnitDiscoveryTestRun Convert(NUnitResults discovery, TestConverterForXml converterForXml)
         {
             var doc = XDocument.Load(new XmlNodeReader(discovery.FullTopNode));
             var testrun = ExtractTestRun(doc);
@@ -211,7 +211,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
             foreach (var propnode in node.Elements("properties").Elements("property"))
             {
-                var prop = new NUnitTestDiscoveryProperty(
+                var prop = new NUnitProperty(
                     propnode.Attribute("name").Value,
                     propnode.Attribute("value").Value);
                 bp.NUnitTestDiscoveryProperties.Add(prop);
@@ -228,14 +228,14 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         }
 
 
-        private static NUnitEventTestCase.RunStateEnum ExtractRunState(XElement node)
+        private static RunStateEnum ExtractRunState(XElement node)
         {
             var runState = node.Attribute(runstate)?.Value switch
             {
-                "Runnable" => NUnitEventTestCase.RunStateEnum.Runnable,
-                "Explicit" => NUnitEventTestCase.RunStateEnum.Explicit,
-                "NotRunnable" => NUnitEventTestCase.RunStateEnum.NotRunnable,
-                _ => NUnitEventTestCase.RunStateEnum.NA
+                "Runnable" => RunStateEnum.Runnable,
+                "Explicit" => RunStateEnum.Explicit,
+                "NotRunnable" => RunStateEnum.NotRunnable,
+                _ => RunStateEnum.NA
             };
             return runState;
         }

@@ -56,7 +56,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             executor = Substitute.For<INUnit3TestExecutor>();
             executor.Settings.Returns(settings);
             settings.CollectSourceInformation.Returns(true);
-            using (var testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings))
+            using (var testConverter = new TestConverterForXml(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings))
             {
                 fakeTestNode = new NUnitEventTestCase(FakeTestData.GetTestNode());
 

@@ -191,6 +191,8 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public string Name { get; }
         public string Value { get; }
 
+        public bool IsInternal => Name.StartsWith("_");
+
         public NUnitProperty(string name, string value)
         {
             Name = name;
