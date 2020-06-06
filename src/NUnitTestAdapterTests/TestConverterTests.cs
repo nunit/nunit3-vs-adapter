@@ -25,8 +25,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
-//using System.Xml;
-
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NSubstitute;
 using NUnit.Framework;

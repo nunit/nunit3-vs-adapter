@@ -32,13 +32,13 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         string Type { get; }
         string ClassName { get; }
         string MethodName { get; }
-        NUnitEventTestCase.eRunState RunState { get; }
+        NUnitEventTestCase.RunStateEnum RunState { get; }
         NUnitEventTestCase Parent { get; }
     }
 
     public class NUnitEventTestCase : NUnitTestNode, INUnitTestCase
     {
-        public enum eRunState
+        public enum RunStateEnum
         {
             NA,
             Runnable,
@@ -52,19 +52,19 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public string ClassName => Node.GetAttribute("classname");
         public string MethodName => Node.GetAttribute("methodname");
 
-        eRunState runState = eRunState.NA;
+        RunStateEnum runState = RunStateEnum.NA;
 
-        public eRunState RunState
+        public RunStateEnum RunState
         {
             get
             {
-                if (runState == eRunState.NA)
+                if (runState == RunStateEnum.NA)
                 {
                     runState = Node.GetAttribute("runstate") switch
                     {
-                        "Runnable" => eRunState.Runnable,
-                        "Explicit" => eRunState.Explicit,
-                        "NotRunnable" => eRunState.NotRunnable,
+                        "Runnable" => RunStateEnum.Runnable,
+                        "Explicit" => RunStateEnum.Explicit,
+                        "NotRunnable" => RunStateEnum.NotRunnable,
                         _ => runState
                     };
                 }

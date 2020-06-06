@@ -240,7 +240,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
                 if (discoveryResults.IsRunnable)
                 {
-                    var discovery = new DiscoveryExtensions();
+                    var discovery = new Discovery();
                     var loadedTestCases = discovery.Convert(discoveryResults, TestLog, assemblyPath, Settings);
 
                     // If we have a TFS Filter, convert it to an nunit filter

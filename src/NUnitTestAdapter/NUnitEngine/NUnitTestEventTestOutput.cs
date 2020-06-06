@@ -87,6 +87,5 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         // Notes:
         // The input doesnt have any id, but used testid instead.
         // Properties FullName and Name is not in use
-
     }
 }

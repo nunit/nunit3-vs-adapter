@@ -95,7 +95,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
             }
 
-            if (testNode.RunState != NUnitEventTestCase.eRunState.Explicit) // Attributes?["runstate"]?.Value != "Explicit")
+            if (testNode.RunState != NUnitEventTestCase.RunStateEnum.Explicit) // Attributes?["runstate"]?.Value != "Explicit")
                 return categorylist;
             // Add UI grouping “Explicit”
             if (testCase.Traits.All(trait => trait.Name != ExplicitTraitName))

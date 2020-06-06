@@ -2,7 +2,6 @@
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
-
     public interface INUnitTestEventTestCase : INUnitTestEvent
     {
         NUnitFailure Failure { get; }
