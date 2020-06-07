@@ -39,9 +39,11 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         INUnitDiscoverySuiteBase Parent { get; set; }
         NUnitDiscoveryProperties NUnitDiscoveryProperties { get; }
         bool IsExplicit { get; }
+        bool IsExplicitReverse { get; }
+
         bool IsParameterizedMethod { get; }
         IEnumerable<NUnitProperty> Properties { get; }
-        void AddToAllTestCases(NUnitDiscoveryTestCase  tc);
+        void AddToAllTestCases(NUnitDiscoveryTestCase tc);
     }
 
     /// <summary>
@@ -83,10 +85,11 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         }
 
         public virtual bool IsExplicit => RunState == RunStateEnum.Explicit;
+        public virtual bool IsExplicitReverse => RunState == RunStateEnum.Explicit || (Parent?.IsExplicitReverse ?? RunState == RunStateEnum.Explicit);
         public virtual bool IsParameterizedMethod => false;
         public IEnumerable<NUnitProperty> Properties => NUnitDiscoveryProperties.Properties;
 
-        public virtual void AddToAllTestCases(NUnitDiscoveryTestCase  tc)
+        public virtual void AddToAllTestCases(NUnitDiscoveryTestCase tc)
         {
             Parent.AddToAllTestCases(tc);
         }

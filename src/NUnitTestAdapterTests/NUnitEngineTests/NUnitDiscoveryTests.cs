@@ -741,6 +741,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
                 new TestConverterForXml(logger, "whatever", settings));
             var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
             Assert.That(topLevelSuite.IsExplicit);
+            Assert.That(ndr.TestAssembly.AllTestCases.Count(), Is.EqualTo(3));
+            Assert.Multiple(() =>
+            {
+                foreach (var testCase in ndr.TestAssembly.AllTestCases)
+                {
+                    Assert.That(testCase.IsExplicitReverse, $"Failed for {testCase.Id}");
+                }
+            });
         }
 
         private const string NotExplicitXml =
