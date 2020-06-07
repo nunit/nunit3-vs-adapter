@@ -228,6 +228,9 @@ namespace NUnit.VisualStudio.TestAdapter
 
             if (Settings.StopOnError)
                 package.Settings[PackageSettings.StopOnError] = true;
+            
+            if (Settings.SkipNonTestAssemblies)
+                package.Settings[PackageSettings.SkipNonTestAssemblies] = true;
 
             // Always run one assembly at a time in process in its own domain
             package.Settings[PackageSettings.ProcessModel] = "InProcess";
