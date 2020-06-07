@@ -122,7 +122,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
     public enum DiscoveryMethod
     {
-        Classic,
+        Old,
         Modern,
         Both
     }
@@ -220,7 +220,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public int ConsoleOut { get; private set; }
         public bool StopOnError { get; private set; }
 
-        public DiscoveryMethod DiscoveryMethod { get; private set; } = DiscoveryMethod.Classic;
+        public DiscoveryMethod DiscoveryMethod { get; private set; } = DiscoveryMethod.Old;
 
         public VsTestCategoryType VsTestCategoryType { get; private set; } = VsTestCategoryType.NUnit;
 

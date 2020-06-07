@@ -44,8 +44,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public IList<TestCase> Convert(NUnitResults discoveryResults, ITestLogger logger, string assemblyPath, IAdapterSettings settings)
         {
-            TestConverterForXml = new TestConverterForXml(logger, assemblyPath, settings);
-            if (settings.DiscoveryMethod != DiscoveryMethod.Classic)
+            if (settings.DiscoveryMethod != DiscoveryMethod.Old)
             {
                 var discoveryConverter = new DiscoveryConverter();
                 TestRun = discoveryConverter.Convert(discoveryResults, TestConverterForXml);
@@ -57,9 +56,23 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             // As a side effect of calling TestConverter.ConvertTestCase,
             // the converter's cache of all test cases is populated as well.
             // All future calls to convert a test case may now use the cache.
-            foreach (XmlNode testNode in nunitTestCases)
-                loadedTestCases.Add(TestConverterForXml.ConvertTestCase(new NUnitEventTestCase(testNode)));
-            logger.Info($"   NUnit3TestExecutor discovered {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases");
+
+            if (settings.DiscoveryMethod == DiscoveryMethod.Old)
+            {
+                TestConverterForXml = new TestConverterForXml(logger, assemblyPath, settings);
+                foreach (XmlNode testNode in nunitTestCases)
+                    loadedTestCases.Add(TestConverterForXml.ConvertTestCase(new NUnitEventTestCase(testNode)));
+                logger.Info(
+                    $"   NUnit3TestExecutor discovered {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases using Classic mode");
+            }
+            else
+            {
+                var testConverter = new TestConverter(logger, assemblyPath, settings);
+                foreach (var testNode in TestRun.TestAssembly.AllTestCases)
+                    loadedTestCases.Add(testConverter.ConvertTestCase(testNode));
+                logger.Info(
+                    $"   NUnit3TestExecutor discovered {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases using Classic mode");
+            }
 
             return loadedTestCases;
         }
