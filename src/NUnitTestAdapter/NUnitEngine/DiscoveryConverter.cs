@@ -227,7 +227,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                 var prop = new NUnitProperty(
                     propnode.Attribute("name").Value,
                     propnode.Attribute("value").Value);
-                bp.NUnitTestDiscoveryProperties.Add(prop);
+                bp.NUnitDiscoveryProperties.Add(prop);
             }
             return bp;
         }

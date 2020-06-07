@@ -37,7 +37,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         int TestCaseCount { get; }
         RunStateEnum RunState { get; set; }
         INUnitDiscoverySuiteBase Parent { get; set; }
-        NUnitTestDiscoveryProperties NUnitTestDiscoveryProperties { get; }
+        NUnitDiscoveryProperties NUnitDiscoveryProperties { get; }
         bool IsExplicit { get; }
         bool IsParameterizedMethod { get; }
         IEnumerable<NUnitProperty> Properties { get; }
@@ -66,15 +66,15 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             other.TestCaseCount)
         {
             RunState = other.RunState;
-            foreach (var prop in other.NUnitTestDiscoveryProperties.Properties)
+            foreach (var prop in other.NUnitDiscoveryProperties.Properties)
             {
-                NUnitTestDiscoveryProperties.Add(prop);
+                NUnitDiscoveryProperties.Add(prop);
             }
         }
         public RunStateEnum RunState { get; set; }
         public virtual INUnitDiscoverySuiteBase Parent { get; set; }
 
-        public NUnitTestDiscoveryProperties NUnitTestDiscoveryProperties { get; } = new NUnitTestDiscoveryProperties();
+        public NUnitDiscoveryProperties NUnitDiscoveryProperties { get; } = new NUnitDiscoveryProperties();
 
         public NUnitDiscoverySuiteBase(string id, string name, string fullname, int count, RunStateEnum runstate)
         : this(id, name, fullname, count)
@@ -84,7 +84,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public virtual bool IsExplicit => RunState == RunStateEnum.Explicit;
         public virtual bool IsParameterizedMethod => false;
-        public IEnumerable<NUnitProperty> Properties => NUnitTestDiscoveryProperties.Properties;
+        public IEnumerable<NUnitProperty> Properties => NUnitDiscoveryProperties.Properties;
 
         public virtual void AddToAllTestCases(NUnitDiscoveryTestCase  tc)
         {
@@ -102,7 +102,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public NUnitDiscoveryTestAssembly TestAssembly { get; set; }
     }
 
-    public class NUnitTestDiscoveryProperties
+    public class NUnitDiscoveryProperties
     {
         private List<NUnitProperty> TheProperties { get; } = new List<NUnitProperty>();
         public IEnumerable<NUnitProperty> Properties => TheProperties;

@@ -69,7 +69,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void CanMakeTestCaseFromTest()
         {
-
             var testCase = testConverter.ConvertTestCase(fakeTestNode);
             CheckTestCase(testCase);
         }
@@ -93,9 +92,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void CanMakeTestCaseShouldBuildTraitsCache()
         {
-
-
-
             var xmlNodeList = FakeTestData.GetTestNodes();
             var tf = Substitute.For<INUnitDiscoveryCanHaveTestCases>();
             foreach (XmlNode node in xmlNodeList)
@@ -121,11 +117,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
                 // Checking assembly level attribute.
                 CheckNodeProperties(traitsCache, "0-1009",
-                    new[] {new KeyValuePair<string, string>("Category", "AsmCat")});
+                    new[] { new KeyValuePair<string, string>("Category", "AsmCat") });
 
                 // Checking Class level attributes base class & dervied class
                 CheckNodeProperties(traitsCache, "0-1000",
-                    new[] {new KeyValuePair<string, string>("Category", "BaseClass")});
+                    new[] { new KeyValuePair<string, string>("Category", "BaseClass") });
                 CheckNodeProperties(traitsCache, "0-1002",
                     new[]
                     {
@@ -134,8 +130,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                     });
 
                 // Checking Nested class attributes.
-                CheckNodeProperties(traitsCache, "0-1005", new[] {new KeyValuePair<string, string>("Category", "NS1")});
-                CheckNodeProperties(traitsCache, "0-1007", new[] {new KeyValuePair<string, string>("Category", "NS2")});
+                CheckNodeProperties(traitsCache, "0-1005", new[] { new KeyValuePair<string, string>("Category", "NS1") });
+                CheckNodeProperties(traitsCache, "0-1007", new[] { new KeyValuePair<string, string>("Category", "NS2") });
             });
         }
 

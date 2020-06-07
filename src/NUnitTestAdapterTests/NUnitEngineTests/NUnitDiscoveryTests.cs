@@ -469,8 +469,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
 
             Assert.That(ndr.Id, Is.EqualTo("2"));
             Assert.That(ndr.TestAssembly, Is.Not.Null, "Missing test assembly");
-            Assert.That(ndr.TestAssembly.NUnitTestDiscoveryProperties.Properties.Count(), Is.EqualTo(2));
-            Assert.That(ndr.TestAssembly.NUnitTestDiscoveryProperties.AllInternal);
+            Assert.That(ndr.TestAssembly.NUnitDiscoveryProperties.Properties.Count(), Is.EqualTo(2));
+            Assert.That(ndr.TestAssembly.NUnitDiscoveryProperties.AllInternal);
             var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
             var fixturesCount = topLevelSuite.TestFixtures.Count();
             var genericFixturesCount = topLevelSuite.GenericFixtures.Count();
@@ -518,10 +518,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
                 Assert.That(testCase.FullName, Is.EqualTo("NUnitTestDemo.SimpleTests.TestSucceeds"), "Fullname fails");
                 Assert.That(testCase.MethodName, Is.EqualTo("TestSucceeds"), "Methodname fails");
                 Assert.That(testCase.ClassName, Is.EqualTo("NUnitTestDemo.SimpleTests"), "Classname fails");
-                Assert.That(((NUnitDiscoverySuiteBase) testCase).RunState, Is.EqualTo(RunStateEnum.Runnable), "Runstate fails");
+                Assert.That(testCase.RunState, Is.EqualTo(RunStateEnum.Runnable), "Runstate fails");
                 Assert.That(testCase.Seed, Is.EqualTo(296066266), "Seed fails");
                 Assert.That(
-                    testCase.NUnitTestDiscoveryProperties.Properties.Single(o => o.Name == "Category").Value,
+                    testCase.NUnitDiscoveryProperties.Properties.Single(o => o.Name == "Category").Value,
                     Is.EqualTo("Whatever"));
             });
         }
@@ -654,7 +654,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
                             Assert.That(testCase.FullName, Does.StartWith("NUnitTestDemo.SetUpFixture.TestFixture"));
                             Assert.That(testCase.MethodName, Does.StartWith("Test"), "MethodName is wrong");
                             Assert.That(testCase.ClassName, Does.StartWith("NUnitTestDemo.SetUpFixture.TestFixture"), "Name is wrong");
-                            Assert.That(((NUnitDiscoverySuiteBase) testCase).RunState, Is.EqualTo(RunStateEnum.Runnable),
+                            Assert.That(testCase.RunState, Is.EqualTo(RunStateEnum.Runnable),
                                 "Runstate fails for testCase");
                             Assert.That(testCase.Seed, Is.GreaterThan(0), "Seed missing");
                         });
