@@ -99,6 +99,7 @@ namespace NUnit.VisualStudio.TestAdapter
         bool FreakMode { get; }
         DisplayNameOptions DisplayName { get; }
         char FullnameSeparator { get; }
+        bool SkipNonTestAssemblies { get; }
 
         void Load(IDiscoveryContext context);
         void Load(string settingsXml);
@@ -212,6 +213,8 @@ namespace NUnit.VisualStudio.TestAdapter
         public int ConsoleOut { get; private set; }
         public bool StopOnError { get; private set; }
 
+        public bool SkipNonTestAssemblies { get; private set; }
+
 
         public VsTestCategoryType VsTestCategoryType { get; private set; } = VsTestCategoryType.NUnit;
 
@@ -308,6 +311,10 @@ namespace NUnit.VisualStudio.TestAdapter
             UseNUnitIdforTestCaseId = GetInnerTextAsBool(nunitNode, nameof(UseNUnitIdforTestCaseId), false);
             ConsoleOut = GetInnerTextAsInt(nunitNode, nameof(ConsoleOut), 1);  // 0 no output to console, 1 : output to console
             StopOnError = GetInnerTextAsBool(nunitNode, nameof(StopOnError), false);
+
+            // Engine settings
+            SkipNonTestAssemblies = GetInnerTextAsBool(nunitNode, nameof(SkipNonTestAssemblies), true);
+
 
             // Adapter Diagnostics
             DumpXmlTestDiscovery = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestDiscovery), false);
