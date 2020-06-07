@@ -57,6 +57,8 @@ namespace NUnit.Common
         /// </summary>
         public const string WorkDirectory = "WorkDirectory";
 
+        public const string SkipNonTestAssemblies = nameof(SkipNonTestAssemblies);
+
         #endregion
 
         #region Engine Settings - Used by the Engine itself
