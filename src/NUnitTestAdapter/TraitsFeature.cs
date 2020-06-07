@@ -66,7 +66,7 @@ namespace NUnit.VisualStudio.TestAdapter
             var key = ancestor?.Id;
             var categoryList = new CategoryList(testCase, adapterSettings);
             // Reading ancestor properties of a test-case node. And adding to the cache.
-            while (ancestor != null && key != null)
+            while (ancestor != null && !string.IsNullOrEmpty(key))
             {
                 if (traitsCache.ContainsKey(key))
                 {

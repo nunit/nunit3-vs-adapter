@@ -29,10 +29,25 @@ using System.Linq;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
+    public interface INUnitDiscoverySuiteBase : INUnitTestCasePropertyInfo
+    {
+        string Id { get; }
+        string Name { get; }
+        string FullName { get; }
+        int TestCaseCount { get; }
+        RunStateEnum RunState { get; set; }
+        INUnitDiscoverySuiteBase Parent { get; set; }
+        NUnitTestDiscoveryProperties NUnitTestDiscoveryProperties { get; }
+        bool IsExplicit { get; }
+        bool IsParameterizedMethod { get; }
+        IEnumerable<NUnitProperty> Properties { get; }
+        void AddToAllTestCases(NUnitDiscoveryTestCase  tc);
+    }
+
     /// <summary>
     /// These classes are those found during the discovery in the execution phase.
     /// </summary>
-    public class NUnitDiscoverySuiteBase : INUnitTestCasePropertyInfo
+    public class NUnitDiscoverySuiteBase : INUnitDiscoverySuiteBase
     {
         public string Id { get; }
         public string Name { get; }
@@ -57,7 +72,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             }
         }
         public RunStateEnum RunState { get; set; }
-        public virtual NUnitDiscoverySuiteBase Parent { get; set; }
+        public virtual INUnitDiscoverySuiteBase Parent { get; set; }
 
         public NUnitTestDiscoveryProperties NUnitTestDiscoveryProperties { get; } = new NUnitTestDiscoveryProperties();
 
@@ -196,7 +211,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             base.NoOfActualTestCases
             + parametrizedMethods.Sum(o => o.NoOfActualTestCases)
             + theories.Sum(o => o.NoOfActualTestCases);
-        public NUnitDiscoveryTestFixture(NUnitDiscoverySuiteBase theBase, string classname, NUnitDiscoveryCanHaveTestFixture parent) : base(theBase)
+        public NUnitDiscoveryTestFixture(NUnitDiscoverySuiteBase theBase, string classname, INUnitDiscoverySuiteBase parent) : base(theBase)
         {
             Parent = parent;
             ClassName = classname;
@@ -216,13 +231,20 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         }
     }
 
-    public sealed class NUnitDiscoveryTestCase : NUnitDiscoverySuiteBase
+    public interface INUnitDiscoveryTestCase : INUnitDiscoverySuiteBase
+    {
+        string ClassName { get; set; }
+        string MethodName { get; set; }
+        long Seed { get; set; }
+    }
+
+    public sealed class NUnitDiscoveryTestCase : NUnitDiscoverySuiteBase, INUnitDiscoveryTestCase
     {
         public string ClassName { get; set; }
         public string MethodName { get; set; }
         public long Seed { get; set; }
 
-        public NUnitDiscoveryTestCase(NUnitDiscoverySuiteBase theBase, NUnitDiscoveryCanHaveTestCases parent, string methodname, long seed) : base(theBase)
+        public NUnitDiscoveryTestCase(NUnitDiscoverySuiteBase theBase, INUnitDiscoveryCanHaveTestCases parent, string methodname, long seed) : base(theBase)
         {
             Parent = parent;
             MethodName = methodname;
@@ -242,7 +264,14 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public override bool IsParameterizedMethod => true;
     }
 
-    public abstract class NUnitDiscoveryCanHaveTestCases : NUnitDiscoverySuiteBase
+    public interface INUnitDiscoveryCanHaveTestCases : INUnitDiscoverySuiteBase
+    {
+        IEnumerable<NUnitDiscoveryTestCase> TestCases { get; }
+        int NoOfActualTestCases { get; }
+        void AddTestCase(NUnitDiscoveryTestCase tc);
+    }
+
+    public abstract class NUnitDiscoveryCanHaveTestCases : NUnitDiscoverySuiteBase, INUnitDiscoveryCanHaveTestCases
     {
         private readonly List<NUnitDiscoveryTestCase> testCases = new List<NUnitDiscoveryTestCase>();
 
@@ -264,13 +293,21 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         }
     }
 
-    public abstract class NUnitDiscoveryCanHaveTestFixture : NUnitDiscoverySuiteBase
+    public interface INUnitDiscoveryCanHaveTestFixture : INUnitDiscoverySuiteBase
+    {
+        IEnumerable<NUnitDiscoveryTestFixture> TestFixtures { get; }
+        bool AreFixturesExplicit { get; }
+        int NoOfActualTestCases { get; }
+        void AddTestFixture(NUnitDiscoveryTestFixture tf);
+    }
+
+    public abstract class NUnitDiscoveryCanHaveTestFixture : NUnitDiscoverySuiteBase, INUnitDiscoveryCanHaveTestFixture
     {
         private readonly List<NUnitDiscoveryTestFixture> testFixtures = new List<NUnitDiscoveryTestFixture>();
 
         public IEnumerable<NUnitDiscoveryTestFixture> TestFixtures => testFixtures;
 
-        protected bool AreFixturesExplicit => testFixtures.All(o => o.IsExplicit);
+        public bool AreFixturesExplicit => testFixtures.All(o => o.IsExplicit);
         public override bool IsExplicit =>
             base.IsExplicit || AreFixturesExplicit;
 

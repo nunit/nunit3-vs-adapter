@@ -21,6 +21,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
@@ -143,21 +144,33 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             }
         }
 
-        private static void ExtractTestCases(NUnitDiscoveryCanHaveTestCases tf, XElement node)
+        public static IEnumerable<NUnitDiscoveryTestCase> ExtractTestCases(INUnitDiscoveryCanHaveTestCases tf, XElement node)
         {
             foreach (var child in node.Elements("test-case"))
             {
-                var className = child.Attribute(classname)?.Value;
-                var methodName = child.Attribute(methodname)?.Value;
-                var seed = long.Parse(child.Attribute("seed").Value);
-                var btf = ExtractSuiteBasePropertiesClass(child);
-                var tc = new NUnitDiscoveryTestCase(btf, tf, methodName, seed) { ClassName = className };
+                var tc = ExtractTestCase(tf, child);
                 tf.AddTestCase(tc);
             }
+
+            return tf.TestCases;
+        }
+
+        /// <summary>
+        /// Extracts single test case, made public for testing.
+        /// </summary>
+        public static NUnitDiscoveryTestCase ExtractTestCase(INUnitDiscoveryCanHaveTestCases tf, XElement child)
+        {
+            var className = child.Attribute(classname)?.Value;
+            var methodName = child.Attribute(methodname)?.Value;
+            var seedAtr = child.Attribute("seed")?.Value;
+            var seed = seedAtr != null ? long.Parse(seedAtr) : 0;
+            var btf = ExtractSuiteBasePropertiesClass(child);
+            var tc = new NUnitDiscoveryTestCase(btf, tf, methodName, seed) {ClassName = className};
+            return tc;
         }
 
 
-        private static NUnitDiscoveryTestFixture ExtractTestFixture(NUnitDiscoveryCanHaveTestFixture parent, XElement node,
+        public static NUnitDiscoveryTestFixture ExtractTestFixture(INUnitDiscoveryCanHaveTestFixture parent, XElement node,
             string className)
         {
             var b = ExtractSuiteBasePropertiesClass(node);
