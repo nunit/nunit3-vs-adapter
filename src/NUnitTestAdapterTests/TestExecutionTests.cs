@@ -30,7 +30,6 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using NUnit.Framework;
 using NUnit.Tests;
 using NUnit.Tests.Assemblies;
-using NUnit.Tests.Singletons;
 using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests

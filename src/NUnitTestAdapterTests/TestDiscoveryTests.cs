@@ -39,7 +39,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     {
         public static IEnumerable<IDiscoveryContext> TestDiscoveryData()
         {
-            yield return new FakeDiscoveryContext(null);
+           // yield return new FakeDiscoveryContext(null);
             yield return new FakeDiscoveryContext(new FakeRunSettings());
         }
     }
@@ -67,7 +67,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(NUnit.Tests.Assemblies.MockAssembly.TestsAtRuntime, Is.EqualTo(NUnit.Tests.Assemblies.MockAssembly.Tests),
                 "The reference to mock-assembly.dll appears to be the wrong version");
             Assert.That(File.Exists(MockAssemblyPath), $"Can't locate mock-assembly.dll at {MockAssemblyPath}");
-            var runsettings = "<RunSettings><NUnit><UseParentFQNForParametrizedTests>True</UseParentFQNForParametrizedTests></NUnit></RunSettings>";
+            var runsettings = "<RunSettings><NUnit><UseParentFQNForParametrizedTests>True</UseParentFQNForParametrizedTests><SkipNonTestAssemblies>false</SkipNonTestAssemblies></NUnit></RunSettings>";
             var rs = Substitute.For<IRunSettings>();
             rs.SettingsXml.Returns(runsettings);
             _context.RunSettings.Returns(rs);
