@@ -33,12 +33,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
             throw new NotImplementedException();
         }
 
-        public virtual string SettingsXml => "<RunSettings/>";
+        public virtual string SettingsXml => "<RunSettings><NUnit><SkipNonTestAssemblies>false</SkipNonTestAssemblies></NUnit></RunSettings>";
     }
 
     class FakeRunSettingsForTestOutput : FakeRunSettings
     {
-        public override string SettingsXml => "<RunSettings><NUnit><TestOutputXml>TestResults</TestOutputXml></NUnit></RunSettings>";
+        public override string SettingsXml => "<RunSettings><NUnit><TestOutputXml>TestResults</TestOutputXml><SkipNonTestAssemblies>false</SkipNonTestAssemblies></NUnit></RunSettings>";
     }
 
     class FakeRunSettingsForTestOutputAndWorkDir : FakeRunSettings
@@ -51,7 +51,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
             _workDir = workDir;
             _testOutput = testOutput;
         }
-        public override string SettingsXml => $"<RunSettings><NUnit><WorkDirectory>{_workDir}</WorkDirectory><TestOutputXml>{_testOutput}</TestOutputXml></NUnit></RunSettings>";
+        public override string SettingsXml => $"<RunSettings><NUnit><WorkDirectory>{_workDir}</WorkDirectory><TestOutputXml>{_testOutput}</TestOutputXml><SkipNonTestAssemblies>false</SkipNonTestAssemblies></NUnit></RunSettings>";
     }
 
     class FakeRunSettingsForWhere : FakeRunSettings
@@ -62,6 +62,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
         {
             _where = where;
         }
-        public override string SettingsXml => $"<RunSettings><NUnit><Where>{_where}</Where></NUnit></RunSettings>";
+        public override string SettingsXml => $"<RunSettings><NUnit><Where>{_where}</Where><SkipNonTestAssemblies>false</SkipNonTestAssemblies></NUnit></RunSettings>";
     }
 }
