@@ -24,6 +24,7 @@
 using System.IO;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
+using NSubstitute;
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
@@ -439,6 +440,18 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 Assert.That(_settings.DisplayName, Is.EqualTo(DisplayNameOptions.Name));
                 Assert.That(_settings.MapWarningTo, Is.EqualTo(TestOutcome.Skipped));
             });
+        }
+
+        [TestCase("garbage", DiscoveryMethod.Old, DiscoveryMethod.Old)]
+        [TestCase("Old", DiscoveryMethod.Old, DiscoveryMethod.Old)]
+        [TestCase("Modern", DiscoveryMethod.Old, DiscoveryMethod.Modern)]
+        public void TestMapEnum<T>(string setting, T defaultValue, T expected)
+        where T : System.Enum
+        {
+            var logger = Substitute.For<ITestLogger>();
+            var sut = new AdapterSettings(logger);
+            var result = sut.MapEnum(setting, defaultValue);
+            Assert.That(result, Is.EqualTo(expected), $"Failed for {setting}");
         }
     }
 }

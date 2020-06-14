@@ -38,7 +38,12 @@ namespace NUnit.VisualStudio.TestAdapter
         TestConverterForXml.TestResultSet GetVsTestResults(INUnitTestEventTestCase resultNode, ICollection<INUnitTestEventTestOutput> outputNodes);
     }
 
-    public sealed class TestConverterForXml : IDisposable, ITestConverter
+    public interface ITestConverterXml : ITestConverter
+    {
+        TestCase ConvertTestCase(NUnitEventTestCase nUnitEventTestCase);
+    }
+
+    public sealed class TestConverterForXml : IDisposable, ITestConverterXml
     {
         private readonly ITestLogger _logger;
         private readonly Dictionary<string, TestCase> _vsTestCaseMap;
@@ -200,7 +205,7 @@ namespace NUnit.VisualStudio.TestAdapter
                                     new Uri(NUnitTestAdapter.ExecutorUri),
                                     _sourceAssembly)
             {
-                DisplayName = CreateDisplayName(fullyQualifiedName, testNode.Name), // .Replace(".",":"), //"N:Name -> MS:DisplayName", // testNode.Name,
+                DisplayName = CreateDisplayName(fullyQualifiedName, testNode.Name),
                 CodeFilePath = null,
                 LineNumber = 0,
             };

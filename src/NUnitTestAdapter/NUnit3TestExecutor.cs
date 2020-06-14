@@ -21,7 +21,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-// #define LAUNCHDEBUGGER
+#define LAUNCHDEBUGGER
 
 using System;
 using System.Collections.Generic;
@@ -257,18 +257,16 @@ namespace NUnit.VisualStudio.TestAdapter
                         return;
                     }
                     executionDumpXml?.AddString($"\n\n<NUnitExecution>{assemblyPath}</NUnitExecution>\n\n");
-                    using (var listener = new NUnitEventListener(FrameworkHandle, discovery.TestConverterForXml, this))
+                    using var listener = new NUnitEventListener(FrameworkHandle, discovery.TestConverterForXml, this);
+                    try
                     {
-                        try
-                        {
-                            var results = NUnitEngineAdapter.Run(listener, filter);
-                            NUnitEngineAdapter.GenerateTestOutput(results, assemblyPath, this);
-                        }
-                        catch (NullReferenceException)
-                        {
-                            // this happens during the run when CancelRun is called.
-                            TestLog.Debug("   Null ref caught");
-                        }
+                        var results = NUnitEngineAdapter.Run(listener, filter);
+                        NUnitEngineAdapter.GenerateTestOutput(results, assemblyPath, this);
+                    }
+                    catch (NullReferenceException)
+                    {
+                        // this happens during the run when CancelRun is called.
+                        TestLog.Debug("   Null ref caught");
                     }
                 }
                 else

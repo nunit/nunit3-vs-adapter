@@ -35,14 +35,12 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         string Name { get; }
         string FullName { get; }
         int TestCaseCount { get; }
-        RunStateEnum RunState { get; set; }
         INUnitDiscoverySuiteBase Parent { get; set; }
         NUnitDiscoveryProperties NUnitDiscoveryProperties { get; }
         bool IsExplicit { get; }
         bool IsExplicitReverse { get; }
 
         bool IsParameterizedMethod { get; }
-        IEnumerable<NUnitProperty> Properties { get; }
         void AddToAllTestCases(NUnitDiscoveryTestCase tc);
     }
 
@@ -188,6 +186,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         private readonly List<NUnitDiscoveryTestCase> allTestCases = new List<NUnitDiscoveryTestCase>();
 
         public IEnumerable<NUnitDiscoveryTestCase> AllTestCases => allTestCases;
+        public IEnumerable<NUnitDiscoveryTestCase> RunnableTestCases => allTestCases.Where(c => !c.IsExplicitReverse);
 
         public void AddTestSuite(NUnitDiscoveryTestSuite ts)
         {
@@ -243,8 +242,11 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
     public sealed class NUnitDiscoveryTestCase : NUnitDiscoverySuiteBase, INUnitDiscoveryTestCase
     {
+        public bool IsTestCase => true;
+        public string Type { get; }
         public string ClassName { get; set; }
         public string MethodName { get; set; }
+        public INUnitDiscoveryCanHaveTestCases Parent { get; set; }
         public long Seed { get; set; }
 
         public NUnitDiscoveryTestCase(NUnitDiscoverySuiteBase theBase, INUnitDiscoveryCanHaveTestCases parent, string methodname, long seed) : base(theBase)
@@ -329,10 +331,11 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
 
 
-    public class NUnitDiscoveryGenericFixture : NUnitDiscoveryCanHaveTestFixture
+    public sealed class NUnitDiscoveryGenericFixture : NUnitDiscoveryCanHaveTestFixture
     {
-        public NUnitDiscoveryGenericFixture(NUnitDiscoverySuiteBase theBase) : base(theBase)
+        public NUnitDiscoveryGenericFixture(NUnitDiscoverySuiteBase theBase, INUnitDiscoverySuiteBase parent) : base(theBase)
         {
+            Parent = parent;
         }
     }
 

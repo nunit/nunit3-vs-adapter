@@ -131,11 +131,11 @@ namespace NUnit.VisualStudio.TestAdapter
     public class AdapterSettings : IAdapterSettings
     {
         private const string RANDOM_SEED_FILE = "nunit_random_seed.tmp";
-        private readonly TestLogger _logger;
+        private readonly ITestLogger _logger;
 
         #region Constructor
 
-        public AdapterSettings(TestLogger logger)
+        public AdapterSettings(ITestLogger logger)
         {
             _logger = logger;
         }
@@ -319,6 +319,8 @@ namespace NUnit.VisualStudio.TestAdapter
             UseNUnitIdforTestCaseId = GetInnerTextAsBool(nunitNode, nameof(UseNUnitIdforTestCaseId), false);
             ConsoleOut = GetInnerTextAsInt(nunitNode, nameof(ConsoleOut), 1);  // 0 no output to console, 1 : output to console
             StopOnError = GetInnerTextAsBool(nunitNode, nameof(StopOnError), false);
+            DiscoveryMethod = MapEnum(GetInnerText(nunitNode, nameof(DiscoveryMethod), Verbosity > 0), DiscoveryMethod.Old);
+
 
             // Engine settings
             SkipNonTestAssemblies = GetInnerTextAsBool(nunitNode, nameof(SkipNonTestAssemblies), true);
@@ -573,6 +575,39 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             return testoutcome;
         }
+
+        public DiscoveryMethod MapDiscoveryMethod(string setting)
+        {
+            if (setting == null)
+                return DiscoveryMethod.Old;
+            bool ok = TryParse.EnumTryParse(setting, out DiscoveryMethod discoveryMethod);
+
+
+            if (!ok)
+            {
+                _logger.Warning(
+                    $"Invalid value ({setting}) for MapWarningTo, should be either Skipped,Failed,Passed or None");
+                return DiscoveryMethod.Old;
+            }
+            return discoveryMethod;
+        }
+
+        public T MapEnum<T>(string setting, T defaultValue)
+            where T : System.Enum
+        {
+            if (setting == null)
+                return defaultValue;
+            bool ok = TryParse.EnumTryParse(setting, out T result);
+            if (!ok)
+            {
+                _logger.Warning(
+                    $"Invalid value ({setting}) for {typeof(T)}");
+                return defaultValue;
+            }
+            return result;
+        }
+
+
         #endregion
     }
 }

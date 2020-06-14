@@ -30,7 +30,8 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
     public class Discovery
     {
-        public TestConverterForXml TestConverterForXml { get; private set; }
+        public ITestConverterXml TestConverterForXml { get; private set; }
+        public TestConverter  TestConverter { get; private set; }
 
         public NUnitDiscoveryTestRun TestRun { get; private set; }
 
@@ -67,11 +68,12 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             }
             else
             {
-                var testConverter = new TestConverter(logger, assemblyPath, settings);
-                foreach (var testNode in TestRun.TestAssembly.AllTestCases)
-                    loadedTestCases.Add(testConverter.ConvertTestCase(testNode));
+                TestConverter = new TestConverter(logger, assemblyPath, settings);
+                var testCases = TestRun.IsExplicit ? TestRun.TestAssembly.AllTestCases : TestRun.TestAssembly.RunnableTestCases;
+                foreach (var testNode in testCases)
+                    loadedTestCases.Add(TestConverter.ConvertTestCase(testNode));
                 logger.Info(
-                    $"   NUnit3TestExecutor discovered {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases using Classic mode");
+                    $"   NUnit3TestExecutor discovered {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases using Modern mode");
             }
 
             return loadedTestCases;

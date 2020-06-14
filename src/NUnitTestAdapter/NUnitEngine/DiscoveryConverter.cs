@@ -42,7 +42,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
 #pragma warning restore SA1303 // Const field names should begin with upper-case letter
 
-        public NUnitDiscoveryTestRun Convert(NUnitResults discovery, TestConverterForXml converterForXml)
+        public NUnitDiscoveryTestRun Convert(NUnitResults discovery, ITestConverter converterForXml)
         {
             var doc = XDocument.Load(new XmlNodeReader(discovery.FullTopNode));
             var testrun = ExtractTestRun(doc);
@@ -165,7 +165,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             var seedAtr = child.Attribute("seed")?.Value;
             var seed = seedAtr != null ? long.Parse(seedAtr) : 0;
             var btf = ExtractSuiteBasePropertiesClass(child);
-            var tc = new NUnitDiscoveryTestCase(btf, tf, methodName, seed) {ClassName = className};
+            var tc = new NUnitDiscoveryTestCase(btf, tf, methodName, seed) { ClassName = className };
             return tc;
         }
 
@@ -183,7 +183,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             XElement node, string className)
         {
             var b = ExtractSuiteBasePropertiesClass(node);
-            var ts = new NUnitDiscoveryGenericFixture(b);
+            var ts = new NUnitDiscoveryGenericFixture(b, parent);
             return ts;
         }
         private static NUnitDiscoverySetUpFixture ExtractSetUpTestFixture(
@@ -198,7 +198,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             NUnitDiscoveryCanHaveTestFixture parent, XElement node, string className)
         {
             var b = ExtractSuiteBasePropertiesClass(node);
-            var ts = new NUnitDiscoveryParameterizedTestFixture(b,  parent);
+            var ts = new NUnitDiscoveryParameterizedTestFixture(b, parent);
             return ts;
         }
 

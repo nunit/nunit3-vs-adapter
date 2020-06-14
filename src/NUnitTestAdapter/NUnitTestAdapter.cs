@@ -228,7 +228,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             if (Settings.StopOnError)
                 package.Settings[PackageSettings.StopOnError] = true;
-            
+
             if (Settings.SkipNonTestAssemblies)
                 package.Settings[PackageSettings.SkipNonTestAssemblies] = true;
 
