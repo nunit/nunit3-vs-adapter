@@ -32,13 +32,23 @@ using VSTestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-    public interface ITestConverter
+    public interface ITestConverterCommon
     {
         TestCase GetCachedTestCase(string id);
         TestConverterForXml.TestResultSet GetVsTestResults(INUnitTestEventTestCase resultNode, ICollection<INUnitTestEventTestOutput> outputNodes);
     }
 
-    public interface ITestConverterXml : ITestConverter
+    public interface ITestConverter : ITestConverterCommon
+    {
+        /// <summary>
+        /// Converts an NUnit test into a TestCase for Visual Studio,
+        /// using the best method available according to the exact
+        /// type passed and caching results for efficiency.
+        /// </summary>
+        TestCase ConvertTestCase(NUnitDiscoveryTestCase testNode);
+    }
+
+    public interface ITestConverterXml : ITestConverterCommon
     {
         TestCase ConvertTestCase(NUnitEventTestCase nUnitEventTestCase);
     }

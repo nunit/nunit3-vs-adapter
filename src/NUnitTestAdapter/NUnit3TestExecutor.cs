@@ -21,7 +21,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-#define LAUNCHDEBUGGER
+//#define LAUNCHDEBUGGER
 
 using System;
 using System.Collections.Generic;
@@ -257,7 +257,11 @@ namespace NUnit.VisualStudio.TestAdapter
                         return;
                     }
                     executionDumpXml?.AddString($"\n\n<NUnitExecution>{assemblyPath}</NUnitExecution>\n\n");
-                    using var listener = new NUnitEventListener(FrameworkHandle, discovery.TestConverterForXml, this);
+
+                    var converter = Settings.DiscoveryMethod == DiscoveryMethod.Modern
+                        ? discovery.TestConverter
+                        : discovery.TestConverterForXml;
+                    using var listener = new NUnitEventListener(FrameworkHandle, converter, this);
                     try
                     {
                         var results = NUnitEngineAdapter.Run(listener, filter);

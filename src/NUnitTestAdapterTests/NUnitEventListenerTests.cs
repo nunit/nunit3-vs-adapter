@@ -203,7 +203,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     public class NUnitEventListenerOutputTests
     {
         private ITestExecutionRecorder recorder;
-        private ITestConverter converter;
+        private ITestConverterCommon converter;
         private IDumpXml dumpxml;
         private IAdapterSettings settings;
         private INUnit3TestExecutor executor;
@@ -231,7 +231,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void Setup()
         {
             recorder = Substitute.For<ITestExecutionRecorder>();
-            converter = Substitute.For<ITestConverter>();
+            converter = Substitute.For<ITestConverterCommon>();
             dumpxml = Substitute.For<IDumpXml>();
             settings = Substitute.For<IAdapterSettings>();
             executor = Substitute.For<INUnit3TestExecutor>();

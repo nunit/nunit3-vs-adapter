@@ -30,8 +30,12 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
     public class Discovery
     {
-        public ITestConverterXml TestConverterForXml { get; private set; }
-        public TestConverter  TestConverter { get; private set; }
+        private ITestConverterXml converterForXml;
+        private ITestConverter converter;
+
+        public ITestConverterCommon TestConverterForXml => converterForXml;
+
+        public ITestConverterCommon TestConverter => converter;
 
         public NUnitDiscoveryTestRun TestRun { get; private set; }
 
@@ -48,7 +52,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             if (settings.DiscoveryMethod != DiscoveryMethod.Old)
             {
                 var discoveryConverter = new DiscoveryConverter();
-                TestRun = discoveryConverter.Convert(discoveryResults, TestConverterForXml);
+                TestRun = discoveryConverter.Convert(discoveryResults);
             }
 
             var nunitTestCases = discoveryResults.TestCases();
@@ -60,18 +64,18 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
             if (settings.DiscoveryMethod == DiscoveryMethod.Old)
             {
-                TestConverterForXml = new TestConverterForXml(logger, assemblyPath, settings);
+                converterForXml = new TestConverterForXml(logger, assemblyPath, settings);
                 foreach (XmlNode testNode in nunitTestCases)
-                    loadedTestCases.Add(TestConverterForXml.ConvertTestCase(new NUnitEventTestCase(testNode)));
+                    loadedTestCases.Add(converterForXml.ConvertTestCase(new NUnitEventTestCase(testNode)));
                 logger.Info(
                     $"   NUnit3TestExecutor discovered {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases using Classic mode");
             }
             else
             {
-                TestConverter = new TestConverter(logger, assemblyPath, settings);
+                converter = new TestConverter(logger, assemblyPath, settings);
                 var testCases = TestRun.IsExplicit ? TestRun.TestAssembly.AllTestCases : TestRun.TestAssembly.RunnableTestCases;
                 foreach (var testNode in testCases)
-                    loadedTestCases.Add(TestConverter.ConvertTestCase(testNode));
+                    loadedTestCases.Add(converter.ConvertTestCase(testNode));
                 logger.Info(
                     $"   NUnit3TestExecutor discovered {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases using Modern mode");
             }

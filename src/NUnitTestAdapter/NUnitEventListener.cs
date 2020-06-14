@@ -48,7 +48,7 @@ namespace NUnit.VisualStudio.TestAdapter
     {
         private static readonly ICollection<INUnitTestEventTestOutput> EmptyNodes = new List<INUnitTestEventTestOutput>();
         private readonly ITestExecutionRecorder _recorder;
-        private readonly ITestConverter _testConverter;
+        private readonly ITestConverterCommon _testConverter;
         private readonly IAdapterSettings _settings;
         private readonly Dictionary<string, ICollection<INUnitTestEventTestOutput>> _outputNodes = new Dictionary<string, ICollection<INUnitTestEventTestOutput>>();
 
@@ -65,7 +65,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private readonly INUnit3TestExecutor executor;
 
-        public NUnitEventListener(ITestExecutionRecorder recorder, ITestConverter testConverter, INUnit3TestExecutor executor)
+        public NUnitEventListener(ITestExecutionRecorder recorder, ITestConverterCommon testConverter, INUnit3TestExecutor executor)
         {
             this.executor = executor;
             dumpXml = executor.Dump;

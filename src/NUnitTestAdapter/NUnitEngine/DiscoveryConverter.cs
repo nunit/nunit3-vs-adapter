@@ -42,7 +42,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
 #pragma warning restore SA1303 // Const field names should begin with upper-case letter
 
-        public NUnitDiscoveryTestRun Convert(NUnitResults discovery, ITestConverter converterForXml)
+        public NUnitDiscoveryTestRun Convert(NUnitResults discovery)
         {
             var doc = XDocument.Load(new XmlNodeReader(discovery.FullTopNode));
             var testrun = ExtractTestRun(doc);
