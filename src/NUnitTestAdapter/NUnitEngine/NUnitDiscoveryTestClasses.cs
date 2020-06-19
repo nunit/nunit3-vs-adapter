@@ -101,6 +101,9 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         }
 
         public NUnitDiscoveryTestAssembly TestAssembly { get; set; }
+        public override bool IsExplicit =>
+            RunState == RunStateEnum.Explicit || TestAssembly.IsExplicit;
+
     }
 
     public class NUnitDiscoveryProperties
@@ -180,7 +183,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         private readonly List<NUnitDiscoveryTestSuite> testSuites = new List<NUnitDiscoveryTestSuite>();
         public IEnumerable<NUnitDiscoveryTestSuite> TestSuites => testSuites;
 
-        public new bool IsExplicit =>
+        public override bool IsExplicit =>
             RunState == RunStateEnum.Explicit || testSuites.All(o => o.IsExplicit);
 
         private readonly List<NUnitDiscoveryTestCase> allTestCases = new List<NUnitDiscoveryTestCase>();

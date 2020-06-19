@@ -44,6 +44,7 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
         void StartDiscoveryInExecution();
         void StartExecution();
         void Dump4Execution();
+        void DumpVSInputFilter(TestFilter filter, string info);
     }
 
     public class DumpXml : IDumpXml
@@ -117,9 +118,9 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
             txt.Append(text);
         }
 
-        public void DumpVSInputFilter(TestFilter filter)
+        public void DumpVSInputFilter(TestFilter filter, string info)
         {
-            AddString($"<TestFilter>\n   {filter.Text}\n</TestFilter>\n\n");
+            AddString($"<TestFilter>\n {info}  {filter.Text}\n</TestFilter>\n\n");
         }
 
         public void DumpVSInput(IEnumerable<TestCase> testCases)
@@ -145,9 +146,10 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
         public void DumpFromVSInput(IGrouping<string, TestCase> testCases, TestFilter filter, TestPackage package)
         {
             AddString("<VSTest input/>\n\n");
-            DumpVSInput(testCases);
+            if (testCases != null)
+                DumpVSInput(testCases);
             DumpVSInput2NUnit(package);
-            DumpVSInputFilter(filter);
+            DumpVSInputFilter(filter, "");
             AddString("</VSTest input/>\n\n");
         }
 

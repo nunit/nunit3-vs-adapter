@@ -21,7 +21,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-#define LAUNCHDEBUGGER
+// #define LAUNCHDEBUGGER
 
 using System;
 using System.Collections.Generic;
@@ -249,6 +249,7 @@ namespace NUnit.VisualStudio.TestAdapter
                         // NOTE This overwrites filter used in call
                         var filterBuilder = CreateTestFilterBuilder();
                         filter = filterBuilder.ConvertTfsFilterToNUnitFilter(TfsFilter, loadedTestCases);
+                        Dump?.DumpVSInputFilter(filter, "(At Execution)");
                     }
 
                     if (filter == NUnitTestFilterBuilder.NoTestsFound)
@@ -259,9 +260,18 @@ namespace NUnit.VisualStudio.TestAdapter
 
                     Dump?.StartExecution();
 
-                    var converter = Settings.DiscoveryMethod == DiscoveryMethod.Modern
-                        ? discovery.TestConverter
-                        : discovery.TestConverterForXml;
+                    ITestConverterCommon converter;
+                    if (Settings.DiscoveryMethod == DiscoveryMethod.Modern)
+                    {
+                        var filterBuilder = CreateTestFilterBuilder();
+                        filter = filterBuilder.FilterByList(loadedTestCases);
+                        converter = discovery.TestConverter;
+                    }
+                    else
+                    {
+                        converter = discovery.TestConverterForXml;
+                    }
+                    Dump?.DumpVSInputFilter(filter, "(At Execution)");
                     using var listener = new NUnitEventListener(FrameworkHandle, converter, this);
                     try
                     {
@@ -324,7 +334,7 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
 
-        private NUnitTestFilterBuilder CreateTestFilterBuilder() 
+        private NUnitTestFilterBuilder CreateTestFilterBuilder()
             => new NUnitTestFilterBuilder(NUnitEngineAdapter.GetService<ITestFilterService>());
 
 

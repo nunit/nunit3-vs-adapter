@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.Engine;
+using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -64,6 +65,18 @@ namespace NUnit.VisualStudio.TestAdapter
             foreach (var testCase in testCases)
             {
                 filterBuilder.AddTest(testCase.FullyQualifiedName);
+            }
+
+            return filterBuilder.GetFilter();
+        }
+
+        public TestFilter FilterByList(IEnumerable<INUnitDiscoverySuiteBase> testCases)
+        {
+            var filterBuilder = _filterService.GetTestFilterBuilder();
+
+            foreach (var testCase in testCases)
+            {
+                filterBuilder.AddTest(testCase.FullName);
             }
 
             return filterBuilder.GetFilter();
