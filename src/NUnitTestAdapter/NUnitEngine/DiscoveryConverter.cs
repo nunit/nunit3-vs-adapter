@@ -52,16 +52,16 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             testassembly.Parent = testrun;
             testrun.TestAssembly = testassembly;
             var node = assemblyNode.Elements("test-suite").Single();
-            var type = node.Attribute("test-suite")?.Value;
-            if (type != null)
+            var theType = node.Attribute("test-suite")?.Value;
+            if (theType != null)
                 throw new DiscoveryException();
-            var topLevelSuite = ExtractTestSuiteForAssembly(node, testassembly);
-            testassembly.AddTestSuite(topLevelSuite);
+            var topLevelSuite = ExtractTestSuite(node, testassembly);
+            testassembly.AddTestSuiteToAssembly(topLevelSuite);
             ExtractAllFixtures(topLevelSuite, node);
             return testrun;
         }
 
-        private NUnitDiscoveryTestSuite ExtractTestSuiteForAssembly(XElement node, NUnitDiscoverySuiteBase parent)
+        private static NUnitDiscoveryTestSuite ExtractTestSuite(XElement node, NUnitDiscoverySuiteBase parent)
         {
             var b = ExtractSuiteBasePropertiesClass(node);
             var ts = new NUnitDiscoveryTestSuite(b, parent);
@@ -74,7 +74,6 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             {
                 var type = child.Attribute("type").Value;
                 var className = child.Attribute(classname)?.Value;
-                var btf = ExtractSuiteBasePropertiesClass(child);
                 switch (type)
                 {
                     case "TestFixture":
@@ -97,6 +96,11 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                         var stf = ExtractSetUpTestFixture(parent, child, className);
                         parent.AddSetUpFixture(stf);
                         ExtractTestFixtures(stf, child);
+                        break;
+                    case "TestSuite":
+                        var ts = ExtractTestSuite(child, parent);
+                        parent.AddTestSuite(ts);
+                        ExtractAllFixtures(ts, child);
                         break;
                     default:
                         throw new DiscoveryException($"Invalid type found in ExtractAllFixtures: {type}");
@@ -126,8 +130,8 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             foreach (var child in node.Elements("test-suite"))
             {
                 var type = child.Attribute("type")?.Value;
-                if (type != ParameterizedMethod && type != "Theory")
-                    throw new DiscoveryException($"Expected ParameterizedMethod or Theory, but was {type}");
+                if (type != ParameterizedMethod && type != "Theory" && type != "GenericMethod")
+                    throw new DiscoveryException($"Expected ParameterizedMethod, Theory or GenericMethod, but was {type}");
                 var className = child.Attribute(classname)?.Value;
                 var btf = ExtractSuiteBasePropertiesClass(child);
                 if (type == ParameterizedMethod)
@@ -136,10 +140,16 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                     ExtractTestCases(tc, child);
                     tf.AddParametrizedMethod(tc);
                 }
-                else
+                else if (type == "Theory")
                 {
                     var tc = new NUnitDiscoveryTheory(btf, className, tf);
                     tf.AddTheory(tc);
+                    ExtractTestCases(tc, child);
+                }
+                else
+                {
+                    var tc = new NUnitDiscoveryGenericMethod(btf, className, tf);
+                    tf.AddGenericMethod(tc);
                     ExtractTestCases(tc, child);
                 }
             }
@@ -212,7 +222,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             return new NUnitDiscoveryTestAssembly(a_base);
         }
 
-        private static NUnitDiscoverySuiteBase ExtractSuiteBasePropertiesClass(XElement node)
+        private static BaseProperties ExtractSuiteBasePropertiesClass(XElement node)
         {
             string dId = node.Attribute(id).Value;
             string dName = node.Attribute(name).Value;
@@ -221,14 +231,14 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             const char apo = (char)0x22;
             var tcs = node.Attribute(testcasecount)?.Value.Trim(apo);
             int dTestcasecount = int.Parse(tcs ?? "1");
-            var bp = new NUnitDiscoverySuiteBase(dId, dName, dFullname, dTestcasecount, dRunstate);
+            var bp = new BaseProperties(dId, dName, dFullname, dTestcasecount, dRunstate);
 
             foreach (var propnode in node.Elements("properties").Elements("property"))
             {
                 var prop = new NUnitProperty(
                     propnode.Attribute("name").Value,
                     propnode.Attribute("value").Value);
-                bp.NUnitDiscoveryProperties.Add(prop);
+                bp.Properties.Add(prop);
             }
             return bp;
         }
@@ -253,5 +263,26 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             };
             return runState;
         }
+    }
+
+    public class BaseProperties
+    {
+        public BaseProperties(string dId, string dName, string dFullname, int dTestcasecount, RunStateEnum dRunstate)
+        {
+            Id = dId;
+            Name = dName;
+            Fullname = dFullname;
+            TestCaseCount = dTestcasecount;
+            RunState = dRunstate;
+        }
+
+        public List<NUnitProperty> Properties { get; } = new List<NUnitProperty>();
+
+        public string Id { get; }
+        public string Name { get; }
+        public string Fullname { get; }
+        public RunStateEnum RunState { get; }
+
+        public int TestCaseCount { get; }
     }
 }

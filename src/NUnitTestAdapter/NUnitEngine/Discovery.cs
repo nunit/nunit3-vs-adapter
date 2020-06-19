@@ -73,11 +73,13 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             else
             {
                 converter = new TestConverter(logger, assemblyPath, settings);
-                var testCases = TestRun.IsExplicit ? TestRun.TestAssembly.AllTestCases : TestRun.TestAssembly.RunnableTestCases;
+                var isExplicit = TestRun.IsExplicit;
+                var testCases = isExplicit ? TestRun.TestAssembly.AllTestCases : TestRun.TestAssembly.RunnableTestCases;
                 foreach (var testNode in testCases)
                     loadedTestCases.Add(converter.ConvertTestCase(testNode));
+                var msg = isExplicit ? "Explicit run" : "Non-isExplicit run";
                 logger.Info(
-                    $"   NUnit3TestExecutor discovered {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases using Modern mode");
+                    $"   NUnit3TestExecutor discovered {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases using Modern mode, {msg}");
             }
 
             return loadedTestCases;

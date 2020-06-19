@@ -20,6 +20,9 @@ title NUnitEngineAdapterClasses for discovery
    SuiteBase <|-- Assembly
    Assembly o-- TestSuite
    Fixture o-- Theory
+   Fixture o-- GenericMethod
+   CanHaveTestCases <|-- GenericMethod
+   TestRun o-- Assembly
    
 abstract class SuiteBase {
    Property collection,

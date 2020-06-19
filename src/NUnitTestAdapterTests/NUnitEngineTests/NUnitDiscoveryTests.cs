@@ -726,15 +726,42 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
    </test-suite>
 </test-run>";
 
-        [Test]
-        public void ThatExplicitWorks()
+        private const string ExplicitQuickTestXml =
+            @"<test-run id='0' name='NUnit.VisualStudio.TestAdapter.Tests.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter\src\NUnitTestAdapterTests\bin\Debug\netcoreapp2.1\NUnit.VisualStudio.TestAdapter.Tests.dll' runstate='Runnable' testcasecount='1'>
+   <test-suite type='Assembly' id='0-1358' name='NUnit.VisualStudio.TestAdapter.Tests.dll' fullname='D:/repos/NUnit/nunit3-vs-adapter/src/NUnitTestAdapterTests/bin/Debug/netcoreapp2.1/NUnit.VisualStudio.TestAdapter.Tests.dll' runstate='Runnable' testcasecount='1'>
+      <test-suite type='TestSuite' id='0-1359' name='NUnit' fullname='NUnit' runstate='Runnable' testcasecount='1'>
+         <test-suite type='TestSuite' id='0-1360' name='VisualStudio' fullname='NUnit.VisualStudio' runstate='Runnable' testcasecount='1'>
+            <test-suite type='TestSuite' id='0-1361' name='TestAdapter' fullname='NUnit.VisualStudio.TestAdapter' runstate='Runnable' testcasecount='1'>
+               <test-suite type='TestSuite' id='0-1362' name='Tests' fullname='NUnit.VisualStudio.TestAdapter.Tests' runstate='Runnable' testcasecount='1'>
+                  <test-suite type='TestFixture' id='0-1363' name='IssueNo24Tests' fullname='NUnit.VisualStudio.TestAdapter.Tests.IssueNo24Tests' runstate='Explicit' testcasecount='1'>
+                     <test-case id='0-1100' name='Quick' fullname='NUnit.VisualStudio.TestAdapter.Tests.IssueNo24Tests.Quick' methodname='Quick' classname='NUnit.VisualStudio.TestAdapter.Tests.IssueNo24Tests' runstate='Explicit' seed='845750879' />
+                  </test-suite>
+               </test-suite>
+            </test-suite>
+         </test-suite>
+      </test-suite>
+   </test-suite>
+</test-run>";
+
+
+        [TestCase(ExplicitXml, 3, TestName = nameof(ThatExplicitWorks) + "." + nameof(ExplicitXml))]
+        public void ThatExplicitWorks(string xml, int count)
         {
             var sut = new DiscoveryConverter();
             var ndr = sut.Convert(
-                new NUnitResults(XmlHelper.CreateXmlNode(ExplicitXml)));
+                new NUnitResults(XmlHelper.CreateXmlNode(xml)));
             var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
-            Assert.That(topLevelSuite.IsExplicit);
-            Assert.That(ndr.TestAssembly.AllTestCases.Count(), Is.EqualTo(3));
+            Assert.Multiple(() =>
+            {
+                var first = topLevelSuite.TestFixtures.First();
+                Assert.That(first.IsExplicit, $"First {first.Id} failed");
+                var second = topLevelSuite.TestFixtures.Skip(1).First();
+                Assert.That(second.IsExplicit, $"Second {first.Id} failed");
+                var third = topLevelSuite.TestFixtures.Skip(2).First();
+                Assert.That(third.IsExplicit, $"Third {first.Id} failed");
+            });
+            Assert.That(topLevelSuite.IsExplicit, "TopLevelsuite failed");
+            Assert.That(ndr.TestAssembly.AllTestCases.Count(), Is.EqualTo(count), "Count failed");
             Assert.Multiple(() =>
             {
                 foreach (var testCase in ndr.TestAssembly.AllTestCases)
@@ -743,6 +770,35 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
                 }
             });
         }
+
+
+        [TestCase(ExplicitQuickTestXml, 1, TestName = nameof(ThatExplicitWorks2) + "." + nameof(ExplicitQuickTestXml))]
+        public void ThatExplicitWorks2(string xml, int count)
+        {
+            var sut = new DiscoveryConverter();
+            var ndr = sut.Convert(
+                new NUnitResults(XmlHelper.CreateXmlNode(xml)));
+            var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
+            Assert.Multiple(() =>
+            {
+                Assert.That(topLevelSuite.IsExplicit, "TopLevelsuite failed");
+                var first = topLevelSuite.TestSuites.First();
+                Assert.That(first.IsExplicit, $"First {first.Id} failed");
+            });
+
+            Assert.That(ndr.TestAssembly.AllTestCases.Count(), Is.EqualTo(count), "Count failed");
+            Assert.Multiple(() =>
+            {
+                foreach (var testCase in ndr.TestAssembly.AllTestCases)
+                {
+                    Assert.That(testCase.IsExplicitReverse, $"Failed for {testCase.Id}");
+                }
+            });
+        }
+
+
+
+
 
         private const string NotExplicitXml =
             @"<test-run id='2' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' testcasecount='3'>
