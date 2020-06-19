@@ -60,6 +60,8 @@ namespace NUnit.VisualStudio.TestAdapter
         bool DumpXmlTestDiscovery { get; }
         bool DumpXmlTestResults { get; }
 
+        bool DumpVsInput { get; }
+
         bool PreFilter { get; }
 
         /// <summary>
@@ -249,6 +251,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public bool DumpXmlTestResults { get; private set; }
 
+        public bool DumpVsInput { get; private set; }
+
         public bool FreakMode { get; private set; }
 
         #endregion
@@ -329,6 +333,7 @@ namespace NUnit.VisualStudio.TestAdapter
             // Adapter Diagnostics
             DumpXmlTestDiscovery = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestDiscovery), false);
             DumpXmlTestResults = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestResults), false);
+            DumpVsInput = GetInnerTextAsBool(nunitNode, nameof(DumpVsInput), false);
             FreakMode = GetInnerTextAsBool(nunitNode, nameof(FreakMode), false);
             // End Diagnostics
 

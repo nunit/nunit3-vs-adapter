@@ -49,6 +49,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             var anode = doc.Root.Elements("test-suite");
             var assemblyNode = anode.Single(o => o.Attribute("type").Value == "Assembly");
             var testassembly = ExtractTestAssembly(assemblyNode);
+            testassembly.Parent = testrun;
             testrun.TestAssembly = testassembly;
             var node = assemblyNode.Elements("test-suite").Single();
             var type = node.Attribute("test-suite")?.Value;

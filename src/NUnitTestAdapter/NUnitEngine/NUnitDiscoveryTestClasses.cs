@@ -246,7 +246,6 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public string Type { get; }
         public string ClassName { get; set; }
         public string MethodName { get; set; }
-        public INUnitDiscoveryCanHaveTestCases Parent { get; set; }
         public long Seed { get; set; }
 
         public NUnitDiscoveryTestCase(NUnitDiscoverySuiteBase theBase, INUnitDiscoveryCanHaveTestCases parent, string methodname, long seed) : base(theBase)
