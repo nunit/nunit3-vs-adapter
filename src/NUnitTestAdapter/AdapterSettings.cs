@@ -25,7 +25,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
-using System.Xml.Schema;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
@@ -125,9 +124,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
     public enum DiscoveryMethod
     {
-        Old,
-        Modern,
-        Both
+        ClassicXml,
+        Modern
     }
 
     public class AdapterSettings : IAdapterSettings
@@ -223,7 +221,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public int ConsoleOut { get; private set; }
         public bool StopOnError { get; private set; }
 
-        public DiscoveryMethod DiscoveryMethod { get; private set; } = DiscoveryMethod.Old;
+        public DiscoveryMethod DiscoveryMethod { get; private set; } = DiscoveryMethod.ClassicXml;
         public bool SkipNonTestAssemblies { get; private set; }
 
         public VsTestCategoryType VsTestCategoryType { get; private set; } = VsTestCategoryType.NUnit;
@@ -323,7 +321,7 @@ namespace NUnit.VisualStudio.TestAdapter
             UseNUnitIdforTestCaseId = GetInnerTextAsBool(nunitNode, nameof(UseNUnitIdforTestCaseId), false);
             ConsoleOut = GetInnerTextAsInt(nunitNode, nameof(ConsoleOut), 1);  // 0 no output to console, 1 : output to console
             StopOnError = GetInnerTextAsBool(nunitNode, nameof(StopOnError), false);
-            DiscoveryMethod = MapEnum(GetInnerText(nunitNode, nameof(DiscoveryMethod), Verbosity > 0), DiscoveryMethod.Old);
+            DiscoveryMethod = MapEnum(GetInnerText(nunitNode, nameof(DiscoveryMethod), Verbosity > 0), DiscoveryMethod.ClassicXml);
 
 
             // Engine settings
@@ -584,7 +582,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public DiscoveryMethod MapDiscoveryMethod(string setting)
         {
             if (setting == null)
-                return DiscoveryMethod.Old;
+                return DiscoveryMethod.ClassicXml;
             bool ok = TryParse.EnumTryParse(setting, out DiscoveryMethod discoveryMethod);
 
 
@@ -592,7 +590,7 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 _logger.Warning(
                     $"Invalid value ({setting}) for MapWarningTo, should be either Skipped,Failed,Passed or None");
-                return DiscoveryMethod.Old;
+                return DiscoveryMethod.ClassicXml;
             }
             return discoveryMethod;
         }

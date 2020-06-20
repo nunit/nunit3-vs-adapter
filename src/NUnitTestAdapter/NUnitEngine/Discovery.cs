@@ -49,7 +49,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public IList<TestCase> Convert(NUnitResults discoveryResults, ITestLogger logger, string assemblyPath, IAdapterSettings settings)
         {
-            if (settings.DiscoveryMethod != DiscoveryMethod.Old)
+            if (settings.DiscoveryMethod != DiscoveryMethod.ClassicXml)
             {
                 var discoveryConverter = new DiscoveryConverter();
                 TestRun = discoveryConverter.Convert(discoveryResults);
@@ -62,7 +62,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             // the converter's cache of all test cases is populated as well.
             // All future calls to convert a test case may now use the cache.
 
-            if (settings.DiscoveryMethod == DiscoveryMethod.Old)
+            if (settings.DiscoveryMethod == DiscoveryMethod.ClassicXml)
             {
                 converterForXml = new TestConverterForXml(logger, assemblyPath, settings);
                 foreach (XmlNode testNode in nunitTestCases)
