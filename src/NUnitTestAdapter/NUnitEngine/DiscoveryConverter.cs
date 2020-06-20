@@ -57,7 +57,8 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                 throw new DiscoveryException();
             var topLevelSuite = ExtractTestSuite(node, testassembly);
             testassembly.AddTestSuiteToAssembly(topLevelSuite);
-            ExtractAllFixtures(topLevelSuite, node);
+            if (node.HasElements)
+                ExtractAllFixtures(topLevelSuite, node);
             return testrun;
         }
 
@@ -100,7 +101,8 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                     case "TestSuite":
                         var ts = ExtractTestSuite(child, parent);
                         parent.AddTestSuite(ts);
-                        ExtractAllFixtures(ts, child);
+                        if (child.HasElements)
+                            ExtractAllFixtures(ts, child);
                         break;
                     default:
                         throw new DiscoveryException($"Invalid type found in ExtractAllFixtures: {type}");
