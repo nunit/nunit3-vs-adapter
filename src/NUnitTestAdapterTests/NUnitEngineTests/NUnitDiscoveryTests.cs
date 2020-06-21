@@ -2,6 +2,7 @@
 using NSubstitute;
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
+// ReSharper disable StringLiteralTypo
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
 {
@@ -521,6 +522,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
                 Assert.That(
                     testCase.NUnitDiscoveryProperties.Properties.Single(o => o.Name == "Category").Value,
                     Is.EqualTo("Whatever"));
+                Assert.That(testCase.Parent, Is.Not.Null, "Parent missing");
             });
         }
 

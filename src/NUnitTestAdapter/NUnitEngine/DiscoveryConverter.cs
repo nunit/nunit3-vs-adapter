@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
+// ReSharper disable InconsistentNaming
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
@@ -48,13 +49,8 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             var testrun = ExtractTestRun(doc);
             var anode = doc.Root.Elements("test-suite");
             var assemblyNode = anode.Single(o => o.Attribute("type").Value == "Assembly");
-            var testassembly = ExtractTestAssembly(assemblyNode);
-            testassembly.Parent = testrun;
-            testrun.TestAssembly = testassembly;
+            var testassembly = ExtractTestAssembly(assemblyNode, testrun);
             var node = assemblyNode.Elements("test-suite").Single();
-            var theType = node.Attribute("test-suite")?.Value;
-            if (theType != null)
-                throw new DiscoveryException();
             var topLevelSuite = ExtractTestSuite(node, testassembly);
             testassembly.AddTestSuiteToAssembly(topLevelSuite);
             if (node.HasElements)
@@ -129,6 +125,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         private static void ExtractParameterizedMethodsAndTheories(NUnitDiscoveryTestFixture tf, XElement node)
         {
             const string ParameterizedMethod = nameof(ParameterizedMethod);
+            const string Theory = nameof(Theory);
             foreach (var child in node.Elements("test-suite"))
             {
                 var type = child.Attribute("type")?.Value;
@@ -178,7 +175,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             var seedAtr = child.Attribute("seed")?.Value;
             var seed = seedAtr != null ? long.Parse(seedAtr) : 0;
             var btf = ExtractSuiteBasePropertiesClass(child);
-            var tc = new NUnitDiscoveryTestCase(btf, tf, methodName, seed) { ClassName = className };
+            var tc = new NUnitDiscoveryTestCase(btf, tf, className, methodName, seed) ;
             return tc;
         }
 
@@ -215,13 +212,15 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             return ts;
         }
 
-        private NUnitDiscoveryTestAssembly ExtractTestAssembly(XElement node)
+        private NUnitDiscoveryTestAssembly ExtractTestAssembly(XElement node, NUnitDiscoveryTestRun parent)
         {
             string d_type = node.Attribute(type).Value;
             if (d_type != "Assembly")
                 throw new DiscoveryException("Node is not of type assembly: " + node);
             var a_base = ExtractSuiteBasePropertiesClass(node);
-            return new NUnitDiscoveryTestAssembly(a_base);
+            var assembly = new NUnitDiscoveryTestAssembly(a_base, parent);
+            parent.AddTestAssembly(assembly);
+            return assembly;
         }
 
         private static BaseProperties ExtractSuiteBasePropertiesClass(XElement node)

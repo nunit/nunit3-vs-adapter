@@ -33,6 +33,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using NUnit.Engine;
 using NUnit.VisualStudio.TestAdapter.Dump;
+using NUnit.VisualStudio.TestAdapter.Internal;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
 namespace NUnit.VisualStudio.TestAdapter
@@ -133,6 +134,7 @@ namespace NUnit.VisualStudio.TestAdapter
             Initialize(runContext, frameworkHandle);
             TestLog.Debug("RunTests by IEnumerable<TestCase>");
             InitializeForExecution(runContext, frameworkHandle);
+            var timing = new Timing(Settings, TestLog);
             Debug.Assert(NUnitEngineAdapter != null, "NUnitEngineAdapter is null");
             Debug.Assert(NUnitEngineAdapter.EngineEnabled, "NUnitEngineAdapter TestEngine is null");
             var assemblyGroups = tests.GroupBy(tc => tc.Source);
@@ -145,6 +147,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             foreach (var assemblyGroup in assemblyGroups)
             {
+                var assemblytiming = new Timing(Settings, TestLog);
                 try
                 {
                     string assemblyName = assemblyGroup.Key;
@@ -160,8 +163,11 @@ namespace NUnit.VisualStudio.TestAdapter
                     if (ex is TargetInvocationException) { ex = ex.InnerException; }
                     TestLog.Warning("Exception thrown executing tests", ex);
                 }
+
+                assemblytiming.LogTime($"Executing {assemblyGroup.Key} time ");
             }
 
+            timing.LogTime("Total execution time");
             TestLog.Info($"NUnit Adapter {AdapterVersion}: Test execution complete");
             Unload();
         }
@@ -225,7 +231,7 @@ namespace NUnit.VisualStudio.TestAdapter
             // No need to restore if the seed was in runsettings file
             if (!Settings.RandomSeedSpecified)
                 Settings.RestoreRandomSeed(Path.GetDirectoryName(assemblyPath));
-            Dump = DumpXml.CreateDump(assemblyPath, testCases,Settings);
+            Dump = DumpXml.CreateDump(assemblyPath, testCases, Settings);
 
             try
             {

@@ -24,6 +24,7 @@
 using System;
 using System.IO;
 using NUnit.Engine;
+using NUnit.VisualStudio.TestAdapter.Internal;
 // We use an alias so that we don't accidentally make
 // references to engine internals, except for creating
 // the engine object in the Initialize method.
@@ -73,17 +74,23 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public NUnitResults Explore()
         {
-            return new NUnitResults(Runner.Explore(TestFilter.Empty));
+            return Explore(TestFilter.Empty);
         }
 
         public NUnitResults Explore(TestFilter filter)
         {
-            return new NUnitResults(Runner.Explore(filter));
+            var timing = new Timing(settings, logger);
+            var results = new NUnitResults(Runner.Explore(filter));
+            timing.LogTime("Execution engine discovery time ");
+            return results;
         }
 
         public NUnitResults Run(ITestEventListener listener, TestFilter filter)
         {
-            return new NUnitResults(Runner.Run(listener, filter));
+            var timing = new Timing(settings, logger);
+            var results = new NUnitResults(Runner.Run(listener, filter));
+            timing.LogTime("Execution engine run time ");
+            return results;
         }
 
         public T GetService<T>()

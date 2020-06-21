@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using NUnit.VisualStudio.TestAdapter.Internal;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
@@ -49,6 +50,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public IList<TestCase> Convert(NUnitResults discoveryResults, ITestLogger logger, string assemblyPath, IAdapterSettings settings)
         {
+            var timing = new Timing(settings, logger);
             if (settings.DiscoveryMethod != DiscoveryMethod.ClassicXml)
             {
                 var discoveryConverter = new DiscoveryConverter();
@@ -77,11 +79,12 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                 var testCases = isExplicit ? TestRun.TestAssembly.AllTestCases : TestRun.TestAssembly.RunnableTestCases;
                 foreach (var testNode in testCases)
                     loadedTestCases.Add(converter.ConvertTestCase(testNode));
-                var msg = isExplicit ? "Explicit run" : "Non-isExplicit run";
+                var msg = isExplicit ? "Explicit run" : "Non-Explicit run";
                 logger.Info(
                     $"   NUnit3TestExecutor discovered {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases using Modern mode, {msg}");
             }
 
+            timing.LogTime("Converting test cases ");
             return loadedTestCases;
         }
     }
