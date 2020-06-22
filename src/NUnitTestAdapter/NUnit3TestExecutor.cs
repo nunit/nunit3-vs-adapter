@@ -255,7 +255,7 @@ namespace NUnit.VisualStudio.TestAdapter
                         // NOTE This overwrites filter used in call
                         var filterBuilder = CreateTestFilterBuilder();
                         filter = filterBuilder.ConvertTfsFilterToNUnitFilter(TfsFilter, loadedTestCases);
-                        Dump?.DumpVSInputFilter(filter, "(At Execution)");
+                        Dump?.DumpVSInputFilter(filter, "(At Execution (TfsFilter)");
                     }
 
                     if (filter == NUnitTestFilterBuilder.NoTestsFound)
@@ -269,8 +269,11 @@ namespace NUnit.VisualStudio.TestAdapter
                     ITestConverterCommon converter;
                     if (Settings.DiscoveryMethod == DiscoveryMethod.Modern)
                     {
-                        var filterBuilder = CreateTestFilterBuilder();
-                        filter = filterBuilder.FilterByList(loadedTestCases);
+                        if (TfsFilter == null && filter != TestFilter.Empty)
+                        {
+                            var filterBuilder = CreateTestFilterBuilder();
+                            filter = filterBuilder.FilterByList(loadedTestCases);
+                        }
                         converter = discovery.TestConverter;
                     }
                     else
