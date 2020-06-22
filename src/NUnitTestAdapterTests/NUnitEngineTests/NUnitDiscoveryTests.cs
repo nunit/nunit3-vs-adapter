@@ -925,5 +925,126 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
             var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
             Assert.That(topLevelSuite.NoOfActualTestCases, Is.EqualTo(6));
         }
+
+
+        private const string DotnetXml =
+            @"<test-run id='2' name='Filtering.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter.issues\Issue497\bin\Debug\net461\Filtering.dll' testcasecount='20000'>
+   <test-suite type='Assembly' id='0-21501' name='Filtering.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter.issues\Issue497\bin\Debug\net461\Filtering.dll' runstate='Runnable' testcasecount='20000'>
+            <properties>
+               <property name='Something' value='Foo' />
+            </properties>
+      <test-suite type='TestFixture' id='0-21502' name='GeneratedTest0' fullname='GeneratedTest0' runstate='Runnable' testcasecount='40'>
+        <properties>
+               <property name='SomethingElse' value='FooToo' />
+          </properties>
+         <test-case id='0-1001' name='Test1' fullname='GeneratedTest0.Test1' methodname='Test1' classname='GeneratedTest0' runstate='Runnable' seed='1044071786'>
+            <properties>
+               <property name='Category' value='Foo' />
+            </properties>
+         </test-case>
+         <test-case id='0-1010' name='Test10' fullname='GeneratedTest0.Test10' methodname='Test10' classname='GeneratedTest0' runstate='Runnable' seed='117332475' />
+         <test-case id='0-1011' name='Test11' fullname='GeneratedTest0.Test11' methodname='Test11' classname='GeneratedTest0' runstate='Runnable' seed='12294536' />
+         <test-case id='0-1012' name='Test12' fullname='GeneratedTest0.Test12' methodname='Test12' classname='GeneratedTest0' runstate='Runnable' seed='147045895' />
+         <test-case id='0-1013' name='Test13' fullname='GeneratedTest0.Test13' methodname='Test13' classname='GeneratedTest0' runstate='Runnable' seed='2032810448' />
+         <test-case id='0-1014' name='Test14' fullname='GeneratedTest0.Test14' methodname='Test14' classname='GeneratedTest0' runstate='Runnable' seed='1777679651' />
+         <test-case id='0-1015' name='Test15' fullname='GeneratedTest0.Test15' methodname='Test15' classname='GeneratedTest0' runstate='Runnable' seed='1426069887' />
+         <test-case id='0-1016' name='Test16' fullname='GeneratedTest0.Test16' methodname='Test16' classname='GeneratedTest0' runstate='Runnable' seed='527812985' />
+         <test-case id='0-1017' name='Test17' fullname='GeneratedTest0.Test17' methodname='Test17' classname='GeneratedTest0' runstate='Runnable' seed='745144677' />
+         <test-case id='0-1018' name='Test18' fullname='GeneratedTest0.Test18' methodname='Test18' classname='GeneratedTest0' runstate='Runnable' seed='1905102164' />
+         <test-case id='0-1019' name='Test19' fullname='GeneratedTest0.Test19' methodname='Test19' classname='GeneratedTest0' runstate='Runnable' seed='1668656561' />
+         <test-case id='0-1002' name='Test2' fullname='GeneratedTest0.Test2' methodname='Test2' classname='GeneratedTest0' runstate='Runnable' seed='1613039933' />
+         <test-case id='0-1020' name='Test20' fullname='GeneratedTest0.Test20' methodname='Test20' classname='GeneratedTest0' runstate='Runnable' seed='1383170775' />
+         <test-case id='0-1021' name='Test21' fullname='GeneratedTest0.Test21' methodname='Test21' classname='GeneratedTest0' runstate='Runnable' seed='1674016225' />
+         <test-case id='0-1022' name='Test22' fullname='GeneratedTest0.Test22' methodname='Test22' classname='GeneratedTest0' runstate='Runnable' seed='862466136' />
+         <test-case id='0-1023' name='Test23' fullname='GeneratedTest0.Test23' methodname='Test23' classname='GeneratedTest0' runstate='Runnable' seed='2105852876' />
+         <test-case id='0-1024' name='Test24' fullname='GeneratedTest0.Test24' methodname='Test24' classname='GeneratedTest0' runstate='Runnable' seed='1228213720' />
+         <test-case id='0-1025' name='Test25' fullname='GeneratedTest0.Test25' methodname='Test25' classname='GeneratedTest0' runstate='Runnable' seed='756030213' />
+         <test-case id='0-1026' name='Test26' fullname='GeneratedTest0.Test26' methodname='Test26' classname='GeneratedTest0' runstate='Runnable' seed='1878205678' />
+         <test-case id='0-1027' name='Test27' fullname='GeneratedTest0.Test27' methodname='Test27' classname='GeneratedTest0' runstate='Runnable' seed='857731820' />
+         <test-case id='0-1028' name='Test28' fullname='GeneratedTest0.Test28' methodname='Test28' classname='GeneratedTest0' runstate='Runnable' seed='1119168784' />
+         <test-case id='0-1029' name='Test29' fullname='GeneratedTest0.Test29' methodname='Test29' classname='GeneratedTest0' runstate='Runnable' seed='1828252765' />
+         <test-case id='0-1003' name='Test3' fullname='GeneratedTest0.Test3' methodname='Test3' classname='GeneratedTest0' runstate='Runnable' seed='438217722' />
+         <test-case id='0-1030' name='Test30' fullname='GeneratedTest0.Test30' methodname='Test30' classname='GeneratedTest0' runstate='Runnable' seed='1139815260' />
+         <test-case id='0-1031' name='Test31' fullname='GeneratedTest0.Test31' methodname='Test31' classname='GeneratedTest0' runstate='Runnable' seed='1425150058' />
+         <test-case id='0-1032' name='Test32' fullname='GeneratedTest0.Test32' methodname='Test32' classname='GeneratedTest0' runstate='Runnable' seed='1811000703' />
+         <test-case id='0-1033' name='Test33' fullname='GeneratedTest0.Test33' methodname='Test33' classname='GeneratedTest0' runstate='Runnable' seed='2003858315' />
+         <test-case id='0-1034' name='Test34' fullname='GeneratedTest0.Test34' methodname='Test34' classname='GeneratedTest0' runstate='Runnable' seed='644066936' />
+         <test-case id='0-1035' name='Test35' fullname='GeneratedTest0.Test35' methodname='Test35' classname='GeneratedTest0' runstate='Runnable' seed='678290327' />
+         <test-case id='0-1036' name='Test36' fullname='GeneratedTest0.Test36' methodname='Test36' classname='GeneratedTest0' runstate='Runnable' seed='94311409' />
+         <test-case id='0-1037' name='Test37' fullname='GeneratedTest0.Test37' methodname='Test37' classname='GeneratedTest0' runstate='Runnable' seed='205638913' />
+         <test-case id='0-1038' name='Test38' fullname='GeneratedTest0.Test38' methodname='Test38' classname='GeneratedTest0' runstate='Runnable' seed='1600436152' />
+         <test-case id='0-1039' name='Test39' fullname='GeneratedTest0.Test39' methodname='Test39' classname='GeneratedTest0' runstate='Runnable' seed='1570613399' />
+         <test-case id='0-1004' name='Test4' fullname='GeneratedTest0.Test4' methodname='Test4' classname='GeneratedTest0' runstate='Runnable' seed='1305619662' />
+         <test-case id='0-1040' name='Test40' fullname='GeneratedTest0.Test40' methodname='Test40' classname='GeneratedTest0' runstate='Runnable' seed='445739210' />
+         <test-case id='0-1005' name='Test5' fullname='GeneratedTest0.Test5' methodname='Test5' classname='GeneratedTest0' runstate='Runnable' seed='38486705' />
+         <test-case id='0-1006' name='Test6' fullname='GeneratedTest0.Test6' methodname='Test6' classname='GeneratedTest0' runstate='Runnable' seed='1171258042' />
+         <test-case id='0-1007' name='Test7' fullname='GeneratedTest0.Test7' methodname='Test7' classname='GeneratedTest0' runstate='Runnable' seed='1959533843' />
+         <test-case id='0-1008' name='Test8' fullname='GeneratedTest0.Test8' methodname='Test8' classname='GeneratedTest0' runstate='Runnable' seed='2054494074' />
+         <test-case id='0-1009' name='Test9' fullname='GeneratedTest0.Test9' methodname='Test9' classname='GeneratedTest0' runstate='Runnable' seed='1393583200' />
+      </test-suite>
+      <test-suite type='TestFixture' id='0-21503' name='GeneratedTest1' fullname='GeneratedTest1' runstate='Runnable' testcasecount='40'>
+         <test-case id='0-1042' name='Test1' fullname='GeneratedTest1.Test1' methodname='Test1' classname='GeneratedTest1' runstate='Runnable' seed='907302604' />
+         <test-case id='0-1051' name='Test10' fullname='GeneratedTest1.Test10' methodname='Test10' classname='GeneratedTest1' runstate='Runnable' seed='542403258' />
+         <test-case id='0-1052' name='Test11' fullname='GeneratedTest1.Test11' methodname='Test11' classname='GeneratedTest1' runstate='Runnable' seed='2036961476' />
+         <test-case id='0-1053' name='Test12' fullname='GeneratedTest1.Test12' methodname='Test12' classname='GeneratedTest1' runstate='Runnable' seed='1846185038' />
+         <test-case id='0-1054' name='Test13' fullname='GeneratedTest1.Test13' methodname='Test13' classname='GeneratedTest1' runstate='Runnable' seed='1668069964' />
+         <test-case id='0-1055' name='Test14' fullname='GeneratedTest1.Test14' methodname='Test14' classname='GeneratedTest1' runstate='Runnable' seed='1461142204' />
+         <test-case id='0-1056' name='Test15' fullname='GeneratedTest1.Test15' methodname='Test15' classname='GeneratedTest1' runstate='Runnable' seed='1603637991' />
+         <test-case id='0-1057' name='Test16' fullname='GeneratedTest1.Test16' methodname='Test16' classname='GeneratedTest1' runstate='Runnable' seed='2003412282' />
+         <test-case id='0-1058' name='Test17' fullname='GeneratedTest1.Test17' methodname='Test17' classname='GeneratedTest1' runstate='Runnable' seed='616955605' />
+         <test-case id='0-1059' name='Test18' fullname='GeneratedTest1.Test18' methodname='Test18' classname='GeneratedTest1' runstate='Runnable' seed='505552507' />
+         <test-case id='0-1060' name='Test19' fullname='GeneratedTest1.Test19' methodname='Test19' classname='GeneratedTest1' runstate='Runnable' seed='1345156938' />
+         <test-case id='0-1043' name='Test2' fullname='GeneratedTest1.Test2' methodname='Test2' classname='GeneratedTest1' runstate='Runnable' seed='1299991219' />
+         <test-case id='0-1061' name='Test20' fullname='GeneratedTest1.Test20' methodname='Test20' classname='GeneratedTest1' runstate='Runnable' seed='2137224924' />
+         <test-case id='0-1062' name='Test21' fullname='GeneratedTest1.Test21' methodname='Test21' classname='GeneratedTest1' runstate='Runnable' seed='2071686396' />
+         <test-case id='0-1063' name='Test22' fullname='GeneratedTest1.Test22' methodname='Test22' classname='GeneratedTest1' runstate='Runnable' seed='2088970327' />
+         <test-case id='0-1064' name='Test23' fullname='GeneratedTest1.Test23' methodname='Test23' classname='GeneratedTest1' runstate='Runnable' seed='95025602' />
+         <test-case id='0-1065' name='Test24' fullname='GeneratedTest1.Test24' methodname='Test24' classname='GeneratedTest1' runstate='Runnable' seed='105032218' />
+         <test-case id='0-1066' name='Test25' fullname='GeneratedTest1.Test25' methodname='Test25' classname='GeneratedTest1' runstate='Runnable' seed='1700985092' />
+         <test-case id='0-1067' name='Test26' fullname='GeneratedTest1.Test26' methodname='Test26' classname='GeneratedTest1' runstate='Runnable' seed='608640820' />
+         <test-case id='0-1068' name='Test27' fullname='GeneratedTest1.Test27' methodname='Test27' classname='GeneratedTest1' runstate='Runnable' seed='331430477' />
+         <test-case id='0-1069' name='Test28' fullname='GeneratedTest1.Test28' methodname='Test28' classname='GeneratedTest1' runstate='Runnable' seed='1372022193' />
+         <test-case id='0-1070' name='Test29' fullname='GeneratedTest1.Test29' methodname='Test29' classname='GeneratedTest1' runstate='Runnable' seed='994442547' />
+         <test-case id='0-1044' name='Test3' fullname='GeneratedTest1.Test3' methodname='Test3' classname='GeneratedTest1' runstate='Runnable' seed='156211659' />
+         <test-case id='0-1071' name='Test30' fullname='GeneratedTest1.Test30' methodname='Test30' classname='GeneratedTest1' runstate='Runnable' seed='1493746617' />
+         <test-case id='0-1072' name='Test31' fullname='GeneratedTest1.Test31' methodname='Test31' classname='GeneratedTest1' runstate='Runnable' seed='1131140417' />
+         <test-case id='0-1073' name='Test32' fullname='GeneratedTest1.Test32' methodname='Test32' classname='GeneratedTest1' runstate='Runnable' seed='1295113085' />
+         <test-case id='0-1074' name='Test33' fullname='GeneratedTest1.Test33' methodname='Test33' classname='GeneratedTest1' runstate='Runnable' seed='764028487' />
+         <test-case id='0-1075' name='Test34' fullname='GeneratedTest1.Test34' methodname='Test34' classname='GeneratedTest1' runstate='Runnable' seed='1011987161' />
+         <test-case id='0-1076' name='Test35' fullname='GeneratedTest1.Test35' methodname='Test35' classname='GeneratedTest1' runstate='Runnable' seed='1394469065' />
+         <test-case id='0-1077' name='Test36' fullname='GeneratedTest1.Test36' methodname='Test36' classname='GeneratedTest1' runstate='Runnable' seed='610985181' />
+         <test-case id='0-1078' name='Test37' fullname='GeneratedTest1.Test37' methodname='Test37' classname='GeneratedTest1' runstate='Runnable' seed='1358993249' />
+         <test-case id='0-1079' name='Test38' fullname='GeneratedTest1.Test38' methodname='Test38' classname='GeneratedTest1' runstate='Runnable' seed='117442375' />
+         <test-case id='0-1080' name='Test39' fullname='GeneratedTest1.Test39' methodname='Test39' classname='GeneratedTest1' runstate='Runnable' seed='871760740' />
+         <test-case id='0-1045' name='Test4' fullname='GeneratedTest1.Test4' methodname='Test4' classname='GeneratedTest1' runstate='Runnable' seed='745477006' />
+         <test-case id='0-1081' name='Test40' fullname='GeneratedTest1.Test40' methodname='Test40' classname='GeneratedTest1' runstate='Runnable' seed='2130062425' />
+         <test-case id='0-1046' name='Test5' fullname='GeneratedTest1.Test5' methodname='Test5' classname='GeneratedTest1' runstate='Runnable' seed='294423161' />
+         <test-case id='0-1047' name='Test6' fullname='GeneratedTest1.Test6' methodname='Test6' classname='GeneratedTest1' runstate='Runnable' seed='1611885069' />
+         <test-case id='0-1048' name='Test7' fullname='GeneratedTest1.Test7' methodname='Test7' classname='GeneratedTest1' runstate='Runnable' seed='53029913' />
+         <test-case id='0-1049' name='Test8' fullname='GeneratedTest1.Test8' methodname='Test8' classname='GeneratedTest1' runstate='Runnable' seed='1560128322' />
+         <test-case id='0-1050' name='Test9' fullname='GeneratedTest1.Test9' methodname='Test9' classname='GeneratedTest1' runstate='Runnable' seed='560180655' />
+      </test-suite>
+        <test-suite type='TestFixture' id='0-21504' name='GeneratedTest10' fullname='GeneratedTest10' runstate='Runnable' testcasecount='40'>
+         <test-case id='0-1083' name='Test1' fullname='GeneratedTest10.Test1' methodname='Test1' classname='GeneratedTest10' runstate='Runnable' seed='857897643' />
+         <test-case id='0-1092' name='Test10' fullname='GeneratedTest10.Test10' methodname='Test10' classname='GeneratedTest10' runstate='Runnable' seed='162525546' />
+         <test-case id='0-1093' name='Test11' fullname='GeneratedTest10.Test11' methodname='Test11' classname='GeneratedTest10' runstate='Runnable' seed='48042500' />
+        </test-suite>
+    </test-suite>
+</test-run>";
+
+        /// <summary>
+        /// The dotnetxml has no top level suite, but fixtures directly under assembly.
+        /// </summary>
+        [Test]
+        public void ThatDotNetTestWorks()
+        {
+            var sut = new DiscoveryConverter();
+            var ndr = sut.Convert(
+                new NUnitResults(XmlHelper.CreateXmlNode(DotnetXml)));
+            var fixtures = ndr.TestAssembly.TestFixtures;
+            Assert.That(fixtures.Count(), Is.EqualTo(3), "Didnt find all fixtures");
+            Assert.That(fixtures.Skip(2).Single().TestCases.Count, Is.EqualTo(3),
+                "Didnt find all testcases for 3rd fixture");
+        }
     }
 }

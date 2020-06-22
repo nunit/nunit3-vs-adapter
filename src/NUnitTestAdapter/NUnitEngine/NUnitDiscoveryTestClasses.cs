@@ -177,7 +177,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
 
 
-    public sealed class NUnitDiscoveryTestAssembly : NUnitDiscoverySuiteBase
+    public sealed class NUnitDiscoveryTestAssembly : NUnitDiscoveryCanHaveTestFixture
     {
         public NUnitDiscoveryTestAssembly(BaseProperties theBase, NUnitDiscoveryTestRun parent) : base(theBase, parent)
         { }

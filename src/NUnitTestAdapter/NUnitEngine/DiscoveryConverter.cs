@@ -50,11 +50,20 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             var anode = doc.Root.Elements("test-suite");
             var assemblyNode = anode.Single(o => o.Attribute("type").Value == "Assembly");
             var testassembly = ExtractTestAssembly(assemblyNode, testrun);
-            var node = assemblyNode.Elements("test-suite").Single();
-            var topLevelSuite = ExtractTestSuite(node, testassembly);
-            testassembly.AddTestSuiteToAssembly(topLevelSuite);
-            if (node.HasElements)
-                ExtractAllFixtures(topLevelSuite, node);
+            var suiteNode = assemblyNode.Elements("test-suite").FirstOrDefault(o => o.Attribute("type").Value == "TestSuite");
+            if (suiteNode != null)
+            {
+                var topLevelSuite = ExtractTestSuite(suiteNode, testassembly);
+                testassembly.AddTestSuiteToAssembly(topLevelSuite);
+                if (suiteNode.HasElements)
+                    ExtractAllFixtures(topLevelSuite, suiteNode);
+            }
+            else // Check if there are testfixtures below
+            {
+                if (assemblyNode.HasElements)
+                    ExtractAllFixtures(testassembly, assemblyNode);
+            }
+
             return testrun;
         }
 
@@ -65,9 +74,29 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             return ts;
         }
 
+        private static void ExtractAllFixtures(NUnitDiscoveryTestAssembly parent, XElement node)
+        {
+            foreach (var child in node.Elements("test-suite"))
+            {
+                var type = child.Attribute("type").Value;
+                var className = child.Attribute(classname)?.Value;
+                switch (type)
+                {
+                    case "TestFixture":
+                        var tf = ExtractTestFixture(parent, child, className);
+                        parent.AddTestFixture(tf);
+                        ExtractTestCases(tf, child);
+                        ExtractParameterizedMethodsAndTheories(tf, child);
+                        break;
+                    default:
+                        throw new DiscoveryException($"Invalid type found in ExtractAllFixtures for assembly: {type}");
+                }
+            }
+        }
+
         private static void ExtractAllFixtures(NUnitDiscoveryTestSuite parent, XElement node)
         {
-            foreach (var child in node.Elements())
+            foreach (var child in node.Elements("test-suite"))
             {
                 var type = child.Attribute("type").Value;
                 var className = child.Attribute(classname)?.Value;
@@ -101,7 +130,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                             ExtractAllFixtures(ts, child);
                         break;
                     default:
-                        throw new DiscoveryException($"Invalid type found in ExtractAllFixtures: {type}");
+                        throw new DiscoveryException($"Invalid type found in ExtractAllFixtures for test suite: {type}");
                 }
             }
         }
@@ -175,7 +204,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             var seedAtr = child.Attribute("seed")?.Value;
             var seed = seedAtr != null ? long.Parse(seedAtr) : 0;
             var btf = ExtractSuiteBasePropertiesClass(child);
-            var tc = new NUnitDiscoveryTestCase(btf, tf, className, methodName, seed) ;
+            var tc = new NUnitDiscoveryTestCase(btf, tf, className, methodName, seed);
             return tc;
         }
 
