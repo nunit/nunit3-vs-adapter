@@ -64,6 +64,11 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public bool IsExplicitRun => CurrentTestAssembly?.IsExplicit ?? false;
 
+        private readonly List<TestCase> loadedTestCases = new List<TestCase>();
+
+        public IList<TestCase> LoadedTestCases => loadedTestCases;
+
+        public int NoOfLoadedTestCases => loadedTestCases.Count;
 
         public IList<TestCase> Convert(NUnitResults discoveryResults, ITestLogger logger, string assemblyPath, IAdapterSettings settings)
         {
@@ -74,7 +79,6 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             }
 
             var nunitTestCases = discoveryResults.TestCases();
-            var loadedTestCases = new List<TestCase>();
 
             // As a side effect of calling TestConverter.ConvertTestCase,
             // the converter's cache of all test cases is populated as well.

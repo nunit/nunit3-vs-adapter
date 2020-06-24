@@ -103,6 +103,10 @@ namespace NUnit.VisualStudio.TestAdapter
         DiscoveryMethod DiscoveryMethod { get; }
         bool SkipNonTestAssemblies { get; }
 
+        int AssemblySelectLimit { get; }
+
+
+
         void Load(IDiscoveryContext context);
         void Load(string settingsXml);
         void SaveRandomSeed(string dirname);
@@ -223,6 +227,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public DiscoveryMethod DiscoveryMethod { get; private set; } = DiscoveryMethod.ClassicXml;
         public bool SkipNonTestAssemblies { get; private set; }
+        public int AssemblySelectLimit { get; private set; }
 
         public VsTestCategoryType VsTestCategoryType { get; private set; } = VsTestCategoryType.NUnit;
 
@@ -326,6 +331,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             // Engine settings
             SkipNonTestAssemblies = GetInnerTextAsBool(nunitNode, nameof(SkipNonTestAssemblies), true);
+            AssemblySelectLimit = GetInnerTextAsInt(nunitNode, nameof(AssemblySelectLimit), 2000);
 
 
             // Adapter Diagnostics
@@ -577,22 +583,6 @@ namespace NUnit.VisualStudio.TestAdapter
                 return TestOutcome.Skipped;
             }
             return testoutcome;
-        }
-
-        public DiscoveryMethod MapDiscoveryMethod(string setting)
-        {
-            if (setting == null)
-                return DiscoveryMethod.ClassicXml;
-            bool ok = TryParse.EnumTryParse(setting, out DiscoveryMethod discoveryMethod);
-
-
-            if (!ok)
-            {
-                _logger.Warning(
-                    $"Invalid value ({setting}) for MapWarningTo, should be either Skipped,Failed,Passed or None");
-                return DiscoveryMethod.ClassicXml;
-            }
-            return discoveryMethod;
         }
 
         public T MapEnum<T>(string setting, T defaultValue)

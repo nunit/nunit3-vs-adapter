@@ -35,9 +35,11 @@ namespace NUnit.VisualStudio.TestAdapter
 
         // ReSharper disable once StringLiteralTypo
         public static readonly TestFilter NoTestsFound = new TestFilter("<notestsfound/>");
+        private IAdapterSettings settings;
 
-        public NUnitTestFilterBuilder(ITestFilterService filterService)
+        public NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSettings settings)
         {
+            this.settings = settings;
             _filterService = filterService ?? throw new NUnitEngineException("TestFilterService is not available. Engine in use is incorrect version.");
         }
 
@@ -60,6 +62,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public TestFilter FilterByList(IEnumerable<TestCase> testCases)
         {
+            if (testCases.Count() > settings.AssemblySelectLimit)
+                return TestFilter.Empty;
             var filterBuilder = _filterService.GetTestFilterBuilder();
 
             foreach (var testCase in testCases)

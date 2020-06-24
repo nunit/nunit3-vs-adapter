@@ -21,7 +21,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-//#define LAUNCHDEBUGGER
+#define LAUNCHDEBUGGER
 
 using System;
 using System.Collections.Generic;
@@ -272,8 +272,15 @@ namespace NUnit.VisualStudio.TestAdapter
                     {
                         if (TfsFilter == null && filter != TestFilter.Empty)
                         {
-                            var filterBuilder = CreateTestFilterBuilder();
-                            filter = filterBuilder.FilterByList(loadedTestCases);
+                            if (discovery.NoOfLoadedTestCases > Settings.AssemblySelectLimit)
+                            {
+                                filter = TestFilter.Empty;
+                            }
+                            else
+                            {
+                                var filterBuilder = CreateTestFilterBuilder();
+                                filter = filterBuilder.FilterByList(loadedTestCases);
+                            }
                         }
                         converter = discovery.TestConverter;
                     }
@@ -345,7 +352,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
 
         private NUnitTestFilterBuilder CreateTestFilterBuilder()
-            => new NUnitTestFilterBuilder(NUnitEngineAdapter.GetService<ITestFilterService>());
+            => new NUnitTestFilterBuilder(NUnitEngineAdapter.GetService<ITestFilterService>(), Settings);
 
 
         private void CreateTestOutputFolder()
