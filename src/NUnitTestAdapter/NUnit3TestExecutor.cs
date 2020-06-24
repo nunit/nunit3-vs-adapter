@@ -134,7 +134,7 @@ namespace NUnit.VisualStudio.TestAdapter
             Initialize(runContext, frameworkHandle);
             TestLog.Debug("RunTests by IEnumerable<TestCase>");
             InitializeForExecution(runContext, frameworkHandle);
-            var timing = new Timing(Settings, TestLog);
+            var timing = new TimingLogger(Settings, TestLog);
             Debug.Assert(NUnitEngineAdapter != null, "NUnitEngineAdapter is null");
             Debug.Assert(NUnitEngineAdapter.EngineEnabled, "NUnitEngineAdapter TestEngine is null");
             var assemblyGroups = tests.GroupBy(tc => tc.Source);
@@ -147,7 +147,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             foreach (var assemblyGroup in assemblyGroups)
             {
-                var assemblytiming = new Timing(Settings, TestLog);
+                var assemblytiming = new TimingLogger(Settings, TestLog);
                 try
                 {
                     string assemblyName = assemblyGroup.Key;
@@ -246,7 +246,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
                 if (discoveryResults.IsRunnable)
                 {
-                    var discovery = new Discovery();
+                    var discovery = new DiscoveryConverter();
                     var loadedTestCases = discovery.Convert(discoveryResults, TestLog, assemblyPath, Settings);
 
                     // If we have a TFS Filter, convert it to an nunit filter
@@ -255,6 +255,7 @@ namespace NUnit.VisualStudio.TestAdapter
                         // NOTE This overwrites filter used in call
                         var filterBuilder = CreateTestFilterBuilder();
                         filter = filterBuilder.ConvertTfsFilterToNUnitFilter(TfsFilter, loadedTestCases);
+                        Dump?.AddString($"\n\nTFSFilter: {TfsFilter.TfsTestCaseFilterExpression.TestCaseFilterValue}\n");
                         Dump?.DumpVSInputFilter(filter, "(At Execution (TfsFilter)");
                     }
 
@@ -327,7 +328,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             finally
             {
-                Dump?.Dump4Execution();
+                Dump?.DumpForExecution();
                 try
                 {
                     NUnitEngineAdapter?.CloseRunner();

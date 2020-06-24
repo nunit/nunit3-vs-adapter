@@ -158,7 +158,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         ///    }
         /// }.
         /// </summary>
-        const string TestXmlParametrizedData =
+        const string TestXmlParameterizedData =
             @"<test-suite type='Assembly' id='4-1004' name='ClassLibrary11.dll' fullname='C:\Users\Terje\documents\visual studio 2017\Projects\ClassLibrary11\ClassLibrary11\bin\Debug\ClassLibrary11.dll' runstate='Runnable' testcasecount='2'>
 	<properties>
 		<property name='_PID' value='10904' />
@@ -356,7 +356,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         public XmlNode XmlForNestedClasses => XmlHelper.CreateXmlNode(XmlNestedClasses);
         public XmlNode XmlForHierarchyOfClasses => XmlHelper.CreateXmlNode(XmlHierarchyOfClasses);
-        public XmlNode XmlForParametrizedTests => XmlHelper.CreateXmlNode(TestXmlParametrizedData);
+        public XmlNode XmlForParameterizedTests => XmlHelper.CreateXmlNode(TestXmlParameterizedData);
         public XmlNode XmlForStandardTest => XmlHelper.CreateXmlNode(TestXmlStandardClass);
 
         public XmlNode XmlForTestCaseWithCategory => XmlHelper.CreateXmlNode(TestCaseWithCategory);
@@ -395,9 +395,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         [Test]
-        public void ThatParametrizedTestsHaveTraits()
+        public void ThatParameterizedTestsHaveTraits()
         {
-            var xml = testDataForTraits.XmlForParametrizedTests;
+            var xml = testDataForTraits.XmlForParameterizedTests;
 
             ProcessXml2TestCase(xml);
 

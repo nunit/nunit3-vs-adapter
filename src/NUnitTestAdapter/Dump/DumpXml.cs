@@ -43,7 +43,7 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
         void DumpFromVSInput(IGrouping<string, TestCase> testCases, TestFilter filter, TestPackage package);
         void StartDiscoveryInExecution();
         void StartExecution();
-        void Dump4Execution();
+        void DumpForExecution();
         void DumpVSInputFilter(TestFilter filter, string info);
     }
 
@@ -84,14 +84,14 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
                 file.CreateDirectory(folder);
         }
 
-        public void Dump4Discovery()
+        public void DumpForDiscovery()
         {
             var dumpfolder = Path.Combine(directory, "Dump");
             var path = Path.Combine(dumpfolder, $"D_{filename}.dump");
             Dump2File(path);
         }
 
-        public void Dump4Execution()
+        public void DumpForExecution()
         {
             var dumpfolder = Path.Combine(directory, "Dump");
             var path = Path.Combine(dumpfolder, $"E_{filename}.dump");

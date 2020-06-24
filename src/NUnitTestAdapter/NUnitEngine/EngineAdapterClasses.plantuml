@@ -6,18 +6,18 @@ title NUnitEngineAdapterClasses for discovery
    SuiteBase <|-- TestRun
    CanHaveTestCases <|-- Fixture
    SuiteBase <|-- TestCase
-   CanHaveTestCases <|-- ParametrizedMethod
+   CanHaveTestCases <|-- ParameterizedMethod
    CanHaveFixtures <|-- GenericFixture
    CanHaveFixtures <|-- SetUpFixture
    CanHaveTestCases <|-- Theory
    TestSuite o-- GenericFixture
    TestSuite o-- TestSuite
-   Fixture o-- ParametrizedMethod
+   Fixture o-- ParameterizedMethod
    CanHaveTestCases o-- TestCase
    CanHaveFixtures o-- Fixture
-   CanHaveFixtures <|-- ParametrizedFixture
+   CanHaveFixtures <|-- ParameterizedFixture
    CanHaveFixtures <|-- Assembly
-   TestSuite o-- ParametrizedFixture
+   TestSuite o-- ParameterizedFixture
    TestSuite o-- SetUpFixture
    Assembly o-- TestSuite
    Fixture o-- Theory

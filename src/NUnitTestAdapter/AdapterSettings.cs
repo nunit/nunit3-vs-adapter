@@ -596,7 +596,7 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         public T MapEnum<T>(string setting, T defaultValue)
-            where T : System.Enum
+            where T : struct, Enum
         {
             if (setting == null)
                 return defaultValue;

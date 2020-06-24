@@ -79,7 +79,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public NUnitResults Explore(TestFilter filter)
         {
-            var timing = new Timing(settings, logger);
+            var timing = new TimingLogger(settings, logger);
             var results = new NUnitResults(Runner.Explore(filter));
             timing.LogTime("Execution engine discovery time ");
             return results;
@@ -87,7 +87,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public NUnitResults Run(ITestEventListener listener, TestFilter filter)
         {
-            var timing = new Timing(settings, logger);
+            var timing = new TimingLogger(settings, logger);
             var results = new NUnitResults(Runner.Run(listener, filter));
             timing.LogTime("Execution engine run time ");
             return results;

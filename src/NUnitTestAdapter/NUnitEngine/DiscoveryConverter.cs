@@ -25,32 +25,93 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
-// ReSharper disable InconsistentNaming
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using NUnit.VisualStudio.TestAdapter.Internal;
+
+
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
     public class DiscoveryConverter
     {
-#pragma warning disable SA1303 // Const field names should begin with upper-case letter
-        private const string id = nameof(id);
-        private const string type = nameof(type);
-        private const string name = nameof(name);
-        private const string fullname = nameof(fullname);
-        private const string runstate = nameof(runstate);
-        private const string testcasecount = nameof(testcasecount);
-        private const string classname = nameof(classname);
-        private const string methodname = nameof(methodname);
+        internal static class NUnitXmlAttributeNames
+        {
+            public const string Id = "id";
+            public const string Type = "type";
+            public const string Name = "name";
+            public const string Fullname = "fullname";
+            public const string Runstate = "runstate";
+            public const string Testcasecount = "testcasecount";
+            public const string Classname = "classname";
+            public const string Methodname = "methodname";
+            public const string Seed = "seed";
+        }
 
-#pragma warning restore SA1303 // Const field names should begin with upper-case letter
+        private ITestConverterXml converterForXml;
+        private ITestConverter converter;
 
-        public NUnitDiscoveryTestRun Convert(NUnitResults discovery)
+        public ITestConverterCommon TestConverterForXml => converterForXml;
+
+        public ITestConverterCommon TestConverter => converter;
+
+        public NUnitDiscoveryTestRun TestRun { get; private set; }
+
+        public NUnitDiscoveryTestAssembly CurrentTestAssembly => TestRun.TestAssembly;
+
+        public NUnitDiscoveryTestSuite TopLevelTestSuite => CurrentTestAssembly.TestSuites.FirstOrDefault();
+
+        public IEnumerable<NUnitDiscoveryTestCase> AllTestCases => CurrentTestAssembly.AllTestCases;
+
+        public bool IsExplicitRun => CurrentTestAssembly?.IsExplicit ?? false;
+
+
+        public IList<TestCase> Convert(NUnitResults discoveryResults, ITestLogger logger, string assemblyPath, IAdapterSettings settings)
+        {
+            var timing = new TimingLogger(settings, logger);
+            if (settings.DiscoveryMethod != DiscoveryMethod.ClassicXml)
+            {
+                TestRun = ConvertXml(discoveryResults);
+            }
+
+            var nunitTestCases = discoveryResults.TestCases();
+            var loadedTestCases = new List<TestCase>();
+
+            // As a side effect of calling TestConverter.ConvertTestCase,
+            // the converter's cache of all test cases is populated as well.
+            // All future calls to convert a test case may now use the cache.
+
+            if (settings.DiscoveryMethod == DiscoveryMethod.ClassicXml)
+            {
+                converterForXml = new TestConverterForXml(logger, assemblyPath, settings);
+                foreach (XmlNode testNode in nunitTestCases)
+                    loadedTestCases.Add(converterForXml.ConvertTestCase(new NUnitEventTestCase(testNode)));
+                logger.Info(
+                    $"   NUnit3TestExecutor discovered {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases using Classic mode");
+            }
+            else
+            {
+                converter = new TestConverter(logger, assemblyPath, settings);
+                var isExplicit = TestRun.IsExplicit;
+                var testCases = isExplicit ? TestRun.TestAssembly.AllTestCases : TestRun.TestAssembly.RunnableTestCases;
+                foreach (var testNode in testCases)
+                    loadedTestCases.Add(converter.ConvertTestCase(testNode));
+                var msg = isExplicit ? "Explicit run" : "Non-Explicit run";
+                logger.Info(
+                    $"   NUnit3TestExecutor discovered {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases using Modern mode, {msg}");
+            }
+
+            timing.LogTime("Converting test cases ");
+            return loadedTestCases;
+        }
+
+        public NUnitDiscoveryTestRun ConvertXml(NUnitResults discovery)
         {
             var doc = XDocument.Load(new XmlNodeReader(discovery.FullTopNode));
             var testrun = ExtractTestRun(doc);
             var anode = doc.Root.Elements("test-suite");
-            var assemblyNode = anode.Single(o => o.Attribute("type").Value == "Assembly");
+            var assemblyNode = anode.Single(o => o.Attribute(NUnitXmlAttributeNames.Type).Value == "Assembly");
             var testassembly = ExtractTestAssembly(assemblyNode, testrun);
-            var suiteNode = assemblyNode.Elements("test-suite").FirstOrDefault(o => o.Attribute("type").Value == "TestSuite");
+            var suiteNode = assemblyNode.Elements("test-suite").FirstOrDefault(o => o.Attribute(NUnitXmlAttributeNames.Type).Value == "TestSuite");
             if (suiteNode != null)
             {
                 var topLevelSuite = ExtractTestSuite(suiteNode, testassembly);
@@ -78,8 +139,8 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         {
             foreach (var child in node.Elements("test-suite"))
             {
-                var type = child.Attribute("type").Value;
-                var className = child.Attribute(classname)?.Value;
+                var type = child.Attribute(NUnitXmlAttributeNames.Type)?.Value;
+                var className = child.Attribute(NUnitXmlAttributeNames.Classname)?.Value;
                 switch (type)
                 {
                     case "TestFixture":
@@ -98,8 +159,8 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         {
             foreach (var child in node.Elements("test-suite"))
             {
-                var type = child.Attribute("type").Value;
-                var className = child.Attribute(classname)?.Value;
+                var type = child.Attribute(NUnitXmlAttributeNames.Type).Value;
+                var className = child.Attribute(NUnitXmlAttributeNames.Classname)?.Value;
                 switch (type)
                 {
                     case "TestFixture":
@@ -114,8 +175,8 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                         ExtractTestFixtures(gtf, child);
                         break;
                     case "ParameterizedFixture":
-                        var ptf = ExtractParametrizedTestFixture(parent, child, className);
-                        parent.AddParametrizedFixture(ptf);
+                        var ptf = ExtractParameterizedTestFixture(parent, child, className);
+                        parent.AddParameterizedFixture(ptf);
                         ExtractTestFixtures(ptf, child);
                         break;
                     case "SetUpFixture":
@@ -139,8 +200,8 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         {
             foreach (var child in node.Elements())
             {
-                var type = child.Attribute("type").Value;
-                var className = child.Attribute(classname)?.Value;
+                var type = child.Attribute(NUnitXmlAttributeNames.Type).Value;
+                var className = child.Attribute(NUnitXmlAttributeNames.Classname)?.Value;
                 var btf = ExtractSuiteBasePropertiesClass(child);
                 if (type != "TestFixture")
                     throw new DiscoveryException($"Not a TestFixture, but {type}");
@@ -153,32 +214,38 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         private static void ExtractParameterizedMethodsAndTheories(NUnitDiscoveryTestFixture tf, XElement node)
         {
-            const string ParameterizedMethod = nameof(ParameterizedMethod);
-            const string Theory = nameof(Theory);
+            const string parameterizedMethod = "ParameterizedMethod";
+            const string theory = "Theory";
             foreach (var child in node.Elements("test-suite"))
             {
-                var type = child.Attribute("type")?.Value;
-                if (type != ParameterizedMethod && type != "Theory" && type != "GenericMethod")
+                var type = child.Attribute(NUnitXmlAttributeNames.Type)?.Value;
+                if (type != parameterizedMethod && type != "Theory" && type != "GenericMethod")
                     throw new DiscoveryException($"Expected ParameterizedMethod, Theory or GenericMethod, but was {type}");
-                var className = child.Attribute(classname)?.Value;
+                var className = child.Attribute(NUnitXmlAttributeNames.Classname)?.Value;
                 var btf = ExtractSuiteBasePropertiesClass(child);
-                if (type == ParameterizedMethod)
+                switch (type)
                 {
-                    var tc = new NUnitDiscoveryParameterizedMethod(btf, className, tf);
-                    ExtractTestCases(tc, child);
-                    tf.AddParametrizedMethod(tc);
-                }
-                else if (type == "Theory")
-                {
-                    var tc = new NUnitDiscoveryTheory(btf, className, tf);
-                    tf.AddTheory(tc);
-                    ExtractTestCases(tc, child);
-                }
-                else
-                {
-                    var tc = new NUnitDiscoveryGenericMethod(btf, className, tf);
-                    tf.AddGenericMethod(tc);
-                    ExtractTestCases(tc, child);
+                    case parameterizedMethod:
+                    {
+                        var tc = new NUnitDiscoveryParameterizedMethod(btf, className, tf);
+                        ExtractTestCases(tc, child);
+                        tf.AddParameterizedMethod(tc);
+                        break;
+                    }
+                    case theory:
+                    {
+                        var tc = new NUnitDiscoveryTheory(btf, className, tf);
+                        tf.AddTheory(tc);
+                        ExtractTestCases(tc, child);
+                        break;
+                    }
+                    default:
+                    {
+                        var tc = new NUnitDiscoveryGenericMethod(btf, className, tf);
+                        tf.AddGenericMethod(tc);
+                        ExtractTestCases(tc, child);
+                        break;
+                    }
                 }
             }
         }
@@ -199,9 +266,9 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         /// </summary>
         public static NUnitDiscoveryTestCase ExtractTestCase(INUnitDiscoveryCanHaveTestCases tf, XElement child)
         {
-            var className = child.Attribute(classname)?.Value;
-            var methodName = child.Attribute(methodname)?.Value;
-            var seedAtr = child.Attribute("seed")?.Value;
+            var className = child.Attribute(NUnitXmlAttributeNames.Classname)?.Value;
+            var methodName = child.Attribute(NUnitXmlAttributeNames.Methodname)?.Value;
+            var seedAtr = child.Attribute(NUnitXmlAttributeNames.Seed)?.Value;
             var seed = seedAtr != null ? long.Parse(seedAtr) : 0;
             var btf = ExtractSuiteBasePropertiesClass(child);
             var tc = new NUnitDiscoveryTestCase(btf, tf, className, methodName, seed);
@@ -233,7 +300,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             var ts = new NUnitDiscoverySetUpFixture(b, className, parent);
             return ts;
         }
-        private static NUnitDiscoveryParameterizedTestFixture ExtractParametrizedTestFixture(
+        private static NUnitDiscoveryParameterizedTestFixture ExtractParameterizedTestFixture(
             NUnitDiscoveryCanHaveTestFixture parent, XElement node, string className)
         {
             var b = ExtractSuiteBasePropertiesClass(node);
@@ -243,7 +310,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         private NUnitDiscoveryTestAssembly ExtractTestAssembly(XElement node, NUnitDiscoveryTestRun parent)
         {
-            string d_type = node.Attribute(type).Value;
+            string d_type = node.Attribute(NUnitXmlAttributeNames.Type).Value;
             if (d_type != "Assembly")
                 throw new DiscoveryException("Node is not of type assembly: " + node);
             var a_base = ExtractSuiteBasePropertiesClass(node);
@@ -254,12 +321,12 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         private static BaseProperties ExtractSuiteBasePropertiesClass(XElement node)
         {
-            string dId = node.Attribute(id).Value;
-            string dName = node.Attribute(name).Value;
-            string dFullname = node.Attribute(fullname).Value;
+            string dId = node.Attribute(NUnitXmlAttributeNames.Id).Value;
+            string dName = node.Attribute(NUnitXmlAttributeNames.Name).Value;
+            string dFullname = node.Attribute(NUnitXmlAttributeNames.Fullname).Value;
             var dRunstate = ExtractRunState(node);
             const char apo = (char)0x22;
-            var tcs = node.Attribute(testcasecount)?.Value.Trim(apo);
+            var tcs = node.Attribute(NUnitXmlAttributeNames.Testcasecount)?.Value.Trim(apo);
             int dTestcasecount = int.Parse(tcs ?? "1");
             var bp = new BaseProperties(dId, dName, dFullname, dTestcasecount, dRunstate);
 
@@ -284,7 +351,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         private static RunStateEnum ExtractRunState(XElement node)
         {
-            var runState = node.Attribute(runstate)?.Value switch
+            var runState = node.Attribute(NUnitXmlAttributeNames.Runstate)?.Value switch
             {
                 "Runnable" => RunStateEnum.Runnable,
                 "Explicit" => RunStateEnum.Explicit,

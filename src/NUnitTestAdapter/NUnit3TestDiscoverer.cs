@@ -163,7 +163,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
                 finally
                 {
-                    dumpXml?.Dump4Discovery();
+                    dumpXml?.DumpForDiscovery();
                     NUnitEngineAdapter?.CloseRunner();
                 }
             }

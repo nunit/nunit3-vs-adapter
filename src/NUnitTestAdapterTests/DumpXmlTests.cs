@@ -20,6 +20,7 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
+using System;
 using System.Text.RegularExpressions;
 using NSubstitute;
 using NUnit.Framework;
@@ -39,11 +40,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var sut = new DumpXml("whatever", file);
             var string1 = "something";
             sut.AddString(string1);
-            sut.Dump4Discovery();
+            sut.DumpForDiscovery();
             Assert.That(res.Contains(string1));
             var string2 = "new string";
             sut.AddString(string2);
-            sut.Dump4Discovery();
+            sut.DumpForDiscovery();
             Assert.That(res.Contains(string2));
             Assert.That(res.Contains(string1), Is.False);
         }
@@ -69,8 +70,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var file = Substitute.For<IFile>();
             var sut = new DumpXml(path, file);
             sut.AddString("whatever");
-            sut.Dump4Discovery();
-            file.Received().WriteAllText(Arg.Is<string>(o => o.StartsWith(expected)), Arg.Any<string>());
+            sut.DumpForDiscovery();
+            file.Received().WriteAllText(Arg.Is<string>(o => o.StartsWith(expected, StringComparison.OrdinalIgnoreCase)), Arg.Any<string>());
         }
 
 
@@ -81,7 +82,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var file = Substitute.For<IFile>();
             file.WriteAllText(Arg.Any<string>(), Arg.Do<string>(o => res = o));
             var sut = new DumpXml("Whatever", file);
-            sut.Dump4Discovery();
+            sut.DumpForDiscovery();
             Assert.That(res.Contains("NUnitXml"));
             var sarray = res.Split('\n');
             Assert.That(sarray.Length, Is.GreaterThanOrEqualTo(3));

@@ -464,7 +464,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         public void ThatWeCanParseDiscoveryXml()
         {
             var sut = new DiscoveryConverter();
-            var ndr = sut.Convert(
+            var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(FullDiscoveryXml)));
 
             Assert.That(ndr.Id, Is.EqualTo("2"));
@@ -474,13 +474,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
             var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
             var fixturesCount = topLevelSuite.TestFixtures.Count();
             var genericFixturesCount = topLevelSuite.GenericFixtures.Count();
-            var parametrizedFicturesCount = topLevelSuite.ParameterizedFixtures.Count();
+            var parameterizedFicturesCount = topLevelSuite.ParameterizedFixtures.Count();
             var setupFixturesCount = topLevelSuite.SetUpFixtures.Count();
             Assert.Multiple(() =>
             {
                 Assert.That(fixturesCount, Is.EqualTo(12), nameof(fixturesCount));
                 Assert.That(genericFixturesCount, Is.EqualTo(2), nameof(genericFixturesCount));
-                Assert.That(parametrizedFicturesCount, Is.EqualTo(1), nameof(parametrizedFicturesCount));
+                Assert.That(parameterizedFicturesCount, Is.EqualTo(1), nameof(parameterizedFicturesCount));
                 Assert.That(setupFixturesCount, Is.EqualTo(1), nameof(setupFixturesCount));
             });
         }
@@ -506,7 +506,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         public void ThatTestCaseHasAllData()
         {
             var sut = new DiscoveryConverter();
-            var ndr = sut.Convert(
+            var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(SimpleTestXml)));
             var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
             var testCase = topLevelSuite.TestFixtures.First().TestCases.First();
@@ -533,7 +533,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         public void ThatNumberOfTestCasesAreCorrect()
         {
             var sut = new DiscoveryConverter();
-            var ndr = sut.Convert(
+            var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(FullDiscoveryXml)));
             var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
             var count = topLevelSuite.TestCaseCount;
@@ -629,7 +629,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         public void ThatSetUpFixtureWorks()
         {
             var sut = new DiscoveryConverter();
-            var ndr = sut.Convert(
+            var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(SetupFixtureXml)));
             var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
 
@@ -661,7 +661,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
             }
         }
 
-        private const string ParametrizedMethodXml =
+        private const string ParameterizedMethodXml =
             @"<test-run id='2' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' testcasecount='3'>
    <test-suite type='Assembly' id='0-1160' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' runstate='Runnable' testcasecount='3'>
       <test-suite type='TestSuite' id='0-1161' name='NUnitTestDemo' fullname='NUnitTestDemo' runstate='Runnable' testcasecount='3'>
@@ -678,18 +678,18 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
 
 
         [Test]
-        public void ThatParametrizedMethodsWorks()
+        public void ThatParameterizedMethodsWorks()
         {
             var sut = new DiscoveryConverter();
-            var ndr = sut.Convert(
-                new NUnitResults(XmlHelper.CreateXmlNode(ParametrizedMethodXml)));
+            var ndr = sut.ConvertXml(
+                new NUnitResults(XmlHelper.CreateXmlNode(ParameterizedMethodXml)));
             var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
             Assert.That(topLevelSuite.TestCaseCount, Is.EqualTo(3), "Count number from NUnit is wrong");
             Assert.That(topLevelSuite.TestFixtures.Count, Is.EqualTo(1), "Missing text fixture");
-            Assert.That(topLevelSuite.TestFixtures.Single().ParametrizedMethods.Count(), Is.EqualTo(1),
+            Assert.That(topLevelSuite.TestFixtures.Single().ParameterizedMethods.Count(), Is.EqualTo(1),
                 "Missing parameterizedMethod");
             Assert.That(
-                topLevelSuite.TestFixtures.Single().ParametrizedMethods.Single().TestCases.Count,
+                topLevelSuite.TestFixtures.Single().ParameterizedMethods.Single().TestCases.Count,
                 Is.EqualTo(3));
         }
 
@@ -697,7 +697,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         public void ThatTheoryWorks()
         {
             var sut = new DiscoveryConverter();
-            var ndr = sut.Convert(
+            var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(FullDiscoveryXml)));
             var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
             var theoryFixture = topLevelSuite.TestFixtures.FirstOrDefault(o => o.Name == "Theories");
@@ -750,7 +750,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         public void ThatExplicitWorks(string xml, int count)
         {
             var sut = new DiscoveryConverter();
-            var ndr = sut.Convert(
+            var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(xml)));
             var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
             Assert.Multiple(() =>
@@ -778,7 +778,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         public void ThatExplicitWorks2(string xml, int count)
         {
             var sut = new DiscoveryConverter();
-            var ndr = sut.Convert(
+            var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(xml)));
             var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
             Assert.Multiple(() =>
@@ -835,7 +835,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         public void ThatExplicitWorksWhenOneTestIsNotExplicit()
         {
             var sut = new DiscoveryConverter();
-            var ndr = sut.Convert(
+            var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(NotExplicitXml)));
             var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
             Assert.That(topLevelSuite.IsExplicit, Is.False);
@@ -887,7 +887,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         public void ThatAsyncTestsHasSevenTests()
         {
             var sut = new DiscoveryConverter();
-            var ndr = sut.Convert(
+            var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(AsyncTestsXml)));
             var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
             Assert.That(topLevelSuite.NoOfActualTestCases, Is.EqualTo(7));
@@ -920,7 +920,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         public void ThatParameterizedTestFixtureHasSixTests()
         {
             var sut = new DiscoveryConverter();
-            var ndr = sut.Convert(
+            var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(ParameterizedTestFixtureXml)));
             var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
             Assert.That(topLevelSuite.NoOfActualTestCases, Is.EqualTo(6));
@@ -1039,7 +1039,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         public void ThatDotNetTestWorks()
         {
             var sut = new DiscoveryConverter();
-            var ndr = sut.Convert(
+            var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(DotnetXml)));
             var fixtures = ndr.TestAssembly.TestFixtures;
             Assert.That(fixtures.Count(), Is.EqualTo(3), "Didnt find all fixtures");

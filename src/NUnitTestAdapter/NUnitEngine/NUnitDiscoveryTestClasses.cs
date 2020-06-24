@@ -23,7 +23,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 
 // ReSharper disable InconsistentNaming
@@ -168,7 +167,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         {
             setUpFixtures.Add(ts);
         }
-        public void AddParametrizedFixture(NUnitDiscoveryParameterizedTestFixture ts)
+        public void AddParameterizedFixture(NUnitDiscoveryParameterizedTestFixture ts)
         {
             parameterizedFixtures.Add(ts);
         }
@@ -214,8 +213,8 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
     public sealed class NUnitDiscoveryTestFixture : NUnitDiscoveryCanHaveTestCases
     {
-        private readonly List<NUnitDiscoveryParameterizedMethod> parametrizedMethods = new List<NUnitDiscoveryParameterizedMethod>();
-        public IEnumerable<NUnitDiscoveryParameterizedMethod> ParametrizedMethods => parametrizedMethods;
+        private readonly List<NUnitDiscoveryParameterizedMethod> parameterizedMethods = new List<NUnitDiscoveryParameterizedMethod>();
+        public IEnumerable<NUnitDiscoveryParameterizedMethod> ParameterizedMethods => parameterizedMethods;
 
         private readonly List<NUnitDiscoveryTheory> theories = new List<NUnitDiscoveryTheory>();
 
@@ -224,13 +223,13 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public override int NoOfActualTestCases =>
             base.NoOfActualTestCases
-            + parametrizedMethods.Sum(o => o.NoOfActualTestCases)
+            + parameterizedMethods.Sum(o => o.NoOfActualTestCases)
             + theories.Sum(o => o.NoOfActualTestCases)
             + genericMethods.Sum(o => o.NoOfActualTestCases);
 
         public override bool IsExplicit =>
             base.IsExplicit
-            || parametrizedMethods.AllWithEmptyFalse(o => o.IsExplicit)
+            || parameterizedMethods.AllWithEmptyFalse(o => o.IsExplicit)
             || theories.AllWithEmptyFalse(o => o.IsExplicit)
             || genericMethods.AllWithEmptyFalse(o => o.IsExplicit);
 
@@ -240,9 +239,9 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         {
         }
 
-        public void AddParametrizedMethod(NUnitDiscoveryParameterizedMethod ts)
+        public void AddParameterizedMethod(NUnitDiscoveryParameterizedMethod ts)
         {
-            parametrizedMethods.Add(ts);
+            parameterizedMethods.Add(ts);
         }
 
 

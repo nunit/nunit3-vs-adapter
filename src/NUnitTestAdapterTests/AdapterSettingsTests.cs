@@ -21,6 +21,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
+using System;
 using System.IO;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
@@ -446,7 +447,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase("Old", DiscoveryMethod.ClassicXml, DiscoveryMethod.ClassicXml)]
         [TestCase("Modern", DiscoveryMethod.ClassicXml, DiscoveryMethod.Modern)]
         public void TestMapEnum<T>(string setting, T defaultValue, T expected)
-        where T : System.Enum
+        where T : struct, Enum
         {
             var logger = Substitute.For<ITestLogger>();
             var sut = new AdapterSettings(logger);

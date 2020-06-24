@@ -3,13 +3,13 @@ using System.Diagnostics;
 
 namespace NUnit.VisualStudio.TestAdapter.Internal
 {
-    public class Timing
+    public class TimingLogger
     {
         private readonly IAdapterSettings settings;
         private readonly ITestLogger logger;
         public Stopwatch Stopwatch { get; }
 
-        public Timing(IAdapterSettings settings, ITestLogger logger)
+        public TimingLogger(IAdapterSettings settings, ITestLogger logger)
         {
             this.settings = settings;
             this.logger = logger;
