@@ -140,7 +140,7 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
             {
                 DumpVSInput2NUnit(tc);
             }
-            AddString($"\n</TestPackage>/n/n");
+            AddString("\n</TestPackage>\n\n");
         }
 
         public void DumpFromVSInput(IGrouping<string, TestCase> testCases, TestFilter filter, TestPackage package)

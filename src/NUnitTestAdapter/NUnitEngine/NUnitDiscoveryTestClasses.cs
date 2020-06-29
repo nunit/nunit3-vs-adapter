@@ -117,75 +117,21 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public bool AllInternal => TheProperties.All(o => o.IsInternal);
     }
 
-    public sealed class NUnitDiscoveryTestSuite : NUnitDiscoveryCanHaveTestFixture
+    public class NUnitDiscoveryTestSuite : NUnitDiscoveryCanHaveTestFixture
     {
-        private readonly List<NUnitDiscoveryTestSuite> testSuites = new List<NUnitDiscoveryTestSuite>();
-
-        private readonly List<NUnitDiscoveryGenericFixture> genericFixtures = new List<NUnitDiscoveryGenericFixture>();
-        private readonly List<NUnitDiscoverySetUpFixture> setUpFixtures = new List<NUnitDiscoverySetUpFixture>();
-        private readonly List<NUnitDiscoveryParameterizedTestFixture> parameterizedFixtures = new List<NUnitDiscoveryParameterizedTestFixture>();
         public NUnitDiscoveryTestSuite(BaseProperties theBase, INUnitDiscoverySuiteBase parent) : base(theBase, parent)
         {
         }
 
-        public IEnumerable<NUnitDiscoveryTestSuite> TestSuites => testSuites;
-        public IEnumerable<NUnitDiscoverySetUpFixture> SetUpFixtures => setUpFixtures;
-        public IEnumerable<NUnitDiscoveryParameterizedTestFixture> ParameterizedFixtures => parameterizedFixtures;
-
-        public IEnumerable<NUnitDiscoveryGenericFixture> GenericFixtures => genericFixtures;
-
-        public override bool IsExplicit
-        {
-            get
-            {
-                var fullList = new List<NUnitDiscoverySuiteBase>();
-                fullList.AddRange(TestFixtures.Cast<NUnitDiscoverySuiteBase>());
-                fullList.AddRange(TestSuites.Cast<NUnitDiscoverySuiteBase>());
-                fullList.AddRange(GenericFixtures.Cast<NUnitDiscoverySuiteBase>());
-                fullList.AddRange(SetUpFixtures.Cast<NUnitDiscoverySuiteBase>());
-                fullList.AddRange(ParameterizedFixtures.Cast<NUnitDiscoverySuiteBase>());
-                return RunState == RunStateEnum.Explicit || fullList.All(o => o.IsExplicit);
-            }
-        }
-
-        public override int NoOfActualTestCases => base.NoOfActualTestCases
-                                                   + testSuites.Sum(o => o.NoOfActualTestCases)
-                                                   + genericFixtures.Sum(o => o.NoOfActualTestCases)
-                                                   + setUpFixtures.Sum(o => o.NoOfActualTestCases)
-                                                   + parameterizedFixtures.Sum(o => o.NoOfActualTestCases);
-
-        public void AddTestSuite(NUnitDiscoveryTestSuite ts)
-        {
-            testSuites.Add(ts);
-        }
-
-        public void AddTestGenericFixture(NUnitDiscoveryGenericFixture ts)
-        {
-            genericFixtures.Add(ts);
-        }
-        public void AddSetUpFixture(NUnitDiscoverySetUpFixture ts)
-        {
-            setUpFixtures.Add(ts);
-        }
-        public void AddParameterizedFixture(NUnitDiscoveryParameterizedTestFixture ts)
-        {
-            parameterizedFixtures.Add(ts);
-        }
         public NUnitDiscoveryTestAssembly ParentAssembly { get; set; }
     }
 
 
 
-    public sealed class NUnitDiscoveryTestAssembly : NUnitDiscoveryCanHaveTestFixture
+    public sealed class NUnitDiscoveryTestAssembly : NUnitDiscoveryTestSuite
     {
         public NUnitDiscoveryTestAssembly(BaseProperties theBase, NUnitDiscoveryTestRun parent) : base(theBase, parent)
         { }
-
-        private readonly List<NUnitDiscoveryTestSuite> testSuites = new List<NUnitDiscoveryTestSuite>();
-        public IEnumerable<NUnitDiscoveryTestSuite> TestSuites => testSuites;
-
-        public override bool IsExplicit =>
-            RunState == RunStateEnum.Explicit || testSuites.AllWithEmptyFalse(o => o.IsExplicit);
 
         private readonly List<NUnitDiscoveryTestCase> allTestCases = new List<NUnitDiscoveryTestCase>();
 
@@ -201,8 +147,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public void AddTestSuiteToAssembly(NUnitDiscoveryTestSuite ts)
         {
-            ts.ParentAssembly = this;
-            testSuites.Add(ts);
+            AddTestSuite(ts);
         }
 
         public override void AddToAllTestCases(NUnitDiscoveryTestCase tc)
@@ -258,8 +203,8 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
     public interface INUnitDiscoveryTestCase : INUnitDiscoverySuiteBase
     {
-        string ClassName { get;  }
-        string MethodName { get;  }
+        string ClassName { get; }
+        string MethodName { get; }
         long Seed { get; set; }
     }
 
@@ -334,27 +279,66 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public IEnumerable<NUnitDiscoveryTestFixture> TestFixtures => testFixtures;
 
-        public override bool IsExplicit
-        {
-            get
-            {
-                if (RunState == RunStateEnum.Explicit)
-                    return true;
-                if (testFixtures.Any())
-                    return testFixtures.All(o => o.IsExplicit);
-
-                return false;
-            }
-        }
-
-        public virtual int NoOfActualTestCases => testFixtures.Sum(o => o.NoOfActualTestCases);
-
         public void AddTestFixture(NUnitDiscoveryTestFixture tf)
         {
             testFixtures.Add(tf);
         }
         protected NUnitDiscoveryCanHaveTestFixture(BaseProperties theBase, INUnitDiscoverySuiteBase parent) : base(theBase, parent)
         {
+        }
+
+
+        private readonly List<NUnitDiscoveryTestSuite> testSuites = new List<NUnitDiscoveryTestSuite>();
+
+        private readonly List<NUnitDiscoveryGenericFixture> genericFixtures = new List<NUnitDiscoveryGenericFixture>();
+        private readonly List<NUnitDiscoverySetUpFixture> setUpFixtures = new List<NUnitDiscoverySetUpFixture>();
+        private readonly List<NUnitDiscoveryParameterizedTestFixture> parameterizedFixtures = new List<NUnitDiscoveryParameterizedTestFixture>();
+
+
+        public IEnumerable<NUnitDiscoveryTestSuite> TestSuites => testSuites;
+        public IEnumerable<NUnitDiscoverySetUpFixture> SetUpFixtures => setUpFixtures;
+        public IEnumerable<NUnitDiscoveryParameterizedTestFixture> ParameterizedFixtures => parameterizedFixtures;
+
+        public IEnumerable<NUnitDiscoveryGenericFixture> GenericFixtures => genericFixtures;
+
+        public override bool IsExplicit
+        {
+            get
+            {
+                if (RunState == RunStateEnum.Explicit)
+                    return true;
+                var fullList = new List<NUnitDiscoverySuiteBase>();
+                fullList.AddRange(TestFixtures.Cast<NUnitDiscoverySuiteBase>());
+                fullList.AddRange(TestSuites.Cast<NUnitDiscoverySuiteBase>());
+                fullList.AddRange(GenericFixtures.Cast<NUnitDiscoverySuiteBase>());
+                fullList.AddRange(SetUpFixtures.Cast<NUnitDiscoverySuiteBase>());
+                fullList.AddRange(ParameterizedFixtures.Cast<NUnitDiscoverySuiteBase>());
+                return fullList.All(o => o.IsExplicit);
+            }
+        }
+
+        public int NoOfActualTestCases => testFixtures.Sum(o => o.NoOfActualTestCases)
+                                                   + testSuites.Sum(o => o.NoOfActualTestCases)
+                                                   + genericFixtures.Sum(o => o.NoOfActualTestCases)
+                                                   + setUpFixtures.Sum(o => o.NoOfActualTestCases)
+                                                   + parameterizedFixtures.Sum(o => o.NoOfActualTestCases);
+
+        public void AddTestSuite(NUnitDiscoveryTestSuite ts)
+        {
+            testSuites.Add(ts);
+        }
+
+        public void AddTestGenericFixture(NUnitDiscoveryGenericFixture ts)
+        {
+            genericFixtures.Add(ts);
+        }
+        public void AddSetUpFixture(NUnitDiscoverySetUpFixture ts)
+        {
+            setUpFixtures.Add(ts);
+        }
+        public void AddParameterizedFixture(NUnitDiscoveryParameterizedTestFixture ts)
+        {
+            parameterizedFixtures.Add(ts);
         }
     }
 
@@ -383,7 +367,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
     public sealed class NUnitDiscoveryTheory : NUnitDiscoveryCanHaveTestCases
     {
-        public NUnitDiscoveryTheory(BaseProperties theBase, string classname, INUnitDiscoverySuiteBase parent) : base(theBase,parent, classname)
+        public NUnitDiscoveryTheory(BaseProperties theBase, string classname, INUnitDiscoverySuiteBase parent) : base(theBase, parent, classname)
         {
         }
     }

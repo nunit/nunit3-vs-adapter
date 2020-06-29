@@ -23,6 +23,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Xml;
 using System.Xml.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -32,7 +33,15 @@ using NUnit.VisualStudio.TestAdapter.Internal;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
-    public class DiscoveryConverter
+    public interface IDiscoveryConverter
+    {
+        IEnumerable<NUnitDiscoveryTestCase> AllTestCases { get; }
+        bool IsExplicitRun { get; }
+        IList<TestCase> LoadedTestCases { get; }
+        int NoOfLoadedTestCases { get; }
+    }
+
+    public class DiscoveryConverter : IDiscoveryConverter
     {
         internal static class NUnitXmlAttributeNames
         {
@@ -94,7 +103,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             }
             else
             {
-                converter = new TestConverter(logger, assemblyPath, settings);
+                converter = new TestConverter(logger, assemblyPath, settings,this);
                 var isExplicit = TestRun.IsExplicit;
                 var testCases = isExplicit ? TestRun.TestAssembly.AllTestCases : TestRun.TestAssembly.RunnableTestCases;
                 foreach (var testNode in testCases)
@@ -115,20 +124,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             var anode = doc.Root.Elements("test-suite");
             var assemblyNode = anode.Single(o => o.Attribute(NUnitXmlAttributeNames.Type).Value == "Assembly");
             var testassembly = ExtractTestAssembly(assemblyNode, testrun);
-            var suiteNode = assemblyNode.Elements("test-suite").FirstOrDefault(o => o.Attribute(NUnitXmlAttributeNames.Type).Value == "TestSuite");
-            if (suiteNode != null)
-            {
-                var topLevelSuite = ExtractTestSuite(suiteNode, testassembly);
-                testassembly.AddTestSuiteToAssembly(topLevelSuite);
-                if (suiteNode.HasElements)
-                    ExtractAllFixtures(topLevelSuite, suiteNode);
-            }
-            else // Check if there are testfixtures below
-            {
-                if (assemblyNode.HasElements)
-                    ExtractAllFixtures(testassembly, assemblyNode);
-            }
-
+            ExtractAllFixtures(testassembly, assemblyNode);
             return testrun;
         }
 
@@ -137,26 +133,6 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             var b = ExtractSuiteBasePropertiesClass(node);
             var ts = new NUnitDiscoveryTestSuite(b, parent);
             return ts;
-        }
-
-        private static void ExtractAllFixtures(NUnitDiscoveryTestAssembly parent, XElement node)
-        {
-            foreach (var child in node.Elements("test-suite"))
-            {
-                var type = child.Attribute(NUnitXmlAttributeNames.Type)?.Value;
-                var className = child.Attribute(NUnitXmlAttributeNames.Classname)?.Value;
-                switch (type)
-                {
-                    case "TestFixture":
-                        var tf = ExtractTestFixture(parent, child, className);
-                        parent.AddTestFixture(tf);
-                        ExtractTestCases(tf, child);
-                        ExtractParameterizedMethodsAndTheories(tf, child);
-                        break;
-                    default:
-                        throw new DiscoveryException($"Invalid type found in ExtractAllFixtures for assembly: {type}");
-                }
-            }
         }
 
         private static void ExtractAllFixtures(NUnitDiscoveryTestSuite parent, XElement node)
@@ -230,26 +206,26 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                 switch (type)
                 {
                     case parameterizedMethod:
-                    {
-                        var tc = new NUnitDiscoveryParameterizedMethod(btf, className, tf);
-                        ExtractTestCases(tc, child);
-                        tf.AddParameterizedMethod(tc);
-                        break;
-                    }
+                        {
+                            var tc = new NUnitDiscoveryParameterizedMethod(btf, className, tf);
+                            ExtractTestCases(tc, child);
+                            tf.AddParameterizedMethod(tc);
+                            break;
+                        }
                     case theory:
-                    {
-                        var tc = new NUnitDiscoveryTheory(btf, className, tf);
-                        tf.AddTheory(tc);
-                        ExtractTestCases(tc, child);
-                        break;
-                    }
+                        {
+                            var tc = new NUnitDiscoveryTheory(btf, className, tf);
+                            tf.AddTheory(tc);
+                            ExtractTestCases(tc, child);
+                            break;
+                        }
                     default:
-                    {
-                        var tc = new NUnitDiscoveryGenericMethod(btf, className, tf);
-                        tf.AddGenericMethod(tc);
-                        ExtractTestCases(tc, child);
-                        break;
-                    }
+                        {
+                            var tc = new NUnitDiscoveryGenericMethod(btf, className, tf);
+                            tf.AddGenericMethod(tc);
+                            ExtractTestCases(tc, child);
+                            break;
+                        }
                 }
             }
         }

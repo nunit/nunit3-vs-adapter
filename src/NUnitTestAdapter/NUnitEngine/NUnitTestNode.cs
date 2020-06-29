@@ -19,7 +19,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public string Name => Node.GetAttribute("name");
         public bool IsNull => Node == null;
 
-        private List<NUnitProperty> properties = new List<NUnitProperty>();
+        private readonly List<NUnitProperty> properties = new List<NUnitProperty>();
         public IEnumerable<NUnitProperty> Properties => properties;
         protected NUnitTestNode(XmlNode node)
         {

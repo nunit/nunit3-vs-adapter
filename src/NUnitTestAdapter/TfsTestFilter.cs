@@ -93,8 +93,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private ITestCaseFilterExpression testCaseFilterExpression;
         public ITestCaseFilterExpression TfsTestCaseFilterExpression =>
-            testCaseFilterExpression ??
-            (testCaseFilterExpression = runContext.GetTestCaseFilter(SupportedProperties, PropertyProvider));
+            testCaseFilterExpression ??= runContext.GetTestCaseFilter(SupportedProperties, PropertyProvider);
 
         public bool IsEmpty => TfsTestCaseFilterExpression == null || TfsTestCaseFilterExpression.TestCaseFilterValue == string.Empty;
 

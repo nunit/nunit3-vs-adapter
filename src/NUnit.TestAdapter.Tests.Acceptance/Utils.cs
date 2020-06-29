@@ -69,7 +69,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             for (var id = 1; ; id++)
             {
-                var path = Path.Combine(parentDirectory,
+                var path = Path.Combine(
+                    parentDirectory,
                     safeName is null ? id.ToString() :
                     id == 1 ? safeName :
                     safeName + "_" + id);

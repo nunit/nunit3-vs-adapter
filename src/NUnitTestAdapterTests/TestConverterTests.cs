@@ -57,7 +57,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             settings.ConsoleOut.Returns(0);
             settings.UseTestNameInConsoleOutput.Returns(false);
             settings.CollectSourceInformation.Returns(true);
-            testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings);
+            var discoveryConverter = Substitute.For<IDiscoveryConverter>();
+            testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings, discoveryConverter);
         }
 
         [TearDown]

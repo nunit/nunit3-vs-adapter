@@ -46,10 +46,12 @@ namespace NUnit.VisualStudio.TestAdapter
         private readonly NavigationDataProvider _navigationDataProvider;
         private bool CollectSourceInformation => adapterSettings.CollectSourceInformation;
         private readonly IAdapterSettings adapterSettings;
+        private static readonly string NL = Environment.NewLine;
+        private IDiscoveryConverter discoveryConverter;
 
-
-        public TestConverter(ITestLogger logger, string sourceAssembly, IAdapterSettings settings)
+        public TestConverter(ITestLogger logger, string sourceAssembly, IAdapterSettings settings, IDiscoveryConverter discoveryConverter)
         {
+            this.discoveryConverter = discoveryConverter;
             adapterSettings = settings;
             _logger = logger;
             _sourceAssembly = sourceAssembly;
@@ -97,8 +99,6 @@ namespace NUnit.VisualStudio.TestAdapter
             _logger.Warning("Test " + id + " not found in cache");
             return null;
         }
-
-        private static readonly string NL = Environment.NewLine;
 
         public TestConverterForXml.TestResultSet GetVsTestResults(INUnitTestEventTestCase resultNode, ICollection<INUnitTestEventTestOutput> outputNodes)
         {
@@ -285,7 +285,17 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             var vsTest = GetCachedTestCase(resultNode.Id);
             if (vsTest == null)
-                return null;
+            {
+                var discoveredTest = discoveryConverter.AllTestCases.FirstOrDefault(o => o.Id == resultNode.Id);
+                if (discoveredTest != null)
+                {
+                    vsTest = ConvertTestCase(discoveredTest);
+                }
+                else
+                {
+                    return null;
+                }
+            }
 
             var vsResult = new VSTestResult(vsTest)
             {

@@ -21,7 +21,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-//#define LAUNCHDEBUGGER
+// #define LAUNCHDEBUGGER
 
 using System;
 using System.Collections.Generic;
@@ -270,7 +270,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     ITestConverterCommon converter;
                     if (Settings.DiscoveryMethod == DiscoveryMethod.Modern)
                     {
-                        if (TfsFilter == null && filter != TestFilter.Empty)
+                        if ((TfsFilter == null || TfsFilter.IsEmpty) && filter != TestFilter.Empty)
                         {
                             if (discovery.NoOfLoadedTestCases > Settings.AssemblySelectLimit)
                             {
