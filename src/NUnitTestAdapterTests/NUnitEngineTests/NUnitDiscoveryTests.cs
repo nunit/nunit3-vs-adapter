@@ -1007,6 +1007,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
    </test-suite>
 </test-run>";
 
+        [Ignore("Wait if we should support 3.10 in modern mode")]
         [Test]
         public void ThatMixedExplicitTestSourceWorksForNUnit310()
         {
@@ -1052,6 +1053,40 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
 
         }
 
+        private const string ExplicitRun =
+            @"<test-run id='0' name='Issue545.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter.issues\Issue545\Issue545\bin\Debug\Issue545.dll' runstate='Runnable' testcasecount='2'>
+   <test-suite type='Assembly' id='0-1007' name='Issue545.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter.issues\Issue545\Issue545\bin\Debug\Issue545.dll' runstate='Runnable' testcasecount='2'>
+      <test-suite type='TestSuite' id='0-1008' name='Issue545' fullname='Issue545' runstate='Runnable' testcasecount='2'>
+         <test-suite type='TestFixture' id='0-1009' name='FooTests' fullname='Issue545.FooTests' runstate='Runnable' testcasecount='2'>
+            <test-suite type='ParameterizedMethod' id='0-1010' name='Test1' fullname='Issue545.FooTests.Test1' classname='Issue545.FooTests' runstate='Explicit' testcasecount='2'>
+               <test-case id='0-1001' name='Test1(1)' fullname='Issue545.FooTests.Test1(1)' methodname='Test1' classname='Issue545.FooTests' runstate='Runnable' seed='581862553' />
+               <test-case id='0-1002' name='Test1(2)' fullname='Issue545.FooTests.Test1(2)' methodname='Test1' classname='Issue545.FooTests' runstate='Runnable' seed='243299682' />
+            </test-suite>
+         </test-suite>
+      </test-suite>
+   </test-suite>
+</test-run>";
+
+        [Test]
+        public void ThatExplicitRunWorks()
+        {
+            var sut = new DiscoveryConverter();
+            var ndr = sut.ConvertXml(
+                new NUnitResults(XmlHelper.CreateXmlNode(ExplicitRun)));
+            Assert.Multiple(() =>
+            {
+                Assert.That(ndr.IsExplicit, "Explicit check fails");
+                Assert.That(ndr.TestAssembly.AllTestCases.Count, Is.EqualTo(2), "All testcases number fails");
+                Assert.That(ndr.TestAssembly.AllTestCases.Count, Is.EqualTo(2), "Can't find all testcases");
+                Assert.That(ndr.TestAssembly.TestSuites.First().IsExplicit, "Test suite don't match explicit");
+                Assert.That(ndr.TestAssembly.TestSuites.First().TestFixtures.First().IsExplicit, "Test fixture don't match explicit");
+                Assert.That(ndr.TestAssembly.TestSuites.First().TestFixtures.First().ParameterizedMethods.First().IsExplicit, "Parameterized method don't match explicit");
+                Assert.That(
+                    ndr.TestAssembly.TestSuites.First().TestFixtures.First().ParameterizedMethods.First().RunState,
+                    Is.EqualTo(RunStateEnum.Explicit), "Runstate fails for parameterizedfixture");
+            });
+
+        }
 
 
     }

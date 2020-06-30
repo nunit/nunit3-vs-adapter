@@ -172,12 +172,20 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             + theories.Sum(o => o.NoOfActualTestCases)
             + genericMethods.Sum(o => o.NoOfActualTestCases);
 
-        public override bool IsExplicit =>
-            RunState == RunStateEnum.Explicit ||
-            (TestCases.AllWithEmptyFalse(o => o.IsExplicit)
-                && parameterizedMethods.AllWithEmptyFalse(o => o.IsExplicit)
-                && theories.AllWithEmptyFalse(o => o.IsExplicit)
-                && genericMethods.AllWithEmptyFalse(o => o.IsExplicit));
+        public override bool IsExplicit
+        {
+            get
+            {
+                if (RunState == RunStateEnum.Explicit)
+                    return true;
+                var all = new List<NUnitDiscoverySuiteBase>();
+                all.AddRange(TestCases.Cast<NUnitDiscoverySuiteBase>());
+                all.AddRange(parameterizedMethods.Cast<NUnitDiscoverySuiteBase>());
+                all.AddRange(theories.Cast<NUnitDiscoverySuiteBase>());
+                all.AddRange(genericMethods.Cast<NUnitDiscoverySuiteBase>());
+                return all.All(o => o.IsExplicit);
+            }
+        }
 
         public IEnumerable<NUnitDiscoveryGenericMethod> GenericMethods => genericMethods;
 
