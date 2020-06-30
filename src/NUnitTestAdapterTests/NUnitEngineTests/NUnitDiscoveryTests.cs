@@ -988,5 +988,71 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
             Assert.That(suite.TestFixtures.Count, Is.EqualTo(1));
             Assert.That(suite.TestCaseCount, Is.EqualTo(2));
         }
+
+        /// <summary>
+        /// Result of test with NUnit 3.10.  Notice that TestSuites holds everything.
+        /// </summary>
+        private const string MixedExplicitTestSourceXml =
+            @"<test-run id='0' name='Issue545.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter.issues\Issue545\Issue545\bin\Debug\Issue545.dll' runstate='Runnable' testcasecount='3'>
+   <test-suite type='Assembly' id='0-1007' name='Issue545.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter.issues\Issue545\Issue545\bin\Debug\Issue545.dll' runstate='Runnable' testcasecount='3'>
+      <test-suite type='TestSuite' id='0-1008' name='Issue545' fullname='Issue545' runstate='Runnable' testcasecount='3'>
+         <test-suite type='TestSuite' id='0-1009' name='FooTests' fullname='Issue545.FooTests' runstate='Runnable' testcasecount='3'>
+            <test-suite type='TestSuite' id='0-1010' name='Test1' fullname='Issue545.FooTests.Test1' classname='Issue545.FooTests' runstate='Explicit' testcasecount='2'>
+               <test-case id='0-1001' name='Test1(1)' fullname='Issue545.FooTests.Test1(1)' methodname='Test1' classname='Issue545.FooTests' runstate='Runnable' seed='1077576641' />
+               <test-case id='0-1002' name='Test1(2)' fullname='Issue545.FooTests.Test1(2)' methodname='Test1' classname='Issue545.FooTests' runstate='Runnable' seed='1739201284' />
+            </test-suite>
+            <test-case id='0-1004' name='Test2' fullname='Issue545.FooTests.Test2' methodname='Test2' classname='Issue545.FooTests' runstate='Runnable' seed='1003524017' />
+         </test-suite>
+      </test-suite>
+   </test-suite>
+</test-run>";
+
+        [Test]
+        public void ThatMixedExplicitTestSourceWorksForNUnit310()
+        {
+            var sut = new DiscoveryConverter();
+            var ndr = sut.ConvertXml(
+                new NUnitResults(XmlHelper.CreateXmlNode(MixedExplicitTestSourceXml)));
+            Assert.Multiple(() =>
+            {
+                Assert.That(ndr.IsExplicit, Is.False, "Explicit check fails");
+                Assert.That(ndr.TestAssembly.RunnableTestCases.Count, Is.EqualTo(1), "Runnable number fails");
+                Assert.That(ndr.TestAssembly.AllTestCases.Count, Is.EqualTo(3), "Can't find all testcases");
+            });
+        }
+
+
+        private const string MixedExplicitTestSourceXmlForNUnit312 =
+            @"<test-run id='0' name='Issue545.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter.issues\Issue545\Issue545\bin\Debug\Issue545.dll' runstate='Runnable' testcasecount='3'>
+   <test-suite type='Assembly' id='0-1007' name='Issue545.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter.issues\Issue545\Issue545\bin\Debug\Issue545.dll' runstate='Runnable' testcasecount='3'>
+      <test-suite type='TestSuite' id='0-1008' name='Issue545' fullname='Issue545' runstate='Runnable' testcasecount='3'>
+         <test-suite type='TestFixture' id='0-1009' name='FooTests' fullname='Issue545.FooTests' runstate='Runnable' testcasecount='3'>
+            <test-suite type='ParameterizedMethod' id='0-1010' name='Test1' fullname='Issue545.FooTests.Test1' classname='Issue545.FooTests' runstate='Explicit' testcasecount='2'>
+               <test-case id='0-1001' name='Test1(1)' fullname='Issue545.FooTests.Test1(1)' methodname='Test1' classname='Issue545.FooTests' runstate='Runnable' seed='727400600' />
+               <test-case id='0-1002' name='Test1(2)' fullname='Issue545.FooTests.Test1(2)' methodname='Test1' classname='Issue545.FooTests' runstate='Runnable' seed='6586680' />
+            </test-suite>
+            <test-case id='0-1004' name='Test2' fullname='Issue545.FooTests.Test2' methodname='Test2' classname='Issue545.FooTests' runstate='Runnable' seed='756826920' />
+         </test-suite>
+      </test-suite>
+   </test-suite>
+</test-run>";
+
+        [Test]
+        public void ThatMixedExplicitTestSourceWorksFor312()
+        {
+            var sut = new DiscoveryConverter();
+            var ndr = sut.ConvertXml(
+                new NUnitResults(XmlHelper.CreateXmlNode(MixedExplicitTestSourceXmlForNUnit312)));
+            Assert.Multiple(() =>
+            {
+                Assert.That(ndr.IsExplicit, Is.False, "Explicit check fails");
+                Assert.That(ndr.TestAssembly.RunnableTestCases.Count, Is.EqualTo(1), "Runnable number fails");
+                Assert.That(ndr.TestAssembly.AllTestCases.Count, Is.EqualTo(3), "Can't find all testcases");
+            });
+
+        }
+
+
+
     }
 }
