@@ -103,7 +103,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             }
             else
             {
-                converter = new TestConverter(logger, assemblyPath, settings,this);
+                converter = new TestConverter(logger, assemblyPath, settings, this);
                 var isExplicit = TestRun.IsExplicit;
                 var testCases = isExplicit ? TestRun.TestAssembly.AllTestCases : TestRun.TestAssembly.RunnableTestCases;
                 foreach (var testNode in testCases)
