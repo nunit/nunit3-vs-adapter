@@ -197,23 +197,19 @@ namespace NUnit.VisualStudio.TestAdapter
                                     new Uri(NUnitTestAdapter.ExecutorUri),
                                     _sourceAssembly)
             {
-                DisplayName = CreateDisplayName(fullyQualifiedName, testNode.Name), // .Replace(".",":"), //"N:Name -> MS:DisplayName", // testNode.Name,
+                DisplayName = CreateDisplayName(fullyQualifiedName, testNode.Name), 
                 CodeFilePath = null,
                 LineNumber = 0,
             };
             if (adapterSettings.UseNUnitIdforTestCaseId)
             {
-                var id = testNode.Id;
-                testCase.Id = EqtHash.GuidFromString(id);
+                testCase.Id = EqtHash.GuidFromString(testNode.Id);
             }
             if (CollectSourceInformation && _navigationDataProvider != null)
             {
                 if (!CheckCodeFilePathOverride())
                 {
-                    var className = testNode.ClassName;
-                    var methodName = testNode.MethodName;
-
-                    var navData = _navigationDataProvider.GetNavigationData(className, methodName);
+                    var navData = _navigationDataProvider.GetNavigationData(testNode.ClassName, testNode.MethodName);
                     if (navData.IsValid)
                     {
                         testCase.CodeFilePath = navData.FilePath;
@@ -360,10 +356,10 @@ namespace NUnit.VisualStudio.TestAdapter
             const string fileUriScheme = "file://";
             var attachmentSet = new AttachmentSet(new Uri(NUnitTestAdapter.ExecutorUri), "Attachments");
 
-            foreach (var attachment in resultNode.NUnitAttachments) // AttSelectNodes("attachments/attachment"))
+            foreach (var attachment in resultNode.NUnitAttachments)
             {
-                var path = attachment.FilePath; // SelectSingleNode("filePath")?.InnerText ?? string.Empty;
-                var description = attachment.Description; // SelectSingleNode("description")?.InnerText;
+                var path = attachment.FilePath;
+                var description = attachment.Description;
 
                 if (!(string.IsNullOrEmpty(path) || path.StartsWith(fileUriScheme, StringComparison.OrdinalIgnoreCase)))
                 {
