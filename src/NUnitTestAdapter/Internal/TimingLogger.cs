@@ -18,13 +18,22 @@ namespace NUnit.VisualStudio.TestAdapter.Internal
             Stopwatch = Stopwatch.StartNew();
         }
 
-        public void LogTime(string leadText = "")
+        public TimingLogger ReStart()
         {
             if (settings.Verbosity < 5)
-                return;
+                return this;
+            Stopwatch.StartNew();
+            return this;
+        }
+
+        public TimingLogger LogTime(string leadText = "")
+        {
+            if (settings.Verbosity < 5)
+                return this;
             var ts = Stopwatch.Elapsed;
             string elapsedTime = $"{ts.Hours:00}:{ts.Minutes:00}:{ts.Seconds:00}.{ts.Milliseconds / 10:00}";
             logger.Info($"{leadText} :Elapsed: {elapsedTime}");
+            return this;
         }
     }
 }

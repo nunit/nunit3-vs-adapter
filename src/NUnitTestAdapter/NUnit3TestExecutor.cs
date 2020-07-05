@@ -21,7 +21,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-// #define LAUNCHDEBUGGER
+//#define LAUNCHDEBUGGER
 
 using System;
 using System.Collections.Generic;
@@ -252,9 +252,19 @@ namespace NUnit.VisualStudio.TestAdapter
                     // If we have a TFS Filter, convert it to an nunit filter
                     if (TfsFilter != null && !TfsFilter.IsEmpty)
                     {
+                        TestLog.Debug(
+                            $"TfsFilter used, length: {TfsFilter.TfsTestCaseFilterExpression?.TestCaseFilterValue.Length}");
                         // NOTE This overwrites filter used in call
                         var filterBuilder = CreateTestFilterBuilder();
-                        filter = filterBuilder.ConvertTfsFilterToNUnitFilter(TfsFilter, loadedTestCases);
+                        if (Settings.DiscoveryMethod == DiscoveryMethod.Modern)
+                        {
+                           // filter = filterBuilder.ConvertTfsFilterToNUnitFilter(TfsFilter, discovery.AllTestCases);
+                        }
+                        else
+                        {
+                            filter = filterBuilder.ConvertTfsFilterToNUnitFilter(TfsFilter, loadedTestCases);
+                        }
+
                         Dump?.AddString($"\n\nTFSFilter: {TfsFilter.TfsTestCaseFilterExpression.TestCaseFilterValue}\n");
                         Dump?.DumpVSInputFilter(filter, "(At Execution (TfsFilter)");
                     }
@@ -274,12 +284,23 @@ namespace NUnit.VisualStudio.TestAdapter
                         {
                             if (discovery.NoOfLoadedTestCases > Settings.AssemblySelectLimit)
                             {
+                                TestLog.Debug("Setting filter to empty du to number of testcases");
                                 filter = TestFilter.Empty;
                             }
                             else
                             {
                                 var filterBuilder = CreateTestFilterBuilder();
                                 filter = filterBuilder.FilterByList(loadedTestCases);
+                            }
+                        }
+                        else if (TfsFilter != null && !TfsFilter.IsEmpty)
+                        {
+                            var s = TfsFilter.TfsTestCaseFilterExpression.TestCaseFilterValue;
+                            var scount = s.Split('|', '&').Length;
+                            if (scount > Settings.AssemblySelectLimit)
+                            {
+                                TestLog.Debug("Setting filter to empty due to TfsFilter size");
+                                filter = TestFilter.Empty;
                             }
                         }
                         converter = discovery.TestConverter;

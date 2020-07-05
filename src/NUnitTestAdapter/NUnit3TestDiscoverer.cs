@@ -37,6 +37,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Engine;
 using NUnit.VisualStudio.TestAdapter.Dump;
+using NUnit.VisualStudio.TestAdapter.Internal;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
 namespace NUnit.VisualStudio.TestAdapter
@@ -57,7 +58,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private DumpXml dumpXml;
 
-#region ITestDiscoverer Members
+        #region ITestDiscoverer Members
 
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger messageLogger, ITestCaseDiscoverySink discoverySink)
         {
@@ -99,7 +100,9 @@ namespace NUnit.VisualStudio.TestAdapter
                         int cases;
                         using (var testConverter = new TestConverterForXml(TestLog, sourceAssemblyPath, Settings))
                         {
+                            var timing = new TimingLogger(Settings, TestLog);
                             cases = ProcessTestCases(results, discoverySink, testConverter);
+                            timing.LogTime("Discovery/Processing/Converting:");
                         }
 
                         TestLog.Debug($"Discovered {cases} test cases");
@@ -173,9 +176,9 @@ namespace NUnit.VisualStudio.TestAdapter
             Unload();
         }
 
-#endregion
+        #endregion
 
-#region Helper Methods
+        #region Helper Methods
 
         private int ProcessTestCases(NUnitResults results, ITestCaseDiscoverySink discoverySink, TestConverterForXml testConverterForXml)
         {
@@ -201,6 +204,6 @@ namespace NUnit.VisualStudio.TestAdapter
             return cases;
         }
 
-#endregion
+        #endregion
     }
 }
