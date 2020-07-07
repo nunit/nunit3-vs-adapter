@@ -35,30 +35,30 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
         [Test]
         public void PropertyProvider()
         {
-            var testfilter = new TfsTestFilter(null);
-            var prop = TfsTestFilter.PropertyProvider("Priority");
+            var testfilter = new VsTestFilter(null);
+            var prop = VsTestFilter.PropertyProvider("Priority");
             Assert.NotNull(prop);
-            prop = TfsTestFilter.PropertyProvider("TestCategory");
+            prop = VsTestFilter.PropertyProvider("TestCategory");
             Assert.NotNull(prop);
-            prop = TfsTestFilter.PropertyProvider("Category");
+            prop = VsTestFilter.PropertyProvider("Category");
             Assert.NotNull(prop);
         }
 
         [Test]
         public void TraitProvider()
         {
-            var testFilter = new TfsTestFilter(null);
-            var trait = TfsTestFilter.TraitProvider("TestCategory");
+            var testFilter = new VsTestFilter(null);
+            var trait = VsTestFilter.TraitProvider("TestCategory");
             Assert.NotNull(trait);
-            trait = TfsTestFilter.TraitProvider("Category");
+            trait = VsTestFilter.TraitProvider("Category");
             Assert.NotNull(trait);
         }
 
         [Test]
         public void TraitProviderWithNoCategory()
         {
-            var testFilter = new TfsTestFilter(null);
-            var trait = TfsTestFilter.TraitProvider("JustKidding");
+            var testFilter = new VsTestFilter(null);
+            var trait = VsTestFilter.TraitProvider("JustKidding");
             Assert.Null(trait);
         }
 
@@ -66,8 +66,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
         public void PropertyValueProviderFqn()
         {
             var tc = new TestCase("Test1", new Uri("executor://NUnitTestExecutor"), "NUnit.VSIX");
-            var testFilter = new TfsTestFilter(null);
-            var obj = TfsTestFilter.PropertyValueProvider(tc, "FullyQualifiedName");
+            var testFilter = new VsTestFilter(null);
+            var obj = VsTestFilter.PropertyValueProvider(tc, "FullyQualifiedName");
             Assert.AreSame("Test1", obj);
         }
 
@@ -76,8 +76,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
         {
             var tc = new TestCase("Test1", new Uri("executor://NUnitTestExecutor"), "NUnit.VSIX");
             tc.AddTrait("Category", "CI");
-            var testFilter = new TfsTestFilter(null);
-            var obj = TfsTestFilter.PropertyValueProvider(tc, "TestCategory");
+            var testFilter = new VsTestFilter(null);
+            var obj = VsTestFilter.PropertyValueProvider(tc, "TestCategory");
             Assert.AreSame("CI", obj);
         }
 
@@ -86,8 +86,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
         {
             var tc = new TestCase("Test1", new Uri("executor://NUnitTestExecutor"), "NUnit.VSIX");
             tc.AddTrait("Category", "CI");
-            var testFilter = new TfsTestFilter(null);
-            var obj = TfsTestFilter.PropertyValueProvider(tc, "Category");
+            var testFilter = new VsTestFilter(null);
+            var obj = VsTestFilter.PropertyValueProvider(tc, "Category");
             Assert.AreSame("CI", obj);
         }
 
@@ -95,8 +95,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
         public void PropertyValueProviderWithNoTraitsAndTestCategoryAsFilter()
         {
             var tc = new TestCase("Test1", new Uri("executor://NUnitTestExecutor"), "NUnit.VSIX");
-            var testFilter = new TfsTestFilter(null);
-            var obj = TfsTestFilter.PropertyValueProvider(tc, "TestCategory");
+            var testFilter = new VsTestFilter(null);
+            var obj = VsTestFilter.PropertyValueProvider(tc, "TestCategory");
             Assert.IsNull(obj);
         }
 
@@ -104,8 +104,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
         public void PropertyValueProviderWithNoTraitsAndCategoryAsFilter()
         {
             var tc = new TestCase("Test1", new Uri("executor://NUnitTestExecutor"), "NUnit.VSIX");
-            var testFilter = new TfsTestFilter(null);
-            var obj = TfsTestFilter.PropertyValueProvider(tc, "Category");
+            var testFilter = new VsTestFilter(null);
+            var obj = VsTestFilter.PropertyValueProvider(tc, "Category");
             Assert.IsNull(obj);
         }
 
@@ -115,8 +115,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
             var tc = new TestCase("Test1", new Uri("executor://NUnitTestExecutor"), "NUnit.VSIX");
             tc.AddTrait("Category", "CI");
             tc.AddTrait("Category", "MyOwn");
-            var testFilter = new TfsTestFilter(null);
-            var obj = TfsTestFilter.PropertyValueProvider(tc, "TestCategory") as string[];
+            var testFilter = new VsTestFilter(null);
+            var obj = VsTestFilter.PropertyValueProvider(tc, "TestCategory") as string[];
             Assert.IsNotNull(obj);
             Assert.AreEqual(obj.Length, 2);
             Assert.AreSame("CI", obj[0]);
@@ -129,8 +129,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
             var tc = new TestCase("Test1", new Uri("executor://NUnitTestExecutor"), "NUnit.VSIX");
             tc.AddTrait("Category", "CI");
             tc.AddTrait("Category", "MyOwn");
-            var testFilter = new TfsTestFilter(null);
-            var obj = TfsTestFilter.PropertyValueProvider(tc, "Category") as string[];
+            var testFilter = new VsTestFilter(null);
+            var obj = VsTestFilter.PropertyValueProvider(tc, "Category") as string[];
             Assert.IsNotNull(obj);
             Assert.AreEqual(obj.Length, 2);
             Assert.AreSame("CI", obj[0]);
@@ -142,8 +142,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
         {
             var tc = new TestCase("Test1", new Uri("executor://NUnitTestExecutor"), "NUnit.VSIX");
             tc.AddTrait("Category", "CI");
-            var testFilter = new TfsTestFilter(null);
-            var obj = TfsTestFilter.PropertyValueProvider(tc, "Garbage");
+            var testFilter = new VsTestFilter(null);
+            var obj = VsTestFilter.PropertyValueProvider(tc, "Garbage");
             Assert.Null(obj);
         }
 

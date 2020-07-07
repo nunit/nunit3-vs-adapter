@@ -51,7 +51,7 @@ namespace NUnit.VisualStudio.TestAdapter
             public List<Trait> Traits { get; } = new List<Trait>();
 
             /// <summary>
-            /// Used by <see cref="TfsTestFilter"/>; does not affect the Test Explorer UI.
+            /// Used by <see cref="VsTestFilter"/>; does not affect the Test Explorer UI.
             /// </summary>
             public bool Explicit { get; set; }
 

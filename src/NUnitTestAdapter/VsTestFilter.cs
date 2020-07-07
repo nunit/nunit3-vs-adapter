@@ -34,7 +34,7 @@ namespace NUnit.VisualStudio.TestAdapter
     using System.Reflection;  // Needed for .net core 2.1
     using NUnit.VisualStudio.TestAdapter.Internal;
 
-    public interface ITfsTestFilter
+    public interface IVsTestFilter
     {
         ITestCaseFilterExpression TfsTestCaseFilterExpression { get; }
 
@@ -43,7 +43,7 @@ namespace NUnit.VisualStudio.TestAdapter
         IEnumerable<TestCase> CheckFilter(IEnumerable<TestCase> tests);
     }
 
-    public class TfsTestFilter : ITfsTestFilter
+    public class VsTestFilter : IVsTestFilter
     {
         /// <summary>
         /// Supported properties for filtering.
@@ -53,7 +53,7 @@ namespace NUnit.VisualStudio.TestAdapter
         private static readonly Dictionary<NTrait, TestProperty> TraitPropertyMap;
         private static readonly List<string> SupportedProperties;
 
-        static TfsTestFilter()
+        static VsTestFilter()
         {
             // Initialize the property cache
             SupportedPropertiesCache = new Dictionary<string, TestProperty>(StringComparer.OrdinalIgnoreCase)
@@ -85,7 +85,7 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         private readonly IRunContext runContext;
-        public TfsTestFilter(IRunContext runContext)
+        public VsTestFilter(IRunContext runContext)
         {
             this.runContext = runContext;
         }

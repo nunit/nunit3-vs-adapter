@@ -48,11 +48,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
                 .Invoke(new object[] { filterExpressionWrapper });
         }
 
-        public static TfsTestFilter CreateTestFilter(ITestCaseFilterExpression filterExpression)
+        public static VsTestFilter CreateTestFilter(ITestCaseFilterExpression filterExpression)
         {
             var context = Substitute.For<IRunContext>();
             context.GetTestCaseFilter(null, null).ReturnsForAnyArgs(filterExpression);
-            return new TfsTestFilter(context);
+            return new VsTestFilter(context);
         }
 
         public static void AssertExpectedResult(ITestCaseFilterExpression filterExpression, IReadOnlyCollection<TestCase> testCases, IReadOnlyCollection<string> expectedMatchingTestNames)

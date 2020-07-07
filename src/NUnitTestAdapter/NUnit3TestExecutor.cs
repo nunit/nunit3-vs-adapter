@@ -59,7 +59,7 @@ namespace NUnit.VisualStudio.TestAdapter
         // Properties set when either of the RunTests methods is called
         public IRunContext RunContext { get; private set; }
         public IFrameworkHandle FrameworkHandle { get; private set; }
-        private TfsTestFilter TfsFilter { get; set; }
+        private VsTestFilter VsTestFilter { get; set; }
 
         public string TestOutputXmlFolder { get; set; } = "";
 
@@ -196,7 +196,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             RunContext = runContext;
             FrameworkHandle = frameworkHandle;
-            TfsFilter = new TfsTestFilter(runContext);
+            VsTestFilter = new VsTestFilter(runContext);
 
             CleanUpRegisteredChannels();
 
@@ -209,7 +209,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 enableShutdown = !runContext.KeepAlive;
             }
 
-            if (TfsFilter.IsEmpty)
+            if (VsTestFilter.IsEmpty)
             {
                 if (!(enableShutdown && !runContext.KeepAlive))  // Otherwise causes exception when run as commandline, illegal to enableshutdown when Keepalive is false, might be only VS2012
                     frameworkHandle.EnableShutdownAfterTestRun = enableShutdown;
@@ -228,9 +228,7 @@ namespace NUnit.VisualStudio.TestAdapter
             string actionText = Debugger.IsAttached ? "Debugging " : "Running ";
             string selectionText = filter == null || filter == TestFilter.Empty ? "all" : "selected";
             TestLog.Info(actionText + selectionText + " tests in " + assemblyPath);
-            // No need to restore if the seed was in runsettings file
-            if (!Settings.RandomSeedSpecified)
-                Settings.RestoreRandomSeed(Path.GetDirectoryName(assemblyPath));
+            RestoreRandomSeed(assemblyPath);
             Dump = DumpXml.CreateDump(assemblyPath, testCases, Settings);
 
             try
@@ -249,11 +247,11 @@ namespace NUnit.VisualStudio.TestAdapter
                     var discovery = new DiscoveryConverter();
                     var loadedTestCases = discovery.Convert(discoveryResults, TestLog, assemblyPath, Settings);
 
-                    // If we have a TFS Filter, convert it to an nunit filter
-                    if (TfsFilter != null && !TfsFilter.IsEmpty)
+                    // If we have a VSTest TestFilter, convert it to an nunit filter
+                    if (VsTestFilter != null && !VsTestFilter.IsEmpty)
                     {
                         TestLog.Debug(
-                            $"TfsFilter used, length: {TfsFilter.TfsTestCaseFilterExpression?.TestCaseFilterValue.Length}");
+                            $"TfsFilter used, length: {VsTestFilter.TfsTestCaseFilterExpression?.TestCaseFilterValue.Length}");
                         // NOTE This overwrites filter used in call
                         var filterBuilder = CreateTestFilterBuilder();
                         if (Settings.DiscoveryMethod == DiscoveryMethod.Modern)
@@ -262,10 +260,10 @@ namespace NUnit.VisualStudio.TestAdapter
                         }
                         else
                         {
-                            filter = filterBuilder.ConvertTfsFilterToNUnitFilter(TfsFilter, loadedTestCases);
+                            filter = filterBuilder.ConvertTfsFilterToNUnitFilter(VsTestFilter, loadedTestCases);
                         }
 
-                        Dump?.AddString($"\n\nTFSFilter: {TfsFilter.TfsTestCaseFilterExpression.TestCaseFilterValue}\n");
+                        Dump?.AddString($"\n\nTFSFilter: {VsTestFilter.TfsTestCaseFilterExpression.TestCaseFilterValue}\n");
                         Dump?.DumpVSInputFilter(filter, "(At Execution (TfsFilter)");
                     }
 
@@ -275,16 +273,13 @@ namespace NUnit.VisualStudio.TestAdapter
                         return;
                     }
 
-                    Dump?.StartExecution();
-
-                    ITestConverterCommon converter;
                     if (Settings.DiscoveryMethod == DiscoveryMethod.Modern)
                     {
-                        if ((TfsFilter == null || TfsFilter.IsEmpty) && filter != TestFilter.Empty)
+                        if ((VsTestFilter == null || VsTestFilter.IsEmpty) && filter != TestFilter.Empty)
                         {
                             if (discovery.NoOfLoadedTestCases > Settings.AssemblySelectLimit)
                             {
-                                TestLog.Debug("Setting filter to empty du to number of testcases");
+                                TestLog.Debug("Setting filter to empty due to number of testcases");
                                 filter = TestFilter.Empty;
                             }
                             else
@@ -293,9 +288,9 @@ namespace NUnit.VisualStudio.TestAdapter
                                 filter = filterBuilder.FilterByList(loadedTestCases);
                             }
                         }
-                        else if (TfsFilter != null && !TfsFilter.IsEmpty)
+                        else if (VsTestFilter != null && !VsTestFilter.IsEmpty)
                         {
-                            var s = TfsFilter.TfsTestCaseFilterExpression.TestCaseFilterValue;
+                            var s = VsTestFilter.TfsTestCaseFilterExpression.TestCaseFilterValue;
                             var scount = s.Split('|', '&').Length;
                             if (scount > Settings.AssemblySelectLimit)
                             {
@@ -303,12 +298,9 @@ namespace NUnit.VisualStudio.TestAdapter
                                 filter = TestFilter.Empty;
                             }
                         }
-                        converter = discovery.TestConverter;
                     }
-                    else
-                    {
-                        converter = discovery.TestConverterForXml;
-                    }
+                    Dump?.StartExecution();
+                    var converter = CreateConverter(discovery);
                     Dump?.DumpVSInputFilter(filter, "(At Execution)");
                     using var listener = new NUnitEventListener(FrameworkHandle, converter, this);
                     try
@@ -369,6 +361,15 @@ namespace NUnit.VisualStudio.TestAdapter
                     TestLog.Warning($"   Exception thrown unloading tests from {assemblyPath}", ex);
                 }
             }
+        }
+
+        private ITestConverterCommon CreateConverter(DiscoveryConverter discovery) => Settings.DiscoveryMethod == DiscoveryMethod.Modern ? discovery.TestConverter : discovery.TestConverterForXml;
+
+        private void RestoreRandomSeed(string assemblyPath)
+        {
+            // No need to restore if the seed was in runsettings file
+            if (!Settings.RandomSeedSpecified)
+                Settings.RestoreRandomSeed(Path.GetDirectoryName(assemblyPath));
         }
 
 

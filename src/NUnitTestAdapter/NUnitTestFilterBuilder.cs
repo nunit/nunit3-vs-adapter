@@ -43,9 +43,9 @@ namespace NUnit.VisualStudio.TestAdapter
             _filterService = filterService ?? throw new NUnitEngineException("TestFilterService is not available. Engine in use is incorrect version.");
         }
 
-        public TestFilter ConvertTfsFilterToNUnitFilter(ITfsTestFilter tfsFilter, IList<TestCase> loadedTestCases)
+        public TestFilter ConvertTfsFilterToNUnitFilter(IVsTestFilter vsFilter, IList<TestCase> loadedTestCases)
         {
-            var filteredTestCases = tfsFilter.CheckFilter(loadedTestCases);
+            var filteredTestCases = vsFilter.CheckFilter(loadedTestCases);
             var testCases = filteredTestCases as TestCase[] ?? filteredTestCases.ToArray();
             // TestLog.Info(string.Format("TFS Filter detected: LoadedTestCases {0}, Filtered Test Cases {1}", loadedTestCases.Count, testCases.Count()));
             return testCases.Any() ? FilterByList(testCases) : NoTestsFound;
