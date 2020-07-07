@@ -24,7 +24,7 @@
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.TestFilterConverter;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests.TestFilterParserTests
+namespace NUnit.VisualStudio.TestAdapter.Tests.TestFilterConverterTests
 {
     public class TokenizerTests
     {

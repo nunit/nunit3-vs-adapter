@@ -69,7 +69,6 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
         /// <summary>
         /// Parse a single term or an or expression, returning the xml
         /// </summary>
-        /// <returns></returns>
         public string ParseFilterExpression()
         {
             var terms = new List<string>();
@@ -99,8 +98,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
         /// </summary>
         public string ParseFilterTerm()
         {
-            var elements = new List<string>();
-            elements.Add(ParseFilterCondition());
+            var elements = new List<string> { ParseFilterCondition() };
 
             while (LookingAt(AND_OPS))
             {
@@ -176,7 +174,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
         {
             return EmitFilter("name", op, value);
         }
-        
+
         private static string EmitFilter(string lhs, Token op, string rhs)
         {
             rhs = EscapeRhsValue(op, rhs);
@@ -238,9 +236,10 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
         {
             Token token = NextToken();
 
-            foreach (TokenKind kind in kinds)
-                if (token.Kind == kind)
-                    return token;
+            if (kinds.Any(kind => token.Kind == kind))
+            {
+                return token;
+            }
 
             throw InvalidTokenError(token);
         }
@@ -250,9 +249,10 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
         {
             Token token = NextToken();
 
-            foreach (Token item in valid)
-                if (token == item)
-                    return token;
+            if (valid.Any(item => token == item))
+            {
+                return token;
+            }
 
             throw InvalidTokenError(token);
         }
@@ -263,18 +263,11 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
                 $"Unexpected {token.Kind} '{token.Text}' at position {token.Pos} in selection expression."));
         }
 
-        private Token LookAhead
-        {
-            get { return _tokenizer.LookAhead; }
-        }
+        private Token LookAhead => _tokenizer.LookAhead;
 
         private bool LookingAt(params Token[] tokens)
         {
-            foreach (Token token in tokens)
-                if (LookAhead == token)
-                    return true;
-
-            return false;
+            return tokens.Any(token => LookAhead == token);
         }
 
         private Token NextToken()
