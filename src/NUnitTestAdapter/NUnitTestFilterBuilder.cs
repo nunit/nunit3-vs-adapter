@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.Engine;
+using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -46,6 +47,17 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             var filteredTestCases = vsFilter.CheckFilter(loadedTestCases);
             var testCases = filteredTestCases as TestCase[] ?? filteredTestCases.ToArray();
+            // TestLog.Info(string.Format("TFS Filter detected: LoadedTestCases {0}, Filtered Test Cases {1}", loadedTestCases.Count, testCases.Count()));
+            return testCases.Any() ? FilterByList(testCases) : NoTestsFound;
+        }
+
+        public TestFilter ConvertTfsFilterToNUnitFilter(IVsTestFilter vsFilter, IDiscoveryConverter discovery)
+        {
+            var filteredTestCases = vsFilter.CheckFilter(discovery.LoadedTestCases).ToList();
+            var explicitCases = discovery.CheckTestCasesExplicit(filteredTestCases).ToList();
+            bool isExplicit = filteredTestCases.Count == explicitCases.Count;
+            var tcs = isExplicit ? filteredTestCases : filteredTestCases.Except(explicitCases);
+            var testCases = tcs as TestCase[] ?? tcs.ToArray();
             // TestLog.Info(string.Format("TFS Filter detected: LoadedTestCases {0}, Filtered Test Cases {1}", loadedTestCases.Count, testCases.Count()));
             return testCases.Any() ? FilterByList(testCases) : NoTestsFound;
         }

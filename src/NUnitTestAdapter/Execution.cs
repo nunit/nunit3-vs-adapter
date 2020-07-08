@@ -130,7 +130,7 @@ namespace NUnit.VisualStudio.TestAdapter
             var filterBuilder = CreateTestFilterBuilder();
             if (Settings.DiscoveryMethod == DiscoveryMethod.Modern)
             {
-                filter = filterBuilder.ConvertTfsFilterToNUnitFilter(vsTestFilter, discovery.LoadedTestCases);
+                filter = filterBuilder.ConvertTfsFilterToNUnitFilter(vsTestFilter, discovery);
             }
             else
             {

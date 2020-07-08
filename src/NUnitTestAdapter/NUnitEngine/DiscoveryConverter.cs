@@ -46,6 +46,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         bool IsDiscoveryMethodCurrent { get; }
 
         bool NoOfLoadedTestCasesAboveLimit { get; }
+        IEnumerable<TestCase> CheckTestCasesExplicit(IEnumerable<TestCase> filteredTestCases);
     }
 
     public class DiscoveryConverter : IDiscoveryConverter
@@ -96,6 +97,24 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         ITestLogger TestLog { get; }
 
         public bool NoOfLoadedTestCasesAboveLimit => NoOfLoadedTestCases > Settings.AssemblySelectLimit;
+        public IEnumerable<TestCase> CheckTestCasesExplicit(IEnumerable<TestCase> filteredTestCases)
+        {
+            var explicitCases = new List<TestCase>();
+            foreach (var tc in filteredTestCases)
+            {
+                var correspondingNUnitTestCase = AllTestCases.FirstOrDefault(o => o.FullName == tc.FullyQualifiedName);
+                if (correspondingNUnitTestCase == null)
+                {
+                    TestLog.Warning(
+                        $"CheckExplicit: Can't locate corresponding NUnit testcase {tc.FullyQualifiedName}");
+                    continue;
+                }
+
+                if (correspondingNUnitTestCase.IsExplicitReverse)
+                    explicitCases.Add(tc);
+            }
+            return explicitCases;
+        }
 
 
         public DiscoveryConverter(ITestLogger logger, IAdapterSettings settings)
