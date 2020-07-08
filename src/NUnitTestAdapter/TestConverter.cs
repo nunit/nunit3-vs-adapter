@@ -197,9 +197,9 @@ namespace NUnit.VisualStudio.TestAdapter
                                     new Uri(NUnitTestAdapter.ExecutorUri),
                                     _sourceAssembly)
             {
-                DisplayName = CreateDisplayName(fullyQualifiedName, testNode.Name), 
+                DisplayName = CreateDisplayName(fullyQualifiedName, testNode.Name),
                 CodeFilePath = null,
-                LineNumber = 0,
+                LineNumber = 0
             };
             if (adapterSettings.UseNUnitIdforTestCaseId)
             {

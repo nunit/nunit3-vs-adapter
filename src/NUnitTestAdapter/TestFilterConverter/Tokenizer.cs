@@ -8,10 +8,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -113,10 +113,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
 
         public Tokenizer(string input)
         {
-            if (input == null)
-                throw new ArgumentNullException("input");
-
-            _input = input;
+            _input = input ?? throw new ArgumentNullException(nameof(input));
             _index = 0;
         }
 
@@ -163,12 +160,13 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
                 // Could be alone or start of a double char symbol
                 case '!':
                     GetChar();
-                    foreach(string dbl in DOUBLE_CHAR_SYMBOLS)
-                        if (ch == dbl[0] && NextChar == dbl[1])
-                        {
-                            GetChar();
-                            return new Token(TokenKind.Symbol, dbl) { Pos = pos };
-                        }
+                    foreach (string dbl in DOUBLE_CHAR_SYMBOLS)
+                    {
+                        if (ch != dbl[0] || NextChar != dbl[1]) 
+                            continue;
+                        GetChar();
+                        return new Token(TokenKind.Symbol, dbl) { Pos = pos };
+                    }
 
                     return new Token(TokenKind.Symbol, ch);
 
@@ -249,7 +247,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
                 sb.Append(GetChar());
                 CollectWordChars(sb);
                 if (NextChar == '(')
-                    CollectBalancedParentheticalExpression(sb);       
+                    CollectBalancedParentheticalExpression(sb);
             }
 
             return new Token(TokenKind.FQN, sb.ToString()) { Pos = pos };
@@ -265,7 +263,8 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
         {
             int depth = 0;
             if (NextChar == '(')
-            {   do
+            {
+                do
                 {
                     var c = GetChar();
                     sb.Append(c);
@@ -275,7 +274,8 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
                         --depth;
                     else if (c == '"')
                         CollectQuotedString(sb);
-                } while (depth > 0);
+                }
+                while (depth > 0);
             }
         }
 
@@ -305,7 +305,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
         }
 
         /// <summary>
-        /// Peek ahead at the next character in input
+        /// Peek ahead at the next character in input.
         /// </summary>
         private char NextChar
         {

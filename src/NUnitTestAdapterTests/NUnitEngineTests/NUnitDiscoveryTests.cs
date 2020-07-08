@@ -463,7 +463,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         [Test]
         public void ThatWeCanParseDiscoveryXml()
         {
-            var sut = new DiscoveryConverter();
+            var sut = new DiscoveryConverter(logger, settings);
             var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(FullDiscoveryXml)));
 
@@ -506,7 +506,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         [Test]
         public void ThatTestCaseHasAllData()
         {
-            var sut = new DiscoveryConverter();
+            var sut = new DiscoveryConverter(logger, settings);
             var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(SimpleTestXml)));
             var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
@@ -533,7 +533,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         [Test]
         public void ThatNumberOfTestCasesAreCorrect()
         {
-            var sut = new DiscoveryConverter();
+            var sut = new DiscoveryConverter(logger, settings);
             var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(FullDiscoveryXml)));
             var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
@@ -629,7 +629,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         [Test]
         public void ThatSetUpFixtureWorks()
         {
-            var sut = new DiscoveryConverter();
+            var sut = new DiscoveryConverter(logger, settings);
             var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(SetupFixtureXml)));
             var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
@@ -681,7 +681,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         [Test]
         public void ThatParameterizedMethodsWorks()
         {
-            var sut = new DiscoveryConverter();
+            var sut = new DiscoveryConverter(logger, settings);
             var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(ParameterizedMethodXml)));
             var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
@@ -697,7 +697,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         [Test]
         public void ThatTheoryWorks()
         {
-            var sut = new DiscoveryConverter();
+            var sut = new DiscoveryConverter(logger, settings);
             var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(FullDiscoveryXml)));
             var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
@@ -750,7 +750,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         [TestCase(ExplicitXml, 3, TestName = nameof(ThatExplicitWorks) + "." + nameof(ExplicitXml))]
         public void ThatExplicitWorks(string xml, int count)
         {
-            var sut = new DiscoveryConverter();
+            var sut = new DiscoveryConverter(logger, settings);
             var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(xml)));
             var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
@@ -778,7 +778,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         [TestCase(ExplicitQuickTestXml, 1, TestName = nameof(ThatExplicitWorks2) + "." + nameof(ExplicitQuickTestXml))]
         public void ThatExplicitWorks2(string xml, int count)
         {
-            var sut = new DiscoveryConverter();
+            var sut = new DiscoveryConverter(logger, settings);
             var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(xml)));
             var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
@@ -835,7 +835,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         [Test]
         public void ThatExplicitWorksWhenOneTestIsNotExplicit()
         {
-            var sut = new DiscoveryConverter();
+            var sut = new DiscoveryConverter(logger, settings);
             var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(NotExplicitXml)));
             var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
@@ -887,7 +887,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         [Test]
         public void ThatAsyncTestsHasSevenTests()
         {
-            var sut = new DiscoveryConverter();
+            var sut = new DiscoveryConverter(logger, settings);
             var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(AsyncTestsXml)));
             var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
@@ -920,7 +920,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         [Test]
         public void ThatParameterizedTestFixtureHasSixTests()
         {
-            var sut = new DiscoveryConverter();
+            var sut = new DiscoveryConverter(logger, settings);
             var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(ParameterizedTestFixtureXml)));
             var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
@@ -973,7 +973,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         [Test]
         public void ThatDotNetTestWorks()
         {
-            var sut = new DiscoveryConverter();
+            var sut = new DiscoveryConverter(logger, settings);
             var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(DotnetXml)));
             var fixtures = ndr.TestAssembly.TestFixtures;
@@ -1007,7 +1007,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         [Test]
         public void ThatMixedExplicitTestSourceWorksFor312()
         {
-            var sut = new DiscoveryConverter();
+            var sut = new DiscoveryConverter(logger, settings);
             var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(MixedExplicitTestSourceXmlForNUnit312)));
             Assert.Multiple(() =>
@@ -1035,7 +1035,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         [Test]
         public void ThatExplicitRunWorks()
         {
-            var sut = new DiscoveryConverter();
+            var sut = new DiscoveryConverter(logger, settings);
             var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(ExplicitRun)));
             Assert.Multiple(() =>

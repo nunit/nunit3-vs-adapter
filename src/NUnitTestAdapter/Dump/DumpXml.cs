@@ -40,11 +40,10 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
     {
         void AddString(string text);
         void AddTestEvent(string text);
-        void DumpFromVSInput(IGrouping<string, TestCase> testCases, TestFilter filter, TestPackage package);
-        void StartDiscoveryInExecution();
-        void StartExecution();
+        void StartDiscoveryInExecution(IGrouping<string, TestCase> testCases, TestFilter filter, TestPackage package);
         void DumpForExecution();
         void DumpVSInputFilter(TestFilter filter, string info);
+        void StartExecution(TestFilter filter, string atExecution);
     }
 
     public class DumpXml : IDumpXml
@@ -143,7 +142,7 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
             AddString("\n</TestPackage>\n\n");
         }
 
-        public void DumpFromVSInput(IGrouping<string, TestCase> testCases, TestFilter filter, TestPackage package)
+        private void DumpFromVSInput(IGrouping<string, TestCase> testCases, TestFilter filter, TestPackage package)
         {
             AddString("<VSTest input/>\n\n");
             if (testCases != null)
@@ -153,13 +152,15 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
             AddString("</VSTest input/>\n\n");
         }
 
-        public void StartDiscoveryInExecution()
+        public void StartDiscoveryInExecution(IGrouping<string, TestCase> testCases, TestFilter filter, TestPackage package)
         {
+            DumpFromVSInput(testCases, filter, package);
             AddString($"<NUnitDiscoveryInExecution>{assemblyPath}</NUnitExecution>\n\n");
         }
 
-        public void StartExecution()
+        public void StartExecution(TestFilter filter, string atExecution)
         {
+            DumpVSInputFilter(filter, atExecution);
             AddString($"\n\n<NUnitExecution>{assemblyPath}</NUnitExecution>\n\n");
         }
 

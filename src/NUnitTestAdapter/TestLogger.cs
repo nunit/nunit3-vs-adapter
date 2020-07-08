@@ -35,6 +35,7 @@ namespace NUnit.VisualStudio.TestAdapter
         void Warning(string message, Exception ex);
         void Info(string message);
         int Verbosity { get; set; }
+        void Debug(string message);
     }
 
     /// <summary>

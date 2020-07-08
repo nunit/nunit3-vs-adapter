@@ -39,6 +39,13 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         bool IsExplicitRun { get; }
         IList<TestCase> LoadedTestCases { get; }
         int NoOfLoadedTestCases { get; }
+
+        /// <summary>
+        /// Checks if we're running the latest Current DiscoveryMethod.
+        /// </summary>
+        bool IsDiscoveryMethodCurrent { get; }
+
+        bool NoOfLoadedTestCasesAboveLimit { get; }
     }
 
     public class DiscoveryConverter : IDiscoveryConverter
@@ -65,6 +72,11 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public NUnitDiscoveryTestRun TestRun { get; private set; }
 
+        /// <summary>
+        /// Checks if we're running the latest Current DiscoveryMethod
+        /// </summary>
+        public bool IsDiscoveryMethodCurrent => Settings.DiscoveryMethod == DiscoveryMethod.Modern;
+
         public NUnitDiscoveryTestAssembly CurrentTestAssembly => TestRun.TestAssembly;
 
         public NUnitDiscoveryTestSuite TopLevelTestSuite => CurrentTestAssembly.TestSuites.FirstOrDefault();
@@ -74,15 +86,29 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public bool IsExplicitRun => CurrentTestAssembly?.IsExplicit ?? false;
 
         private readonly List<TestCase> loadedTestCases = new List<TestCase>();
-
         public IList<TestCase> LoadedTestCases => loadedTestCases;
 
         public int NoOfLoadedTestCases => loadedTestCases.Count;
 
-        public IList<TestCase> Convert(NUnitResults discoveryResults, ITestLogger logger, string assemblyPath, IAdapterSettings settings)
+        public string AssemblyPath { get; private set; }
+
+        IAdapterSettings Settings { get; }
+        ITestLogger TestLog { get; }
+
+        public bool NoOfLoadedTestCasesAboveLimit => NoOfLoadedTestCases > Settings.AssemblySelectLimit;
+
+
+        public DiscoveryConverter(ITestLogger logger, IAdapterSettings settings)
         {
-            var timing = new TimingLogger(settings, logger);
-            if (settings.DiscoveryMethod != DiscoveryMethod.ClassicXml)
+            Settings = settings;
+            TestLog = logger;
+        }
+
+        public IList<TestCase> Convert(NUnitResults discoveryResults, string assemblyPath)
+        {
+            AssemblyPath = assemblyPath;
+            var timing = new TimingLogger(Settings, TestLog);
+            if (Settings.DiscoveryMethod != DiscoveryMethod.ClassicXml)
             {
                 TestRun = ConvertXml(discoveryResults);
             }
@@ -93,23 +119,23 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             // the converter's cache of all test cases is populated as well.
             // All future calls to convert a test case may now use the cache.
 
-            if (settings.DiscoveryMethod == DiscoveryMethod.ClassicXml)
+            if (Settings.DiscoveryMethod == DiscoveryMethod.ClassicXml)
             {
-                converterForXml = new TestConverterForXml(logger, assemblyPath, settings);
+                converterForXml = new TestConverterForXml(TestLog, AssemblyPath, Settings);
                 foreach (XmlNode testNode in nunitTestCases)
                     loadedTestCases.Add(converterForXml.ConvertTestCase(new NUnitEventTestCase(testNode)));
-                logger.Info(
+                TestLog.Info(
                     $"   NUnit3TestExecutor discovered {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases using Classic mode");
             }
             else
             {
-                converter = new TestConverter(logger, assemblyPath, settings, this);
+                converter = new TestConverter(TestLog, AssemblyPath, Settings, this);
                 var isExplicit = TestRun.IsExplicit;
                 var testCases = isExplicit ? TestRun.TestAssembly.AllTestCases : TestRun.TestAssembly.RunnableTestCases;
                 foreach (var testNode in testCases)
                     loadedTestCases.Add(converter.ConvertTestCase(testNode));
                 var msg = isExplicit ? "Explicit run" : "Non-Explicit run";
-                logger.Info(
+                TestLog.Info(
                     $"   NUnit3TestExecutor discovered {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases using Modern mode, {msg}");
             }
 

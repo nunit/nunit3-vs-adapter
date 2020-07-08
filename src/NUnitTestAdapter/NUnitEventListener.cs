@@ -65,12 +65,12 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private readonly INUnit3TestExecutor executor;
 
-        public NUnitEventListener(ITestExecutionRecorder recorder, ITestConverterCommon testConverter, INUnit3TestExecutor executor)
+        public NUnitEventListener(ITestConverterCommon testConverter, INUnit3TestExecutor executor)
         {
             this.executor = executor;
             dumpXml = executor.Dump;
             _settings = executor.Settings;
-            _recorder = recorder;
+            _recorder = executor.FrameworkHandle;
             _testConverter = testConverter;
         }
 

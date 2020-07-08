@@ -43,11 +43,12 @@ namespace NUnit.VisualStudio.TestAdapter
         void StopRun();
         IDumpXml Dump { get; }
         IAdapterSettings Settings { get; }
+        IFrameworkHandle FrameworkHandle { get; }
     }
 
 
     [ExtensionUri(ExecutorUri)]
-    public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDisposable, INUnit3TestExecutor
+    public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDisposable, INUnit3TestExecutor, IExecutionContext
     {
         public NUnit3TestExecutor()
         {
@@ -59,8 +60,11 @@ namespace NUnit.VisualStudio.TestAdapter
         // Properties set when either of the RunTests methods is called
         public IRunContext RunContext { get; private set; }
         public IFrameworkHandle FrameworkHandle { get; private set; }
-        private VsTestFilter VsTestFilter { get; set; }
 
+        public IVsTestFilter VsTestFilter { get; private set; }
+
+        public ITestLogger Log => TestLog;
+        public INUnitEngineAdapter EngineAdapter => NUnitEngineAdapter;
         public string TestOutputXmlFolder { get; set; } = "";
 
         // NOTE: an earlier version of this code had a FilterBuilder
@@ -236,83 +240,17 @@ namespace NUnit.VisualStudio.TestAdapter
                 var package = CreateTestPackage(assemblyPath, testCases);
                 NUnitEngineAdapter.CreateRunner(package);
                 CreateTestOutputFolder();
-                Dump?.DumpFromVSInput(testCases, filter, package);
-                Dump?.StartDiscoveryInExecution();
+                Dump?.StartDiscoveryInExecution(testCases, filter, package);
 
                 var discoveryResults = NUnitEngineAdapter.Explore(filter);
                 Dump?.AddString(discoveryResults.AsString());
 
                 if (discoveryResults.IsRunnable)
                 {
-                    var discovery = new DiscoveryConverter();
-                    var loadedTestCases = discovery.Convert(discoveryResults, TestLog, assemblyPath, Settings);
-
-                    // If we have a VSTest TestFilter, convert it to an nunit filter
-                    if (VsTestFilter != null && !VsTestFilter.IsEmpty)
-                    {
-                        TestLog.Debug(
-                            $"TfsFilter used, length: {VsTestFilter.TfsTestCaseFilterExpression?.TestCaseFilterValue.Length}");
-                        // NOTE This overwrites filter used in call
-                        var filterBuilder = CreateTestFilterBuilder();
-                        if (Settings.DiscoveryMethod == DiscoveryMethod.Modern)
-                        {
-                           // filter = filterBuilder.ConvertTfsFilterToNUnitFilter(TfsFilter, discovery.AllTestCases);
-                        }
-                        else
-                        {
-                            filter = filterBuilder.ConvertTfsFilterToNUnitFilter(VsTestFilter, loadedTestCases);
-                        }
-
-                        Dump?.AddString($"\n\nTFSFilter: {VsTestFilter.TfsTestCaseFilterExpression.TestCaseFilterValue}\n");
-                        Dump?.DumpVSInputFilter(filter, "(At Execution (TfsFilter)");
-                    }
-
-                    if (filter == NUnitTestFilterBuilder.NoTestsFound)
-                    {
-                        TestLog.Info("   Skipping assembly - no matching test cases found");
-                        return;
-                    }
-
-                    if (Settings.DiscoveryMethod == DiscoveryMethod.Modern)
-                    {
-                        if ((VsTestFilter == null || VsTestFilter.IsEmpty) && filter != TestFilter.Empty)
-                        {
-                            if (discovery.NoOfLoadedTestCases > Settings.AssemblySelectLimit)
-                            {
-                                TestLog.Debug("Setting filter to empty due to number of testcases");
-                                filter = TestFilter.Empty;
-                            }
-                            else
-                            {
-                                var filterBuilder = CreateTestFilterBuilder();
-                                filter = filterBuilder.FilterByList(loadedTestCases);
-                            }
-                        }
-                        else if (VsTestFilter != null && !VsTestFilter.IsEmpty)
-                        {
-                            var s = VsTestFilter.TfsTestCaseFilterExpression.TestCaseFilterValue;
-                            var scount = s.Split('|', '&').Length;
-                            if (scount > Settings.AssemblySelectLimit)
-                            {
-                                TestLog.Debug("Setting filter to empty due to TfsFilter size");
-                                filter = TestFilter.Empty;
-                            }
-                        }
-                    }
-                    Dump?.StartExecution();
-                    var converter = CreateConverter(discovery);
-                    Dump?.DumpVSInputFilter(filter, "(At Execution)");
-                    using var listener = new NUnitEventListener(FrameworkHandle, converter, this);
-                    try
-                    {
-                        var results = NUnitEngineAdapter.Run(listener, filter);
-                        NUnitEngineAdapter.GenerateTestOutput(results, assemblyPath, this);
-                    }
-                    catch (NullReferenceException)
-                    {
-                        // this happens during the run when CancelRun is called.
-                        TestLog.Debug("   Null ref caught");
-                    }
+                    var discovery = new DiscoveryConverter(TestLog, Settings);
+                    discovery.Convert(discoveryResults, assemblyPath);
+                    var ea = ExecutionFactory.Create(this);
+                    ea.Run(filter, discovery, this);
                 }
                 else
                 {
@@ -363,7 +301,8 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
-        private ITestConverterCommon CreateConverter(DiscoveryConverter discovery) => Settings.DiscoveryMethod == DiscoveryMethod.Modern ? discovery.TestConverter : discovery.TestConverterForXml;
+
+
 
         private void RestoreRandomSeed(string assemblyPath)
         {

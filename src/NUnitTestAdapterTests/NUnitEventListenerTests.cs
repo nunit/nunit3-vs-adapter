@@ -55,6 +55,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             settings = Substitute.For<IAdapterSettings>();
             executor = Substitute.For<INUnit3TestExecutor>();
             executor.Settings.Returns(settings);
+            executor.FrameworkHandle.Returns(testLog);
             settings.CollectSourceInformation.Returns(true);
             using (var testConverter = new TestConverterForXml(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings))
             {
@@ -64,7 +65,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 testConverter.ConvertTestCase(fakeTestNode);
                 Assert.NotNull(testConverter.GetCachedTestCase("123"));
 
-                listener = new NUnitEventListener(testLog, testConverter, executor);
+                listener = new NUnitEventListener(testConverter, executor);
             }
         }
 
@@ -230,18 +231,19 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [SetUp]
         public void Setup()
         {
-            recorder = Substitute.For<ITestExecutionRecorder>();
+            recorder = Substitute.For<IFrameworkHandle>();
             converter = Substitute.For<ITestConverterCommon>();
             dumpxml = Substitute.For<IDumpXml>();
             settings = Substitute.For<IAdapterSettings>();
             executor = Substitute.For<INUnit3TestExecutor>();
             executor.Settings.Returns(settings);
+            executor.FrameworkHandle.Returns(recorder);
         }
 
         [Test]
         public void ThatNormalTestOutputIsOutput()
         {
-            var sut = new NUnitEventListener(recorder, converter, executor);
+            var sut = new NUnitEventListener(converter, executor);
             sut.OnTestEvent(TestOutputProgress);
             sut.OnTestEvent(TestFinish);
 
@@ -252,7 +254,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void ThatNormalTestOutputIsError()
         {
-            var sut = new NUnitEventListener(recorder, converter, executor);
+            var sut = new NUnitEventListener(converter, executor);
             sut.OnTestEvent(TestOutputError);
             sut.OnTestEvent(TestFinish);
 
@@ -263,7 +265,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void ThatTestOutputWithOnlyWhiteSpaceIsNotOutput()
         {
-            var sut = new NUnitEventListener(recorder, converter, executor);
+            var sut = new NUnitEventListener(converter, executor);
 
             sut.OnTestEvent(BlankTestOutput);
 
