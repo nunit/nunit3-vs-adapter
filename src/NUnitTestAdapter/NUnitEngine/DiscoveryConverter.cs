@@ -131,7 +131,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             {
                 converter = new TestConverter(TestLog, AssemblyPath, Settings, this);
                 var isExplicit = TestRun.IsExplicit;
-                var testCases = isExplicit ? TestRun.TestAssembly.AllTestCases : TestRun.TestAssembly.RunnableTestCases;
+                var testCases = RunnableTestCases(isExplicit);
                 foreach (var testNode in testCases)
                     loadedTestCases.Add(converter.ConvertTestCase(testNode));
                 var msg = isExplicit ? "Explicit run" : "Non-Explicit run";
@@ -141,6 +141,16 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
             timing.LogTime("Converting test cases ");
             return loadedTestCases;
+
+            IEnumerable<NUnitDiscoveryTestCase> RunnableTestCases(bool isExplicit)
+            {
+                IEnumerable<NUnitDiscoveryTestCase> result;
+                if (isExplicit || !Settings.DesignMode)
+                    result = TestRun.TestAssembly.AllTestCases;
+                else
+                    result = TestRun.TestAssembly.RunnableTestCases;
+                return result;
+            }
         }
 
         public NUnitDiscoveryTestRun ConvertXml(NUnitResults discovery)

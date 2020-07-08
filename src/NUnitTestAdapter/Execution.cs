@@ -116,7 +116,6 @@ namespace NUnit.VisualStudio.TestAdapter
                 TestLog.Info("   Skipping assembly - no matching test cases found");
                 return false;
             }
-
             return base.Run(filter, discovery, nUnit3TestExecutor);
         }
 

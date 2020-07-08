@@ -104,9 +104,9 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private bool CheckFilter(TestCase testCase)
         {
-            var isExplicit = testCase.GetPropertyValue(CategoryList.NUnitExplicitProperty, false);
+            // var isExplicit = testCase.GetPropertyValue(CategoryList.NUnitExplicitProperty, false);
 
-            return !isExplicit && TfsTestCaseFilterExpression?.MatchTestCase(testCase, p => PropertyValueProvider(testCase, p)) != false;
+            return /*!isExplicit &&*/ TfsTestCaseFilterExpression?.MatchTestCase(testCase, p => PropertyValueProvider(testCase, p)) != false;
         }
 
         /// <summary>
