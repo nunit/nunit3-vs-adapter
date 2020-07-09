@@ -144,7 +144,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                 foreach (XmlNode testNode in nunitTestCases)
                     loadedTestCases.Add(converterForXml.ConvertTestCase(new NUnitEventTestCase(testNode)));
                 TestLog.Info(
-                    $"   NUnit3TestExecutor discovered {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases using Classic mode");
+                    $"   NUnit3TestExecutor discovered {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases using Legacy discovery mode");
             }
             else
             {
@@ -155,7 +155,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                     loadedTestCases.Add(converter.ConvertTestCase(testNode));
                 var msg = isExplicit ? "Explicit run" : "Non-Explicit run";
                 TestLog.Info(
-                    $"   NUnit3TestExecutor discovered {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases using Modern mode, {msg}");
+                    $"   NUnit3TestExecutor discovered {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases using Current Discovery mode, {msg}");
             }
 
             timing.LogTime("Converting test cases ");

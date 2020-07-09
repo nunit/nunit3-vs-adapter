@@ -52,7 +52,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
         {
             var context = Substitute.For<IRunContext>();
             context.GetTestCaseFilter(null, null).ReturnsForAnyArgs(filterExpression);
-            return new VsTestFilter(context);
+            var settings = Substitute.For<IAdapterSettings>();
+            settings.DiscoveryMethod.Returns(DiscoveryMethod.Legacy);
+            return VsTestFilterFactory.CreateVsTestFilter(settings, context);
         }
 
         public static void AssertExpectedResult(ITestCaseFilterExpression filterExpression, IReadOnlyCollection<TestCase> testCases, IReadOnlyCollection<string> expectedMatchingTestNames)

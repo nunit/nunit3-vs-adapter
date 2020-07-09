@@ -200,7 +200,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             RunContext = runContext;
             FrameworkHandle = frameworkHandle;
-            VsTestFilter = new VsTestFilter(runContext);
+            VsTestFilter = VsTestFilterFactory.CreateVsTestFilter(Settings, runContext);
 
             CleanUpRegisteredChannels();
 

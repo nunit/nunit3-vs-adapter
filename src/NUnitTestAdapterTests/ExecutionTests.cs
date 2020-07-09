@@ -39,6 +39,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             filter = new TestFilter("<filter><or>A<or>B</or></or></filter>");
         }
 
+        [Explicit("Need to mock out the engine, it crashes on [command line] build due to multiple instances that can't be handled")]
         [Test]
         public void ThatCheckFilterInCurrentModeWorks()
         {
@@ -47,6 +48,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(result.IsEmpty, Is.False);
             Assert.That(result.Text, Is.Not.EqualTo(filter.Text));
             Assert.That(result.Text, Is.EqualTo("<filter><test>A</test></filter>"));
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            ctx.EngineAdapter.CloseRunner();
         }
     }
 }
