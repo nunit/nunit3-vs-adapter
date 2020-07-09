@@ -360,7 +360,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             string dName = node.Attribute(NUnitXmlAttributeNames.Name).Value;
             string dFullname = node.Attribute(NUnitXmlAttributeNames.Fullname).Value;
             var dRunstate = ExtractRunState(node);
-            const char apo = (char)0x22;
+            const char apo = '\'';
             var tcs = node.Attribute(NUnitXmlAttributeNames.Testcasecount)?.Value.Trim(apo);
             int dTestcasecount = int.Parse(tcs ?? "1");
             var bp = new BaseProperties(dId, dName, dFullname, dTestcasecount, dRunstate);
