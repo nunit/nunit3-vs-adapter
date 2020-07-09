@@ -55,7 +55,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         private readonly IDiscoveryContext _context;
 
-        public TestDiscoveryTests(IDiscoveryContext context)
+        public TestDiscoveryTests()
         {
             _context = Substitute.For<IDiscoveryContext>();
         }

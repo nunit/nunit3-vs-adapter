@@ -456,7 +456,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         {
             logger = Substitute.For<ITestLogger>();
             settings = Substitute.For<IAdapterSettings>();
-            settings.DiscoveryMethod.Returns(DiscoveryMethod.ClassicXml);
+            settings.DiscoveryMethod.Returns(DiscoveryMethod.Legacy);
         }
 
 

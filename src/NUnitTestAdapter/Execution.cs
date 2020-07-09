@@ -68,7 +68,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         protected NUnitTestFilterBuilder CreateTestFilterBuilder()
             => new NUnitTestFilterBuilder(NUnitEngineAdapter.GetService<ITestFilterService>(), Settings);
-        protected ITestConverterCommon CreateConverter(DiscoveryConverter discovery) => Settings.DiscoveryMethod == DiscoveryMethod.Modern ? discovery.TestConverter : discovery.TestConverterForXml;
+        protected ITestConverterCommon CreateConverter(DiscoveryConverter discovery) => Settings.DiscoveryMethod == DiscoveryMethod.Current ? discovery.TestConverter : discovery.TestConverterForXml;
     }
 
     public class IdeExecution : Execution
@@ -128,7 +128,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 $"TfsFilter used, length: {vsTestFilter.TfsTestCaseFilterExpression?.TestCaseFilterValue.Length}");
             // NOTE This overwrites filter used in call
             var filterBuilder = CreateTestFilterBuilder();
-            if (Settings.DiscoveryMethod == DiscoveryMethod.Modern)
+            if (Settings.DiscoveryMethod == DiscoveryMethod.Current)
             {
                 filter = filterBuilder.ConvertTfsFilterToNUnitFilter(vsTestFilter, discovery);
             }

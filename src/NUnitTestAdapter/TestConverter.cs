@@ -47,7 +47,7 @@ namespace NUnit.VisualStudio.TestAdapter
         private bool CollectSourceInformation => adapterSettings.CollectSourceInformation;
         private readonly IAdapterSettings adapterSettings;
         private static readonly string NL = Environment.NewLine;
-        private IDiscoveryConverter discoveryConverter;
+        private readonly IDiscoveryConverter discoveryConverter;
 
         public TestConverter(ITestLogger logger, string sourceAssembly, IAdapterSettings settings, IDiscoveryConverter discoveryConverter)
         {

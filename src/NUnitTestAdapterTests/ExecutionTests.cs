@@ -27,7 +27,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var engineAdapter = new NUnitEngineAdapter();
             engineAdapter.Initialize();
             ctx.EngineAdapter.Returns(engineAdapter);
-            settings.DiscoveryMethod.Returns(DiscoveryMethod.Modern);
+            settings.DiscoveryMethod.Returns(DiscoveryMethod.Current);
             discovery = Substitute.For<IDiscoveryConverter>();
             discovery.NoOfLoadedTestCases.Returns(1);
             discovery.IsDiscoveryMethodCurrent.Returns(true);
@@ -47,9 +47,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(result.IsEmpty, Is.False);
             Assert.That(result.Text, Is.Not.EqualTo(filter.Text));
             Assert.That(result.Text, Is.EqualTo("<filter><test>A</test></filter>"));
-
         }
-
-
     }
 }

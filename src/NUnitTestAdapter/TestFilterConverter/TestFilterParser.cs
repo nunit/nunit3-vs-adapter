@@ -67,12 +67,11 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
         }
 
         /// <summary>
-        /// Parse a single term or an or expression, returning the xml
+        /// Parse a single term or an or expression, returning the xml.
         /// </summary>
         public string ParseFilterExpression()
         {
-            var terms = new List<string>();
-            terms.Add(ParseFilterTerm());
+            var terms = new List<string> { ParseFilterTerm() };
 
             while (LookingAt(OR_OPS))
             {

@@ -443,9 +443,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             });
         }
 
-        [TestCase("garbage", DiscoveryMethod.ClassicXml, DiscoveryMethod.ClassicXml)]
-        [TestCase("Old", DiscoveryMethod.ClassicXml, DiscoveryMethod.ClassicXml)]
-        [TestCase("Modern", DiscoveryMethod.ClassicXml, DiscoveryMethod.Modern)]
+        [TestCase("garbage", DiscoveryMethod.Legacy, DiscoveryMethod.Legacy)]
+        [TestCase("Old", DiscoveryMethod.Legacy, DiscoveryMethod.Legacy)]
+        [TestCase("Modern", DiscoveryMethod.Legacy, DiscoveryMethod.Current)]
         public void TestMapEnum<T>(string setting, T defaultValue, T expected)
         where T : struct, Enum
         {

@@ -40,20 +40,20 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TestFilterParserException"/> class.
-        /// Construct with a message
+        /// Construct with a message.
         /// </summary>
         public TestFilterParserException(string message) : base(message) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TestFilterParserException"/> class.
-        /// Construct with a message and inner exception
+        /// Construct with a message and inner exception.
         /// </summary>
         public TestFilterParserException(string message, Exception innerException) : base(message, innerException) { }
 
 #if !NETSTANDARD1_6
         /// <summary>
         /// Initializes a new instance of the <see cref="TestFilterParserException"/> class.
-        /// Serialization constructor
+        /// Serialization constructor.
         /// </summary>
         public TestFilterParserException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 #endif

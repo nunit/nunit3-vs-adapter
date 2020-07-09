@@ -128,8 +128,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
     public enum DiscoveryMethod
     {
-        ClassicXml,
-        Modern
+        Legacy,
+        Current
     }
 
     public class AdapterSettings : IAdapterSettings
@@ -225,7 +225,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public int ConsoleOut { get; private set; }
         public bool StopOnError { get; private set; }
 
-        public DiscoveryMethod DiscoveryMethod { get; private set; } = DiscoveryMethod.ClassicXml;
+        public DiscoveryMethod DiscoveryMethod { get; private set; } = DiscoveryMethod.Current;
         public bool SkipNonTestAssemblies { get; private set; }
         public int AssemblySelectLimit { get; private set; }
 
@@ -326,7 +326,7 @@ namespace NUnit.VisualStudio.TestAdapter
             UseNUnitIdforTestCaseId = GetInnerTextAsBool(nunitNode, nameof(UseNUnitIdforTestCaseId), false);
             ConsoleOut = GetInnerTextAsInt(nunitNode, nameof(ConsoleOut), 1);  // 0 no output to console, 1 : output to console
             StopOnError = GetInnerTextAsBool(nunitNode, nameof(StopOnError), false);
-            DiscoveryMethod = MapEnum(GetInnerText(nunitNode, nameof(DiscoveryMethod), Verbosity > 0), DiscoveryMethod.ClassicXml);
+            DiscoveryMethod = MapEnum(GetInnerText(nunitNode, nameof(DiscoveryMethod), Verbosity > 0), DiscoveryMethod.Legacy);
 
 
             // Engine settings

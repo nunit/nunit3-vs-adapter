@@ -291,10 +291,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
     }
 
-
-
-
-
     [Category("TestExecution")]
     public class TestExecutionTestsForTestOutput
     {

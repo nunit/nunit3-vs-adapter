@@ -102,12 +102,12 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
     /// </summary>
     public class Tokenizer
     {
-        private string _input;
+        private readonly string _input;
         private int _index;
 
         private const char EOF_CHAR = '\0';
         private const string WORD_BREAK_CHARS = "=~!()&|";
-        private readonly string[] DOUBLE_CHAR_SYMBOLS = new string[] { "!=", "!~" };
+        private readonly string[] DOUBLE_CHAR_SYMBOLS = { "!=", "!~" };
 
         private Token _lookahead;
 
@@ -162,7 +162,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
                     GetChar();
                     foreach (string dbl in DOUBLE_CHAR_SYMBOLS)
                     {
-                        if (ch != dbl[0] || NextChar != dbl[1]) 
+                        if (ch != dbl[0] || NextChar != dbl[1])
                             continue;
                         GetChar();
                         return new Token(TokenKind.Symbol, dbl) { Pos = pos };
@@ -298,7 +298,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
         /// <summary>
         /// Get the next character in the input, consuming it.
         /// </summary>
-        /// <returns>The next char</returns>
+        /// <returns>The next char.</returns>
         private char GetChar()
         {
             return _index < _input.Length ? _input[_index++] : EOF_CHAR;

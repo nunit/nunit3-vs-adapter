@@ -74,9 +74,9 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public NUnitDiscoveryTestRun TestRun { get; private set; }
 
         /// <summary>
-        /// Checks if we're running the latest Current DiscoveryMethod
+        /// Checks if we're running the latest Current DiscoveryMethod.
         /// </summary>
-        public bool IsDiscoveryMethodCurrent => Settings.DiscoveryMethod == DiscoveryMethod.Modern;
+        public bool IsDiscoveryMethodCurrent => Settings.DiscoveryMethod == DiscoveryMethod.Current;
 
         public NUnitDiscoveryTestAssembly CurrentTestAssembly => TestRun.TestAssembly;
 
@@ -127,7 +127,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         {
             AssemblyPath = assemblyPath;
             var timing = new TimingLogger(Settings, TestLog);
-            if (Settings.DiscoveryMethod != DiscoveryMethod.ClassicXml)
+            if (Settings.DiscoveryMethod != DiscoveryMethod.Legacy)
             {
                 TestRun = ConvertXml(discoveryResults);
             }
@@ -138,7 +138,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             // the converter's cache of all test cases is populated as well.
             // All future calls to convert a test case may now use the cache.
 
-            if (Settings.DiscoveryMethod == DiscoveryMethod.ClassicXml)
+            if (Settings.DiscoveryMethod == DiscoveryMethod.Legacy)
             {
                 converterForXml = new TestConverterForXml(TestLog, AssemblyPath, Settings);
                 foreach (XmlNode testNode in nunitTestCases)
