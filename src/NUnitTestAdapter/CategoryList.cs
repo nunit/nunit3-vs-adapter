@@ -72,6 +72,9 @@ namespace NUnit.VisualStudio.TestAdapter
             categorylist.AddRange(categories);
         }
 
+        /// <summary>
+        /// Unsure about purpose of this, see https://github.com/nunit/nunit3-vs-adapter/pull/763#discussion_r446668680.
+        /// </summary
         public int LastNodeListCount { get; private set; }
 
         public IEnumerable<string> ProcessTestCaseProperties(INUnitTestCasePropertyInfo testNode, bool addToCache, string key = null,

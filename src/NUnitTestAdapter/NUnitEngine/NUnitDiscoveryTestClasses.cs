@@ -313,7 +313,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public override bool IsExplicit
         {
             get
-            {
+            { 
                 if (RunState == RunStateEnum.Explicit)
                     return true;
                 var fullList = new List<NUnitDiscoverySuiteBase>();

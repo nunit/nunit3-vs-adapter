@@ -32,12 +32,6 @@ using VSTestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-    // public interface ITestConverter
-    // {
-    //    TestCase GetCachedTestCase(string id);
-    //    TestConverterForXml.TestResultSet GetVsTestResults(INUnitTestEventTestCase resultNode, ICollection<INUnitTestEventTestOutput> outputNodes);
-    // }
-
     public sealed class TestConverter : IDisposable, ITestConverter
     {
         private readonly ITestLogger _logger;
@@ -140,14 +134,6 @@ namespace NUnit.VisualStudio.TestAdapter
                     results.Add(result);
             }
             return new TestConverterForXml.TestResultSet { TestCaseResult = testCaseResult, TestResults = results, ConsoleOutput = resultNode.Output };
-        }
-
-        public struct TestResultSet
-        {
-            public IList<VSTestResult> TestResults { get; set; }
-            public TestResult TestCaseResult { get; set; }
-
-            public string ConsoleOutput { get; set; }
         }
 
         #endregion

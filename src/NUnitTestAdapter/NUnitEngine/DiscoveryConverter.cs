@@ -22,6 +22,7 @@
 // ***********************************************************************
 
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Xml;
@@ -304,7 +305,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             var className = child.Attribute(NUnitXmlAttributeNames.Classname)?.Value;
             var methodName = child.Attribute(NUnitXmlAttributeNames.Methodname)?.Value;
             var seedAtr = child.Attribute(NUnitXmlAttributeNames.Seed)?.Value;
-            var seed = seedAtr != null ? long.Parse(seedAtr) : 0;
+            var seed = seedAtr != null ? long.Parse(seedAtr, CultureInfo.InvariantCulture) : 0;
             var btf = ExtractSuiteBasePropertiesClass(child);
             var tc = new NUnitDiscoveryTestCase(btf, tf, className, methodName, seed);
             return tc;
@@ -362,7 +363,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             var dRunstate = ExtractRunState(node);
             const char apo = (char)0x22;
             var tcs = node.Attribute(NUnitXmlAttributeNames.Testcasecount)?.Value.Trim(apo);
-            int dTestcasecount = int.Parse(tcs ?? "1");
+            int dTestcasecount = int.Parse(tcs ?? "1", CultureInfo.InvariantCulture);
             var bp = new BaseProperties(dId, dName, dFullname, dTestcasecount, dRunstate);
 
             foreach (var propnode in node.Elements("properties").Elements("property"))
