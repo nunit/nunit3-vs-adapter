@@ -162,7 +162,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     filter = filterBuilder.FilterByList(discovery.LoadedTestCases);
                 }
             }
-            else if (VsTestFilter != null && !VsTestFilter.IsEmpty)
+            else if (VsTestFilter != null && !VsTestFilter.IsEmpty && !Settings.UseNUnitFilter)
             {
                 var s = VsTestFilter.TfsTestCaseFilterExpression.TestCaseFilterValue;
                 var scount = s.Split('|', '&').Length;
