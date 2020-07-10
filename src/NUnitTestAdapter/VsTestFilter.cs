@@ -33,6 +33,7 @@ namespace NUnit.VisualStudio.TestAdapter
     // ReSharper disable once RedundantUsingDirective
     using System.Reflection;  // Needed for .net core 2.1
     using NUnit.VisualStudio.TestAdapter.Internal;  // Needed for reflection
+    using NUnit.VisualStudio.TestAdapter.TestFilterConverter;
 
     public interface IVsTestFilter
     {
@@ -233,9 +234,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         protected override bool CheckFilter(TestCase testCase)
         {
-            // var isExplicit = testCase.GetPropertyValue(CategoryList.NUnitExplicitProperty, false);
-
-            return /*!isExplicit &&*/ TfsTestCaseFilterExpression?.MatchTestCase(testCase, p => PropertyValueProvider(testCase, p)) != false;
+            return TfsTestCaseFilterExpression?.MatchTestCase(testCase, p => PropertyValueProvider(testCase, p)) != false;
         }
     }
 

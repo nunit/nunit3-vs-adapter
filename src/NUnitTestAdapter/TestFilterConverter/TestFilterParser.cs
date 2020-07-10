@@ -63,6 +63,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
             var result = ParseFilterExpression();
 
             Expect(EOF);
+            result = $"<filter>{result}</filter>";
             return result;
         }
 

@@ -105,6 +105,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         int AssemblySelectLimit { get; }
 
+        bool UseNUnitFilter { get; }
 
 
         void Load(IDiscoveryContext context);
@@ -228,6 +229,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public DiscoveryMethod DiscoveryMethod { get; private set; } = DiscoveryMethod.Current;
         public bool SkipNonTestAssemblies { get; private set; }
         public int AssemblySelectLimit { get; private set; }
+        public bool UseNUnitFilter { get; private set; }
 
         public VsTestCategoryType VsTestCategoryType { get; private set; } = VsTestCategoryType.NUnit;
 
@@ -326,7 +328,8 @@ namespace NUnit.VisualStudio.TestAdapter
             UseNUnitIdforTestCaseId = GetInnerTextAsBool(nunitNode, nameof(UseNUnitIdforTestCaseId), false);
             ConsoleOut = GetInnerTextAsInt(nunitNode, nameof(ConsoleOut), 1);  // 0 no output to console, 1 : output to console
             StopOnError = GetInnerTextAsBool(nunitNode, nameof(StopOnError), false);
-            DiscoveryMethod = MapEnum(GetInnerText(nunitNode, nameof(DiscoveryMethod), Verbosity > 0), DiscoveryMethod.Legacy);
+            DiscoveryMethod = MapEnum(GetInnerText(nunitNode, nameof(DiscoveryMethod), Verbosity > 0), DiscoveryMethod.Current);
+            UseNUnitFilter = GetInnerTextAsBool(nunitNode, nameof(UseNUnitFilter), true);
 
 
             // Engine settings

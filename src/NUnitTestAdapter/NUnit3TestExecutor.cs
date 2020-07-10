@@ -21,7 +21,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-// #define LAUNCHDEBUGGER
+//#define LAUNCHDEBUGGER
 
 using System;
 using System.Collections.Generic;
@@ -64,7 +64,9 @@ namespace NUnit.VisualStudio.TestAdapter
         public IVsTestFilter VsTestFilter { get; private set; }
 
         public ITestLogger Log => TestLog;
+
         public INUnitEngineAdapter EngineAdapter => NUnitEngineAdapter;
+
         public string TestOutputXmlFolder { get; set; } = "";
 
         // NOTE: an earlier version of this code had a FilterBuilder
@@ -103,13 +105,23 @@ namespace NUnit.VisualStudio.TestAdapter
                 return;
             }
 
+            var builder = CreateTestFilterBuilder();
+            TestFilter filter = null;
+            if (Settings.UseNUnitFilter)
+            {
+                var vsTestFilter = VsTestFilterFactory.CreateVsTestFilter(Settings, runContext);
+                filter = builder.ConvertVsTestFilterToNUnitFilter(vsTestFilter);
+            }
+            if (filter == null)
+            {
+                filter = builder.FilterByWhere(Settings.Where);
+            }
+
             foreach (string assemblyName in sources)
             {
                 try
                 {
                     string assemblyPath = Path.IsPathRooted(assemblyName) ? assemblyName : Path.Combine(Directory.GetCurrentDirectory(), assemblyName);
-                    var filter = CreateTestFilterBuilder().FilterByWhere(Settings.Where);
-
                     RunAssembly(assemblyPath, null, filter);
                 }
                 catch (Exception ex)
@@ -224,11 +236,6 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private void RunAssembly(string assemblyPath, IGrouping<string, TestCase> testCases, TestFilter filter)
         {
-#if LAUNCHDEBUGGER
-            if (!Debugger.IsAttached)
-                Debugger.Launch();
-#endif
-
             string actionText = Debugger.IsAttached ? "Debugging " : "Running ";
             string selectionText = filter == null || filter == TestFilter.Empty ? "all" : "selected";
             TestLog.Info(actionText + selectionText + " tests in " + assemblyPath);
@@ -313,7 +320,11 @@ namespace NUnit.VisualStudio.TestAdapter
 
 
         private NUnitTestFilterBuilder CreateTestFilterBuilder()
-            => new NUnitTestFilterBuilder(NUnitEngineAdapter.GetService<ITestFilterService>(), Settings);
+        {
+            return new NUnitTestFilterBuilder(NUnitEngineAdapter.GetService<ITestFilterService>(), Settings);
+        }
+
+
 
 
         private void CreateTestOutputFolder()

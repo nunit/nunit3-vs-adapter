@@ -26,6 +26,7 @@ using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.Engine;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
+using NUnit.VisualStudio.TestAdapter.TestFilterConverter;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
@@ -50,6 +51,30 @@ namespace NUnit.VisualStudio.TestAdapter
             // TestLog.Info(string.Format("TFS Filter detected: LoadedTestCases {0}, Filtered Test Cases {1}", loadedTestCases.Count, testCases.Count()));
             return testCases.Any() ? FilterByList(testCases) : NoTestsFound;
         }
+
+
+        public TestFilter ConvertVsTestFilterToNUnitFilter(IVsTestFilter vsFilter, IDiscoveryConverter discovery)
+        {
+            if (settings.DiscoveryMethod == DiscoveryMethod.Legacy)
+                return ConvertTfsFilterToNUnitFilter(vsFilter, discovery.LoadedTestCases);
+            if (!settings.UseNUnitFilter) 
+                return ConvertTfsFilterToNUnitFilter(vsFilter, discovery);
+            var result = ConvertVsTestFilterToNUnitFilter(vsFilter);
+            if (result == null)
+                return ConvertTfsFilterToNUnitFilter(vsFilter, discovery);
+            return result;
+        }
+
+        public TestFilter ConvertVsTestFilterToNUnitFilter(IVsTestFilter vsFilter)
+        {
+            if (string.IsNullOrEmpty(vsFilter?.TfsTestCaseFilterExpression?.TestCaseFilterValue))
+                return null;
+            var parser = new TestFilterParser();
+            var filter = parser.Parse(vsFilter.TfsTestCaseFilterExpression.TestCaseFilterValue);
+            var tf = new TestFilter(filter);
+            return tf;
+        }
+
 
         public TestFilter ConvertTfsFilterToNUnitFilter(IVsTestFilter vsFilter, IDiscoveryConverter discovery)
         {
