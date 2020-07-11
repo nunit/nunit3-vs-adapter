@@ -12,8 +12,8 @@ var configuration = Argument("configuration", "Release");
 // SET PACKAGE VERSION
 //////////////////////////////////////////////////////////////////////
 
-var version = "3.17.0";
-var modifier = "-ce168";
+var version = "4.0.0";
+var modifier = "";
 
 var dbgSuffix = configuration.ToLower() == "debug" ? "-dbg" : "";
 var packageVersion = version + modifier + dbgSuffix;
