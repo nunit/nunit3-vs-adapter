@@ -217,7 +217,20 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         long Seed { get; set; }
     }
 
-    public sealed class NUnitDiscoveryTestCase : NUnitDiscoverySuiteBase, INUnitDiscoveryTestCase
+    /// <summary>
+    /// Interface for common properties between event testcase and discoverytestcase
+    /// </summary>
+    public interface INUnitCommonTestCase
+    {
+        string Id { get; }
+        string Name { get; }
+        string FullName { get; }
+        string ClassName { get; }
+        string MethodName { get; }
+        long Seed { get;  }
+    }
+
+    public sealed class NUnitDiscoveryTestCase : NUnitDiscoverySuiteBase, INUnitDiscoveryTestCase, INUnitCommonTestCase
     {
         public string ClassName { get; }
         public string MethodName { get; set; }

@@ -126,6 +126,8 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public IList<TestCase> Convert(NUnitResults discoveryResults, string assemblyPath)
         {
+            if (discoveryResults == null)
+                return new List<TestCase>();
             AssemblyPath = assemblyPath;
             var timing = new TimingLogger(Settings, TestLog);
             if (Settings.DiscoveryMethod != DiscoveryMethod.Legacy)

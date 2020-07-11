@@ -46,6 +46,15 @@ namespace NUnit.VisualStudio.TestAdapter
         IFrameworkHandle FrameworkHandle { get; }
     }
 
+    public enum RunType
+    {
+        Unknown,
+        CommandLineLegacy,
+        CommandLineCurrentVsTest,
+        CommandLineCurrentNUnit,
+        Ide
+    }
+
 
     [ExtensionUri(ExecutorUri)]
     public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDisposable, INUnit3TestExecutor, IExecutionContext
@@ -56,6 +65,8 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         #region Properties
+
+        private RunType RunType { get; set; }
 
         // Properties set when either of the RunTests methods is called
         public IRunContext RunContext { get; private set; }
@@ -105,9 +116,10 @@ namespace NUnit.VisualStudio.TestAdapter
                 return;
             }
 
+            SetRunTypeByStrings();
             var builder = CreateTestFilterBuilder();
             TestFilter filter = null;
-            if (Settings.UseNUnitFilter)
+            if (RunType == RunType.CommandLineCurrentNUnit)
             {
                 var vsTestFilter = VsTestFilterFactory.CreateVsTestFilter(Settings, runContext);
                 filter = builder.ConvertVsTestFilterToNUnitFilter(vsTestFilter);
@@ -135,6 +147,12 @@ namespace NUnit.VisualStudio.TestAdapter
             Unload();
         }
 
+        private void SetRunTypeByStrings() =>
+            RunType = !Settings.DesignMode
+                ? Settings.DiscoveryMethod == DiscoveryMethod.Legacy ? RunType.CommandLineLegacy :
+                Settings.UseNUnitFilter ? RunType.CommandLineCurrentNUnit : RunType.CommandLineCurrentVsTest
+                : RunType.Ide;
+
         /// <summary>
         /// Called by the VisualStudio IDE when selected tests are to be run. Never called from TFS Build.
         /// </summary>
@@ -150,11 +168,12 @@ namespace NUnit.VisualStudio.TestAdapter
             Initialize(runContext, frameworkHandle);
             TestLog.Debug("RunTests by IEnumerable<TestCase>");
             InitializeForExecution(runContext, frameworkHandle);
+            RunType = RunType.Ide;
             var timing = new TimingLogger(Settings, TestLog);
             Debug.Assert(NUnitEngineAdapter != null, "NUnitEngineAdapter is null");
             Debug.Assert(NUnitEngineAdapter.EngineEnabled, "NUnitEngineAdapter TestEngine is null");
             var assemblyGroups = tests.GroupBy(tc => tc.Source);
-            if (Settings.InProcDataCollectorsAvailable && assemblyGroups.Count() > 1)
+            if (IsInProcDataCollectorsSpecifiedWithMultipleAssemblies(assemblyGroups))
             {
                 TestLog.Error("Failed to run tests for multiple assemblies when InProcDataCollectors specified in run configuration.");
                 Unload();
@@ -187,6 +206,9 @@ namespace NUnit.VisualStudio.TestAdapter
             TestLog.Info($"NUnit Adapter {AdapterVersion}: Test execution complete");
             Unload();
         }
+
+        private bool IsInProcDataCollectorsSpecifiedWithMultipleAssemblies(IEnumerable<IGrouping<string, TestCase>> assemblyGroups) 
+            => Settings.InProcDataCollectorsAvailable && assemblyGroups.Count() > 1;
 
         void ITestExecutor.Cancel()
         {
@@ -249,10 +271,11 @@ namespace NUnit.VisualStudio.TestAdapter
                 CreateTestOutputFolder();
                 Dump?.StartDiscoveryInExecution(testCases, filter, package);
 
+                // var discoveryResults = RunType == RunType.CommandLineCurrentNUnit ? null : NUnitEngineAdapter.Explore(filter);
                 var discoveryResults = NUnitEngineAdapter.Explore(filter);
-                Dump?.AddString(discoveryResults.AsString());
+                Dump?.AddString(discoveryResults?.AsString() ?? " No discovery");
 
-                if (discoveryResults.IsRunnable)
+                if (discoveryResults?.IsRunnable ?? true)
                 {
                     var discovery = new DiscoveryConverter(TestLog, Settings);
                     discovery.Convert(discoveryResults, assemblyPath);

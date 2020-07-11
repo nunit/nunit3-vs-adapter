@@ -170,7 +170,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.TestFilterConverterTests
             "<and><cat>Urgent</cat><not><or><test>My.Tests</test><cat>high</cat></or></not></and>")]
         public void TestParser(string input, string output)
         {
-            Assert.That(_parser.Parse(input), Is.EqualTo(output));
+            Assert.That(_parser.Parse(input), Is.EqualTo($"<filter>{output}</filter>"));
 
             XmlDocument doc = new XmlDocument();
             Assert.DoesNotThrow(() => doc.LoadXml(output));
