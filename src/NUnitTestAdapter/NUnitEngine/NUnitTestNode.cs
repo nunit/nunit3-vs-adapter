@@ -8,7 +8,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         string Id { get; }
         string FullName { get; }
         string Name { get; }
-        List<NUnitProperty> Properties { get; }
+        IEnumerable<NUnitProperty> Properties { get; }
     }
 
     public abstract class NUnitTestNode : INUnitTestNode
@@ -18,8 +18,9 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public string FullName => Node.GetAttribute("fullname");
         public string Name => Node.GetAttribute("name");
         public bool IsNull => Node == null;
-        public List<NUnitProperty> Properties { get; } = new List<NUnitProperty>();
 
+        private readonly List<NUnitProperty> properties = new List<NUnitProperty>();
+        public IEnumerable<NUnitProperty> Properties => properties;
         protected NUnitTestNode(XmlNode node)
         {
             Node = node;
@@ -28,7 +29,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             {
                 foreach (XmlNode prop in propertyNodes)
                 {
-                    Properties.Add(new NUnitProperty(prop.GetAttribute("name"), prop.GetAttribute("value")));
+                    properties.Add(new NUnitProperty(prop.GetAttribute("name"), prop.GetAttribute("value")));
                 }
             }
         }

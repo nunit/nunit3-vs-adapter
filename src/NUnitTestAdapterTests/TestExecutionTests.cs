@@ -209,11 +209,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             var testResult = GetTestResult(name);
 
-            Assert.NotNull(testResult, "Unable to find result for method: " + name);
+            Assert.That(testResult, Is.Not.Null, "Unable to find result for method: " + name);
             Assert.That(testResult.Outcome, Is.EqualTo(outcome));
             Assert.That(testResult.ErrorMessage, Is.EqualTo(message));
             if (hasStackTrace)
-                Assert.NotNull(testResult.ErrorStackTrace, "Unable to find error stacktrace");
+                Assert.That(testResult.ErrorStackTrace, Is.Not.Null, "Unable to find error stacktrace");
         }
 
         [Test]
@@ -290,10 +290,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                             .FirstOrDefault();
         }
     }
-
-
-
-
 
     [Category("TestExecution")]
     public class TestExecutionTestsForTestOutput

@@ -84,7 +84,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             var dir = TestContext.CurrentContext.TestDirectory;
             var filesNotToExist = Directory.EnumerateFiles(dir, "Microsoft", SearchOption.TopDirectoryOnly);
-            Assert.IsTrue(!filesNotToExist.Any(), "The reference of NUnitTestAdapter - Microsoft.VisualStudio.TestPlatform.ObjectModel must be set Copy Local to false");
+            Assert.That(!filesNotToExist.Any(), Is.True, "The reference of NUnitTestAdapter - Microsoft.VisualStudio.TestPlatform.ObjectModel must be set Copy Local to false");
         }
     }
 

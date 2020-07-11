@@ -42,7 +42,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public string AsString() => FullTopNode.AsString();
 
-        private XmlNode FullTopNode { get; }
+        public XmlNode FullTopNode { get; }
         public NUnitResults(XmlNode results)
         {
             FullTopNode = results;

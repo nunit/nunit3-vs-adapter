@@ -72,14 +72,16 @@ namespace NUnit.VisualStudio.TestAdapter
             categorylist.AddRange(categories);
         }
 
+        /// <summary>
+        /// Unsure about purpose of this, see https://github.com/nunit/nunit3-vs-adapter/pull/763#discussion_r446668680.
+        /// </summary
         public int LastNodeListCount { get; private set; }
 
-        public IEnumerable<string> ProcessTestCaseProperties(INUnitTestCase testNode, bool addToCache, string key = null,
+        public IEnumerable<string> ProcessTestCaseProperties(INUnitTestCasePropertyInfo testNode, bool addToCache, string key = null,
             IDictionary<string, TraitsFeature.CachedTestCaseInfo> traitsCache = null)
         {
-            var nodelist = testNode.Properties;
-            LastNodeListCount = nodelist.Count;
-            foreach (var propertyNode in nodelist)
+            LastNodeListCount = testNode.Properties.Count();
+            foreach (var propertyNode in testNode.Properties)
             {
                 if (addToCache)
                     AddTraitsToCache(traitsCache, key, propertyNode);
@@ -95,7 +97,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
             }
 
-            if (testNode.RunState != NUnitTestCase.eRunState.Explicit) // Attributes?["runstate"]?.Value != "Explicit")
+            if (testNode.RunState != RunStateEnum.Explicit) // Attributes?["runstate"]?.Value != "Explicit")
                 return categorylist;
             // Add UI grouping “Explicit”
             if (testCase.Traits.All(trait => trait.Name != ExplicitTraitName))

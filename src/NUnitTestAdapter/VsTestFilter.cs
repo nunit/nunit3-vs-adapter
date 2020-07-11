@@ -32,9 +32,10 @@ namespace NUnit.VisualStudio.TestAdapter
     using System.Collections;
     // ReSharper disable once RedundantUsingDirective
     using System.Reflection;  // Needed for .net core 2.1
-    using NUnit.VisualStudio.TestAdapter.Internal;
+    using NUnit.VisualStudio.TestAdapter.Internal;  // Needed for reflection
+    using NUnit.VisualStudio.TestAdapter.TestFilterConverter;
 
-    public interface ITfsTestFilter
+    public interface IVsTestFilter
     {
         ITestCaseFilterExpression TfsTestCaseFilterExpression { get; }
 
@@ -43,7 +44,7 @@ namespace NUnit.VisualStudio.TestAdapter
         IEnumerable<TestCase> CheckFilter(IEnumerable<TestCase> tests);
     }
 
-    public class TfsTestFilter : ITfsTestFilter
+    public abstract class VsTestFilter : IVsTestFilter
     {
         /// <summary>
         /// Supported properties for filtering.
@@ -53,7 +54,7 @@ namespace NUnit.VisualStudio.TestAdapter
         private static readonly Dictionary<NTrait, TestProperty> TraitPropertyMap;
         private static readonly List<string> SupportedProperties;
 
-        static TfsTestFilter()
+        static VsTestFilter()
         {
             // Initialize the property cache
             SupportedPropertiesCache = new Dictionary<string, TestProperty>(StringComparer.OrdinalIgnoreCase)
@@ -68,7 +69,9 @@ namespace NUnit.VisualStudio.TestAdapter
             var categoryTrait = new NTrait("Category", "");
             SupportedTraitCache = new Dictionary<string, NTrait>(StringComparer.OrdinalIgnoreCase)
             {
-                ["Priority"] = priorityTrait, ["TestCategory"] = categoryTrait, ["Category"] = categoryTrait
+                ["Priority"] = priorityTrait,
+                ["TestCategory"] = categoryTrait,
+                ["Category"] = categoryTrait
             };
             // Initialize the trait property map, since TFS doesnt know about traits
             TraitPropertyMap = new Dictionary<NTrait, TestProperty>(new NTraitNameComparer());
@@ -85,7 +88,8 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         private readonly IRunContext runContext;
-        public TfsTestFilter(IRunContext runContext)
+
+        protected VsTestFilter(IRunContext runContext)
         {
             this.runContext = runContext;
         }
@@ -93,8 +97,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private ITestCaseFilterExpression testCaseFilterExpression;
         public ITestCaseFilterExpression TfsTestCaseFilterExpression =>
-            testCaseFilterExpression ??
-            (testCaseFilterExpression = runContext.GetTestCaseFilter(SupportedProperties, PropertyProvider));
+            testCaseFilterExpression ??= runContext.GetTestCaseFilter(SupportedProperties, PropertyProvider);
 
         public bool IsEmpty => TfsTestCaseFilterExpression == null || TfsTestCaseFilterExpression.TestCaseFilterValue == string.Empty;
 
@@ -103,12 +106,7 @@ namespace NUnit.VisualStudio.TestAdapter
             return tests.Where(CheckFilter).ToList();
         }
 
-        private bool CheckFilter(TestCase testCase)
-        {
-            var isExplicit = testCase.GetPropertyValue(CategoryList.NUnitExplicitProperty, false);
-
-            return !isExplicit && TfsTestCaseFilterExpression?.MatchTestCase(testCase, p => PropertyValueProvider(testCase, p)) != false;
-        }
+        protected abstract bool CheckFilter(TestCase testCase);
 
         /// <summary>
         /// Provides value of TestProperty corresponding to property name 'propertyName' as used in filter.
@@ -187,6 +185,61 @@ namespace NUnit.VisualStudio.TestAdapter
             return testTrait;
         }
     }
+
+    public static class VsTestFilterFactory
+    {
+        public static VsTestFilter CreateVsTestFilter(IAdapterSettings settings, IRunContext context)
+        {
+            if (settings.DiscoveryMethod == DiscoveryMethod.Legacy)
+                return new VsTestFilterLegacy(context);
+            if (settings.DesignMode)
+                return new VsTestFilterIde(context);
+            return new VsTestFilterNonIde(context);
+        }
+    }
+
+    public class VsTestFilterLegacy : VsTestFilter
+    {
+        public VsTestFilterLegacy(IRunContext runContext) : base(runContext)
+        {
+        }
+
+        protected override bool CheckFilter(TestCase testCase)
+        {
+            var isExplicit = testCase.GetPropertyValue(CategoryList.NUnitExplicitProperty, false);
+
+            return !isExplicit && TfsTestCaseFilterExpression?.MatchTestCase(testCase, p => PropertyValueProvider(testCase, p)) != false;
+        }
+    }
+
+    public class VsTestFilterIde : VsTestFilter
+    {
+        public VsTestFilterIde(IRunContext runContext) : base(runContext)
+        {
+        }
+
+        protected override bool CheckFilter(TestCase testCase)
+        {
+            var isExplicit = testCase.GetPropertyValue(CategoryList.NUnitExplicitProperty, false);
+
+            return !isExplicit && TfsTestCaseFilterExpression?.MatchTestCase(testCase, p => PropertyValueProvider(testCase, p)) != false;
+        }
+    }
+
+    public class VsTestFilterNonIde : VsTestFilter
+    {
+        public VsTestFilterNonIde(IRunContext runContext) : base(runContext)
+        {
+        }
+
+        protected override bool CheckFilter(TestCase testCase)
+        {
+            return TfsTestCaseFilterExpression?.MatchTestCase(testCase, p => PropertyValueProvider(testCase, p)) != false;
+        }
+    }
+
+
+
 
     public class NTraitNameComparer : IEqualityComparer<NTrait>
     {

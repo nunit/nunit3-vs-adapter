@@ -32,7 +32,28 @@ using VSTestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-    public sealed class TestConverter : IDisposable, ITestConverter
+    public interface ITestConverterCommon
+    {
+        TestCase GetCachedTestCase(string id);
+        TestConverterForXml.TestResultSet GetVsTestResults(INUnitTestEventTestCase resultNode, ICollection<INUnitTestEventTestOutput> outputNodes);
+    }
+
+    public interface ITestConverter : ITestConverterCommon
+    {
+        /// <summary>
+        /// Converts an NUnit test into a TestCase for Visual Studio,
+        /// using the best method available according to the exact
+        /// type passed and caching results for efficiency.
+        /// </summary>
+        TestCase ConvertTestCase(NUnitDiscoveryTestCase testNode);
+    }
+
+    public interface ITestConverterXml : ITestConverterCommon
+    {
+        TestCase ConvertTestCase(NUnitEventTestCase nUnitEventTestCase);
+    }
+
+    public sealed class TestConverterForXml : IDisposable, ITestConverterXml
     {
         private readonly ITestLogger _logger;
         private readonly Dictionary<string, TestCase> _vsTestCaseMap;
@@ -40,12 +61,10 @@ namespace NUnit.VisualStudio.TestAdapter
         private readonly NavigationDataProvider _navigationDataProvider;
         private bool CollectSourceInformation => adapterSettings.CollectSourceInformation;
         private readonly IAdapterSettings adapterSettings;
-        private static readonly string NL = Environment.NewLine;
-        private readonly IDiscoveryConverter discoveryConverter;
 
-        public TestConverter(ITestLogger logger, string sourceAssembly, IAdapterSettings settings, IDiscoveryConverter discoveryConverter)
+
+        public TestConverterForXml(ITestLogger logger, string sourceAssembly, IAdapterSettings settings)
         {
-            this.discoveryConverter = discoveryConverter;
             adapterSettings = settings;
             _logger = logger;
             _sourceAssembly = sourceAssembly;
@@ -72,15 +91,18 @@ namespace NUnit.VisualStudio.TestAdapter
         /// using the best method available according to the exact
         /// type passed and caching results for efficiency.
         /// </summary>
-        public TestCase ConvertTestCase(NUnitDiscoveryTestCase testNode)
+        public TestCase ConvertTestCase(NUnitEventTestCase testNode)
         {
+            if (!testNode.IsTestCase)
+                throw new ArgumentException("The argument must be a test case", nameof(testNode));
+
             // Return cached value if we have one
             string id = testNode.Id;
             if (_vsTestCaseMap.ContainsKey(id))
                 return _vsTestCaseMap[id];
 
             // Convert to VS TestCase and cache the result
-            var testCase = MakeTestCaseFromDiscoveryNode(testNode);
+            var testCase = MakeTestCaseFromXmlNode(testNode);
             _vsTestCaseMap.Add(id, testCase);
             return testCase;
         }
@@ -94,7 +116,9 @@ namespace NUnit.VisualStudio.TestAdapter
             return null;
         }
 
-        public TestConverterForXml.TestResultSet GetVsTestResults(INUnitTestEventTestCase resultNode, ICollection<INUnitTestEventTestOutput> outputNodes)
+        private static readonly string NL = Environment.NewLine;
+
+        public TestResultSet GetVsTestResults(INUnitTestEventTestCase resultNode, ICollection<INUnitTestEventTestOutput> outputNodes)
         {
             var results = new List<VSTestResult>();
 
@@ -133,7 +157,15 @@ namespace NUnit.VisualStudio.TestAdapter
                 if (result != null)
                     results.Add(result);
             }
-            return new TestConverterForXml.TestResultSet { TestCaseResult = testCaseResult, TestResults = results, ConsoleOutput = resultNode.Output };
+            return new TestResultSet { TestCaseResult = testCaseResult, TestResults = results, ConsoleOutput = resultNode.Output };
+        }
+
+        public struct TestResultSet
+        {
+            public IList<VSTestResult> TestResults { get; set; }
+            public TestResult TestCaseResult { get; set; }
+
+            public string ConsoleOutput { get; set; }
         }
 
         #endregion
@@ -144,7 +176,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// Makes a TestCase from an NUnit test, adding
         /// navigation data if it can be found.
         /// </summary>
-        private TestCase MakeTestCaseFromDiscoveryNode(NUnitDiscoveryTestCase testNode)
+        private TestCase MakeTestCaseFromXmlNode(NUnitEventTestCase testNode)
         {
             string fullyQualifiedName = testNode.FullName;
             if (adapterSettings.UseParentFQNForParametrizedTests)
@@ -185,17 +217,21 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 DisplayName = CreateDisplayName(fullyQualifiedName, testNode.Name),
                 CodeFilePath = null,
-                LineNumber = 0
+                LineNumber = 0,
             };
             if (adapterSettings.UseNUnitIdforTestCaseId)
             {
-                testCase.Id = EqtHash.GuidFromString(testNode.Id);
+                var id = testNode.Id;
+                testCase.Id = EqtHash.GuidFromString(id);
             }
             if (CollectSourceInformation && _navigationDataProvider != null)
             {
                 if (!CheckCodeFilePathOverride())
                 {
-                    var navData = _navigationDataProvider.GetNavigationData(testNode.ClassName, testNode.MethodName);
+                    var className = testNode.ClassName;
+                    var methodName = testNode.MethodName;
+
+                    var navData = _navigationDataProvider.GetNavigationData(className, methodName);
                     if (navData.IsValid)
                     {
                         testCase.CodeFilePath = navData.FilePath;
@@ -208,7 +244,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 _ = CheckCodeFilePathOverride();
             }
 
-            testCase.AddTraitsFromTestNode(testNode, TraitsCache, _logger, adapterSettings);
+            testCase.AddTraitsFromXmlTestNode(testNode, TraitsCache, _logger, adapterSettings);
 
             return testCase;
 
@@ -267,17 +303,7 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             var vsTest = GetCachedTestCase(resultNode.Id);
             if (vsTest == null)
-            {
-                var discoveredTest = discoveryConverter.AllTestCases.FirstOrDefault(o => o.Id == resultNode.Id);
-                if (discoveredTest != null)
-                {
-                    vsTest = ConvertTestCase(discoveredTest);
-                }
-                else
-                {
-                    return null;
-                }
-            }
+                return null;
 
             var vsResult = new VSTestResult(vsTest)
             {
@@ -342,10 +368,10 @@ namespace NUnit.VisualStudio.TestAdapter
             const string fileUriScheme = "file://";
             var attachmentSet = new AttachmentSet(new Uri(NUnitTestAdapter.ExecutorUri), "Attachments");
 
-            foreach (var attachment in resultNode.NUnitAttachments)
+            foreach (var attachment in resultNode.NUnitAttachments) // AttSelectNodes("attachments/attachment"))
             {
-                var path = attachment.FilePath;
-                var description = attachment.Description;
+                var path = attachment.FilePath; // SelectSingleNode("filePath")?.InnerText ?? string.Empty;
+                var description = attachment.Description; // SelectSingleNode("description")?.InnerText;
 
                 if (!(string.IsNullOrEmpty(path) || path.StartsWith(fileUriScheme, StringComparison.OrdinalIgnoreCase)))
                 {

@@ -24,7 +24,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
@@ -45,7 +44,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     }
 
     [Category("TestDiscovery")]
-    [TestFixtureSource(typeof(TestDiscoveryDataProvider), nameof(TestDiscoveryDataProvider.TestDiscoveryData))]
     public class TestDiscoveryTests : ITestCaseDiscoverySink
     {
         static readonly string MockAssemblyPath =
@@ -55,7 +53,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         private readonly IDiscoveryContext _context;
 
-        public TestDiscoveryTests(IDiscoveryContext context)
+        public TestDiscoveryTests()
         {
             _context = Substitute.For<IDiscoveryContext>();
         }
@@ -63,16 +61,16 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [OneTimeSetUp]
         public void LoadMockassembly()
         {
-            // Sanity check to be sure we have the correct version of mock-assembly.dll
+            // Sanity check to be sure we have the correct version of mock-assembly.dll.
             Assert.That(NUnit.Tests.Assemblies.MockAssembly.TestsAtRuntime, Is.EqualTo(NUnit.Tests.Assemblies.MockAssembly.Tests),
                 "The reference to mock-assembly.dll appears to be the wrong version");
             Assert.That(File.Exists(MockAssemblyPath), $"Can't locate mock-assembly.dll at {MockAssemblyPath}");
-            var runsettings = "<RunSettings><NUnit><UseParentFQNForParametrizedTests>True</UseParentFQNForParametrizedTests><SkipNonTestAssemblies>false</SkipNonTestAssemblies></NUnit></RunSettings>";
+            var runsettings = "<RunSettings><NUnit><UseParentFQNForParametrizedTests>True</UseParentFQNForParametrizedTests><SkipNonTestAssemblies>false</SkipNonTestAssemblies><DiscoveryMethod>Legacy</DiscoveryMethod></NUnit></RunSettings>";
             var rs = Substitute.For<IRunSettings>();
             rs.SettingsXml.Returns(runsettings);
             _context.RunSettings.Returns(rs);
             // Load the NUnit mock-assembly.dll once for this test, saving
-            // the list of test cases sent to the discovery sink
+            // the list of test cases sent to the discovery sink.
             var discoverer = TestAdapterUtils.CreateDiscoverer();
             discoverer.DiscoverTests(
                 new[] { MockAssemblyPath },

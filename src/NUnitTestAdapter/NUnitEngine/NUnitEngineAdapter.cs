@@ -23,9 +23,8 @@
 
 using System;
 using System.IO;
-using System.Xml;
 using NUnit.Engine;
-using NUnit.Engine.Services;
+using NUnit.VisualStudio.TestAdapter.Internal;
 // We use an alias so that we don't accidentally make
 // references to engine internals, except for creating
 // the engine object in the Initialize method.
@@ -40,6 +39,11 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         NUnitResults Explore(TestFilter filter);
         NUnitResults Run(ITestEventListener listener, TestFilter filter);
         void StopRun();
+
+        T GetService<T>()
+            where T : class;
+
+        void GenerateTestOutput(NUnitResults testResults, string assemblyPath, string testOutputXmlFolder);
     }
 
     public class NUnitEngineAdapter : INUnitEngineAdapter, IDisposable
@@ -75,17 +79,23 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public NUnitResults Explore()
         {
-            return new NUnitResults(Runner.Explore(TestFilter.Empty));
+            return Explore(TestFilter.Empty);
         }
 
         public NUnitResults Explore(TestFilter filter)
         {
-            return new NUnitResults(Runner.Explore(filter));
+            var timing = new TimingLogger(settings, logger);
+            var results = new NUnitResults(Runner.Explore(filter));
+            timing.LogTime("Execution engine discovery time ");
+            return results;
         }
 
         public NUnitResults Run(ITestEventListener listener, TestFilter filter)
         {
-            return new NUnitResults(Runner.Run(listener, filter));
+            var timing = new TimingLogger(settings, logger);
+            var results = new NUnitResults(Runner.Run(listener, filter));
+            timing.LogTime("Execution engine run time ");
+            return results;
         }
 
         public T GetService<T>()
@@ -122,12 +132,12 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             TestEngine?.Dispose();
         }
 
-        public void GenerateTestOutput(NUnitResults testResults, string assemblyPath, NUnit3TestExecutor nUnit3TestExecutor)
+        public void GenerateTestOutput(NUnitResults testResults, string assemblyPath, string testOutputXmlFolder)
         {
             if (!settings.UseTestOutputXml)
                 return;
 
-            string path = Path.Combine(nUnit3TestExecutor.TestOutputXmlFolder, $"{Path.GetFileNameWithoutExtension(assemblyPath)}.xml");
+            string path = Path.Combine(testOutputXmlFolder, $"{Path.GetFileNameWithoutExtension(assemblyPath)}.xml");
             var resultService = GetService<IResultService>();
 
             // Following null argument should work for nunit3 format. Empty array is OK as well.

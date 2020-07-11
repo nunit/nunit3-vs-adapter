@@ -49,7 +49,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var settings = Substitute.For<IAdapterSettings>();
             settings.MapWarningTo.Returns(TestOutcome.Skipped);
 
-            var converter = new TestConverter(logger, "whatever", settings);
+            var converter = new TestConverterForXml(logger, "whatever", settings);
 
             var res = converter.GetTestOutcome(resultNode);
 
