@@ -50,7 +50,7 @@ namespace NUnit.VisualStudio.TestAdapter
     {
         Unknown,
         CommandLineLegacy,
-        CommandLineCurrentVsTest,
+        CommandLineCurrentVSTest,
         CommandLineCurrentNUnit,
         Ide
     }
@@ -149,8 +149,11 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private void SetRunTypeByStrings() =>
             RunType = !Settings.DesignMode
-                ? Settings.DiscoveryMethod == DiscoveryMethod.Legacy ? RunType.CommandLineLegacy :
-                Settings.UseNUnitFilter ? RunType.CommandLineCurrentNUnit : RunType.CommandLineCurrentVsTest
+                ? Settings.DiscoveryMethod == DiscoveryMethod.Legacy
+                    ? RunType.CommandLineLegacy
+                    : Settings.UseNUnitFilter
+                        ? RunType.CommandLineCurrentNUnit
+                        : RunType.CommandLineCurrentVSTest
                 : RunType.Ide;
 
         /// <summary>
