@@ -21,9 +21,11 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
+using System;
 using System.IO;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
+using NSubstitute;
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
@@ -56,30 +58,30 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(_settings.MaxCpuCount, Is.EqualTo(-1));
-                Assert.Null(_settings.ResultsDirectory);
-                Assert.Null(_settings.TargetFrameworkVersion);
-                Assert.Null(_settings.TargetPlatform);
-                Assert.Null(_settings.TestAdapterPaths);
-                Assert.IsTrue(_settings.CollectSourceInformation);
+                Assert.That(_settings.ResultsDirectory, Is.Null);
+                Assert.That(_settings.TargetFrameworkVersion, Is.Null);
+                Assert.That(_settings.TargetPlatform, Is.Null);
+                Assert.That(_settings.TestAdapterPaths, Is.Null);
+                Assert.That(_settings.CollectSourceInformation, Is.True);
                 Assert.IsEmpty(_settings.TestProperties);
-                Assert.Null(_settings.InternalTraceLevel);
-                Assert.Null(_settings.WorkDirectory);
+                Assert.That(_settings.InternalTraceLevel, Is.Null);
+                Assert.That(_settings.WorkDirectory, Is.Null);
                 Assert.That(_settings.NumberOfTestWorkers, Is.EqualTo(-1));
                 Assert.That(_settings.DefaultTimeout, Is.EqualTo(0));
                 Assert.That(_settings.Verbosity, Is.EqualTo(0));
-                Assert.False(_settings.ShadowCopyFiles);
-                Assert.False(_settings.UseVsKeepEngineRunning);
-                Assert.Null(_settings.BasePath);
-                Assert.Null(_settings.PrivateBinPath);
-                Assert.NotNull(_settings.RandomSeed);
-                Assert.False(_settings.SynchronousEvents);
-                Assert.Null(_settings.DomainUsage);
-                Assert.False(_settings.InProcDataCollectorsAvailable);
-                Assert.IsFalse(_settings.DisableAppDomain);
-                Assert.IsFalse(_settings.DisableParallelization);
-                Assert.IsFalse(_settings.DesignMode);
-                Assert.False(_settings.UseTestOutputXml);
-            });
+                Assert.That(_settings.ShadowCopyFiles, Is.False);
+                Assert.That(_settings.UseVsKeepEngineRunning, Is.False);
+                Assert.That(_settings.BasePath, Is.Null);
+                Assert.That(_settings.PrivateBinPath, Is.Null);
+                Assert.That(_settings.RandomSeed, Is.Not.Null);
+                Assert.That(_settings.SynchronousEvents, Is.False);
+                Assert.That(_settings.DomainUsage, Is.Null);
+                Assert.That(_settings.InProcDataCollectorsAvailable, Is.False);
+                Assert.That(_settings.DisableAppDomain, Is.False);
+                Assert.That(_settings.DisableParallelization, Is.False);
+                Assert.That(_settings.DesignMode, Is.False);
+                Assert.That(_settings.UseTestOutputXml, Is.False);
+        });
         }
 
         [Test]
@@ -235,7 +237,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void ShadowCopySetting()
         {
             _settings.Load("<RunSettings><NUnit><ShadowCopyFiles>true</ShadowCopyFiles></NUnit></RunSettings>");
-            Assert.True(_settings.ShadowCopyFiles);
+            Assert.That(_settings.ShadowCopyFiles, Is.True);
+        }
+
+
+        [Test]
+        public void ShadowCopySettingDefault()
+        {
+            _settings.Load("");
+            Assert.That(_settings.ShadowCopyFiles, Is.False);
         }
 
         [Test]
@@ -249,7 +259,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void UseVsKeepEngineRunningSetting()
         {
             _settings.Load("<RunSettings><NUnit><UseVsKeepEngineRunning>true</UseVsKeepEngineRunning></NUnit></RunSettings>");
-            Assert.True(_settings.UseVsKeepEngineRunning);
+            Assert.That(_settings.UseVsKeepEngineRunning, Is.True);
         }
 
         [Test]
@@ -325,7 +335,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     </InProcDataCollectionRunSettings>
 </RunSettings>");
 
-            Assert.Null(_settings.DomainUsage);
+            Assert.That(_settings.DomainUsage, Is.Null);
             Assert.That(_settings.SynchronousEvents);
             Assert.That(_settings.NumberOfTestWorkers, Is.Zero);
             Assert.That(_settings.InProcDataCollectorsAvailable);
@@ -343,10 +353,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     </InProcDataCollectionRunSettings>
 </RunSettings>");
 
-            Assert.Null(_settings.DomainUsage);
-            Assert.False(_settings.SynchronousEvents);
+            Assert.That(_settings.DomainUsage, Is.Null);
+            Assert.That(_settings.SynchronousEvents, Is.False);
             Assert.That(_settings.NumberOfTestWorkers, Is.EqualTo(-1));
-            Assert.True(_settings.InProcDataCollectorsAvailable);
+            Assert.That(_settings.InProcDataCollectorsAvailable, Is.True);
         }
 
         [Test]
@@ -361,10 +371,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     </InProcDataCollectionRunSettings>
 </RunSettings>");
 
-            Assert.Null(_settings.DomainUsage);
-            Assert.True(_settings.SynchronousEvents);
+            Assert.That(_settings.DomainUsage, Is.Null);
+            Assert.That(_settings.SynchronousEvents, Is.True);
             Assert.That(_settings.NumberOfTestWorkers, Is.Zero);
-            Assert.True(_settings.InProcDataCollectorsAvailable);
+            Assert.That(_settings.InProcDataCollectorsAvailable, Is.True);
         }
 
         [Test]
@@ -431,6 +441,18 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 Assert.That(_settings.DisplayName, Is.EqualTo(DisplayNameOptions.Name));
                 Assert.That(_settings.MapWarningTo, Is.EqualTo(TestOutcome.Skipped));
             });
+        }
+
+        [TestCase("garbage", DiscoveryMethod.Current, DiscoveryMethod.Current)]
+        [TestCase("Legacy", DiscoveryMethod.Legacy, DiscoveryMethod.Legacy)]
+        [TestCase("Current", DiscoveryMethod.Legacy, DiscoveryMethod.Current)]
+        public void TestMapEnum<T>(string setting, T defaultValue, T expected)
+        where T : struct, Enum
+        {
+            var logger = Substitute.For<ITestLogger>();
+            var sut = new AdapterSettings(logger);
+            var result = sut.MapEnum(setting, defaultValue);
+            Assert.That(result, Is.EqualTo(expected), $"Failed for {setting}");
         }
     }
 }

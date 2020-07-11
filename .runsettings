@@ -47,6 +47,7 @@
         <Verbosity>5</Verbosity>
       <DumpXmlTestResults>true</DumpXmlTestResults>
       <DumpXmlTestDiscovery>true</DumpXmlTestDiscovery>
+      <DiscoveryMethod>Current</DiscoveryMethod>
     </NUnit>
 
 

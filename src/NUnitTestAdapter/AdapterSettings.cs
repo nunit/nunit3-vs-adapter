@@ -25,7 +25,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
-using System.Xml.Schema;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
@@ -59,6 +58,8 @@ namespace NUnit.VisualStudio.TestAdapter
         string DomainUsage { get; }
         bool DumpXmlTestDiscovery { get; }
         bool DumpXmlTestResults { get; }
+
+        bool DumpVsInput { get; }
 
         bool PreFilter { get; }
 
@@ -99,7 +100,13 @@ namespace NUnit.VisualStudio.TestAdapter
         bool FreakMode { get; }
         DisplayNameOptions DisplayName { get; }
         char FullnameSeparator { get; }
+        DiscoveryMethod DiscoveryMethod { get; }
         bool SkipNonTestAssemblies { get; }
+
+        int AssemblySelectLimit { get; }
+
+        bool UseNUnitFilter { get; }
+
 
         void Load(IDiscoveryContext context);
         void Load(string settingsXml);
@@ -120,14 +127,20 @@ namespace NUnit.VisualStudio.TestAdapter
         FullNameSep
     }
 
+    public enum DiscoveryMethod
+    {
+        Legacy,
+        Current
+    }
+
     public class AdapterSettings : IAdapterSettings
     {
         private const string RANDOM_SEED_FILE = "nunit_random_seed.tmp";
-        private readonly TestLogger _logger;
+        private readonly ITestLogger _logger;
 
         #region Constructor
 
-        public AdapterSettings(TestLogger logger)
+        public AdapterSettings(ITestLogger logger)
         {
             _logger = logger;
         }
@@ -213,8 +226,10 @@ namespace NUnit.VisualStudio.TestAdapter
         public int ConsoleOut { get; private set; }
         public bool StopOnError { get; private set; }
 
+        public DiscoveryMethod DiscoveryMethod { get; private set; } = DiscoveryMethod.Current;
         public bool SkipNonTestAssemblies { get; private set; }
-
+        public int AssemblySelectLimit { get; private set; }
+        public bool UseNUnitFilter { get; private set; }
 
         public VsTestCategoryType VsTestCategoryType { get; private set; } = VsTestCategoryType.NUnit;
 
@@ -240,6 +255,8 @@ namespace NUnit.VisualStudio.TestAdapter
         public bool DumpXmlTestDiscovery { get; private set; }
 
         public bool DumpXmlTestResults { get; private set; }
+
+        public bool DumpVsInput { get; private set; }
 
         public bool FreakMode { get; private set; }
 
@@ -311,14 +328,19 @@ namespace NUnit.VisualStudio.TestAdapter
             UseNUnitIdforTestCaseId = GetInnerTextAsBool(nunitNode, nameof(UseNUnitIdforTestCaseId), false);
             ConsoleOut = GetInnerTextAsInt(nunitNode, nameof(ConsoleOut), 1);  // 0 no output to console, 1 : output to console
             StopOnError = GetInnerTextAsBool(nunitNode, nameof(StopOnError), false);
+            DiscoveryMethod = MapEnum(GetInnerText(nunitNode, nameof(DiscoveryMethod), Verbosity > 0), DiscoveryMethod.Current);
+            UseNUnitFilter = GetInnerTextAsBool(nunitNode, nameof(UseNUnitFilter), true);
+
 
             // Engine settings
             SkipNonTestAssemblies = GetInnerTextAsBool(nunitNode, nameof(SkipNonTestAssemblies), true);
+            AssemblySelectLimit = GetInnerTextAsInt(nunitNode, nameof(AssemblySelectLimit), 2000);
 
 
             // Adapter Diagnostics
             DumpXmlTestDiscovery = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestDiscovery), false);
             DumpXmlTestResults = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestResults), false);
+            DumpVsInput = GetInnerTextAsBool(nunitNode, nameof(DumpVsInput), false);
             FreakMode = GetInnerTextAsBool(nunitNode, nameof(FreakMode), false);
             // End Diagnostics
 
@@ -565,6 +587,23 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             return testoutcome;
         }
+
+        public T MapEnum<T>(string setting, T defaultValue)
+            where T : struct, Enum
+        {
+            if (setting == null)
+                return defaultValue;
+            bool ok = TryParse.EnumTryParse(setting, out T result);
+            if (!ok)
+            {
+                _logger.Warning(
+                    $"Invalid value ({setting}) for {typeof(T)}");
+                return defaultValue;
+            }
+            return result;
+        }
+
+
         #endregion
     }
 }

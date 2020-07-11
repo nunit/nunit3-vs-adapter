@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2018 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2020-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -21,20 +21,30 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-using System.Reflection;
-using NUnit.Framework;
+using System;
+using System.Runtime.Serialization;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests
+namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
-    [TestFixture]
-    public class NUnit3TestDiscovererTests
+    [Serializable]
+    public class DiscoveryException : Exception
     {
-        [Test]
-        public void VerifyNunit3TestDiscovererHasCategoryAttribute()
+        public DiscoveryException()
         {
-            var attribute = typeof(NUnit3TestDiscoverer).GetTypeInfo().GetCustomAttribute(typeof(System.ComponentModel.CategoryAttribute));
-            Assert.That(attribute, Is.Not.Null);
-            Assert.That((attribute as System.ComponentModel.CategoryAttribute)?.Category, Is.EqualTo("managed"));
+        }
+
+        public DiscoveryException(string message) : base(message)
+        {
+        }
+
+        public DiscoveryException(string message, Exception inner) : base(message, inner)
+        {
+        }
+
+        protected DiscoveryException(
+            SerializationInfo info,
+            StreamingContext context) : base(info, context)
+        {
         }
     }
 }

@@ -21,6 +21,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
+using System.Collections.Generic;
 using System.Xml;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
@@ -32,37 +33,45 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         string Type { get; }
         string ClassName { get; }
         string MethodName { get; }
-        NUnitTestCase.eRunState RunState { get; }
-        NUnitTestCase Parent { get; }
+        RunStateEnum RunState { get; }
+        NUnitEventTestCase Parent { get; }
     }
 
-    public class NUnitTestCase : NUnitTestNode, INUnitTestCase
+    public enum RunStateEnum
     {
-        public enum eRunState
-        {
-            NA,
-            Runnable,
-            Explicit
-        }
+        NA,
+        Runnable,
+        Explicit,
+        NotRunnable
+    }
 
+    public interface INUnitTestCasePropertyInfo
+    {
+        RunStateEnum RunState { get; }
+        IEnumerable<NUnitProperty> Properties { get; }
+    }
+
+    public class NUnitEventTestCase : NUnitTestNode, INUnitTestCase, INUnitTestCasePropertyInfo
+    {
         public bool IsTestCase => !IsNull && Node.Name == "test-case";
         public bool IsParameterizedMethod => Type == "ParameterizedMethod";
         public string Type => Node.GetAttribute("type");
         public string ClassName => Node.GetAttribute("classname");
         public string MethodName => Node.GetAttribute("methodname");
 
-        eRunState runState = eRunState.NA;
+        RunStateEnum runState = RunStateEnum.NA;
 
-        public eRunState RunState
+        public RunStateEnum RunState
         {
             get
             {
-                if (runState == eRunState.NA)
+                if (runState == RunStateEnum.NA)
                 {
                     runState = Node.GetAttribute("runstate") switch
                     {
-                        "Runnable" => eRunState.Runnable,
-                        "Explicit" => eRunState.Explicit,
+                        "Runnable" => RunStateEnum.Runnable,
+                        "Explicit" => RunStateEnum.Explicit,
+                        "NotRunnable" => RunStateEnum.NotRunnable,
                         _ => runState
                     };
                 }
@@ -70,12 +79,12 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             }
         }
 
-        public NUnitTestCase(XmlNode testCase) : base(testCase)
+        public NUnitEventTestCase(XmlNode testCase) : base(testCase)
         {
             if (Node.ParentNode != null)
-                Parent = new NUnitTestCase(Node.ParentNode);
+                Parent = new NUnitEventTestCase(Node.ParentNode);
         }
 
-        public NUnitTestCase Parent { get; }
+        public NUnitEventTestCase Parent { get; }
     }
 }

@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2018 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2020-2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -21,20 +21,22 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-using System.Reflection;
-using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using NUnit.Engine;
+#pragma warning disable SA1618 // Generic type parameters should be documented
 
-namespace NUnit.VisualStudio.TestAdapter.Tests
+namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
-    [TestFixture]
-    public class NUnit3TestDiscovererTests
+    public static class Extensions
     {
-        [Test]
-        public void VerifyNunit3TestDiscovererHasCategoryAttribute()
-        {
-            var attribute = typeof(NUnit3TestDiscoverer).GetTypeInfo().GetCustomAttribute(typeof(System.ComponentModel.CategoryAttribute));
-            Assert.That(attribute, Is.Not.Null);
-            Assert.That((attribute as System.ComponentModel.CategoryAttribute)?.Category, Is.EqualTo("managed"));
-        }
+        /// <summary>
+        /// All will return true if seq is empty.  This returns false if sequence is empty.
+        /// </summary>
+        public static bool AllWithEmptyFalse<T>(this IEnumerable<T> list, Func<T, bool> pred) =>
+            list.All(pred) && list.Any();
+
+        public static bool IsEmpty(this TestFilter filter) => filter == TestFilter.Empty;
     }
 }

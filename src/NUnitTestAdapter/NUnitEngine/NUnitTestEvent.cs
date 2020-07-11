@@ -181,15 +181,17 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             Description = description;
         }
 
-        public string FilePath { get;  }
+        public string FilePath { get; }
 
-        public string Description { get;  }
+        public string Description { get; }
     }
 
     public class NUnitProperty
     {
         public string Name { get; }
         public string Value { get; }
+
+        public bool IsInternal => Name.StartsWith("_", StringComparison.Ordinal);
 
         public NUnitProperty(string name, string value)
         {

@@ -28,7 +28,7 @@ using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
 {
-    public static class VSTestFilterStringTests
+    public static class VSTestFilterStringTestsLegacy
     {
         [TestCase(null, new[] { "NonExplicitParent.NonExplicitTest" })]
         [TestCase("", new[] { "NonExplicitParent.NonExplicitTest" })]

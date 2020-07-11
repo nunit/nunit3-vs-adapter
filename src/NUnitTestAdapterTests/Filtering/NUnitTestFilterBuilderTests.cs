@@ -35,9 +35,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
         public void ThatConvertTfsFilterToNUnitFilterHandlesNoTests()
         {
             var filterService = Substitute.For<ITestFilterService>();
-            var sut = new NUnitTestFilterBuilder(filterService);
+            var settings = Substitute.For<IAdapterSettings>();
+            settings.AssemblySelectLimit.Returns(2000);
+            var sut = new NUnitTestFilterBuilder(filterService, settings);
             var loadedTestCases = new List<TestCase>();
-            var tfsFilter = Substitute.For<ITfsTestFilter>();
+            var tfsFilter = Substitute.For<IVsTestFilter>();
             var results = sut.ConvertTfsFilterToNUnitFilter(tfsFilter, loadedTestCases);
             Assert.That(results, Is.EqualTo(NUnitTestFilterBuilder.NoTestsFound));
         }
@@ -46,7 +48,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
         public void ThatWhereFilterIsAdded()
         {
             var filterService = Substitute.For<ITestFilterService>();
-            var sut = new NUnitTestFilterBuilder(filterService);
+            var settings = Substitute.For<IAdapterSettings>();
+            settings.AssemblySelectLimit.Returns(2000);
+            var sut = new NUnitTestFilterBuilder(filterService, settings);
             string where = "name='abc'";
             var testFilterBuilder = Substitute.For<ITestFilterBuilder>();
             filterService.GetTestFilterBuilder().Returns(testFilterBuilder);

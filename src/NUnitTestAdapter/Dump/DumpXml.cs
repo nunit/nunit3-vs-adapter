@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using NUnit.Engine;
 
 namespace NUnit.VisualStudio.TestAdapter.Dump
 {
@@ -36,6 +40,10 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
     {
         void AddString(string text);
         void AddTestEvent(string text);
+        void StartDiscoveryInExecution(IGrouping<string, TestCase> testCases, TestFilter filter, TestPackage package);
+        void DumpForExecution();
+        void DumpVSInputFilter(TestFilter filter, string info);
+        void StartExecution(TestFilter filter, string atExecution);
     }
 
     public class DumpXml : IDumpXml
@@ -47,9 +55,11 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
         private readonly string directory;
         private readonly string filename;
         private StringBuilder txt;
+        private static string assemblyPath;
 
         public DumpXml(string path, IFile file = null)
         {
+            assemblyPath = path;
             directory = Path.GetDirectoryName(path);
             filename = Path.GetFileName(path);
             this.file = file ?? new File();
@@ -73,14 +83,14 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
                 file.CreateDirectory(folder);
         }
 
-        public void Dump4Discovery()
+        public void DumpForDiscovery()
         {
             var dumpfolder = Path.Combine(directory, "Dump");
             var path = Path.Combine(dumpfolder, $"D_{filename}.dump");
             Dump2File(path);
         }
 
-        public void Dump4Execution()
+        public void DumpForExecution()
         {
             var dumpfolder = Path.Combine(directory, "Dump");
             var path = Path.Combine(dumpfolder, $"E_{filename}.dump");
@@ -102,31 +112,68 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
             txt.Append("\n</NUnitTestEvent>\n");
         }
 
-
-
-
-
         public void AddString(string text)
         {
             txt.Append(text);
         }
-    }
 
-    public static class XmlNodeExtension
-    {
-        public static string AsString(this System.Xml.XmlNode node)
+        public void DumpVSInputFilter(TestFilter filter, string info)
         {
-            using (var swriter = new StringWriter())
+            AddString($"<TestFilter>\n {info}  {filter.Text}\n</TestFilter>\n\n");
+        }
+
+        public void DumpVSInput(IEnumerable<TestCase> testCases)
+        {
+            AddString($"<VS_Input_TestCases>   (DisplayName : FQN : Id)\n");
+            foreach (var tc in testCases)
             {
-                using (var twriter = new System.Xml.XmlTextWriter(swriter))
-                {
-                    twriter.Formatting = System.Xml.Formatting.Indented;
-                    twriter.Indentation = 3;
-                    twriter.QuoteChar = '\'';
-                    node.WriteTo(twriter);
-                }
-                return swriter.ToString();
+                AddString($"   {tc.DisplayName} : {tc.FullyQualifiedName} : {tc.Id}\n");
             }
+            AddString("</VS_Input_TestCases>\n");
+        }
+
+        public void DumpVSInput2NUnit(TestPackage package)
+        {
+            AddString($"\n<TestPackage>: {package.Name}\n\n");
+            foreach (var tc in package.SubPackages)
+            {
+                DumpVSInput2NUnit(tc);
+            }
+            AddString("\n</TestPackage>\n\n");
+        }
+
+        private void DumpFromVSInput(IGrouping<string, TestCase> testCases, TestFilter filter, TestPackage package)
+        {
+            AddString("<VSTest input/>\n\n");
+            if (testCases != null)
+                DumpVSInput(testCases);
+            DumpVSInput2NUnit(package);
+            DumpVSInputFilter(filter, "");
+            AddString("</VSTest input/>\n\n");
+        }
+
+        public void StartDiscoveryInExecution(IGrouping<string, TestCase> testCases, TestFilter filter, TestPackage package)
+        {
+            DumpFromVSInput(testCases, filter, package);
+            AddString($"<NUnitDiscoveryInExecution>{assemblyPath}</NUnitExecution>\n\n");
+        }
+
+        public void StartExecution(TestFilter filter, string atExecution)
+        {
+            DumpVSInputFilter(filter, atExecution);
+            AddString($"\n\n<NUnitExecution>{assemblyPath}</NUnitExecution>\n\n");
+        }
+
+        public static IDumpXml CreateDump(string path, IGrouping<string, TestCase> testCases, IAdapterSettings settings)
+        {
+            if (!settings.DumpXmlTestResults)
+                return null;
+            var executionDumpXml = new DumpXml(path);
+            string runningBy = testCases == null
+                ? "<RunningBy>Sources</RunningBy>"
+                : "<RunningBy>TestCases</RunningBy>";
+            executionDumpXml.AddString($"\n{runningBy}\n");
+            return executionDumpXml;
         }
     }
 }

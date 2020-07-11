@@ -6,12 +6,14 @@
     <RootNamespace>NUnit.VisualStudio.TestAdapter.Tests.Acceptance</RootNamespace>
     <AssemblyName>NUnit.VisualStudio.TestAdapter.Tests.Acceptance</AssemblyName>
     <IsPackable>false</IsPackable>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="nunit" Version="3.12.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.16.1"/>
+    <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4" />
+    <PackageReference Include="NUnit.Analyzers" Version="0.3.0" />
   </ItemGroup>
 
 </Project>

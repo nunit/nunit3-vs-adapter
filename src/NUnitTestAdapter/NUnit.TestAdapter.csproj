@@ -48,6 +48,10 @@
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="15.0.0" PrivateAssets="All" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="TestFilterConverter\" />
+  </ItemGroup>
+
   <Target Name="PreventTestPlatformObjectModelCopyLocal" AfterTargets="ResolveReferences">
     <ItemGroup>
       <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' == 'Microsoft.VisualStudio.TestPlatform.ObjectModel'" />

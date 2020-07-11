@@ -25,7 +25,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
-using System.Xml.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NSubstitute;
 using NUnit.Framework;
@@ -37,110 +36,89 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     using Fakes;
 
     [Category("TestConverter")]
-    public class TestConverterTests
+    public class TestConverterForXmlTests
     {
-        private NUnitDiscoveryTestCase fakeTestNode;
-        private TestConverter testConverter;
+        private NUnitEventTestCase fakeTestNode;
+        private TestConverterForXml testConverterForXml;
 
         [SetUp]
         public void SetUp()
         {
-            var xDoc = XDocument.Parse(FakeTestData.TestXml);
-            var parent = Substitute.For<INUnitDiscoveryCanHaveTestFixture>();
-            parent.Parent.Returns(null as INUnitDiscoverySuiteBase);
-            var className = xDoc.Root.Attribute("classname").Value;
-            var tf = DiscoveryConverter.ExtractTestFixture(parent, xDoc.Root, className);
-            var tcs = DiscoveryConverter.ExtractTestCases(tf, xDoc.Root);
-            Assert.That(tcs.Count(), Is.EqualTo(1), "Setup: More than one test case in fake data");
-            fakeTestNode = tcs.Single();
+            fakeTestNode = new NUnitEventTestCase(FakeTestData.GetTestNode());
             var settings = Substitute.For<IAdapterSettings>();
             settings.ConsoleOut.Returns(0);
             settings.UseTestNameInConsoleOutput.Returns(false);
             settings.CollectSourceInformation.Returns(true);
-            var discoveryConverter = Substitute.For<IDiscoveryConverter>();
-            testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings, discoveryConverter);
+            testConverterForXml = new TestConverterForXml(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings);
         }
 
         [TearDown]
         public void TearDown()
         {
-            testConverter?.Dispose();
+            testConverterForXml.Dispose();
         }
 
         [Test]
         public void CanMakeTestCaseFromTest()
         {
-            var testCase = testConverter.ConvertTestCase(fakeTestNode);
+            var testCase = testConverterForXml.ConvertTestCase(fakeTestNode);
             CheckTestCase(testCase);
         }
 
         [Test]
         public void CanMakeTestCaseFromTestWithCache()
         {
-            var testCase = testConverter.ConvertTestCase(fakeTestNode);
+            var testCase = testConverterForXml.ConvertTestCase(fakeTestNode);
 
             CheckTestCase(testCase);
 
-            Assert.That(testConverter.TraitsCache.Keys.Count, Is.EqualTo(1));
-            Assert.That(testConverter.TraitsCache["121"].Traits.Count, Is.EqualTo(1));
-            var parentTrait = testConverter.TraitsCache["121"].Traits;
+            Assert.That(testConverterForXml.TraitsCache.Keys.Count, Is.EqualTo(1));
+            Assert.That(testConverterForXml.TraitsCache["121"].Traits.Count, Is.EqualTo(1));
+            var parentTrait = testConverterForXml.TraitsCache["121"].Traits;
             Assert.That(parentTrait[0].Name, Is.EqualTo("Category"));
             Assert.That(parentTrait[0].Value, Is.EqualTo("super"));
         }
 
-
-        [Ignore("To do")]
         [Test]
         public void CanMakeTestCaseShouldBuildTraitsCache()
         {
             var xmlNodeList = FakeTestData.GetTestNodes();
-            var tf = Substitute.For<INUnitDiscoveryCanHaveTestCases>();
+
             foreach (XmlNode node in xmlNodeList)
             {
-                var xElem = XElement.Load(node.CreateNavigator().ReadSubtree());
-                var tc = DiscoveryConverter.ExtractTestCase(tf, xElem);
-                var testCase = testConverter.ConvertTestCase(tc);
+                var testCase = testConverterForXml.ConvertTestCase(new NUnitEventTestCase(node));
             }
 
-            var traitsCache = testConverter.TraitsCache;
-            Assert.Multiple(() =>
-            {
-                // There are 12 ids in the TestXml2, but will be storing only ancestor properties.
-                // Not the leaf node test-case properties.
-                Assert.That(traitsCache.Keys.Count, Is.EqualTo(7));
+            var traitsCache = testConverterForXml.TraitsCache;
 
-                // Even though ancestor doesn't have any properties. Will be storing their ids.
-                // So that we will not make call SelectNodes call again.
-                CheckNodesWithNoProperties(traitsCache);
+            // There are 12 ids in the TestXml2, but will be storing only ancestor properties.
+            // Not the leaf node test-case properties.
+            Assert.That(traitsCache.Keys.Count, Is.EqualTo(7));
 
-                // Will not be storing leaf nodes test-case nodes in the cache.
-                CheckNoTestCaseNodesExist(traitsCache);
+            // Even though ancestor doesn't have any properties. Will be storing their ids.
+            // So that we will not make call SelectNodes call again.
+            CheckNodesWithNoProperties(traitsCache);
 
-                // Checking assembly level attribute.
-                CheckNodeProperties(traitsCache, "0-1009",
-                    new[] { new KeyValuePair<string, string>("Category", "AsmCat") });
+            // Will not be storing leaf nodes test-case nodes in the cache.
+            CheckNoTestCaseNodesExist(traitsCache);
 
-                // Checking Class level attributes base class & dervied class
-                CheckNodeProperties(traitsCache, "0-1000",
-                    new[] { new KeyValuePair<string, string>("Category", "BaseClass") });
-                CheckNodeProperties(traitsCache, "0-1002",
-                    new[]
-                    {
-                        new KeyValuePair<string, string>("Category", "DerivedClass"),
-                        new KeyValuePair<string, string>("Category", "BaseClass")
-                    });
+            // Checking assembly level attribute.
+            CheckNodeProperties(traitsCache, "0-1009", new[] { new KeyValuePair<string, string>("Category", "AsmCat") });
 
-                // Checking Nested class attributes.
-                CheckNodeProperties(traitsCache, "0-1005", new[] { new KeyValuePair<string, string>("Category", "NS1") });
-                CheckNodeProperties(traitsCache, "0-1007", new[] { new KeyValuePair<string, string>("Category", "NS2") });
-            });
+            // Checking Class level attributes base class & dervied class
+            CheckNodeProperties(traitsCache, "0-1000", new[] { new KeyValuePair<string, string>("Category", "BaseClass") });
+            CheckNodeProperties(traitsCache, "0-1002", new[] { new KeyValuePair<string, string>("Category", "DerivedClass"), new KeyValuePair<string, string>("Category", "BaseClass") });
+
+            // Checking Nested class attributes.
+            CheckNodeProperties(traitsCache, "0-1005", new[] { new KeyValuePair<string, string>("Category", "NS1") });
+            CheckNodeProperties(traitsCache, "0-1007", new[] { new KeyValuePair<string, string>("Category", "NS2") });
         }
 
         [Test]
         public void ConvertedTestCaseIsCached()
         {
-            testConverter.ConvertTestCase(fakeTestNode);
-            var testCase = testConverter.GetCachedTestCase("123");
+            testConverterForXml.ConvertTestCase(fakeTestNode);
+            var testCase = testConverterForXml.GetCachedTestCase("123");
 
             CheckTestCase(testCase);
         }
@@ -149,7 +127,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void CannotMakeTestResultWhenTestCaseIsNotInCache()
         {
             var fakeResultNode = new NUnitTestEventTestCase(FakeTestData.GetResultNode());
-            var results = testConverter.GetVsTestResults(fakeResultNode, Enumerable.Empty<INUnitTestEventTestOutput>().ToList());
+            var results = testConverterForXml.GetVsTestResults(fakeResultNode, Enumerable.Empty<INUnitTestEventTestOutput>().ToList());
             Assert.That(results.TestResults.Count, Is.EqualTo(0));
         }
 
@@ -157,10 +135,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void CanMakeTestResultFromNUnitTestResult()
         {
             // This should put the TestCase in the cache
-            var cachedTestCase = testConverter.ConvertTestCase(fakeTestNode);
+            var cachedTestCase = testConverterForXml.ConvertTestCase(fakeTestNode);
             var fakeResultNode = new NUnitTestEventTestCase(FakeTestData.GetResultNode());
 
-            var testResults = testConverter.GetVsTestResults(fakeResultNode, Enumerable.Empty<INUnitTestEventTestOutput>().ToList());
+            var testResults = testConverterForXml.GetVsTestResults(fakeResultNode, Enumerable.Empty<INUnitTestEventTestOutput>().ToList());
             var testResult = testResults.TestResults[0];
             var testCase = testResult.TestCase;
 
@@ -187,11 +165,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             "StdErrMsgs:some stdErr")]
         public void CanMakeTestResultFromNUnitTestResult2(string output, string expectedMessages)
         {
-            var cachedTestCase = testConverter.ConvertTestCase(fakeTestNode);
+            var cachedTestCase = testConverterForXml.ConvertTestCase(fakeTestNode);
             var fakeResultNode = new NUnitTestEventTestCase(FakeTestData.GetResultNode());
             var outputNodes = output.Split(';').Select(i => new NUnitTestEventTestOutput(XmlHelper.CreateXmlNode(i.Trim()))).ToList();
             var outputNodesCollection = new List<INUnitTestEventTestOutput>(outputNodes);
-            var testResults = testConverter.GetVsTestResults(fakeResultNode, outputNodesCollection);
+            var testResults = testConverterForXml.GetVsTestResults(fakeResultNode, outputNodesCollection);
             var testResult = testResults.TestResults[0];
             var actualMessages = string.Join(";", testResult.Messages.Select(i => i.Category + ":" + i.Text));
 
@@ -203,10 +181,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void Attachments_CorrectAmountOfConvertedAttachments()
         {
-            var cachedTestCase = testConverter.ConvertTestCase(fakeTestNode);
+            var cachedTestCase = testConverterForXml.ConvertTestCase(fakeTestNode);
             var fakeResultNode = new NUnitTestEventTestCase(FakeTestData.GetResultNode());
 
-            var testResults = testConverter.GetVsTestResults(fakeResultNode, Enumerable.Empty<INUnitTestEventTestOutput>().ToList());
+            var testResults = testConverterForXml.GetVsTestResults(fakeResultNode, Enumerable.Empty<INUnitTestEventTestOutput>().ToList());
 
             var fakeAttachments = fakeResultNode.NUnitAttachments
                 .Where(n => !string.IsNullOrEmpty(n.FilePath))
@@ -229,10 +207,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             const string fileUriScheme = "file://";
             const string errorMessage = "Path must start with file:// uri scheme";
 
-            var cachedTestCase = testConverter.ConvertTestCase(fakeTestNode);
+            var cachedTestCase = testConverterForXml.ConvertTestCase(fakeTestNode);
             var fakeResultNode = new NUnitTestEventTestCase(FakeTestData.GetResultNode().AsString());
 
-            var testResults = testConverter.GetVsTestResults(fakeResultNode, Enumerable.Empty<INUnitTestEventTestOutput>().ToList());
+            var testResults = testConverterForXml.GetVsTestResults(fakeResultNode, Enumerable.Empty<INUnitTestEventTestOutput>().ToList());
 
             var convertedAttachments = testResults.TestResults
                 .SelectMany(tr => tr.Attachments.SelectMany(ats => ats.Attachments))

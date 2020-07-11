@@ -6,6 +6,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
+		.runsettings = .runsettings
 		appveyor.yml = appveyor.yml
 		build.cake = build.cake
 		build.cmd = build.cmd
@@ -19,7 +20,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		NUnit3TestAdapter.sln.DotSettings = NUnit3TestAdapter.sln.DotSettings
 		Osiris.Extended.ruleset = Osiris.Extended.ruleset
 		README.md = README.md
-		Simple.runsettings = Simple.runsettings
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{DE347D88-F6ED-4031-AFC2-318F63E39BC9}"
