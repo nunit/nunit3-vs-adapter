@@ -41,12 +41,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var string1 = "something";
             sut.AddString(string1);
             sut.DumpForDiscovery();
-            Assert.That(res.Contains(string1));
+            Assert.That(res, Does.Contain(string1));
             var string2 = "new string";
             sut.AddString(string2);
             sut.DumpForDiscovery();
-            Assert.That(res.Contains(string2));
-            Assert.That(res.Contains(string1), Is.False);
+            Assert.That(res, Does.Contain(string2));
+            Assert.That(res, Does.Not.Contain(string1));
         }
 
         [Test]
@@ -54,7 +54,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             var sut = new DumpXml("whatever");
             var res = sut.RandomName();
-            Assert.That(res.EndsWith(".dump"));
+            Assert.That(res, Does.EndWith(".dump"));
             var parts = res.Split('.');
             Assert.That(parts.Length, Is.EqualTo(2), $"Too many dots in {res}");
             var part1 = parts[0];
@@ -83,7 +83,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             file.WriteAllText(Arg.Any<string>(), Arg.Do<string>(o => res = o));
             var sut = new DumpXml("Whatever", file);
             sut.DumpForDiscovery();
-            Assert.That(res.Contains("NUnitXml"));
+            Assert.That(res, Does.Contain("NUnitXml"));
             var sarray = res.Split('\n');
             Assert.That(sarray.Length, Is.GreaterThanOrEqualTo(3));
         }

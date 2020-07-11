@@ -539,7 +539,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             settings.CollectSourceInformation.Returns(false);
             using (var converter = new TestConverterForXml(
                 new TestLogger(new MessageLoggerStub()),
-                sourceAssembly: "unused",
+                "unused",
                 settings))
             {
                 return converter.ConvertTestCases(xml);

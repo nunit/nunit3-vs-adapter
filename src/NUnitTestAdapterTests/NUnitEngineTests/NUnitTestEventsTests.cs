@@ -128,8 +128,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
             Assert.That(failure, Is.Not.Null);
             Assert.Multiple(() =>
             {
-                Assert.That(failure.Message.Trim().StartsWith("Expected: 5"), $"Failure.Message is: {failure.Message}");
-                Assert.That(failure.Stacktrace.StartsWith("   at NUnitTestDemo.SimpleTests.TestFails()"), $"Stacktrace:{failure.Stacktrace}");
+                Assert.That(failure.Message.Trim(), Does.StartWith("Expected: 5"), $"Failure.Message is: {failure.Message}");
+                Assert.That(failure.Stacktrace, Does.StartWith("   at NUnitTestDemo.SimpleTests.TestFails()"), $"Stacktrace:{failure.Stacktrace}");
             });
         }
 
@@ -278,8 +278,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
             Assert.That(sut.HasFailure);
             Assert.Multiple(() =>
             {
-                Assert.That(sut.Failure.Message.Trim().StartsWith("Expected: 5"), $"Failure.Message is: {sut.Failure.Message}");
-                Assert.That(sut.Failure.Stacktrace.StartsWith("   at NUnitTestDemo.SimpleTests.TestFails()"));
+                Assert.That(sut.Failure.Message.Trim(), Does.StartWith("Expected: 5"), $"Failure.Message is: {sut.Failure.Message}");
+                Assert.That(sut.Failure.Stacktrace, Does.StartWith("   at NUnitTestDemo.SimpleTests.TestFails()"));
             });
         }
 

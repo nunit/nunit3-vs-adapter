@@ -21,7 +21,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-//#define LAUNCHDEBUGGER
+// #define LAUNCHDEBUGGER
 
 using System;
 using System.Collections.Generic;
@@ -210,7 +210,7 @@ namespace NUnit.VisualStudio.TestAdapter
             Unload();
         }
 
-        private bool IsInProcDataCollectorsSpecifiedWithMultipleAssemblies(IEnumerable<IGrouping<string, TestCase>> assemblyGroups) 
+        private bool IsInProcDataCollectorsSpecifiedWithMultipleAssemblies(IEnumerable<IGrouping<string, TestCase>> assemblyGroups)
             => Settings.InProcDataCollectorsAvailable && assemblyGroups.Count() > 1;
 
         void ITestExecutor.Cancel()

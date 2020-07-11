@@ -57,7 +57,7 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             if (settings.DiscoveryMethod == DiscoveryMethod.Legacy)
                 return ConvertTfsFilterToNUnitFilter(vsFilter, discovery.LoadedTestCases);
-            if (!settings.UseNUnitFilter) 
+            if (!settings.UseNUnitFilter)
                 return ConvertTfsFilterToNUnitFilter(vsFilter, discovery);
             var result = ConvertVsTestFilterToNUnitFilter(vsFilter);
             if (result == null)

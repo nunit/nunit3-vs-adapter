@@ -57,16 +57,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             executor.Settings.Returns(settings);
             executor.FrameworkHandle.Returns(testLog);
             settings.CollectSourceInformation.Returns(true);
-            using (var testConverter = new TestConverterForXml(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings))
-            {
-                fakeTestNode = new NUnitEventTestCase(FakeTestData.GetTestNode());
+            using var testConverter = new TestConverterForXml(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings);
+            fakeTestNode = new NUnitEventTestCase(FakeTestData.GetTestNode());
 
-                // Ensure that the converted testcase is cached
-                testConverter.ConvertTestCase(fakeTestNode);
-                Assert.NotNull(testConverter.GetCachedTestCase("123"));
+            // Ensure that the converted testcase is cached
+            testConverter.ConvertTestCase(fakeTestNode);
+            Assert.That(testConverter.GetCachedTestCase("123"), Is.Not.Null);
 
-                listener = new NUnitEventListener(testConverter, executor);
-            }
+            listener = new NUnitEventListener(testConverter, executor);
         }
 
         #region TestStarted Tests
@@ -93,9 +91,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             listener.TestFinished(new NUnitTestEventTestCase(FakeTestData.GetResultNode().AsString()));
             Assert.That(testLog.Events.Count, Is.EqualTo(2));
             Assert.That(testLog.Events[0].EventType, Is.EqualTo(FakeFrameworkHandle.EventType.RecordEnd));
-            Assert.AreEqual(
-                FakeFrameworkHandle.EventType.RecordResult,
-                testLog.Events[1].EventType);
+            Assert.That(
+                testLog.Events[1].EventType, Is.EqualTo(FakeFrameworkHandle.EventType.RecordResult));
         }
 
         [Test]
@@ -106,7 +103,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assume.That(testLog.Events[0].EventType, Is.EqualTo(FakeFrameworkHandle.EventType.RecordEnd));
 
             VerifyTestCase(testLog.Events[0].TestCase);
-            Assert.AreEqual(TestOutcome.Passed, testLog.Events[0].TestOutcome);
+            Assert.That(testLog.Events[0].TestOutcome, Is.EqualTo(TestOutcome.Passed));
         }
 
         [Test]
@@ -173,7 +170,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         private void VerifyTestCase(TestCase ourCase)
         {
-            Assert.NotNull(ourCase, "TestCase not set");
+            Assert.That(ourCase, Is.Not.Null, "TestCase not set");
             Assert.That(ourCase.DisplayName, Is.EqualTo(FakeTestData.DisplayName));
             Assert.That(ourCase.FullyQualifiedName, Is.EqualTo(FakeTestData.FullyQualifiedName));
             Assert.That(ourCase.Source, Is.EqualTo(FakeTestData.AssemblyPath));
@@ -186,13 +183,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         private void VerifyTestResult(VSTestResult ourResult)
         {
-            Assert.NotNull(ourResult, "TestResult not set");
+            Assert.That(ourResult, Is.Not.Null, "TestResult not set");
             VerifyTestCase(ourResult.TestCase);
 
-            Assert.AreEqual(Environment.MachineName, ourResult.ComputerName);
-            Assert.AreEqual(TestOutcome.Passed, ourResult.Outcome);
-            Assert.AreEqual(null, ourResult.ErrorMessage);
-            Assert.AreEqual(TimeSpan.FromSeconds(1.234), ourResult.Duration);
+            Assert.That(ourResult.ComputerName, Is.EqualTo(Environment.MachineName));
+            Assert.That(ourResult.Outcome, Is.EqualTo(TestOutcome.Passed));
+            Assert.That(ourResult.ErrorMessage, Is.EqualTo(null));
+            Assert.That(ourResult.Duration, Is.EqualTo(TimeSpan.FromSeconds(1.234)));
         }
 
         #endregion

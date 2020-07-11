@@ -47,18 +47,15 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
             Text = text;
         }
 
-        public TokenKind Kind { get; private set; }
+        public TokenKind Kind { get; }
 
-        public string Text { get; private set; }
+        public string Text { get; }
 
         public int Pos { get; set; }
 
         #region Equality Overrides
 
-        public override bool Equals(object obj)
-        {
-            return obj is Token && this == (Token)obj;
-        }
+        public override bool Equals(object obj) => obj is Token token && this == token;
 
         public override int GetHashCode()
         {
@@ -68,7 +65,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
         public override string ToString()
         {
             return Text != null
-                ? Kind.ToString() + ":" + Text
+                ? Kind + ":" + Text
                 : Kind.ToString();
         }
 
@@ -102,36 +99,36 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
     /// </summary>
     public class Tokenizer
     {
-        private readonly string _input;
-        private int _index;
+        private readonly string input;
+        private int index;
 
         private const char EOF_CHAR = '\0';
         private const string WORD_BREAK_CHARS = "=~!()&|";
-        private readonly string[] DOUBLE_CHAR_SYMBOLS = { "!=", "!~" };
+        private readonly string[] dOubleCharSymbols = { "!=", "!~" };
 
-        private Token _lookahead;
+        private Token lookahead;
 
         public Tokenizer(string input)
         {
-            _input = input ?? throw new ArgumentNullException(nameof(input));
-            _index = 0;
+            this.input = input ?? throw new ArgumentNullException(nameof(input));
+            index = 0;
         }
 
         public Token LookAhead
         {
             get
             {
-                if (_lookahead == null)
-                    _lookahead = GetNextToken();
+                if (lookahead == null)
+                    lookahead = GetNextToken();
 
-                return _lookahead;
+                return lookahead;
             }
         }
 
         public Token NextToken()
         {
-            Token result = _lookahead ?? GetNextToken();
-            _lookahead = null;
+            Token result = lookahead ?? GetNextToken();
+            lookahead = null;
             return result;
         }
 
@@ -140,7 +137,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
             SkipBlanks();
 
             var ch = NextChar;
-            int pos = _index;
+            int pos = index;
 
             switch (ch)
             {
@@ -160,7 +157,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
                 // Could be alone or start of a double char symbol
                 case '!':
                     GetChar();
-                    foreach (string dbl in DOUBLE_CHAR_SYMBOLS)
+                    foreach (string dbl in dOubleCharSymbols)
                     {
                         if (ch != dbl[0] || NextChar != dbl[1])
                             continue;
@@ -185,7 +182,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
                     // will return either a Word or an FQN and the
                     // parser grammar has been changed to accept either
                     // one of them in certain places.
-                    return GetWordOrFQN();
+                    return GetWordOrFqn();
             }
         }
 
@@ -230,10 +227,10 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
         }
 #endif
 
-        private Token GetWordOrFQN()
+        private Token GetWordOrFqn()
         {
             var sb = new StringBuilder();
-            int pos = _index;
+            int pos = index;
 
             CollectWordChars(sb);
 
@@ -301,7 +298,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
         /// <returns>The next char.</returns>
         private char GetChar()
         {
-            return _index < _input.Length ? _input[_index++] : EOF_CHAR;
+            return index < input.Length ? input[index++] : EOF_CHAR;
         }
 
         /// <summary>
@@ -311,14 +308,14 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
         {
             get
             {
-                return _index < _input.Length ? _input[_index] : EOF_CHAR;
+                return index < input.Length ? input[index] : EOF_CHAR;
             }
         }
 
         private void SkipBlanks()
         {
             while (char.IsWhiteSpace(NextChar))
-                _index++;
+                index++;
         }
     }
 }

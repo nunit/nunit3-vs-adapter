@@ -34,7 +34,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             var result = await ReturnOne();
 
-            Assert.AreEqual(1, result);
+            Assert.That(result, Is.EqualTo(1));
         }
 
         [TestCase(ExpectedResult = 1)]

@@ -33,8 +33,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void VerifyNunit3TestDiscovererHasCategoryAttribute()
         {
             var attribute = typeof(NUnit3TestDiscoverer).GetTypeInfo().GetCustomAttribute(typeof(System.ComponentModel.CategoryAttribute));
-            Assert.IsNotNull(attribute);
-            Assert.AreEqual("managed", (attribute as System.ComponentModel.CategoryAttribute)?.Category);
+            Assert.That(attribute, Is.Not.Null);
+            Assert.That((attribute as System.ComponentModel.CategoryAttribute)?.Category, Is.EqualTo("managed"));
         }
     }
 }
