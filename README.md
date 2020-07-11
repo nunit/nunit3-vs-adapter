@@ -29,9 +29,9 @@ or raise an issue [![](https://img.shields.io/github/issues/nunit/NUnit3-vs-Adap
 
 ## Documentation
 
-The [NUnit3TestAdapter wiki](https://github.com/nunit/docs/wiki/Visual-Studio-Test-Adapter) is the best place to start.
+The [NUnit3TestAdapter wiki](https://docs.nunit.org/articles/vs-test-adapter/Index.html) is the best place to start.
 
-Also check the [release notes](https://github.com/nunit/docs/wiki/Adapter-Release-Notes).
+Also check the [release notes](https://docs.nunit.org/articles/vs-test-adapter/Adapter-Release-Notes.html).
 
 
 

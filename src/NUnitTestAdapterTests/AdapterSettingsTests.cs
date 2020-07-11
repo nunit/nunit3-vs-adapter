@@ -397,7 +397,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void MapWarningToTestsDefault()
         {
             _settings.Load("");
-           
         }
 
         [TestCase("Name", DisplayNameOptions.Name)]
@@ -432,9 +431,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 Assert.That(_settings.DisplayName, Is.EqualTo(DisplayNameOptions.Name));
                 Assert.That(_settings.MapWarningTo, Is.EqualTo(TestOutcome.Skipped));
             });
-            
         }
-
-
     }
 }

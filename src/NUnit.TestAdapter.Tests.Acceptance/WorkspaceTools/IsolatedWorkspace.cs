@@ -16,7 +16,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 
         public IsolatedWorkspace(DirectoryMutex directoryMutex, ToolResolver toolResolver)
         {
-            this.directoryMutex = directoryMutex ?? throw new ArgumentNullException(nameof(toolResolver)); ;
+            this.directoryMutex = directoryMutex ?? throw new ArgumentNullException(nameof(toolResolver));
             this.toolResolver = toolResolver ?? throw new ArgumentNullException(nameof(toolResolver));
         }
 
