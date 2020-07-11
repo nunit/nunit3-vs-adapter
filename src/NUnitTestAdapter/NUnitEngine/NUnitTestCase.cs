@@ -43,7 +43,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             NA,
             Runnable,
             Explicit
-        };
+        }
 
         public bool IsTestCase => !IsNull && Node.Name == "test-case";
         public bool IsParameterizedMethod => Type == "ParameterizedMethod";

@@ -6,7 +6,6 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
     public class DiscoveryExtensions
     {
-
         public TestConverter TestConverter { get; private set; }
 
         public IList<TestCase> Convert(NUnitResults discoveryResults, ITestLogger logger, string assemblyPath, IAdapterSettings settings)

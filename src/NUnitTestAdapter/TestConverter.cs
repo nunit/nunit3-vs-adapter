@@ -201,7 +201,7 @@ namespace NUnit.VisualStudio.TestAdapter
                                     new Uri(NUnitTestAdapter.ExecutorUri),
                                     _sourceAssembly)
             {
-                DisplayName = CreateDisplayName(fullyQualifiedName,testNode.Name), // .Replace(".",":"), //"N:Name -> MS:DisplayName", // testNode.Name,
+                DisplayName = CreateDisplayName(fullyQualifiedName, testNode.Name), // .Replace(".",":"), //"N:Name -> MS:DisplayName", // testNode.Name,
                 CodeFilePath = null,
                 LineNumber = 0,
             };

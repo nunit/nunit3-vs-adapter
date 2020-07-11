@@ -170,7 +170,6 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                 return nUnitAttachments;
             }
         }
-
     }
 
 
