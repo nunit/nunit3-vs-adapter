@@ -1073,6 +1073,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
 </test-run>";
 
 
+        [Ignore("Not ready yet, Issue 770")]
         [Test]
         public void ThatSetUpFixtureWorks2()
         {
