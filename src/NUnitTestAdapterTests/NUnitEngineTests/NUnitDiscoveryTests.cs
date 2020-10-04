@@ -652,7 +652,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
                             Assert.That(testCase.Name, Does.StartWith("Test"), "Name is wrong");
                             Assert.That(testCase.FullName, Does.StartWith("NUnitTestDemo.SetUpFixture.TestFixture"));
                             Assert.That(testCase.MethodName, Does.StartWith("Test"), "MethodName is wrong");
-                            Assert.That(testCase.ClassName, Does.StartWith("NUnitTestDemo.SetUpFixture.TestFixture"), "Name is wrong");
+                            Assert.That(testCase.ClassName, Does.StartWith("NUnitTestDemo.SetUpFixture.TestFixture"),
+                                "Name is wrong");
                             Assert.That(testCase.RunState, Is.EqualTo(RunStateEnum.Runnable),
                                 "Runstate fails for testCase");
                             Assert.That(testCase.Seed, Is.GreaterThan(0), "Seed missing");
@@ -983,6 +984,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
                 Assert.That(fixture.TestCases.Count, Is.EqualTo(3),
                     "Didnt find all testcases for fixture");
             }
+
             Assert.That(ndr.TestAssembly.TestSuites.Count, Is.EqualTo(1));
             var suite = ndr.TestAssembly.TestSuites.Single();
             Assert.That(suite.TestFixtures.Count, Is.EqualTo(1));
@@ -1044,12 +1046,43 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
                 Assert.That(ndr.TestAssembly.AllTestCases.Count, Is.EqualTo(2), "All testcases number fails");
                 Assert.That(ndr.TestAssembly.AllTestCases.Count, Is.EqualTo(2), "Can't find all testcases");
                 Assert.That(ndr.TestAssembly.TestSuites.First().IsExplicit, "Test suite don't match explicit");
-                Assert.That(ndr.TestAssembly.TestSuites.First().TestFixtures.First().IsExplicit, "Test fixture don't match explicit");
-                Assert.That(ndr.TestAssembly.TestSuites.First().TestFixtures.First().ParameterizedMethods.First().IsExplicit, "Parameterized method don't match explicit");
+                Assert.That(
+                    ndr.TestAssembly.TestSuites.First().TestFixtures.First().IsExplicit,
+                    "Test fixture don't match explicit");
+                Assert.That(
+                    ndr.TestAssembly.TestSuites.First().TestFixtures.First().ParameterizedMethods.First().IsExplicit,
+                    "Parameterized method don't match explicit");
                 Assert.That(
                     ndr.TestAssembly.TestSuites.First().TestFixtures.First().ParameterizedMethods.First().RunState,
                     Is.EqualTo(RunStateEnum.Explicit), "Runstate fails for parameterizedfixture");
             });
         }
+
+
+        private const string SetupFixtureIssue770 =
+            @"<test-run id='0' name='TestLib.dll' fullname='d:\repos\NUnit\nunit3-vs-adapter.issues\Issue770\TestLib\bin\Debug\netcoreapp3.1\TestLib.dll' runstate='Runnable' testcasecount='1'>
+   <test-suite type='Assembly' id='0-1005' name='TestLib.dll' fullname='d:/repos/NUnit/nunit3-vs-adapter.issues/Issue770/TestLib/bin/Debug/netcoreapp3.1/TestLib.dll' runstate='Runnable' testcasecount='1'>
+      <test-suite type='SetUpFixture' id='0-1006' name='[default namespace]' fullname='SetupF' runstate='Runnable' testcasecount='1'>
+         <test-suite type='TestSuite' id='0-1007' name='L' fullname='L' runstate='Runnable' testcasecount='1'>
+            <test-suite type='TestFixture' id='0-1008' name='Class1' fullname='L.Class1' runstate='Runnable' testcasecount='1'>
+               <test-case id='0-1002' name='Test' fullname='L.Class1.Test' methodname='Test' classname='L.Class1' runstate='Runnable' seed='1622556793' />
+            </test-suite>
+         </test-suite>
+      </test-suite>
+   </test-suite>
+</test-run>";
+
+
+        [Ignore("Not ready yet, Issue 770")]
+        [Test]
+        public void ThatSetUpFixtureWorks2()
+        {
+            var sut = new DiscoveryConverter(logger, settings);
+            var ndr = sut.ConvertXml(
+                new NUnitResults(XmlHelper.CreateXmlNode(SetupFixtureIssue770)));
+            Assert.That(ndr, Is.Not.Null);
+
+        }
+
     }
 }

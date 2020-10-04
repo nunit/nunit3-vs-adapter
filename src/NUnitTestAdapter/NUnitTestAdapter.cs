@@ -85,7 +85,13 @@ namespace NUnit.VisualStudio.TestAdapter
         // The adapter version
         protected string AdapterVersion { get; set; }
 
-        public NUnitEngineAdapter NUnitEngineAdapter { get; private set; }
+        private NUnitEngineAdapter nUnitEngineAdapter;
+
+        public NUnitEngineAdapter NUnitEngineAdapter
+        {
+            get => nUnitEngineAdapter ??= new NUnitEngineAdapter();
+            private set => nUnitEngineAdapter = value;
+        }
 
         // Our logger used to display messages
         protected TestLogger TestLog { get; private set; }
@@ -93,6 +99,7 @@ namespace NUnit.VisualStudio.TestAdapter
         protected string WorkDir { get; private set; }
 
         private static string exeName;
+
 
         public static bool IsRunningUnderIde
         {
