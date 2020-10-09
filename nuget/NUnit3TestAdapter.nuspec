@@ -5,7 +5,7 @@
         <version>$version$</version>
         <title>NUnit 3 Test Adapter for Visual Studio and DotNet</title>
         <authors>Charlie Poole, Terje Sandstrom</authors>
-        <license type="file">LICENSE.txt</license>
+        <license type="expression">MIT</license>
         <projectUrl>https://github.com/nunit/docs/wiki/Visual-Studio-Test-Adapter</projectUrl>
         <repository type="git" url="https://github.com/nunit/nunit3-vs-adapter"/>
         <iconUrl>https://cdn.rawgit.com/nunit/resources/master/images/icon/nunit_256.png</iconUrl>
@@ -25,22 +25,8 @@
         <tags>test visualstudio testadapter nunit nunit3 dotnet</tags>
 
         <developmentDependency>false</developmentDependency>
-        <dependencies>
-            <group targetFramework="netcoreapp2.1">
-                <dependency id="Microsoft.DotNet.InternalAbstractions" version="1.0.0" />
-                <dependency id="System.ComponentModel.EventBasedAsync" version="4.3.0" />
-                <dependency id="System.ComponentModel.TypeConverter" version="4.3.0" />
-                <dependency id="System.Diagnostics.Process" version="4.3.0" />
-                <dependency id="System.Reflection" version="4.3.0" />
-                <dependency id="System.Runtime.InteropServices.RuntimeInformation" version="4.3.0" />
-                <dependency id="System.Threading.Thread" version="4.3.0" />
-                <dependency id="System.Xml.XmlDocument" version="4.3.0" />
-                <dependency id="System.Xml.XPath.XmlDocument" version="4.3.0" />
-            </group>
-        </dependencies>
     </metadata>
     <files>
-        <file src="LICENSE.txt" />
         <file src="build\net35\NUnit3.TestAdapter.dll" target="build\net35\NUnit3.TestAdapter.dll" />
         <file src="build\net35\NUnit3.TestAdapter.pdb" target="build\net35\NUnit3.TestAdapter.pdb" />
         <file src="build\net35\nunit.engine.dll" target="build\net35\nunit.engine.dll" />
