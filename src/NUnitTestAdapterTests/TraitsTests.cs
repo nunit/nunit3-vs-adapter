@@ -7,6 +7,7 @@ using NSubstitute;
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
+// ReSharper disable StringLiteralTypo
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
@@ -516,7 +517,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(testcaselist.Count, Is.EqualTo(3), "Wrong number of testcases found");
             var testcasesWithCategories = testcaselist.Where(o => o.GetCategories()?.FirstOrDefault() != null).ToList();
             Assert.That(testcasesWithCategories, Is.Not.Null, "Didn't find the  testcases");
-            Assert.That(testcasesWithCategories.Count(), Is.EqualTo(1), "Wrong number of testcases with categories, should be only 1");
+            Assert.That(testcasesWithCategories.Count, Is.EqualTo(1), "Wrong number of testcases with categories, should be only 1");
             var tc = testcasesWithCategories.FirstOrDefault();
             VerifyCategoriesOnly(tc, 1, "simple");
             Assert.That(tc.GetCategories().First(), Is.EqualTo("Single"));
@@ -537,13 +538,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             var settings = Substitute.For<IAdapterSettings>();
             settings.CollectSourceInformation.Returns(false);
-            using (var converter = new TestConverterForXml(
+            using var converter = new TestConverterForXml(
                 new TestLogger(new MessageLoggerStub()),
                 "unused",
-                settings))
-            {
-                return converter.ConvertTestCases(xml);
-            }
+                settings);
+            return converter.ConvertTestCases(xml);
         }
 
         [Test]

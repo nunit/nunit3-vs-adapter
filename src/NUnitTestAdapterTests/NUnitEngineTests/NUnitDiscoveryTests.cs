@@ -1081,8 +1081,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
             var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(SetupFixtureIssue770)));
             Assert.That(ndr, Is.Not.Null);
-
         }
-
     }
 }
