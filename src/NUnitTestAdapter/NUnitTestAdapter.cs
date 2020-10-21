@@ -148,6 +148,16 @@ namespace NUnit.VisualStudio.TestAdapter
                 TestLog.Warning("Error initializing RunSettings. Default settings will be used");
                 TestLog.Warning(e.ToString());
             }
+            finally
+            {
+#if NET35
+                string fw = "Net Framework";
+#else
+                string fw = "Net Core";
+#endif
+                var assLoc = Assembly.GetExecutingAssembly().Location;
+                TestLog.Debug($"{fw} adapter running from {assLoc}");
+            }
         }
 
         public void InitializeForbiddenFolders()
@@ -313,6 +323,6 @@ namespace NUnit.VisualStudio.TestAdapter
             NUnitEngineAdapter = null;
         }
 
-        #endregion
+#endregion
     }
 }
