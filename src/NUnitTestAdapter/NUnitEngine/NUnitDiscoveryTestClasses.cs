@@ -218,7 +218,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
     }
 
     /// <summary>
-    /// Interface for common properties between event testcase and discoverytestcase
+    /// Interface for common properties between event testcase and discoverytestcase.
     /// </summary>
     public interface INUnitCommonTestCase
     {

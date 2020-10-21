@@ -1073,7 +1073,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
 </test-run>";
 
 
-       // [Ignore("Not ready yet, Issue 770")]
         [Test]
         public void ThatSetUpFixtureWorksIssue770()
         {
@@ -1081,8 +1080,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
             var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(SetupFixtureIssue770)));
             Assert.That(ndr, Is.Not.Null);
-
         }
-
     }
 }

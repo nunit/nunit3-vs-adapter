@@ -34,7 +34,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase(@"C:\Program Files (x86)\Something")]
         public void ThatWeFindForbiddenFolders(string folder)
         {
-            var sut = new TestAdapter.NUnit3TestExecutor();
+            var sut = new NUnit3TestExecutor();
             sut.InitializeForbiddenFolders();
             Assert.That(sut.CheckDirectory(folder));
         }
@@ -44,7 +44,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase(@"C:\Program Files Whatever\Something")]
         public void ThatWeAcceptNonForbiddenFolders(string folder)
         {
-            var sut = new TestAdapter.NUnit3TestExecutor();
+            var sut = new NUnit3TestExecutor();
             sut.InitializeForbiddenFolders();
             Assert.That(sut.CheckDirectory(folder), Is.False);
         }
@@ -52,7 +52,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void ThatForbiddenFoldersAreUnique()
         {
-            var sut = new TestAdapter.NUnit3TestExecutor();
+            var sut = new NUnit3TestExecutor();
             sut.InitializeForbiddenFolders();
             var sutunique = sut.ForbiddenFolders.Distinct();
             Assert.That(sutunique.Count(), Is.EqualTo(sut.ForbiddenFolders.Count), "There are duplicate entries in ForbiddenFolders");

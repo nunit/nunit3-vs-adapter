@@ -41,33 +41,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
 
         #region IRunContext Members
 
-        bool IRunContext.InIsolation
-        {
-            get { throw new NotImplementedException(); }
-        }
+        bool IRunContext.InIsolation => throw new NotImplementedException();
 
-        bool IRunContext.IsBeingDebugged
-        {
-            get { throw new NotImplementedException(); }
-        }
+        bool IRunContext.IsBeingDebugged => throw new NotImplementedException();
 
-        bool IRunContext.IsDataCollectionEnabled
-        {
-            get { throw new NotImplementedException(); }
-        }
+        bool IRunContext.IsDataCollectionEnabled => throw new NotImplementedException();
 
-        bool IRunContext.KeepAlive
-        {
-            get
-            {
-                return true;
-            }
-        }
+        bool IRunContext.KeepAlive => true;
 
-        string IRunContext.TestRunDirectory
-        {
-            get { throw new NotImplementedException(); }
-        }
+        string IRunContext.TestRunDirectory => throw new NotImplementedException();
 
         ITestCaseFilterExpression IRunContext.GetTestCaseFilter(IEnumerable<string> supportedProperties, Func<string, TestProperty> propertyProvider)
         {
@@ -76,9 +58,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
 
         #endregion
 
-        public string SolutionDirectory
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public string SolutionDirectory => throw new NotImplementedException();
     }
 }
