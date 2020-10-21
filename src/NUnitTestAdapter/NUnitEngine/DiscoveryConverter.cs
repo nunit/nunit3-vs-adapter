@@ -232,6 +232,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                         throw new DiscoveryException($"Invalid type found in ExtractAllFixtures for test suite: {type}");
                 }
             }
+
         }
 
         private static void ExtractTestFixtures(NUnitDiscoveryCanHaveTestFixture parent, XElement node)
@@ -241,12 +242,23 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                 var type = child.Attribute(NUnitXmlAttributeNames.Type).Value;
                 var className = child.Attribute(NUnitXmlAttributeNames.Classname)?.Value;
                 var btf = ExtractSuiteBasePropertiesClass(child);
-                if (type != "TestFixture")
-                    throw new DiscoveryException($"Not a TestFixture, but {type}");
-                var tf = new NUnitDiscoveryTestFixture(btf, className, parent);
-                parent.AddTestFixture(tf);
-                ExtractTestCases(tf, child);
-                ExtractParameterizedMethodsAndTheories(tf, child);
+                switch (type)
+                {
+                    case "TestFixture":
+                        var tf = new NUnitDiscoveryTestFixture(btf, className, parent);
+                        parent.AddTestFixture(tf);
+                        ExtractTestCases(tf, child);
+                        ExtractParameterizedMethodsAndTheories(tf, child);
+                        break;
+                    case "TestSuite":
+                        var ts = ExtractTestSuite(child, parent);
+                        parent.AddTestSuite(ts);
+                        if (child.HasElements)
+                            ExtractAllFixtures(ts, child);
+                        break;
+                    default:
+                        throw new DiscoveryException($"Not a TestFixture or TestSuite, but {type}");
+                }
             }
         }
 
