@@ -67,38 +67,36 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 
         private static void WriteNuGetConfig(string directory, string testNupkgDirectory, string packageCachePath)
         {
-            using (var file = File.CreateText(Path.Combine(directory, "nuget.config")))
-            using (var writer = XmlWriter.Create(file, new XmlWriterSettings { Indent = true }))
-            {
-                writer.WriteComment(string.Join(
-                    Environment.NewLine,
-                    "",
-                    "This file exists so that if any of the projects under this folder are opened by an IDE or restored from the CLI by acceptance tests or by hand,",
-                    " 1. the .nupkg that is being tested can be referenced by these projects, and",
-                    " 2. the .nupkg that is tested does not pollute the global cache in %userprofile%\\.nuget.",
-                    ""));
+            using var file = File.CreateText(Path.Combine(directory, "nuget.config"));
+            using var writer = XmlWriter.Create(file, new XmlWriterSettings { Indent = true });
+            writer.WriteComment(string.Join(
+                Environment.NewLine,
+                "",
+                "This file exists so that if any of the projects under this folder are opened by an IDE or restored from the CLI by acceptance tests or by hand,",
+                " 1. the .nupkg that is being tested can be referenced by these projects, and",
+                " 2. the .nupkg that is tested does not pollute the global cache in %userprofile%\\.nuget.",
+                ""));
 
-                writer.WriteStartElement("configuration");
-                writer.WriteStartElement("config");
+            writer.WriteStartElement("configuration");
+            writer.WriteStartElement("config");
 
-                writer.WriteComment(" Implements the second point ");
-                writer.WriteStartElement("add");
-                writer.WriteAttributeString("key", "globalPackagesFolder");
-                writer.WriteAttributeString("value", packageCachePath);
-                writer.WriteEndElement();
+            writer.WriteComment(" Implements the second point ");
+            writer.WriteStartElement("add");
+            writer.WriteAttributeString("key", "globalPackagesFolder");
+            writer.WriteAttributeString("value", packageCachePath);
+            writer.WriteEndElement();
 
-                writer.WriteEndElement();
-                writer.WriteStartElement("packageSources");
+            writer.WriteEndElement();
+            writer.WriteStartElement("packageSources");
 
-                writer.WriteComment(" Implements the first point ");
-                writer.WriteStartElement("add");
-                writer.WriteAttributeString("key", "Build script package output");
-                writer.WriteAttributeString("value", testNupkgDirectory);
-                writer.WriteEndElement();
+            writer.WriteComment(" Implements the first point ");
+            writer.WriteStartElement("add");
+            writer.WriteAttributeString("key", "Build script package output");
+            writer.WriteAttributeString("value", testNupkgDirectory);
+            writer.WriteEndElement();
 
-                writer.WriteEndElement();
-                writer.WriteEndElement();
-            }
+            writer.WriteEndElement();
+            writer.WriteEndElement();
         }
     }
 }

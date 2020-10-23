@@ -24,7 +24,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
 using System.Xml;
 using System.Xml.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -208,12 +207,12 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                         ExtractParameterizedMethodsAndTheories(tf, child);
                         break;
                     case "GenericFixture":
-                        var gtf = ExtractGenericTestFixture(parent, child, className);
+                        var gtf = ExtractGenericTestFixture(parent, child);
                         parent.AddTestGenericFixture(gtf);
                         ExtractTestFixtures(gtf, child);
                         break;
                     case "ParameterizedFixture":
-                        var ptf = ExtractParameterizedTestFixture(parent, child, className);
+                        var ptf = ExtractParameterizedTestFixture(parent, child);
                         parent.AddParameterizedFixture(ptf);
                         ExtractTestFixtures(ptf, child);
                         break;
@@ -241,12 +240,23 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                 var type = child.Attribute(NUnitXmlAttributeNames.Type).Value;
                 var className = child.Attribute(NUnitXmlAttributeNames.Classname)?.Value;
                 var btf = ExtractSuiteBasePropertiesClass(child);
-                if (type != "TestFixture")
-                    throw new DiscoveryException($"Not a TestFixture, but {type}");
-                var tf = new NUnitDiscoveryTestFixture(btf, className, parent);
-                parent.AddTestFixture(tf);
-                ExtractTestCases(tf, child);
-                ExtractParameterizedMethodsAndTheories(tf, child);
+                switch (type)
+                {
+                    case "TestFixture":
+                        var tf = new NUnitDiscoveryTestFixture(btf, className, parent);
+                        parent.AddTestFixture(tf);
+                        ExtractTestCases(tf, child);
+                        ExtractParameterizedMethodsAndTheories(tf, child);
+                        break;
+                    case "TestSuite":
+                        var ts = ExtractTestSuite(child, parent);
+                        parent.AddTestSuite(ts);
+                        if (child.HasElements)
+                            ExtractAllFixtures(ts, child);
+                        break;
+                    default:
+                        throw new DiscoveryException($"Not a TestFixture or TestSuite, but {type}");
+                }
             }
         }
 
@@ -324,7 +334,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         private static NUnitDiscoveryGenericFixture ExtractGenericTestFixture(
             NUnitDiscoveryCanHaveTestFixture parent,
-            XElement node, string className)
+            XElement node)
         {
             var b = ExtractSuiteBasePropertiesClass(node);
             var ts = new NUnitDiscoveryGenericFixture(b, parent);
@@ -339,7 +349,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             return ts;
         }
         private static NUnitDiscoveryParameterizedTestFixture ExtractParameterizedTestFixture(
-            NUnitDiscoveryCanHaveTestFixture parent, XElement node, string className)
+            NUnitDiscoveryCanHaveTestFixture parent, XElement node)
         {
             var b = ExtractSuiteBasePropertiesClass(node);
             var ts = new NUnitDiscoveryParameterizedTestFixture(b, parent);
@@ -348,11 +358,11 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         private NUnitDiscoveryTestAssembly ExtractTestAssembly(XElement node, NUnitDiscoveryTestRun parent)
         {
-            string d_type = node.Attribute(NUnitXmlAttributeNames.Type).Value;
-            if (d_type != "Assembly")
+            string dType = node.Attribute(NUnitXmlAttributeNames.Type).Value;
+            if (dType != "Assembly")
                 throw new DiscoveryException("Node is not of type assembly: " + node);
-            var a_base = ExtractSuiteBasePropertiesClass(node);
-            var assembly = new NUnitDiscoveryTestAssembly(a_base, parent);
+            var aBase = ExtractSuiteBasePropertiesClass(node);
+            var assembly = new NUnitDiscoveryTestAssembly(aBase, parent);
             parent.AddTestAssembly(assembly);
             return assembly;
         }

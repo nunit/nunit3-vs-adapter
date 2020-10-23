@@ -296,21 +296,12 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
         /// Get the next character in the input, consuming it.
         /// </summary>
         /// <returns>The next char.</returns>
-        private char GetChar()
-        {
-            return index < input.Length ? input[index++] : EOF_CHAR;
-        }
+        private char GetChar() => index < input.Length ? input[index++] : EOF_CHAR;
 
         /// <summary>
         /// Peek ahead at the next character in input.
         /// </summary>
-        private char NextChar
-        {
-            get
-            {
-                return index < input.Length ? input[index] : EOF_CHAR;
-            }
-        }
+        private char NextChar => index < input.Length ? input[index] : EOF_CHAR;
 
         private void SkipBlanks()
         {

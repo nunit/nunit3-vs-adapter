@@ -32,8 +32,8 @@ namespace NUnit.VisualStudio.TestAdapter
     using System.Collections;
     // ReSharper disable once RedundantUsingDirective
     using System.Reflection;  // Needed for .net core 2.1
-    using NUnit.VisualStudio.TestAdapter.Internal;  // Needed for reflection
-    using NUnit.VisualStudio.TestAdapter.TestFilterConverter;
+    using Internal;  // Needed for reflection
+    using TestFilterConverter;
 
     public interface IVsTestFilter
     {

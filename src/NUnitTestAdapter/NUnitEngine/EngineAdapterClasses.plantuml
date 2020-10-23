@@ -20,10 +20,12 @@ title NUnitEngineAdapterClasses for discovery
    TestSuite o-- ParameterizedFixture
    TestSuite o-- SetUpFixture
    Assembly o-- TestSuite
+   Assembly o-- SetUpFixture
    Fixture o-- Theory
    Fixture o-- GenericMethod
    CanHaveTestCases <|-- GenericMethod
    TestRun o-- Assembly
+   SetUpFixture o-- TestSuite
    
 abstract class SuiteBase {
    Property collection,
