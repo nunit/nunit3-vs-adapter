@@ -69,6 +69,22 @@ namespace NUnit.VisualStudio.TestAdapter
         protected NUnitTestFilterBuilder CreateTestFilterBuilder()
             => new NUnitTestFilterBuilder(NUnitEngineAdapter.GetService<ITestFilterService>(), Settings);
         protected ITestConverterCommon CreateConverter(DiscoveryConverter discovery) => Settings.DiscoveryMethod == DiscoveryMethod.Current ? discovery.TestConverter : discovery.TestConverterForXml;
+
+        protected TestFilter CheckFilter(IDiscoveryConverter discovery)
+        {
+            TestFilter filter;
+            if (discovery.NoOfLoadedTestCasesAboveLimit)
+            {
+                TestLog.Debug("Setting filter to empty due to number of testcases");
+                filter = TestFilter.Empty;
+            }
+            else
+            {
+                var filterBuilder = CreateTestFilterBuilder();
+                filter = filterBuilder.FilterByList(discovery.LoadedTestCases);
+            }
+            return filter;
+        }
     }
 
     public class IdeExecution : Execution
@@ -87,16 +103,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 return filter;
             if (filter.IsEmpty())
                 return filter;
-            if (discovery.NoOfLoadedTestCasesAboveLimit)
-            {
-                TestLog.Debug("Setting filter to empty due to number of testcases");
-                filter = TestFilter.Empty;
-            }
-            else
-            {
-                var filterBuilder = CreateTestFilterBuilder();
-                filter = filterBuilder.FilterByList(discovery.LoadedTestCases);
-            }
+            filter = CheckFilter(discovery);
             return filter;
         }
     }
@@ -151,16 +158,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 return filter;
             if ((VsTestFilter == null || VsTestFilter.IsEmpty) && filter != TestFilter.Empty)
             {
-                if (discovery.NoOfLoadedTestCasesAboveLimit)
-                {
-                    TestLog.Debug("Setting filter to empty due to number of testcases");
-                    filter = TestFilter.Empty;
-                }
-                else
-                {
-                    var filterBuilder = CreateTestFilterBuilder();
-                    filter = filterBuilder.FilterByList(discovery.LoadedTestCases);
-                }
+                filter = CheckFilter(discovery);
             }
             else if (VsTestFilter != null && !VsTestFilter.IsEmpty && !Settings.UseNUnitFilter)
             {
