@@ -156,22 +156,20 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         private sealed class Fixture
         {
-            public ITestLogger Logger { get; } = Substitute.For<ITestLogger>();
+            private ITestLogger Logger { get; } = Substitute.For<ITestLogger>();
             public IMetadataProvider MetadataProvider { get; } = Substitute.For<IMetadataProvider>();
-            private readonly string _existingAssemblyPath = typeof(NavigationDataProviderTests).GetTypeInfo().Assembly.Location;
+            private readonly string existingAssemblyPath = typeof(NavigationDataProviderTests).GetTypeInfo().Assembly.Location;
 
             public void CauseLookupFailure()
             {
-                using (var navigationProvider = new NavigationDataProvider(_existingAssemblyPath, Logger, MetadataProvider))
-                {
-                    navigationProvider.GetNavigationData("NonExistentFixture", "SomeTest");
-                    navigationProvider.GetNavigationData("NonExistentFixture", "SomeTest");
-                }
+                using var navigationProvider = new NavigationDataProvider(existingAssemblyPath, Logger, MetadataProvider);
+                navigationProvider.GetNavigationData("NonExistentFixture", "SomeTest");
+                navigationProvider.GetNavigationData("NonExistentFixture", "SomeTest");
             }
 
             public void AssertLoggerReceivedErrorForAssemblyPath()
             {
-                Logger.Received().Warning(Arg.Is<string>(message => message.Contains(_existingAssemblyPath)), Arg.Any<Exception>());
+                Logger.Received().Warning(Arg.Is<string>(message => message.Contains(existingAssemblyPath)), Arg.Any<Exception>());
             }
         }
     }

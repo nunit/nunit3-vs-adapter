@@ -74,7 +74,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         /// <summary>
         /// Unsure about purpose of this, see https://github.com/nunit/nunit3-vs-adapter/pull/763#discussion_r446668680.
-        /// </summary
+        /// </summary>
         public int LastNodeListCount { get; private set; }
 
         public IEnumerable<string> ProcessTestCaseProperties(INUnitTestCasePropertyInfo testNode, bool addToCache, string key = null,

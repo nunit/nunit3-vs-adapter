@@ -537,13 +537,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             var settings = Substitute.For<IAdapterSettings>();
             settings.CollectSourceInformation.Returns(false);
-            using (var converter = new TestConverterForXml(
+            using var converter = new TestConverterForXml(
                 new TestLogger(new MessageLoggerStub()),
                 "unused",
-                settings))
-            {
-                return converter.ConvertTestCases(xml);
-            }
+                settings);
+            return converter.ConvertTestCases(xml);
         }
 
         [Test]

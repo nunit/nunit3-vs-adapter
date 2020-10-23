@@ -124,7 +124,7 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
 
         public void DumpVSInput(IEnumerable<TestCase> testCases)
         {
-            AddString($"<VS_Input_TestCases>   (DisplayName : FQN : Id)\n");
+            AddString("<VS_Input_TestCases>   (DisplayName : FQN : Id)\n");
             foreach (var tc in testCases)
             {
                 AddString($"   {tc.DisplayName} : {tc.FullyQualifiedName} : {tc.Id}\n");

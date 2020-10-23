@@ -22,7 +22,6 @@
 // ***********************************************************************
 using System;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests

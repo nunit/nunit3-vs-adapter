@@ -202,7 +202,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     {
         private ITestExecutionRecorder recorder;
         private ITestConverterCommon converter;
-        private IDumpXml dumpxml;
         private IAdapterSettings settings;
         private INUnit3TestExecutor executor;
 
@@ -230,7 +229,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             recorder = Substitute.For<IFrameworkHandle>();
             converter = Substitute.For<ITestConverterCommon>();
-            dumpxml = Substitute.For<IDumpXml>();
             settings = Substitute.For<IAdapterSettings>();
             executor = Substitute.For<INUnit3TestExecutor>();
             executor.Settings.Returns(settings);
