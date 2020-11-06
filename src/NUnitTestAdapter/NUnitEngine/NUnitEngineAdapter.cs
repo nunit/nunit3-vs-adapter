@@ -143,7 +143,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             // Following null argument should work for nunit3 format. Empty array is OK as well.
             // If you decide to handle other formats in the runsettings, it needs more work.
             var resultWriter = resultService.GetResultWriter("nunit3", null);
-            resultWriter.WriteResultFile(testResults.TopNode, path);
+            resultWriter.WriteResultFile(testResults.FullTopNode, path);
             logger.Info($"   Test results written to {path}");
         }
     }
