@@ -21,11 +21,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         }
 
         [Test]
-        public void TestXmlFileNameGenerationNewFileForEachRun()
+        public void TestXmlFileNameGenerationNewOutputXmlFileForEachRun()
         {
             var logger = Substitute.For<ITestLogger>();
             var settings = new AdapterSettings(logger);
-            settings.Load("<RunSettings><NUnit><TestOutputXml>/my/work/dir</TestOutputXml><NewFileForEachRun>true</NewFileForEachRun></NUnit></RunSettings>");
+            settings.Load("<RunSettings><NUnit><TestOutputXml>/my/work/dir</TestOutputXml><NewOutputXmlFileForEachRun>true</NewOutputXmlFileForEachRun></NUnit></RunSettings>");
             var sut = new NUnitEngineAdapter();
             sut.InitializeSettingsAndLogging(settings, logger);
             string path = sut.GetXmlFilePath("c:/", "assembly", "xml");

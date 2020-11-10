@@ -150,7 +150,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public string GetXmlFilePath(string folder, string defaultFileName, string extension)
         {
-            if (!settings.NewFileForEachRun)
+            if (!settings.NewOutputXmlFileForEachRun)
             {
                 // overwrite the existing file
                 return Path.Combine(folder, $"{defaultFileName}.{extension}");
