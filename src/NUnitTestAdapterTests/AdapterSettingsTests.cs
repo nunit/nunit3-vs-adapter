@@ -81,7 +81,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 Assert.That(_settings.DisableParallelization, Is.False);
                 Assert.That(_settings.DesignMode, Is.False);
                 Assert.That(_settings.UseTestOutputXml, Is.False);
-        });
+                Assert.That(_settings.NewFileForEachRun, Is.False);
+            });
         }
 
         [Test]
@@ -199,6 +200,16 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             {
                 Assert.That(_settings.TestOutputXml, Does.Contain(@"/my/work/dir"));
             });
+        }
+
+        /// <summary>
+        /// NewFileForEachRun.
+        /// </summary>
+        [Test]
+        public void TestNewFileForEachRunSetting()
+        {
+            _settings.Load("<RunSettings><NUnit><NewFileForEachRun>true</NewFileForEachRun></NUnit></RunSettings>");
+            Assert.That(_settings.NewFileForEachRun, Is.True);
         }
 
         /// <summary>
