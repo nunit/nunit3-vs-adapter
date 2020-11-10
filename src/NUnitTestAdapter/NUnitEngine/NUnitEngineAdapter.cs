@@ -148,7 +148,6 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             logger.Info($"   Test results written to {path}");
         }
 
-        private const int MAX_RUNS = 100;
         public string GetXmlFilePath(string folder, string defaultFileName, string extension)
         {
             if (!settings.NewFileForEachRun)
@@ -158,13 +157,12 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             }
             // allways create a new file
             int i = 1;
-            while (i < MAX_RUNS)
+            while (true)
             {
                 string path = Path.Combine(folder,  $"{defaultFileName}.{i++}.{extension}");
                 if (!File.Exists(path))
                     return path;
             }
-            throw new Exception(string.Format($"Found more than {0} result files, remove old files first!", MAX_RUNS));
         }
     }
 }
