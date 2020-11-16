@@ -44,6 +44,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             where T : class;
 
         void GenerateTestOutput(NUnitResults testResults, string assemblyPath, string testOutputXmlFolder);
+        string GetXmlFilePath(string folder, string defaultFileName, string extension);
     }
 
     public class NUnitEngineAdapter : INUnitEngineAdapter, IDisposable
@@ -137,7 +138,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             if (!settings.UseTestOutputXml)
                 return;
 
-            string path = Path.Combine(testOutputXmlFolder, $"{Path.GetFileNameWithoutExtension(assemblyPath)}.xml");
+            string path = GetXmlFilePath(testOutputXmlFolder, Path.GetFileNameWithoutExtension(assemblyPath), "xml");
             var resultService = GetService<IResultService>();
 
             // Following null argument should work for nunit3 format. Empty array is OK as well.
@@ -145,6 +146,23 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             var resultWriter = resultService.GetResultWriter("nunit3", null);
             resultWriter.WriteResultFile(testResults.FullTopNode, path);
             logger.Info($"   Test results written to {path}");
+        }
+
+        public string GetXmlFilePath(string folder, string defaultFileName, string extension)
+        {
+            if (!settings.NewOutputXmlFileForEachRun)
+            {
+                // overwrite the existing file
+                return Path.Combine(folder, $"{defaultFileName}.{extension}");
+            }
+            // allways create a new file
+            int i = 1;
+            while (true)
+            {
+                string path = Path.Combine(folder,  $"{defaultFileName}.{i++}.{extension}");
+                if (!File.Exists(path))
+                    return path;
+            }
         }
     }
 }

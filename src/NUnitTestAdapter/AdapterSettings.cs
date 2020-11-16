@@ -71,7 +71,10 @@ namespace NUnit.VisualStudio.TestAdapter
         VsTestCategoryType VsTestCategoryType { get; }
         string TestOutputXml { get; }
         bool UseTestOutputXml { get; }
-
+        /// <summary>
+        /// For retry runs create a new file for each run
+        /// </summary>
+        bool NewOutputXmlFileForEachRun { get; }
         /// <summary>
         /// True if test run is triggered in an IDE/Editor context.
         /// </summary>
@@ -195,6 +198,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public string Where { get; private set; }
         public string TestOutputXml { get; private set; }
         public bool UseTestOutputXml => !string.IsNullOrEmpty(TestOutputXml);
+        public bool NewOutputXmlFileForEachRun { get; private set; }
         public int DefaultTimeout { get; private set; }
 
         public int NumberOfTestWorkers { get; private set; }
@@ -318,6 +322,7 @@ namespace NUnit.VisualStudio.TestAdapter
             BasePath = GetInnerTextWithLog(nunitNode, nameof(BasePath));
             PrivateBinPath = GetInnerTextWithLog(nunitNode, nameof(PrivateBinPath));
             TestOutputXml = GetInnerTextWithLog(nunitNode, nameof(TestOutputXml));
+            NewOutputXmlFileForEachRun = GetInnerTextAsBool(nunitNode, nameof(NewOutputXmlFileForEachRun), false);
             RandomSeed = GetInnerTextAsNullableInt(nunitNode, nameof(RandomSeed));
             RandomSeedSpecified = RandomSeed.HasValue;
             if (!RandomSeedSpecified)
