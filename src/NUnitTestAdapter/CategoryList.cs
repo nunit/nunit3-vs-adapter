@@ -33,7 +33,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public const string NUnitCategoryName = "NUnit.TestCategory";
         private const string NunitTestCategoryLabel = "Category";
         private const string VsTestCategoryLabel = "TestCategory";
-        private const string MSTestCategoryName = "MSTestDiscoverer.TestCategory";
+        // private const string MSTestCategoryName = "MSTestDiscoverer.TestCategory";
 
         internal static readonly TestProperty NUnitTestCategoryProperty = TestProperty.Register(
             NUnitCategoryName,
