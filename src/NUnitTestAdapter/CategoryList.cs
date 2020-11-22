@@ -30,13 +30,13 @@ namespace NUnit.VisualStudio.TestAdapter
 {
     public class CategoryList
     {
-        public const string NUnitCategoryName = "NUnit.TestCategory";
         private const string NUnitTestCategoryLabel = "Category";
-        private const string VsTestCategoryLabel = "TestCategory";
 
         internal static readonly TestProperty NUnitTestCategoryProperty = TestProperty.Register(
-            NUnitCategoryName,
-            VsTestCategoryLabel,
+            id: "NUnit.TestCategory",
+            // This label is what causes VSTest to include the values in the Test Categories column and show the
+            // grouping as `X` rather than `Category [X]`. (https://github.com/nunit/nunit3-vs-adapter/issues/310)
+            label: "TestCategory",
             valueType: typeof(string[]),
             TestPropertyAttributes.Hidden
 #pragma warning disable CS0618 // This is the only way to fix https://github.com/nunit/nunit3-vs-adapter/issues/310, and MSTest also depends on this.
