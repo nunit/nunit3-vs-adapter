@@ -35,7 +35,7 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             testCase?.Traits.Add(new Trait(name, value));
         }
-        private const string NunitTestCategoryLabel = "Category";
+        private const string NUnitTestCategoryLabel = "Category";
 
 
         /// <summary>
@@ -83,13 +83,13 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             if (traitsCache.ContainsKey(key))
             {
-                categoryList.AddRange(traitsCache[key].Traits.Where(o => o.Name == NunitTestCategoryLabel)
+                categoryList.AddRange(traitsCache[key].Traits.Where(o => o.Name == NUnitTestCategoryLabel)
                     .Select(prop => prop.Value).ToList());
 
                 if (traitsCache[key].Explicit)
                     testCase.SetPropertyValue(CategoryList.NUnitExplicitProperty, true);
 
-                var traitsList = traitsCache[key].Traits.Where(o => o.Name != NunitTestCategoryLabel).ToList();
+                var traitsList = traitsCache[key].Traits.Where(o => o.Name != NUnitTestCategoryLabel).ToList();
                 if (traitsList.Count > 0)
                     testCase.Traits.AddRange(traitsList);
             }

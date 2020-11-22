@@ -31,7 +31,7 @@ namespace NUnit.VisualStudio.TestAdapter
     public class CategoryList
     {
         public const string NUnitCategoryName = "NUnit.TestCategory";
-        private const string NunitTestCategoryLabel = "Category";
+        private const string NUnitTestCategoryLabel = "Category";
         private const string VsTestCategoryLabel = "TestCategory";
 
         internal static readonly TestProperty NUnitTestCategoryProperty = TestProperty.Register(
@@ -88,7 +88,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     AddTraitsToCache(traitsCache, key, propertyNode);
                 if (IsInternalProperty(propertyNode))
                     continue;
-                if (propertyNode.Name != NunitTestCategoryLabel)
+                if (propertyNode.Name != NUnitTestCategoryLabel)
                 {
                     testCase.Traits.Add(new Trait(propertyNode.Name, propertyNode.Value));
                 }

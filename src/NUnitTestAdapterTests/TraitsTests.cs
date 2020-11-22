@@ -53,7 +53,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         /// {
         ///    [Category("Derived")]
         ///    [Test]
-        ///    public void dNunitTest()
+        ///    public void dNUnitTest()
         ///    { }
         /// }.
         /// </summary>
@@ -79,7 +79,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 					<property name='Category' value='DerivedClass' />
 					<property name='Category' value='BaseClass' />
 				</properties>
-				<test-case id='0-1003' name='dNunitTest' fullname='nUnitClassLibrary.ClassD.dNunitTest' methodname='dNunitTest' classname='nUnitClassLibrary.ClassD' runstate='Runnable' seed='405714082'>
+				<test-case id='0-1003' name='dNUnitTest' fullname='nUnitClassLibrary.ClassD.dNUnitTest' methodname='dNUnitTest' classname='nUnitClassLibrary.ClassD' runstate='Runnable' seed='405714082'>
 					<properties>
 						<property name='Category' value='Derived' />
 					</properties>
@@ -420,7 +420,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             ProcessXml2TestCase(xml);
 
             Assert.That(testcaselist.Count, Is.EqualTo(3), "Wrong number of testcases found");
-            var testcase1 = testcaselist.FirstOrDefault(o => o.DisplayName == "dNunitTest");
+            var testcase1 = testcaselist.FirstOrDefault(o => o.DisplayName == "dNUnitTest");
             Assert.That(testcase1, Is.Not.Null, "Didn't find the  testcase");
             VerifyCategoriesOnly(testcase1, 3, "derived");
        }
