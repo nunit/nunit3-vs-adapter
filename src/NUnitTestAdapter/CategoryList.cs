@@ -36,8 +36,13 @@ namespace NUnit.VisualStudio.TestAdapter
 
         internal static readonly TestProperty NUnitTestCategoryProperty = TestProperty.Register(
             NUnitCategoryName,
-            VsTestCategoryLabel, typeof(string[]), TestPropertyAttributes.Hidden | TestPropertyAttributes.Trait,
-            typeof(TestCase));
+            VsTestCategoryLabel,
+            valueType: typeof(string[]),
+            TestPropertyAttributes.Hidden
+#pragma warning disable CS0618 // This is the only way to fix https://github.com/nunit/nunit3-vs-adapter/issues/310, and MSTest also depends on this.
+                | TestPropertyAttributes.Trait,
+#pragma warning restore CS0618
+            owner: typeof(TestCase));
 
         internal static readonly TestProperty NUnitExplicitProperty = TestProperty.Register(
             "NUnit.Explicit",
