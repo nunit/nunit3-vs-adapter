@@ -30,10 +30,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="..\..\LICENSE.txt" Link="LICENSE.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="SourceLink.Create.CommandLine" Version="2.8.3" PrivateAssets="All" />
     <PackageReference Include="nunit.engine" Version="3.11.1" />
   </ItemGroup>

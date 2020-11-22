@@ -82,9 +82,19 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 Assert.That(_settings.DesignMode, Is.False);
                 Assert.That(_settings.UseTestOutputXml, Is.False);
                 Assert.That(_settings.NewOutputXmlFileForEachRun, Is.False);
+                Assert.That(_settings.DumpXmlTestDiscovery, Is.False);
+                Assert.That(_settings.DumpXmlTestResults, Is.False);
+                Assert.That(_settings.PreFilter, Is.False);
+                Assert.That(_settings.ShowInternalProperties, Is.False);
+                Assert.That(_settings.UseParentFQNForParametrizedTests, Is.False);
+                Assert.That(_settings.UseNUnitIdforTestCaseId, Is.False);
+                Assert.That(_settings.StopOnError, Is.False);
+                Assert.That(_settings.SkipNonTestAssemblies, Is.False);
+                Assert.That(_settings.NewOutputXmlFileForEachRun, Is.False);
+
             });
         }
-        
+
         [Test]
         public void ResultsDirectorySetting()
         {

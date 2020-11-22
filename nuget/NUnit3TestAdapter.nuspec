@@ -1,45 +1,48 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
-    <metadata>
-        <id>NUnit3TestAdapter</id>
-        <version>$version$</version>
-        <title>NUnit 3 Test Adapter for Visual Studio and DotNet</title>
-        <authors>Charlie Poole, Terje Sandstrom</authors>
-        <license type="expression">MIT</license>
-        <projectUrl>https://github.com/nunit/docs/wiki/Visual-Studio-Test-Adapter</projectUrl>
-        <repository type="git" url="https://github.com/nunit/nunit3-vs-adapter"/>
-        <iconUrl>https://cdn.rawgit.com/nunit/resources/master/images/icon/nunit_256.png</iconUrl>
-        <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <summary>NUnit 3 adapter for running tests in Visual Studio and DotNet. Works with NUnit 3.x, use the NUnit 2 adapter for 2.x tests.</summary>
-        <description>
-          The NUnit3 TestAdapter for Visual Studio, all versions from 2012 and onwards, and DotNet (incl. .Net core).
+  <metadata>
+    <id>NUnit3TestAdapter</id>
+    <version>$version$</version>
+    <title>NUnit 3 Test Adapter for Visual Studio and DotNet</title>
+    <authors>Charlie Poole, Terje Sandstrom</authors>
+    <license type="expression">MIT</license>
+    <projectUrl>https://github.com/nunit/docs/wiki/Visual-Studio-Test-Adapter</projectUrl>
+    <repository type="git" url="https://github.com/nunit/nunit3-vs-adapter"/>
+    <iconUrl>https://cdn.rawgit.com/nunit/resources/master/images/icon/nunit_256.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <summary>NUnit 3 adapter for running tests in Visual Studio and DotNet. Works with NUnit 3.x, use the NUnit 2 adapter for 2.x tests.</summary>
+    <description>
+      The NUnit3 TestAdapter for Visual Studio, all versions from 2012 and onwards, and DotNet (incl. .Net core).
 
-          Note that this package ONLY contains the adapter, not the NUnit framework.
-          For VS 2017 and forward, you should add this package to every test project in your solution. (Earlier versions only require a single adapter package per solution.)
+      Note that this package ONLY contains the adapter, not the NUnit framework.
+      For VS 2017 and forward, you should add this package to every test project in your solution. (Earlier versions only require a single adapter package per solution.)
 
-          Note that with this package you should not install the VSIX adapter package.
-        </description>
-        <releaseNotes>This release works with NUnit 3.0 and higher only.  Also see  https://docs.nunit.org/articles/vs-test-adapter/Adapter-Release-Notes.html  </releaseNotes>
-        <copyright>Copyright (c) 2011-2020 Charlie Poole, 2014-2020 Terje Sandstrom</copyright>
-        <language>en-US</language>
-        <tags>test visualstudio testadapter nunit nunit3 dotnet</tags>
+      Note that with this package you should not install the VSIX adapter package.
+    </description>
+    <releaseNotes>This release works with NUnit 3.0 and higher only.  Also see  https://docs.nunit.org/articles/vs-test-adapter/Adapter-Release-Notes.html  </releaseNotes>
+    <copyright>Copyright (c) 2011-2020 Charlie Poole, 2014-2020 Terje Sandstrom</copyright>
+    <language>en-US</language>
+    <tags>test visualstudio testadapter nunit nunit3 dotnet</tags>
 
-        <developmentDependency>false</developmentDependency>
-    </metadata>
-    <files>
-        <file src="build\net35\NUnit3.TestAdapter.dll" target="build\net35\NUnit3.TestAdapter.dll" />
-        <file src="build\net35\NUnit3.TestAdapter.pdb" target="build\net35\NUnit3.TestAdapter.pdb" />
-        <file src="build\net35\nunit.engine.dll" target="build\net35\nunit.engine.dll" />
-        <file src="build\net35\nunit.engine.api.dll" target="build\net35\nunit.engine.api.dll" />
-        <file src="build\net35\nunit.engine.core.dll" target="build\net35\nunit.engine.core.dll" />
-        <file src="build\net35\NUnit3TestAdapter.props" target="build\net35\NUnit3TestAdapter.props" />
+    <developmentDependency>false</developmentDependency>
+  </metadata>
+  <dependencies>
+    <dependent id="NUnit" version="3.*" />
+  </dependencies>
+  <files>
+    <file src="build\net35\NUnit3.TestAdapter.dll" target="build\net35\NUnit3.TestAdapter.dll" />
+    <file src="build\net35\NUnit3.TestAdapter.pdb" target="build\net35\NUnit3.TestAdapter.pdb" />
+    <file src="build\net35\nunit.engine.dll" target="build\net35\nunit.engine.dll" />
+    <file src="build\net35\nunit.engine.api.dll" target="build\net35\nunit.engine.api.dll" />
+    <file src="build\net35\nunit.engine.core.dll" target="build\net35\nunit.engine.core.dll" />
+    <file src="build\net35\NUnit3TestAdapter.props" target="build\net35\NUnit3TestAdapter.props" />
 
-        <file src="build\netcoreapp2.1\NUnit3.TestAdapter.dll" target="build\netcoreapp2.1\NUnit3.TestAdapter.dll" />
-        <file src="build\netcoreapp2.1\NUnit3.TestAdapter.pdb" target="build\netcoreapp2.1\NUnit3.TestAdapter.pdb" />
-        <file src="build\netcoreapp2.1\nunit.engine.dll" target="build\netcoreapp2.1\nunit.engine.dll" />
-        <file src="build\netcoreapp2.1\nunit.engine.api.dll" target="build\netcoreapp2.1\nunit.engine.api.dll" />
-        <file src="build\netcoreapp2.1\nunit.engine.core.dll" target="build\netcoreapp2.1\nunit.engine.core.dll" />
-        <file src="build\netcoreapp2.1\NUnit3TestAdapter.props" target="build\netcoreapp2.1\NUnit3TestAdapter.props" />
+    <file src="build\netcoreapp2.1\NUnit3.TestAdapter.dll" target="build\netcoreapp2.1\NUnit3.TestAdapter.dll" />
+    <file src="build\netcoreapp2.1\NUnit3.TestAdapter.pdb" target="build\netcoreapp2.1\NUnit3.TestAdapter.pdb" />
+    <file src="build\netcoreapp2.1\nunit.engine.dll" target="build\netcoreapp2.1\nunit.engine.dll" />
+    <file src="build\netcoreapp2.1\nunit.engine.api.dll" target="build\netcoreapp2.1\nunit.engine.api.dll" />
+    <file src="build\netcoreapp2.1\nunit.engine.core.dll" target="build\netcoreapp2.1\nunit.engine.core.dll" />
+    <file src="build\netcoreapp2.1\NUnit3TestAdapter.props" target="build\netcoreapp2.1\NUnit3TestAdapter.props" />
 
-    </files>
+  </files>
 </package>
