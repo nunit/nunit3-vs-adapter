@@ -29,16 +29,5 @@ jobs:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    - task: UseDotNet@2
-      displayName: Install required .NET Core SDK
-      inputs:
-        useGlobalJson: true
-
-    - task: UseDotNet@2
-      displayName: Install .NET Core 2.1 runtime
-      inputs:
-        packageType: runtime
-        version: 2.1.x
-
     - powershell: .\build.ps1 --target=Acceptance --configuration=$(BuildConfiguration)
       displayName: Build and test
