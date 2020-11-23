@@ -84,7 +84,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 Assert.That(_settings.NewOutputXmlFileForEachRun, Is.False);
             });
         }
-        
+
         [Test]
         public void ResultsDirectorySetting()
         {
