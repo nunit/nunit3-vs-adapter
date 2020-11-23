@@ -397,30 +397,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             // Update NumberOfTestWorkers based on the DisableParallelization and NumberOfTestWorkers from runsettings.
             UpdateNumberOfTestWorkers();
-
-
-            string ValidatedPath(string path, string purpose)
-            {
-                try
-                {
-                    if (string.IsNullOrEmpty(WorkDirectory))
-                    {
-                        return Path.GetFullPath(path);
-                    }
-
-                    if (Path.IsPathRooted(path))
-                    {
-                        return Path.GetFullPath(path);
-                    }
-                    return Path.GetFullPath(Path.Combine(WorkDirectory, path));
-                }
-                catch (Exception)
-                {
-                    _logger.Error($"   Invalid path for {purpose}: {path}");
-                    throw;
-                }
-            }
-
+            
             void UpdateTestProperties()
             {
                 foreach (XmlNode node in doc.SelectNodes("RunSettings/TestRunParameters/Parameter"))
