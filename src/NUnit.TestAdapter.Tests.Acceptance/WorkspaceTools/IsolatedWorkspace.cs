@@ -69,7 +69,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
             if (new FileInfo(tempTrxFile).Length == 0)
                 result.ThrowIfError();
 
-            return VSTestResult.Load(tempTrxFile);
+            return VSTestResult.Load(result, tempTrxFile);
         }
 
         public void DotNetVSTest(IEnumerable<string> testAssemblyPaths)
@@ -108,7 +108,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
             if (new FileInfo(tempTrxFile).Length == 0)
                 result.ThrowIfError();
 
-            return VSTestResult.Load(tempTrxFile);
+            return VSTestResult.Load(result, tempTrxFile);
         }
 
         private RunSettings ConfigureRun(string filename) => new RunSettings(Directory, filename);
