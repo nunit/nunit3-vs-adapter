@@ -96,12 +96,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                 .Run();
         }
 
-        public VSTestResult VSTest(IEnumerable<string> testAssemblyPaths)
+        public VSTestResult VSTest(string testAssemblyPath)
         {
             using var tempTrxFile = new TempFile();
 
             var result = ConfigureRun(toolResolver.VSTest)
-                .AddRange(testAssemblyPaths)
+                .Add(testAssemblyPath)
                 .Add("/logger:trx;LogFileName=" + tempTrxFile)
                 .Run(throwOnError: false);
 

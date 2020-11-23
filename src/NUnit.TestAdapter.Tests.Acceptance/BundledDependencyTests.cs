@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 {
@@ -52,9 +51,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             workspace.MSBuild(restore: true);
 
-            workspace.VSTest(
-                from targetFramework in TargetFrameworks
-                select $@"bin\Debug\{targetFramework}\Test.dll");
+            foreach (var targetFramework in TargetFrameworks)
+            {
+                workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll");
+            }
         }
 
         [Test, Platform("Win")]
@@ -129,9 +129,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             workspace.MSBuild(restore: true);
 
-            workspace.VSTest(
-                from targetFramework in TargetFrameworks
-                select $@"bin\Debug\{targetFramework}\Test.dll");
+            foreach (var targetFramework in TargetFrameworks)
+            {
+                workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll");
+            }
         }
     }
 }
