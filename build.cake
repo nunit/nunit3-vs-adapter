@@ -13,7 +13,7 @@ var configuration = Argument("configuration", "Release");
 //////////////////////////////////////////////////////////////////////
 
 var version = "4.0.0";
-var modifier = "";
+var modifier = "-beta.1";
 
 var dbgSuffix = configuration.ToLower() == "debug" ? "-dbg" : "";
 var packageVersion = version + modifier + dbgSuffix;
@@ -243,7 +243,7 @@ Task("CreateWorkingImage")
         CreateDirectory(PACKAGE_IMAGE_DIR);
         CleanDirectory(PACKAGE_IMAGE_DIR);
 
-        CopyFileToDirectory("LICENSE.txt", PACKAGE_IMAGE_DIR);
+        CopyFileToDirectory("LICENSE", PACKAGE_IMAGE_DIR);
 
         // dotnet publish doesn't work for .NET 3.5
         var net35Files = new FilePath[]
