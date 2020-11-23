@@ -59,11 +59,6 @@ namespace NUnit.VisualStudio.TestAdapter
     [ExtensionUri(ExecutorUri)]
     public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDisposable, INUnit3TestExecutor, IExecutionContext
     {
-        public NUnit3TestExecutor()
-        {
-            EmbeddedAssemblyResolution.EnsureInitialized();
-        }
-
         #region Properties
 
         private RunType RunType { get; set; }
