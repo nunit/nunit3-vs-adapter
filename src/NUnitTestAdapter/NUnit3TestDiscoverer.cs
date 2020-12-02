@@ -51,11 +51,6 @@ namespace NUnit.VisualStudio.TestAdapter
     [Category("managed")]
     public sealed class NUnit3TestDiscoverer : NUnitTestAdapter, ITestDiscoverer
     {
-        public NUnit3TestDiscoverer()
-        {
-            EmbeddedAssemblyResolution.EnsureInitialized();
-        }
-
         private DumpXml dumpXml;
 
         #region ITestDiscoverer Members

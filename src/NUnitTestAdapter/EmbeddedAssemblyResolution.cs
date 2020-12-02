@@ -24,6 +24,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 #if !NET35
 using System.Runtime.Loader;
 #endif
@@ -32,25 +33,14 @@ namespace NUnit.VisualStudio.TestAdapter
 {
     internal static class EmbeddedAssemblyResolution
     {
-        private static readonly object LockObj = new object();
-        private static bool isInitialized;
-
+        [ModuleInitializer]
         public static void EnsureInitialized()
         {
-            if (isInitialized) return;
-
-            lock (LockObj)
-            {
-                if (isInitialized) return;
-
 #if NET35
-                AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
 #else
-                AssemblyLoadContext.Default.Resolving += Default_Resolving;
+            AssemblyLoadContext.Default.Resolving += Default_Resolving;
 #endif
-
-                isInitialized = true;
-            }
         }
 
 #if NET35
