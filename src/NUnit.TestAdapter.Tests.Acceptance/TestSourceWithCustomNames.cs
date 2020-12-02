@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
@@ -107,7 +106,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             workspace.MSBuild(restore: true);
 
-            var results = workspace.VSTest(new[] { $@"bin\Debug\{targetFramework}\Test.dll" });
+            var results = workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll");
 
             // Total Tests =
             //              3 from PassingTestStr/TestCaseSourceMethod

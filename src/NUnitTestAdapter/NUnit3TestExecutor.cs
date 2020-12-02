@@ -59,11 +59,6 @@ namespace NUnit.VisualStudio.TestAdapter
     [ExtensionUri(ExecutorUri)]
     public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDisposable, INUnit3TestExecutor, IExecutionContext
     {
-        public NUnit3TestExecutor()
-        {
-            EmbeddedAssemblyResolution.EnsureInitialized();
-        }
-
         #region Properties
 
         private RunType RunType { get; set; }
@@ -292,19 +287,10 @@ namespace NUnit.VisualStudio.TestAdapter
                             : "   NUnit failed to load " + assemblyPath);
                 }
             }
-            catch (BadImageFormatException)
+            catch (Exception ex) when (ex is BadImageFormatException || ex.InnerException is BadImageFormatException)
             {
                 // we skip the native c++ binaries that we don't support.
                 TestLog.Warning("   Assembly not supported: " + assemblyPath);
-            }
-            catch (NUnitEngineException e)
-            {
-                if (e.InnerException is BadImageFormatException)
-                {
-                    // we skip the native c++ binaries that we don't support.
-                    TestLog.Warning("   Assembly not supported: " + assemblyPath);
-                }
-                throw;
             }
             catch (FileNotFoundException ex)
             {
