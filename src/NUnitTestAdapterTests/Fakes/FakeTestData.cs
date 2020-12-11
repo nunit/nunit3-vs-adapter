@@ -81,7 +81,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
                     <property name='Category' value='DerivedClass' />
                     <property name='Category' value='BaseClass' />
                 </properties>
-                <test-case id='0-1003' name='dNunitTest' fullname='nUnitClassLibrary.ClassD.dNunitTest' methodname='dNunitTest' classname='nUnitClassLibrary.ClassD' runstate='Runnable' seed='405714082'>
+                <test-case id='0-1003' name='dNUnitTest' fullname='nUnitClassLibrary.ClassD.dNUnitTest' methodname='dNUnitTest' classname='nUnitClassLibrary.ClassD' runstate='Runnable' seed='405714082'>
                     <properties>
                         <property name='Category' value='Derived' />
                     </properties>

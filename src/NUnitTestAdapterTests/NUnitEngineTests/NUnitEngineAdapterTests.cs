@@ -7,7 +7,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
     [TestFixture]
     public class NUnitEngineAdapterTests
     {
-
         [Test]
         public void TestXmlFileNameGeneration()
         {

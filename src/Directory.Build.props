@@ -5,6 +5,7 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\NUnitAdapter.snk</AssemblyOriginatorKeyFile>
     <CodeAnalysisRuleSet>..\..\Osiris.Extended.ruleset</CodeAnalysisRuleSet>
+    <TreatWarningsAsErrors Condition="'$(Configuration)' == 'Release'">true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>

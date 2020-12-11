@@ -71,10 +71,12 @@ namespace NUnit.VisualStudio.TestAdapter
         VsTestCategoryType VsTestCategoryType { get; }
         string TestOutputXml { get; }
         bool UseTestOutputXml { get; }
+
         /// <summary>
-        /// For retry runs create a new file for each run
+        /// For retry runs create a new file for each run.
         /// </summary>
         bool NewOutputXmlFileForEachRun { get; }
+
         /// <summary>
         /// True if test run is triggered in an IDE/Editor context.
         /// </summary>
@@ -397,7 +399,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             // Update NumberOfTestWorkers based on the DisableParallelization and NumberOfTestWorkers from runsettings.
             UpdateNumberOfTestWorkers();
-            
+
             void UpdateTestProperties()
             {
                 foreach (XmlNode node in doc.SelectNodes("RunSettings/TestRunParameters/Parameter"))
