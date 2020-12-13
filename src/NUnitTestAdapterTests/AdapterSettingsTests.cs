@@ -91,7 +91,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 Assert.That(_settings.StopOnError, Is.False);
                 Assert.That(_settings.SkipNonTestAssemblies, Is.False);
                 Assert.That(_settings.NewOutputXmlFileForEachRun, Is.False);
-
             });
         }
 
