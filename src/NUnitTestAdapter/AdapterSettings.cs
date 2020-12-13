@@ -71,10 +71,12 @@ namespace NUnit.VisualStudio.TestAdapter
         VsTestCategoryType VsTestCategoryType { get; }
         string TestOutputXml { get; }
         bool UseTestOutputXml { get; }
+
         /// <summary>
-        /// For retry runs create a new file for each run
+        /// For retry runs create a new file for each run.
         /// </summary>
         bool NewOutputXmlFileForEachRun { get; }
+
         /// <summary>
         /// True if test run is triggered in an IDE/Editor context.
         /// </summary>
@@ -397,29 +399,6 @@ namespace NUnit.VisualStudio.TestAdapter
 
             // Update NumberOfTestWorkers based on the DisableParallelization and NumberOfTestWorkers from runsettings.
             UpdateNumberOfTestWorkers();
-
-
-            string ValidatedPath(string path, string purpose)
-            {
-                try
-                {
-                    if (string.IsNullOrEmpty(WorkDirectory))
-                    {
-                        return Path.GetFullPath(path);
-                    }
-
-                    if (Path.IsPathRooted(path))
-                    {
-                        return Path.GetFullPath(path);
-                    }
-                    return Path.GetFullPath(Path.Combine(WorkDirectory, path));
-                }
-                catch (Exception)
-                {
-                    _logger.Error($"   Invalid path for {purpose}: {path}");
-                    throw;
-                }
-            }
 
             void UpdateTestProperties()
             {

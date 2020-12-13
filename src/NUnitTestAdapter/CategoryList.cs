@@ -30,18 +30,19 @@ namespace NUnit.VisualStudio.TestAdapter
 {
     public class CategoryList
     {
-        public const string NUnitCategoryName = "NUnit.TestCategory";
-        private const string NunitTestCategoryLabel = "Category";
-        private const string VsTestCategoryLabel = "TestCategory";
-        private const string MSTestCategoryName = "MSTestDiscoverer.TestCategory";
+        private const string NUnitTestCategoryLabel = "Category";
 
         internal static readonly TestProperty NUnitTestCategoryProperty = TestProperty.Register(
-            NUnitCategoryName,
-            VsTestCategoryLabel, typeof(string[]), TestPropertyAttributes.Hidden | TestPropertyAttributes.Trait,
-            typeof(TestCase));
-
-        private readonly TestProperty
-            msTestCategoryProperty; // = TestProperty.Register(MSTestCategoryName, VsTestCategoryLabel, typeof(string[]), TestPropertyAttributes.Hidden | TestPropertyAttributes.Trait, typeof(TestCase));
+            id: "NUnit.TestCategory",
+            // This label is what causes VSTest to include the values in the Test Categories column and show the
+            // grouping as `X` rather than `Category [X]`. (https://github.com/nunit/nunit3-vs-adapter/issues/310)
+            label: "TestCategory",
+            valueType: typeof(string[]),
+            TestPropertyAttributes.Hidden
+#pragma warning disable CS0618 // This is the only way to fix https://github.com/nunit/nunit3-vs-adapter/issues/310, and MSTest also depends on this.
+                | TestPropertyAttributes.Trait,
+#pragma warning restore CS0618
+            owner: typeof(TestCase));
 
         internal static readonly TestProperty NUnitExplicitProperty = TestProperty.Register(
             "NUnit.Explicit",
@@ -87,7 +88,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     AddTraitsToCache(traitsCache, key, propertyNode);
                 if (IsInternalProperty(propertyNode))
                     continue;
-                if (propertyNode.Name != NunitTestCategoryLabel)
+                if (propertyNode.Name != NUnitTestCategoryLabel)
                 {
                     testCase.Traits.Add(new Trait(propertyNode.Name, propertyNode.Value));
                 }
@@ -163,7 +164,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 testCase.SetPropertyValue(
                     settings.VsTestCategoryType == VsTestCategoryType.NUnit
                         ? NUnitTestCategoryProperty
-                        : msTestCategoryProperty, categorylist.Distinct().ToArray());
+                        : null, categorylist.Distinct().ToArray());
             }
         }
     }

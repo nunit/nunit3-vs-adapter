@@ -160,11 +160,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
 
 
         [TestCase("CategoryThatMatchesNothing", new string[0])]
-        [TestCase("AsmCat", new[] { "nUnitClassLibrary.Class1.nUnitTest", "nUnitClassLibrary.ClassD.dNunitTest", "nUnitClassLibrary.ClassD.nUnitTest", "nUnitClassLibrary.NestedClasses.NC11", "nUnitClassLibrary.NestedClasses+NestedClass2.NC21" })]
-        [TestCase("BaseClass", new[] { "nUnitClassLibrary.Class1.nUnitTest", "nUnitClassLibrary.ClassD.dNunitTest", "nUnitClassLibrary.ClassD.nUnitTest" })]
+        [TestCase("AsmCat", new[] { "nUnitClassLibrary.Class1.nUnitTest", "nUnitClassLibrary.ClassD.dNUnitTest", "nUnitClassLibrary.ClassD.nUnitTest", "nUnitClassLibrary.NestedClasses.NC11", "nUnitClassLibrary.NestedClasses+NestedClass2.NC21" })]
+        [TestCase("BaseClass", new[] { "nUnitClassLibrary.Class1.nUnitTest", "nUnitClassLibrary.ClassD.dNUnitTest", "nUnitClassLibrary.ClassD.nUnitTest" })]
         [TestCase("Base", new[] { "nUnitClassLibrary.Class1.nUnitTest", "nUnitClassLibrary.ClassD.nUnitTest" })]
-        [TestCase("DerivedClass", new[] { "nUnitClassLibrary.ClassD.dNunitTest", "nUnitClassLibrary.ClassD.nUnitTest" })]
-        [TestCase("Derived", new[] { "nUnitClassLibrary.ClassD.dNunitTest" })]
+        [TestCase("DerivedClass", new[] { "nUnitClassLibrary.ClassD.dNUnitTest", "nUnitClassLibrary.ClassD.nUnitTest" })]
+        [TestCase("Derived", new[] { "nUnitClassLibrary.ClassD.dNUnitTest" })]
         [TestCase("NS1", new[] { "nUnitClassLibrary.NestedClasses.NC11" })]
         [TestCase("NS11", new[] { "nUnitClassLibrary.NestedClasses.NC11" })]
         [TestCase("NS2", new[] { "nUnitClassLibrary.NestedClasses+NestedClass2.NC21" })]
@@ -178,11 +178,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
         }
 
         [TestCase("CategoryThatMatchesNothing", new string[0])]
-        [TestCase("AsmCat", new[] { "nUnitClassLibrary.Class1.nUnitTest", "nUnitClassLibrary.ClassD.dNunitTest", "nUnitClassLibrary.ClassD.nUnitTest", "nUnitClassLibrary.NestedClasses.NC11", "nUnitClassLibrary.NestedClasses+NestedClass2.NC21" })]
-        [TestCase("BaseClass", new[] { "nUnitClassLibrary.Class1.nUnitTest", "nUnitClassLibrary.ClassD.dNunitTest", "nUnitClassLibrary.ClassD.nUnitTest" })]
+        [TestCase("AsmCat", new[] { "nUnitClassLibrary.Class1.nUnitTest", "nUnitClassLibrary.ClassD.dNUnitTest", "nUnitClassLibrary.ClassD.nUnitTest", "nUnitClassLibrary.NestedClasses.NC11", "nUnitClassLibrary.NestedClasses+NestedClass2.NC21" })]
+        [TestCase("BaseClass", new[] { "nUnitClassLibrary.Class1.nUnitTest", "nUnitClassLibrary.ClassD.dNUnitTest", "nUnitClassLibrary.ClassD.nUnitTest" })]
         [TestCase("Base", new[] { "nUnitClassLibrary.Class1.nUnitTest", "nUnitClassLibrary.ClassD.nUnitTest" })]
-        [TestCase("DerivedClass", new[] { "nUnitClassLibrary.ClassD.dNunitTest", "nUnitClassLibrary.ClassD.nUnitTest" })]
-        [TestCase("Derived", new[] { "nUnitClassLibrary.ClassD.dNunitTest" })]
+        [TestCase("DerivedClass", new[] { "nUnitClassLibrary.ClassD.dNUnitTest", "nUnitClassLibrary.ClassD.nUnitTest" })]
+        [TestCase("Derived", new[] { "nUnitClassLibrary.ClassD.dNUnitTest" })]
         [TestCase("NS1", new[] { "nUnitClassLibrary.NestedClasses.NC11" })]
         [TestCase("NS11", new[] { "nUnitClassLibrary.NestedClasses.NC11" })]
         [TestCase("NS2", new[] { "nUnitClassLibrary.NestedClasses+NestedClass2.NC21" })]

@@ -31,7 +31,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     public class NUnit3TestDiscovererTests
     {
         [Test]
-        public void VerifyNunit3TestDiscovererHasCategoryAttribute()
+        public void VerifyNUnit3TestDiscovererHasCategoryAttribute()
         {
             var attribute = typeof(NUnit3TestDiscoverer).GetTypeInfo().GetCustomAttribute(typeof(System.ComponentModel.CategoryAttribute));
             Assert.That(attribute, Is.Not.Null);

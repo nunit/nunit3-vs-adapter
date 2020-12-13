@@ -33,7 +33,18 @@
     <VsixSourceItem Include="$(VsixInputFileLocation)\NUnit3.TestAdapter.pdb" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="license.rtf;nunit_90.png;preview.png" CopyToOutputDirectory="Always" IncludeInVSIX="true" />
+    <Content Include="license.rtf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="nunit_90.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="preview.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <None Include="source.extension.vsixmanifest" SubType="Designer" />
   </ItemGroup>
   <ItemGroup>
