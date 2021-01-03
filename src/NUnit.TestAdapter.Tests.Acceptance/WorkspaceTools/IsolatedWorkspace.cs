@@ -88,12 +88,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                 .Run();
         }
 
-        public void MSBuild(string target = null, bool restore = false)
+        public IProcessRunResult MSBuild(string target = null, bool restore = false)
         {
-            ConfigureRun(toolResolver.MSBuild)
+            var result = ConfigureRun(toolResolver.MSBuild)
                 .AddIf(target != null, "/t:" + target)
                 .AddIf(restore, "/restore")
                 .Run();
+            return result;
         }
 
         public VSTestResult VSTest(string testAssemblyPath)

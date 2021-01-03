@@ -46,10 +46,8 @@ namespace NUnit.VisualStudio.TestAdapter
 #if NET35
         private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
         {
-            using (var stream = TryGetResourceAssemblyStream(new AssemblyName(args.Name)))
-            {
-                return stream == null ? null : Assembly.Load(stream.ReadToEnd());
-            }
+            using var stream = TryGetResourceAssemblyStream(new AssemblyName(args.Name));
+            return stream == null ? null : Assembly.Load(stream.ReadToEnd());
         }
 #else
         private static Assembly Default_Resolving(AssemblyLoadContext context, AssemblyName name)

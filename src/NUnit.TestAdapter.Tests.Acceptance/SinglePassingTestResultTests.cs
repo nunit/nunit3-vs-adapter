@@ -1,6 +1,8 @@
 ﻿using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools;
 
+#pragma warning disable NUnit1011
+
 namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 {
     public sealed class SinglePassingTestResultTests : AcceptanceTests
@@ -301,10 +303,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                       </ItemGroup>
                       <ItemGroup>
                         <PackageReference Include='Microsoft.NET.Test.Sdk'>
-                          <Version>15.9.0</Version>
+                          <Version>16.8.0</Version>
                         </PackageReference>
                         <PackageReference Include='NUnit'>
-                          <Version>3.11.0</Version>
+                          <Version>3.12.0</Version>
                         </PackageReference>
                         <PackageReference Include='NUnit3TestAdapter'>
                           <Version>{nuvers}</Version>
@@ -315,7 +317,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             AddTestsCs(workspace);
 
-            workspace.MSBuild(restore: true);
+            var compileResults = workspace.MSBuild(restore: true);
 
             var result = workspace.VSTest(@"bin\Debug\Test.dll");
             result.AssertSinglePassingTest();

@@ -14,7 +14,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
     {
         public static string NuGetPackageId { get; } = "NUnit3TestAdapter";
 
-        public static string NuGetPackageVersion => Initialization.Value.nupkgVersion;
+        public static string NuGetPackageVersion => Initialization.Value.NupkgVersion;
 
         public const string LowestNetfxTarget = "net35";
         public const string LegacyProjectTargetFrameworkVersion = "v3.5";
@@ -31,7 +31,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
             "netcoreapp3.1"
         };
 
-        private static readonly Lazy<(IsolatedWorkspaceManager manager, string nupkgVersion, bool keepWorkspaces)> Initialization = new Lazy<(IsolatedWorkspaceManager, string, bool)>(() =>
+        private static readonly Lazy<(IsolatedWorkspaceManager Manager, string NupkgVersion, bool KeepWorkspaces)> Initialization = new Lazy<(IsolatedWorkspaceManager, string, bool)>(() =>
         {
             var directory = TestContext.Parameters["ProjectWorkspaceDirectory"]
                 ?? TryAutoDetectProjectWorkspaceDirectory()
@@ -75,7 +75,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         {
             var test = TestContext.CurrentContext?.Test ?? throw new InvalidOperationException("There is no current test.");
 
-            var workspace = Initialization.Value.manager.CreateWorkspace(test.Name);
+            var workspace = Initialization.Value.Manager.CreateWorkspace(test.Name);
 
             lock (WorkspacesByTestId)
             {
@@ -111,11 +111,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             if (TestContext.CurrentContext.Result.Outcome.Status == TestStatus.Failed)
             {
-                Initialization.Value.manager.PreserveDirectory(
+                Initialization.Value.Manager.PreserveDirectory(
                     test.FullName + " failed:" + Environment.NewLine
                     + TestContext.CurrentContext.Result.Message.TrimEnd() + Environment.NewLine);
             }
-            else if (!Initialization.Value.keepWorkspaces)
+            else if (!Initialization.Value.KeepWorkspaces)
             {
                 foreach (var workspace in workspaces)
                     Utils.DeleteDirectoryRobust(workspace.Directory);
@@ -126,7 +126,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         {
             if (!Initialization.IsValueCreated) return;
 
-            Initialization.Value.manager.Dispose();
+            Initialization.Value.Manager.Dispose();
         }
 
         private static string TryAutoDetectProjectWorkspaceDirectory()

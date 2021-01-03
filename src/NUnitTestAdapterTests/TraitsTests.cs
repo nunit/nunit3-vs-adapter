@@ -588,7 +588,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 					<test-case id='2' name='Test' fullname='Fixture.Test' methodname='Test' classname='Fixture' runstate='Explicit' />
 				</test-suite>").Single();
 
-            Assert.That(testCase.Traits, Has.One.With.Property("Name").EqualTo("Explicit").And.Property("Value").SameAs(string.Empty));
+            Assert.That(testCase.Traits, expression: Has.One.With.Property("Name").EqualTo("Explicit").And.Property("Value").SameAs(string.Empty));
         }
     }
 }

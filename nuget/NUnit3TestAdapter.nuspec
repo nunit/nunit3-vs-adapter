@@ -28,7 +28,7 @@
     <developmentDependency>false</developmentDependency>
     <dependencies>
       <dependency id="NUnit" version="[3.12,)" />  
-      <dependency id="NUnit.Engine" version="[3.12.0-beta1,)"/>
+      <dependency id="NUnit.Engine" version="[3.11.1,)"/>
     </dependencies>
   </metadata>
   
