@@ -423,10 +423,26 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                 <packages>
                     <package id='Microsoft.CodeCoverage' version='15.9.0' targetFramework='net45' />
                     <package id='Microsoft.NET.Test.Sdk' version='15.9.0' targetFramework='net45' />
-                    <package id='NUnit' version='3.11.0' targetFramework='net45' />
+                    <package id='NUnit' version='3.12.0' targetFramework='net45' />
                     <package id='NUnit3TestAdapter' version='{NuGetPackageVersion}' targetFramework='net45' />
                 </packages>");
         }
+
+        private static void AddRunsettings(IsolatedWorkspace workspace)
+        {
+            workspace.AddFile(".runsettings", $@"
+                <?xml version='1.0' encoding='utf - 8'?>
+                <RunSettings>
+                    <NUnit>
+                        <Verbosity>5</Verbosity>
+                        <DumpXmlTestResults>true</DumpXmlTestResults>
+                        <DumpXmlTestDiscovery>true</DumpXmlTestDiscovery>
+                        <DiscoveryMethod>Current</DiscoveryMethod>
+                    </NUnit>
+                </RunSettings>
+                ");
+        }
+
 
         [Test, Platform("Win")]
         public static void Legacy_csproj_with_packages_config()
@@ -436,7 +452,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                     <?xml version='1.0' encoding='utf-8'?>
                     <Project ToolsVersion='15.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                       <Import Project='packages\NUnit3TestAdapter.{NuGetPackageVersion}\build\{LowestNetfxTarget}\NUnit3TestAdapter.props' Condition=""Exists('packages\NUnit3TestAdapter.{NuGetPackageVersion}\build\{LowestNetfxTarget}\NUnit3TestAdapter.props')"" />
-                      <Import Project='packages\NUnit.3.11.0\build\NUnit.props' Condition=""Exists('packages\NUnit.3.11.0\build\NUnit.props')"" />
+                      <Import Project='packages\NUnit.3.12.0\build\NUnit.props' Condition=""Exists('packages\NUnit.3.12.0\build\NUnit.props')"" />
                       <Import Project='packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.props' Condition=""Exists('packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.props')"" />
                       <Import Project='packages\Microsoft.CodeCoverage.15.9.0\build\netstandard1.0\Microsoft.CodeCoverage.props' Condition=""Exists('packages\Microsoft.CodeCoverage.15.9.0\build\netstandard1.0\Microsoft.CodeCoverage.props')"" />
                       <Import Project='$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props' Condition=""Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"" />
@@ -475,8 +491,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                         <Reference Include='Microsoft.VisualStudio.CodeCoverage.Shim, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL'>
                           <HintPath>packages\Microsoft.CodeCoverage.15.9.0\lib\net45\Microsoft.VisualStudio.CodeCoverage.Shim.dll</HintPath>
                         </Reference>
-                        <Reference Include='nunit.framework, Version=3.11.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL'>
-                          <HintPath>packages\NUnit.3.11.0\lib\net45\nunit.framework.dll</HintPath>
+                        <Reference Include='nunit.framework, Version=3.12.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL'>
+                          <HintPath>packages\NUnit.3.12.0\lib\net45\nunit.framework.dll</HintPath>
                         </Reference>
                         <Reference Include='System' />
                         <Reference Include='System.Core' />
@@ -500,7 +516,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                         <Error Condition=""!Exists('packages\Microsoft.CodeCoverage.15.9.0\build\netstandard1.0\Microsoft.CodeCoverage.targets')"" Text=""$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.CodeCoverage.15.9.0\build\netstandard1.0\Microsoft.CodeCoverage.targets'))"" />
                         <Error Condition=""!Exists('packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.props')"" Text=""$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.props'))"" />
                         <Error Condition=""!Exists('packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.targets')"" Text=""$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.targets'))"" />
-                        <Error Condition=""!Exists('packages\NUnit.3.11.0\build\NUnit.props')"" Text=""$([System.String]::Format('$(ErrorText)', 'packages\NUnit.3.11.0\build\NUnit.props'))"" />
+                        <Error Condition=""!Exists('packages\NUnit.3.12.0\build\NUnit.props')"" Text=""$([System.String]::Format('$(ErrorText)', 'packages\NUnit.3.12.0\build\NUnit.props'))"" />
                         <Error Condition=""!Exists('packages\NUnit3TestAdapter.{NuGetPackageVersion}\build\{LowestNetfxTarget}\NUnit3TestAdapter.props')"" Text=""$([System.String]::Format('$(ErrorText)', 'packages\NUnit3TestAdapter.{NuGetPackageVersion}\build\{LowestNetfxTarget}\NUnit3TestAdapter.props'))"" />
                       </Target>
                       <Import Project='packages\Microsoft.CodeCoverage.15.9.0\build\netstandard1.0\Microsoft.CodeCoverage.targets' Condition=""Exists('packages\Microsoft.CodeCoverage.15.9.0\build\netstandard1.0\Microsoft.CodeCoverage.targets')"" />
@@ -508,6 +524,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                     </Project>");
 
             AddPackagesConfig(workspace);
+            AddRunsettings(workspace);
             AddTestsCs(workspace);
 
             workspace.NuGetRestore(packagesDirectory: "packages");
@@ -621,6 +638,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                     </Project>");
 
             AddPackagesConfig(workspace);
+            AddRunsettings(workspace);
             AddTestsVb(workspace);
 
             workspace.NuGetRestore(packagesDirectory: "packages");
