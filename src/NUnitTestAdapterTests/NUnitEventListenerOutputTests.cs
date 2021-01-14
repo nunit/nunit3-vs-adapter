@@ -38,6 +38,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         private const string TestFinish =
             @"<test-case id='0-1001' name='Test1' fullname='UnitTests.Test1' methodname='Test1' classname='UnitTests' runstate='Runnable' seed='108294034' result='Passed' start-time='2018-10-15 09:41:24Z' end-time='2018-10-15 09:41:24Z' duration='0.000203' asserts='0' parentId='0-1000' />";
 
+        /// <summary>
+        /// For Issue 811
+        /// </summary>
+        private const string TestFinishWithExplicitFixture =
+            @"<test-case id='0-1001' name='ExplicitTest' fullname='NUnit3VSIssue811.Explicit.ExplicitTest' methodname='ExplicitTest' classname='NUnit3VSIssue811.Explicit' runstate='Runnable' seed='1980958818' result='Skipped' label='Explicit' site='Parent' start-time='0001-01-01T00:00:00.0000000' end-time='0001-01-01T00:00:00.0000000' duration='0.000000' asserts='0' parentId='0-1000'/>";
+
         [SetUp]
         public void Setup()
         {
@@ -80,6 +86,16 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             sut.OnTestEvent(BlankTestOutput);
 
             recorder.DidNotReceive().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Any<string>());
+        }
+
+        /// <summary>
+        /// Issue 811  System.FormatException: The UTC representation of the date falls outside the year range 1-9999" from skipped test in Eastern European time zone
+        /// </summary>
+        [Test]
+        public void ThatExplicitTestFixtureWorksWithZeroStartTime()
+        {
+            var sut = new NUnitEventListener(converter, executor);
+            Assert.DoesNotThrow(() => sut.OnTestEvent(TestFinishWithExplicitFixture));
         }
     }
 }
