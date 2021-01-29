@@ -98,7 +98,5 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var sut = new NUnitEventListener(converter, executor);
             Assert.DoesNotThrow(() => sut.OnTestEvent(TestFinishWithExplicitFixture));
         }
-
-
     }
 }
