@@ -21,7 +21,7 @@
       Note that with this package you should not install the VSIX adapter package.
     </description>
     <releaseNotes>This release works with NUnit 3.0 and higher only.  Also see  https://docs.nunit.org/articles/vs-test-adapter/Adapter-Release-Notes.html  </releaseNotes>
-    <copyright>Copyright (c) 2011-2020 Charlie Poole, 2014-2020 Terje Sandstrom</copyright>
+    <copyright>Copyright (c) 2011-2021 Charlie Poole, 2014-2021 Terje Sandstrom</copyright>
     <language>en-US</language>
     <tags>test visualstudio testadapter nunit nunit3 dotnet</tags>
 

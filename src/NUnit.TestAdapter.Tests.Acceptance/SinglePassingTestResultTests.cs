@@ -443,7 +443,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                 ");
         }
 
-
+        [Ignore("Not valid for Version 4")]
         [Test, Platform("Win")]
         public static void Legacy_csproj_with_packages_config()
         {
@@ -535,6 +535,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                 .AssertSinglePassingTest();
         }
 
+        [Ignore("Not valid for Version 4")]
         [Test, Platform("Win")]
         public static void Legacy_vbproj_with_packages_config()
         {

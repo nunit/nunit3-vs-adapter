@@ -30,8 +30,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
 {
     public class NUnitTestEventsTests
     {
-        private const string StartSuite = @"<start-suite id = '0-1073' parentId='0-1141' name='SimpleTests' fullname='NUnitTestDemo.SimpleTests' type='TestFixture' />";
-        private readonly string testSuite = @"<test-suite type='TestFixture' id='0-1073' name='SimpleTests' fullname='NUnitTestDemo.SimpleTests' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' testcasecount='20' result='Failed' site='Child' start-time='2020-01-24 13:02:55Z' end-time='2020-01-24 13:02:55Z' duration='0.032827' total='15' passed='6' failed='8' warnings='0' inconclusive='1' skipped='0' asserts='11' parentId='0-1141'>
+        private const string StartSuite =
+            @"<start-suite id = '0-1073' parentId='0-1141' name='SimpleTests' fullname='NUnitTestDemo.SimpleTests' type='TestFixture' />";
+
+        private readonly string testSuite =
+            @"<test-suite type='TestFixture' id='0-1073' name='SimpleTests' fullname='NUnitTestDemo.SimpleTests' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' testcasecount='20' result='Failed' site='Child' start-time='2020-01-24 13:02:55Z' end-time='2020-01-24 13:02:55Z' duration='0.032827' total='15' passed='6' failed='8' warnings='0' inconclusive='1' skipped='0' asserts='11' parentId='0-1141'>
    <failure>
       <message><![CDATA[One or more child tests had errors]]></message>
    </failure>
@@ -40,32 +43,33 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         [Test]
         public void ThatTestEventIsParsedForTestSuite()
         {
-            var sut = new NUnitTestEventSuiteFinished(testSuite);
-            Assert.Multiple(() =>
+            var sut = new NUnitTestEventSuiteFinished(testEvent: testSuite);
+            Assert.Multiple(testDelegate: () =>
             {
-                Assert.That(sut.FullName, Is.EqualTo("NUnitTestDemo.SimpleTests"));
-                Assert.That(sut.TestType(), Is.EqualTo(NUnitTestEvent.TestTypes.TestFixture));
-                Assert.That(sut.Name, Is.EqualTo("SimpleTests"));
-                Assert.That(sut.TestType, Is.EqualTo(NUnitTestEvent.TestTypes.TestFixture));
-                Assert.That(sut.Id, Is.EqualTo("0-1073"));
+                Assert.That(actual: sut.FullName, expression: Is.EqualTo(expected: "NUnitTestDemo.SimpleTests"));
+                Assert.That(actual: sut.TestType(), expression: Is.EqualTo(expected: NUnitTestEvent.TestTypes.TestFixture));
+                Assert.That(actual: sut.Name, expression: Is.EqualTo(expected: "SimpleTests"));
+                Assert.That(del: sut.TestType, expr: Is.EqualTo(expected: NUnitTestEvent.TestTypes.TestFixture));
+                Assert.That(actual: sut.Id, expression: Is.EqualTo(expected: "0-1073"));
             });
-            Assert.That(sut.HasFailure);
-            Assert.That(sut.FailureMessage, Is.EqualTo("One or more child tests had errors"));
+            Assert.That(condition: sut.HasFailure);
+            Assert.That(actual: sut.FailureMessage, expression: Is.EqualTo(expected: "One or more child tests had errors"));
         }
 
-        private readonly string startTest = @"<start-test id='0-1139' parentId='0-1138' name='Test2' fullname='NUnitTestDemo.SetUpFixture.TestFixture2.Test2' type='TestMethod' />";
+        private readonly string startTest =
+            @"<start-test id='0-1139' parentId='0-1138' name='Test2' fullname='NUnitTestDemo.SetUpFixture.TestFixture2.Test2' type='TestMethod' />";
 
         [Test]
         public void ThatTestEventIsParsedForStartTest()
         {
-            var sut = new NUnitTestEventStartTest(startTest);
-            Assert.Multiple(() =>
+            var sut = new NUnitTestEventStartTest(testEvent: startTest);
+            Assert.Multiple(testDelegate: () =>
             {
-                Assert.That(sut.FullName, Is.EqualTo("NUnitTestDemo.SetUpFixture.TestFixture2.Test2"));
-                Assert.That(sut.TestType(), Is.EqualTo(NUnitTestEvent.TestTypes.TestMethod));
-                Assert.That(sut.Name, Is.EqualTo("Test2"));
-                Assert.That(sut.TestType, Is.EqualTo(NUnitTestEvent.TestTypes.TestMethod));
-                Assert.That(sut.Id, Is.EqualTo("0-1139"));
+                Assert.That(actual: sut.FullName, expression: Is.EqualTo(expected: "NUnitTestDemo.SetUpFixture.TestFixture2.Test2"));
+                Assert.That(actual: sut.TestType(), expression: Is.EqualTo(expected: NUnitTestEvent.TestTypes.TestMethod));
+                Assert.That(actual: sut.Name, expression: Is.EqualTo(expected: "Test2"));
+                Assert.That(del: sut.TestType, expr: Is.EqualTo(expected: NUnitTestEvent.TestTypes.TestMethod));
+                Assert.That(actual: sut.Id, expression: Is.EqualTo(expected: "0-1139"));
             });
         }
 
@@ -91,84 +95,91 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
       </assertion>
    </assertions>
 </test-case>";
+
         [Test]
         public void ThatTestEventIsParsedForFailingTestCase()
         {
-            var sut = new NUnitTestEventTestCase(testCaseFailing);
-            Assert.Multiple(() =>
+            var sut = new NUnitTestEventTestCase(testEvent: testCaseFailing);
+            Assert.Multiple(testDelegate: () =>
             {
-                Assert.That(sut.FullName, Is.EqualTo("NUnitTestDemo.SimpleTests.TestFails"));
-                Assert.That(sut.TestType(), Is.EqualTo(NUnitTestEvent.TestTypes.NoIdea));
-                Assert.That(sut.Name, Is.EqualTo("TestFails"));
-                Assert.That(sut.Id, Is.EqualTo("0-1076"));
-                Assert.That(sut.Result, Is.EqualTo(NUnitTestEvent.ResultType.Failed));
-                Assert.That(sut.Duration.TotalMilliseconds, Is.GreaterThanOrEqualTo(1.0));
-                Assert.That(sut.StartTime().Ok);
-                Assert.That(sut.EndTime().Ok);
+                Assert.That(actual: sut.FullName, expression: Is.EqualTo(expected: "NUnitTestDemo.SimpleTests.TestFails"));
+                Assert.That(actual: sut.TestType(), expression: Is.EqualTo(expected: NUnitTestEvent.TestTypes.NoIdea));
+                Assert.That(actual: sut.Name, expression: Is.EqualTo(expected: "TestFails"));
+                Assert.That(actual: sut.Id, expression: Is.EqualTo(expected: "0-1076"));
+                Assert.That(del: sut.Result, expr: Is.EqualTo(expected: NUnitTestEvent.ResultType.Failed));
+                Assert.That(actual: sut.Duration.TotalMilliseconds, expression: Is.GreaterThanOrEqualTo(expected: 1.0));
+                Assert.That(condition: sut.StartTime().Ok);
+                Assert.That(condition: sut.EndTime().Ok);
             });
         }
 
         [Test]
         public void ThatTestCasePropertiesAreParsedWhenFailing()
         {
-            var sut = new NUnitTestEventTestCase(testCaseFailing);
-            Assert.That(sut.Properties, Is.Not.Null);
-            Assert.That(sut.Properties.Count, Is.EqualTo(1));
+            var sut = new NUnitTestEventTestCase(testEvent: testCaseFailing);
+            Assert.That(actual: sut.Properties, expression: Is.Not.Null);
+            Assert.That(del: sut.Properties.Count, expr: Is.EqualTo(expected: 1));
             var property = sut.Properties.FirstOrDefault();
-            Assert.That(property, Is.Not.Null);
-            Assert.That(property.Name, Is.EqualTo("Expect"));
-            Assert.That(property.Value, Is.EqualTo("Failure"));
+            Assert.That(actual: property, expression: Is.Not.Null);
+            Assert.That(actual: property.Name, expression: Is.EqualTo(expected: "Expect"));
+            Assert.That(actual: property.Value, expression: Is.EqualTo(expected: "Failure"));
         }
 
         [Test]
         public void ThatTestCaseFailureIsParsedWhenFailing()
         {
-            var sut = new NUnitTestEventTestCase(testCaseFailing);
+            var sut = new NUnitTestEventTestCase(testEvent: testCaseFailing);
             var failure = sut.Failure;
-            Assert.That(failure, Is.Not.Null);
-            Assert.Multiple(() =>
+            Assert.That(actual: failure, expression: Is.Not.Null);
+            Assert.Multiple(testDelegate: () =>
             {
-                Assert.That(failure.Message.Trim(), Does.StartWith("Expected: 5"), $"Failure.Message is: {failure.Message}");
-                Assert.That(failure.Stacktrace, Does.StartWith("   at NUnitTestDemo.SimpleTests.TestFails()"), $"Stacktrace:{failure.Stacktrace}");
+                Assert.That(actual: failure.Message.Trim(), expression: Does.StartWith(expected: "Expected: 5"),
+                    message: $"Failure.Message is: {failure.Message}");
+                Assert.That(actual: failure.Stacktrace, expression: Does.StartWith(expected: "   at NUnitTestDemo.SimpleTests.TestFails()"),
+                    message: $"Stacktrace:{failure.Stacktrace}");
             });
         }
 
 
-        private readonly string testCaseSucceeds = @"<test-case id='0-1006' name='AsyncTaskTestSucceeds' fullname='NUnitTestDemo.AsyncTests.AsyncTaskTestSucceeds' methodname='AsyncTaskTestSucceeds' classname='NUnitTestDemo.AsyncTests' runstate='Runnable' seed='1350317088' result='Passed' start-time='2020-01-23 18:07:42Z' end-time='2020-01-23 18:07:42Z' duration='0.001131' asserts='1' parentId='0-1004'>
+        private readonly string testCaseSucceeds =
+            @"<test-case id='0-1006' name='AsyncTaskTestSucceeds' fullname='NUnitTestDemo.AsyncTests.AsyncTaskTestSucceeds' methodname='AsyncTaskTestSucceeds' classname='NUnitTestDemo.AsyncTests' runstate='Runnable' seed='1350317088' result='Passed' start-time='2020-01-23 18:07:42Z' end-time='2020-01-23 18:07:42Z' duration='0.001131' asserts='1' parentId='0-1004'>
    <properties>
       <property name='Expect' value='Pass' />
    </properties>
 </test-case>";
+
         [Test]
         public void ThatTestEventIsParsedForSuccessTestCase()
         {
-            var sut = new NUnitTestEventTestCase(testCaseSucceeds);
-            Assert.Multiple(() =>
+            var sut = new NUnitTestEventTestCase(testEvent: testCaseSucceeds);
+            Assert.Multiple(testDelegate: () =>
             {
-                Assert.That(sut.FullName, Is.EqualTo("NUnitTestDemo.AsyncTests.AsyncTaskTestSucceeds"));
-                Assert.That(sut.TestType(), Is.EqualTo(NUnitTestEvent.TestTypes.NoIdea));
-                Assert.That(sut.Name, Is.EqualTo("AsyncTaskTestSucceeds"));
-                Assert.That(sut.Id, Is.EqualTo("0-1006"));
-                Assert.That(sut.Result, Is.EqualTo(NUnitTestEvent.ResultType.Success));
+                Assert.That(actual: sut.FullName, expression: Is.EqualTo(expected: "NUnitTestDemo.AsyncTests.AsyncTaskTestSucceeds"));
+                Assert.That(actual: sut.TestType(), expression: Is.EqualTo(expected: NUnitTestEvent.TestTypes.NoIdea));
+                Assert.That(actual: sut.Name, expression: Is.EqualTo(expected: "AsyncTaskTestSucceeds"));
+                Assert.That(actual: sut.Id, expression: Is.EqualTo(expected: "0-1006"));
+                Assert.That(del: sut.Result, expr: Is.EqualTo(expected: NUnitTestEvent.ResultType.Success));
             });
         }
 
-        private readonly string testSuiteFinished = @"<test-suite type='TestFixture' id='0-1094' name='TextOutputTests' fullname='NUnitTestDemo.TextOutputTests' classname='NUnitTestDemo.TextOutputTests' runstate='Runnable' testcasecount='9' result='Passed' start-time='2020-01-23 18:07:42Z' end-time='2020-01-23 18:07:42Z' duration='0.018222' total='9' passed='9' failed='0' warnings='0' inconclusive='0' skipped='0' asserts='0' parentId='0-1141'>
+        private readonly string testSuiteFinished =
+            @"<test-suite type='TestFixture' id='0-1094' name='TextOutputTests' fullname='NUnitTestDemo.TextOutputTests' classname='NUnitTestDemo.TextOutputTests' runstate='Runnable' testcasecount='9' result='Passed' start-time='2020-01-23 18:07:42Z' end-time='2020-01-23 18:07:42Z' duration='0.018222' total='9' passed='9' failed='0' warnings='0' inconclusive='0' skipped='0' asserts='0' parentId='0-1141'>
    <properties>
       <property name='Expect' value='Pass' />
    </properties>
 </test-suite>";
+
         [Test]
         public void ThatTestEventIsParsedForFinishSuite()
         {
-            var sut = new NUnitTestEventSuiteFinished(testSuiteFinished);
-            Assert.Multiple(() =>
+            var sut = new NUnitTestEventSuiteFinished(testEvent: testSuiteFinished);
+            Assert.Multiple(testDelegate: () =>
             {
-                Assert.That(sut.FullName, Is.EqualTo("NUnitTestDemo.TextOutputTests"));
-                Assert.That(sut.TestType(), Is.EqualTo(NUnitTestEvent.TestTypes.TestFixture));
-                Assert.That(sut.Name, Is.EqualTo("TextOutputTests"));
-                Assert.That(sut.Id, Is.EqualTo("0-1094"));
-                Assert.That(sut.Result, Is.EqualTo(NUnitTestEvent.ResultType.Success));
+                Assert.That(actual: sut.FullName, expression: Is.EqualTo(expected: "NUnitTestDemo.TextOutputTests"));
+                Assert.That(actual: sut.TestType(), expression: Is.EqualTo(expected: NUnitTestEvent.TestTypes.TestFixture));
+                Assert.That(actual: sut.Name, expression: Is.EqualTo(expected: "TextOutputTests"));
+                Assert.That(actual: sut.Id, expression: Is.EqualTo(expected: "0-1094"));
+                Assert.That(del: sut.Result, expr: Is.EqualTo(expected: NUnitTestEvent.ResultType.Success));
             });
         }
 
@@ -185,12 +196,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         [Test]
         public void ThatTestEventIsParsedForFinishSuiteWithReason()
         {
-            var sut = new NUnitTestEventSuiteFinished(testSuiteFinishedWithReason);
-            Assert.That(sut.HasReason);
-            Assert.That(sut.ReasonMessage, Is.EqualTo("One or more child tests had warnings"));
-            Assert.That(sut.HasFailure, Is.False);
+            var sut = new NUnitTestEventSuiteFinished(testEvent: testSuiteFinishedWithReason);
+            Assert.That(condition: sut.HasReason);
+            Assert.That(actual: sut.ReasonMessage, expression: Is.EqualTo(expected: "One or more child tests had warnings"));
+            Assert.That(actual: sut.HasFailure, expression: Is.False);
         }
-        private readonly string testCaseSucceedsWithOutputAndReason = @"<test-case id='0-1074' name='TestSucceeds' fullname='NUnitTestDemo.SimpleTests.TestSucceeds' methodname='TestSucceeds' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' seed='1232497275' result='Passed' start-time='2020-01-24 11:18:32Z' end-time='2020-01-24 11:18:32Z' duration='0.016868' asserts='1' parentId='0-1073'>
+
+        private readonly string testCaseSucceedsWithOutputAndReason =
+            @"<test-case id='0-1074' name='TestSucceeds' fullname='NUnitTestDemo.SimpleTests.TestSucceeds' methodname='TestSucceeds' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' seed='1232497275' result='Passed' start-time='2020-01-24 11:18:32Z' end-time='2020-01-24 11:18:32Z' duration='0.016868' asserts='1' parentId='0-1073'>
    <properties>
       <property name='Expect' value='Pass' />
    </properties>
@@ -204,12 +217,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         [Test]
         public void ThatTestEventIsParsedForTestCaseWithReason()
         {
-            var sut = new NUnitTestEventTestCase(testCaseSucceedsWithOutputAndReason);
-            Assert.That(sut.HasReason);
-            Assert.That(sut.ReasonMessage, Is.EqualTo("One or more child tests had warnings"));
+            var sut = new NUnitTestEventTestCase(testEvent: testCaseSucceedsWithOutputAndReason);
+            Assert.That(condition: sut.HasReason);
+            Assert.That(actual: sut.ReasonMessage, expression: Is.EqualTo(expected: "One or more child tests had warnings"));
         }
 
-        private readonly string testSuiteFinishedWithFailure = @"<test-suite type='ParameterizedMethod' id='0-1072' name='TestCaseWithRandomParameterWithFixedNaming' fullname='NUnitTestDemo.ParameterizedTests.TestCaseWithRandomParameterWithFixedNaming' classname='NUnitTestDemo.ParameterizedTests' runstate='Runnable' testcasecount='2' result='Failed' site='Child' start-time='2020-01-26 12:45:23Z' end-time='2020-01-26 12:45:23Z' duration='0.000101' total='2' passed='1' failed='1' warnings='0' inconclusive='0' skipped='0' asserts='0' parentId='0-1031'>
+        private readonly string testSuiteFinishedWithFailure =
+            @"<test-suite type='ParameterizedMethod' id='0-1072' name='TestCaseWithRandomParameterWithFixedNaming' fullname='NUnitTestDemo.ParameterizedTests.TestCaseWithRandomParameterWithFixedNaming' classname='NUnitTestDemo.ParameterizedTests' runstate='Runnable' testcasecount='2' result='Failed' site='Child' start-time='2020-01-26 12:45:23Z' end-time='2020-01-26 12:45:23Z' duration='0.000101' total='2' passed='1' failed='1' warnings='0' inconclusive='0' skipped='0' asserts='0' parentId='0-1031'>
    <failure>
       <message><![CDATA[One or more child tests had errors]]></message>
    </failure>
@@ -218,37 +232,40 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         [Test]
         public void ThatTestEventIsParsedForFinishSuiteWithFailure()
         {
-            var sut = new NUnitTestEventSuiteFinished(testSuiteFinishedWithFailure);
-            Assert.That(sut.HasFailure);
-            Assert.That(sut.FailureMessage, Is.EqualTo("One or more child tests had errors"));
+            var sut = new NUnitTestEventSuiteFinished(testEvent: testSuiteFinishedWithFailure);
+            Assert.That(condition: sut.HasFailure);
+            Assert.That(actual: sut.FailureMessage, expression: Is.EqualTo(expected: "One or more child tests had errors"));
         }
 
 
 
-        private readonly string testCaseSucceedsWithOutput = @"<test-case id='0-1074' name='TestSucceeds' fullname='NUnitTestDemo.SimpleTests.TestSucceeds' methodname='TestSucceeds' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' seed='1232497275' result='Passed' start-time='2020-01-24 11:18:32Z' end-time='2020-01-24 11:18:32Z' duration='0.016868' asserts='1' parentId='0-1073'>
+        private readonly string testCaseSucceedsWithOutput =
+            @"<test-case id='0-1074' name='TestSucceeds' fullname='NUnitTestDemo.SimpleTests.TestSucceeds' methodname='TestSucceeds' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' seed='1232497275' result='Passed' start-time='2020-01-24 11:18:32Z' end-time='2020-01-24 11:18:32Z' duration='0.016868' asserts='1' parentId='0-1073'>
    <properties>
       <property name='Expect' value='Pass' />
    </properties>
    <output><![CDATA[Simple test running
 ]]></output>
 </test-case>";
+
         [Test]
         public void ThatTestEventIsParsedForSuccessTestCaseWithOutput()
         {
-            var sut = new NUnitTestEventTestCase(testCaseSucceedsWithOutput);
-            Assert.Multiple(() =>
+            var sut = new NUnitTestEventTestCase(testEvent: testCaseSucceedsWithOutput);
+            Assert.Multiple(testDelegate: () =>
             {
-                Assert.That(sut.FullName, Is.EqualTo("NUnitTestDemo.SimpleTests.TestSucceeds"));
-                Assert.That(sut.TestType(), Is.EqualTo(NUnitTestEvent.TestTypes.NoIdea));
-                Assert.That(sut.Name, Is.EqualTo("TestSucceeds"));
-                Assert.That(sut.Id, Is.EqualTo("0-1074"));
-                Assert.That(sut.Result, Is.EqualTo(NUnitTestEvent.ResultType.Success));
-                Assert.That(sut.MethodName, Is.EqualTo("TestSucceeds"));
-                Assert.That(sut.ClassName, Is.EqualTo("NUnitTestDemo.SimpleTests"));
+                Assert.That(actual: sut.FullName, expression: Is.EqualTo(expected: "NUnitTestDemo.SimpleTests.TestSucceeds"));
+                Assert.That(actual: sut.TestType(), expression: Is.EqualTo(expected: NUnitTestEvent.TestTypes.NoIdea));
+                Assert.That(actual: sut.Name, expression: Is.EqualTo(expected: "TestSucceeds"));
+                Assert.That(actual: sut.Id, expression: Is.EqualTo(expected: "0-1074"));
+                Assert.That(del: sut.Result, expr: Is.EqualTo(expected: NUnitTestEvent.ResultType.Success));
+                Assert.That(actual: sut.MethodName, expression: Is.EqualTo(expected: "TestSucceeds"));
+                Assert.That(actual: sut.ClassName, expression: Is.EqualTo(expected: "NUnitTestDemo.SimpleTests"));
             });
         }
 
-        private readonly string testCaseFails = @"<test-case id='0-1076' name='TestFails' fullname='NUnitTestDemo.SimpleTests.TestFails' methodname='TestFails' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' seed='299199212' result='Failed' start-time='2020-01-26 12:45:23Z' end-time='2020-01-26 12:45:23Z' duration='0.000959' asserts='1' parentId='0-1073'>
+        private readonly string testCaseFails =
+            @"<test-case id='0-1076' name='TestFails' fullname='NUnitTestDemo.SimpleTests.TestFails' methodname='TestFails' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' seed='299199212' result='Failed' start-time='2020-01-26 12:45:23Z' end-time='2020-01-26 12:45:23Z' duration='0.000959' asserts='1' parentId='0-1073'>
    <properties>
       <property name='Expect' value='Failure' />
    </properties>
@@ -273,17 +290,19 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         [Test]
         public void ThatTestCaseFailsCanBeParsed()
         {
-            var sut = new NUnitTestEventTestCase(testCaseFails);
-            Assert.That(sut.Properties.Count, Is.EqualTo(1));
-            Assert.That(sut.HasFailure);
-            Assert.Multiple(() =>
+            var sut = new NUnitTestEventTestCase(testEvent: testCaseFails);
+            Assert.That(del: sut.Properties.Count, expr: Is.EqualTo(expected: 1));
+            Assert.That(condition: sut.HasFailure);
+            Assert.Multiple(testDelegate: () =>
             {
-                Assert.That(sut.Failure.Message.Trim(), Does.StartWith("Expected: 5"), $"Failure.Message is: {sut.Failure.Message}");
-                Assert.That(sut.Failure.Stacktrace, Does.StartWith("   at NUnitTestDemo.SimpleTests.TestFails()"));
+                Assert.That(actual: sut.Failure.Message.Trim(), expression: Does.StartWith(expected: "Expected: 5"),
+                    message: $"Failure.Message is: {sut.Failure.Message}");
+                Assert.That(actual: sut.Failure.Stacktrace, expression: Does.StartWith(expected: "   at NUnitTestDemo.SimpleTests.TestFails()"));
             });
         }
 
-        private readonly string testCaseFailsWithReason = @"<test-case id='0-1086' name='TestIsIgnored_Assert' fullname='NUnitTestDemo.SimpleTests.TestIsIgnored_Assert' methodname='TestIsIgnored_Assert' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' seed='202557333' result='Skipped' label='Ignored' start-time='2020-01-26 12:45:23Z' end-time='2020-01-26 12:45:23Z' duration='0.000540' asserts='0' parentId='0-1073'>
+        private readonly string testCaseFailsWithReason =
+            @"<test-case id='0-1086' name='TestIsIgnored_Assert' fullname='NUnitTestDemo.SimpleTests.TestIsIgnored_Assert' methodname='TestIsIgnored_Assert' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' seed='202557333' result='Skipped' label='Ignored' start-time='2020-01-26 12:45:23Z' end-time='2020-01-26 12:45:23Z' duration='0.000540' asserts='0' parentId='0-1073'>
    <properties>
       <property name='Expect' value='Ignore' />
    </properties>
@@ -295,8 +314,21 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         [Test]
         public void ThatTestCaseFailsCanBeParsedWithReason()
         {
-            var sut = new NUnitTestEventTestCase(testCaseFailsWithReason);
-            Assert.That(sut.ReasonMessage, Is.EqualTo("Ignoring this test deliberately"));
+            var sut = new NUnitTestEventTestCase(testEvent: testCaseFailsWithReason);
+            Assert.That(actual: sut.ReasonMessage, expression: Is.EqualTo(expected: "Ignoring this test deliberately"));
+        }
+
+        private readonly string testCaseExplicitFixtureTime =
+            @"<test-case id='0-1001' name='ExplicitTest' fullname='NUnit3VSIssue811.Explicit.ExplicitTest' methodname='ExplicitTest' classname='NUnit3VSIssue811.Explicit' runstate='Runnable' seed='1980958818' result='Skipped' label='Explicit' site='Parent' start-time='0001-01-01T00:00:00.0000000' end-time='0001-01-01T00:00:00.0000000' duration='0.000000' asserts='0' parentId='0-1000'/>";
+
+        /// <summary>
+        /// Issue 811
+        /// </summary>
+        [Test]
+        public void ThatExplicitTestFixtureWorksWithZeroStartTime()
+        {
+            var sut = new NUnitTestEventTestCase(testEvent: testCaseExplicitFixtureTime);
+            Assert.DoesNotThrow(code: () => sut.StartTime());
         }
     }
 }
