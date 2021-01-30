@@ -25,6 +25,6 @@
       <Link>nunit.engine.core.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Visible>False</Visible>
-    </None>
-  </ItemGroup>-->
+    </None>-->
+  </ItemGroup>
 </Project>
