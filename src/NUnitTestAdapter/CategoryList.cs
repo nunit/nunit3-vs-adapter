@@ -60,10 +60,12 @@ namespace NUnit.VisualStudio.TestAdapter
         private readonly List<string> categorylist = new List<string>();
         private readonly TestCase testCase;
         private readonly IAdapterSettings settings;
+        private readonly bool showInternalProperties;
 
         public CategoryList(TestCase testCase, IAdapterSettings adapterSettings)
         {
             settings = adapterSettings;
+            showInternalProperties = settings.ShowInternalProperties;
             this.testCase = testCase;
             // MsTestCategoryProperty = TestProperty.Register(MSTestCategoryName, VsTestCategoryLabel, typeof(string[]), TestPropertyAttributes.Hidden | TestPropertyAttributes.Trait, typeof(TestCase));
         }
@@ -122,7 +124,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <summary>
         /// See https://github.com/nunit/nunit/blob/master/src/NUnitFramework/framework/Internal/PropertyNames.cs.
         /// </summary>
-        private readonly List<string> _internalProperties = new List<string>
+        private readonly HashSet<string> _internalProperties = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         { "Author", "ApartmentState", "Description", "IgnoreUntilDate", "LevelOfParallelism", "MaxTime", "Order", "ParallelScope", "Repeat", "RequiresThread", "SetCulture", "SetUICulture", "TestOf", "Timeout" };
 
 
@@ -136,8 +138,8 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             // Property names starting with '_' are for internal use only, but over time this has changed, so we now use a list
-            if (!settings.ShowInternalProperties &&
-                _internalProperties.Contains(property.Name, StringComparer.OrdinalIgnoreCase))
+            if (!showInternalProperties &&
+                _internalProperties.Contains(property.Name))
                 return true;
             return string.IsNullOrEmpty(property.Name) || property.Name[0] == '_' || string.IsNullOrEmpty(property.Value);
         }
