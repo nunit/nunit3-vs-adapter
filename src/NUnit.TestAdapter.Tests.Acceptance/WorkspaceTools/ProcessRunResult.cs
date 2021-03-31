@@ -3,7 +3,17 @@ using System.IO;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 {
-    public readonly struct ProcessRunResult
+    public interface IProcessRunResult
+    {
+        string FileName { get; }
+        string Arguments { get; }
+        string ProcessName { get; }
+        int ExitCode { get; }
+        string StdOut { get; }
+        string StdErr { get; }
+    }
+
+    public readonly struct ProcessRunResult : IProcessRunResult
     {
         public ProcessRunResult(string fileName, string arguments, int exitCode, string stdOut, string stdErr)
         {

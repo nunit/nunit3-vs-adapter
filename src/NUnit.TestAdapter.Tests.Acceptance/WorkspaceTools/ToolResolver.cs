@@ -74,10 +74,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
             {
                 Directory.CreateDirectory(directory);
 
-                using (var client = new WebClient())
-                {
-                    client.DownloadFile(downloadUrl, toolPath);
-                }
+                using var client = new WebClient();
+                client.DownloadFile(downloadUrl, toolPath);
             }
 
             return toolPath;

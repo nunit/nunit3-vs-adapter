@@ -75,12 +75,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                         <PackageReference Include='NUnit3TestAdapter' Version='{NuGetPackageVersion}' />
                       </ItemGroup>
                       <ItemGroup Condition=""'$(TargetFrameworkIdentifier)' == '.NETFramework'"">
-                        <PackageReference Include='nunit.engine.api' Version='3.9.0' />
+                        <PackageReference Include='nunit.engine.api' Version='3.11.1' />
                       </ItemGroup>
 
                       <ItemGroup Condition=""'$(TargetFrameworkIdentifier)' == '.NETCoreApp'"">
                         <PackageReference Include='System.Diagnostics.FileVersionInfo' Version='*' />
-                        <PackageReference Include='nunit.engine.netstandard' Version='3.8.0' />
+                        <PackageReference Include='nunit.engine.netstandard' Version='3.11.1' />
                       </ItemGroup>
 
                       <ItemGroup>

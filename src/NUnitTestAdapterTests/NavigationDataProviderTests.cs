@@ -46,15 +46,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase(true, TestName = "AsyncMethodWithAttributeDefinedOutsideAdapterDirectory(with binding redirect)")]
         public static void AsyncMethodWithAttributeDefinedOutsideAdapterDirectory(bool withBindingRedirect)
         {
-            using (var dir = new TempDirectory())
+            using var dir = new TempDirectory();
+            // The tests must run in the same AppDomain as VSTest for DiaSession to work,
+            // but that VSTest has already loaded an old version of S.C.Immutable in this AppDomain.
+            // To avoid MissingMethodException, it’s necessary to only deal with Roslyn in a separate AppDomain.
+            using (var compileInvoker = new AppDomainInvoker())
             {
-                // The tests must run in the same AppDomain as VSTest for DiaSession to work,
-                // but that VSTest has already loaded an old version of S.C.Immutable in this AppDomain.
-                // To avoid MissingMethodException, it’s necessary to only deal with Roslyn in a separate AppDomain.
-                using (var compileInvoker = new AppDomainInvoker())
-                {
-                    compileInvoker.Invoke(
-                        marshalled =>
+                compileInvoker.Invoke(
+                    marshalled =>
                     {
                         var baseCompilation = CSharpCompilation.Create(null)
                             .AddReferences(MetadataReference.CreateFromFile(typeof(object).GetTypeInfo().Assembly.Location))
@@ -101,14 +100,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                             if (!dependentAssembly.Success) Assert.Fail("Broken test");
                         }
                     }, (outputDir: dir.Path, withBindingRedirect));
-                }
+            }
 
-                var assemblyPath = Path.Combine(dir, "DependentAssembly.dll");
-                if (withBindingRedirect)
-                {
-                    File.WriteAllText(
-                        assemblyPath + ".config",
-                        @"<?xml version=""1.0"" encoding=""utf-8""?>
+            var assemblyPath = Path.Combine(dir, "DependentAssembly.dll");
+            if (withBindingRedirect)
+            {
+                File.WriteAllText(
+                    assemblyPath + ".config",
+                    @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <runtime>
     <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
@@ -119,14 +118,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     </assemblyBinding>
   </runtime>
 </configuration>");
-                }
-
-                using (var metadataProvider = NavigationDataProvider.CreateMetadataProvider(assemblyPath))
-                {
-                    var result = metadataProvider.GetStateMachineType(assemblyPath, "TestClass", "AsyncMethod");
-                    Assert.That(result, Is.Not.Null);
-                }
             }
+
+            using var metadataProvider = NavigationDataProvider.CreateMetadataProvider(assemblyPath);
+            var result = metadataProvider.GetStateMachineType(assemblyPath, "TestClass", "AsyncMethod");
+            Assert.That(result, Is.Not.Null);
         }
 #endif
 

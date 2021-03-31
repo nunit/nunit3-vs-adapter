@@ -44,6 +44,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         private const string TestFinishWithExplicitFixture =
             @"<test-case id='0-1001' name='ExplicitTest' fullname='NUnit3VSIssue811.Explicit.ExplicitTest' methodname='ExplicitTest' classname='NUnit3VSIssue811.Explicit' runstate='Runnable' seed='1980958818' result='Skipped' label='Explicit' site='Parent' start-time='0001-01-01T00:00:00.0000000' end-time='0001-01-01T00:00:00.0000000' duration='0.000000' asserts='0' parentId='0-1000'/>";
 
+
         [SetUp]
         public void Setup()
         {

@@ -4,6 +4,7 @@
     <AssemblyName>empty-assembly</AssemblyName>
     <RootNamespace>NUnit.Tests</RootNamespace>
     <TargetFrameworks>net35;netcoreapp2.1</TargetFrameworks>
+    <IsTestProject>false</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>

@@ -11,7 +11,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Visible>False</Visible>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)nunit.engine.dll">
+    <!--<None Include="$(MSBuildThisFileDirectory)nunit.engine.dll">
       <Link>nunit.engine.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Visible>False</Visible>
@@ -25,6 +25,6 @@
       <Link>nunit.engine.core.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Visible>False</Visible>
-    </None>
+    </None>-->
   </ItemGroup>
 </Project>
