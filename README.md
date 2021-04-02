@@ -24,7 +24,7 @@ or the latest pre-release version
 
 ##### Support
 
-Ask support questions [![Chat](https://img.shields.io/gitter/room/nunit/nunit.svg?style=flat)](https://gitter.im/nunit/nunit)
+Ask support questions [![Slack](https://img.shields.io/badge/chat-on%20Slack-brightgreen)](https://join.slack.com/t/nunit/shared_invite/zt-jz58jw68-Led8y3WH4n2a~Y5WjuOpKA)
 or raise an issue [![](https://img.shields.io/github/issues/nunit/NUnit3-vs-Adapter.svg?style=flat)](https://github.com/nunit/nunit3-vs-adapter/issues)
 
 ## Documentation
