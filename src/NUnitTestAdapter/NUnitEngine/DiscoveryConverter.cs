@@ -254,8 +254,16 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                         if (child.HasElements)
                             ExtractAllFixtures(ts, child);
                         break;
+                    case "SetUpFixture":
+                        var tsf = ExtractSetUpTestFixture(parent, node, className);
+                        parent.AddSetUpFixture(tsf);
+                        if (child.HasElements)
+                        {
+                            ExtractTestFixtures(tsf, child);
+                        }
+                        break;
                     default:
-                        throw new DiscoveryException($"Not a TestFixture or TestSuite, but {type}");
+                        throw new DiscoveryException($"Not a TestFixture, SetUpFixture or TestSuite, but {type}");
                 }
             }
         }
