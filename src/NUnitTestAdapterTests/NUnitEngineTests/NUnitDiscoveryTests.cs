@@ -1081,5 +1081,38 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
                 new NUnitResults(XmlHelper.CreateXmlNode(SetupFixtureIssue770)));
             Assert.That(ndr, Is.Not.Null);
         }
+
+        private const string SetupFixtureIssue824 =
+            @"<test-run id='0' name='Issue824.dll' fullname='d:\repos\NUnit\nunit3-vs-adapter.issues\Issue824\bin\Debug\net5.0\Issue824.dll' runstate='Runnable' testcasecount='2'>
+   <test-suite type='Assembly' id='0-1012' name='Issue824.dll' fullname='d:/repos/NUnit/nunit3-vs-adapter.issues/Issue824/bin/Debug/net5.0/Issue824.dll' runstate='Runnable' testcasecount='2'>
+      <environment framework-version='3.13.1.0' clr-version='5.0.4' os-version='Microsoft Windows 10.0.18363' platform='Win32NT' cwd='d:\repos\NUnit\nunit3-vs-adapter.issues\Issue824\bin\Debug\net5.0' machine-name='DESKTOP-SIATMVB' user='TerjeSandstrom' user-domain='AzureAD' culture='en-US' uiculture='en-US' os-architecture='x64' />
+            <test-suite type='SetUpFixture' id='0-1013' name='[default namespace]' fullname='GlobalSetUpFixture' runstate='Runnable' testcasecount='2'>
+         <test-suite type='SetUpFixture' id='0-1014' name='Issue824' fullname='Issue824.NUnitTestsDemoSetUpFixture1' runstate='Runnable' testcasecount='2'>
+            <test-suite type='SetUpFixture' id='0-1015' name='Issue824' fullname='Issue824.NUnitTestsDemoSetUpFixture2' runstate='Runnable' testcasecount='2'>
+               <test-suite type='SetUpFixture' id='0-1016' name='Inner' fullname='Issue824.Inner.NUnitTestsDemoInnerSetUpFixture1' runstate='Runnable' testcasecount='1'>
+                  <test-suite type='SetUpFixture' id='0-1017' name='Inner' fullname='Issue824.Inner.NUnitTestsDemoInnerSetUpFixture2' runstate='Runnable' testcasecount='1'>
+                     <test-suite type='TestFixture' id='0-1018' name='InnerTests' fullname='Issue824.Inner.InnerTests' runstate='Runnable' testcasecount='1'>
+                        <test-case id='0-1008' name='Test' fullname='Issue824.Inner.InnerTests.Test' methodname='Test' classname='Issue824.Inner.InnerTests' runstate='Runnable' seed='1110169426' />
+                     </test-suite>
+                  </test-suite>
+               </test-suite>
+               <test-suite type='TestFixture' id='0-1019' name='Tests' fullname='Issue824.Tests' runstate='Runnable' testcasecount='1'>
+                  <test-case id='0-1004' name='Test' fullname='Issue824.Tests.Test' methodname='Test' classname='Issue824.Tests' runstate='Runnable' seed='558639032' />
+               </test-suite>
+            </test-suite>
+         </test-suite>
+      </test-suite>
+   </test-suite>
+</test-run>";
+
+
+        [Test]
+        public void ThatSetUpFixtureWorksIssue824()
+        {
+            var sut = new DiscoveryConverter(logger, settings);
+            var ndr = sut.ConvertXml(
+                new NUnitResults(XmlHelper.CreateXmlNode(SetupFixtureIssue824)));
+            Assert.That(ndr, Is.Not.Null);
+        }
     }
 }

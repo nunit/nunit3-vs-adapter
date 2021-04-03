@@ -26,6 +26,7 @@ title NUnitEngineAdapterClasses for discovery
    CanHaveTestCases <|-- GenericMethod
    TestRun o-- Assembly
    SetUpFixture o-- TestSuite
+   SetUpFixture o-- SetUpFixture
    
 abstract class SuiteBase {
    Property collection,
