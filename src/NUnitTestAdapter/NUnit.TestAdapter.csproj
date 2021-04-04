@@ -10,7 +10,6 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <SourceLinkOriginUrl>https://github.com/nunit/nunit3-vs-adapter</SourceLinkOriginUrl>
     <SourceLinkCreate>true</SourceLinkCreate>
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup>

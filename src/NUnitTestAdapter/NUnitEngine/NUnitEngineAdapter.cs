@@ -61,7 +61,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public void Initialize()
         {
-            var engineX = new TestEngineClass();
+            var engineX = TestEngineActivator.CreateInstance();
             InternalEngineCreated?.Invoke(engineX);
             TestEngine = engineX;
         }
