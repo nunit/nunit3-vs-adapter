@@ -55,14 +55,14 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         private ITestEngine TestEngine { get; set; }
         private ITestRunner Runner { get; set; }
 
-        internal event Action<TestEngineClass> InternalEngineCreated;
+       // internal event Action<TestEngineClass> InternalEngineCreated;
 
         public bool EngineEnabled => TestEngine != null;
 
         public void Initialize()
         {
             var engineX = TestEngineActivator.CreateInstance();
-            InternalEngineCreated?.Invoke(engineX);
+         // InternalEngineCreated?.Invoke(engineX);
             TestEngine = engineX;
         }
 
