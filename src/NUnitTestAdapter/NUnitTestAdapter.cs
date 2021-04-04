@@ -28,10 +28,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-// We use an alias so that we don't accidentally make
-// references to engine internals, except for creating
-// the engine object in the Initialize method.
-using TestEngineClass = NUnit.Engine.TestEngine;
 #if NET35
 using System.Runtime.Remoting.Channels;
 #endif

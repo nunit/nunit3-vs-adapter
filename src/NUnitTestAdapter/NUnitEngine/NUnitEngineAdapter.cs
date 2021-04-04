@@ -25,10 +25,6 @@ using System;
 using System.IO;
 using NUnit.Engine;
 using NUnit.VisualStudio.TestAdapter.Internal;
-// We use an alias so that we don't accidentally make
-// references to engine internals, except for creating
-// the engine object in the Initialize method.
-using TestEngineClass = NUnit.Engine.TestEngine;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
