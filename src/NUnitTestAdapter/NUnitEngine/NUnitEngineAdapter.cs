@@ -57,7 +57,11 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public void Initialize()
         {
+#if NET35
+            var engineX = new TestEngine();
+#else
             var engineX = TestEngineActivator.CreateInstance();
+#endif
             InternalEngineCreated?.Invoke(engineX);
             TestEngine = engineX;
         }
