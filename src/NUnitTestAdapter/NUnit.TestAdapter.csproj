@@ -10,7 +10,6 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <SourceLinkOriginUrl>https://github.com/nunit/nunit3-vs-adapter</SourceLinkOriginUrl>
     <SourceLinkCreate>true</SourceLinkCreate>
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -35,7 +34,8 @@
 
   <ItemGroup>
     <PackageReference Include="SourceLink.Create.CommandLine" Version="2.8.3" PrivateAssets="All" />
-    <PackageReference Include="nunit.engine" Version="3.11.1" />
+    <PackageReference Include="nunit.engine" Version="3.12.0"  />
+    <PackageReference Include="TestCentric.Metadata" Version="1.4.1" Aliases="TestCentric"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net35'">
@@ -57,11 +57,11 @@
   </Target>
 
   <!-- Before RemoveReferencesToEmbeddedAssembles (our thing in Common.props which disappears the ReferencePath that we need here). -->
-  <Target Name="AddReferencesAsEmbeddedResources" BeforeTargets="RemoveReferencesToEmbeddedAssembles">
+  <!--<Target Name="AddReferencesAsEmbeddedResources" BeforeTargets="RemoveReferencesToEmbeddedAssembles">
     <ItemGroup>
-      <!-- Add Mono.Cecil.dll as an embedded reference named ‘Assemblies/Mono.Cecil.dll’ -->
+      --><!-- Add Mono.Cecil.dll as an embedded reference named ‘Assemblies/Mono.Cecil.dll’ --><!--
       <EmbeddedResource Include="@(ReferencePath)" Condition="'%(Filename)' == 'Mono.Cecil'" KeepMetadata="x" LogicalName="Assemblies/%(Filename)%(Extension)" />
     </ItemGroup>
-  </Target>
+  </Target>-->
 
 </Project>

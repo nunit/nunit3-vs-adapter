@@ -13,7 +13,7 @@ var configuration = Argument("configuration", "Release");
 //////////////////////////////////////////////////////////////////////
 
 var version = "4.0.0";
-var modifier = "-beta.1";
+var modifier = "-beta.2";
 
 var dbgSuffix = configuration.ToLower() == "debug" ? "-dbg" : "";
 var packageVersion = version + modifier + dbgSuffix;
@@ -252,7 +252,8 @@ Task("CreateWorkingImage")
             ADAPTER_BIN_DIR_NET35 + "NUnit3.TestAdapter.pdb",
             ADAPTER_BIN_DIR_NET35 + "nunit.engine.dll",
             ADAPTER_BIN_DIR_NET35 + "nunit.engine.api.dll",
-            ADAPTER_BIN_DIR_NET35 + "nunit.engine.core.dll"
+            ADAPTER_BIN_DIR_NET35 + "nunit.engine.core.dll",
+            ADAPTER_BIN_DIR_NET35 + "testcentric.engine.metadata.dll"
         };
 
         var net35Dir = PACKAGE_IMAGE_DIR + "build/net35";

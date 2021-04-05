@@ -25,10 +25,6 @@ using System;
 using System.IO;
 using NUnit.Engine;
 using NUnit.VisualStudio.TestAdapter.Internal;
-// We use an alias so that we don't accidentally make
-// references to engine internals, except for creating
-// the engine object in the Initialize method.
-using TestEngineClass = NUnit.Engine.TestEngine;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
@@ -55,13 +51,17 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         private ITestEngine TestEngine { get; set; }
         private ITestRunner Runner { get; set; }
 
-        internal event Action<TestEngineClass> InternalEngineCreated;
+        internal event Action<ITestEngine> InternalEngineCreated;
 
         public bool EngineEnabled => TestEngine != null;
 
         public void Initialize()
         {
-            var engineX = new TestEngineClass();
+#if NET35
+            var engineX = new TestEngine();
+#else
+            var engineX = TestEngineActivator.CreateInstance();
+#endif
             InternalEngineCreated?.Invoke(engineX);
             TestEngine = engineX;
         }
