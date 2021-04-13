@@ -35,18 +35,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                 // It breaks MSBuild 15’s targets when it tries to build legacy csprojs and vbprojs.
                 process.StartInfo.EnvironmentVariables.Remove("VisualStudioVersion");
 
-                var stdout = (StringBuilder)null;
-                var stderr = (StringBuilder)null;
+                // stdout and stderr is always redirected, as such these can be newed up here
+                // so the events would not need to check if it's null or not and then just
+                // immediately use it instead.
+                var stdout = new StringBuilder();
+                var stderr = new StringBuilder();
 
                 process.OutputDataReceived += (sender, e) =>
                 {
                     if (e.Data is null) return;
 
-                    if (stdout is null)
-                        stdout = new StringBuilder();
-                    else
-                        stdout.AppendLine();
-
+                    stdout.AppendLine();
                     stdout.Append(e.Data);
                 };
 
@@ -54,11 +53,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                 {
                     if (e.Data is null) return;
 
-                    if (stderr is null)
-                        stderr = new StringBuilder();
-                    else
-                        stderr.AppendLine();
-
+                    stderr.AppendLine();
                     stderr.Append(e.Data);
                 };
 
@@ -71,8 +66,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                     fileName,
                     escapedArguments,
                     process.ExitCode,
-                    stdout?.ToString(),
-                    stderr?.ToString());
+                    stdout.ToString(),
+                    stderr.ToString());
             }
         }
 
