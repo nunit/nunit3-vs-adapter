@@ -45,7 +45,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                 {
                     if (e.Data is null) return;
 
-                    stdout.AppendLine();
+                    if (stdout.Length != 0)
+                        stdout.AppendLine();
+
                     stdout.Append(e.Data);
                 };
 
@@ -53,7 +55,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                 {
                     if (e.Data is null) return;
 
-                    stderr.AppendLine();
+                    if (stderr.Length != 0)
+                        stderr.AppendLine();
+
                     stderr.Append(e.Data);
                 };
 
@@ -66,8 +70,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                     fileName,
                     escapedArguments,
                     process.ExitCode,
-                    stdout.ToString(),
-                    stderr.ToString());
+                    stdout.Length != 0 ? stdout.ToString() : null,
+                    stderr.Length != 0 ? stderr.ToString() : null);
             }
         }
 
