@@ -35,9 +35,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                 // It breaks MSBuild 15’s targets when it tries to build legacy csprojs and vbprojs.
                 process.StartInfo.EnvironmentVariables.Remove("VisualStudioVersion");
 
-                // stdout and stderr is always redirected, as such these can be newed up here
-                // so the events would not need to check if it's null or not and then just
-                // immediately use it instead.
                 var stdout = new StringBuilder();
                 var stderr = new StringBuilder();
 
