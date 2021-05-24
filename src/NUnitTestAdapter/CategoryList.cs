@@ -55,9 +55,9 @@ namespace NUnit.VisualStudio.TestAdapter
         // If it's not empty, it shows up as “Explicit [value]” in Test Explorer.
         private const string ExplicitTraitValue = "";
 
-        private readonly NUnitProperty explicitTrait = new NUnitProperty(ExplicitTraitName, ExplicitTraitValue);
+        private readonly NUnitProperty explicitTrait = new (ExplicitTraitName, ExplicitTraitValue);
 
-        private readonly List<string> categorylist = new List<string>();
+        private readonly List<string> categorylist = new ();
         private readonly TestCase testCase;
         private readonly IAdapterSettings settings;
         private readonly bool showInternalProperties;

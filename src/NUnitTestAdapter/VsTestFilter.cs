@@ -62,7 +62,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 ["FullyQualifiedName"] = TestCaseProperties.FullyQualifiedName,
                 ["Name"] = TestCaseProperties.DisplayName,
                 ["TestCategory"] = CategoryList.NUnitTestCategoryProperty,
-                ["Category"] = CategoryList.NUnitTestCategoryProperty
+                ["Category"] = CategoryList.NUnitTestCategoryProperty,
             };
             // Initialize the trait cache
             var priorityTrait = new NTrait("Priority", "");
