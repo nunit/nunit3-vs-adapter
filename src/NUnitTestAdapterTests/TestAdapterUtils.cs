@@ -48,17 +48,18 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 #if NET46
             adapter.NUnitEngineAdapter.InternalEngineCreated += engine =>
             {
-                engine.Services.Add(new SettingsService(true));
-                engine.Services.Add(new DomainManager());
-                engine.Services.Add(new ExtensionService());
-                engine.Services.Add(new DriverService());
-                engine.Services.Add(new RecentFilesService());
-                engine.Services.Add(new ProjectService());
-                engine.Services.Add(new RuntimeFrameworkService());
-                engine.Services.Add(new DefaultTestRunnerFactory());
-                engine.Services.Add(new TestAgency("TestAgency for " + TestContext.CurrentContext.Test.Name, 0));
-                engine.Services.Add(new ResultService());
-                engine.Services.Add(new TestFilterService());
+                var concreteEngineType = (NUnit.Engine.TestEngine)engine;
+                concreteEngineType.Services.Add(new SettingsService(true));
+                concreteEngineType.Services.Add(new DomainManager());
+                concreteEngineType.Services.Add(new ExtensionService());
+                concreteEngineType.Services.Add(new DriverService());
+                concreteEngineType.Services.Add(new RecentFilesService());
+                concreteEngineType.Services.Add(new ProjectService());
+                concreteEngineType.Services.Add(new RuntimeFrameworkService());
+                concreteEngineType.Services.Add(new DefaultTestRunnerFactory());
+                concreteEngineType.Services.Add(new TestAgency("TestAgency for " + TestContext.CurrentContext.Test.Name, 0));
+                concreteEngineType.Services.Add(new ResultService());
+                concreteEngineType.Services.Add(new TestFilterService());
             };
 #endif
         }
