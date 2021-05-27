@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2020-2020 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2020-2021 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -235,7 +235,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         private static void ExtractTestFixtures(NUnitDiscoveryCanHaveTestFixture parent, XElement node)
         {
-            foreach (var child in node.Elements())
+            foreach (var child in node.Elements().Where(o => o.Name != "properties"))
             {
                 var type = child.Attribute(NUnitXmlAttributeNames.Type).Value;
                 var className = child.Attribute(NUnitXmlAttributeNames.Classname)?.Value;
