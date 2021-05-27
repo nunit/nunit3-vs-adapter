@@ -42,7 +42,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             // fakeTest2 = new NUnitTestMethod(fakeTestMethod2);
         }
 
-        private static readonly Uri ExecutorUri = new Uri(NUnit3TestExecutor.ExecutorUri);
+        private static readonly Uri ExecutorUri = new (NUnit3TestExecutor.ExecutorUri);
 
 // ReSharper disable once UnusedMember.Local
         private void FakeTestMethod1()

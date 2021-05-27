@@ -81,7 +81,7 @@ namespace NUnit.VisualStudio.TestAdapter.Metadata
 
         private sealed class AppDomainHelper : MarshalByRefObject
         {
-            private readonly DirectReflectionMetadataProvider provider = new DirectReflectionMetadataProvider();
+            private readonly DirectReflectionMetadataProvider provider = new ();
 
             public TypeInfo? GetDeclaringType(string assemblyPath, string reflectedTypeName, string methodName)
             {

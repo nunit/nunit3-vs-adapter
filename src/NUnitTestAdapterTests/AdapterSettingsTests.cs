@@ -63,7 +63,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 Assert.That(_settings.TargetPlatform, Is.Null);
                 Assert.That(_settings.TestAdapterPaths, Is.Null);
                 Assert.That(_settings.CollectSourceInformation, Is.True);
-                Assert.IsEmpty(_settings.TestProperties);
+                Assert.That(_settings.TestProperties, Is.Empty);
                 Assert.That(_settings.InternalTraceLevel, Is.Null);
                 Assert.That(_settings.WorkDirectory, Is.Null);
                 Assert.That(_settings.NumberOfTestWorkers, Is.EqualTo(-1));

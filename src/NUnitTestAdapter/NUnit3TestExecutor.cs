@@ -333,7 +333,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private NUnitTestFilterBuilder CreateTestFilterBuilder()
         {
-            return new NUnitTestFilterBuilder(NUnitEngineAdapter.GetService<ITestFilterService>(), Settings);
+            return new (NUnitEngineAdapter.GetService<ITestFilterService>(), Settings);
         }
 
 

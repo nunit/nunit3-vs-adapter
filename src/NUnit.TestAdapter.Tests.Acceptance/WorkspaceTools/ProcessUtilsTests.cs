@@ -19,13 +19,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
         [Test]
         public static void EscapeProcessArguments_empty()
         {
-            Assert.That(ProcessUtils.EscapeProcessArguments(new string[] { string.Empty }), Is.EqualTo("\"\""));
+            Assert.That(ProcessUtils.EscapeProcessArguments(new[] { string.Empty }), Is.EqualTo("\"\""));
         }
 
         [Test]
         public static void EscapeProcessArguments_empty_alwaysQuote()
         {
-            Assert.That(ProcessUtils.EscapeProcessArguments(new string[] { string.Empty }, true), Is.EqualTo("\"\""));
+            Assert.That(ProcessUtils.EscapeProcessArguments(new[] { string.Empty }, true), Is.EqualTo("\"\""));
         }
 
         [Test]

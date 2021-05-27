@@ -35,23 +35,23 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
     {
         private Tokenizer _tokenizer;
 
-        private static readonly Token LPAREN = new Token(TokenKind.Symbol, "(");
-        private static readonly Token RPAREN = new Token(TokenKind.Symbol, ")");
-        private static readonly Token AND_OP = new Token(TokenKind.Symbol, "&");
-        private static readonly Token OR_OP = new Token(TokenKind.Symbol, "|");
-        private static readonly Token NOT_OP = new Token(TokenKind.Symbol, "!");
+        private static readonly Token LPAREN = new (TokenKind.Symbol, "(");
+        private static readonly Token RPAREN = new (TokenKind.Symbol, ")");
+        private static readonly Token AND_OP = new (TokenKind.Symbol, "&");
+        private static readonly Token OR_OP = new (TokenKind.Symbol, "|");
+        private static readonly Token NOT_OP = new (TokenKind.Symbol, "!");
 
-        private static readonly Token EQ_OP = new Token(TokenKind.Symbol, "=");
-        private static readonly Token NE_OP = new Token(TokenKind.Symbol, "!=");
-        private static readonly Token CONTAINS_OP = new Token(TokenKind.Symbol, "~");
-        private static readonly Token NOTCONTAINS_OP = new Token(TokenKind.Symbol, "!~");
+        private static readonly Token EQ_OP = new (TokenKind.Symbol, "=");
+        private static readonly Token NE_OP = new (TokenKind.Symbol, "!=");
+        private static readonly Token CONTAINS_OP = new (TokenKind.Symbol, "~");
+        private static readonly Token NOTCONTAINS_OP = new (TokenKind.Symbol, "!~");
 
-        private static readonly Token[] AND_OPS = new Token[] { AND_OP };
-        private static readonly Token[] OR_OPS = new Token[] { OR_OP };
-        private static readonly Token[] EQ_OPS = new Token[] { EQ_OP };
-        private static readonly Token[] REL_OPS = new Token[] { EQ_OP, NE_OP, CONTAINS_OP, NOTCONTAINS_OP };
+        private static readonly Token[] AND_OPS = { AND_OP };
+        private static readonly Token[] OR_OPS = { OR_OP };
+        private static readonly Token[] EQ_OPS = { EQ_OP };
+        private static readonly Token[] REL_OPS = { EQ_OP, NE_OP, CONTAINS_OP, NOTCONTAINS_OP };
 
-        private static readonly Token EOF = new Token(TokenKind.Eof);
+        private static readonly Token EOF = new (TokenKind.Eof);
 
         public string Parse(string input)
         {

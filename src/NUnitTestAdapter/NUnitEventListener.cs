@@ -50,7 +50,7 @@ namespace NUnit.VisualStudio.TestAdapter
         private readonly ITestExecutionRecorder _recorder;
         private readonly ITestConverterCommon _testConverter;
         private readonly IAdapterSettings _settings;
-        private readonly Dictionary<string, ICollection<INUnitTestEventTestOutput>> _outputNodes = new Dictionary<string, ICollection<INUnitTestEventTestOutput>>();
+        private readonly Dictionary<string, ICollection<INUnitTestEventTestOutput>> _outputNodes = new ();
 
 #if NET35
         public override object InitializeLifetimeService()

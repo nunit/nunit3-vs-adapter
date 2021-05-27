@@ -86,7 +86,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public bool IsExplicitRun => CurrentTestAssembly?.IsExplicit ?? false;
 
-        private readonly List<TestCase> loadedTestCases = new List<TestCase>();
+        private readonly List<TestCase> loadedTestCases = new ();
         public IList<TestCase> LoadedTestCases => loadedTestCases;
 
         public int NoOfLoadedTestCases => loadedTestCases.Count;
@@ -429,7 +429,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             RunState = dRunstate;
         }
 
-        public List<NUnitProperty> Properties { get; } = new List<NUnitProperty>();
+        public List<NUnitProperty> Properties { get; } = new ();
 
         public string Id { get; }
         public string Name { get; }

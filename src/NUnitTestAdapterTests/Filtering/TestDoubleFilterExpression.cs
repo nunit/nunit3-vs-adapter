@@ -48,11 +48,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
 
         public static TestDoubleFilterExpression AnyIsEqualTo(string propertyName, object value)
         {
-            return new TestDoubleFilterExpression($"{propertyName}={value}", propertyValueProvider =>
-            {
-                var list = propertyValueProvider.Invoke(propertyName) as IEnumerable;
-                return list == null ? false : list.Cast<object>().Contains(value);
-            });
+            return new ($"{propertyName}={value}", propertyValueProvider => propertyValueProvider.Invoke(propertyName) is IEnumerable list && list.Cast<object>().Contains(value));
         }
     }
 }

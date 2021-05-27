@@ -49,7 +49,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         static readonly string MockAssemblyPath =
             Path.Combine(TestContext.CurrentContext.TestDirectory, "mock-assembly.dll");
 
-        private readonly List<TestCase> testCases = new List<TestCase>();
+        private readonly List<TestCase> testCases = new ();
 
         private readonly IDiscoveryContext _context;
 
@@ -104,7 +104,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var testCase = testCases.Find(tc => tc.DisplayName == name);
 
             Assert.That(!string.IsNullOrEmpty(testCase.Source));
-            Assert.Greater(testCase.LineNumber, 0);
+            Assert.That(testCase.LineNumber, Is.GreaterThan(0));
         }
 
         #region ITestCaseDiscoverySink Methods

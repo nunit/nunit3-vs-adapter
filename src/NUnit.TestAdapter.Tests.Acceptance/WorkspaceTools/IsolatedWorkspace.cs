@@ -8,7 +8,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
     [DebuggerDisplay("{Directory,nq}")]
     public sealed partial class IsolatedWorkspace : IDisposable
     {
-        private readonly List<string> projectPaths = new List<string>();
+        private readonly List<string> projectPaths = new ();
         private readonly ToolResolver toolResolver;
         private readonly DirectoryMutex directoryMutex;
 
@@ -111,6 +111,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
             return VSTestResult.Load(result, tempTrxFile);
         }
 
-        private RunSettings ConfigureRun(string filename) => new RunSettings(Directory, filename);
+        private RunSettings ConfigureRun(string filename) => new (Directory, filename);
     }
 }
