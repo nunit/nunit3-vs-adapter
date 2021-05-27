@@ -235,7 +235,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         private static void ExtractTestFixtures(NUnitDiscoveryCanHaveTestFixture parent, XElement node)
         {
-            foreach (var child in node.Elements())
+            foreach (var child in node.Elements().Where(o => o.Name != "properties"))
             {
                 var type = child.Attribute(NUnitXmlAttributeNames.Type).Value;
                 var className = child.Attribute(NUnitXmlAttributeNames.Classname)?.Value;
