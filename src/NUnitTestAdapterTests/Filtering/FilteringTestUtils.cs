@@ -45,7 +45,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
 
             return (ITestCaseFilterExpression)Type.GetType("Microsoft.VisualStudio.TestPlatform.Common.Filtering.TestCaseFilterExpression, Microsoft.VisualStudio.TestPlatform.Common", throwOnError: true).GetTypeInfo()
                 .GetConstructor(new[] { filterExpressionWrapperType })
-                .Invoke(new object[] { filterExpressionWrapper });
+                .Invoke(new[] { filterExpressionWrapper });
         }
 
         public static VsTestFilter CreateTestFilter(ITestCaseFilterExpression filterExpression)

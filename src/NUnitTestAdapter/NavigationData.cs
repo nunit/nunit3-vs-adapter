@@ -25,7 +25,7 @@ namespace NUnit.VisualStudio.TestAdapter
 {
     public class NavigationData
     {
-        public static readonly NavigationData Invalid = new NavigationData(null, 0);
+        public static readonly NavigationData Invalid = new (null, 0);
 
         public NavigationData(string filePath, int lineNumber)
         {

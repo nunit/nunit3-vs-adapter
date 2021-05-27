@@ -49,7 +49,7 @@ namespace NUnit.VisualStudio.TestAdapter
             /// Currently, the only effect this has is to add a Test Explorer grouping header
             /// for each trait with the name “Name [Value]”, or for an empty value, “Name”.
             /// </summary>
-            public List<Trait> Traits { get; } = new List<Trait>();
+            public List<Trait> Traits { get; } = new ();
 
             /// <summary>
             /// Used by <see cref="VsTestFilter"/>; does not affect the Test Explorer UI.

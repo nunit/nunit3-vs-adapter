@@ -124,7 +124,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <summary>
         /// See https://github.com/nunit/nunit/blob/master/src/NUnitFramework/framework/Internal/PropertyNames.cs.
         /// </summary>
-        private readonly HashSet<string> _internalProperties = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        private readonly HashSet<string> _internalProperties = new (StringComparer.OrdinalIgnoreCase)
         { "Author", "ApartmentState", "Description", "IgnoreUntilDate", "LevelOfParallelism", "MaxTime", "Order", "ParallelScope", "Repeat", "RequiresThread", "SetCulture", "SetUICulture", "TestOf", "Timeout" };
 
 
