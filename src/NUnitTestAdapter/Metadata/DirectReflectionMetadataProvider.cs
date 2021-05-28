@@ -95,10 +95,9 @@ namespace NUnit.VisualStudio.TestAdapter.Metadata
 #endif
 
                 var type = assembly.GetType(reflectedTypeName, throwOnError: false);
-                if (type == null) return null;
 
-                var methods = type.GetMethods().Where(m => m.Name == methodName).Take(2).ToList();
-                return methods.Count == 1 ? methods[0] : null;
+                var methods = type?.GetMethods().Where(m => m.Name == methodName).Take(2).ToList();
+                return methods?.Count == 1 ? methods[0] : null;
             }
             catch (FileNotFoundException)
             {

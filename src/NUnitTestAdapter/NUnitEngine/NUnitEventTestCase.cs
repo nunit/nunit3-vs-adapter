@@ -59,7 +59,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public string ClassName => Node.GetAttribute("classname");
         public string MethodName => Node.GetAttribute("methodname");
 
-        RunStateEnum runState = RunStateEnum.NA;
+        private RunStateEnum runState = RunStateEnum.NA;
 
         public RunStateEnum RunState
         {
