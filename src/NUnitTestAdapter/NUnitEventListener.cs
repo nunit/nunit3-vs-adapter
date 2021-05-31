@@ -172,15 +172,18 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
             }
 
-            recorder.RecordEnd(result.TestCaseResult.TestCase, result.TestCaseResult.Outcome);
-            foreach (var vsResult in result.TestResults)
+            if (result.TestCaseResult != null)
             {
-                recorder.RecordResult(vsResult);
-            }
+                recorder.RecordEnd(result.TestCaseResult.TestCase, result.TestCaseResult.Outcome);
+                foreach (var vsResult in result.TestResults)
+                {
+                    recorder.RecordResult(vsResult);
+                }
 
-            if (result.TestCaseResult.Outcome == TestOutcome.Failed && settings.StopOnError)
-            {
-                executor.StopRun();
+                if (result.TestCaseResult.Outcome == TestOutcome.Failed && settings.StopOnError)
+                {
+                    executor.StopRun();
+                }
             }
         }
 

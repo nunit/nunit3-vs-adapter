@@ -85,7 +85,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
 
             var sb = new StringBuilder("<or>");
 
-            foreach (string term in terms)
+            foreach (var term in terms)
                 sb.Append(term);
 
             sb.Append("</or>");
@@ -111,7 +111,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
 
             var sb = new StringBuilder("<and>");
 
-            foreach (string element in elements)
+            foreach (var element in elements)
                 sb.Append(element);
 
             sb.Append("</and>");
@@ -128,12 +128,12 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
             if (LookingAt(LPAREN, NOT_OP))
                 return ParseExpressionInParentheses();
 
-            Token lhs = Expect(TokenKind.Word);
+            var lhs = Expect(TokenKind.Word);
 
             if (!LookingAt(REL_OPS))
                 return EmitFullNameFilter(CONTAINS_OP, lhs.Text);
 
-            Token op = Expect(REL_OPS);
+            var op = Expect(REL_OPS);
             Token rhs;
 
             switch (lhs.Text)
@@ -153,10 +153,8 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
 
                 default:
                     // Assume it's a property name
-                    // op = Expect(REL_OPS);
-                    // rhs = Expect(TokenKind.String, TokenKind.Word);
-                    // return EmitPropertyElement(op, lhs, rhs);
-                    throw InvalidTokenError(lhs);
+                    rhs = Expect(TokenKind.String, TokenKind.Word);
+                    return EmitPropertyFilter(op, lhs.Text, rhs.Text);
             }
         }
 
@@ -217,11 +215,11 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
 
         private string ParseExpressionInParentheses()
         {
-            Token op = Expect(LPAREN, NOT_OP);
+            var op = Expect(LPAREN, NOT_OP);
 
             if (op == NOT_OP) Expect(LPAREN);
 
-            string result = ParseFilterExpression();
+            var result = ParseFilterExpression();
 
             Expect(RPAREN);
 
@@ -234,7 +232,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
         // Require a token of one or more kinds
         private Token Expect(params TokenKind[] kinds)
         {
-            Token token = NextToken();
+            var token = NextToken();
 
             if (kinds.Any(kind => token.Kind == kind))
             {
@@ -247,7 +245,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
         // Require a token from a list of tokens
         private Token Expect(params Token[] valid)
         {
-            Token token = NextToken();
+            var token = NextToken();
 
             if (valid.Any(item => token == item))
             {
@@ -284,7 +282,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
         {
             var sb = new StringBuilder();
 
-            foreach (char c in input)
+            foreach (var c in input)
             {
                 if (REGEX_CHARS.Contains(c))
                     sb.Append('\\');
