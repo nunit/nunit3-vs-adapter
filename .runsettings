@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <RunSettings>
-  <RunConfiguration>
-    <!-- 0 = As many processes as possible, limited by number of cores on machine, 1 = Sequential (1 process), 2-> Given number of processes up to limit by number of cores on machine-->
-    <MaxCpuCount>0</MaxCpuCount>
-   
-  </RunConfiguration>
+    <RunConfiguration>
+        <!-- 0 = As many processes as possible, limited by number of cores on machine, 1 = Sequential (1 process), 2-> Given number of processes up to limit by number of cores on machine-->
+        <MaxCpuCount>0</MaxCpuCount>
+
+    </RunConfiguration>
 
     <!--
     <TestRunParameters>
@@ -46,9 +46,9 @@
 
     <NUnit>
         <Verbosity>5</Verbosity>
-      <DumpXmlTestResults>true</DumpXmlTestResults>
-      <DumpXmlTestDiscovery>true</DumpXmlTestDiscovery>
-      <DiscoveryMethod>Current</DiscoveryMethod>
+        <DumpXmlTestResults>true</DumpXmlTestResults>
+        <DumpXmlTestDiscovery>true</DumpXmlTestDiscovery>
+        <DiscoveryMethod>Current</DiscoveryMethod>
     </NUnit>
 
 

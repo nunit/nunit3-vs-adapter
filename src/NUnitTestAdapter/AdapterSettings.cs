@@ -111,6 +111,7 @@ namespace NUnit.VisualStudio.TestAdapter
         int AssemblySelectLimit { get; }
 
         bool UseNUnitFilter { get; }
+        bool IncludeStackTraceForSuites { get; }
 
 
         void Load(IDiscoveryContext context);
@@ -236,6 +237,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public bool SkipNonTestAssemblies { get; private set; }
         public int AssemblySelectLimit { get; private set; }
         public bool UseNUnitFilter { get; private set; }
+        public bool IncludeStackTraceForSuites { get; private set; }
 
         public VsTestCategoryType VsTestCategoryType { get; private set; } = VsTestCategoryType.NUnit;
 
@@ -322,7 +324,7 @@ namespace NUnit.VisualStudio.TestAdapter
             ConsoleOut = GetInnerTextAsInt(nunitNode, nameof(ConsoleOut), 1);  // 0 no output to console, 1 : output to console
             StopOnError = GetInnerTextAsBool(nunitNode, nameof(StopOnError), false);
             UseNUnitFilter = GetInnerTextAsBool(nunitNode, nameof(UseNUnitFilter), true);
-
+            IncludeStackTraceForSuites = GetInnerTextAsBool(nunitNode, nameof(IncludeStackTraceForSuites), true);
 
             // Engine settings
             DiscoveryMethod = MapEnum(GetInnerText(nunitNode, nameof(DiscoveryMethod), Verbosity > 0), DiscoveryMethod.Current);

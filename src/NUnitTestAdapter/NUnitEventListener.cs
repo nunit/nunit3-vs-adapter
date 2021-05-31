@@ -47,10 +47,10 @@ namespace NUnit.VisualStudio.TestAdapter
         ITestEventListener, IDisposable // Public for testing
     {
         private static readonly ICollection<INUnitTestEventTestOutput> EmptyNodes = new List<INUnitTestEventTestOutput>();
-        private readonly ITestExecutionRecorder _recorder;
-        private readonly ITestConverterCommon _testConverter;
-        private readonly IAdapterSettings _settings;
-        private readonly Dictionary<string, ICollection<INUnitTestEventTestOutput>> _outputNodes = new ();
+        private readonly ITestExecutionRecorder recorder;
+        private readonly ITestConverterCommon testConverter;
+        private readonly IAdapterSettings settings;
+        private readonly Dictionary<string, ICollection<INUnitTestEventTestOutput>> outputNodes = new ();
 
 #if NET35
         public override object InitializeLifetimeService()
@@ -69,9 +69,9 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             this.executor = executor;
             dumpXml = executor.Dump;
-            _settings = executor.Settings;
-            _recorder = executor.FrameworkHandle;
-            _testConverter = testConverter;
+            settings = executor.Settings;
+            recorder = executor.FrameworkHandle;
+            this.testConverter = testConverter;
         }
 
         #region ITestEventListener
@@ -103,8 +103,8 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             catch (Exception ex)
             {
-                _recorder.SendMessage(TestMessageLevel.Warning, $"Error processing {node.Name} event for {node.FullName}");
-                _recorder.SendMessage(TestMessageLevel.Warning, ex.ToString());
+                recorder.SendMessage(TestMessageLevel.Warning, $"Error processing {node.Name} event for {node.FullName}");
+                recorder.SendMessage(TestMessageLevel.Warning, ex.ToString());
             }
         }
 
@@ -141,44 +141,44 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void TestStarted(INUnitTestEventStartTest testNode)
         {
-            var ourCase = _testConverter.GetCachedTestCase(testNode.Id);
+            var ourCase = testConverter.GetCachedTestCase(testNode.Id);
 
             // Simply ignore any TestCase not found in the cache
             if (ourCase != null)
-                _recorder.RecordStart(ourCase);
+                recorder.RecordStart(ourCase);
         }
 
         public void TestFinished(INUnitTestEventTestCase resultNode)
         {
             var testId = resultNode.Id;
-            if (_outputNodes.TryGetValue(testId, out var outputNodes))
+            if (this.outputNodes.TryGetValue(testId, out var outputNodes))
             {
-                _outputNodes.Remove(testId);
+                this.outputNodes.Remove(testId);
             }
 
-            var result = _testConverter.GetVsTestResults(resultNode, outputNodes ?? EmptyNodes);
-            if (_settings.ConsoleOut == 1)
+            var result = testConverter.GetVsTestResults(resultNode, outputNodes ?? EmptyNodes);
+            if (settings.ConsoleOut == 1)
             {
                 if (!string.IsNullOrEmpty(result.ConsoleOutput) && result.ConsoleOutput != NL)
                 {
                     string msg = result.ConsoleOutput;
-                    if (_settings.UseTestNameInConsoleOutput)
+                    if (settings.UseTestNameInConsoleOutput)
                         msg = $"{resultNode.Name}: {msg}";
-                    _recorder.SendMessage(TestMessageLevel.Informational, msg);
+                    recorder.SendMessage(TestMessageLevel.Informational, msg);
                 }
                 if (!string.IsNullOrEmpty(resultNode.ReasonMessage))
                 {
-                    _recorder.SendMessage(TestMessageLevel.Informational,                        $"{resultNode.Name}: {resultNode.ReasonMessage}");
+                    recorder.SendMessage(TestMessageLevel.Informational, $"{resultNode.Name}: {resultNode.ReasonMessage}");
                 }
             }
 
-            _recorder.RecordEnd(result.TestCaseResult.TestCase, result.TestCaseResult.Outcome);
+            recorder.RecordEnd(result.TestCaseResult.TestCase, result.TestCaseResult.Outcome);
             foreach (var vsResult in result.TestResults)
             {
-                _recorder.RecordResult(vsResult);
+                recorder.RecordResult(vsResult);
             }
 
-            if (result.TestCaseResult.Outcome == TestOutcome.Failed && _settings.StopOnError)
+            if (result.TestCaseResult.Outcome == TestOutcome.Failed && settings.StopOnError)
             {
                 executor.StopRun();
             }
@@ -191,15 +191,16 @@ namespace NUnit.VisualStudio.TestAdapter
             var site = resultNode.Site();
             if (site != NUnitTestEvent.SiteType.Setup && site != NUnitTestEvent.SiteType.TearDown)
                 return;
-            _recorder.SendMessage(TestMessageLevel.Warning, $"{site} failed for test fixture {resultNode.FullName}");
+            recorder.SendMessage(TestMessageLevel.Warning, $"{site} failed for test fixture {resultNode.FullName}");
 
             if (resultNode.HasFailure)
-                _recorder.SendMessage(TestMessageLevel.Warning, resultNode.FailureMessage);
-
-            // Should not be any stacktrace on Suite-finished
-            // var stackNode = resultNode.Failure.StackTrace;
-            // if (!string.IsNullOrEmpty(stackNode))
-            //    _recorder.SendMessage(TestMessageLevel.Warning, stackNode);
+            {
+                string msg = resultNode.FailureMessage;
+                var stackNode = resultNode.StackTrace;
+                if (!string.IsNullOrEmpty(stackNode) && settings.IncludeStackTraceForSuites)
+                    msg += $"\nStackTrace: {stackNode}";
+                recorder.SendMessage(TestMessageLevel.Warning, msg);
+            }
         }
 
         private static readonly string NL = Environment.NewLine;
@@ -222,16 +223,16 @@ namespace NUnit.VisualStudio.TestAdapter
             string testId = outputNodeEvent.TestId;
             if (!string.IsNullOrEmpty(testId))
             {
-                if (!_outputNodes.TryGetValue(testId, out var outputNodes))
+                if (!this.outputNodes.TryGetValue(testId, out var outputNodes))
                 {
                     outputNodes = new List<INUnitTestEventTestOutput>();
-                    _outputNodes.Add(testId, outputNodes);
+                    this.outputNodes.Add(testId, outputNodes);
                 }
 
                 outputNodes.Add(outputNodeEvent);
             }
 
-            _recorder.SendMessage(TestMessageLevel.Warning, text);
+            recorder.SendMessage(TestMessageLevel.Warning, text);
         }
     }
 }
