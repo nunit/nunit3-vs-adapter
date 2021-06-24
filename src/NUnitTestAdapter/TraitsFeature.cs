@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2013-2020 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2013-2021 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -49,7 +49,7 @@ namespace NUnit.VisualStudio.TestAdapter
             /// Currently, the only effect this has is to add a Test Explorer grouping header
             /// for each trait with the name “Name [Value]”, or for an empty value, “Name”.
             /// </summary>
-            public List<Trait> Traits { get; } = new List<Trait>();
+            public List<Trait> Traits { get; } = new ();
 
             /// <summary>
             /// Used by <see cref="VsTestFilter"/>; does not affect the Test Explorer UI.

@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2020 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2021 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -63,7 +63,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 Assert.That(_settings.TargetPlatform, Is.Null);
                 Assert.That(_settings.TestAdapterPaths, Is.Null);
                 Assert.That(_settings.CollectSourceInformation, Is.True);
-                Assert.IsEmpty(_settings.TestProperties);
+                Assert.That(_settings.TestProperties, Is.Empty);
                 Assert.That(_settings.InternalTraceLevel, Is.Null);
                 Assert.That(_settings.WorkDirectory, Is.Null);
                 Assert.That(_settings.NumberOfTestWorkers, Is.EqualTo(-1));

@@ -18,7 +18,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 
             var escapedArguments = arguments is null ? null : EscapeProcessArguments(arguments, alwaysQuote: false);
 
-            using (var process = new Process
+            using var process = new Process
             {
                 StartInfo =
                 {
@@ -29,51 +29,49 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                     RedirectStandardOutput = true,
                     RedirectStandardError = true
                 }
-            })
+            };
+            // This is inherited if the test runner was started by the Visual Studio process.
+            // It breaks MSBuild 15’s targets when it tries to build legacy csprojs and vbprojs.
+            process.StartInfo.EnvironmentVariables.Remove("VisualStudioVersion");
+
+            var stdout = (StringBuilder)null;
+            var stderr = (StringBuilder)null;
+
+            process.OutputDataReceived += (sender, e) =>
             {
-                // This is inherited if the test runner was started by the Visual Studio process.
-                // It breaks MSBuild 15’s targets when it tries to build legacy csprojs and vbprojs.
-                process.StartInfo.EnvironmentVariables.Remove("VisualStudioVersion");
+                if (e.Data is null) return;
 
-                var stdout = (StringBuilder)null;
-                var stderr = (StringBuilder)null;
+                if (stdout is null)
+                    stdout = new StringBuilder();
+                else
+                    stdout.AppendLine();
 
-                process.OutputDataReceived += (sender, e) =>
-                {
-                    if (e.Data is null) return;
+                stdout.Append(e.Data);
+            };
 
-                    if (stdout is null)
-                        stdout = new StringBuilder();
-                    else
-                        stdout.AppendLine();
+            process.ErrorDataReceived += (sender, e) =>
+            {
+                if (e.Data is null) return;
 
-                    stdout.Append(e.Data);
-                };
+                if (stderr is null)
+                    stderr = new StringBuilder();
+                else
+                    stderr.AppendLine();
 
-                process.ErrorDataReceived += (sender, e) =>
-                {
-                    if (e.Data is null) return;
+                stderr.Append(e.Data);
+            };
 
-                    if (stderr is null)
-                        stderr = new StringBuilder();
-                    else
-                        stderr.AppendLine();
+            process.Start();
+            process.BeginErrorReadLine();
+            process.BeginOutputReadLine();
+            process.WaitForExit();
 
-                    stderr.Append(e.Data);
-                };
-
-                process.Start();
-                process.BeginErrorReadLine();
-                process.BeginOutputReadLine();
-                process.WaitForExit();
-
-                return new ProcessRunResult(
-                    fileName,
-                    escapedArguments,
-                    process.ExitCode,
-                    stdout?.ToString(),
-                    stderr?.ToString());
-            }
+            return new ProcessRunResult(
+                fileName,
+                escapedArguments,
+                process.ExitCode,
+                stdout?.ToString(),
+                stderr?.ToString());
         }
 
         private static readonly char[] CharsThatRequireQuoting = { ' ', '"' };
@@ -87,21 +85,19 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
         {
             if (literalValues is null) throw new ArgumentNullException(nameof(literalValues));
 
-            using (var en = literalValues.GetEnumerator())
+            using var en = literalValues.GetEnumerator();
+            if (!en.MoveNext()) return string.Empty;
+
+            var builder = new StringBuilder();
+
+            while (true)
             {
-                if (!en.MoveNext()) return string.Empty;
-
-                var builder = new StringBuilder();
-
-                while (true)
-                {
-                    EscapeProcessArgument(builder, en.Current, alwaysQuote);
-                    if (!en.MoveNext()) break;
-                    builder.Append(' ');
-                }
-
-                return builder.ToString();
+                EscapeProcessArgument(builder, en.Current, alwaysQuote);
+                if (!en.MoveNext()) break;
+                builder.Append(' ');
             }
+
+            return builder.ToString();
         }
 
         private static void EscapeProcessArgument(StringBuilder builder, string literalValue, bool alwaysQuote)

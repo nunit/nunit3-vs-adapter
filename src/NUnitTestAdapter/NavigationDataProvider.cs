@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2018-2020 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2018-2021 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -34,7 +34,7 @@ namespace NUnit.VisualStudio.TestAdapter
         private readonly string _assemblyPath;
         private readonly IMetadataProvider _metadataProvider;
         private readonly ITestLogger _logger;
-        private readonly Dictionary<string, DiaSession> _sessionsByAssemblyPath = new Dictionary<string, DiaSession>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, DiaSession> _sessionsByAssemblyPath = new (StringComparer.OrdinalIgnoreCase);
         private bool _disableMetadataLookup;
 
         public NavigationDataProvider(string assemblyPath, ITestLogger logger)
@@ -49,7 +49,7 @@ namespace NUnit.VisualStudio.TestAdapter
 #if NET35
         internal static AppDomainMetadataProvider CreateMetadataProvider(string assemblyPath)
         {
-            return new AppDomainMetadataProvider(
+            return new (
                 applicationBase: Path.GetDirectoryName(assemblyPath),
                 configurationFile: assemblyPath + ".config");
         }

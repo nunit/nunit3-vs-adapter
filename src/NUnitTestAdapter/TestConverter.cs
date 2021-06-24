@@ -1,5 +1,5 @@
 // ***********************************************************************
-// Copyright (c) 2011-2020 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2021 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -209,6 +209,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             testCase.AddTraitsFromTestNode(testNode, TraitsCache, _logger, adapterSettings);
+            testCase.SetPropertyValue(Seed.NUnitSeedProperty, testNode.Seed.ToString());
 
             return testCase;
 
@@ -299,6 +300,11 @@ namespace NUnit.VisualStudio.TestAdapter
                 vsResult.Duration = TimeSpan.FromTicks(1);
 
             vsResult.ComputerName = Environment.MachineName;
+            vsResult.SetPropertyValue(Seed.NUnitSeedProperty, resultNode.Seed);
+            if (adapterSettings.Verbosity >= 5)
+            {
+                vsResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, $"seed: {resultNode.Seed}"));
+            }
 
             FillResultFromOutputNodes(outputNodes, vsResult);
 

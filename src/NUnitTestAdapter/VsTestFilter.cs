@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2013-2020 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2013-2021 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -62,7 +62,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 ["FullyQualifiedName"] = TestCaseProperties.FullyQualifiedName,
                 ["Name"] = TestCaseProperties.DisplayName,
                 ["TestCategory"] = CategoryList.NUnitTestCategoryProperty,
-                ["Category"] = CategoryList.NUnitTestCategoryProperty
+                ["Category"] = CategoryList.NUnitTestCategoryProperty,
             };
             // Initialize the trait cache
             var priorityTrait = new NTrait("Priority", "");

@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2016-2020 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2016-2021 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -25,7 +25,7 @@ namespace NUnit.VisualStudio.TestAdapter
 {
     public class NavigationData
     {
-        public static readonly NavigationData Invalid = new NavigationData(null, 0);
+        public static readonly NavigationData Invalid = new (null, 0);
 
         public NavigationData(string filePath, int lineNumber)
         {

@@ -9,6 +9,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         string FullName { get; }
         string Name { get; }
         IEnumerable<NUnitProperty> Properties { get; }
+        string Seed { get; }
     }
 
     public abstract class NUnitTestNode : INUnitTestNode
@@ -17,10 +18,13 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public virtual string Id => Node.GetAttribute("id");
         public string FullName => Node.GetAttribute("fullname");
         public string Name => Node.GetAttribute("name");
+
         public bool IsNull => Node == null;
 
-        private readonly List<NUnitProperty> properties = new List<NUnitProperty>();
+        private readonly List<NUnitProperty> properties = new ();
         public IEnumerable<NUnitProperty> Properties => properties;
+        public string Seed => Node.GetAttribute("seed");
+
         protected NUnitTestNode(XmlNode node)
         {
             Node = node;

@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Xml;
 using NSubstitute;
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
@@ -1112,6 +1113,37 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
             var sut = new DiscoveryConverter(logger, settings);
             var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(SetupFixtureIssue824)));
+            Assert.That(ndr, Is.Not.Null);
+        }
+
+        private const string ExtractFixturesHandlesProperties =
+            @"<test-run id='0' name='Issue824.dll' fullname='d:\repos\NUnit\nunit3-vs-adapter.issues\Issue824\bin\Debug\net5.0\Issue824.dll' runstate='Runnable' testcasecount='2'>
+   <test-suite type='Assembly' id='0-1012' name='Issue824.dll' fullname='d:/repos/NUnit/nunit3-vs-adapter.issues/Issue824/bin/Debug/net5.0/Issue824.dll' runstate='Runnable' testcasecount='2'>
+      <environment framework-version='3.13.1.0' clr-version='5.0.4' os-version='Microsoft Windows 10.0.18363' platform='Win32NT' cwd='d:\repos\NUnit\nunit3-vs-adapter.issues\Issue824\bin\Debug\net5.0' machine-name='DESKTOP-SIATMVB' user='TerjeSandstrom' user-domain='AzureAD' culture='en-US' uiculture='en-US' os-architecture='x64' />
+            <test-suite type='ParameterizedFixture' id='0-1253' name='Issue3848' fullname='nunit.v3.Issue3848' runstate='Runnable' testcasecount='4'>
+  <properties>
+    <property name='ParallelScope' value='All' />
+  </properties>
+  <test-suite type='TestFixture' id='0-1254' name='Issue3848(&quot;Chrome&quot;)' fullname='nunit.v3.Issue3848(&quot;Chrome&quot;)' runstate='Runnable' testcasecount='2'>
+    <test-case id='0-1106' name='Test1' fullname='nunit.v3.Issue3848(&quot;Chrome&quot;).Test1' methodname='Test1' classname='nunit.v3.Issue3848' runstate='Runnable' seed='1759656977' />
+    <test-case id='0-1107' name='Test2' fullname='nunit.v3.Issue3848(&quot;Chrome&quot;).Test2' methodname='Test2' classname='nunit.v3.Issue3848' runstate='Runnable' seed='637248127' />
+  </test-suite>
+  <test-suite type='TestFixture' id='0-1255' name='Issue3848(&quot;Edge&quot;)' fullname='nunit.v3.Issue3848(&quot;Edge&quot;)' runstate='Runnable' testcasecount='2'>
+    <test-case id='0-1109' name='Test1' fullname='nunit.v3.Issue3848(&quot;Edge&quot;).Test1' methodname='Test1' classname='nunit.v3.Issue3848' runstate='Runnable' seed='273999456' />
+    <test-case id='0-1110' name='Test2' fullname='nunit.v3.Issue3848(&quot;Edge&quot;).Test2' methodname='Test2' classname='nunit.v3.Issue3848' runstate='Runnable' seed='777271813' />
+  </test-suite>
+</test-suite> 
+</test-suite>
+</test-run>";
+
+        [Test]
+        public void ThatExtractFixturesHandlesProperties()
+        {
+            var sut = new DiscoveryConverter(logger, settings);
+            XmlNode node = null;
+            Assert.DoesNotThrow(() => node = XmlHelper.CreateXmlNode(ExtractFixturesHandlesProperties));
+            var ndr = sut.ConvertXml(
+                new NUnitResults(node));
             Assert.That(ndr, Is.Not.Null);
         }
     }

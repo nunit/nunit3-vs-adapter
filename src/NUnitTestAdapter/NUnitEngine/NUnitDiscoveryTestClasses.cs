@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2020-2020 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2020-2021 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -77,7 +77,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             Parent = parent;
         }
 
-        public NUnitDiscoveryProperties NUnitDiscoveryProperties { get; } = new NUnitDiscoveryProperties();
+        public NUnitDiscoveryProperties NUnitDiscoveryProperties { get; } = new ();
 
         public abstract bool IsExplicit { get; }
         public virtual bool IsExplicitReverse => RunState == RunStateEnum.Explicit || (Parent?.IsExplicitReverse ?? RunState == RunStateEnum.Explicit);
@@ -109,7 +109,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
     public class NUnitDiscoveryProperties
     {
-        private List<NUnitProperty> TheProperties { get; } = new List<NUnitProperty>();
+        private List<NUnitProperty> TheProperties { get; } = new ();
         public IEnumerable<NUnitProperty> Properties => TheProperties;
 
         public void Add(NUnitProperty p) => TheProperties.Add(p);
@@ -133,7 +133,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public NUnitDiscoveryTestAssembly(BaseProperties theBase, NUnitDiscoveryTestRun parent) : base(theBase, parent)
         { }
 
-        private readonly List<NUnitDiscoveryTestCase> allTestCases = new List<NUnitDiscoveryTestCase>();
+        private readonly List<NUnitDiscoveryTestCase> allTestCases = new ();
 
         /// <summary>
         /// If all testcases are Explicit, we can run this one.
@@ -158,12 +158,12 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
     public sealed class NUnitDiscoveryTestFixture : NUnitDiscoveryCanHaveTestCases
     {
-        private readonly List<NUnitDiscoveryParameterizedMethod> parameterizedMethods = new List<NUnitDiscoveryParameterizedMethod>();
+        private readonly List<NUnitDiscoveryParameterizedMethod> parameterizedMethods = new ();
         public IEnumerable<NUnitDiscoveryParameterizedMethod> ParameterizedMethods => parameterizedMethods;
 
-        private readonly List<NUnitDiscoveryTheory> theories = new List<NUnitDiscoveryTheory>();
+        private readonly List<NUnitDiscoveryTheory> theories = new ();
 
-        private readonly List<NUnitDiscoveryGenericMethod> genericMethods = new List<NUnitDiscoveryGenericMethod>();
+        private readonly List<NUnitDiscoveryGenericMethod> genericMethods = new ();
         public IEnumerable<NUnitDiscoveryTheory> Theories => theories;
 
         public override int NoOfActualTestCases =>
@@ -266,7 +266,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
     public abstract class NUnitDiscoveryCanHaveTestCases : NUnitDiscoverySuiteBase, INUnitDiscoveryCanHaveTestCases
     {
-        private readonly List<NUnitDiscoveryTestCase> testCases = new List<NUnitDiscoveryTestCase>();
+        private readonly List<NUnitDiscoveryTestCase> testCases = new ();
 
         public IEnumerable<NUnitDiscoveryTestCase> TestCases => testCases;
         public virtual int NoOfActualTestCases => testCases.Count;
@@ -297,7 +297,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
     public abstract class NUnitDiscoveryCanHaveTestFixture : NUnitDiscoverySuiteBase, INUnitDiscoveryCanHaveTestFixture
     {
-        private readonly List<NUnitDiscoveryTestFixture> testFixtures = new List<NUnitDiscoveryTestFixture>();
+        private readonly List<NUnitDiscoveryTestFixture> testFixtures = new ();
 
         public IEnumerable<NUnitDiscoveryTestFixture> TestFixtures => testFixtures;
 
@@ -310,11 +310,11 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         }
 
 
-        private readonly List<NUnitDiscoveryTestSuite> testSuites = new List<NUnitDiscoveryTestSuite>();
+        private readonly List<NUnitDiscoveryTestSuite> testSuites = new ();
 
-        private readonly List<NUnitDiscoveryGenericFixture> genericFixtures = new List<NUnitDiscoveryGenericFixture>();
-        private readonly List<NUnitDiscoverySetUpFixture> setUpFixtures = new List<NUnitDiscoverySetUpFixture>();
-        private readonly List<NUnitDiscoveryParameterizedTestFixture> parameterizedFixtures = new List<NUnitDiscoveryParameterizedTestFixture>();
+        private readonly List<NUnitDiscoveryGenericFixture> genericFixtures = new ();
+        private readonly List<NUnitDiscoverySetUpFixture> setUpFixtures = new ();
+        private readonly List<NUnitDiscoveryParameterizedTestFixture> parameterizedFixtures = new ();
 
 
         public IEnumerable<NUnitDiscoveryTestSuite> TestSuites => testSuites;

@@ -34,7 +34,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             discovery.LoadedTestCases.Returns(new List<TestCase>
             {
-                new TestCase("A", new Uri(NUnitTestAdapter.ExecutorUri), "line 23")
+                new ("A", new Uri(NUnitTestAdapter.ExecutorUri), "line 23")
             });
             filter = new TestFilter("<filter><or>A<or>B</or></or></filter>");
         }
