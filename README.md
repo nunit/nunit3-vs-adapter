@@ -43,7 +43,7 @@ The NUnit 3 Test Adapter is Open Source software released under the [![](https:/
 
 ## Developing
 
-Visual Studio 2017 is the minimum required version to build the adapter.
+Visual Studio 2019 is the minimum required version to build the adapter.
 
 Use `.\build -t test` at the command line to build and run complete tests.
 

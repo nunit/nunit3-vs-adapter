@@ -1,5 +1,5 @@
 #tool vswhere&version=2.7.1
-#tool Microsoft.TestPlatform&version=16.3.0
+#tool Microsoft.TestPlatform&version=16.9.4
 
 //////////////////////////////////////////////////////////////////////
 // ARGUMENTS
@@ -13,7 +13,7 @@ var configuration = Argument("configuration", "Release");
 //////////////////////////////////////////////////////////////////////
 
 var version = "4.0.0";
-var modifier = "-beta.2";
+var modifier = "";
 
 var dbgSuffix = configuration.ToLower() == "debug" ? "-dbg" : "";
 var packageVersion = version + modifier + dbgSuffix;

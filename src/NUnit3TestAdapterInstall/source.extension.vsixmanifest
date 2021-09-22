@@ -3,9 +3,9 @@
     <Metadata>
         <Identity Id="NUnit.NUnit3TestAdapter" Version="4.0.0" Language="en-US" Publisher="Charlie Poole, Terje Sandstrom" />
         <DisplayName>NUnit 3 Test Adapter</DisplayName>
-        <Description xml:space="preserve">NUnit 3 adapter for running tests in Visual Studio. Works with NUnit 3.x.
-For running NUnit 2 tests, use the NUnit 2 adapter.
-Note that use of VSIX Test adapters are deprecated in VS 2019, we recommend you to use the nuget versions of the adapter. </Description>
+        <Description xml:space="preserve">NUnit 3 adapter for running tests in Visual Studio. Works with NUnit 3.x and higher.
+Note that use of VSIX Test adapters are deprecated in VS 2019 and later, we recommend you to use the nuget versions of the adapter. 
+(For running NUnit 2 tests, use the NUnit 2 adapter.)</Description>
         <MoreInfo>https://docs.nunit.org/articles/vs-test-adapter/Index.html</MoreInfo>
         <License>license.rtf</License>
         <Icon>nunit_90.png</Icon>
@@ -13,9 +13,9 @@ Note that use of VSIX Test adapters are deprecated in VS 2019, we recommend you 
         <Tags>test, Testing, adapter, NUnit, TDD, NUnit3, UnitTesting</Tags>
     </Metadata>
     <Installation>
-        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[11.0,17.0)" />
-        <InstallationTarget Id="Microsoft.VisualStudio.Pro" Version="[11.0,17.0)" />
-        <InstallationTarget Id="Microsoft.VisualStudio.Enterprise" Version="[11.0,17.0)" />
+        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[11.0,18.0)" />
+        <InstallationTarget Id="Microsoft.VisualStudio.Pro" Version="[11.0,18.0)" />
+        <InstallationTarget Id="Microsoft.VisualStudio.Enterprise" Version="[11.0,18.0)" />
     </Installation>
     <Dependencies>
         <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5,)" />
