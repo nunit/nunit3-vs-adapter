@@ -408,9 +408,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
             foreach (var propnode in node.Elements("properties").Elements("property"))
             {
-                var prop = new NUnitProperty(
-                    propnode.Attribute("name").Value,
-                    propnode.Attribute("value").Value);
+                var prop = new NUnitProperty(propnode);
                 bp.Properties.Add(prop);
             }
             return bp;
