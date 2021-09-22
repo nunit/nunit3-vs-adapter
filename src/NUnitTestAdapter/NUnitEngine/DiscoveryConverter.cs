@@ -51,6 +51,12 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
     public class DiscoveryConverter : IDiscoveryConverter
     {
+        private const string ParameterizedFixture = nameof(ParameterizedFixture);
+        private const string TestFixture = nameof(TestFixture);
+        private const string GenericFixture = nameof(GenericFixture);
+        private const string SetUpFixture = nameof(SetUpFixture);
+        private const string TestSuite = nameof(TestSuite);
+
         internal static class NUnitXmlAttributeNames
         {
             public const string Id = "id";
@@ -187,7 +193,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             return ts;
         }
 
-        private void ExtractAllFixtures(NUnitDiscoveryTestSuite parent, XElement node)
+        private void ExtractAllFixtures(NUnitDiscoveryCanHaveTestFixture parent, XElement node)
         {
             foreach (var child in node.Elements("test-suite"))
             {
@@ -201,28 +207,28 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                 var className = child.Attribute(NUnitXmlAttributeNames.Classname)?.Value;
                 switch (type)
                 {
-                    case "TestFixture":
+                    case TestFixture:
                         var tf = ExtractTestFixture(parent, child, className);
                         parent.AddTestFixture(tf);
                         ExtractTestCases(tf, child);
                         ExtractParameterizedMethodsAndTheories(tf, child);
                         break;
-                    case "GenericFixture":
+                    case GenericFixture:
                         var gtf = ExtractGenericTestFixture(parent, child);
                         parent.AddTestGenericFixture(gtf);
                         ExtractTestFixtures(gtf, child);
                         break;
-                    case "ParameterizedFixture":
+                    case ParameterizedFixture:
                         var ptf = ExtractParameterizedTestFixture(parent, child);
                         parent.AddParameterizedFixture(ptf);
                         ExtractTestFixtures(ptf, child);
                         break;
-                    case "SetUpFixture":
+                    case SetUpFixture:
                         var stf = ExtractSetUpTestFixture(parent, child, className);
                         parent.AddSetUpFixture(stf);
                         ExtractTestFixtures(stf, child);
                         break;
-                    case "TestSuite":
+                    case TestSuite:
                         var ts = ExtractTestSuite(child, parent);
                         parent.AddTestSuite(ts);
                         if (child.HasElements)
@@ -248,19 +254,19 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                 var btf = ExtractSuiteBasePropertiesClass(child);
                 switch (type)
                 {
-                    case "TestFixture":
+                    case TestFixture:
                         var tf = new NUnitDiscoveryTestFixture(btf, className, parent);
                         parent.AddTestFixture(tf);
                         ExtractTestCases(tf, child);
                         ExtractParameterizedMethodsAndTheories(tf, child);
                         break;
-                    case "TestSuite":
+                    case TestSuite:
                         var ts = ExtractTestSuite(child, parent);
                         parent.AddTestSuite(ts);
                         if (child.HasElements)
                             ExtractAllFixtures(ts, child);
                         break;
-                    case "SetUpFixture":
+                    case SetUpFixture:
                         var tsf = ExtractSetUpTestFixture(parent, node, className);
                         parent.AddSetUpFixture(tsf);
                         if (child.HasElements)
@@ -268,8 +274,16 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                             ExtractTestFixtures(tsf, child);
                         }
                         break;
+                    case ParameterizedFixture:
+                        var ptf = ExtractParameterizedTestFixture(parent, node);
+                        parent.AddParameterizedFixture(ptf);
+                        if (child.HasElements)
+                        {
+                            ExtractTestFixtures(ptf, child);
+                        }
+                        break;
                     default:
-                        throw new DiscoveryException($"Not a TestFixture, SetUpFixture or TestSuite, but {type}");
+                        throw new DiscoveryException($"Not a TestFixture, SetUpFixture, ParameterizedFixture or TestSuite, but {type}");
                 }
             }
         }
