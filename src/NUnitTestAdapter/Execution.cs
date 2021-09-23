@@ -67,7 +67,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public abstract TestFilter CheckFilterInCurrentMode(TestFilter filter, IDiscoveryConverter discovery);
 
         protected NUnitTestFilterBuilder CreateTestFilterBuilder()
-            => new NUnitTestFilterBuilder(NUnitEngineAdapter.GetService<ITestFilterService>(), Settings);
+            => new (NUnitEngineAdapter.GetService<ITestFilterService>(), Settings);
         protected ITestConverterCommon CreateConverter(DiscoveryConverter discovery) => Settings.DiscoveryMethod == DiscoveryMethod.Current ? discovery.TestConverter : discovery.TestConverterForXml;
 
         protected TestFilter CheckFilter(IDiscoveryConverter discovery)

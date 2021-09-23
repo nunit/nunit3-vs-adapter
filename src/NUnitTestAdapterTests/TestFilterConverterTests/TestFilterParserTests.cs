@@ -168,6 +168,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.TestFilterConverterTests
         [TestCase(
             "TestCategory=Urgent & !(FullyQualifiedName=My.Tests | TestCategory = high)",
             "<and><cat>Urgent</cat><not><or><test>My.Tests</test><cat>high</cat></or></not></and>")]
+        [TestCase("Bug = 12345", "<prop name='Bug'>12345</prop>")]
         public void TestParser(string input, string output)
         {
             Assert.That(_parser.Parse(input), Is.EqualTo($"<filter>{output}</filter>"));

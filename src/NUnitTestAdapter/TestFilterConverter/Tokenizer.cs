@@ -31,7 +31,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
         Eof,
         Word,
         FQN,
-        // String, // Unused
+        String, // Unused
         Symbol
     }
 

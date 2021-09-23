@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2020-2020 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2020-2021 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -51,6 +51,12 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
     public class DiscoveryConverter : IDiscoveryConverter
     {
+        private const string ParameterizedFixture = nameof(ParameterizedFixture);
+        private const string TestFixture = nameof(TestFixture);
+        private const string GenericFixture = nameof(GenericFixture);
+        private const string SetUpFixture = nameof(SetUpFixture);
+        private const string TestSuite = nameof(TestSuite);
+
         internal static class NUnitXmlAttributeNames
         {
             public const string Id = "id";
@@ -86,15 +92,15 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public bool IsExplicitRun => CurrentTestAssembly?.IsExplicit ?? false;
 
-        private readonly List<TestCase> loadedTestCases = new List<TestCase>();
+        private readonly List<TestCase> loadedTestCases = new ();
         public IList<TestCase> LoadedTestCases => loadedTestCases;
 
         public int NoOfLoadedTestCases => loadedTestCases.Count;
 
         public string AssemblyPath { get; private set; }
 
-        IAdapterSettings Settings { get; }
-        ITestLogger TestLog { get; }
+        private IAdapterSettings Settings { get; }
+        private ITestLogger TestLog { get; }
 
         public bool NoOfLoadedTestCasesAboveLimit => NoOfLoadedTestCases > Settings.AssemblySelectLimit;
         public IEnumerable<TestCase> CheckTestCasesExplicit(IEnumerable<TestCase> filteredTestCases)
@@ -163,15 +169,10 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             timing.LogTime("Converting test cases ");
             return loadedTestCases;
 
-            IEnumerable<NUnitDiscoveryTestCase> RunnableTestCases(bool isExplicit)
-            {
-                IEnumerable<NUnitDiscoveryTestCase> result;
-                if (isExplicit || !Settings.DesignMode)
-                    result = TestRun.TestAssembly.AllTestCases;
-                else
-                    result = TestRun.TestAssembly.RunnableTestCases;
-                return result;
-            }
+            IEnumerable<NUnitDiscoveryTestCase> RunnableTestCases(bool isExplicit) =>
+                isExplicit || !Settings.DesignMode
+                    ? TestRun.TestAssembly.AllTestCases
+                    : TestRun.TestAssembly.RunnableTestCases;
         }
 
         public NUnitDiscoveryTestRun ConvertXml(NUnitResults discovery)
@@ -192,36 +193,42 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             return ts;
         }
 
-        private static void ExtractAllFixtures(NUnitDiscoveryTestSuite parent, XElement node)
+        private void ExtractAllFixtures(NUnitDiscoveryCanHaveTestFixture parent, XElement node)
         {
             foreach (var child in node.Elements("test-suite"))
             {
-                var type = child.Attribute(NUnitXmlAttributeNames.Type).Value;
+                var type = child.Attribute(NUnitXmlAttributeNames.Type)?.Value;
+                if (type == null)
+                {
+                    TestLog.Debug($"ETF1:Don't understand element: {child}");
+                    continue;
+                }
+
                 var className = child.Attribute(NUnitXmlAttributeNames.Classname)?.Value;
                 switch (type)
                 {
-                    case "TestFixture":
+                    case TestFixture:
                         var tf = ExtractTestFixture(parent, child, className);
                         parent.AddTestFixture(tf);
                         ExtractTestCases(tf, child);
                         ExtractParameterizedMethodsAndTheories(tf, child);
                         break;
-                    case "GenericFixture":
+                    case GenericFixture:
                         var gtf = ExtractGenericTestFixture(parent, child);
                         parent.AddTestGenericFixture(gtf);
                         ExtractTestFixtures(gtf, child);
                         break;
-                    case "ParameterizedFixture":
+                    case ParameterizedFixture:
                         var ptf = ExtractParameterizedTestFixture(parent, child);
                         parent.AddParameterizedFixture(ptf);
                         ExtractTestFixtures(ptf, child);
                         break;
-                    case "SetUpFixture":
+                    case SetUpFixture:
                         var stf = ExtractSetUpTestFixture(parent, child, className);
                         parent.AddSetUpFixture(stf);
                         ExtractTestFixtures(stf, child);
                         break;
-                    case "TestSuite":
+                    case TestSuite:
                         var ts = ExtractTestSuite(child, parent);
                         parent.AddTestSuite(ts);
                         if (child.HasElements)
@@ -233,28 +240,33 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             }
         }
 
-        private static void ExtractTestFixtures(NUnitDiscoveryCanHaveTestFixture parent, XElement node)
+        private void ExtractTestFixtures(NUnitDiscoveryCanHaveTestFixture parent, XElement node)
         {
-            foreach (var child in node.Elements())
+            foreach (var child in node.Elements().Where(o => o.Name != "properties"))
             {
-                var type = child.Attribute(NUnitXmlAttributeNames.Type).Value;
+                var type = child.Attribute(NUnitXmlAttributeNames.Type)?.Value;
+                if (type == null)
+                {
+                    TestLog.Debug($"ETF2:Don't understand element: {child}");
+                    continue;
+                }
                 var className = child.Attribute(NUnitXmlAttributeNames.Classname)?.Value;
                 var btf = ExtractSuiteBasePropertiesClass(child);
                 switch (type)
                 {
-                    case "TestFixture":
+                    case TestFixture:
                         var tf = new NUnitDiscoveryTestFixture(btf, className, parent);
                         parent.AddTestFixture(tf);
                         ExtractTestCases(tf, child);
                         ExtractParameterizedMethodsAndTheories(tf, child);
                         break;
-                    case "TestSuite":
+                    case TestSuite:
                         var ts = ExtractTestSuite(child, parent);
                         parent.AddTestSuite(ts);
                         if (child.HasElements)
                             ExtractAllFixtures(ts, child);
                         break;
-                    case "SetUpFixture":
+                    case SetUpFixture:
                         var tsf = ExtractSetUpTestFixture(parent, node, className);
                         parent.AddSetUpFixture(tsf);
                         if (child.HasElements)
@@ -262,8 +274,16 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                             ExtractTestFixtures(tsf, child);
                         }
                         break;
+                    case ParameterizedFixture:
+                        var ptf = ExtractParameterizedTestFixture(parent, node);
+                        parent.AddParameterizedFixture(ptf);
+                        if (child.HasElements)
+                        {
+                            ExtractTestFixtures(ptf, child);
+                        }
+                        break;
                     default:
-                        throw new DiscoveryException($"Not a TestFixture, SetUpFixture or TestSuite, but {type}");
+                        throw new DiscoveryException($"Not a TestFixture, SetUpFixture, ParameterizedFixture or TestSuite, but {type}");
                 }
             }
         }
@@ -366,8 +386,8 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         private NUnitDiscoveryTestAssembly ExtractTestAssembly(XElement node, NUnitDiscoveryTestRun parent)
         {
-            string dType = node.Attribute(NUnitXmlAttributeNames.Type).Value;
-            if (dType != "Assembly")
+            string dType = node.Attribute(NUnitXmlAttributeNames.Type)?.Value;
+            if (dType is not "Assembly")
                 throw new DiscoveryException("Node is not of type assembly: " + node);
             var aBase = ExtractSuiteBasePropertiesClass(node);
             var assembly = new NUnitDiscoveryTestAssembly(aBase, parent);
@@ -388,9 +408,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
             foreach (var propnode in node.Elements("properties").Elements("property"))
             {
-                var prop = new NUnitProperty(
-                    propnode.Attribute("name").Value,
-                    propnode.Attribute("value").Value);
+                var prop = new NUnitProperty(propnode);
                 bp.Properties.Add(prop);
             }
             return bp;
@@ -429,7 +447,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             RunState = dRunstate;
         }
 
-        public List<NUnitProperty> Properties { get; } = new List<NUnitProperty>();
+        public List<NUnitProperty> Properties { get; } = new ();
 
         public string Id { get; }
         public string Name { get; }

@@ -1,5 +1,5 @@
 // ***********************************************************************
-// Copyright (c) 2014-2020 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2014-2021 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -111,6 +111,7 @@ namespace NUnit.VisualStudio.TestAdapter
         int AssemblySelectLimit { get; }
 
         bool UseNUnitFilter { get; }
+        bool IncludeStackTraceForSuites { get; }
 
 
         void Load(IDiscoveryContext context);
@@ -236,6 +237,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public bool SkipNonTestAssemblies { get; private set; }
         public int AssemblySelectLimit { get; private set; }
         public bool UseNUnitFilter { get; private set; }
+        public bool IncludeStackTraceForSuites { get; private set; }
 
         public VsTestCategoryType VsTestCategoryType { get; private set; } = VsTestCategoryType.NUnit;
 
@@ -296,25 +298,11 @@ namespace NUnit.VisualStudio.TestAdapter
             Verbosity = GetInnerTextAsInt(nunitNode, nameof(Verbosity), 0);
             _logger.Verbosity = Verbosity;
 
-            var runConfiguration = doc.SelectSingleNode("RunSettings/RunConfiguration");
-            MaxCpuCount = GetInnerTextAsInt(runConfiguration, nameof(MaxCpuCount), -1);
-            ResultsDirectory = GetInnerTextWithLog(runConfiguration, nameof(ResultsDirectory));
-            TargetPlatform = GetInnerTextWithLog(runConfiguration, nameof(TargetPlatform));
-            TargetFrameworkVersion = GetInnerTextWithLog(runConfiguration, nameof(TargetFrameworkVersion));
-            TestAdapterPaths = GetInnerTextWithLog(runConfiguration, nameof(TestAdapterPaths));
-            CollectSourceInformation = GetInnerTextAsBool(runConfiguration, nameof(CollectSourceInformation), true);
-            DisableAppDomain = GetInnerTextAsBool(runConfiguration, nameof(DisableAppDomain), false);
-            DisableParallelization = GetInnerTextAsBool(runConfiguration, nameof(DisableParallelization), false);
-            DesignMode = GetInnerTextAsBool(runConfiguration, nameof(DesignMode), false);
-            CollectDataForEachTestSeparately =
-                GetInnerTextAsBool(runConfiguration, nameof(CollectDataForEachTestSeparately), false);
+            ExtractRunConfiguration(doc);
 
-            TestProperties = new Dictionary<string, string>();
-            UpdateTestProperties();
+            UpdateTestProperties(doc);
 
             // NUnit settings
-            InternalTraceLevel = GetInnerTextWithLog(nunitNode, nameof(InternalTraceLevel), "Off", "Error", "Warning",
-                "Info", "Verbose", "Debug");
             WorkDirectory = GetInnerTextWithLog(nunitNode, nameof(WorkDirectory));
             Where = GetInnerTextWithLog(nunitNode, nameof(Where));
             DefaultTimeout = GetInnerTextAsInt(nunitNode, nameof(DefaultTimeout), 0);
@@ -335,29 +323,22 @@ namespace NUnit.VisualStudio.TestAdapter
             UseNUnitIdforTestCaseId = GetInnerTextAsBool(nunitNode, nameof(UseNUnitIdforTestCaseId), false);
             ConsoleOut = GetInnerTextAsInt(nunitNode, nameof(ConsoleOut), 1);  // 0 no output to console, 1 : output to console
             StopOnError = GetInnerTextAsBool(nunitNode, nameof(StopOnError), false);
-            DiscoveryMethod = MapEnum(GetInnerText(nunitNode, nameof(DiscoveryMethod), Verbosity > 0), DiscoveryMethod.Current);
             UseNUnitFilter = GetInnerTextAsBool(nunitNode, nameof(UseNUnitFilter), true);
-
+            IncludeStackTraceForSuites = GetInnerTextAsBool(nunitNode, nameof(IncludeStackTraceForSuites), true);
 
             // Engine settings
+            DiscoveryMethod = MapEnum(GetInnerText(nunitNode, nameof(DiscoveryMethod), Verbosity > 0), DiscoveryMethod.Current);
             SkipNonTestAssemblies = GetInnerTextAsBool(nunitNode, nameof(SkipNonTestAssemblies), true);
             AssemblySelectLimit = GetInnerTextAsInt(nunitNode, nameof(AssemblySelectLimit), 2000);
 
 
-            // Adapter Diagnostics
-            DumpXmlTestDiscovery = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestDiscovery), false);
-            DumpXmlTestResults = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestResults), false);
-            DumpVsInput = GetInnerTextAsBool(nunitNode, nameof(DumpVsInput), false);
-            FreakMode = GetInnerTextAsBool(nunitNode, nameof(FreakMode), false);
-            // End Diagnostics
+            ExtractNUnitDiagnosticSettings(nunitNode);
 
             // Adapter Display Options
             MapDisplayName(GetInnerText(nunitNode, nameof(DisplayName), Verbosity > 0));
             FullnameSeparator = GetInnerText(nunitNode, nameof(FullnameSeparator), Verbosity > 0)?[0] ?? ':';
 
             // EndDisplay
-
-
 
             PreFilter = GetInnerTextAsBool(nunitNode, nameof(PreFilter), false);
             MapTestCategory(GetInnerText(nunitNode, nameof(VsTestCategoryType), Verbosity > 0));
@@ -399,17 +380,44 @@ namespace NUnit.VisualStudio.TestAdapter
 
             // Update NumberOfTestWorkers based on the DisableParallelization and NumberOfTestWorkers from runsettings.
             UpdateNumberOfTestWorkers();
+        }
 
-            void UpdateTestProperties()
+        private void ExtractNUnitDiagnosticSettings(XmlNode nunitNode)
+        {
+            DumpXmlTestDiscovery = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestDiscovery), false);
+            DumpXmlTestResults = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestResults), false);
+            DumpVsInput = GetInnerTextAsBool(nunitNode, nameof(DumpVsInput), false);
+            FreakMode = GetInnerTextAsBool(nunitNode, nameof(FreakMode), false);
+            InternalTraceLevel = GetInnerTextWithLog(nunitNode, nameof(InternalTraceLevel), "Off", "Error", "Warning",
+                "Info", "Verbose", "Debug");
+        }
+
+        private void UpdateTestProperties(XmlDocument doc)
+        {
+            TestProperties = new Dictionary<string, string>();
+            foreach (XmlNode node in doc.SelectNodes("RunSettings/TestRunParameters/Parameter"))
             {
-                foreach (XmlNode node in doc.SelectNodes("RunSettings/TestRunParameters/Parameter"))
-                {
-                    var key = node.GetAttribute("name");
-                    var value = node.GetAttribute("value");
-                    if (key != null && value != null)
-                        TestProperties.Add(key, value);
-                }
+                var key = node.GetAttribute("name");
+                var value = node.GetAttribute("value");
+                if (key != null && value != null)
+                    TestProperties.Add(key, value);
             }
+        }
+
+        private void ExtractRunConfiguration(XmlDocument doc)
+        {
+            var runConfiguration = doc.SelectSingleNode("RunSettings/RunConfiguration");
+            MaxCpuCount = GetInnerTextAsInt(runConfiguration, nameof(MaxCpuCount), -1);
+            ResultsDirectory = GetInnerTextWithLog(runConfiguration, nameof(ResultsDirectory));
+            TargetPlatform = GetInnerTextWithLog(runConfiguration, nameof(TargetPlatform));
+            TargetFrameworkVersion = GetInnerTextWithLog(runConfiguration, nameof(TargetFrameworkVersion));
+            TestAdapterPaths = GetInnerTextWithLog(runConfiguration, nameof(TestAdapterPaths));
+            CollectSourceInformation = GetInnerTextAsBool(runConfiguration, nameof(CollectSourceInformation), true);
+            DisableAppDomain = GetInnerTextAsBool(runConfiguration, nameof(DisableAppDomain), false);
+            DisableParallelization = GetInnerTextAsBool(runConfiguration, nameof(DisableParallelization), false);
+            DesignMode = GetInnerTextAsBool(runConfiguration, nameof(DesignMode), false);
+            CollectDataForEachTestSeparately =
+                GetInnerTextAsBool(runConfiguration, nameof(CollectDataForEachTestSeparately), false);
         }
 
         private void MapTestCategory(string vsTestCategoryType)

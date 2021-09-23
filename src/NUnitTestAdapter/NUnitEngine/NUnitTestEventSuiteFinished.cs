@@ -8,6 +8,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         bool HasReason { get; }
         string FailureMessage { get; }
         bool HasFailure { get; }
+        string StackTrace { get; }
     }
 
     /// <summary>
@@ -28,6 +29,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             if (failureNode != null)
             {
                 FailureMessage = failureNode.SelectSingleNode("message")?.InnerText;
+                StackTrace = failureNode.SelectSingleNode("stack-trace")?.InnerText;
             }
             ReasonMessage = Node.SelectSingleNode("reason/message")?.InnerText;
         }
@@ -35,7 +37,9 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public string ReasonMessage { get; }
 
         public bool HasReason => !string.IsNullOrEmpty(ReasonMessage);
-        public string FailureMessage { get; }
+        public string FailureMessage { get; } = "";
+
+        public string StackTrace { get; } = "";
 
         public bool HasFailure => !string.IsNullOrEmpty(FailureMessage);
     }

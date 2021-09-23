@@ -30,7 +30,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
 {
     public class MessageLoggerStub : IMessageLogger
     {
-        private readonly List<Tuple<TestMessageLevel, string>> messages = new List<Tuple<TestMessageLevel, string>>();
+        private readonly List<Tuple<TestMessageLevel, string>> messages = new ();
         public void SendMessage(TestMessageLevel testMessageLevel, string message)
         {
             messages.Add(new Tuple<TestMessageLevel, string>(testMessageLevel, message));

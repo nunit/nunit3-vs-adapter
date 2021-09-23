@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2020-2020 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2020-2021 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.Serialization;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
@@ -197,6 +198,12 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         {
             Name = name;
             Value = value;
+        }
+
+        public NUnitProperty(XElement node)
+        {
+            Name = node.Attribute("name").Value;
+            Value = node.Attribute("value").Value;
         }
     }
 

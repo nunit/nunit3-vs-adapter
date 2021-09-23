@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2014-2020 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2014-2021 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -55,9 +55,9 @@ namespace NUnit.VisualStudio.TestAdapter
         // If it's not empty, it shows up as “Explicit [value]” in Test Explorer.
         private const string ExplicitTraitValue = "";
 
-        private readonly NUnitProperty explicitTrait = new NUnitProperty(ExplicitTraitName, ExplicitTraitValue);
+        private readonly NUnitProperty explicitTrait = new (ExplicitTraitName, ExplicitTraitValue);
 
-        private readonly List<string> categorylist = new List<string>();
+        private readonly List<string> categorylist = new ();
         private readonly TestCase testCase;
         private readonly IAdapterSettings settings;
         private readonly bool showInternalProperties;
@@ -124,7 +124,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <summary>
         /// See https://github.com/nunit/nunit/blob/master/src/NUnitFramework/framework/Internal/PropertyNames.cs.
         /// </summary>
-        private readonly HashSet<string> _internalProperties = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        private readonly HashSet<string> _internalProperties = new (StringComparer.OrdinalIgnoreCase)
         { "Author", "ApartmentState", "Description", "IgnoreUntilDate", "LevelOfParallelism", "MaxTime", "Order", "ParallelScope", "Repeat", "RequiresThread", "SetCulture", "SetUICulture", "TestOf", "Timeout" };
 
 

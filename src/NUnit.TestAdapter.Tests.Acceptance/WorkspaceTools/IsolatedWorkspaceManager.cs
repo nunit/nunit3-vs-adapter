@@ -44,7 +44,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 
         public IsolatedWorkspace CreateWorkspace(string name)
         {
-            return new IsolatedWorkspace(
+            return new (
                 Utils.CreateMutexDirectory(workspaceDirectory.DirectoryPath, name),
                 toolResolver);
         }
