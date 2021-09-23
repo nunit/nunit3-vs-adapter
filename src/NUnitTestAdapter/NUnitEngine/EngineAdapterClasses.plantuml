@@ -27,6 +27,7 @@ title NUnitEngineAdapterClasses for discovery
    TestRun o-- Assembly
    SetUpFixture o-- TestSuite
    SetUpFixture o-- SetUpFixture
+   SetUpFixture o-- ParameterizedFixture
    
 abstract class SuiteBase {
    Property collection,

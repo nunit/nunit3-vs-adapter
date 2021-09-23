@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.Serialization;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
@@ -197,6 +198,12 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         {
             Name = name;
             Value = value;
+        }
+
+        public NUnitProperty(XElement node)
+        {
+            Name = node.Attribute("name").Value;
+            Value = node.Attribute("value").Value;
         }
     }
 
