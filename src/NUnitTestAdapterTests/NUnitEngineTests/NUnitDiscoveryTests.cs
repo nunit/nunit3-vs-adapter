@@ -1116,6 +1116,50 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
             Assert.That(ndr, Is.Not.Null);
         }
 
+        private const string SetupFixtureIssue884 =
+            @"<test-run id='0' name='NUnitTestAdapterIssueRepro.dll' fullname='d:\repos\NUnit\nunitissues_otherrepos\Issue884\NUnitTestAdapterIssueRepro\bin\Debug\netcoreapp3.1\NUnitTestAdapterIssueRepro.dll' runstate='Runnable' testcasecount='3'>
+   <test-suite type='Assembly' id='0-1010' name='NUnitTestAdapterIssueRepro.dll' fullname='d:/repos/NUnit/nunitissues_otherrepos/Issue884/NUnitTestAdapterIssueRepro/bin/Debug/netcoreapp3.1/NUnitTestAdapterIssueRepro.dll' runstate='Runnable' testcasecount='3'>
+      <environment framework-version='3.13.2.0' clr-version='3.1.19' os-version='Microsoft Windows 10.0.19042' platform='Win32NT' cwd='d:\repos\NUnit\nunitissues_otherrepos\Issue884\NUnitTestAdapterIssueRepro\bin\Debug\netcoreapp3.1' machine-name='DESKTOP-SIATMVB' user='TerjeSandstrom' user-domain='AzureAD' culture='en-US' uiculture='en-US' os-architecture='x64' />
+      <settings>
+         <setting name='SynchronousEvents' value='False' />
+         <setting name='InternalTraceLevel' value='Off' />
+         <setting name='RandomSeed' value='2091732297' />
+         <setting name='ProcessModel' value='InProcess' />
+         <setting name='DomainUsage' value='Single' />
+         <setting name='DefaultTestNamePattern' value='{m}{a}' />
+         <setting name='WorkDirectory' value='d:\repos\NUnit\nunitissues_otherrepos\Issue884\NUnitTestAdapterIssueRepro\bin\Debug\netcoreapp3.1' />
+         <setting name='NumberOfTestWorkers' value='28' />
+      </settings>
+      <properties>
+         <property name='_PID' value='36768' />
+         <property name='_APPDOMAIN' value='testhost' />
+      </properties>
+      <test-suite type='SetUpFixture' id='0-1011' name='NUnitTestAdapterIssueRepro' fullname='NUnitTestAdapterIssueRepro.SetupFixture' runstate='Runnable' testcasecount='3'>
+         <test-suite type='ParameterizedFixture' id='0-1012' name='Tests' fullname='NUnitTestAdapterIssueRepro.Tests' runstate='Runnable' testcasecount='3'>
+            <test-suite type='TestFixture' id='0-1013' name='Tests(1)' fullname='NUnitTestAdapterIssueRepro.Tests(1)' runstate='Runnable' testcasecount='1'>
+               <test-case id='0-1002' name='Test1' fullname='NUnitTestAdapterIssueRepro.Tests(1).Test1' methodname='Test1' classname='NUnitTestAdapterIssueRepro.Tests' runstate='Runnable' seed='1282313027' />
+            </test-suite>
+            <test-suite type='TestFixture' id='0-1014' name='Tests(2)' fullname='NUnitTestAdapterIssueRepro.Tests(2)' runstate='Runnable' testcasecount='1'>
+               <test-case id='0-1004' name='Test1' fullname='NUnitTestAdapterIssueRepro.Tests(2).Test1' methodname='Test1' classname='NUnitTestAdapterIssueRepro.Tests' runstate='Runnable' seed='1183073751' />
+            </test-suite>
+            <test-suite type='TestFixture' id='0-1015' name='Tests(3)' fullname='NUnitTestAdapterIssueRepro.Tests(3)' runstate='Runnable' testcasecount='1'>
+               <test-case id='0-1006' name='Test1' fullname='NUnitTestAdapterIssueRepro.Tests(3).Test1' methodname='Test1' classname='NUnitTestAdapterIssueRepro.Tests' runstate='Runnable' seed='1826793735' />
+            </test-suite>
+         </test-suite>
+      </test-suite>
+   </test-suite>
+</test-run>";
+
+        [Test]
+        public void ThatSetUpFixtureWorksIssue884()
+        {
+            var sut = new DiscoveryConverter(logger, settings);
+            var ndr = sut.ConvertXml(
+                new NUnitResults(XmlHelper.CreateXmlNode(SetupFixtureIssue884)));
+            Assert.That(ndr, Is.Not.Null);
+        }
+
+
         private const string ExtractFixturesHandlesProperties =
             @"<test-run id='0' name='Issue824.dll' fullname='d:\repos\NUnit\nunit3-vs-adapter.issues\Issue824\bin\Debug\net5.0\Issue824.dll' runstate='Runnable' testcasecount='2'>
    <test-suite type='Assembly' id='0-1012' name='Issue824.dll' fullname='d:/repos/NUnit/nunit3-vs-adapter.issues/Issue824/bin/Debug/net5.0/Issue824.dll' runstate='Runnable' testcasecount='2'>
