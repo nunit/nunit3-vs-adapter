@@ -14,9 +14,9 @@
 
   <ItemGroup>
     <PackageReference Include="NSubstitute" Version="4.2.2" />
-    <PackageReference Include="NUnit" Version="3.13.1" />
+    <PackageReference Include="NUnit" Version="3.13.2" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="2.6.1" />
-    <PackageReference Include="NUnit.Analyzers" Version="3.1.0" />
+    <PackageReference Include="NUnit.Analyzers" Version="3.2.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
@@ -24,8 +24,8 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
-    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="16.9.4" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
+    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="16.11.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -39,6 +39,13 @@
     <Content Include="..\native-assembly\NativeTests.dll" Link="NativeTests.dll" CopyToOutputDirectory="PreserveNewest" />
     <Compile Update="NavigationDataTests.cs" CopyToOutputDirectory="PreserveNewest" />
     <None Update="temp.snk" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <Target Name="PreventTestPlatformObjectModelCopyLocal" AfterTargets="ResolveReferences">
