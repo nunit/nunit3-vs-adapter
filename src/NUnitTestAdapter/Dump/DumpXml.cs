@@ -155,7 +155,7 @@ namespace NUnit.VisualStudio.TestAdapter.Dump
         public void StartDiscoveryInExecution(IGrouping<string, TestCase> testCases, TestFilter filter, TestPackage package)
         {
             DumpFromVSInput(testCases, filter, package);
-            AddString($"<NUnitDiscoveryInExecution>{assemblyPath}</NUnitExecution>\n\n");
+            AddString($"<NUnitDiscoveryInExecution>{assemblyPath}</NUnitDiscoveryInExecution>\n\n");
         }
 
         public void StartExecution(TestFilter filter, string atExecution)
