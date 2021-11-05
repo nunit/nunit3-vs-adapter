@@ -10,9 +10,6 @@ namespace NUnit.VisualStudio.TestAdapter.Internal
 #endif
     public static class StringExtensions
     {
-        public static bool IsNullOrWhiteSpace(this string value)
-        {
-            return value == null || value.Trim().Length == 0;
-        }
+        public static bool IsNullOrWhiteSpace(this string value) => string.IsNullOrEmpty(value) || value.Trim().Length == 0;
     }
 }
