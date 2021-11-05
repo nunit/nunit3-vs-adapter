@@ -122,8 +122,15 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             if (Runner.IsTestRunning)
                 Runner.StopRun(true);
 
-            Runner.Unload();
-            Runner.Dispose();
+            try
+            {
+                Runner.Unload();
+                Runner.Dispose();
+            }
+            catch (NUnitEngineUnloadException ex)
+            {
+                logger.Warning($"Engine encountered NUnitEngineUnloadException :  {ex.Message}");
+            }
             Runner = null;
         }
 
@@ -159,7 +166,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             int i = 1;
             while (true)
             {
-                string path = Path.Combine(folder,  $"{defaultFileName}.{i++}.{extension}");
+                string path = Path.Combine(folder, $"{defaultFileName}.{i++}.{extension}");
                 if (!File.Exists(path))
                     return path;
             }

@@ -30,6 +30,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Engine;
+using NUnit.VisualStudio.TestAdapter;
 using NUnit.VisualStudio.TestAdapter.Dump;
 using NUnit.VisualStudio.TestAdapter.Internal;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
@@ -159,14 +160,14 @@ namespace NUnit.VisualStudio.TestAdapter
             var result = testConverter.GetVsTestResults(resultNode, outputNodes ?? EmptyNodes);
             if (settings.ConsoleOut == 1)
             {
-                if (!string.IsNullOrEmpty(result.ConsoleOutput) && result.ConsoleOutput != NL)
+                if (!result.ConsoleOutput.IsNullOrWhiteSpace() && result.ConsoleOutput != NL)
                 {
                     string msg = result.ConsoleOutput;
                     if (settings.UseTestNameInConsoleOutput)
                         msg = $"{resultNode.Name}: {msg}";
                     recorder.SendMessage(TestMessageLevel.Informational, msg);
                 }
-                if (!string.IsNullOrEmpty(resultNode.ReasonMessage))
+                if (!resultNode.ReasonMessage.IsNullOrWhiteSpace())
                 {
                     recorder.SendMessage(TestMessageLevel.Informational, $"{resultNode.Name}: {resultNode.ReasonMessage}");
                 }

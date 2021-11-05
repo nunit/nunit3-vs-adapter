@@ -106,6 +106,29 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(testLog.Events[0].TestOutcome, Is.EqualTo(TestOutcome.Passed));
         }
 
+        /// <summary>
+        /// Issue516
+        /// </summary>
+        [TestCase(null)]
+        [TestCase("")]
+        [TestCase(" ")]
+        [TestCase("\t")]
+        [TestCase("\r")]
+        [TestCase("\n")]
+        [TestCase("\r\n")]
+        public void TestFinished_DoNotSendWhiteSpaceToMessages(string data)
+        {
+            var testcase = Substitute.For<INUnitTestEventTestCase>();
+            testcase.Name.Returns($"Test1({data})");
+            testcase.FullName.Returns($"Issue516.Tests.Test1({data})");
+            testcase.Output.Returns($"{data}");
+            settings.ConsoleOut.Returns(1);
+            listener.TestFinished(testcase);
+            Assert.That(testLog.Events.Count, Is.EqualTo(0));
+        }
+
+
+
         [Test]
         public void TestFinished_CallsRecordResultCorrectly()
         {
