@@ -125,9 +125,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             settings.ConsoleOut.Returns(1);
             listener.TestFinished(testcase);
             Assert.That(testLog.Events.Count, Is.EqualTo(0));
-
-
-
         }
 
 
