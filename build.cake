@@ -306,7 +306,7 @@ Task("Test")
 
 Task("Package")
     .IsDependentOn("PackageZip")
-    .IsDependentOn("PackageNuGet")
+    .IsDependentOn("PackageNuGet");
 
 Task("QuickRelease")
     .IsDependentOn("Build")
