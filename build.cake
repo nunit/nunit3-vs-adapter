@@ -290,15 +290,6 @@ Task("PackageNuGet")
         });
     });
 
-Task("PackageVsix")
-    .IsDependentOn("CreatePackageDir")
-    .Does(() =>
-    {
-        CopyFile(
-            BIN_DIR + "NUnit3TestAdapter.vsix",
-            PACKAGE_DIR + packageName + ".vsix");
-    });
-
 //////////////////////////////////////////////////////////////////////
 // TASK TARGETS
 //////////////////////////////////////////////////////////////////////
@@ -315,8 +306,7 @@ Task("Test")
 
 Task("Package")
     .IsDependentOn("PackageZip")
-    .IsDependentOn("PackageNuGet")
-    .IsDependentOn("PackageVsix");
+    .IsDependentOn("PackageNuGet");
 
 Task("QuickRelease")
     .IsDependentOn("Build")

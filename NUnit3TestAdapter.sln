@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28606.126
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7CE30108-5D81-4850-BE6B-C8BCA35D3592}"
 	ProjectSection(SolutionItems) = preProject
@@ -36,11 +36,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NUnit.TestAdapter", "src\NUnitTestAdapter\NUnit.TestAdapter.csproj", "{1E9364E9-9D4F-4FA9-8A0C-09A66252449F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NUnit.TestAdapter.Tests", "src\NUnitTestAdapterTests\NUnit.TestAdapter.Tests.csproj", "{D4061204-B7A4-4E1F-A8FD-2035758B3AD8}"
-	ProjectSection(ProjectDependencies) = postProject
-		{D6990436-E3BA-4AC1-8A7D-9FFF9C3B19AD} = {D6990436-E3BA-4AC1-8A7D-9FFF9C3B19AD}
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NUnit3TestAdapterInstall", "src\NUnit3TestAdapterInstall\NUnit3TestAdapterInstall.csproj", "{D6990436-E3BA-4AC1-8A7D-9FFF9C3B19AD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NUnit3AdapterExternalTests", "src\NUnit3AdapterExternalTests\NUnit3AdapterExternalTests.csproj", "{A4EA819A-D77D-46D3-B2B7-2C754DBD2BC7}"
 EndProject
@@ -78,10 +73,6 @@ Global
 		{D4061204-B7A4-4E1F-A8FD-2035758B3AD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4061204-B7A4-4E1F-A8FD-2035758B3AD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D4061204-B7A4-4E1F-A8FD-2035758B3AD8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D6990436-E3BA-4AC1-8A7D-9FFF9C3B19AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D6990436-E3BA-4AC1-8A7D-9FFF9C3B19AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D6990436-E3BA-4AC1-8A7D-9FFF9C3B19AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D6990436-E3BA-4AC1-8A7D-9FFF9C3B19AD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A4EA819A-D77D-46D3-B2B7-2C754DBD2BC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A4EA819A-D77D-46D3-B2B7-2C754DBD2BC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A4EA819A-D77D-46D3-B2B7-2C754DBD2BC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
