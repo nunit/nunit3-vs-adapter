@@ -282,8 +282,16 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                             ExtractTestFixtures(ptf, child);
                         }
                         break;
+                    case GenericFixture:
+                        var gf = ExtractGenericTestFixture(parent, node);
+                        parent.AddTestGenericFixture(gf);
+                        if (child.HasElements)
+                        {
+                            ExtractTestFixtures(gf, child);
+                        }
+                        break;
                     default:
-                        throw new DiscoveryException($"Not a TestFixture, SetUpFixture, ParameterizedFixture or TestSuite, but {type}");
+                        throw new DiscoveryException($"Not a TestFixture, SetUpFixture, ParameterizedFixture, GenericFixture or TestSuite, but {type}");
                 }
             }
         }

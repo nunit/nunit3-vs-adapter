@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2017 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2017 Charlie Poole, 2014-2021 Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -23,7 +23,6 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Xml.Linq;
 using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
