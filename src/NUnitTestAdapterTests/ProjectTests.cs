@@ -49,7 +49,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(adapter, Does.EndWith(".TestAdapter.dll"), $"Ensure the Testadapter {Path.GetFileName(adapter)} ends with '.TestAdapter.dll'");
         }
 
-
         [Test]
         public void ThatNoMSTestDLLIsCopiedToOutput()
         {
