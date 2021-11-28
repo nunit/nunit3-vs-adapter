@@ -120,7 +120,6 @@ namespace NUnit.VisualStudio.TestAdapter
         void RestoreRandomSeed(string dirname);
 
         bool EnsureAttachmentFileScheme { get; }
-
     }
 
     public enum VsTestCategoryType
