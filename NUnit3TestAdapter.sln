@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28606.126
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7CE30108-5D81-4850-BE6B-C8BCA35D3592}"
 	ProjectSection(SolutionItems) = preProject
@@ -17,7 +17,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		LICENSE.txt = LICENSE.txt
 		src\native-assembly\NativeTests.dll = src\native-assembly\NativeTests.dll
 		NuGet.Config = NuGet.Config
-		.github\workflows\NUnit3TestAdapter.Cake.CI.yml = .github\workflows\NUnit3TestAdapter.Cake.CI.yml
 		NUnit3TestAdapter.sln.DotSettings = NUnit3TestAdapter.sln.DotSettings
 		images\nunit_256.png = images\nunit_256.png
 		Osiris.Extended.ruleset = Osiris.Extended.ruleset
@@ -36,11 +35,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NUnit.TestAdapter", "src\NUnitTestAdapter\NUnit.TestAdapter.csproj", "{1E9364E9-9D4F-4FA9-8A0C-09A66252449F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NUnit.TestAdapter.Tests", "src\NUnitTestAdapterTests\NUnit.TestAdapter.Tests.csproj", "{D4061204-B7A4-4E1F-A8FD-2035758B3AD8}"
-	ProjectSection(ProjectDependencies) = postProject
-		{D6990436-E3BA-4AC1-8A7D-9FFF9C3B19AD} = {D6990436-E3BA-4AC1-8A7D-9FFF9C3B19AD}
-	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NUnit3TestAdapterInstall", "src\NUnit3TestAdapterInstall\NUnit3TestAdapterInstall.csproj", "{D6990436-E3BA-4AC1-8A7D-9FFF9C3B19AD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NUnit3AdapterExternalTests", "src\NUnit3AdapterExternalTests\NUnit3AdapterExternalTests.csproj", "{A4EA819A-D77D-46D3-B2B7-2C754DBD2BC7}"
 EndProject
@@ -55,6 +49,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "netcoreapp2.1", "netcoreapp
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NUnit.TestAdapter.Tests.Acceptance", "src\NUnit.TestAdapter.Tests.Acceptance\NUnit.TestAdapter.Tests.Acceptance.csproj", "{3FAC7EE0-664F-4B11-918B-8E0FF865EE4C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github", "github", "{062B1763-73C8-4B5A-92DF-C66A36C43CE1}"
+	ProjectSection(SolutionItems) = preProject
+		.github\dependabot.yml = .github\dependabot.yml
+		.github\ISSUE_TEMPLATE.md = .github\ISSUE_TEMPLATE.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{7D708804-B2F1-4A31-A9FB-85A0C7433200}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\NUnit3TestAdapter.Cake.CI.yml = .github\workflows\NUnit3TestAdapter.Cake.CI.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -78,10 +83,6 @@ Global
 		{D4061204-B7A4-4E1F-A8FD-2035758B3AD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4061204-B7A4-4E1F-A8FD-2035758B3AD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D4061204-B7A4-4E1F-A8FD-2035758B3AD8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D6990436-E3BA-4AC1-8A7D-9FFF9C3B19AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D6990436-E3BA-4AC1-8A7D-9FFF9C3B19AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D6990436-E3BA-4AC1-8A7D-9FFF9C3B19AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D6990436-E3BA-4AC1-8A7D-9FFF9C3B19AD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A4EA819A-D77D-46D3-B2B7-2C754DBD2BC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A4EA819A-D77D-46D3-B2B7-2C754DBD2BC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A4EA819A-D77D-46D3-B2B7-2C754DBD2BC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -97,6 +98,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{D41249E3-C080-4B66-8CBD-99CE4D309A10} = {DE347D88-F6ED-4031-AFC2-318F63E39BC9}
 		{A9584E41-6ECE-44B4-A504-41795A65DA5F} = {DE347D88-F6ED-4031-AFC2-318F63E39BC9}
+		{062B1763-73C8-4B5A-92DF-C66A36C43CE1} = {7CE30108-5D81-4850-BE6B-C8BCA35D3592}
+		{7D708804-B2F1-4A31-A9FB-85A0C7433200} = {062B1763-73C8-4B5A-92DF-C66A36C43CE1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8EF03474-188E-44A8-8C76-9FBCF9A382EC}

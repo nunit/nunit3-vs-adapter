@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2017 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2017 Charlie Poole, 2014-2021 Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -23,7 +23,6 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Xml.Linq;
 using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
@@ -49,35 +48,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var adapter = typeof(NUnitTestAdapter).GetTypeInfo().Assembly.Location;
             Assert.That(adapter, Does.EndWith(".TestAdapter.dll"), $"Ensure the Testadapter {Path.GetFileName(adapter)} ends with '.TestAdapter.dll'");
         }
-
-
-        [Test]
-        public void ThatAdapterInstallProjectHasVsixManifestWithUnitTestExtensionAsset()
-        {
-            var location = TestContext.CurrentContext.TestDirectory;
-            var di = new DirectoryInfo(location).MoveUp(4);
-            Assert.That(di, Is.Not.Null, "Invalid parent");
-            var installDir = di.EnumerateDirectories("NUnit3TestAdapterInstall").SingleOrDefault();
-            Assert.That(installDir, Is.Not.Null, $"Didn't find NUnit3TestAdapterInstall folder at {di.Name}");
-            var vsixManifestFile = installDir.EnumerateFiles("*.vsixmanifest").SingleOrDefault();
-            Assert.That(vsixManifestFile, Is.Not.Null, $"Didn't find any vsixmanifestfile at folder {installDir.Name}");
-            var vsixManifestTxt = File.ReadAllText(vsixManifestFile.FullName);
-            Assert.That(vsixManifestTxt.Length, Is.GreaterThan(0), "No content in vsixmanifestfile");
-
-            var vsixManifest = XDocument.Parse(vsixManifestTxt);
-            var desc = vsixManifest.Descendants();
-            var assets = desc.FirstOrDefault(o => o.Name.LocalName == "Assets");
-            Assert.That(assets, Is.Not.Null, "Missing Assets");
-            var assetItems = vsixManifest.Descendants().Where(o => o.Name.LocalName == "Asset").ToList();
-            Assert.That(assetItems.Count, Is.GreaterThanOrEqualTo(1), "Missing asset items");
-            var unitTestAsset = assetItems.FirstOrDefault(o => o.Attribute("Type") != null && o.Attribute("Type").Value != null &&
-                                                      o.Attribute("Type").Value == "UnitTestExtension");
-            Assert.That(unitTestAsset, Is.Not.Null, "No asset with type UnitTestExtension found");
-            var path = unitTestAsset.Attribute("Path");
-            Assert.That(path, Is.Not.Null, "UnitTestAsset must have path");
-            Assert.That(path.Value.EndsWith("NUnit3.TestAdapter.dll"), "UnitTestAsset path must contain the NUNit3TestAdapter.dll");
-        }
-
 
         [Test]
         public void ThatNoMSTestDLLIsCopiedToOutput()

@@ -1120,16 +1120,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
             @"<test-run id='0' name='NUnitTestAdapterIssueRepro.dll' fullname='d:\repos\NUnit\nunitissues_otherrepos\Issue884\NUnitTestAdapterIssueRepro\bin\Debug\netcoreapp3.1\NUnitTestAdapterIssueRepro.dll' runstate='Runnable' testcasecount='3'>
    <test-suite type='Assembly' id='0-1010' name='NUnitTestAdapterIssueRepro.dll' fullname='d:/repos/NUnit/nunitissues_otherrepos/Issue884/NUnitTestAdapterIssueRepro/bin/Debug/netcoreapp3.1/NUnitTestAdapterIssueRepro.dll' runstate='Runnable' testcasecount='3'>
       <environment framework-version='3.13.2.0' clr-version='3.1.19' os-version='Microsoft Windows 10.0.19042' platform='Win32NT' cwd='d:\repos\NUnit\nunitissues_otherrepos\Issue884\NUnitTestAdapterIssueRepro\bin\Debug\netcoreapp3.1' machine-name='DESKTOP-SIATMVB' user='TerjeSandstrom' user-domain='AzureAD' culture='en-US' uiculture='en-US' os-architecture='x64' />
-      <settings>
-         <setting name='SynchronousEvents' value='False' />
-         <setting name='InternalTraceLevel' value='Off' />
-         <setting name='RandomSeed' value='2091732297' />
-         <setting name='ProcessModel' value='InProcess' />
-         <setting name='DomainUsage' value='Single' />
-         <setting name='DefaultTestNamePattern' value='{m}{a}' />
-         <setting name='WorkDirectory' value='d:\repos\NUnit\nunitissues_otherrepos\Issue884\NUnitTestAdapterIssueRepro\bin\Debug\netcoreapp3.1' />
-         <setting name='NumberOfTestWorkers' value='28' />
-      </settings>
       <properties>
          <property name='_PID' value='36768' />
          <property name='_APPDOMAIN' value='testhost' />
@@ -1156,6 +1146,34 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
             var sut = new DiscoveryConverter(logger, settings);
             var ndr = sut.ConvertXml(
                 new NUnitResults(XmlHelper.CreateXmlNode(SetupFixtureIssue884)));
+            Assert.That(ndr, Is.Not.Null);
+        }
+
+        private const string GenericIssue918 = @"<test-run id='0' name='Issue918.dll' fullname='d:\repos\NUnit\nunit3-vs-adapter.issues\Issue918\bin\Debug\net6.0\Issue918.dll' runstate='Runnable' testcasecount='1'>
+   <test-suite type='Assembly' id='0-1004' name='Issue918.dll' fullname='d:/repos/NUnit/nunit3-vs-adapter.issues/Issue918/bin/Debug/net6.0/Issue918.dll' runstate='Runnable' testcasecount='1'>
+      <environment framework-version='3.13.2.0' clr-version='6.0.0' os-version='Microsoft Windows 10.0.19042' platform='Win32NT' cwd='d:\repos\NUnit\nunit3-vs-adapter.issues\Issue918\bin\Debug\net6.0' machine-name='DESKTOP-SIATMVB' user='TerjeSandstrom' user-domain='AzureAD' culture='en-US' uiculture='en-US' os-architecture='x64' />
+      <properties>
+         <property name='_PID' value='90212' />
+         <property name='_APPDOMAIN' value='testhost' />
+      </properties>
+      <test-suite type='TestSuite' id='0-1005' name='Issue918' fullname='Issue918' runstate='Runnable' testcasecount='1'>
+         <test-suite type='GenericFixture' id='0-1003' name='Tests+SomeTest&lt;T&gt;' fullname='Issue918.Tests+SomeTest&lt;T&gt;' runstate='Runnable' testcasecount='1'>
+            <test-suite type='GenericFixture' id='0-1000' name='Tests+SomeTest&lt;T&gt;' fullname='Issue918.Tests+SomeTest&lt;T&gt;' runstate='Runnable' testcasecount='1'>
+               <test-suite type='TestFixture' id='0-1001' name='Tests+SomeTest&lt;Object&gt;' fullname='Issue918.Tests+SomeTest&lt;Object&gt;' classname='Issue918.Tests+SomeTest`1' runstate='Runnable' testcasecount='1'>
+                  <test-case id='0-1002' name='Foo' fullname='Issue918.Tests+SomeTest&lt;Object&gt;.Foo' methodname='Foo' classname='Issue918.Tests+SomeTest`1' runstate='Runnable' seed='506899496' />
+               </test-suite>
+            </test-suite>
+         </test-suite>
+      </test-suite>
+   </test-suite>
+</test-run>";
+
+        [Test]
+        public void ThatGenericFixturesWorksIssue918()
+        {
+            var sut = new DiscoveryConverter(logger, settings);
+            var ndr = sut.ConvertXml(
+                new NUnitResults(XmlHelper.CreateXmlNode(GenericIssue918)));
             Assert.That(ndr, Is.Not.Null);
         }
 
