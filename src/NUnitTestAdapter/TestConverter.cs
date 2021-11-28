@@ -345,26 +345,40 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <returns>attachments to be added to the test, it will be empty if no attachments are found.</returns>
         private AttachmentSet ParseAttachments(INUnitTestEvent resultNode)
         {
+            const string fileUriScheme = "file://";
             var attachmentSet = new AttachmentSet(new Uri(NUnitTestAdapter.ExecutorUri), "Attachments");
 
             foreach (var attachment in resultNode.NUnitAttachments)
             {
                 var description = attachment.Description;
-
+                var path = attachment.FilePath;
+                if (adapterSettings.EnsureAttachmentFileScheme)
+                {
+                    if (!(string.IsNullOrEmpty(path) ||
+                          path.StartsWith(fileUriScheme, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        path = fileUriScheme + path;
+                    }
+                }
+                // For Linux paths
+                if (!(string.IsNullOrEmpty(path) || path.StartsWith(fileUriScheme, StringComparison.OrdinalIgnoreCase)) && !path.Contains(':'))
+                {
+                    path = fileUriScheme + path;
+                }
                 try
                 {
                     // We only support absolute paths since we dont lookup working directory here
                     // any problem with path will throw an exception
-                    var fileUri = new Uri(attachment.FilePath, UriKind.Absolute);
+                    var fileUri = new Uri(path, UriKind.Absolute);
                     attachmentSet.Attachments.Add(new UriDataAttachment(fileUri, description));
                 }
                 catch (UriFormatException ex)
                 {
-                    _logger.Warning($"Ignoring attachment with path '{attachment.FilePath}' due to problem with path: {ex.Message}");
+                    _logger.Warning($"Ignoring attachment with path '{path}' due to problem with path: {ex.Message}");
                 }
                 catch (Exception ex)
                 {
-                    _logger.Warning($"Ignoring attachment with path '{attachment.FilePath}': {ex.Message}.");
+                    _logger.Warning($"Ignoring attachment with path '{path}': {ex.Message}.");
                 }
             }
 
