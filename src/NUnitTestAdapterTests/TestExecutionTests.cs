@@ -82,11 +82,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase("method =~ MockTest?", 5)]
         [TestCase("method =~ MockTest? and cat != MockCategory", 3)]
         [TestCase("namespace == ThisNamespaceDoesNotExist", 0)]
-        [TestCase("test==NUnit.Tests.Assemblies.MockTestFixture", MockTestFixture.Tests, TestName = "{m}_MockTestFixture")]
+        [TestCase("test==NUnit.Tests.Assemblies.MockTestFixture", MockTestFixture.Tests - MockTestFixture.Explicit, TestName = "{m}_MockTestFixture")]
         [TestCase("test==NUnit.Tests.IgnoredFixture and method == Test2", 1, TestName = "{m}_IgnoredFixture")]
-        [TestCase("class==NUnit.Tests.Assemblies.MockTestFixture", MockTestFixture.Tests)]
-        [TestCase("name==MockTestFixture", MockTestFixture.Tests + NUnit.Tests.TestAssembly.MockTestFixture.Tests)]
-        [TestCase("cat==FixtureCategory", MockTestFixture.Tests)]
+        [TestCase("class==NUnit.Tests.Assemblies.MockTestFixture", MockTestFixture.Tests - MockTestFixture.Explicit)]
+        [TestCase("name==MockTestFixture", MockTestFixture.Tests + NUnit.Tests.TestAssembly.MockTestFixture.Tests - MockTestFixture.Explicit)]
+        [TestCase("cat==FixtureCategory", MockTestFixture.Tests - MockTestFixture.Explicit)]
         public void TestsWhereShouldFilter(string filter, int expectedCount)
         {
             // Create a fake environment.
@@ -158,7 +158,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 Console.WriteLine(ev.TestCase.DisplayName);
             Assert.That(
                 testLog.Events.FindAll(e => e.EventType == eventType).Count,
-                Is.EqualTo(MockAssembly.ResultCount - BadFixture.Tests - IgnoredFixture.Tests - ExplicitFixture.Tests));
+                Is.EqualTo(MockAssembly.ResultCount - BadFixture.Tests - IgnoredFixture.Tests - ExplicitFixture.Tests - MockTestFixture.Explicit));
         }
 
         [Test]
