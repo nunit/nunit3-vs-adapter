@@ -18,12 +18,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
     public static class ExecutionFactory
     {
-        public static Execution Create(IExecutionContext ctx)
-        {
-            if (ctx.Settings.DesignMode) // We come from IDE
-                return new IdeExecution(ctx);
-            return new VsTestExecution(ctx);
-        }
+        public static Execution Create(IExecutionContext ctx) => ctx.Settings.DesignMode ? new IdeExecution(ctx) : new VsTestExecution(ctx);
     }
 
     public abstract class Execution

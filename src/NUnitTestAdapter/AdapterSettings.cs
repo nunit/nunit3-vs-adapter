@@ -102,7 +102,6 @@ namespace NUnit.VisualStudio.TestAdapter
         bool StopOnError { get; }
         TestOutcome MapWarningTo { get; }
         bool UseTestNameInConsoleOutput { get; }
-        bool FreakMode { get; }
         DisplayNameOptions DisplayName { get; }
         char FullnameSeparator { get; }
         DiscoveryMethod DiscoveryMethod { get; }
@@ -120,6 +119,12 @@ namespace NUnit.VisualStudio.TestAdapter
         void RestoreRandomSeed(string dirname);
 
         bool EnsureAttachmentFileScheme { get; }
+
+        // For Internal Development use
+        bool FreakMode { get; }  // displays metadata instead of real data in Test Explorer
+        bool Debug { get; }
+        bool DebugExecution { get; }
+        bool DebugDiscovery { get; }
     }
 
     public enum VsTestCategoryType
@@ -269,8 +274,12 @@ namespace NUnit.VisualStudio.TestAdapter
         public bool DumpVsInput { get; private set; }
 
         public bool FreakMode { get; private set; }
+        public bool Debug { get; private set; }
+        public bool DebugExecution { get; private set; }
+        public bool DebugDiscovery { get; private set; }
 
         #endregion
+
 
 
 
@@ -393,6 +402,9 @@ namespace NUnit.VisualStudio.TestAdapter
             FreakMode = GetInnerTextAsBool(nunitNode, nameof(FreakMode), false);
             InternalTraceLevel = GetInnerTextWithLog(nunitNode, nameof(InternalTraceLevel), "Off", "Error", "Warning",
                 "Info", "Verbose", "Debug");
+            Debug = GetInnerTextAsBool(nunitNode, nameof(Debug), false);
+            DebugExecution = Debug || GetInnerTextAsBool(nunitNode, nameof(DebugExecution), false);
+            DebugDiscovery = Debug || GetInnerTextAsBool(nunitNode, nameof(DebugDiscovery), false);
         }
 
         private void UpdateTestProperties(XmlDocument doc)
