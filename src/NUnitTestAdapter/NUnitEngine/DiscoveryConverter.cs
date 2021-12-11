@@ -170,7 +170,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             return loadedTestCases;
 
             IEnumerable<NUnitDiscoveryTestCase> RunnableTestCases(bool isExplicit) =>
-                isExplicit /*|| !Settings.DesignMode*/
+                isExplicit
                     ? TestRun.TestAssembly.AllTestCases
                     : TestRun.TestAssembly.RunnableTestCases;
         }
