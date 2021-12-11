@@ -66,7 +66,7 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         /// <summary>
-        /// Used when running from command line, mode Non-Ide,  e.g. 'dotnet test --filter xxxxx'.  Reads the TfsTestCaseFilterExpression 
+        /// Used when running from command line, mode Non-Ide,  e.g. 'dotnet test --filter xxxxx'.  Reads the TfsTestCaseFilterExpression.
         /// </summary>
         public TestFilter ConvertVsTestFilterToNUnitFilter(IVsTestFilter vsFilter)
         {
@@ -91,7 +91,7 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         /// <summary>
-        /// Used when a Where statement is added as a runsettings parameter, either in a runsettings file or on the command line from dotnet using the '-- NUnit.Where .....' statement
+        /// Used when a Where statement is added as a runsettings parameter, either in a runsettings file or on the command line from dotnet using the '-- NUnit.Where .....' statement.
         /// </summary>
         public TestFilter FilterByWhere(string where)
         {

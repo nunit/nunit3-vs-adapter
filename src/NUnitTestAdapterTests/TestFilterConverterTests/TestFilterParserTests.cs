@@ -173,7 +173,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.TestFilterConverterTests
         {
             Assert.That(_parser.Parse(input), Is.EqualTo($"<filter>{output}</filter>"));
 
-            XmlDocument doc = new XmlDocument();
+            XmlDocument doc = new ();
             Assert.DoesNotThrow(() => doc.LoadXml(output));
         }
 
