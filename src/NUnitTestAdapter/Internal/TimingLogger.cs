@@ -27,7 +27,7 @@ namespace NUnit.VisualStudio.TestAdapter.Internal
 
         public TimingLogger LogTime(string leadText = "")
         {
-            if (settings.Verbosity < 5)
+            if (settings.Verbosity < 5 || Stopwatch == null)
                 return this;
             var ts = Stopwatch.Elapsed;
             string elapsedTime = $"{ts.Hours:00}:{ts.Minutes:00}:{ts.Seconds:00}.{ts.Milliseconds / 10:00}";

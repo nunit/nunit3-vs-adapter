@@ -74,19 +74,10 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
             bool t1Null = ReferenceEquals(t1, null);
             bool t2Null = ReferenceEquals(t2, null);
 
-            if (t1Null && t2Null)
-                return true;
-
-            if (t1Null || t2Null)
-                return false;
-
-            return t1.Kind == t2.Kind && t1.Text == t2.Text;
+            return (t1Null && t2Null) || (!t1Null && !t2Null && (t1.Kind == t2.Kind && t1.Text == t2.Text));
         }
 
-        public static bool operator !=(Token t1, Token t2)
-        {
-            return !(t1 == t2);
-        }
+        public static bool operator !=(Token t1, Token t2) => !(t1 == t2);
 
         #endregion
     }

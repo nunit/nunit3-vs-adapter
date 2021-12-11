@@ -21,14 +21,11 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-// #define LAUNCHDEBUGGER
 
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-#if LAUNCHDEBUGGER
 using System.Diagnostics;
-#endif
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -57,11 +54,8 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger messageLogger, ITestCaseDiscoverySink discoverySink)
         {
-#if LAUNCHDEBUGGER
-            if (!Debugger.IsAttached)
-                Debugger.Launch();
-#endif
             Initialize(discoveryContext, messageLogger);
+            CheckIfDebug();
             TestLog.Info($"NUnit Adapter {AdapterVersion}: Test discovery starting");
 
             // Ensure any channels registered by other adapters are unregistered
@@ -182,10 +176,6 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 try
                 {
-#if LAUNCHDEBUGGER
-                    if (!Debugger.IsAttached)
-                        Debugger.Launch();
-#endif
                     var testCase = testConverterForXml.ConvertTestCase(new NUnitEventTestCase(testNode));
                     discoverySink.SendTestCase(testCase);
                     cases += 1;
@@ -199,6 +189,13 @@ namespace NUnit.VisualStudio.TestAdapter
             return cases;
         }
 
+        private void CheckIfDebug()
+        {
+            if (!Settings.DebugDiscovery)
+                return;
+            if (!Debugger.IsAttached)
+                Debugger.Launch();
+        }
         #endregion
     }
 }

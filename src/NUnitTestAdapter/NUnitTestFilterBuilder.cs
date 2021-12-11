@@ -60,9 +60,7 @@ namespace NUnit.VisualStudio.TestAdapter
             if (!settings.UseNUnitFilter)
                 return ConvertTfsFilterToNUnitFilter(vsFilter, discovery);
             var result = ConvertVsTestFilterToNUnitFilter(vsFilter);
-            if (result == null)
-                return ConvertTfsFilterToNUnitFilter(vsFilter, discovery);
-            return result;
+            return result ?? ConvertTfsFilterToNUnitFilter(vsFilter, discovery);
         }
 
         /// <summary>

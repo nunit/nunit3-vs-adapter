@@ -138,10 +138,10 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             // Property names starting with '_' are for internal use only, but over time this has changed, so we now use a list
-            if (!showInternalProperties &&
-                _internalProperties.Contains(property.Name))
-                return true;
-            return string.IsNullOrEmpty(property.Name) || property.Name[0] == '_' || string.IsNullOrEmpty(property.Value);
+            return (!showInternalProperties &&
+                _internalProperties.Contains(property.Name)) || (string.IsNullOrEmpty(property.Name) ||
+                                                                property.Name[0] == '_' ||
+                                                                string.IsNullOrEmpty(property.Value));
         }
 
         private void AddTraitsToCache(IDictionary<string, TraitsFeature.CachedTestCaseInfo> traitsCache, string key, NUnitProperty property)

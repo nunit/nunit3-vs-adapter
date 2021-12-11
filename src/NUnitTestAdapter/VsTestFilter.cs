@@ -174,9 +174,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 return testProperty;
             }
             var testTrait = TraitProvider(propertyName);
-            if (testTrait == null)
-                return null;
-            return TraitPropertyMap.TryGetValue(testTrait, out var tp) ? tp : null;
+            return testTrait == null ? null : TraitPropertyMap.TryGetValue(testTrait, out var tp) ? tp : null;
         }
 
         public static NTrait TraitProvider(string traitName)
@@ -188,14 +186,12 @@ namespace NUnit.VisualStudio.TestAdapter
 
     public static class VsTestFilterFactory
     {
-        public static VsTestFilter CreateVsTestFilter(IAdapterSettings settings, IRunContext context)
-        {
-            if (settings.DiscoveryMethod == DiscoveryMethod.Legacy)
-                return new VsTestFilterLegacy(context);
-            if (settings.DesignMode)
-                return new VsTestFilterIde(context);
-            return new VsTestFilterNonIde(context);
-        }
+        public static VsTestFilter CreateVsTestFilter(IAdapterSettings settings, IRunContext context) =>
+            settings.DiscoveryMethod == DiscoveryMethod.Legacy
+                ? new VsTestFilterLegacy(context) :
+                settings.DesignMode
+                    ? new VsTestFilterIde(context)
+                    : new VsTestFilterNonIde(context);
     }
 
     public class VsTestFilterLegacy : VsTestFilter

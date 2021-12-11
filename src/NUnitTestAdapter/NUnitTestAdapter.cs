@@ -21,8 +21,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-// #define VERBOSE
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -109,9 +107,9 @@ namespace NUnit.VisualStudio.TestAdapter
                 }
 
                 return exeName != null && (
-                       exeName.Contains("vstest.executionengine") ||
-                       exeName.Contains("vstest.discoveryengine") ||
-                       exeName.Contains("TE.ProcessHost"));
+                    exeName.Contains("vstest.executionengine") ||
+                    exeName.Contains("vstest.discoveryengine") ||
+                    exeName.Contains("TE.ProcessHost"));
             }
         }
 
@@ -146,13 +144,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             finally
             {
-#if NET35
-                string fw = "Net Framework";
-#else
-                string fw = "Net Core";
-#endif
-                var assLoc = Assembly.GetExecutingAssembly().Location;
-                TestLog.Debug($"{fw} adapter running from {assLoc}");
+                TestLog.DebugRunfrom();
             }
         }
 
@@ -213,8 +205,10 @@ namespace NUnit.VisualStudio.TestAdapter
                 foreach (var testCase in testCases)
                 {
                     int end = testCase.FullyQualifiedName.IndexOfAny(new[] { '(', '<' });
-                    prefilters.Add(end > 0 ? testCase.FullyQualifiedName.Substring(0, end) : testCase.FullyQualifiedName);
+                    prefilters.Add(
+                        end > 0 ? testCase.FullyQualifiedName.Substring(0, end) : testCase.FullyQualifiedName);
                 }
+
                 package.Settings[PackageSettings.LOAD] = prefilters;
             }
 
@@ -256,6 +250,7 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 package.Settings[PackageSettings.DomainUsage] = "Single";
             }
+
             if (Settings.DefaultTestNamePattern != null)
             {
                 package.Settings[PackageSettings.DefaultTestNamePattern] = Settings.DefaultTestNamePattern;
@@ -283,7 +278,9 @@ namespace NUnit.VisualStudio.TestAdapter
         /// <summary>
         /// Sets test parameters, handling backwards compatibility.
         /// </summary>
-        private static void SetTestParameters(IDictionary<string, object> runSettings, IDictionary<string, string> testParameters)
+        private static void SetTestParameters(
+            IDictionary<string, object> runSettings,
+            IDictionary<string, string> testParameters)
         {
             runSettings[PackageSettings.TestParametersDictionary] = testParameters;
 
@@ -297,7 +294,8 @@ namespace NUnit.VisualStudio.TestAdapter
             foreach (var parameter in testParameters)
                 oldFrameworkSerializedParameters.Append(parameter.Key).Append('=').Append(parameter.Value).Append(';');
 
-            runSettings[PackageSettings.TestParameters] = oldFrameworkSerializedParameters.ToString(0, oldFrameworkSerializedParameters.Length - 1);
+            runSettings[PackageSettings.TestParameters] =
+                oldFrameworkSerializedParameters.ToString(0, oldFrameworkSerializedParameters.Length - 1);
         }
 
         /// <summary>
@@ -319,6 +317,6 @@ namespace NUnit.VisualStudio.TestAdapter
             NUnitEngineAdapter = null;
         }
 
-#endregion
+        #endregion
     }
 }
