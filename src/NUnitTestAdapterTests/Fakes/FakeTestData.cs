@@ -161,6 +161,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
                             <description>lin, with scheme</description>
                         </attachment>
                         <attachment>
+                            <filePath>C:\Windows\WindowsUpdate.log</filePath>
+                            <description>win, Issue914</description>
+                        </attachment>
+                        <attachment>
                             <filePath></filePath>
                             <description>empty path</description>
                         </attachment>

@@ -211,38 +211,24 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var fakeAttachments = fakeResultNode.NUnitAttachments
                 .Where(n => !string.IsNullOrEmpty(n.FilePath))
                 .ToArray();
-
+            TestContext.Out.WriteLine("Incoming attachments");
+            foreach (var attachment in fakeAttachments)
+            {
+                TestContext.Out.WriteLine($"{attachment.FilePath}");
+            }
             var convertedAttachments = testResults.TestResults
                 .SelectMany(tr => tr.Attachments.SelectMany(ats => ats.Attachments))
                 .ToArray();
-
+            TestContext.Out.WriteLine("\nConverted attachments (Uri, path)");
+            foreach (var attachment in convertedAttachments)
+            {
+                TestContext.Out.WriteLine($"{attachment.Uri.AbsoluteUri} : {attachment.Uri.LocalPath}");
+            }
             Assert.Multiple(() =>
             {
                 Assert.That(convertedAttachments.Length, Is.GreaterThan(0), "Some converted attachments were expected");
                 Assert.That(convertedAttachments.Length, Is.EqualTo(fakeAttachments.Length), "Attachments are not converted");
             });
-        }
-
-        [Test]
-        public void Attachments_AllFilePathesStartWithFileScheme()
-        {
-            const string fileUriScheme = "file://";
-            const string errorMessage = "Path must start with file:// uri scheme";
-
-            var cachedTestCase = testConverter.ConvertTestCase(fakeTestNode);
-            var fakeResultNode = new NUnitTestEventTestCase(FakeTestData.GetResultNode().AsString());
-
-            var testResults = testConverter.GetVsTestResults(fakeResultNode, Enumerable.Empty<INUnitTestEventTestOutput>().ToList());
-
-            var convertedAttachments = testResults.TestResults
-                .SelectMany(tr => tr.Attachments.SelectMany(ats => ats.Attachments))
-                .ToArray();
-
-            foreach (var attachment in convertedAttachments)
-            {
-                var originalPath = attachment.Uri.OriginalString;
-                Assert.That(originalPath.LastIndexOf(fileUriScheme), Is.EqualTo(0), errorMessage);
-            }
         }
 
         #endregion Attachment tests

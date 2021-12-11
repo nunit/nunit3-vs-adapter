@@ -350,14 +350,21 @@ namespace NUnit.VisualStudio.TestAdapter
 
             foreach (var attachment in resultNode.NUnitAttachments)
             {
-                var path = attachment.FilePath;
                 var description = attachment.Description;
-
-                if (!(string.IsNullOrEmpty(path) || path.StartsWith(fileUriScheme, StringComparison.OrdinalIgnoreCase)))
+                var path = attachment.FilePath;
+                if (adapterSettings.EnsureAttachmentFileScheme)
+                {
+                    if (!(string.IsNullOrEmpty(path) ||
+                          path.StartsWith(fileUriScheme, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        path = fileUriScheme + path;
+                    }
+                }
+                // For Linux paths
+                if (!(string.IsNullOrEmpty(path) || path.StartsWith(fileUriScheme, StringComparison.OrdinalIgnoreCase)) && !path.Contains(':'))
                 {
                     path = fileUriScheme + path;
                 }
-
                 try
                 {
                     // We only support absolute paths since we dont lookup working directory here

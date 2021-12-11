@@ -17,7 +17,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		LICENSE.txt = LICENSE.txt
 		src\native-assembly\NativeTests.dll = src\native-assembly\NativeTests.dll
 		NuGet.Config = NuGet.Config
-		.github\workflows\NUnit3TestAdapter.Cake.CI.yml = .github\workflows\NUnit3TestAdapter.Cake.CI.yml
 		NUnit3TestAdapter.sln.DotSettings = NUnit3TestAdapter.sln.DotSettings
 		images\nunit_256.png = images\nunit_256.png
 		Osiris.Extended.ruleset = Osiris.Extended.ruleset
@@ -50,6 +49,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "netcoreapp2.1", "netcoreapp
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NUnit.TestAdapter.Tests.Acceptance", "src\NUnit.TestAdapter.Tests.Acceptance\NUnit.TestAdapter.Tests.Acceptance.csproj", "{3FAC7EE0-664F-4B11-918B-8E0FF865EE4C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github", "github", "{062B1763-73C8-4B5A-92DF-C66A36C43CE1}"
+	ProjectSection(SolutionItems) = preProject
+		.github\dependabot.yml = .github\dependabot.yml
+		.github\ISSUE_TEMPLATE.md = .github\ISSUE_TEMPLATE.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{7D708804-B2F1-4A31-A9FB-85A0C7433200}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\NUnit3TestAdapter.Cake.CI.yml = .github\workflows\NUnit3TestAdapter.Cake.CI.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -88,6 +98,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{D41249E3-C080-4B66-8CBD-99CE4D309A10} = {DE347D88-F6ED-4031-AFC2-318F63E39BC9}
 		{A9584E41-6ECE-44B4-A504-41795A65DA5F} = {DE347D88-F6ED-4031-AFC2-318F63E39BC9}
+		{062B1763-73C8-4B5A-92DF-C66A36C43CE1} = {7CE30108-5D81-4850-BE6B-C8BCA35D3592}
+		{7D708804-B2F1-4A31-A9FB-85A0C7433200} = {062B1763-73C8-4B5A-92DF-C66A36C43CE1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8EF03474-188E-44A8-8C76-9FBCF9A382EC}

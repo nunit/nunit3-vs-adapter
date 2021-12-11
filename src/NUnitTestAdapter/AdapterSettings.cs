@@ -118,6 +118,8 @@ namespace NUnit.VisualStudio.TestAdapter
         void Load(string settingsXml);
         void SaveRandomSeed(string dirname);
         void RestoreRandomSeed(string dirname);
+
+        bool EnsureAttachmentFileScheme { get; }
     }
 
     public enum VsTestCategoryType
@@ -325,6 +327,7 @@ namespace NUnit.VisualStudio.TestAdapter
             StopOnError = GetInnerTextAsBool(nunitNode, nameof(StopOnError), false);
             UseNUnitFilter = GetInnerTextAsBool(nunitNode, nameof(UseNUnitFilter), true);
             IncludeStackTraceForSuites = GetInnerTextAsBool(nunitNode, nameof(IncludeStackTraceForSuites), true);
+            EnsureAttachmentFileScheme = GetInnerTextAsBool(nunitNode, nameof(IncludeStackTraceForSuites), false);
 
             // Engine settings
             DiscoveryMethod = MapEnum(GetInnerText(nunitNode, nameof(DiscoveryMethod), Verbosity > 0), DiscoveryMethod.Current);
@@ -472,6 +475,8 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
+        public bool EnsureAttachmentFileScheme { get; private set; }
+
         #endregion
 
         #region Helper Methods
@@ -508,7 +513,7 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 val = targetNode.InnerText;
 
-                if (validValues != null && validValues.Length > 0)
+                if (validValues is { Length: > 0 })
                 {
                     foreach (string valid in validValues)
                     {

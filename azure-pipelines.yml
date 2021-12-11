@@ -11,19 +11,6 @@ jobs:
     - powershell: .\build.ps1 --target=CI --configuration=$(BuildConfiguration)
       displayName: Build, package, and test
 
-    - task: PublishBuildArtifacts@1
-      displayName: Publish bin artifacts
-      inputs:
-        PathtoPublish: $(build.sourcesdirectory)\bin\$(BuildConfiguration)
-        ArtifactName: Bin
-      condition: succeededOrFailed()
-
-    - task: PublishBuildArtifacts@1
-      displayName: Publish package artifacts
-      inputs:
-        PathtoPublish: $(build.sourcesdirectory)\package
-        ArtifactName: Package
-      condition: succeededOrFailed()
 
   - job: Linux
     pool:
