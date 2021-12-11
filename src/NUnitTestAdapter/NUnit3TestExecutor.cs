@@ -339,7 +339,7 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
 
-        private NUnitTestFilterBuilder CreateTestFilterBuilder() => new(NUnitEngineAdapter.GetService<ITestFilterService>(), Settings);
+        private NUnitTestFilterBuilder CreateTestFilterBuilder() => new (NUnitEngineAdapter.GetService<ITestFilterService>(), Settings);
 
 
         private void CreateTestOutputFolder()
