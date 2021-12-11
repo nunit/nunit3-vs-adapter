@@ -22,6 +22,7 @@
 // ***********************************************************************
 
 using System;
+using System.Reflection;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
@@ -144,6 +145,26 @@ namespace NUnit.VisualStudio.TestAdapter
                     SendMessage(testMessageLevel, ex.StackTrace);
                     break;
             }
+        }
+        #endregion
+
+        #region SpecializedMessages
+        public void DebugRunfrom()
+        {
+#if NET35
+            string fw = "Net Framework";
+#else
+            string fw = "Net Core";
+#endif
+            var assLoc = Assembly.GetExecutingAssembly().Location;
+            Debug($"{fw} adapter running from {assLoc}");
+        }
+
+        public void InfoNoTests(bool discoveryResultsHasNoNUnitTests, string assemblyPath)
+        {
+            Info(discoveryResultsHasNoNUnitTests
+                ? "   NUnit couldn't find any tests in " + assemblyPath
+                : "   NUnit failed to load " + assemblyPath);
         }
         #endregion
     }
