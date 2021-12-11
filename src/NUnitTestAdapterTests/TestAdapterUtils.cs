@@ -57,7 +57,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 concreteEngineType.Services.Add(new ProjectService());
                 concreteEngineType.Services.Add(new RuntimeFrameworkService());
                 concreteEngineType.Services.Add(new DefaultTestRunnerFactory());
-                concreteEngineType.Services.Add(new TestAgency("TestAgency for " + TestContext.CurrentContext.Test.Name, 0));
+                concreteEngineType.Services.Add(new TestAgency()); // "TestAgency for " + TestContext.CurrentContext.Test.Name, 0));
                 concreteEngineType.Services.Add(new ResultService());
                 concreteEngineType.Services.Add(new TestFilterService());
             };
