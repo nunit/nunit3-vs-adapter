@@ -12,7 +12,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
     [Category("Acceptance")]
     public abstract class AcceptanceTests
     {
-        public static string NuGetPackageId { get; } = "NUnit3TestAdapter";
+        public static string NuGetPackageId => "NUnit3TestAdapter";
 
         public static string NuGetPackageVersion => Initialization.Value.nupkgVersion;
 
@@ -28,7 +28,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         public static IEnumerable<string> DotNetCliTargetFrameworks => new[]
         {
             "netcoreapp2.1",
-            "netcoreapp3.1"
+            "netcoreapp3.1",
+            "net5.0"
         };
 
         private static readonly Lazy<(IsolatedWorkspaceManager manager, string nupkgVersion, bool keepWorkspaces)> Initialization = new (() =>
