@@ -46,7 +46,9 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         bool IsDiscoveryMethodCurrent { get; }
 
         bool NoOfLoadedTestCasesAboveLimit { get; }
-        IEnumerable<TestCase> CheckTestCasesExplicit(IEnumerable<TestCase> filteredTestCases);
+        int NoOfExplicitTestCases { get; }
+        bool HasExplicitTests { get; }
+        IEnumerable<TestCase> GetExplicitTestCases(IEnumerable<TestCase> filteredTestCases);
     }
 
     public class DiscoveryConverter : IDiscoveryConverter
@@ -92,6 +94,10 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public bool IsExplicitRun => CurrentTestAssembly?.IsExplicit ?? false;
 
+        public int NoOfExplicitTestCases => CurrentTestAssembly.NoOfExplicitTestCases;
+
+        public bool HasExplicitTests => NoOfExplicitTestCases > 0;
+
         private readonly List<TestCase> loadedTestCases = new ();
         public IList<TestCase> LoadedTestCases => loadedTestCases;
 
@@ -103,7 +109,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         private ITestLogger TestLog { get; }
 
         public bool NoOfLoadedTestCasesAboveLimit => NoOfLoadedTestCases > Settings.AssemblySelectLimit;
-        public IEnumerable<TestCase> CheckTestCasesExplicit(IEnumerable<TestCase> filteredTestCases)
+        public IEnumerable<TestCase> GetExplicitTestCases(IEnumerable<TestCase> filteredTestCases)
         {
             var explicitCases = new List<TestCase>();
             foreach (var tc in filteredTestCases)

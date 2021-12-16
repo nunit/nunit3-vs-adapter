@@ -80,7 +80,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public TestFilter ConvertTfsFilterToNUnitFilter(IVsTestFilter vsFilter, IDiscoveryConverter discovery)
         {
             var filteredTestCases = vsFilter.CheckFilter(discovery.LoadedTestCases).ToList();
-            var explicitCases = discovery.CheckTestCasesExplicit(filteredTestCases).ToList();
+            var explicitCases = discovery.GetExplicitTestCases(filteredTestCases).ToList();
             bool isExplicit = filteredTestCases.Count == explicitCases.Count;
             var tcs = isExplicit ? filteredTestCases : filteredTestCases.Except(explicitCases);
             var testCases = tcs as TestCase[] ?? tcs.ToArray();
@@ -103,9 +103,12 @@ namespace NUnit.VisualStudio.TestAdapter
         public TestFilter FilterByList(IEnumerable<TestCase> testCases)
         {
             if (testCases.Count() > settings.AssemblySelectLimit)
+            {
+                // Need to log that filter has been set to empty due to AssemblySelectLimit
                 return TestFilter.Empty;
-            var filterBuilder = _filterService.GetTestFilterBuilder();
+            }
 
+            var filterBuilder = _filterService.GetTestFilterBuilder();
             foreach (var testCase in testCases)
             {
                 filterBuilder.AddTest(testCase.FullyQualifiedName);

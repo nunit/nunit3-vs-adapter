@@ -166,6 +166,11 @@ namespace NUnit.VisualStudio.TestAdapter
                 ? "   NUnit couldn't find any tests in " + assemblyPath
                 : "   NUnit failed to load " + assemblyPath);
         }
+
+        public void InfoNoTests(string assemblyPath)
+        {
+            Info($"   NUnit couldn't find any tests in {assemblyPath}");
+        }
         #endregion
     }
 }

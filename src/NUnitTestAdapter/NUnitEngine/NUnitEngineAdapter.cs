@@ -88,7 +88,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             var timing = new TimingLogger(settings, logger);
             var results = new NUnitResults(Runner.Explore(filter));
             timing.LogTime($"Execution engine discovery time with filter length {filter.Text.Length}");
-            if (filter.Text.Length < 100)
+            if (filter.Text.Length < 300)
                 logger.Debug($"Filter: {filter.Text}");
 
             return results;
@@ -99,7 +99,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             var timing = new TimingLogger(settings, logger);
             var results = new NUnitResults(Runner.Run(listener, filter));
             timing.LogTime($"Execution engine run time with filter length {filter.Text.Length}");
-            if (filter.Text.Length < 100)
+            if (filter.Text.Length < 300)
                 logger.Debug($"Filter: {filter.Text}");
             return results;
         }

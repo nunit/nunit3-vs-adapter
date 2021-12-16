@@ -38,5 +38,12 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             list.All(pred) && list.Any();
 
         public static bool IsEmpty(this TestFilter filter) => filter == TestFilter.Empty;
+
+
+        public static bool IsCategoryFilter(this TestFilter filter) =>
+            filter != TestFilter.Empty && filter.Text.Contains("<cat>");
+
+        public static bool IsNegativeCategoryFilter(this TestFilter filter) =>
+            filter.IsCategoryFilter() && filter.Text.Contains("<not><cat>");
     }
 }

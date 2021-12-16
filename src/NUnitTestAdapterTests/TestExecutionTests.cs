@@ -25,8 +25,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
+
 using NUnit.Framework;
 using NUnit.Tests;
 using NUnit.Tests.Assemblies;
@@ -75,19 +77,23 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 "The reference to mock-assembly.dll appears to be the wrong version");
         }
 
-        [TestCase("", 35)]
-        [TestCase(null, 35)]
+        [TestCase("", 38, 5, 5)]
+        [TestCase(null, 38, 5, 5)]
         [TestCase("cat == Special", 1)]
         [TestCase("cat == MockCategory", 2)]
-        [TestCase("method =~ MockTest?", 5)]
-        [TestCase("method =~ MockTest? and cat != MockCategory", 3)]
+        [TestCase("method =~ MockTest?", 5, 1)]
+        [TestCase("method =~ MockTest? and cat != MockCategory", 3, 1)]
         [TestCase("namespace == ThisNamespaceDoesNotExist", 0)]
-        [TestCase("test==NUnit.Tests.Assemblies.MockTestFixture", MockTestFixture.Tests - MockTestFixture.Explicit, TestName = "{m}_MockTestFixture")]
-        [TestCase("test==NUnit.Tests.IgnoredFixture and method == Test2", 1, TestName = "{m}_IgnoredFixture")]
-        [TestCase("class==NUnit.Tests.Assemblies.MockTestFixture", MockTestFixture.Tests - MockTestFixture.Explicit)]
-        [TestCase("name==MockTestFixture", MockTestFixture.Tests + NUnit.Tests.TestAssembly.MockTestFixture.Tests - MockTestFixture.Explicit)]
-        [TestCase("cat==FixtureCategory", MockTestFixture.Tests - MockTestFixture.Explicit)]
-        public void TestsWhereShouldFilter(string filter, int expectedCount)
+        [TestCase("test==NUnit.Tests.Assemblies.MockTestFixture", MockTestFixture.Tests - MockTestFixture.Explicit, 1, 1, TestName = "{m}_MockTestFixture")]
+        [TestCase("test==NUnit.Tests.IgnoredFixture and method == Test2", 1, 1, TestName = "{m}_IgnoredFixture")]
+        [TestCase("class==NUnit.Tests.Assemblies.MockTestFixture", MockTestFixture.Tests - MockTestFixture.Explicit, 1, 1)]
+        [TestCase("name==MockTestFixture", MockTestFixture.Tests + NUnit.Tests.TestAssembly.MockTestFixture.Tests - MockTestFixture.Explicit, 1, 1)]
+        [TestCase("cat==FixtureCategory", MockTestFixture.Tests, 1, 2)]
+        [TestCase("cat!=Special", 38 - 1, 5, 4)]
+        [TestCase("class==NUnit.Tests.Assemblies.MockTestFixture", MockTestFixture.Tests - MockTestFixture.Explicit, MockTestFixture.Ignored, 1)]
+        [TestCase("class==NUnit.Tests.OneOfEach", 2, 1, 0)]
+        [TestCase("cat==OneOfEachCat", 3, 1, 1)]
+        public void TestsWhereShouldFilter(string filter, int expectedCount, int noOfSkipped = 0, int noOfNone = 0)
         {
             // Create a fake environment.
             var context = new FakeRunContext(new FakeRunSettingsForWhere(filter));
@@ -96,9 +102,19 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var executor = TestAdapterUtils.CreateExecutor();
             executor.RunTests(new[] { mockAssemblyPath }, context, fakeFramework);
 
-            var completedRuns = fakeFramework.Events.Where(e => e.EventType == FakeFrameworkHandle.EventType.RecordEnd);
+            var completedRuns = fakeFramework.Events.Where(e => e.EventType == FakeFrameworkHandle.EventType.RecordEnd).ToList();
+            TestContext.WriteLine(" ");
+            foreach (var test in completedRuns)
+            {
+                TestContext.WriteLine($"{test.TestCase.DisplayName}:{test.TestOutcome}");
+            }
 
-            Assert.That(completedRuns, Has.Exactly(expectedCount).Items);
+            Assert.Multiple(() =>
+            {
+                Assert.That(completedRuns, Has.Exactly(expectedCount).Items, "Total number wrong");
+                Assert.That(completedRuns.Count(o => o.TestOutcome == TestOutcome.Skipped), Is.EqualTo(noOfSkipped), "Skipped number wrong");
+                Assert.That(completedRuns.Count(o => o.TestOutcome == TestOutcome.None), Is.EqualTo(noOfNone), "Explicit and inconclusive number wrong");
+            });
         }
     }
 
@@ -154,11 +170,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void CorrectNumberOfTestCasesWereStarted()
         {
             const FakeFrameworkHandle.EventType eventType = FakeFrameworkHandle.EventType.RecordStart;
+            Console.WriteLine(" ");
             foreach (var ev in testLog.Events.FindAll(e => e.EventType == eventType))
-                Console.WriteLine(ev.TestCase.DisplayName);
+                Console.WriteLine($"{ev.TestCase.DisplayName}");
             Assert.That(
                 testLog.Events.FindAll(e => e.EventType == eventType).Count,
-                Is.EqualTo(MockAssembly.ResultCount - BadFixture.Tests - IgnoredFixture.Tests - ExplicitFixture.Tests - MockTestFixture.Explicit));
+                Is.EqualTo(MockAssembly.ResultCount - BadFixture.Tests - IgnoredFixture.Tests - ExplicitFixture.Tests - MockTestFixture.Explicit - OneOfEach.ExplicitTests));
         }
 
         [Test]
@@ -192,6 +209,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCaseSource(nameof(Outcomes))]
         public int TestOutcomeTotalsAreCorrect(TestOutcome outcome)
         {
+            TestContext.WriteLine(" ");
+            TestContext.WriteLine($"Looking for outcome: {outcome}");
             return testLog.Events
                 .Count(e => e.EventType == FakeFrameworkHandle.EventType.RecordResult && e.TestResult.Outcome == outcome);
         }

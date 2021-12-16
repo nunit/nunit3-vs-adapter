@@ -125,6 +125,9 @@ namespace NUnit.VisualStudio.TestAdapter
         bool Debug { get; }
         bool DebugExecution { get; }
         bool DebugDiscovery { get; }
+
+        // Filter control
+        ExplicitModeEnum ExplicitMode { get; }
     }
 
     public enum VsTestCategoryType
@@ -263,7 +266,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public char FullnameSeparator { get; private set; } = ':';
 
-
+        public ExplicitModeEnum ExplicitMode { get; private set; } = ExplicitModeEnum.Strict;
 
 
         #region  NUnit Diagnostic properties
@@ -342,6 +345,9 @@ namespace NUnit.VisualStudio.TestAdapter
             DiscoveryMethod = MapEnum(GetInnerText(nunitNode, nameof(DiscoveryMethod), Verbosity > 0), DiscoveryMethod.Current);
             SkipNonTestAssemblies = GetInnerTextAsBool(nunitNode, nameof(SkipNonTestAssemblies), true);
             AssemblySelectLimit = GetInnerTextAsInt(nunitNode, nameof(AssemblySelectLimit), 2000);
+
+
+            ExplicitMode = MapEnum(GetInnerText(nunitNode, nameof(ExplicitMode), Verbosity > 0), ExplicitModeEnum.Strict);
 
 
             ExtractNUnitDiagnosticSettings(nunitNode);
@@ -614,5 +620,11 @@ namespace NUnit.VisualStudio.TestAdapter
 
 
         #endregion
+    }
+
+    public enum ExplicitModeEnum
+    {
+        Strict,
+        Relaxed
     }
 }

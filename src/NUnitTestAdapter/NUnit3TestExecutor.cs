@@ -280,8 +280,15 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     var discovery = new DiscoveryConverter(TestLog, Settings);
                     discovery.Convert(discoveryResults, assemblyPath);
-                    var ea = ExecutionFactory.Create(this);
-                    ea.Run(filter, discovery, this);
+                    if (discovery.AllTestCases.Any())
+                    {
+                        var ea = ExecutionFactory.Create(this);
+                        ea.Run(filter, discovery, this);
+                    }
+                    else
+                    {
+                        TestLog.InfoNoTests(assemblyPath);
+                    }
                 }
                 else
                 {
