@@ -160,16 +160,11 @@ namespace NUnit.VisualStudio.TestAdapter
             TestLog.Debug($"TfsFilter used, length: {vsTestFilter.TfsTestCaseFilterExpression?.TestCaseFilterValue.Length}");
             // NOTE This overwrites filter used in call
             var filterBuilder = CreateTestFilterBuilder();
-            if (Settings.DiscoveryMethod == DiscoveryMethod.Current)
-            {
-                filter = Settings.UseNUnitFilter
+            filter = Settings.DiscoveryMethod == DiscoveryMethod.Current
+                ? Settings.UseNUnitFilter
                     ? filterBuilder.ConvertVsTestFilterToNUnitFilter(vsTestFilter)
-                    : filterBuilder.ConvertTfsFilterToNUnitFilter(vsTestFilter, discovery);
-            }
-            else
-            {
-                filter = filterBuilder.ConvertTfsFilterToNUnitFilter(vsTestFilter, discovery.LoadedTestCases);
-            }
+                    : filterBuilder.ConvertTfsFilterToNUnitFilter(vsTestFilter, discovery)
+                : filterBuilder.ConvertTfsFilterToNUnitFilter(vsTestFilter, discovery.LoadedTestCases);
 
             Dump?.AddString($"\n\nTFSFilter: {vsTestFilter.TfsTestCaseFilterExpression?.TestCaseFilterValue}\n");
             Dump?.DumpVSInputFilter(filter, "(At Execution (TfsFilter)");

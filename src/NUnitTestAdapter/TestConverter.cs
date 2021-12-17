@@ -227,15 +227,16 @@ namespace NUnit.VisualStudio.TestAdapter
 
         private string CreateDisplayName(string fullyQualifiedName, string testNodeName)
         {
-            if (adapterSettings.FreakMode)
-                return "N:Name -> MS:DisplayName (default)";
-            return adapterSettings.DisplayName switch
-            {
-                DisplayNameOptions.Name => testNodeName,
-                DisplayNameOptions.FullName => fullyQualifiedName,
-                DisplayNameOptions.FullNameSep => fullyQualifiedName.Replace('.', adapterSettings.FullnameSeparator),
-                _ => throw new ArgumentOutOfRangeException(),
-            };
+            return adapterSettings.FreakMode
+                ? "N:Name -> MS:DisplayName (default)"
+                : adapterSettings.DisplayName switch
+                {
+                    DisplayNameOptions.Name => testNodeName,
+                    DisplayNameOptions.FullName => fullyQualifiedName,
+                    DisplayNameOptions.FullNameSep =>
+                        fullyQualifiedName.Replace('.', adapterSettings.FullnameSeparator),
+                    _ => throw new ArgumentOutOfRangeException(),
+                };
         }
 
         private VSTestResult MakeTestResultFromLegacyXmlNode(INUnitTestEventTestCase resultNode, IEnumerable<INUnitTestEventTestOutput> outputNodes)

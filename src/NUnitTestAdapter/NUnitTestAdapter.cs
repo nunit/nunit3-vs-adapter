@@ -242,14 +242,7 @@ namespace NUnit.VisualStudio.TestAdapter
             // Always run one assembly at a time in process in its own domain
             package.Settings[PackageSettings.ProcessModel] = "InProcess";
 
-            if (Settings.DomainUsage != null)
-            {
-                package.Settings[PackageSettings.DomainUsage] = Settings.DomainUsage;
-            }
-            else
-            {
-                package.Settings[PackageSettings.DomainUsage] = "Single";
-            }
+            package.Settings[PackageSettings.DomainUsage] = Settings.DomainUsage ?? "Single";
 
             if (Settings.DefaultTestNamePattern != null)
             {
