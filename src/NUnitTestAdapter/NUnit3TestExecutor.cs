@@ -143,7 +143,8 @@ namespace NUnit.VisualStudio.TestAdapter
             Unload();
         }
 
-        private void SetRunTypeByStrings() =>
+        private void SetRunTypeByStrings()
+        {
             RunType = !Settings.DesignMode
                 ? Settings.DiscoveryMethod == DiscoveryMethod.Legacy
                     ? RunType.CommandLineLegacy
@@ -151,6 +152,8 @@ namespace NUnit.VisualStudio.TestAdapter
                         ? RunType.CommandLineCurrentNUnit
                         : RunType.CommandLineCurrentVSTest
                 : RunType.Ide;
+            TestLog.Debug($"Runtype: {RunType}");
+        }
 
         /// <summary>
         /// Called by the VisualStudio IDE when selected tests are to be run. Never called from TFS Build.
@@ -162,9 +165,9 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             Initialize(runContext, frameworkHandle);
             CheckIfDebug();
-            TestLog.Debug("RunTests by IEnumerable<TestCase>");
             InitializeForExecution(runContext, frameworkHandle);
             RunType = RunType.Ide;
+            TestLog.Debug("RunTests by IEnumerable<TestCase>. RunType = Ide");
             var timing = new TimingLogger(Settings, TestLog);
             Debug.Assert(NUnitEngineAdapter != null, "NUnitEngineAdapter is null");
             Debug.Assert(NUnitEngineAdapter.EngineEnabled, "NUnitEngineAdapter TestEngine is null");

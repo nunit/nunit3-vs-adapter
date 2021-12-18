@@ -74,7 +74,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         [TestCase(@"TestCategory!=BarGroup", 1, 2)]
         [TestCase(@"TestCategory=IsExplicit", 1, 1)]
         [TestCase(@"FullyQualifiedName=Filter.Tests.Foo", 1, 1)]
+        [TestCase(@"FullyQualifiedName!=Filter.Tests.Foo", 1, 1)]
         [TestCase(@"FullyQualifiedName~Filter.Tests.Foo", 1, 1)]
+        [TestCase(@"FullyQualifiedName~Foo", 1, 1)]
         public static void Filter_DotNetTest(string filter, int executed, int total)
         {
             const string framework = "netcoreapp3.1";
