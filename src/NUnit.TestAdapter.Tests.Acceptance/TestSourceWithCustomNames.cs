@@ -84,6 +84,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         [Test, Platform("Win")]
         [TestCase("net48")] // test code requires ValueTuple support, so can't got to net35
         [TestCase("netcoreapp2.1")]
+        [TestCase("net5.0")]
         public static void Single_target_csproj(string targetFramework)
         {
             var workspace = CreateWorkspace()
@@ -104,7 +105,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             AddTestsCs(workspace);
 
-            workspace.MSBuild(restore: true);
+            workspace.MsBuild(restore: true);
 
             var results = workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll");
 

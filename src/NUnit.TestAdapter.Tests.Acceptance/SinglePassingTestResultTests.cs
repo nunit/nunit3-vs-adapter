@@ -61,7 +61,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             AddTestsCs(workspace);
 
-            workspace.MSBuild(restore: true);
+            workspace.MsBuild(restore: true);
 
             workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll")
                 .AssertSinglePassingTest();
@@ -112,7 +112,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             AddTestsVb(workspace);
 
-            workspace.MSBuild(restore: true);
+            workspace.MsBuild(restore: true);
 
             workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll")
                 .AssertSinglePassingTest();
@@ -163,7 +163,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             AddTestsCs(workspace);
 
-            workspace.MSBuild(restore: true);
+            workspace.MsBuild(restore: true);
 
             foreach (var targetFramework in TargetFrameworks)
             {
@@ -217,7 +217,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             AddTestsVb(workspace);
 
-            workspace.MSBuild(restore: true);
+            workspace.MsBuild(restore: true);
 
             foreach (var targetFramework in TargetFrameworks)
             {
@@ -315,7 +315,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             AddTestsCs(workspace);
 
-            workspace.MSBuild(restore: true);
+            workspace.MsBuild(restore: true);
 
             var result = workspace.VSTest(@"bin\Debug\Test.dll");
             result.AssertSinglePassingTest();
@@ -408,7 +408,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             AddTestsVb(workspace);
 
-            workspace.MSBuild(restore: true);
+            workspace.MsBuild(restore: true);
 
             workspace.VSTest(@"bin\Debug\Test.dll")
                 .AssertSinglePassingTest();
@@ -510,7 +510,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             workspace.NuGetRestore(packagesDirectory: "packages");
 
-            workspace.MSBuild();
+            workspace.MsBuild();
 
             workspace.VSTest(@"bin\Debug\Test.dll")
                 .AssertSinglePassingTest();
@@ -623,7 +623,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             workspace.NuGetRestore(packagesDirectory: "packages");
 
-            workspace.MSBuild();
+            workspace.MsBuild();
 
             workspace.VSTest(@"bin\Debug\Test.dll")
                 .AssertSinglePassingTest();

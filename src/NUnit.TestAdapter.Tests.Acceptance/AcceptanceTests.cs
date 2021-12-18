@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools;
@@ -32,51 +33,52 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
             "net5.0"
         };
 
-        private static readonly Lazy<(IsolatedWorkspaceManager manager, string nupkgVersion, bool keepWorkspaces)> Initialization = new (() =>
-        {
-            var directory = TestContext.Parameters["ProjectWorkspaceDirectory"]
-                ?? TryAutoDetectProjectWorkspaceDirectory()
-                ?? throw new InvalidOperationException("The test parameter ProjectWorkspaceDirectory must be set in order to run this test.");
+        private static readonly Lazy<(IsolatedWorkspaceManager manager, string nupkgVersion, bool keepWorkspaces)> Initialization = new(() =>
+       {
+           var directory = TestContext.Parameters["ProjectWorkspaceDirectory"]
+               ?? TryAutoDetectProjectWorkspaceDirectory()
+               ?? throw new InvalidOperationException("The test parameter ProjectWorkspaceDirectory must be set in order to run this test.");
 
-            var nupkgDirectory = TestContext.Parameters["TestNupkgDirectory"]
-                ?? TryAutoDetectTestNupkgDirectory(NuGetPackageId)
-                ?? throw new InvalidOperationException("The test parameter TestNupkgDirectory must be set in order to run this test.");
+           var nupkgDirectory = TestContext.Parameters["TestNupkgDirectory"]
+               ?? TryAutoDetectTestNupkgDirectory(NuGetPackageId)
+               ?? throw new InvalidOperationException("The test parameter TestNupkgDirectory must be set in order to run this test.");
 
-            var nupkgVersion = TryGetTestNupkgVersion(nupkgDirectory, packageId: NuGetPackageId)
-                ?? throw new InvalidOperationException($"No NuGet package with the ID {NuGetPackageId} was found in {nupkgDirectory}.");
+           var nupkgVersion = TryGetTestNupkgVersion(nupkgDirectory, packageId: NuGetPackageId)
+               ?? throw new InvalidOperationException($"No NuGet package with the ID {NuGetPackageId} was found in {nupkgDirectory}.");
 
-            var keepWorkspaces = TestContext.Parameters.Get("KeepWorkspaces", defaultValue: false);
+           var keepWorkspaces = TestContext.Parameters.Get("KeepWorkspaces", defaultValue: false);
 
-            var packageCachePath = Path.Combine(directory, ".isolatednugetcache");
-            ClearCachedTestNupkgs(packageCachePath);
+           var packageCachePath = Path.Combine(directory, ".isolatednugetcache");
+           ClearCachedTestNupkgs(packageCachePath);
 
-            var manager = new IsolatedWorkspaceManager(
-                reason: string.Join(
-                    Environment.NewLine,
-                    "Test assembly: " + typeof(AcceptanceTests).Assembly.Location,
-                    "Runner process: " + Process.GetCurrentProcess().MainModule.FileName),
-                directory,
-                nupkgDirectory,
-                packageCachePath,
-                downloadCachePath: Path.Combine(directory, ".toolcache"));
+           var manager = new IsolatedWorkspaceManager(
+               reason: string.Join(
+                   Environment.NewLine,
+                   "Test assembly: " + typeof(AcceptanceTests).Assembly.Location,
+                   "Runner process: " + Process.GetCurrentProcess().MainModule.FileName),
+               directory,
+               nupkgDirectory,
+               packageCachePath,
+               downloadCachePath: Path.Combine(directory, ".toolcache"));
 
-            if (keepWorkspaces) manager.PreserveDirectory("The KeepWorkspaces test parameter was set to true.");
+           if (keepWorkspaces) manager.PreserveDirectory("The KeepWorkspaces test parameter was set to true.");
 
-            return (manager, nupkgVersion, keepWorkspaces);
-        });
+           return (manager, nupkgVersion, keepWorkspaces);
+       });
 
         private static void ClearCachedTestNupkgs(string packageCachePath)
         {
             Utils.DeleteDirectoryRobust(Path.Combine(packageCachePath, NuGetPackageId));
         }
 
-        private static readonly Dictionary<string, List<IsolatedWorkspace>> WorkspacesByTestId = new ();
+        private static readonly Dictionary<string, List<IsolatedWorkspace>> WorkspacesByTestId = new();
 
         protected static IsolatedWorkspace CreateWorkspace()
         {
             var test = TestContext.CurrentContext?.Test ?? throw new InvalidOperationException("There is no current test.");
-
-            var workspace = Initialization.Value.manager.CreateWorkspace(test.Name);
+            const string chars = "=()!,~";
+            string name = chars.Aggregate(test.Name, (current, ch) => current.Replace(ch, '_'));
+            var workspace = Initialization.Value.manager.CreateWorkspace(name);
 
             lock (WorkspacesByTestId)
             {
@@ -84,7 +86,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                     WorkspacesByTestId.Add(test.ID, workspaces = new List<IsolatedWorkspace>());
                 workspaces.Add(workspace);
             }
-
             return workspace;
         }
 

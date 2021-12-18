@@ -49,7 +49,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                         }
                     }");
 
-            workspace.MSBuild(restore: true);
+            workspace.MsBuild(restore: true);
 
             foreach (var targetFramework in TargetFrameworks)
             {
@@ -127,7 +127,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                 .AddFile("test.addins", @"
                     ﻿Test.dll");
 
-            workspace.MSBuild(restore: true);
+            workspace.MsBuild(restore: true);
 
             foreach (var targetFramework in TargetFrameworks)
             {
