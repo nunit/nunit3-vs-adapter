@@ -10,14 +10,16 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
     {
         private readonly List<string> projectPaths = new();
         private readonly ToolResolver toolResolver;
+        private readonly Action<string> _log;
         private readonly DirectoryMutex directoryMutex;
 
         public string Directory => directoryMutex.DirectoryPath;
 
-        public IsolatedWorkspace(DirectoryMutex directoryMutex, ToolResolver toolResolver)
+        public IsolatedWorkspace(DirectoryMutex directoryMutex, ToolResolver toolResolver, Action<string> log = null)
         {
             this.directoryMutex = directoryMutex ?? throw new ArgumentNullException(nameof(toolResolver));
             this.toolResolver = toolResolver ?? throw new ArgumentNullException(nameof(toolResolver));
+            _log = log;
         }
 
         public void Dispose() => directoryMutex.Dispose();
@@ -63,7 +65,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
         /// <param name="noBuild">if you run MSBuild or dotnet build first, set to false.</param>
         /// <param name="verbose">Set NUnit verbosity to 5, enables seing more info from the run in StdOut.</param>
         /// <returns>VSTestResults</returns>
-        public VSTestResult DotNetTest(string filterArgument = "", bool noBuild = false, bool verbose = false)
+        public VSTestResult DotNetTest(string filterArgument = "", bool noBuild = false, bool verbose = false, Action<string> log = null)
         {
             using var tempTrxFile = new TempFile();
 
@@ -73,16 +75,24 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                 .Add("-v:n")
                 .Add("--logger").Add("trx;LogFileName=" + tempTrxFile);
 
-            if (filterArgument.Length > 0)
+            bool hasNUnitWhere = filterArgument.StartsWith("NUnit.Where");
+
+            if (filterArgument.Length > 0 && !hasNUnitWhere)
             {
                 dotnettest.Add("--filter").Add($"{filterArgument}");
             }
-
+            else if (hasNUnitWhere)
+            {
+                dotnettest.Add("--").Add(filterArgument);
+            }
             if (verbose)
             {
-                dotnettest.Add("--").Add("NUnit.Verbosity=5");
+                if (!hasNUnitWhere)
+                    dotnettest.Add("--");
+                dotnettest.Add("NUnit.Verbosity=5");
             }
-
+            if (log != null)
+                log(dotnettest.ToString());
             var result = dotnettest.Run(throwOnError: false);
 
             if (new FileInfo(tempTrxFile).Length == 0)
