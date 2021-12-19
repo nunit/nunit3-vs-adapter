@@ -107,12 +107,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         [TestCase("test==Filter.Tests.Foo", 1, 1)]
         [TestCase("name==Foo", 1, 1)]
         [TestCase("name!=Bar", 1, 1)]
-        //  [TestCase("test=~Foo", 1, 1)]
+        // [TestCase("test=~Foo", 1, 1)]
         public static void Filter_DotNetTest_NUnitWhere(string filter, int executed, int total)
         {
             var workspace = Build();
             var nunitWhere = $@"NUnit.Where={filter}";
-            var results = workspace.DotNetTest(nunitWhere, true, true,TestContext.WriteLine);
+            var results = workspace.DotNetTest(nunitWhere, true, true, TestContext.WriteLine);
             Verify(executed, total, results);
         }
 
