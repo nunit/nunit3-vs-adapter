@@ -10,16 +10,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
     {
         private readonly List<string> projectPaths = new();
         private readonly ToolResolver toolResolver;
-        private readonly Action<string> _log;
         private readonly DirectoryMutex directoryMutex;
 
         public string Directory => directoryMutex.DirectoryPath;
 
-        public IsolatedWorkspace(DirectoryMutex directoryMutex, ToolResolver toolResolver, Action<string> log = null)
+        public IsolatedWorkspace(DirectoryMutex directoryMutex, ToolResolver toolResolver)
         {
             this.directoryMutex = directoryMutex ?? throw new ArgumentNullException(nameof(toolResolver));
             this.toolResolver = toolResolver ?? throw new ArgumentNullException(nameof(toolResolver));
-            _log = log;
         }
 
         public void Dispose() => directoryMutex.Dispose();
@@ -59,12 +57,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
         }
 
         /// <summary>
-        /// Runs dotnet test
+        /// Runs dotnet test.
         /// </summary>
         /// <param name="filterArgument">Possible filter statement.</param>
         /// <param name="noBuild">if you run MSBuild or dotnet build first, set to false.</param>
         /// <param name="verbose">Set NUnit verbosity to 5, enables seing more info from the run in StdOut.</param>
-        /// <returns>VSTestResults</returns>
+        /// <returns>VSTestResults.</returns>
         public VSTestResult DotNetTest(string filterArgument = "", bool noBuild = false, bool verbose = false, Action<string> log = null)
         {
             using var tempTrxFile = new TempFile();
@@ -91,8 +89,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                     dotnettest.Add("--");
                 dotnettest.Add("NUnit.Verbosity=5");
             }
-            if (log != null)
-                log(dotnettest.ToString());
+            log?.Invoke($"\n{dotnettest.ArgumentsAsEscapedString}");
             var result = dotnettest.Run(throwOnError: false);
 
             if (new FileInfo(tempTrxFile).Length == 0)
@@ -134,7 +131,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                 .Add("/logger:trx;LogFileName=" + tempTrxFile);
 
             if (arguments.Length > 0)
-                vstest.Add($"{arguments}");
+            {
+                var completeFilterStatement = $"/TestCaseFilter:{arguments}";
+                vstest.Add(completeFilterStatement);
+            }
+
             var result = vstest.Run(throwOnError: false);
 
             if (new FileInfo(tempTrxFile).Length == 0)

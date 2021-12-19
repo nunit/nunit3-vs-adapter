@@ -10,6 +10,15 @@ using NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 {
+
+    public class Frameworks
+    {
+        public const string NetCoreApp31 = "netcoreapp3.1";
+        public const string NetCoreApp21 = "netcoreapp2.1";
+        public const string Net50 = "net5.0";
+        public const string Net60 = "net6.0";
+    }
+
     [Category("Acceptance")]
     public abstract class AcceptanceTests
     {

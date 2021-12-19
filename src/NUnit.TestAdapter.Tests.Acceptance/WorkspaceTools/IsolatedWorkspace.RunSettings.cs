@@ -7,10 +7,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
     {
         private sealed class RunSettings
         {
-            private readonly List<string> arguments = new ();
+            private readonly List<string> arguments = new();
 
             public string WorkingDirectory { get; }
             public string FileName { get; }
+
+            public string ArgumentsAsEscapedString => ProcessUtils.EscapeProcessArguments(arguments);
 
             public RunSettings(string workingDirectory, string fileName)
             {
