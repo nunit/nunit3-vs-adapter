@@ -63,10 +63,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         public void Filter_VSTest(string filter, int executed, int total)
         {
             var workspace = Build();
-            var completeFilterStatement = filter.Length > 0
-                ? $"/TestCaseFilter:{filter}"
-                : "";
-            var results = workspace.VSTest($@"bin\Debug\{Framework}\Test.dll", completeFilterStatement);
+            var results = workspace.VSTest($@"bin\Debug\{Framework}\Test.dll", filter);
             Verify(executed, total, results);
         }
 
