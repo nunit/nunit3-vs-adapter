@@ -13,12 +13,6 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <StartAction>Program</StartAction>
-    <StartProgram>$(DevEnvDir)\devenv.exe</StartProgram>
-    <StartArguments>/rootsuffix Exp</StartArguments>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <PackageId>NUnit3TestAdapter</PackageId>
     <Authors>Charlie Poole, Terje Sandstrom</Authors>
   </PropertyGroup>

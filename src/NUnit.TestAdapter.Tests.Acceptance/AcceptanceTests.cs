@@ -23,7 +23,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
     {
         public static string NuGetPackageId => "NUnit3TestAdapter";
 
-        public static string NuGetPackageVersion => Initialization.Value.nupkgVersion;
+        public static string NuGetPackageVersion => Initialization.Value.NupkgVersion;
 
         public const string LowestNetfxTarget = "net35";
         public const string LegacyProjectTargetFrameworkVersion = "v3.5";
@@ -31,17 +31,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         public static IEnumerable<string> TargetFrameworks => new[]
         {
             LowestNetfxTarget,
-            "netcoreapp2.1"
+            Frameworks.NetCoreApp21
         };
 
         public static IEnumerable<string> DotNetCliTargetFrameworks => new[]
         {
-            "netcoreapp2.1",
-            "netcoreapp3.1",
-            "net5.0"
+            Frameworks.NetCoreApp21,
+            Frameworks.NetCoreApp31,
+            Frameworks.Net50
         };
 
-        private static readonly Lazy<(IsolatedWorkspaceManager manager, string nupkgVersion, bool keepWorkspaces)> Initialization = new(() =>
+        private static readonly Lazy<(IsolatedWorkspaceManager Manager, string NupkgVersion, bool KeepWorkspaces)> Initialization = new(() =>
        {
            var directory = TestContext.Parameters["ProjectWorkspaceDirectory"]
                ?? TryAutoDetectProjectWorkspaceDirectory()
@@ -86,7 +86,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
             var test = TestContext.CurrentContext?.Test ?? throw new InvalidOperationException("There is no current test.");
             const string chars = "=()!,~";
             string name = chars.Aggregate(test.Name, (current, ch) => current.Replace(ch, '_'));
-            var workspace = Initialization.Value.manager.CreateWorkspace(name);
+            var workspace = Initialization.Value.Manager.CreateWorkspace(name);
 
             lock (WorkspacesByTestId)
             {
@@ -121,11 +121,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             if (TestContext.CurrentContext.Result.Outcome.Status == TestStatus.Failed)
             {
-                Initialization.Value.manager.PreserveDirectory(
+                Initialization.Value.Manager.PreserveDirectory(
                     test.FullName + " failed:" + Environment.NewLine
                     + TestContext.CurrentContext.Result.Message.TrimEnd() + Environment.NewLine);
             }
-            else if (!Initialization.Value.keepWorkspaces)
+            else if (!Initialization.Value.KeepWorkspaces)
             {
                 foreach (var workspace in workspaces)
                     Utils.DeleteDirectoryRobust(workspace.Directory);
@@ -136,7 +136,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         {
             if (!Initialization.IsValueCreated) return;
 
-            Initialization.Value.manager.Dispose();
+            Initialization.Value.Manager.Dispose();
         }
 
         private static string TryAutoDetectProjectWorkspaceDirectory()
