@@ -158,14 +158,17 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             var result = testConverter.GetVsTestResults(resultNode, outputNodes ?? EmptyNodes);
-            if (settings.ConsoleOut == 1)
+            if (settings.ConsoleOut >= 1)
             {
                 if (!result.ConsoleOutput.IsNullOrWhiteSpace() && result.ConsoleOutput != NL)
                 {
                     string msg = result.ConsoleOutput;
                     if (settings.UseTestNameInConsoleOutput)
                         msg = $"{resultNode.Name}: {msg}";
-                    recorder.SendMessage(TestMessageLevel.Informational, msg);
+                    var messageLevel = settings.ConsoleOut == 1
+                        ? TestMessageLevel.Informational
+                        : TestMessageLevel.Warning;
+                    recorder.SendMessage(messageLevel, msg);
                 }
                 if (!resultNode.ReasonMessage.IsNullOrWhiteSpace())
                 {

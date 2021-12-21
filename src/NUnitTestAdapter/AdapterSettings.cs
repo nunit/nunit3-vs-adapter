@@ -335,7 +335,7 @@ namespace NUnit.VisualStudio.TestAdapter
             ShowInternalProperties = GetInnerTextAsBool(nunitNode, nameof(ShowInternalProperties), false);
             UseParentFQNForParametrizedTests = GetInnerTextAsBool(nunitNode, nameof(UseParentFQNForParametrizedTests), false);
             UseNUnitIdforTestCaseId = GetInnerTextAsBool(nunitNode, nameof(UseNUnitIdforTestCaseId), false);
-            ConsoleOut = GetInnerTextAsInt(nunitNode, nameof(ConsoleOut), 1);  // 0 no output to console, 1 : output to console
+            ConsoleOut = GetInnerTextAsInt(nunitNode, nameof(ConsoleOut), 2);  // 0 no output to console, 1 : output to console
             StopOnError = GetInnerTextAsBool(nunitNode, nameof(StopOnError), false);
             UseNUnitFilter = GetInnerTextAsBool(nunitNode, nameof(UseNUnitFilter), true);
             IncludeStackTraceForSuites = GetInnerTextAsBool(nunitNode, nameof(IncludeStackTraceForSuites), true);
