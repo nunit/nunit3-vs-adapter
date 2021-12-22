@@ -13,9 +13,8 @@ public sealed class ConsoleOutTests : CsProjAcceptanceTests
 
                 namespace Issue774
                 {
-                    public class PropertyTest
+                    public class ConsoleOutTest
                     {
-                        [Property(""Bug"", ""12345"")]
                         [Test]
                         public void Test1()
                         {
