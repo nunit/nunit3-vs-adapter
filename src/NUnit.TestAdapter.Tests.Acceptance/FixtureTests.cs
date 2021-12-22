@@ -109,6 +109,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
         protected override string Framework => Frameworks.NetCoreApp31;
 
+        [Test, Platform("Win")]
         [TestCase("TestCategory=869", 2, 2)]
         [TestCase("TestCategory=884", 3, 3)]
         [TestCase("TestCategory=918", 1, 1)]
@@ -119,6 +120,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
             Verify(executed, total, results);
         }
 
+        [Test, Platform("Win")]
         [TestCase("TestCategory=869", 2, 2)]
         [TestCase("TestCategory=884", 3, 3)]
         [TestCase("TestCategory=918", 1, 1)]
