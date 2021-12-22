@@ -46,7 +46,7 @@ public sealed class ConsoleOutTests : CsProjAcceptanceTests
     public void VsTest()
     {
         var workspace = Build();
-        var results = workspace.VSTest($@"bin\Debug\{Framework}\Test.dll", "");
+        var results = workspace.VSTest($@"bin\Debug\{Framework}\Test.dll");
         Verify(2, 2, results);
     }
 }
