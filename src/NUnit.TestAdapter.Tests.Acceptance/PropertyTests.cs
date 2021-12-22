@@ -3,7 +3,6 @@ using NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 {
-
     public sealed class PropertyTests : CsProjAcceptanceTests
     {
         protected override void AddTestsCs(IsolatedWorkspace workspace)
