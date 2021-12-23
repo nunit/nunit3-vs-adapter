@@ -107,7 +107,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             workspace.MsBuild(restore: true);
 
-            var results = workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll");
+            var results = workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll", VsTestFilter.NoFilter);
 
             // Total Tests =
             //              3 from PassingTestStr/TestCaseSourceMethod

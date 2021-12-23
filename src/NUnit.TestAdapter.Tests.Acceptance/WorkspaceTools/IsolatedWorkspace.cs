@@ -122,7 +122,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                 .Run();
         }
 
-        public VSTestResult VSTest(string testAssemblyPath, string arguments = "")
+        public VSTestResult VSTest(string testAssemblyPath, IFilterArgument filter)
         {
             using var tempTrxFile = new TempFile();
 
@@ -130,16 +130,18 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                 .Add(testAssemblyPath)
                 .Add("/logger:trx;LogFileName=" + tempTrxFile);
 
-            if (arguments.Length > 0)
+            if (filter.HasArguments)
             {
-                var completeFilterStatement = $"/TestCaseFilter:{arguments}";
-                vstest.Add(completeFilterStatement);
+                vstest.Add(filter.CompletedArgument());
             }
 
             var result = vstest.Run(throwOnError: false);
 
             if (new FileInfo(tempTrxFile).Length == 0)
+            {
                 result.ThrowIfError();
+                return new VSTestResult(result);
+            }
 
             return VSTestResult.Load(result, tempTrxFile);
         }

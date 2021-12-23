@@ -63,7 +63,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             workspace.MsBuild(restore: true);
 
-            workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll")
+            workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll", VsTestFilter.NoFilter)
                 .AssertSinglePassingTest();
         }
 
@@ -114,7 +114,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             workspace.MsBuild(restore: true);
 
-            workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll")
+            workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll", VsTestFilter.NoFilter)
                 .AssertSinglePassingTest();
         }
 
@@ -167,7 +167,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             foreach (var targetFramework in TargetFrameworks)
             {
-                workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll")
+                workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll", VsTestFilter.NoFilter)
                     .AssertSinglePassingTest();
             }
         }
@@ -221,7 +221,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             foreach (var targetFramework in TargetFrameworks)
             {
-                workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll")
+                workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll", VsTestFilter.NoFilter)
                     .AssertSinglePassingTest();
             }
         }
@@ -317,7 +317,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             workspace.MsBuild(restore: true);
 
-            var result = workspace.VSTest(@"bin\Debug\Test.dll");
+            var result = workspace.VSTest(@"bin\Debug\Test.dll", VsTestFilter.NoFilter);
             result.AssertSinglePassingTest();
         }
 
@@ -410,7 +410,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             workspace.MsBuild(restore: true);
 
-            workspace.VSTest(@"bin\Debug\Test.dll")
+            workspace.VSTest(@"bin\Debug\Test.dll", VsTestFilter.NoFilter)
                 .AssertSinglePassingTest();
         }
 
@@ -512,7 +512,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             workspace.MsBuild();
 
-            workspace.VSTest(@"bin\Debug\Test.dll")
+            workspace.VSTest(@"bin\Debug\Test.dll", VsTestFilter.NoFilter)
                 .AssertSinglePassingTest();
         }
 
@@ -625,7 +625,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             workspace.MsBuild();
 
-            workspace.VSTest(@"bin\Debug\Test.dll")
+            workspace.VSTest(@"bin\Debug\Test.dll", VsTestFilter.NoFilter)
                 .AssertSinglePassingTest();
         }
     }

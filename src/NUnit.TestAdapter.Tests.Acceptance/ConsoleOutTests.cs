@@ -46,7 +46,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         public void VsTest()
         {
             var workspace = Build();
-            var results = workspace.VSTest($@"bin\Debug\{Framework}\Test.dll");
+            var results = workspace.VSTest($@"bin\Debug\{Framework}\Test.dll", VsTestFilter.NoFilter);
             Verify(2, 2, results);
         }
     }

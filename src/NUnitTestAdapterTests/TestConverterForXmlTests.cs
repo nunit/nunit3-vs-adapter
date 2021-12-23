@@ -86,7 +86,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             foreach (XmlNode node in xmlNodeList)
             {
-                var testCase = testConverterForXml.ConvertTestCase(new NUnitEventTestCase(node));
+                testConverterForXml.ConvertTestCase(new NUnitEventTestCase(node));
             }
 
             var traitsCache = testConverterForXml.TraitsCache;

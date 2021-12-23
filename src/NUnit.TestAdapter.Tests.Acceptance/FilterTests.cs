@@ -60,10 +60,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         [TestCase(@"TestCategory!=BarGroup", 1, 2)]
         [TestCase(@"TestCategory=IsExplicit", 1, 1)]
         [TestCase(@"FullyQualifiedName=Filter.Tests.Foo", 1, 1)]
+        [TestCase(@"TestCategory=XXXX", 0, 0)]
         public void Filter_VSTest(string filter, int executed, int total)
         {
             var workspace = Build();
-            var results = workspace.VSTest($@"bin\Debug\{Framework}\Test.dll", filter);
+            var results = workspace.VSTest($@"bin\Debug\{Framework}\Test.dll", new VsTestTestCaseFilter(filter));
             Verify(executed, total, results);
         }
 
