@@ -35,23 +35,23 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
     {
         private Tokenizer _tokenizer;
 
-        private static readonly Token LPAREN = new (TokenKind.Symbol, "(");
-        private static readonly Token RPAREN = new (TokenKind.Symbol, ")");
-        private static readonly Token AND_OP = new (TokenKind.Symbol, "&");
-        private static readonly Token OR_OP = new (TokenKind.Symbol, "|");
-        private static readonly Token NOT_OP = new (TokenKind.Symbol, "!");
+        private static readonly Token LPAREN = new(TokenKind.Symbol, "(");
+        private static readonly Token RPAREN = new(TokenKind.Symbol, ")");
+        private static readonly Token AND_OP = new(TokenKind.Symbol, "&");
+        private static readonly Token OR_OP = new(TokenKind.Symbol, "|");
+        private static readonly Token NOT_OP = new(TokenKind.Symbol, "!");
 
-        private static readonly Token EQ_OP = new (TokenKind.Symbol, "=");
-        private static readonly Token NE_OP = new (TokenKind.Symbol, "!=");
-        private static readonly Token CONTAINS_OP = new (TokenKind.Symbol, "~");
-        private static readonly Token NOTCONTAINS_OP = new (TokenKind.Symbol, "!~");
+        private static readonly Token EQ_OP = new(TokenKind.Symbol, "=");
+        private static readonly Token NE_OP = new(TokenKind.Symbol, "!=");
+        private static readonly Token CONTAINS_OP = new(TokenKind.Symbol, "~");
+        private static readonly Token NOTCONTAINS_OP = new(TokenKind.Symbol, "!~");
 
         private static readonly Token[] AND_OPS = { AND_OP };
         private static readonly Token[] OR_OPS = { OR_OP };
         private static readonly Token[] EQ_OPS = { EQ_OP };
         private static readonly Token[] REL_OPS = { EQ_OP, NE_OP, CONTAINS_OP, NOTCONTAINS_OP };
 
-        private static readonly Token EOF = new (TokenKind.Eof);
+        private static readonly Token EOF = new(TokenKind.Eof);
 
         public string Parse(string input)
         {
@@ -140,7 +140,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
             {
                 case "FullyQualifiedName":
                     rhs = Expect(TokenKind.FQN, TokenKind.Word);
-                    return EmitFullNameFilter(op, rhs.Text);
+                    return EmitFullNameFilter(op, UnEscape(rhs.Text));
                 case "TestCategory":
                     rhs = Expect(TokenKind.Word);
                     return EmitCategoryFilter(op, rhs.Text);
@@ -149,13 +149,18 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
                     return EmitPropertyFilter(op, lhs.Text, rhs.Text);
                 case "Name":
                     rhs = Expect(TokenKind.FQN, TokenKind.Word);
-                    return EmitNameFilter(op, rhs.Text);
+                    return EmitNameFilter(op, UnEscape(rhs.Text));
 
                 default:
                     // Assume it's a property name
                     rhs = Expect(TokenKind.String, TokenKind.Word);
                     return EmitPropertyFilter(op, lhs.Text, rhs.Text);
             }
+        }
+
+        private string UnEscape(string rhs)
+        {
+            return rhs.Replace(@"\(", "(").Replace(@"\)", ")");
         }
 
         private static string EmitFullNameFilter(Token op, string value)

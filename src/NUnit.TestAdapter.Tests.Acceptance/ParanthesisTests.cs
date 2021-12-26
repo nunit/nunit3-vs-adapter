@@ -45,9 +45,14 @@ public sealed class ParanthesisTests : CsProjAcceptanceTests
     [TestCase(@"FullyQualifiedName=Issue919.Foo.Bzzt", 1, 1)]  // Sanity check
     [TestCase(@"FullyQualifiedName=Issue919.Foo.Bar\(1\)", 0, 0)]
     [TestCase(@"FullyQualifiedName=Issue919.Foo.Baz\(1\)", 1, 1)]
+    [TestCase(@"Name=Bzzt", 1, 1)]  // Sanity check
+    [TestCase(@"Name=Bar\(1\)", 0, 0)]
+    [TestCase(@"Name=Baz\(1\)", 1, 1)]
+    [TestCase(@"", 2, 2)]
     public void VsTestTestCases(string filter, int executed, int total)
     {
         var workspace = Build();
+        workspace.DumpTestExecution = true;
         var results = workspace.VSTest($@"bin\Debug\{Framework}\Test.dll", new VsTestTestCaseFilter(filter));
         Verify(executed, total, results);
     }
@@ -60,6 +65,21 @@ public sealed class ParanthesisTests : CsProjAcceptanceTests
     {
         var workspace = Build();
         var results = workspace.VSTest($@"bin\Debug\{Framework}\Test.dll", new VsTestTestsFilter(filter));
+        Verify(executed, total, results);
+    }
+
+    [Test, Platform("Win")]
+    [TestCase(@"FullyQualifiedName=Issue919.Foo.Bzzt", 1, 1)]  // Sanity check
+    [TestCase(@"FullyQualifiedName=Issue919.Foo.Bar\(1\)", 0, 0)]
+    [TestCase(@"FullyQualifiedName=Issue919.Foo.Baz\(1\)", 1, 1)]
+    [TestCase(@"Name=Bzzt", 1, 1)]  // Sanity check
+    [TestCase(@"Name=Bar\(1\)", 0, 0)]
+    [TestCase(@"Name=Baz\(1\)", 1, 1)]
+    [TestCase(@"", 2, 2)]
+    public void DotnetTestCases(string filter, int executed, int total)
+    {
+        var workspace = Build();
+        var results = workspace.DotNetTest(filter, true, true, TestContext.WriteLine);
         Verify(executed, total, results);
     }
 }

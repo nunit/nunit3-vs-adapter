@@ -84,7 +84,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         protected static IsolatedWorkspace CreateWorkspace()
         {
             var test = TestContext.CurrentContext?.Test ?? throw new InvalidOperationException("There is no current test.");
-            const string chars = "=()!,~";
+            const string chars = "=()!,~-";
             string name = chars.Aggregate(test.Name, (current, ch) => current.Replace(ch, '_'));
             var workspace = Initialization.Value.Manager.CreateWorkspace(name);
 
@@ -156,6 +156,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         {
             // Keep in sync with build.cake.
 
+            // Search for it
             for (var directory = TestContext.CurrentContext.TestDirectory; directory != null; directory = Path.GetDirectoryName(directory))
             {
                 var packagePath = Path.Combine(directory, "package");
@@ -163,7 +164,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                 try
                 {
                     if (Directory.EnumerateFiles(Path.Combine(directory, "package"), packageId + ".*.nupkg").Any())
+                    {
                         return packagePath;
+                    }
                 }
                 catch (DirectoryNotFoundException)
                 {

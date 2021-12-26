@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
+
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
@@ -128,6 +129,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         // Filter control
         ExplicitModeEnum ExplicitMode { get; }
+        bool SkipExecutionWhenNoTests { get; }
     }
 
     public enum VsTestCategoryType
@@ -267,6 +269,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public char FullnameSeparator { get; private set; } = ':';
 
         public ExplicitModeEnum ExplicitMode { get; private set; } = ExplicitModeEnum.Strict;
+        public bool SkipExecutionWhenNoTests { get; private set; }
 
 
         #region  NUnit Diagnostic properties
@@ -339,7 +342,8 @@ namespace NUnit.VisualStudio.TestAdapter
             StopOnError = GetInnerTextAsBool(nunitNode, nameof(StopOnError), false);
             UseNUnitFilter = GetInnerTextAsBool(nunitNode, nameof(UseNUnitFilter), true);
             IncludeStackTraceForSuites = GetInnerTextAsBool(nunitNode, nameof(IncludeStackTraceForSuites), true);
-            EnsureAttachmentFileScheme = GetInnerTextAsBool(nunitNode, nameof(IncludeStackTraceForSuites), false);
+            EnsureAttachmentFileScheme = GetInnerTextAsBool(nunitNode, nameof(EnsureAttachmentFileScheme), false);
+            SkipExecutionWhenNoTests = GetInnerTextAsBool(nunitNode, nameof(SkipExecutionWhenNoTests), false);
 
             // Engine settings
             DiscoveryMethod = MapEnum(GetInnerText(nunitNode, nameof(DiscoveryMethod), Verbosity > 0), DiscoveryMethod.Current);

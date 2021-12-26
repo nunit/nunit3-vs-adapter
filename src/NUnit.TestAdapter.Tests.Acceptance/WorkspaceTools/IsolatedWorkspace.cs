@@ -12,6 +12,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
         private readonly ToolResolver toolResolver;
         private readonly DirectoryMutex directoryMutex;
 
+        public bool DumpTestExecution { get; set; } = false;
+
         public string Directory => directoryMutex.DirectoryPath;
 
         public IsolatedWorkspace(DirectoryMutex directoryMutex, ToolResolver toolResolver)
@@ -134,6 +136,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
             {
                 vstest.Add(filter.CompletedArgument());
             }
+
+            if (DumpTestExecution)
+                vstest.Add("--").Add("NUnit.DumpXmlTestResults=true");
 
             var result = vstest.Run(throwOnError: false);
 

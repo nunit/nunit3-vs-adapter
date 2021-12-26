@@ -156,7 +156,7 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         /// <summary>
-        /// Called by the VisualStudio IDE when selected tests are to be run. Never called from TFS Build.
+        /// Called by the VisualStudio IDE when selected tests are to be run. Never called from TFS Build, except (at least 2022, probably also 2019) when vstest.console uses /test: then this is being used.
         /// </summary>
         /// <param name="tests">The tests to be run.</param>
         /// <param name="runContext">The RunContext.</param>
@@ -283,7 +283,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     var discovery = new DiscoveryConverter(TestLog, Settings);
                     discovery.Convert(discoveryResults, assemblyPath);
-                    if (discovery.AllTestCases.Any())
+                    if (!Settings.SkipExecutionWhenNoTests || discovery.AllTestCases.Any())
                     {
                         var ea = ExecutionFactory.Create(this);
                         ea.Run(filter, discovery, this);
