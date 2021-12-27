@@ -1,4 +1,5 @@
 ﻿using System;
+
 using NUnit.Engine;
 using NUnit.VisualStudio.TestAdapter.Dump;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
@@ -62,43 +63,73 @@ namespace NUnit.VisualStudio.TestAdapter
         public abstract TestFilter CheckFilterInCurrentMode(TestFilter filter, IDiscoveryConverter discovery);
 
         protected NUnitTestFilterBuilder CreateTestFilterBuilder()
-            => new (NUnitEngineAdapter.GetService<ITestFilterService>(), Settings);
+            => new(NUnitEngineAdapter.GetService<ITestFilterService>(), Settings);
         protected ITestConverterCommon CreateConverter(DiscoveryConverter discovery) => Settings.DiscoveryMethod == DiscoveryMethod.Current ? discovery.TestConverter : discovery.TestConverterForXml;
 
-        protected TestFilter CheckFilter(IDiscoveryConverter discovery)
+        protected TestFilter CheckFilter(TestFilter testFilter, IDiscoveryConverter discovery)
         {
-            TestFilter filter;
-            if (discovery.NoOfLoadedTestCasesAboveLimit)
+            if (discovery.NoOfLoadedTestCasesAboveLimit && !testFilter.IsCategoryFilter())
             {
                 TestLog.Debug("Setting filter to empty due to number of testcases");
-                filter = TestFilter.Empty;
+                var filter = TestFilter.Empty;
+                return filter;
             }
-            else
+            if (testFilter.IsCategoryFilter())
             {
-                var filterBuilder = CreateTestFilterBuilder();
-                filter = filterBuilder.FilterByList(discovery.LoadedTestCases);
+                if (!discovery.IsExplicitRun && discovery.HasExplicitTests && Settings.ExplicitMode == ExplicitModeEnum.Strict)
+                {
+                    var filterExt = new TestFilter($"<not><prop name='Explicit'>true</prop></not>");
+                    var combiner = new TestFilterCombiner(testFilter, filterExt);
+                    return combiner.GetFilter();
+                }
+                return testFilter;
             }
-            return filter;
+            var filterBuilder = CreateTestFilterBuilder();
+            return filterBuilder.FilterByList(discovery.LoadedTestCases);
         }
     }
+
+    public class TestFilterCombiner
+    {
+        private readonly TestFilter _a;
+        private readonly TestFilter _b;
+
+        public TestFilterCombiner(TestFilter a, TestFilter b)
+        {
+            _a = a;
+            _b = b;
+        }
+
+        public TestFilter GetFilter()
+        {
+            var innerA = StripFilter(_a);
+            var innerB = StripFilter(_b);
+            var inner = $"<filter>{innerA}{innerB}</filter>";
+            return new TestFilter(inner);
+        }
+
+        private string StripFilter(TestFilter x)
+        {
+            var s = x.Text.Replace("<filter>", "");
+            var s2 = s.Replace("</filter>", "");
+            return s2;
+        }
+    }
+
+
 
     public class IdeExecution : Execution
     {
         public IdeExecution(IExecutionContext ctx) : base(ctx)
         {
         }
-        public override bool Run(TestFilter filter, DiscoveryConverter discovery, NUnit3TestExecutor nUnit3TestExecutor)
-        {
-            return base.Run(filter, discovery, nUnit3TestExecutor);
-        }
-
         public override TestFilter CheckFilterInCurrentMode(TestFilter filter, IDiscoveryConverter discovery)
         {
             if (!discovery.IsDiscoveryMethodCurrent)
                 return filter;
             if (filter.IsEmpty())
                 return filter;
-            filter = CheckFilter(discovery);
+            filter = CheckFilter(filter, discovery);
             return filter;
         }
     }
@@ -126,23 +157,16 @@ namespace NUnit.VisualStudio.TestAdapter
             // If we have a VSTest TestFilter, convert it to an nunit filter
             if (vsTestFilter == null || vsTestFilter.IsEmpty)
                 return filter;
-            TestLog.Debug(
-                $"TfsFilter used, length: {vsTestFilter.TfsTestCaseFilterExpression?.TestCaseFilterValue.Length}");
+            TestLog.Debug($"TfsFilter used, length: {vsTestFilter.TfsTestCaseFilterExpression?.TestCaseFilterValue.Length}");
             // NOTE This overwrites filter used in call
             var filterBuilder = CreateTestFilterBuilder();
-            if (Settings.DiscoveryMethod == DiscoveryMethod.Current)
-            {
-                filter = Settings.UseNUnitFilter
+            filter = Settings.DiscoveryMethod == DiscoveryMethod.Current
+                ? Settings.UseNUnitFilter
                     ? filterBuilder.ConvertVsTestFilterToNUnitFilter(vsTestFilter)
-                    : filterBuilder.ConvertTfsFilterToNUnitFilter(vsTestFilter, discovery);
-            }
-            else
-            {
-                filter = filterBuilder
-                    .ConvertTfsFilterToNUnitFilter(vsTestFilter, discovery.LoadedTestCases);
-            }
+                    : filterBuilder.ConvertTfsFilterToNUnitFilter(vsTestFilter, discovery)
+                : filterBuilder.ConvertTfsFilterToNUnitFilter(vsTestFilter, discovery.LoadedTestCases);
 
-            Dump?.AddString($"\n\nTFSFilter: {vsTestFilter.TfsTestCaseFilterExpression.TestCaseFilterValue}\n");
+            Dump?.AddString($"\n\nTFSFilter: {vsTestFilter.TfsTestCaseFilterExpression?.TestCaseFilterValue}\n");
             Dump?.DumpVSInputFilter(filter, "(At Execution (TfsFilter)");
 
             return filter;
@@ -151,22 +175,28 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             if (!discovery.IsDiscoveryMethodCurrent)
                 return filter;
-            if ((VsTestFilter == null || VsTestFilter.IsEmpty) && filter != TestFilter.Empty)
+            if (filter != TestFilter.Empty)
             {
-                filter = CheckFilter(discovery);
+                filter = CheckFilter(filter, discovery);
             }
-            else if (VsTestFilter != null && !VsTestFilter.IsEmpty && !Settings.UseNUnitFilter)
+            else if (VsTestFilter is { IsEmpty: false } && !Settings.UseNUnitFilter)
             {
                 var s = VsTestFilter.TfsTestCaseFilterExpression.TestCaseFilterValue;
                 var scount = s.Split('|', '&').Length;
-                if (scount > Settings.AssemblySelectLimit)
-                {
-                    TestLog.Debug("Setting filter to empty due to TfsFilter size");
-                    filter = TestFilter.Empty;
-                }
+                filter = CheckAssemblySelectLimit(filter, scount);
             }
 
             return filter;
+        }
+
+        private TestFilter CheckAssemblySelectLimit(TestFilter filter, int scount)
+        {
+            if (scount <= Settings.AssemblySelectLimit)
+            {
+                return filter;
+            }
+            TestLog.Debug("Setting filter to empty due to TfsFilter size");
+            return TestFilter.Empty;
         }
     }
 }

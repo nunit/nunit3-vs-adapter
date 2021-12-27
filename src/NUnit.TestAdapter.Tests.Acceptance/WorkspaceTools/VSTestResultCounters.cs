@@ -22,6 +22,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
         public int InProgress { get; }
         public int Pending { get; }
 
+        public static VSTestResultCounters CreateEmptyCounters() => new (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
         public VSTestResultCounters(
             int total,
             int executed,

@@ -56,11 +56,11 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public SkipReason WhatSkipReason()
         {
             var msgNode = TopNode.SelectSingleNode("properties/property[@name='_SKIPREASON']");
-            if (msgNode != null &&
-                new[] { "contains no tests", "Has no TestFixtures" }.Any(msgNode.GetAttribute("value")
-                    .Contains))
-                return SkipReason.NoNUnitTests;
-            return SkipReason.LoadFailure;
+            return msgNode != null &&
+                   new[] { "contains no tests", "Has no TestFixtures" }.Any(msgNode.GetAttribute("value")
+                       .Contains)
+                ? SkipReason.NoNUnitTests
+                : SkipReason.LoadFailure;
         }
 
         public bool HasNoNUnitTests => WhatSkipReason() == SkipReason.NoNUnitTests;

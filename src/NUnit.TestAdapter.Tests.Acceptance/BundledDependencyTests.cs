@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 {
@@ -49,11 +50,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                         }
                     }");
 
-            workspace.MSBuild(restore: true);
+            workspace.MsBuild(restore: true);
 
             foreach (var targetFramework in TargetFrameworks)
             {
-                workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll");
+                workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll", VsTestFilter.NoFilter);
             }
         }
 
@@ -127,11 +128,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                 .AddFile("test.addins", @"
                     ﻿Test.dll");
 
-            workspace.MSBuild(restore: true);
+            workspace.MsBuild(restore: true);
 
             foreach (var targetFramework in TargetFrameworks)
             {
-                workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll");
+                workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll", VsTestFilter.NoFilter);
             }
         }
     }

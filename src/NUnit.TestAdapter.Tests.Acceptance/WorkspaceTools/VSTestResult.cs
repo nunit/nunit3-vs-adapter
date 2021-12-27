@@ -17,6 +17,16 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
         public IReadOnlyList<string> RunErrors { get; }
         public IReadOnlyList<string> RunWarnings { get; }
 
+        public VSTestResult(ProcessRunResult processRunResult)
+        {
+            ProcessRunResult = processRunResult;
+            Outcome = "";
+            Counters = VSTestResultCounters.CreateEmptyCounters();
+            RunErrors = Array.Empty<string>();
+            RunWarnings = Array.Empty<string>();
+        }
+
+
         public VSTestResult(ProcessRunResult processRunResult, string outcome, VSTestResultCounters counters, IReadOnlyList<string> runErrors = null, IReadOnlyList<string> runWarnings = null)
         {
             ProcessRunResult = processRunResult;

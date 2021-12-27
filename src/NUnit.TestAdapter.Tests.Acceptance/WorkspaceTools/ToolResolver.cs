@@ -28,10 +28,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 
             this.downloadCacheDirectory = downloadCacheDirectory;
 
-            nuGet = new Lazy<string>(() =>
-            {
-                return FindDownloadedTool("NuGet", "nuget.exe", "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe");
-            });
+            nuGet = new Lazy<string>(() => FindDownloadedTool("NuGet", "nuget.exe", "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe"));
 
             msBuild = new Lazy<string>(() =>
             {
@@ -57,12 +54,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
                 return Path.Combine(vsInstallation, @"Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe");
             });
 
-            vsWhere = new Lazy<string>(() =>
-            {
-                return Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
-                    @"Microsoft Visual Studio\Installer\vswhere.exe");
-            });
+            vsWhere = new Lazy<string>(() => Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
+                @"Microsoft Visual Studio\Installer\vswhere.exe"));
         }
 
         private string FindDownloadedTool(string id, string fileName, string downloadUrl)
@@ -74,10 +68,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
             {
                 Directory.CreateDirectory(directory);
 
-                using (var client = new WebClient())
-                {
-                    client.DownloadFile(downloadUrl, toolPath);
-                }
+                using var client = new WebClient();
+                client.DownloadFile(downloadUrl, toolPath);
             }
 
             return toolPath;

@@ -3,18 +3,27 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 {
+    public class Frameworks
+    {
+        public const string NetCoreApp31 = "netcoreapp3.1";
+        public const string NetCoreApp21 = "netcoreapp2.1";
+        public const string Net50 = "net5.0";
+        public const string Net60 = "net6.0";
+    }
+
     [Category("Acceptance")]
     public abstract class AcceptanceTests
     {
-        public static string NuGetPackageId { get; } = "NUnit3TestAdapter";
+        public static string NuGetPackageId => "NUnit3TestAdapter";
 
-        public static string NuGetPackageVersion => Initialization.Value.nupkgVersion;
+        public static string NuGetPackageVersion => Initialization.Value.NupkgVersion;
 
         public const string LowestNetfxTarget = "net35";
         public const string LegacyProjectTargetFrameworkVersion = "v3.5";
@@ -22,60 +31,62 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         public static IEnumerable<string> TargetFrameworks => new[]
         {
             LowestNetfxTarget,
-            "netcoreapp2.1"
+            Frameworks.NetCoreApp21
         };
 
         public static IEnumerable<string> DotNetCliTargetFrameworks => new[]
         {
-            "netcoreapp2.1",
-            "netcoreapp3.1"
+            Frameworks.NetCoreApp21,
+            Frameworks.NetCoreApp31,
+            Frameworks.Net50
         };
 
-        private static readonly Lazy<(IsolatedWorkspaceManager manager, string nupkgVersion, bool keepWorkspaces)> Initialization = new (() =>
-        {
-            var directory = TestContext.Parameters["ProjectWorkspaceDirectory"]
-                ?? TryAutoDetectProjectWorkspaceDirectory()
-                ?? throw new InvalidOperationException("The test parameter ProjectWorkspaceDirectory must be set in order to run this test.");
+        private static readonly Lazy<(IsolatedWorkspaceManager Manager, string NupkgVersion, bool KeepWorkspaces)> Initialization = new(() =>
+       {
+           var directory = TestContext.Parameters["ProjectWorkspaceDirectory"]
+               ?? TryAutoDetectProjectWorkspaceDirectory()
+               ?? throw new InvalidOperationException("The test parameter ProjectWorkspaceDirectory must be set in order to run this test.");
 
-            var nupkgDirectory = TestContext.Parameters["TestNupkgDirectory"]
-                ?? TryAutoDetectTestNupkgDirectory(NuGetPackageId)
-                ?? throw new InvalidOperationException("The test parameter TestNupkgDirectory must be set in order to run this test.");
+           var nupkgDirectory = TestContext.Parameters["TestNupkgDirectory"]
+               ?? TryAutoDetectTestNupkgDirectory(NuGetPackageId)
+               ?? throw new InvalidOperationException("The test parameter TestNupkgDirectory must be set in order to run this test.");
 
-            var nupkgVersion = TryGetTestNupkgVersion(nupkgDirectory, packageId: NuGetPackageId)
-                ?? throw new InvalidOperationException($"No NuGet package with the ID {NuGetPackageId} was found in {nupkgDirectory}.");
+           var nupkgVersion = TryGetTestNupkgVersion(nupkgDirectory, packageId: NuGetPackageId)
+               ?? throw new InvalidOperationException($"No NuGet package with the ID {NuGetPackageId} was found in {nupkgDirectory}.");
 
-            var keepWorkspaces = TestContext.Parameters.Get("KeepWorkspaces", defaultValue: false);
+           var keepWorkspaces = TestContext.Parameters.Get("KeepWorkspaces", defaultValue: false);
 
-            var packageCachePath = Path.Combine(directory, ".isolatednugetcache");
-            ClearCachedTestNupkgs(packageCachePath);
+           var packageCachePath = Path.Combine(directory, ".isolatednugetcache");
+           ClearCachedTestNupkgs(packageCachePath);
 
-            var manager = new IsolatedWorkspaceManager(
-                reason: string.Join(
-                    Environment.NewLine,
-                    "Test assembly: " + typeof(AcceptanceTests).Assembly.Location,
-                    "Runner process: " + Process.GetCurrentProcess().MainModule.FileName),
-                directory,
-                nupkgDirectory,
-                packageCachePath,
-                downloadCachePath: Path.Combine(directory, ".toolcache"));
+           var manager = new IsolatedWorkspaceManager(
+               reason: string.Join(
+                   Environment.NewLine,
+                   "Test assembly: " + typeof(AcceptanceTests).Assembly.Location,
+                   "Runner process: " + Process.GetCurrentProcess().MainModule.FileName),
+               directory,
+               nupkgDirectory,
+               packageCachePath,
+               downloadCachePath: Path.Combine(directory, ".toolcache"));
 
-            if (keepWorkspaces) manager.PreserveDirectory("The KeepWorkspaces test parameter was set to true.");
+           if (keepWorkspaces) manager.PreserveDirectory("The KeepWorkspaces test parameter was set to true.");
 
-            return (manager, nupkgVersion, keepWorkspaces);
-        });
+           return (manager, nupkgVersion, keepWorkspaces);
+       });
 
         private static void ClearCachedTestNupkgs(string packageCachePath)
         {
             Utils.DeleteDirectoryRobust(Path.Combine(packageCachePath, NuGetPackageId));
         }
 
-        private static readonly Dictionary<string, List<IsolatedWorkspace>> WorkspacesByTestId = new ();
+        private static readonly Dictionary<string, List<IsolatedWorkspace>> WorkspacesByTestId = new();
 
         protected static IsolatedWorkspace CreateWorkspace()
         {
             var test = TestContext.CurrentContext?.Test ?? throw new InvalidOperationException("There is no current test.");
-
-            var workspace = Initialization.Value.manager.CreateWorkspace(test.Name);
+            const string chars = "=()!,~-";
+            string name = chars.Aggregate(test.Name, (current, ch) => current.Replace(ch, '_'));
+            var workspace = Initialization.Value.Manager.CreateWorkspace(name);
 
             lock (WorkspacesByTestId)
             {
@@ -83,7 +94,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                     WorkspacesByTestId.Add(test.ID, workspaces = new List<IsolatedWorkspace>());
                 workspaces.Add(workspace);
             }
-
             return workspace;
         }
 
@@ -111,11 +121,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
             if (TestContext.CurrentContext.Result.Outcome.Status == TestStatus.Failed)
             {
-                Initialization.Value.manager.PreserveDirectory(
+                Initialization.Value.Manager.PreserveDirectory(
                     test.FullName + " failed:" + Environment.NewLine
                     + TestContext.CurrentContext.Result.Message.TrimEnd() + Environment.NewLine);
             }
-            else if (!Initialization.Value.keepWorkspaces)
+            else if (!Initialization.Value.KeepWorkspaces)
             {
                 foreach (var workspace in workspaces)
                     Utils.DeleteDirectoryRobust(workspace.Directory);
@@ -126,7 +136,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         {
             if (!Initialization.IsValueCreated) return;
 
-            Initialization.Value.manager.Dispose();
+            Initialization.Value.Manager.Dispose();
         }
 
         private static string TryAutoDetectProjectWorkspaceDirectory()
@@ -146,6 +156,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         {
             // Keep in sync with build.cake.
 
+            // Search for it
             for (var directory = TestContext.CurrentContext.TestDirectory; directory != null; directory = Path.GetDirectoryName(directory))
             {
                 var packagePath = Path.Combine(directory, "package");
@@ -153,7 +164,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                 try
                 {
                     if (Directory.EnumerateFiles(Path.Combine(directory, "package"), packageId + ".*.nupkg").Any())
+                    {
                         return packagePath;
+                    }
                 }
                 catch (DirectoryNotFoundException)
                 {

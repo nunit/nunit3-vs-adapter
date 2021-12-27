@@ -107,7 +107,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
         /// <summary>
-        /// Issue516
+        /// Issue516.
         /// </summary>
         [TestCase(null)]
         [TestCase("")]

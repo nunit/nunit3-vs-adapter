@@ -145,6 +145,8 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         /// </summary>
         public IEnumerable<NUnitDiscoveryTestCase> RunnableTestCases => allTestCases.Where(c => !c.IsExplicitReverse);
 
+        public int NoOfExplicitTestCases => allTestCases.Count(c => c.IsExplicitReverse);
+
         public void AddTestSuiteToAssembly(NUnitDiscoveryTestSuite ts)
         {
             AddTestSuite(ts);
@@ -227,7 +229,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         string FullName { get; }
         string ClassName { get; }
         string MethodName { get; }
-        long Seed { get;  }
+        long Seed { get; }
     }
 
     public sealed class NUnitDiscoveryTestCase : NUnitDiscoverySuiteBase, INUnitDiscoveryTestCase, INUnitCommonTestCase

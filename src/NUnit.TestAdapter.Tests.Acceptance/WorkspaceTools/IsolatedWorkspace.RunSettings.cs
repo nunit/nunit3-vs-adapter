@@ -7,10 +7,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
     {
         private sealed class RunSettings
         {
-            private readonly List<string> arguments = new ();
+            private List<string> Arguments { get; } = new();
 
             public string WorkingDirectory { get; }
             public string FileName { get; }
+
+            public string ArgumentsAsEscapedString => ProcessUtils.EscapeProcessArguments(Arguments);
 
             public RunSettings(string workingDirectory, string fileName)
             {
@@ -20,34 +22,34 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 
             public ProcessRunResult Run(bool throwOnError = true)
             {
-                var result = ProcessUtils.Run(WorkingDirectory, FileName, arguments);
+                var result = ProcessUtils.Run(WorkingDirectory, FileName, Arguments);
                 if (throwOnError) result.ThrowIfError();
                 return result;
             }
 
             public RunSettings Add(string argument)
             {
-                arguments.Add(argument);
+                Arguments.Add(argument);
                 return this;
             }
 
             public RunSettings AddRange(IEnumerable<string> arguments)
             {
                 if (arguments is null) throw new ArgumentNullException(nameof(arguments));
-                this.arguments.AddRange(arguments);
+                Arguments.AddRange(arguments);
                 return this;
             }
 
             public RunSettings AddIf(bool condition, string argument)
             {
-                if (condition) arguments.Add(argument);
+                if (condition) Arguments.Add(argument);
                 return this;
             }
 
             public RunSettings AddRangeIf(bool condition, IEnumerable<string> arguments)
             {
                 if (arguments is null) throw new ArgumentNullException(nameof(arguments));
-                if (condition) this.arguments.AddRange(arguments);
+                if (condition) Arguments.AddRange(arguments);
                 return this;
             }
         }
