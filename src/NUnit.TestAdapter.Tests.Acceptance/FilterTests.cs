@@ -15,19 +15,19 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                     public class Tests
                     {
         
-                        [Test,Category(""FooGroup""),Category(""AllGroup""]
+                        [Test,Category(""FooGroup""),Category(""AllGroup"")]
                         public void Foo()
                         {
                             Assert.Pass();
                         }
 
-                        [Test,Explicit,Category(""IsExplicit""),Category(""FooGroup""),Category(""AllGroup""]
+                        [Test,Explicit,Category(""IsExplicit""),Category(""FooGroup""),Category(""AllGroup"")]
                         public void FooExplicit()
                         {
                             Assert.Pass();
                         }
 
-                        [Test, Category(""BarGroup""),Category(""AllGroup""]
+                        [Test, Category(""BarGroup""),Category(""AllGroup"")]
                         public void Bar()
                         {
                             Assert.Pass();
@@ -45,7 +45,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         [TestCase(@"TestCategory=IsExplicit", 1, 1)]
         [TestCase(@"FullyQualifiedName=Filter.Tests.Foo", 1, 1)]
         [TestCase(@"FullyQualifiedName!=Filter.Tests.Foo", 1, 1)]
-        // [TestCase(@"TestCategory!=AllGroup", 0, 0)]
+        [TestCase(@"TestCategory!=AllGroup", 0, 0)]
         // [TestCase(@"TestThatDontExistHere", 0, 0)]
         // [TestCase(@"FullyQualifiedName~Filter.Tests.Foo", 1, 1)]
         // [TestCase(@"FullyQualifiedName~Foo", 1, 1)]
