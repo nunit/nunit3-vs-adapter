@@ -74,6 +74,8 @@ namespace NUnit.VisualStudio.TestAdapter
                 var filter = TestFilter.Empty;
                 return filter;
             }
+            if (discovery.NoOfLoadedTestCases == 0)
+                return testFilter;
             if (testFilter.IsCategoryFilter())
             {
                 if (!discovery.IsExplicitRun && discovery.HasExplicitTests && Settings.ExplicitMode == ExplicitModeEnum.Strict)
