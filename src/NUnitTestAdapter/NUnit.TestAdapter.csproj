@@ -24,7 +24,7 @@
 
   <!-- We reference a specific pre-release version of the nunit.engine -->
   <PropertyGroup>
-    <RestoreAdditionalProjectSources>https://www.myget.org/F/nunit/api/v3/index.json</RestoreAdditionalProjectSources>
+    <RestoreAdditionalProjectSource>https://www.myget.org/F/nunit/api/v3/index.json</RestoreAdditionalProjectSource>
   </PropertyGroup>
 
   <ItemGroup>
