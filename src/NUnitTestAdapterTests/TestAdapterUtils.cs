@@ -22,8 +22,8 @@
 // ***********************************************************************
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
+
 using NUnit.Engine.Services;
-using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
@@ -49,14 +49,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             adapter.NUnitEngineAdapter.InternalEngineCreated += engine =>
             {
                 var concreteEngineType = (NUnit.Engine.TestEngine)engine;
-                concreteEngineType.Services.Add(new SettingsService(true));
-                concreteEngineType.Services.Add(new DomainManager());
                 concreteEngineType.Services.Add(new ExtensionService());
-                concreteEngineType.Services.Add(new DriverService());
-                concreteEngineType.Services.Add(new RecentFilesService());
                 concreteEngineType.Services.Add(new ProjectService());
                 concreteEngineType.Services.Add(new RuntimeFrameworkService());
-                concreteEngineType.Services.Add(new DefaultTestRunnerFactory());
                 concreteEngineType.Services.Add(new TestAgency()); // "TestAgency for " + TestContext.CurrentContext.Test.Name, 0));
                 concreteEngineType.Services.Add(new ResultService());
                 concreteEngineType.Services.Add(new TestFilterService());

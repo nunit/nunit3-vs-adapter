@@ -22,9 +22,17 @@
     <DisableHandlePackageFileConflicts>false</DisableHandlePackageFileConflicts>
   </PropertyGroup>
 
+  <!-- We reference a specific pre-release version of the nunit.engine -->
+  <PropertyGroup>
+    <RestoreAdditionalProjectSources>https://www.myget.org/F/nunit/api/v3/index.json</RestoreAdditionalProjectSources>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="nunit.engine" Version="4.0.0-dev00100" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="SourceLink.Create.CommandLine" Version="2.8.3" PrivateAssets="All" />
-    <PackageReference Include="nunit.engine" Version="3.13.2" />
     <PackageReference Include="TestCentric.Metadata" Version="1.7.1" Aliases="TestCentric" />
   </ItemGroup>
 

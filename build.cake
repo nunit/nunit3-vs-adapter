@@ -12,7 +12,7 @@ var configuration = Argument("configuration", "Release");
 // SET PACKAGE VERSION
 //////////////////////////////////////////////////////////////////////
 
-var version = "4.2.1";
+var version = "5.0.0";
 var modifier = "";
 
 var dbgSuffix = configuration.ToLower() == "debug" ? "-dbg" : "";
@@ -101,7 +101,7 @@ Task("Clean")
 Task("CleanPackages")
     .Does(()=>
     {
-    CleanDirectory(PACKAGE_DIR);
+        CleanDirectory(PACKAGE_DIR);
     });
 
 //////////////////////////////////////////////////////////////////////
