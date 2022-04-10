@@ -20,11 +20,11 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
-    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="11.0.0" />
+    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="17.1.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
-    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="17.0.0" />
+    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="17.1.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
   </ItemGroup>
 
