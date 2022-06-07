@@ -22,6 +22,8 @@
 // ***********************************************************************
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
+
+using NUnit.Engine.Runners;
 using NUnit.Engine.Services;
 using NUnit.Framework;
 
@@ -50,7 +52,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             {
                 var concreteEngineType = (NUnit.Engine.TestEngine)engine;
                 concreteEngineType.Services.Add(new SettingsService(true));
-                concreteEngineType.Services.Add(new DomainManager());
                 concreteEngineType.Services.Add(new ExtensionService());
                 concreteEngineType.Services.Add(new DriverService());
                 concreteEngineType.Services.Add(new RecentFilesService());
