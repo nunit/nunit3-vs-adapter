@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
 
     <RootNamespace>NUnit.VisualStudio.TestAdapter.Tests.Acceptance</RootNamespace>
     <AssemblyName>NUnit.VisualStudio.TestAdapter.Tests.Acceptance</AssemblyName>
