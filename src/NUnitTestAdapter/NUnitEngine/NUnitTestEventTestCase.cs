@@ -1,4 +1,7 @@
-﻿using System.Xml;
+﻿using System;
+using System.Globalization;
+using System.Text;
+using System.Xml;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
@@ -17,23 +20,25 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
     }
 
 
-
     /// <summary>
     /// Handles the NUnit 'test-case' event.
     /// </summary>
     public class NUnitTestEventTestCase : NUnitTestEvent, INUnitTestEventTestCase
     {
-        public NUnitTestEventTestCase(INUnitTestEventForXml node) : this(node.Node)
+        public NUnitTestEventTestCase(INUnitTestEventForXml node)
+            : this(node.Node)
         {
         }
 
-        public NUnitTestEventTestCase(string testEvent) : this(XmlHelper.CreateXmlNode(testEvent))
+        public NUnitTestEventTestCase(string testEvent)
+            : this(XmlHelper.CreateXmlNode(testEvent))
         {
         }
 
         public NUnitFailure Failure { get; }
 
-        public NUnitTestEventTestCase(XmlNode node) : base(node)
+        public NUnitTestEventTestCase(XmlNode node)
+            : base(node)
         {
             if (node.Name != "test-case")
                 throw new NUnitEventWrongTypeException($"Expected 'test-case', got {node.Name}");
@@ -41,12 +46,12 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             if (failureNode != null)
             {
                 Failure = new NUnitFailure(
-                    failureNode.SelectSingleNode("message")?.InnerText,
-                    failureNode.SelectSingleNode("stack-trace")?.InnerText);
+                    UnicodeEscapeHelper.UnEscapeUnicodeCharacters(failureNode.SelectSingleNode("message")?.InnerText),
+                    UnicodeEscapeHelper.UnEscapeUnicodeCharacters(failureNode.SelectSingleNode("stack-trace")?.InnerText));
             }
-            ReasonMessage = Node.SelectSingleNode("reason/message")?.InnerText;
-        }
 
+            ReasonMessage = UnicodeEscapeHelper.UnEscapeUnicodeCharacters(Node.SelectSingleNode("reason/message")?.InnerText);
+        }
         public string ReasonMessage { get; }
 
         public bool HasReason => !string.IsNullOrEmpty(ReasonMessage);
@@ -62,7 +67,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                 string stackTrace = string.Empty;
                 foreach (XmlNode assertionStacktraceNode in Node.SelectNodes("assertions/assertion/stack-trace"))
                 {
-                    stackTrace += assertionStacktraceNode.InnerText;
+                    stackTrace += UnicodeEscapeHelper.UnEscapeUnicodeCharacters(assertionStacktraceNode.InnerText);
                 }
 
                 return stackTrace;

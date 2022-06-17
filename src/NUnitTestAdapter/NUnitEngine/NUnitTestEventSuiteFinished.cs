@@ -28,10 +28,10 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             var failureNode = Node.SelectSingleNode("failure");
             if (failureNode != null)
             {
-                FailureMessage = failureNode.SelectSingleNode("message")?.InnerText;
-                StackTrace = failureNode.SelectSingleNode("stack-trace")?.InnerText;
+                FailureMessage = UnicodeEscapeHelper.UnEscapeUnicodeCharacters(failureNode.SelectSingleNode("message")?.InnerText);
+                StackTrace = UnicodeEscapeHelper.UnEscapeUnicodeCharacters(failureNode.SelectSingleNode("stack-trace")?.InnerText);
             }
-            ReasonMessage = Node.SelectSingleNode("reason/message")?.InnerText;
+            ReasonMessage = UnicodeEscapeHelper.UnEscapeUnicodeCharacters(Node.SelectSingleNode("reason/message")?.InnerText);
         }
 
         public string ReasonMessage { get; }
