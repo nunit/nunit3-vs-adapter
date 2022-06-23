@@ -8,6 +8,11 @@ jobs:
     pool:
       vmImage: 'windows-latest'
     steps:
+    - task: UseDotNet@2
+      displayName: Install .NET Core 2.1 runtime
+      inputs:
+        packageType: runtime
+        version: 2.1.x
     - powershell: .\build.ps1 --target=CI --configuration=$(BuildConfiguration)
       displayName: Build, package, and test
 
