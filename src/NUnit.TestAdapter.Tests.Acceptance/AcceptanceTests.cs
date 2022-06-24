@@ -38,7 +38,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         {
             Frameworks.NetCoreApp21,
             Frameworks.NetCoreApp31,
-            Frameworks.Net50
+            Frameworks.Net50,
+            Frameworks.Net60
         };
 
         private static readonly Lazy<(IsolatedWorkspaceManager Manager, string NupkgVersion, bool KeepWorkspaces)> Initialization = new(() =>
