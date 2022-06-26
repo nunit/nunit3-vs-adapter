@@ -412,9 +412,9 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         private static BaseProperties ExtractSuiteBasePropertiesClass(XElement node)
         {
             string dId = node.Attribute(NUnitXmlAttributeNames.Id).Value;
-            string dName = node.Attribute(NUnitXmlAttributeNames.Name).Value;
-            string dFullname = node.Attribute(NUnitXmlAttributeNames.Fullname).Value;
-            var dRunstate = ExtractRunState(node);
+            // test-run no longer has a name/fullname property
+            string dName = node.Attribute(NUnitXmlAttributeNames.Name)?.Value ?? "Unnamed";
+            string dFullname = node.Attribute(NUnitXmlAttributeNames.Fullname)?.Value ?? "Unnamed"; var dRunstate = ExtractRunState(node);
             const char apo = '\'';
             var tcs = node.Attribute(NUnitXmlAttributeNames.Testcasecount)?.Value.Trim(apo);
             int dTestcasecount = int.Parse(tcs ?? "1", CultureInfo.InvariantCulture);

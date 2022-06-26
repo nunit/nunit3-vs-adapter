@@ -1,6 +1,8 @@
 ﻿using System.Linq;
 using System.Xml;
+
 using NSubstitute;
+
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 // ReSharper disable StringLiteralTypo
@@ -13,8 +15,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         private IAdapterSettings settings;
 
         private const string FullDiscoveryXml =
-            @"<test-run id='2' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' testcasecount='108'>
-   <test-suite type='Assembly' id='0-1157' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' runstate='Runnable' testcasecount='108'>
+            @"<test-run id='2' testcasecount='108'>
+     <test-suite type='Assembly' id='0-1157' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' runstate='Runnable' testcasecount='108'>
       <properties>
          <property name='_PID' value='9856' />
          <property name='_APPDOMAIN' value='domain-807ad471-CSharpTestDemo.dll' />

@@ -12,6 +12,14 @@
     <SourceLinkCreate>true</SourceLinkCreate>
   </PropertyGroup>
 
+    <PropertyGroup>
+        <RestoreAdditionalProjectSource>https://www.myget.org/F/nunit/api/v3/index.json</RestoreAdditionalProjectSource>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="nunit.engine" Version="4.0.0-dev00100" />
+    </ItemGroup>
+
   <PropertyGroup>
     <PackageId>NUnit3TestAdapter</PackageId>
     <Authors>Charlie Poole, Terje Sandstrom</Authors>
@@ -24,7 +32,6 @@
 
   <ItemGroup>
     <PackageReference Include="SourceLink.Create.CommandLine" Version="2.8.3" PrivateAssets="All" />
-    <PackageReference Include="nunit.engine" Version="3.15.0" />
     <PackageReference Include="TestCentric.Metadata" Version="1.7.1" Aliases="TestCentric" />
   </ItemGroup>
 
