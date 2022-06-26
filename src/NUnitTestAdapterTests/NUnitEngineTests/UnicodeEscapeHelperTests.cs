@@ -13,7 +13,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         [TestCase("some-text", "some-text")]
         public void UnEscapeUnicodeCharacters_ShouldReplaceBackslashU(string value, string expected)
         {
-            Assert.That(UnicodeEscapeHelper.UnEscapeUnicodeCharacters(value), Is.EqualTo(expected));
+            Assert.That(value.UnEscapeUnicodeCharacters(), Is.EqualTo(expected));
         }
     }
 }

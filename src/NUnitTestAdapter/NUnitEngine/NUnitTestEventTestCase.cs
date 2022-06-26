@@ -46,11 +46,11 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             if (failureNode != null)
             {
                 Failure = new NUnitFailure(
-                    UnicodeEscapeHelper.UnEscapeUnicodeCharacters(failureNode.SelectSingleNode("message")?.InnerText),
-                    UnicodeEscapeHelper.UnEscapeUnicodeCharacters(failureNode.SelectSingleNode("stack-trace")?.InnerText));
+                    failureNode.SelectSingleNode("message")?.InnerText.UnEscapeUnicodeCharacters(),
+                    failureNode.SelectSingleNode("stack-trace")?.InnerText.UnEscapeUnicodeCharacters());
             }
 
-            ReasonMessage = UnicodeEscapeHelper.UnEscapeUnicodeCharacters(Node.SelectSingleNode("reason/message")?.InnerText);
+            ReasonMessage = Node.SelectSingleNode("reason/message")?.InnerText.UnEscapeUnicodeCharacters();
         }
         public string ReasonMessage { get; }
 
@@ -67,7 +67,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                 string stackTrace = string.Empty;
                 foreach (XmlNode assertionStacktraceNode in Node.SelectNodes("assertions/assertion/stack-trace"))
                 {
-                    stackTrace += UnicodeEscapeHelper.UnEscapeUnicodeCharacters(assertionStacktraceNode.InnerText);
+                    stackTrace += assertionStacktraceNode.InnerText.UnEscapeUnicodeCharacters();
                 }
 
                 return stackTrace;

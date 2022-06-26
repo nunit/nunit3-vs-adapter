@@ -4,9 +4,9 @@ using System.Text;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
-    public class UnicodeEscapeHelper
+    internal static class UnicodeEscapeHelper
     {
-        public static string UnEscapeUnicodeCharacters(string text)
+        public static string UnEscapeUnicodeCharacters(this string text)
         {
             if (text == null)
                 return null;
