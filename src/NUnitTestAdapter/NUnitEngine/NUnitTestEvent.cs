@@ -127,7 +127,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public string MethodName => Node.GetAttribute("methodname");
         public string ClassName => Node.GetAttribute("classname");
-        public string Output => Node.SelectSingleNode("output")?.InnerText;
+        public string Output => Node.SelectSingleNode("output")?.InnerText.UnEscapeUnicodeCharacters();
 
 
         public CheckedTime StartTime()
@@ -165,7 +165,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                 foreach (XmlNode attachment in Node.SelectNodes("attachments/attachment"))
                 {
                     var path = attachment.SelectSingleNode("filePath")?.InnerText ?? string.Empty;
-                    var description = attachment.SelectSingleNode("description")?.InnerText;
+                    var description = attachment.SelectSingleNode("description")?.InnerText.UnEscapeUnicodeCharacters();
                     nUnitAttachments.Add(new NUnitAttachment(path, description));
                 }
                 return nUnitAttachments;

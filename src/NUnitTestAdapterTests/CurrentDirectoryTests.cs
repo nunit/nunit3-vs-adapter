@@ -32,6 +32,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase(@"C:\Windows\Whatever")]
         [TestCase(@"C:\Program Files\Something")]
         [TestCase(@"C:\Program Files (x86)\Something")]
+        [Platform("Win")]
         public void ThatWeFindForbiddenFolders(string folder)
         {
             var sut = new NUnit3TestExecutor();

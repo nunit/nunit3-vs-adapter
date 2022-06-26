@@ -65,7 +65,21 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [TestCase(@"C:\MyFolder\Whatever.dll", @"C:\MyFolder\Dump\D_Whatever.dll.dump")]
         [TestCase(@"C:\MyFolder\Whatever.dll", @"C:\MyFolder\Dump")]
         [TestCase(@"C:\MyFolder\Whatever.dll", @"C:\MyFolder")]
+        [Platform("Win")]
         public void ThatPathIsCorrectlyParsedInDiscoveryPhase(string path, string expected)
+        {
+            var file = Substitute.For<IFile>();
+            var sut = new DumpXml(path, file);
+            sut.AddString("whatever");
+            sut.DumpForDiscovery();
+            file.Received().WriteAllText(Arg.Is<string>(o => o.StartsWith(expected, StringComparison.OrdinalIgnoreCase)), Arg.Any<string>());
+        }
+
+        [TestCase(@"/some/Folder/Whatever.dll", @"/some/Folder/Dump/D_Whatever.dll.dump")]
+        [TestCase(@"/some/Folder/Whatever.dll", @"/some/Folder/Dump")]
+        [TestCase(@"/some/Folder/Whatever.dll", @"/some/Folder")]
+        [Platform("Unix")]
+        public void ThatPathIsCorrectlyParsedInDiscoveryPhaseOnUnix(string path, string expected)
         {
             var file = Substitute.For<IFile>();
             var sut = new DumpXml(path, file);
