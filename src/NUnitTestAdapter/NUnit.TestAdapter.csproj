@@ -17,7 +17,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="nunit.engine" Version="4.0.0-dev00100" />
+        <PackageReference Include="nunit.engine" Version="3.16.0-alpha.2" />
     </ItemGroup>
 
   <PropertyGroup>
