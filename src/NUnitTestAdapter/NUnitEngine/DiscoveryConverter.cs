@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2020-2021 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2020-2021 Charlie Poole, 2020-2022 Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -414,7 +414,8 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             string dId = node.Attribute(NUnitXmlAttributeNames.Id).Value;
             // test-run no longer has a name/fullname property
             string dName = node.Attribute(NUnitXmlAttributeNames.Name)?.Value ?? "Unnamed";
-            string dFullname = node.Attribute(NUnitXmlAttributeNames.Fullname)?.Value ?? "Unnamed"; var dRunstate = ExtractRunState(node);
+            string dFullname = node.Attribute(NUnitXmlAttributeNames.Fullname)?.Value ?? "Unnamed";
+            var dRunstate = ExtractRunState(node);
             const char apo = '\'';
             var tcs = node.Attribute(NUnitXmlAttributeNames.Testcasecount)?.Value.Trim(apo);
             int dTestcasecount = int.Parse(tcs ?? "1", CultureInfo.InvariantCulture);
