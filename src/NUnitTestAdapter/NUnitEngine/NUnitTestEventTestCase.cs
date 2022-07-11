@@ -1,7 +1,4 @@
-﻿using System;
-using System.Globalization;
-using System.Text;
-using System.Xml;
+﻿using System.Xml;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 {
@@ -17,6 +14,11 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         /// Find stacktrace in assertion nodes if not defined.
         /// </summary>
         string StackTrace { get; }
+
+        /// <summary>
+        /// Complete formatted stacktrace
+        /// </summary>
+        string FailureStackTrace { get; }
     }
 
 
@@ -57,6 +59,9 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         public bool HasReason => !string.IsNullOrEmpty(ReasonMessage);
         public bool HasFailure => Failure != null;
 
+        public string FailureStackTrace => $"{Failure?.Stacktrace ?? ""}\n{StackTrace}";
+
+
         /// <summary>
         /// Find stacktrace in assertion nodes if not defined.
         /// </summary>
@@ -65,9 +70,11 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             get
             {
                 string stackTrace = string.Empty;
+                int i = 1;
                 foreach (XmlNode assertionStacktraceNode in Node.SelectNodes("assertions/assertion/stack-trace"))
                 {
-                    stackTrace += assertionStacktraceNode.InnerText.UnEscapeUnicodeCharacters();
+                    stackTrace += $"{i++}) " + assertionStacktraceNode.InnerText.UnEscapeUnicodeCharacters();
+                    stackTrace += "\n";
                 }
 
                 return stackTrace;

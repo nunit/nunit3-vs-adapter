@@ -1,5 +1,5 @@
 // ***********************************************************************
-// Copyright (c) 2011-2021 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2021 Charlie Poole, 2011 - 2022 Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -25,9 +25,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
+
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
+
 using VSTestResult = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestResult;
 
 namespace NUnit.VisualStudio.TestAdapter
@@ -108,7 +111,7 @@ namespace NUnit.VisualStudio.TestAdapter
                     case TestOutcome.NotFound:
                         {
                             testCaseResult.ErrorMessage = resultNode.Failure?.Message;
-                            testCaseResult.ErrorStackTrace = resultNode.Failure?.Stacktrace ?? resultNode.StackTrace;
+                            testCaseResult.ErrorStackTrace = resultNode.FailureStackTrace;
                             break;
                         }
                     case TestOutcome.Skipped:
