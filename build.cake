@@ -13,7 +13,8 @@ var configuration = Argument("configuration", "Release");
 //////////////////////////////////////////////////////////////////////
 
 var version = "4.3.0";
-var modifier = "-alpha-net7-200.1";
+var modifier = "-alpha-108";
+
 
 var dbgSuffix = configuration.ToLower() == "debug" ? "-dbg" : "";
 var packageVersion = version + modifier + dbgSuffix;
