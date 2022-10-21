@@ -1,5 +1,5 @@
 // ***********************************************************************
-// Copyright (c) 2014-2021 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2014-2021 Charlie Poole, 2014-2022 Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -72,6 +72,7 @@ namespace NUnit.VisualStudio.TestAdapter
         VsTestCategoryType VsTestCategoryType { get; }
         string TestOutputXml { get; }
         bool UseTestOutputXml { get; }
+        OutputXmlFolderMode OutputXmlFolderMode { get; }
 
         /// <summary>
         /// For retry runs create a new file for each run.
@@ -130,6 +131,7 @@ namespace NUnit.VisualStudio.TestAdapter
         // Filter control
         ExplicitModeEnum ExplicitMode { get; }
         bool SkipExecutionWhenNoTests { get; }
+        string TestOutputFolder { get; }
     }
 
     public enum VsTestCategoryType
@@ -212,7 +214,15 @@ namespace NUnit.VisualStudio.TestAdapter
         public string WorkDirectory { get; private set; }
         public string Where { get; private set; }
         public string TestOutputXml { get; private set; }
-        public bool UseTestOutputXml => !string.IsNullOrEmpty(TestOutputXml);
+        public bool UseTestOutputXml => !string.IsNullOrEmpty(TestOutputXml) || OutputXmlFolderMode == OutputXmlFolderMode.UseResultDirectory;
+
+        public OutputXmlFolderMode OutputXmlFolderMode { get; private set; } = OutputXmlFolderMode.RelativeToWorkFolder;
+
+        /// <summary>
+        /// Calculated property.
+        /// </summary>
+        public string TestOutputFolder { get; private set; } = "";
+
         public bool NewOutputXmlFileForEachRun { get; private set; }
         public int DefaultTimeout { get; private set; }
 
@@ -329,7 +339,11 @@ namespace NUnit.VisualStudio.TestAdapter
             BasePath = GetInnerTextWithLog(nunitNode, nameof(BasePath));
             PrivateBinPath = GetInnerTextWithLog(nunitNode, nameof(PrivateBinPath));
             TestOutputXml = GetInnerTextWithLog(nunitNode, nameof(TestOutputXml));
+            OutputXmlFolderMode = MapEnum(GetInnerText(nunitNode, nameof(OutputXmlFolderMode), Verbosity > 0), OutputXmlFolderMode.RelativeToWorkFolder);
             NewOutputXmlFileForEachRun = GetInnerTextAsBool(nunitNode, nameof(NewOutputXmlFileForEachRun), false);
+
+            SetTestOutputFolder();
+
             RandomSeed = GetInnerTextAsNullableInt(nunitNode, nameof(RandomSeed));
             RandomSeedSpecified = RandomSeed.HasValue;
             if (!RandomSeedSpecified)
@@ -402,6 +416,24 @@ namespace NUnit.VisualStudio.TestAdapter
 
             // Update NumberOfTestWorkers based on the DisableParallelization and NumberOfTestWorkers from runsettings.
             UpdateNumberOfTestWorkers();
+        }
+
+        private void SetTestOutputFolder()
+        {
+            if (!UseTestOutputXml)
+                return;
+            switch (OutputXmlFolderMode)
+            {
+                case OutputXmlFolderMode.UseResultDirectory:
+                    TestOutputFolder = ResultsDirectory;
+                    return;
+                case OutputXmlFolderMode.RelativeToResultDirectory:
+                    TestOutputFolder = Path.Combine(ResultsDirectory, TestOutputXml);
+                    return;
+                case OutputXmlFolderMode.RelativeToWorkFolder:
+                    TestOutputFolder = Path.Combine(WorkDirectory, TestOutputXml);
+                    return;
+            }
         }
 
         private void ExtractNUnitDiagnosticSettings(XmlNode nunitNode)
@@ -568,8 +600,7 @@ namespace NUnit.VisualStudio.TestAdapter
             int? res = null;
             if (!string.IsNullOrEmpty(temp))
                 res = int.Parse(temp);
-            if (log)
-                Log(xpath, res);
+            Log(xpath, res);
             return res;
         }
 
@@ -630,5 +661,12 @@ namespace NUnit.VisualStudio.TestAdapter
     {
         Strict,
         Relaxed
+    }
+
+    public enum OutputXmlFolderMode
+    {
+        UseResultDirectory,
+        RelativeToResultDirectory,
+        RelativeToWorkFolder
     }
 }

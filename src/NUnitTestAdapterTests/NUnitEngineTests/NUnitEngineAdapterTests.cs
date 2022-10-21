@@ -12,7 +12,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         {
             var logger = Substitute.For<ITestLogger>();
             var settings = new AdapterSettings(logger);
-            settings.Load("<RunSettings><NUnit><TestOutputXml>/my/work/dir</TestOutputXml></NUnit></RunSettings>");
+            settings.Load(@"<RunSettings><NUnit><WorkDirectory>c:\whatever</WorkDirectory><TestOutputXml>/my/work/dir</TestOutputXml></NUnit></RunSettings>");
             var sut = new NUnitEngineAdapter();
             sut.InitializeSettingsAndLogging(settings, logger);
             string path = sut.GetXmlFilePath("c:/", "assembly", "xml");
@@ -24,7 +24,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         {
             var logger = Substitute.For<ITestLogger>();
             var settings = new AdapterSettings(logger);
-            settings.Load("<RunSettings><NUnit><TestOutputXml>/my/work/dir</TestOutputXml><NewOutputXmlFileForEachRun>true</NewOutputXmlFileForEachRun></NUnit></RunSettings>");
+            settings.Load(@"<RunSettings><NUnit><WorkDirectory>c:\whatever</WorkDirectory><TestOutputXml>/my/work/dir</TestOutputXml><NewOutputXmlFileForEachRun>true</NewOutputXmlFileForEachRun></NUnit></RunSettings>");
             var sut = new NUnitEngineAdapter();
             sut.InitializeSettingsAndLogging(settings, logger);
             string path = sut.GetXmlFilePath("c:/", "assembly", "xml");
