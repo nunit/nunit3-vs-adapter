@@ -57,9 +57,9 @@ namespace NUnit.VisualStudio.TestAdapter
         public override object InitializeLifetimeService()
         {
             // Give the listener an infinite lease lifetime by returning null
-            // http://msdn.microsoft.com/en-us/magazine/cc300474.aspx#edupdate
+            // https://msdn.microsoft.com/en-us/magazine/cc300474.aspx#edupdate
             // This also means RemotingServices.Disconnect() must be called to prevent memory leaks
-            // http://nbevans.wordpress.com/2011/04/17/memory-leaks-with-an-infinite-lifetime-instance-of-marshalbyrefobject/
+            // https://nbevans.wordpress.com/2011/04/17/memory-leaks-with-an-infinite-lifetime-instance-of-marshalbyrefobject/
             return null;
         }
 #endif
