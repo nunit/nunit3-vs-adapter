@@ -1130,7 +1130,7 @@ select new {
 // *Named and Optional arguments* should be used.
 //
 // The *too many overloads* phenomenon can also be a consequence of the usage
-// of the **visitor design pattern** http://en.wikipedia.org/wiki/Visitor_pattern 
+// of the **visitor design pattern** https://en.wikipedia.org/wiki/Visitor_pattern 
 // since a method named *Visit()* must be provided for each sub type.
 // For this reason, the default version of this rule doesn't match overloads whose name
 // start with "visit" or "dispatch" (case-unsensitive) to avoid match 
@@ -2076,7 +2076,7 @@ select new {
 // In *Object-Oriented Programming*, the **open/closed principle** states:
 // *software entities (components, classes, methods, etc.) should be open 
 // for extension, but closed for modification*. 
-// http://en.wikipedia.org/wiki/Open/closed_principle
+// https://en.wikipedia.org/wiki/Open/closed_principle
 //
 // Hence a base class should be designed properly to make it easy to derive from,
 // this is *extension*. But creating a new derived class, or modifying an
@@ -2107,9 +2107,9 @@ select new {
 //
 // Sometime you'll see a base class that creates instance of some derived classes.
 // In such situation, certainly using the *factory method pattern* 
-// http://en.wikipedia.org/wiki/Factory_method_pattern
+// https://en.wikipedia.org/wiki/Factory_method_pattern
 // or the *abstract factory pattern* 
-// http://en.wikipedia.org/wiki/Abstract_factory_pattern
+// https://en.wikipedia.org/wiki/Abstract_factory_pattern
 // will improve the design.
 //
 // The estimated Debt, which means the effort to fix such issue,
@@ -2169,8 +2169,8 @@ select new {
 // a powerful way to enhance the design of the refactored underlying logic.
 //
 // You can also read: 
-// http://en.wikipedia.org/wiki/Composition_over_inheritance and
-// http://stackoverflow.com/questions/49002/prefer-composition-over-inheritance
+// https://en.wikipedia.org/wiki/Composition_over_inheritance and
+// https://stackoverflow.com/questions/49002/prefer-composition-over-inheritance
 //
 // The estimated Debt, which means the effort to fix such issue,
 // depends linearly upon the depth of inheritance.
@@ -2274,7 +2274,7 @@ select new {
 // behavior through an interface, would be a better design choice?
 //
 // In such situation, often using the design pattern **template method**
-// http://en.wikipedia.org/wiki/Template_method_pattern might help
+// https://en.wikipedia.org/wiki/Template_method_pattern might help
 // improving the design.
 //</HowToFix>]]></Query>
       <Query Active="True" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="True"><![CDATA[// <Name>Do not hide base class methods</Name>
@@ -2330,7 +2330,7 @@ select new {
 // However *method hiding is for those times when you need to have two 
 // things to have the same name but different behavior*. This is a very
 // rare situations, described here:
-// http://blogs.msdn.com/b/ericlippert/archive/2008/05/21/method-hiding-apologia.aspx
+// https://blogs.msdn.com/b/ericlippert/archive/2008/05/21/method-hiding-apologia.aspx
 //</HowToFix>]]></Query>
       <Query Active="True" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[// <Name>A stateless class or structure might be turned into a static type</Name>
 // <Id>ND1206:AStatelessClassOrStructureMightBeTurnedIntoAStaticType</Id>
@@ -2721,7 +2721,7 @@ select new {
 
 //<Description>
 // The *singleton pattern* consists in enforcing that a class has just
-// a single instance: http://en.wikipedia.org/wiki/Singleton_pattern
+// a single instance: https://en.wikipedia.org/wiki/Singleton_pattern
 // At first glance, this pattern looks appealing, it is simple to implement,
 // it adresses a common situation, and as a consequence it is widely used.
 //
@@ -3320,7 +3320,7 @@ select new {
 //
 // A related case-study of using *class* or *struct* for *Tuple<…>* generic 
 // types can be found here:
-// http://stackoverflow.com/questions/2410710/why-is-the-new-tuple-type-in-net-4-0-a-reference-type-class-and-not-a-value-t
+// https://stackoverflow.com/questions/2410710/why-is-the-new-tuple-type-in-net-4-0-a-reference-type-class-and-not-a-value-t
 //</Description>
 
 //<HowToFix>
@@ -3328,7 +3328,7 @@ select new {
 //
 // **CAUTION:** Before applying this rule, make sure to understand 
 // the **deep implications** of transforming a class into a structure.
-// http://msdn.microsoft.com/en-us/library/aa664471(v=vs.71).aspx
+// https://msdn.microsoft.com/en-us/library/aa664471(v=vs.71).aspx
 //
 // The estimated Debt, which means the effort to fix such issue,
 // is 5 minutes per class matched plus one minute per method
@@ -3815,7 +3815,7 @@ select new {
 // be rarely used. Hence in most situations the code can 
 // be refactored to avoid relying on *boxing* and *unboxing*.
 // See for example:
-// http://stackoverflow.com/questions/4403055/boxing-unboxing-and-generics
+// https://stackoverflow.com/questions/4403055/boxing-unboxing-and-generics
 //
 // With a performance profiler, indentify methods that consume 
 // a lot of CPU time. If such method uses *boxing* or 
@@ -3949,7 +3949,7 @@ select new {
 // to the *high-level* one, or do the opposite.
 //
 // • Use *Inversion of Control (IoC)*: 
-// http://en.wikipedia.org/wiki/Inversion_of_control
+// https://en.wikipedia.org/wiki/Inversion_of_control
 // This consists in creating new interfaces in the
 // *low-level* namespace, implemented by classes
 // in the *high-level* namespace. This way *low-level* 
@@ -3961,7 +3961,7 @@ select new {
 // you can see these interfaces named as *callbacks*, 
 // and the overall pattern is also known as 
 // *Dependency Injection (DI)*:
-// http://en.wikipedia.org/wiki/Dependency_injection
+// https://en.wikipedia.org/wiki/Dependency_injection
 //
 // That rule might not be applicable for frameworks
 // that present public namespaces mutually dependent.
@@ -4184,7 +4184,7 @@ let uiTypes = Application.Types.UsingAny(Assemblies.WithNameIn("PresentationFram
 // You can easily customize this part to define what are DB types.
 let dbTypes = ThirdParty.Assemblies.WithNameIn("System.Data", "EntityFramework", "NHibernate").ChildTypes()
               // Ideally even DataSet and associated, usage should be forbidden from UI layer: 
-              // http://stackoverflow.com/questions/1708690/is-list-better-than-dataset-for-ui-layer-in-asp-net
+              // https://stackoverflow.com/questions/1708690/is-list-better-than-dataset-for-ui-layer-in-asp-net
               .Except(ThirdParty.Types.WithNameIn("DataSet", "DataTable", "DataRow"))
 
 from uiType in uiTypes.UsingAny(dbTypes)
@@ -4306,7 +4306,7 @@ select new {
 // This rule lists precisely which UI type uses which DAL type.
 //
 // More about this particular design topic here:
-// http://www.kenneth-truyers.net/2013/05/12/the-n-layer-myth-and-basic-dependency-injection/
+// https://www.kenneth-truyers.net/2013/05/12/the-n-layer-myth-and-basic-dependency-injection/
 //</HowToFix>
 ]]></Query>
       <Query Active="True" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[// <Name>Assemblies with poor cohesion (RelationalCohesion)</Name>
@@ -4491,7 +4491,7 @@ select new {
 // https://www.ndepend.com/docs/code-metrics#DitFromMainSeq
 //
 // These concepts have been originally introduced by *Robert C. Martin*
-// in 1994 in this paper: http://www.objectmentor.com/resources/articles/oodmetrc.pdf
+// in 1994 in this paper: https://www.booked.net/objectmentor
 //</Description>
 
 //<HowToFix>
@@ -4936,7 +4936,7 @@ select new {
 // instance fields added or removed. Notice that it doesn't take account
 // of fields tagged with *NonSerializedAttribute*.
 //
-// From http://msdn.microsoft.com/library/system.serializableattribute.aspx :
+// From https://msdn.microsoft.com/library/system.serializableattribute.aspx :
 // "All the public and private fields in a type that are marked by the 
 //  *SerializableAttribute*  are serialized by default, unless the type 
 //  implements the *ISerializable* interface to  override the serialization process. 
@@ -5658,7 +5658,7 @@ select new {
 // **Change Risk Analyzer and Predictor** (i.e. CRAP) is a code metric
 // that helps in pinpointing overly both complex and untested code.
 // Is has been first defined here: 
-// http://www.artima.com/weblogs/viewpost.jsp?thread=215899
+// https://www.artima.com/weblogs/viewpost.jsp?thread=215899
 //
 // The Formula is:  **CRAP(m) = CC(m)^2 * (1 – cov(m)/100)^3 + CC(m)**
 //
@@ -7045,7 +7045,7 @@ select new {
 //
 // This rule can be deactivated if you don't agree with it.
 // Read the whole debate here:
-// http://ericlippert.com/2014/09/15/internal-or-public/
+// https://ericlippert.com/2014/09/15/internal-or-public/
 //
 // By default issues of this rule have a **Low** severity
 // because they reflect more an advice than a problem.
@@ -9500,7 +9500,7 @@ select new {
 // explicitly in order to avoid some performance pitfall.
 //
 // More in information on this here:
-// http://blogs.msdn.com/ricom/archive/2004/11/29/271829.aspx
+// https://blogs.msdn.com/ricom/archive/2004/11/29/271829.aspx
 //
 // This rule matches application methods that call an
 // overload of the method *GC.Collect()*.
@@ -10156,7 +10156,7 @@ select new {
 // Introduction to TPL: https://msdn.microsoft.com/en-us/library/dd460717(v=vs.110).aspx
 //
 // TPL and the CLR v4 thread pool:
-// http://www.danielmoth.com/Blog/New-And-Improved-CLR-4-Thread-Pool-Engine.aspx
+// https://www.danielmoth.com/Blog/New-And-Improved-CLR-4-Thread-Pool-Engine.aspx
 //
 // By default issues of this rule have a **Critical** severity
 // because creating threads can have severe consequences. 
@@ -10191,15 +10191,15 @@ select new {
 //
 // • Usage of *Thread.Abort()* is dangerous.
 // More information on this here:
-// http://www.interact-sw.co.uk/iangblog/2004/11/12/cancellation
+// https://www.interact-sw.co.uk/iangblog/2004/11/12/cancellation
 //
 // • Usage of *Thread.Sleep()* is a sign of 
 // flawed design. More information on this here:
-// http://msmvps.com/blogs/peterritchie/archive/2007/04/26/thread-sleep-is-a-sign-of-a-poorly-designed-program.aspx
+// https://msmvps.com/blogs/peterritchie/archive/2007/04/26/thread-sleep-is-a-sign-of-a-poorly-designed-program.aspx
 //
 // • *Suspend()* and *Resume()* are dangerous threading methods, marked as obsolete.
 // More information on workaround here:
-// http://stackoverflow.com/questions/382173/what-are-alternative-ways-to-suspend-and-resume-a-thread  
+// https://stackoverflow.com/questions/382173/what-are-alternative-ways-to-suspend-and-resume-a-thread  
 //</Description>
 
 //<HowToFix>
@@ -10248,7 +10248,7 @@ select new {
 // that require calls to methods like *Wait()* and *Pulse()*.
 //
 // More information on using the *Monitor* class can be found here:
-// http://www.codeproject.com/Articles/13453/Practical-NET-and-C-Chapter
+// https://www.codeproject.com/Articles/13453/Practical-NET-and-C-Chapter
 //</HowToFix>]]></Query>
         <Query Active="True" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="True"><![CDATA[// <Name>ReaderWriterLock AcquireLock/ReleaseLock must be both called within the same method</Name>
 // <Id>ND2503:ReaderWriterLockAcquireLockReleaseLockMustBeBothCalledWithinTheSameMethod</Id>
@@ -10396,7 +10396,7 @@ select new {
 // An alternative of using *XmlDocument*, is to use 
 // **System.Xml.Linq.XDocument**, aka **LINQ2XML**. 
 // More information on this can be found here: 
-// http://stackoverflow.com/questions/1542073/xdocument-or-xmldocument
+// https://stackoverflow.com/questions/1542073/xdocument-or-xmldocument
 //</HowToFix>]]></Query>
       </Group>
       <Group Name="System.Globalization" Active="True" ShownInReport="False">
@@ -10532,10 +10532,10 @@ select new {
 // file shared by the assemblies.
 //
 // Typically this source file is generated by a dedicated *MSBuild* task 
-// like this one http://www.msbuildextensionpack.com/help/4.0.5.0/html/d6c3b5e8-00d4-c826-1a73-3cfe637f3827.htm.
+// like this one https://www.msbuildextensionpack.com/help/4.0.5.0/html/d6c3b5e8-00d4-c826-1a73-3cfe637f3827.htm.
 //
 // Here you can find interesting assemblies versioning advices.
-// http://stackoverflow.com/a/3905443/27194
+// https://stackoverflow.com/a/3905443/27194
 //
 // By default issues of this rule have a severity set to **major** since
 // unproper assemblies versioning can lead to complicated deployment problem.
@@ -11919,7 +11919,7 @@ where CRAP != null && CRAP > 30 select CRAP)
 // **Change Risk Analyzer and Predictor** (i.e. CRAP) is a code metric
 // that helps in pinpointing overly complex and untested code.
 // Is has been first defined here: 
-// http://www.artima.com/weblogs/viewpost.jsp?thread=215899
+// https://www.artima.com/weblogs/viewpost.jsp?thread=215899
 //
 // The Formula is:  **CRAP(m) = CC(m)^2 * (1 – cov(m)/100)^3 + CC(m)**
 //
@@ -11963,7 +11963,7 @@ where CRAP != null && CRAP > 30 select CRAP)
 // **Change Risk Analyzer and Predictor** (i.e. CRAP) is a code metric
 // that helps in pinpointing overly complex and untested code.
 // Is has been first defined here: 
-// http://www.artima.com/weblogs/viewpost.jsp?thread=215899
+// https://www.artima.com/weblogs/viewpost.jsp?thread=215899
 //
 // The Formula is:  **CRAP(m) = CC(m)^2 * (1 – cov(m)/100)^3 + CC(m)**
 //
@@ -12469,7 +12469,7 @@ select new {
 // shouldn't impact clients of the interface.
 // This is *in essence* the 
 // **Liskov Substitution Principle**.
-// http://en.wikipedia.org/wiki/Liskov_substitution_principle
+// https://en.wikipedia.org/wiki/Liskov_substitution_principle
 //</Description>]]></Query>
       <Query Active="True" DisplayList="False" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[// <Name>Most used methods (Rank)</Name>
 (from m in Application.Methods 
@@ -12508,7 +12508,7 @@ select new {
 // this shouldn't impact callers of the abstract method.
 // This is *in essence* the 
 // **Liskov Substitution Principle**.
-// http://en.wikipedia.org/wiki/Liskov_substitution_principle
+// https://en.wikipedia.org/wiki/Liskov_substitution_principle
 //</Description>]]></Query>
       <Query Active="True" DisplayList="False" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[// <Name>Most used assemblies (#AssembliesUsingMe)</Name>
 (from a in Assemblies orderby a.AssembliesUsingMe.Count() descending
