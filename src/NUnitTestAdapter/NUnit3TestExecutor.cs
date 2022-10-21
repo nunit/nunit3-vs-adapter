@@ -359,9 +359,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 return;
             }
 
-            string path = Path.IsPathRooted(Settings.TestOutputXml)
-                ? Settings.TestOutputXml
-                : Path.Combine(WorkDir, Settings.TestOutputXml);
+            string path = Settings.TestOutputFolder;
             try
             {
                 Directory.CreateDirectory(path);

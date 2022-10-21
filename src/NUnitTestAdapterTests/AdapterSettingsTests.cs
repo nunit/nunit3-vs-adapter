@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2021 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2021 Charlie Poole, 2014-2022 Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -194,11 +194,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void TestOutputSetting()
         {
-            _settings.Load("<RunSettings><NUnit><TestOutputXml>/my/work/dir</TestOutputXml></NUnit></RunSettings>");
+            _settings.Load(@"<RunSettings><NUnit><WorkDirectory>C:\Whatever</WorkDirectory><TestOutputXml>/my/work/dir</TestOutputXml></NUnit></RunSettings>");
             Assert.That(_settings.UseTestOutputXml);
             Assert.Multiple(() =>
             {
-                Assert.That(_settings.TestOutputXml, Does.Contain(@"/my/work/dir"));
+                Assert.That(_settings.TestOutputFolder, Does.Contain(@"/my/work/dir"));
             });
         }
 
@@ -212,21 +212,28 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(_settings.NewOutputXmlFileForEachRun, Is.True);
         }
 
-        /// <summary>
-        /// Workdir set, and is absolute,  TestOutputXml is relative.
-        /// </summary>
-        [Ignore("Is not handled in the test executor, not in the test settings")]
         [Test]
         public void TestOutputSettingWithWorkDir()
         {
-            _settings.Load(@"<RunSettings><NUnit><WorkDirectory>C:\Whatever</WorkDirectory><TestOutputXml>my/testoutput/dir</TestOutputXml></NUnit></RunSettings>");
+            _settings.Load(@"<RunSettings><NUnit><WorkDirectory>C:\Whatever</WorkDirectory><TestOutputXml>my/testoutput/dir</TestOutputXml><OutputXmlFolderMode>RelativeToWorkFolder</OutputXmlFolderMode></NUnit></RunSettings>");
             Assert.That(_settings.UseTestOutputXml, "Settings not loaded properly");
             Assert.Multiple(() =>
             {
-                Assert.That(_settings.TestOutputXml, Does.Contain(@"\my/testoutput/dir"), "Content not correct");
-                Assert.That(_settings.TestOutputXml, Does.StartWith(@"C:\"), "Not correct start drive");
-                Assert.That(Path.IsPathRooted(_settings.TestOutputXml), Is.True, "Path not properly rooted");
+                Assert.That(_settings.TestOutputFolder, Does.Contain(@"\my/testoutput/dir"), "Content not correct");
+                Assert.That(_settings.TestOutputFolder, Does.StartWith(@"C:\"), "Not correct start drive");
+                Assert.That(Path.IsPathRooted(_settings.TestOutputFolder), Is.True, "Path not properly rooted");
             });
+        }
+
+        /// <summary>
+        /// Test should set output folder to same as resultdirectory, and ignore workdirectory and testoutputxml.
+        /// </summary>
+        [Test]
+        public void TestOutputSettingWithUseResultDirectory()
+        {
+            _settings.Load(@"<RunSettings><RunConfiguration><ResultsDirectory>c:\whatever\results</ResultsDirectory></RunConfiguration><NUnit><WorkDirectory>C:\AnotherWhatever</WorkDirectory><TestOutputXml>my/testoutput/dir</TestOutputXml><OutputXmlFolderMode>UseResultDirectory</OutputXmlFolderMode></NUnit></RunSettings>");
+            Assert.That(_settings.UseTestOutputXml, "Settings not loaded properly");
+            Assert.That(_settings.TestOutputFolder, Is.EqualTo(@"c:\whatever\results"), "Content not correct");
         }
 
 
