@@ -231,7 +231,13 @@ namespace NUnit.VisualStudio.TestAdapter
         private string CreateDisplayName(string fullyQualifiedName, string testNodeName)
         {
             return adapterSettings.FreakMode
-                ? "N:Name -> MS:DisplayName (default)"
+                ? adapterSettings.DisplayName switch
+                {
+                    DisplayNameOptions.Name => "N:Name -> MS:DisplayName (default)",
+                    DisplayNameOptions.FullName => "N:FullyQualifiedName -> MS:DisplayName",
+                    DisplayNameOptions.FullNameSep => $"N:FullyQualifiedName -> MS:DisplayName, with separator '.' replaced with '{adapterSettings.FullnameSeparator}'",
+                    _ => $"Invalid setting: {adapterSettings.DisplayName}"
+                }
                 : adapterSettings.DisplayName switch
                 {
                     DisplayNameOptions.Name => testNodeName,
