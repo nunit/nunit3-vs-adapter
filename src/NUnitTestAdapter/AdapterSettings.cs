@@ -433,6 +433,9 @@ namespace NUnit.VisualStudio.TestAdapter
                 case OutputXmlFolderMode.RelativeToWorkFolder:
                     TestOutputFolder = Path.Combine(WorkDirectory, TestOutputXml);
                     return;
+                case OutputXmlFolderMode.AsSpecified:
+                default:
+                    return;
             }
         }
 
@@ -667,6 +670,7 @@ namespace NUnit.VisualStudio.TestAdapter
     {
         UseResultDirectory,
         RelativeToResultDirectory,
-        RelativeToWorkFolder
+        RelativeToWorkFolder,
+        AsSpecified
     }
 }

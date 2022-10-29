@@ -16,6 +16,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         public const string NetCoreApp21 = "netcoreapp2.1";
         public const string Net50 = "net5.0";
         public const string Net60 = "net6.0";
+        public const string Net70 = "net7.0";
     }
 
     [Category("Acceptance")]
@@ -39,7 +40,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
             Frameworks.NetCoreApp21,
             Frameworks.NetCoreApp31,
             Frameworks.Net50,
-            Frameworks.Net60
+            Frameworks.Net60,
+            Frameworks.Net70
         };
 
         private static readonly Lazy<(IsolatedWorkspaceManager Manager, string NupkgVersion, bool KeepWorkspaces)> Initialization = new(() =>
@@ -71,7 +73,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                downloadCachePath: Path.Combine(directory, ".toolcache"));
 
            if (keepWorkspaces) manager.PreserveDirectory("The KeepWorkspaces test parameter was set to true.");
-
+           TestContext.WriteLine($"Directory: {directory}, NugetPackageDirectory {nupkgDirectory},NugetPackageVersion: {nupkgVersion}");
            return (manager, nupkgVersion, keepWorkspaces);
        });
 

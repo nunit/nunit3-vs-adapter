@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("A package containing the NUnit3 TestAdapter for Visual Studio 2012 onwards. \n\r\nThe package works with Visual Studio 2012 and newer, dotnet test and VSTest.Console.\r\n")]
 [assembly: AssemblyCompany("NUnit Project")]
 [assembly: AssemblyProduct("NUnit3TestAdapter")]
-[assembly: AssemblyCopyright("Copyright © 2011-2021 Charlie Poole, 2014-2021 Terje Sandstrom")]
+[assembly: AssemblyCopyright("Copyright © 2011-2021 Charlie Poole, 2014-2022 Terje Sandstrom")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: CLSCompliant(false)]
