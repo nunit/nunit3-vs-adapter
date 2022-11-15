@@ -23,6 +23,7 @@
 
 using System;
 using System.IO;
+
 using NUnit.Engine;
 using NUnit.VisualStudio.TestAdapter.Internal;
 
@@ -64,12 +65,20 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 #endif
             InternalEngineCreated?.Invoke(engineX);
             TestEngine = engineX;
+            var tmpPath = Path.Combine(Path.GetTempPath(), "NUnit.Engine.Logs");
+            if (!Directory.Exists(tmpPath))
+                Directory.CreateDirectory(tmpPath);
+            TestEngine.WorkDirectory = tmpPath;
+            TestEngine.InternalTraceLevel = InternalTraceLevel.Off;
         }
 
         public void InitializeSettingsAndLogging(IAdapterSettings setting, ITestLogger testLog)
         {
             logger = testLog;
             settings = setting;
+#if EnableTraceLevelAtInitialization
+            
+#endif
         }
 
         public void CreateRunner(TestPackage testPackage)
@@ -87,17 +96,18 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
         {
             var timing = new TimingLogger(settings, logger);
             var results = new NUnitResults(Runner.Explore(filter));
-            timing.LogTime($"Execution engine discovery time with filter length {filter.Text.Length}");
-            if (filter.Text.Length < 300)
-                logger.Debug($"Filter: {filter.Text}");
-
-            return results;
+            return LogTiming(filter, timing, results);
         }
 
         public NUnitResults Run(ITestEventListener listener, TestFilter filter)
         {
             var timing = new TimingLogger(settings, logger);
             var results = new NUnitResults(Runner.Run(listener, filter));
+            return LogTiming(filter, timing, results);
+        }
+
+        private NUnitResults LogTiming(TestFilter filter, TimingLogger timing, NUnitResults results)
+        {
             timing.LogTime($"Execution engine run time with filter length {filter.Text.Length}");
             if (filter.Text.Length < 300)
                 logger.Debug($"Filter: {filter.Text}");

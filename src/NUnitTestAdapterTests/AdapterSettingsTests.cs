@@ -23,9 +23,12 @@
 
 using System;
 using System.IO;
+
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
+
 using NSubstitute;
+
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
@@ -64,7 +67,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 Assert.That(_settings.TestAdapterPaths, Is.Null);
                 Assert.That(_settings.CollectSourceInformation, Is.True);
                 Assert.That(_settings.TestProperties, Is.Empty);
-                Assert.That(_settings.InternalTraceLevel, Is.Null);
+                Assert.That(_settings.InternalTraceLevelEnum, Is.EqualTo(Engine.InternalTraceLevel.Off));
                 Assert.That(_settings.WorkDirectory, Is.Null);
                 Assert.That(_settings.NumberOfTestWorkers, Is.EqualTo(-1));
                 Assert.That(_settings.DefaultTimeout, Is.EqualTo(0));
@@ -178,8 +181,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void InternalTraceLevel()
         {
             _settings.Load("<RunSettings><NUnit><InternalTraceLevel>Debug</InternalTraceLevel></NUnit></RunSettings>");
-            Assert.That(_settings.InternalTraceLevel, Is.EqualTo("Debug"));
+            Assert.That(_settings.InternalTraceLevelEnum, Is.EqualTo(Engine.InternalTraceLevel.Debug));
         }
+
+        [Test]
+        public void InternalTraceLevelEmpty()
+        {
+            _settings.Load("");
+            Assert.That(_settings.InternalTraceLevelEnum, Is.EqualTo(Engine.InternalTraceLevel.Off));
+            Assert.That(_settings.InternalTraceLevelEnum.ToString(), Is.EqualTo("Off"));
+        }
+
 
         [Test]
         public void WorkDirectorySetting()
@@ -196,6 +208,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             _settings.Load(@"<RunSettings><NUnit><WorkDirectory>C:\Whatever</WorkDirectory><TestOutputXml>/my/work/dir</TestOutputXml></NUnit></RunSettings>");
             Assert.That(_settings.UseTestOutputXml);
+            _settings.SetTestOutputFolder(_settings.WorkDirectory);
             Assert.Multiple(() =>
             {
                 Assert.That(_settings.TestOutputFolder, Does.Contain(@"/my/work/dir"));
@@ -217,6 +230,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             _settings.Load(@"<RunSettings><NUnit><WorkDirectory>C:\Whatever</WorkDirectory><TestOutputXml>my/testoutput/dir</TestOutputXml><OutputXmlFolderMode>RelativeToWorkFolder</OutputXmlFolderMode></NUnit></RunSettings>");
             Assert.That(_settings.UseTestOutputXml, "Settings not loaded properly");
+            _settings.SetTestOutputFolder(_settings.WorkDirectory);
             Assert.Multiple(() =>
             {
                 Assert.That(_settings.TestOutputFolder, Does.Contain(@"\my/testoutput/dir"), "Content not correct");
@@ -233,7 +247,21 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             _settings.Load(@"<RunSettings><RunConfiguration><ResultsDirectory>c:\whatever\results</ResultsDirectory></RunConfiguration><NUnit><WorkDirectory>C:\AnotherWhatever</WorkDirectory><TestOutputXml>my/testoutput/dir</TestOutputXml><OutputXmlFolderMode>UseResultDirectory</OutputXmlFolderMode></NUnit></RunSettings>");
             Assert.That(_settings.UseTestOutputXml, "Settings not loaded properly");
+            _settings.SetTestOutputFolder(_settings.WorkDirectory);
             Assert.That(_settings.TestOutputFolder, Is.EqualTo(@"c:\whatever\results"), "Content not correct");
+        }
+
+        /// <summary>
+        /// Test should set output folder to same as resultdirectory, and ignore workdirectory and testoutputxml.
+        /// </summary>
+        [Test]
+        public void TestOutputSettingAsSpecified()
+        {
+            _settings.Load(@"<RunSettings><NUnit><TestOutputXml>c:\whatever</TestOutputXml></NUnit></RunSettings>");
+            Assert.That(_settings.UseTestOutputXml, "Settings not loaded properly");
+            _settings.SetTestOutputFolder(_settings.WorkDirectory);
+            Assert.That(_settings.TestOutputFolder, Is.EqualTo(@"c:\whatever"), "Content not correct");
+            Assert.That(_settings.OutputXmlFolderMode, Is.EqualTo(OutputXmlFolderMode.AsSpecified), "Should be set default AsSpecified with absolute path in");
         }
 
 

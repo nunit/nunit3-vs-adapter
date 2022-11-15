@@ -29,6 +29,8 @@ using System.Xml;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
+using NUnit.Engine;
+
 namespace NUnit.VisualStudio.TestAdapter
 {
     public interface IAdapterSettings
@@ -40,7 +42,7 @@ namespace NUnit.VisualStudio.TestAdapter
         string TestAdapterPaths { get; }
         bool CollectSourceInformation { get; }
         IDictionary<string, string> TestProperties { get; }
-        string InternalTraceLevel { get; }
+        InternalTraceLevel InternalTraceLevelEnum { get; }
         string WorkDirectory { get; }
         string Where { get; }
         int DefaultTimeout { get; }
@@ -115,7 +117,7 @@ namespace NUnit.VisualStudio.TestAdapter
         bool IncludeStackTraceForSuites { get; }
 
 
-        void Load(IDiscoveryContext context);
+        void Load(IDiscoveryContext context, TestLogger testLogger = null);
         void Load(string settingsXml);
         void SaveRandomSeed(string dirname);
         void RestoreRandomSeed(string dirname);
@@ -132,6 +134,7 @@ namespace NUnit.VisualStudio.TestAdapter
         ExplicitModeEnum ExplicitMode { get; }
         bool SkipExecutionWhenNoTests { get; }
         string TestOutputFolder { get; }
+        string SetTestOutputFolder(string workDirectory);
     }
 
     public enum VsTestCategoryType
@@ -210,7 +213,11 @@ namespace NUnit.VisualStudio.TestAdapter
         #region Properties - NUnit Specific
 
         public string InternalTraceLevel { get; private set; }
+        public InternalTraceLevel InternalTraceLevelEnum { get; private set; }
 
+        /// <summary>
+        /// Is null if not set in runsettings.
+        /// </summary>
         public string WorkDirectory { get; private set; }
         public string Where { get; private set; }
         public string TestOutputXml { get; private set; }
@@ -303,8 +310,14 @@ namespace NUnit.VisualStudio.TestAdapter
 
         #region Public Methods
 
-        public void Load(IDiscoveryContext context)
+        /// <summary>
+        /// Initialized by the Load method.
+        /// </summary>
+        private TestLogger testLog;
+
+        public void Load(IDiscoveryContext context, TestLogger testLogger)
         {
+            testLog = testLogger;
             if (context == null)
                 throw new ArgumentNullException(nameof(context), "Load called with null context");
 
@@ -338,11 +351,8 @@ namespace NUnit.VisualStudio.TestAdapter
             UseVsKeepEngineRunning = GetInnerTextAsBool(nunitNode, nameof(UseVsKeepEngineRunning), false);
             BasePath = GetInnerTextWithLog(nunitNode, nameof(BasePath));
             PrivateBinPath = GetInnerTextWithLog(nunitNode, nameof(PrivateBinPath));
-            TestOutputXml = GetInnerTextWithLog(nunitNode, nameof(TestOutputXml));
-            OutputXmlFolderMode = MapEnum(GetInnerText(nunitNode, nameof(OutputXmlFolderMode), Verbosity > 0), OutputXmlFolderMode.RelativeToWorkFolder);
+            ParseOutputXml(nunitNode);
             NewOutputXmlFileForEachRun = GetInnerTextAsBool(nunitNode, nameof(NewOutputXmlFileForEachRun), false);
-
-            SetTestOutputFolder();
 
             RandomSeed = GetInnerTextAsNullableInt(nunitNode, nameof(RandomSeed));
             RandomSeedSpecified = RandomSeed.HasValue;
@@ -418,24 +428,44 @@ namespace NUnit.VisualStudio.TestAdapter
             UpdateNumberOfTestWorkers();
         }
 
-        private void SetTestOutputFolder()
+        private void ParseOutputXml(XmlNode nunitNode)
+        {
+            TestOutputXml = GetInnerTextWithLog(nunitNode, nameof(TestOutputXml));
+            if (Path.IsPathRooted(TestOutputXml))
+            {
+                OutputXmlFolderMode = OutputXmlFolderMode.AsSpecified;
+                return;
+            }
+            var outputMode = GetInnerText(nunitNode, nameof(OutputXmlFolderMode), Verbosity > 0);
+
+            if (string.IsNullOrEmpty(WorkDirectory) && string.IsNullOrEmpty(outputMode))
+            {
+                OutputXmlFolderMode = string.IsNullOrEmpty(TestOutputXml) ? OutputXmlFolderMode.UseResultDirectory : OutputXmlFolderMode.RelativeToResultDirectory;
+            }
+
+            OutputXmlFolderMode = MapEnum(outputMode, OutputXmlFolderMode.RelativeToWorkFolder);
+        }
+
+        public string SetTestOutputFolder(string workDirectory)
         {
             if (!UseTestOutputXml)
-                return;
+                return "";
             switch (OutputXmlFolderMode)
             {
                 case OutputXmlFolderMode.UseResultDirectory:
                     TestOutputFolder = ResultsDirectory;
-                    return;
+                    return TestOutputFolder;
                 case OutputXmlFolderMode.RelativeToResultDirectory:
                     TestOutputFolder = Path.Combine(ResultsDirectory, TestOutputXml);
-                    return;
+                    return TestOutputFolder;
                 case OutputXmlFolderMode.RelativeToWorkFolder:
-                    TestOutputFolder = Path.Combine(WorkDirectory, TestOutputXml);
-                    return;
+                    TestOutputFolder = Path.Combine(workDirectory, TestOutputXml);
+                    return TestOutputFolder;
                 case OutputXmlFolderMode.AsSpecified:
+                    TestOutputFolder = TestOutputXml;
+                    return TestOutputFolder;
                 default:
-                    return;
+                    return "";
             }
         }
 
@@ -445,11 +475,30 @@ namespace NUnit.VisualStudio.TestAdapter
             DumpXmlTestResults = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestResults), false);
             DumpVsInput = GetInnerTextAsBool(nunitNode, nameof(DumpVsInput), false);
             FreakMode = GetInnerTextAsBool(nunitNode, nameof(FreakMode), false);
-            InternalTraceLevel = GetInnerTextWithLog(nunitNode, nameof(InternalTraceLevel), "Off", "Error", "Warning",
-                "Info", "Verbose", "Debug");
+            InternalTraceLevel = GetInnerTextWithLog(nunitNode, nameof(InternalTraceLevel), "Off", "Error", "Warning", "Info", "Verbose", "Debug");
+            InternalTraceLevelEnum = ParseInternalTraceLevel(InternalTraceLevel);
             Debug = GetInnerTextAsBool(nunitNode, nameof(Debug), false);
             DebugExecution = Debug || GetInnerTextAsBool(nunitNode, nameof(DebugExecution), false);
             DebugDiscovery = Debug || GetInnerTextAsBool(nunitNode, nameof(DebugDiscovery), false);
+        }
+
+        private InternalTraceLevel ParseInternalTraceLevel(string s)
+        {
+            if (s == null)
+            {
+                return Engine.InternalTraceLevel.Off;
+            }
+
+            try
+            {
+                var internalTrace = (InternalTraceLevel)Enum.Parse(typeof(InternalTraceLevel), s);
+                return internalTrace;
+            }
+            catch
+            {
+                testLog.Warning($"InternalTraceLevel is non-valid:  {s}, see https://docs.nunit.org/articles/vs-test-adapter/Tips-And-Tricks.html");
+                return Engine.InternalTraceLevel.Off;
+            }
         }
 
         private void UpdateTestProperties(XmlDocument doc)

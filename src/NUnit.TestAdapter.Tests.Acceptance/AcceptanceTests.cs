@@ -32,12 +32,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         public static IEnumerable<string> TargetFrameworks => new[]
         {
             LowestNetfxTarget,
-            Frameworks.NetCoreApp21
+            Frameworks.NetCoreApp31
         };
 
         public static IEnumerable<string> DotNetCliTargetFrameworks => new[]
         {
-            Frameworks.NetCoreApp21,
+           // Frameworks.NetCoreApp21,  // Doesnt seem to be supported by VS 2022 anymore
             Frameworks.NetCoreApp31,
             Frameworks.Net50,
             Frameworks.Net60,

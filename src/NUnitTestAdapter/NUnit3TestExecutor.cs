@@ -20,7 +20,7 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
-
+#define REVERSEENGINEERING
 
 using System;
 using System.Collections.Generic;
@@ -89,7 +89,7 @@ namespace NUnit.VisualStudio.TestAdapter
         #region ITestExecutor Implementation
 
         /// <summary>
-        /// Called by the Visual Studio IDE to run all tests. Also called by TFS Build
+        /// Called by dotnet test, and TFS Build
         /// to run either all or selected tests. In the latter case, a filter is provided
         /// as part of the run context.
         /// </summary>
@@ -100,8 +100,13 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             Initialize(runContext, frameworkHandle);
             CheckIfDebug();
-            TestLog.Debug("RunTests by IEnumerable<string>");
+#if REVERSEENGINEERING
+            var st = new StackTrace();
+            var frames = st.GetFrames();
+            var filenames = frames?.Select(x => x.GetMethod()?.DeclaringType?.Assembly.CodeBase).Distinct().ToList();
+#endif
             InitializeForExecution(runContext, frameworkHandle);
+            TestLog.Debug($"RunTests by IEnumerable<string>,({sources.Count()} entries), called from {WhoIsCallingUsEntry}");
 
             if (Settings.InProcDataCollectorsAvailable && sources.Count() > 1)
             {
@@ -156,7 +161,7 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         /// <summary>
-        /// Called by the VisualStudio IDE when selected tests are to be run. Never called from TFS Build, except (at least 2022, probably also 2019) when vstest.console uses /test: then this is being used.
+        /// Called by the VisualStudio IDE when all or selected tests are to be run. Never called from TFS Build, except (at least 2022, probably also 2019) when vstest.console uses /test: then this is being used.
         /// </summary>
         /// <param name="tests">The tests to be run.</param>
         /// <param name="runContext">The RunContext.</param>
@@ -167,11 +172,13 @@ namespace NUnit.VisualStudio.TestAdapter
             CheckIfDebug();
             InitializeForExecution(runContext, frameworkHandle);
             RunType = RunType.Ide;
-            TestLog.Debug("RunTests by IEnumerable<TestCase>. RunType = Ide");
+            TestLog.Debug($"RunTests by IEnumerable<TestCase>. RunType = Ide, called from {WhoIsCallingUsEntry}");
             var timing = new TimingLogger(Settings, TestLog);
             Debug.Assert(NUnitEngineAdapter != null, "NUnitEngineAdapter is null");
             Debug.Assert(NUnitEngineAdapter.EngineEnabled, "NUnitEngineAdapter TestEngine is null");
-            var assemblyGroups = tests.GroupBy(tc => tc.Source);
+            var assemblyGroups = tests.GroupBy(tc => tc.Source).ToList();
+            if (assemblyGroups.Count > 1)
+                TestLog.Debug($"Multiple ({assemblyGroups.Count}) assemblies in one test");
             if (IsInProcDataCollectorsSpecifiedWithMultipleAssemblies(assemblyGroups))
             {
                 TestLog.Error(
@@ -219,18 +226,18 @@ namespace NUnit.VisualStudio.TestAdapter
             StopRun();
         }
 
-        #endregion
+#endregion
 
-        #region IDisposable Implementation
+#region IDisposable Implementation
 
         public void Dispose()
         {
             // TODO: Nothing here at the moment. Check what needs disposing, if anything. Otherwise, remove.
         }
 
-        #endregion
+#endregion
 
-        #region Helper Methods
+#region Helper Methods
 
         public void InitializeForExecution(IRunContext runContext, IFrameworkHandle frameworkHandle)
         {
@@ -274,7 +281,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 NUnitEngineAdapter.CreateRunner(package);
                 CreateTestOutputFolder();
                 Dump?.StartDiscoveryInExecution(testCases, filter, package);
-
+                TestLog.DebugRunfrom();
                 // var discoveryResults = RunType == RunType.CommandLineCurrentNUnit ? null : NUnitEngineAdapter.Explore(filter);
                 var discoveryResults = NUnitEngineAdapter.Explore(filter);
                 Dump?.AddString(discoveryResults?.AsString() ?? " No discovery");
@@ -349,17 +356,18 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
 
-        private NUnitTestFilterBuilder CreateTestFilterBuilder() => new (NUnitEngineAdapter.GetService<ITestFilterService>(), Settings);
+        private NUnitTestFilterBuilder CreateTestFilterBuilder() => new(NUnitEngineAdapter.GetService<ITestFilterService>(), Settings);
 
-
+        /// <summary>
+        /// Must be called after WorkDir have been set.
+        /// </summary>
         private void CreateTestOutputFolder()
         {
             if (!Settings.UseTestOutputXml)
             {
                 return;
             }
-
-            string path = Settings.TestOutputFolder;
+            string path = Settings.SetTestOutputFolder(WorkDir);
             try
             {
                 Directory.CreateDirectory(path);
@@ -373,7 +381,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
-        #endregion
+#endregion
 
         public void StopRun()
         {

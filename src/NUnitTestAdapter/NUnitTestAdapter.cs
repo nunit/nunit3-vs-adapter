@@ -92,24 +92,36 @@ namespace NUnit.VisualStudio.TestAdapter
 
         protected string WorkDir { get; private set; }
 
-        private static string exeName;
+        private static string entryExeName;
 
+        private static string whoIsCallingUsEntry;
+
+        public static string WhoIsCallingUsEntry
+        {
+            get
+            {
+                if (whoIsCallingUsEntry != null)
+                    return whoIsCallingUsEntry;
+                if (entryExeName == null)
+                {
+                    var entryAssembly = Assembly.GetEntryAssembly();
+                    if (entryAssembly != null)
+                        entryExeName = entryAssembly.Location;
+                }
+                whoIsCallingUsEntry = entryExeName;
+                return whoIsCallingUsEntry;
+            }
+        }
 
         public static bool IsRunningUnderIde
         {
             get
             {
-                if (exeName == null)
-                {
-                    var entryAssembly = Assembly.GetEntryAssembly();
-                    if (entryAssembly != null)
-                        exeName = entryAssembly.Location;
-                }
-
-                return exeName != null && (
-                    exeName.Contains("vstest.executionengine") ||
-                    exeName.Contains("vstest.discoveryengine") ||
-                    exeName.Contains("TE.ProcessHost"));
+                var exe = WhoIsCallingUsEntry;
+                return exe != null && (
+                    exe.Contains("vstest.executionengine") ||
+                    exe.Contains("vstest.discoveryengine") ||
+                    exe.Contains("TE.ProcessHost"));
             }
         }
 
@@ -132,7 +144,7 @@ namespace NUnit.VisualStudio.TestAdapter
             TestLog.InitSettings(Settings);
             try
             {
-                Settings.Load(context);
+                Settings.Load(context, TestLog);
                 TestLog.Verbosity = Settings.Verbosity;
                 InitializeForbiddenFolders();
                 SetCurrentWorkingDirectory();
@@ -218,8 +230,7 @@ namespace NUnit.VisualStudio.TestAdapter
             if (timeout > 0)
                 package.Settings[PackageSettings.DefaultTimeout] = timeout;
 
-            if (Settings.InternalTraceLevel != null)
-                package.Settings[PackageSettings.InternalTraceLevel] = Settings.InternalTraceLevel;
+            package.Settings[PackageSettings.InternalTraceLevel] = Settings.InternalTraceLevelEnum.ToString();
 
             if (Settings.BasePath != null)
                 package.Settings[PackageSettings.BasePath] = Settings.BasePath;
@@ -254,6 +265,11 @@ namespace NUnit.VisualStudio.TestAdapter
                 package.Settings[PackageSettings.DefaultTestNamePattern] = "{m}{a}";
             }
 
+            return SetWorkDir(assemblyName, package);
+        }
+
+        private TestPackage SetWorkDir(string assemblyName, TestPackage package)
+        {
             // Set the work directory to the assembly location unless a setting is provided
             string workDir = Settings.WorkDirectory;
             if (workDir == null)
@@ -264,7 +280,8 @@ namespace NUnit.VisualStudio.TestAdapter
                 Directory.CreateDirectory(workDir);
             package.Settings[PackageSettings.WorkDirectory] = workDir;
             WorkDir = workDir;
-            // CreateTestOutputFolder(workDir);
+            Directory.SetCurrentDirectory(workDir);
+            TestLog.Debug($"Workdir set to: {WorkDir}");
             return package;
         }
 
