@@ -33,7 +33,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
             throw new NotImplementedException();
         }
 
-        public virtual string SettingsXml => "<RunSettings><NUnit><SkipNonTestAssemblies>false</SkipNonTestAssemblies></NUnit></RunSettings>";
+        public virtual string SettingsXml => "<RunSettings><NUnit><SkipNonTestAssemblies>false</SkipNonTestAssemblies><Verbosity>5</Verbosity></NUnit></RunSettings>";
     }
 
     class FakeRunSettingsForTestOutput : FakeRunSettings

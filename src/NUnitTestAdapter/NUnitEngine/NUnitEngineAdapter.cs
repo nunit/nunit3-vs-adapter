@@ -65,7 +65,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 #endif
             InternalEngineCreated?.Invoke(engineX);
             TestEngine = engineX;
-            var tmpPath = Path.Combine(Path.GetTempPath(), "NUnit.Engine.Logs");
+            var tmpPath = Path.Combine(Path.GetTempPath(), "NUnit.Engine");
             if (!Directory.Exists(tmpPath))
                 Directory.CreateDirectory(tmpPath);
             TestEngine.WorkDirectory = tmpPath;
