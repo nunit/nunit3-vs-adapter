@@ -13,7 +13,7 @@ var configuration = Argument("configuration", "Release");
 //////////////////////////////////////////////////////////////////////
 
 var version = "4.3.1";
-var modifier = "-alpha.111";
+var modifier = "";
 
 
 var dbgSuffix = configuration.ToLower() == "debug" ? "-dbg" : "";
@@ -72,7 +72,7 @@ var BIN_DIR = PROJECT_DIR + "bin/" + configuration + "/";
 
 var ADAPTER_PROJECT = SRC_DIR + "NUnitTestAdapter/NUnit.TestAdapter.csproj";
 
-var NETCOREAPP_TFM = "netcoreapp2.1";
+var NETCOREAPP_TFM = "netcoreapp3.1";
 
 var ADAPTER_BIN_DIR_NET35 = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/net35/";
 var ADAPTER_BIN_DIR_NETCOREAPP = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/{NETCOREAPP_TFM}/";

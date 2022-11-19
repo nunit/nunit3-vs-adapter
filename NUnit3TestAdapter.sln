@@ -61,6 +61,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\NUnit3TestAdapter.Cake.CI.yml = .github\workflows\NUnit3TestAdapter.Cake.CI.yml
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "netcoreapp3.1", "netcoreapp3.1", "{2F940513-5B8F-45A5-A188-7C5D03D1B50D}"
+	ProjectSection(SolutionItems) = preProject
+		nuget\netcoreapp3.1\NUnit3TestAdapter.props = nuget\netcoreapp3.1\NUnit3TestAdapter.props
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -100,6 +105,7 @@ Global
 		{A9584E41-6ECE-44B4-A504-41795A65DA5F} = {DE347D88-F6ED-4031-AFC2-318F63E39BC9}
 		{062B1763-73C8-4B5A-92DF-C66A36C43CE1} = {7CE30108-5D81-4850-BE6B-C8BCA35D3592}
 		{7D708804-B2F1-4A31-A9FB-85A0C7433200} = {062B1763-73C8-4B5A-92DF-C66A36C43CE1}
+		{2F940513-5B8F-45A5-A188-7C5D03D1B50D} = {DE347D88-F6ED-4031-AFC2-318F63E39BC9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8EF03474-188E-44A8-8C76-9FBCF9A382EC}
