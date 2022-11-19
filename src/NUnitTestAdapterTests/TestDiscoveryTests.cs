@@ -42,7 +42,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             yield return new FakeDiscoveryContext(new FakeRunSettings());
         }
     }
-
+    
+    [Ignore("These tests needs to rewritten as isolated tests")]
     [Category("TestDiscovery")]
     public class TestDiscoveryTests : ITestCaseDiscoverySink
     {
