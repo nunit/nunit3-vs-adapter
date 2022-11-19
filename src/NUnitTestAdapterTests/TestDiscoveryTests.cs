@@ -24,10 +24,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+
 using NSubstitute;
+
 using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
@@ -38,18 +41,19 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     {
         public static IEnumerable<IDiscoveryContext> TestDiscoveryData()
         {
-           // yield return new FakeDiscoveryContext(null);
+            // yield return new FakeDiscoveryContext(null);
             yield return new FakeDiscoveryContext(new FakeRunSettings());
         }
     }
 
+    [Ignore("These tests needs to rewritten as isolated tests")]
     [Category("TestDiscovery")]
     public class TestDiscoveryTests : ITestCaseDiscoverySink
     {
         static readonly string MockAssemblyPath =
             Path.Combine(TestContext.CurrentContext.TestDirectory, "mock-assembly.dll");
 
-        private readonly List<TestCase> testCases = new ();
+        private readonly List<TestCase> testCases = new();
 
         private readonly IDiscoveryContext _context;
 
@@ -134,13 +138,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 this);
         }
 
-#region ITestCaseDiscoverySink Methods
+        #region ITestCaseDiscoverySink Methods
 
         void ITestCaseDiscoverySink.SendTestCase(TestCase discoveredTest)
         {
         }
 
-#endregion
+        #endregion
     }
 
     [Category("TestDiscovery")]

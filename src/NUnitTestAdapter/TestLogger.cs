@@ -158,6 +158,7 @@ namespace NUnit.VisualStudio.TestAdapter
 #endif
             var assLoc = Assembly.GetExecutingAssembly().Location;
             Debug($"{fw} adapter running from {assLoc}");
+            Debug($"Current directory: {Environment.CurrentDirectory}");
         }
 
         public void InfoNoTests(bool discoveryResultsHasNoNUnitTests, string assemblyPath)

@@ -83,8 +83,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
         [Test, Platform("Win")]
         [TestCase("net48")] // test code requires ValueTuple support, so can't got to net35
-        [TestCase("netcoreapp2.1")]
+        [TestCase("netcoreapp3.1")]
         [TestCase("net5.0")]
+        [TestCase("net6.0")]
         public static void Single_target_csproj(string targetFramework)
         {
             var workspace = CreateWorkspace()

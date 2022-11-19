@@ -62,7 +62,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
     }
 
-
+    [Ignore("These tests needs to rewritten as isolated tests")]
     [Category("TestExecution")]
     public class TestFilteringTests
     {
@@ -118,6 +118,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
     }
 
+    [Ignore("These tests needs to rewritten as isolated tests")]
     [Category("TestExecution")]
     public class TestExecutionTests
     {
