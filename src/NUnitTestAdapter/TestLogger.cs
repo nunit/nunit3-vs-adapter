@@ -151,10 +151,10 @@ namespace NUnit.VisualStudio.TestAdapter
         #region SpecializedMessages
         public void DebugRunfrom()
         {
-#if NET35
-            string fw = "Net Framework";
+#if NET462
+            string fw = ".Net Framework";
 #else
-            string fw = "Net Core";
+            string fw = ".Net/ .Net Core";
 #endif
             var assLoc = Assembly.GetExecutingAssembly().Location;
             Debug($"{fw} adapter running from {assLoc}");

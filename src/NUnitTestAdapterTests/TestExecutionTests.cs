@@ -340,7 +340,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 .ToList();
             Summary = new ResultSummary(testResults);
         }
-#if NET35
+#if NET462
         [Test]
         public void ThatTestOutputXmlHasBeenCreatedBelowAssemblyFolder()
         {

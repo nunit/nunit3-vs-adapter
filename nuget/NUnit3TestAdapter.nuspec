@@ -25,13 +25,13 @@
     <developmentDependency>false</developmentDependency>
   </metadata>
   <files>
-    <file src="build\net35\NUnit3.TestAdapter.dll" target="build\net35\NUnit3.TestAdapter.dll" />
-    <file src="build\net35\NUnit3.TestAdapter.pdb" target="build\net35\NUnit3.TestAdapter.pdb" />
-    <file src="build\net35\nunit.engine.dll" target="build\net35\nunit.engine.dll" />
-    <file src="build\net35\nunit.engine.api.dll" target="build\net35\nunit.engine.api.dll" />
-    <file src="build\net35\nunit.engine.core.dll" target="build\net35\nunit.engine.core.dll" />
-    <file src="build\net35\testcentric.engine.metadata.dll" target="build\net35\testcentric.engine.metadata.dll"/>
-    <file src="build\net35\NUnit3TestAdapter.props" target="build\net35\NUnit3TestAdapter.props" />
+    <file src="build\net462\NUnit3.TestAdapter.dll" target="build\net462\NUnit3.TestAdapter.dll" />
+    <file src="build\net462\NUnit3.TestAdapter.pdb" target="build\net462\NUnit3.TestAdapter.pdb" />
+    <file src="build\net462\nunit.engine.dll" target="build\net462\nunit.engine.dll" />
+    <file src="build\net462\nunit.engine.api.dll" target="build\net462\nunit.engine.api.dll" />
+    <file src="build\net462\nunit.engine.core.dll" target="build\net462\nunit.engine.core.dll" />
+    <file src="build\net462\testcentric.engine.metadata.dll" target="build\net462\testcentric.engine.metadata.dll"/>
+    <file src="build\net462\NUnit3TestAdapter.props" target="build\net462\NUnit3TestAdapter.props" />
 
     <file src="build\netcoreapp3.1\NUnit3.TestAdapter.dll" target="build\netcoreapp3.1\NUnit3.TestAdapter.dll" />
     <file src="build\netcoreapp3.1\NUnit3.TestAdapter.pdb" target="build\netcoreapp3.1\NUnit3.TestAdapter.pdb" />

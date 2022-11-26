@@ -23,12 +23,13 @@
 
 using System;
 using System.Collections.Generic;
-#if NET35
+#if NET462
 using System.Runtime.Remoting;
 #endif
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+
 using NUnit.Engine;
 using NUnit.VisualStudio.TestAdapter;
 using NUnit.VisualStudio.TestAdapter.Dump;
@@ -42,7 +43,7 @@ namespace NUnit.VisualStudio.TestAdapter
     /// translates each event into a message for the VS test platform.
     /// </summary>
     public class NUnitEventListener :
-#if NET35
+#if NET462
         MarshalByRefObject,
 #endif
         ITestEventListener, IDisposable // Public for testing
@@ -51,9 +52,9 @@ namespace NUnit.VisualStudio.TestAdapter
         private readonly ITestExecutionRecorder recorder;
         private readonly ITestConverterCommon testConverter;
         private readonly IAdapterSettings settings;
-        private readonly Dictionary<string, ICollection<INUnitTestEventTestOutput>> outputNodes = new ();
+        private readonly Dictionary<string, ICollection<INUnitTestEventTestOutput>> outputNodes = new();
 
-#if NET35
+#if NET462
         public override object InitializeLifetimeService()
         {
             // Give the listener an infinite lease lifetime by returning null
@@ -126,7 +127,7 @@ namespace NUnit.VisualStudio.TestAdapter
             {
                 if (disposing)
                 {
-#if NET35
+#if NET462
                     RemotingServices.Disconnect(this);
 #endif
                 }

@@ -27,7 +27,7 @@ using NUnit.VisualStudio.TestAdapter.Internal;
 
 namespace NUnit.VisualStudio.TestAdapter.Metadata
 {
-#if NET35
+#if NET462
     [Serializable]
 #endif
     public struct TypeInfo

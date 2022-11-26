@@ -13,7 +13,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
     public class Frameworks
     {
         public const string NetCoreApp31 = "netcoreapp3.1";
-        public const string NetCoreApp21 = "netcoreapp2.1";
         public const string Net50 = "net5.0";
         public const string Net60 = "net6.0";
         public const string Net70 = "net7.0";
@@ -26,8 +25,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
         public static string NuGetPackageVersion => Initialization.Value.NupkgVersion;
 
-        public const string LowestNetfxTarget = "net35";
-        public const string LegacyProjectTargetFrameworkVersion = "v3.5";
+        public const string LowestNetfxTarget = "net462";
+        public const string LegacyProjectTargetFrameworkVersion = "v4.6.2";
 
         public static IEnumerable<string> TargetFrameworks => new[]
         {
@@ -37,7 +36,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
         public static IEnumerable<string> DotNetCliTargetFrameworks => new[]
         {
-           // Frameworks.NetCoreApp21,  // Doesnt seem to be supported by VS 2022 anymore
             Frameworks.NetCoreApp31,
             Frameworks.Net50,
             Frameworks.Net60,

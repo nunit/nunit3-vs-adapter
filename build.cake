@@ -1,5 +1,5 @@
-#tool vswhere&version=2.8.4
-#tool Microsoft.TestPlatform&version=17.0.0
+#tool vswhere&version=3.1.1
+#tool Microsoft.TestPlatform&version=17.4.0
 
 //////////////////////////////////////////////////////////////////////
 // ARGUMENTS
@@ -12,8 +12,8 @@ var configuration = Argument("configuration", "Release");
 // SET PACKAGE VERSION
 //////////////////////////////////////////////////////////////////////
 
-var version = "4.3.1";
-var modifier = "";
+var version = "4.4.0";
+var modifier = "-beta.1.1";
 
 
 var dbgSuffix = configuration.ToLower() == "debug" ? "-dbg" : "";
@@ -74,7 +74,7 @@ var ADAPTER_PROJECT = SRC_DIR + "NUnitTestAdapter/NUnit.TestAdapter.csproj";
 
 var NETCOREAPP_TFM = "netcoreapp3.1";
 
-var ADAPTER_BIN_DIR_NET35 = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/net35/";
+var ADAPTER_BIN_DIR_NET462 = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/net462/";
 var ADAPTER_BIN_DIR_NETCOREAPP = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/{NETCOREAPP_TFM}/";
 
 var BIN_DIRS = new [] {
@@ -171,7 +171,7 @@ string GetTestAssemblyPath(string framework)
 }
 
 foreach (var (framework, vstestFramework, adapterDir) in new[] {
-    ("net46", "Framework45", ADAPTER_BIN_DIR_NET35),
+    ("net46", "Framework45", ADAPTER_BIN_DIR_NET462),
     (NETCOREAPP_TFM, NETCOREAPP_TFM, ADAPTER_BIN_DIR_NETCOREAPP)
 })
 {
@@ -247,20 +247,20 @@ Task("CreateWorkingImage")
         CopyFileToDirectory("LICENSE", PACKAGE_IMAGE_DIR);
 
         // dotnet publish doesn't work for .NET 3.5
-        var net35Files = new FilePath[]
+        var net462Files = new FilePath[]
         {
-            ADAPTER_BIN_DIR_NET35 + "NUnit3.TestAdapter.dll",
-            ADAPTER_BIN_DIR_NET35 + "NUnit3.TestAdapter.pdb",
-            ADAPTER_BIN_DIR_NET35 + "nunit.engine.dll",
-            ADAPTER_BIN_DIR_NET35 + "nunit.engine.api.dll",
-            ADAPTER_BIN_DIR_NET35 + "nunit.engine.core.dll",
-            ADAPTER_BIN_DIR_NET35 + "testcentric.engine.metadata.dll"
+            ADAPTER_BIN_DIR_NET462 + "NUnit3.TestAdapter.dll",
+            ADAPTER_BIN_DIR_NET462 + "NUnit3.TestAdapter.pdb",
+            ADAPTER_BIN_DIR_NET462 + "nunit.engine.dll",
+            ADAPTER_BIN_DIR_NET462 + "nunit.engine.api.dll",
+            ADAPTER_BIN_DIR_NET462 + "nunit.engine.core.dll",
+            ADAPTER_BIN_DIR_NET462 + "testcentric.engine.metadata.dll"
         };
 
-        var net35Dir = PACKAGE_IMAGE_DIR + "build/net35";
-        CreateDirectory(net35Dir);
-        CopyFiles(net35Files, net35Dir);
-        CopyFileToDirectory("nuget/net35/NUnit3TestAdapter.props", net35Dir);
+        var net462Dir = PACKAGE_IMAGE_DIR + "build/net462";
+        CreateDirectory(net462Dir);
+        CopyFiles(net462Files, net462Dir);
+        CopyFileToDirectory("nuget/net462/NUnit3TestAdapter.props", net462Dir);
 
         var netcoreDir = PACKAGE_IMAGE_DIR + "build/" + NETCOREAPP_TFM;
         DotNetCorePublish(ADAPTER_PROJECT, new DotNetCorePublishSettings
@@ -327,7 +327,9 @@ Task("Acceptance")
     .Description("Ensures that known project configurations can use the produced NuGet package to restore, build, and run tests.")
     .Does(() =>
     {
-        var testAssembly = SRC_DIR + $"NUnit.TestAdapter.Tests.Acceptance/bin/{configuration}/net472/NUnit.VisualStudio.TestAdapter.Tests.Acceptance.dll";
+        // Target framework specified here should be exactly the same as the one in the acceptance project file.
+        var targetframework = "net48";
+        var testAssembly = SRC_DIR + $"NUnit.TestAdapter.Tests.Acceptance/bin/{configuration}/{targetframework}/NUnit.VisualStudio.TestAdapter.Tests.Acceptance.dll";
 
         var keepWorkspaces = Argument<bool?>("keep-workspaces", false) ?? true;
 
