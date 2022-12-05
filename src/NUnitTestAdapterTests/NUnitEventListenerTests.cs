@@ -139,6 +139,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             VerifyTestResult(testLog.Events[1].TestResult);
         }
 
+
         // [TestCase(ResultState.Success, TestOutcome.Passed, null)]
         // [TestCase(ResultState.Failure, TestOutcome.Failed, "My failure message")]
         // [TestCase(ResultState.Error, TestOutcome.Failed, "Error!")]
@@ -163,6 +164,25 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         //    Assert.AreEqual(outcome, testLog.Events[1].TestResult.Outcome);
         //    Assert.AreEqual(message, testLog.Events[1].TestResult.ErrorMessage);
         // }
+
+        #endregion
+
+        #region TestOutput Tests
+
+        [TestCase(NUnitTestEventTestOutput.Streams.Error, TestMessageLevel.Warning, TestName = "TestOutput with 'Error' stream is send as message level Warning")]
+        [TestCase(NUnitTestEventTestOutput.Streams.Progress, TestMessageLevel.Informational, TestName = "TestOutput with 'Progress' stream is send as message level Informational")]
+        [TestCase(NUnitTestEventTestOutput.Streams.NoIdea, TestMessageLevel.Informational, TestName = "TestOutput with 'NoIdea' stream is send as message level Informational")]
+        public void TestOutput_SendsMessageWithCorrectMessageLevel(NUnitTestEventTestOutput.Streams streamType, TestMessageLevel expectedTestMessageLevel)
+        {
+            var outPutXml = @$"<test-output stream='{streamType}' testid='0-1001' testname='Something.TestClass.SomeTest'><![CDATA[SomeData]]></test-output>";
+            var testOutput = new NUnitTestEventTestOutput(XmlHelper.CreateXmlNode(outPutXml));
+
+            listener.TestOutput(testOutput);
+            Assume.That(testLog.Events.Count, Is.EqualTo(1));
+            Assume.That(testLog.Events[0].EventType, Is.EqualTo(FakeFrameworkHandle.EventType.SendMessage));
+
+            Assert.That(testLog.Events[0].Message.Level, Is.EqualTo(expectedTestMessageLevel));
+        }
 
         #endregion
 
