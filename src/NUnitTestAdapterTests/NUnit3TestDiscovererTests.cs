@@ -23,6 +23,11 @@
 
 using System.Collections.Generic;
 using System.Reflection;
+
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
+
+using NSubstitute;
+
 using NUnit.Framework;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
@@ -43,7 +48,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             var sut = new NUnit3TestDiscoverer();
             Assert.That(sut.NUnitEngineAdapter, Is.Not.Null);
-            sut.DiscoverTests(new List<string>(), null, null, null);
+            var dc = Substitute.For<IDiscoveryContext>();
+            sut.DiscoverTests(new List<string>(), dc, null, null);
             Assert.That(sut.NUnitEngineAdapter, Is.Not.Null);
         }
     }

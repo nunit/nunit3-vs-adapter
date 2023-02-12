@@ -35,7 +35,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 {
     public static class NavigationDataProviderTests
     {
-#if NET46
+#if NET462
         [Ignore("Joseph: This doesn't really work!")]
         [Description(
             "This simulates what happens when the adapter is deployed: " +

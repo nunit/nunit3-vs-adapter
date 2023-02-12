@@ -182,7 +182,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             adapterSettings.CollectSourceInformation.Returns(true);
             var discoveryConverter = Substitute.For<IDiscoveryConverter>();
             using var testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, adapterSettings, discoveryConverter);
-            var localInstance = (MarshalByRefObject)Activator.CreateInstance(typeof(NUnitEventListener), testLog, testConverter, null);
+            var executor = Substitute.For<INUnit3TestExecutor>();
+            var localInstance = (MarshalByRefObject)Activator.CreateInstance(typeof(NUnitEventListener), testConverter, executor);
 
             RemotingServices.Marshal(localInstance);
 

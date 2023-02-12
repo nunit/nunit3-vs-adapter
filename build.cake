@@ -171,7 +171,7 @@ string GetTestAssemblyPath(string framework)
 }
 
 foreach (var (framework, vstestFramework, adapterDir) in new[] {
-    ("net46", "Framework45", ADAPTER_BIN_DIR_NET462),
+    ("net462", "Framework45", ADAPTER_BIN_DIR_NET462),
     (NETCOREAPP_TFM, NETCOREAPP_TFM, ADAPTER_BIN_DIR_NETCOREAPP)
 })
 {
@@ -300,9 +300,9 @@ Task("Rebuild")
     .IsDependentOn("Build");
 
 Task("Test")
-    .IsDependentOn("VSTest-net46")
+    .IsDependentOn("VSTest-net462")
     .IsDependentOn("VSTest-" + NETCOREAPP_TFM)
-    .IsDependentOn("DotnetTest-net46")
+    .IsDependentOn("DotnetTest-net462")
     .IsDependentOn("DotnetTest-" + NETCOREAPP_TFM);
 
 Task("Package")

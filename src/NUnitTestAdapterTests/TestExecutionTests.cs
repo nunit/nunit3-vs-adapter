@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2012-2021 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2012-2021 Charlie Poole, 2014-2023 Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -252,7 +252,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             VerifyAttachment(attachmentSet.Attachments[1], FixtureWithAttachment.Attachment2Name, FixtureWithAttachment.Attachment2Description);
         }
 
-#if NET46
+#if NET462
         [Test]
         public void NativeAssemblyProducesWarning()
         {

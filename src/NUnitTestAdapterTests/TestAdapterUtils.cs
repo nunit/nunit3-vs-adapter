@@ -47,7 +47,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         private static void InitializeForTesting(NUnitTestAdapter adapter)
         {
-#if NET46
+#if NET462
             adapter.NUnitEngineAdapter.InternalEngineCreated += engine =>
             {
                 var concreteEngineType = (NUnit.Engine.TestEngine)engine;
