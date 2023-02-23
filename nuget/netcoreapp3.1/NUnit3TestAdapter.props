@@ -31,5 +31,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Visible>False</Visible>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Microsoft.Extensions.DependencyModel.dll">
+        <Link>Microsoft.Extensions.DependencyModel.dll</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <Visible>False</Visible>
+    </None>
   </ItemGroup>
 </Project>
