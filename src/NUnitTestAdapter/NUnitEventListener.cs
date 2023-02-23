@@ -240,7 +240,11 @@ namespace NUnit.VisualStudio.TestAdapter
                 outputNodes.Add(outputNodeEvent);
             }
 
-            recorder.SendMessage(TestMessageLevel.Warning, text);
+            var testMessageLevel = outputNodeEvent.IsErrorStream
+                ? TestMessageLevel.Warning
+                : TestMessageLevel.Informational;
+
+            recorder.SendMessage(testMessageLevel, text);
         }
     }
 }
