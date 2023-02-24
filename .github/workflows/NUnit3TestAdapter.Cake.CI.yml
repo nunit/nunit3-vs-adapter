@@ -15,6 +15,7 @@ jobs:
           3.1.x
           5.0.x
           6.0.x
+          7.0.x
     - name: Build with cake
       run: .\build.ps1 -t CI
       shell: pwsh
