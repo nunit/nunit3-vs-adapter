@@ -435,7 +435,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                     <Project ToolsVersion='15.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                       <Import Project='packages\NUnit3TestAdapter.{NuGetPackageVersion}\build\{LowestNetfxTarget}\NUnit3TestAdapter.props' Condition=""Exists('packages\NUnit3TestAdapter.{NuGetPackageVersion}\build\{LowestNetfxTarget}\NUnit3TestAdapter.props')"" />
                       <Import Project='packages\NUnit.3.11.0\build\NUnit.props' Condition=""Exists('packages\NUnit.3.11.0\build\NUnit.props')"" />
-                      <Import Project='packages\Microsoft.NET.Test.Sdk.15.9.0\build\net462\Microsoft.Net.Test.Sdk.props' Condition=""Exists('packages\Microsoft.NET.Test.Sdk.15.9.0\build\net462\Microsoft.Net.Test.Sdk.props')"" />
+                      <Import Project='packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.props' Condition=""Exists('packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.props')"" />
                       <Import Project='packages\Microsoft.CodeCoverage.15.9.0\build\netstandard1.0\Microsoft.CodeCoverage.props' Condition=""Exists('packages\Microsoft.CodeCoverage.15.9.0\build\netstandard1.0\Microsoft.CodeCoverage.props')"" />
                       <Import Project='$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props' Condition=""Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"" />
                       <PropertyGroup>
@@ -496,13 +496,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                         </PropertyGroup>
                         <Error Condition=""!Exists('packages\Microsoft.CodeCoverage.15.9.0\build\netstandard1.0\Microsoft.CodeCoverage.props')"" Text=""$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.CodeCoverage.15.9.0\build\netstandard1.0\Microsoft.CodeCoverage.props'))"" />
                         <Error Condition=""!Exists('packages\Microsoft.CodeCoverage.15.9.0\build\netstandard1.0\Microsoft.CodeCoverage.targets')"" Text=""$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.CodeCoverage.15.9.0\build\netstandard1.0\Microsoft.CodeCoverage.targets'))"" />
-                        <Error Condition=""!Exists('packages\Microsoft.NET.Test.Sdk.15.9.0\build\net462\Microsoft.Net.Test.Sdk.props')"" Text=""$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.NET.Test.Sdk.15.9.0\build\net462\Microsoft.Net.Test.Sdk.props'))"" />
-                        <Error Condition=""!Exists('packages\Microsoft.NET.Test.Sdk.15.9.0\build\net462\Microsoft.Net.Test.Sdk.targets')"" Text=""$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.NET.Test.Sdk.15.9.0\build\net462\Microsoft.Net.Test.Sdk.targets'))"" />
+                        <Error Condition=""!Exists('packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.props')"" Text=""$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.props'))"" />
+                        <Error Condition=""!Exists('packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.targets')"" Text=""$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.targets'))"" />
                         <Error Condition=""!Exists('packages\NUnit.3.11.0\build\NUnit.props')"" Text=""$([System.String]::Format('$(ErrorText)', 'packages\NUnit.3.11.0\build\NUnit.props'))"" />
                         <Error Condition=""!Exists('packages\NUnit3TestAdapter.{NuGetPackageVersion}\build\{LowestNetfxTarget}\NUnit3TestAdapter.props')"" Text=""$([System.String]::Format('$(ErrorText)', 'packages\NUnit3TestAdapter.{NuGetPackageVersion}\build\{LowestNetfxTarget}\NUnit3TestAdapter.props'))"" />
                       </Target>
                       <Import Project='packages\Microsoft.CodeCoverage.15.9.0\build\netstandard1.0\Microsoft.CodeCoverage.targets' Condition=""Exists('packages\Microsoft.CodeCoverage.15.9.0\build\netstandard1.0\Microsoft.CodeCoverage.targets')"" />
-                      <Import Project='packages\Microsoft.NET.Test.Sdk.15.9.0\build\net462\Microsoft.Net.Test.Sdk.targets' Condition=""Exists('packages\Microsoft.NET.Test.Sdk.15.9.0\build\net462\Microsoft.Net.Test.Sdk.targets')"" />
+                      <Import Project='packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.targets' Condition=""Exists('packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.targets')"" />
                     </Project>");
 
             AddPackagesConfig(workspace);
@@ -525,7 +525,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                     <Project ToolsVersion='15.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                       <Import Project='packages\NUnit3TestAdapter.{NuGetPackageVersion}\build\{LowestNetfxTarget}\NUnit3TestAdapter.props' Condition=""Exists('packages\NUnit3TestAdapter.{NuGetPackageVersion}\build\{LowestNetfxTarget}\NUnit3TestAdapter.props')"" />
                       <Import Project='packages\NUnit.3.11.0\build\NUnit.props' Condition=""Exists('packages\NUnit.3.11.0\build\NUnit.props')"" />
-                      <Import Project='packages\Microsoft.NET.Test.Sdk.15.9.0\build\net462\Microsoft.Net.Test.Sdk.props' Condition=""Exists('packages\Microsoft.NET.Test.Sdk.15.9.0\build\net462\Microsoft.Net.Test.Sdk.props')"" />
+                      <Import Project='packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.props' Condition=""Exists('packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.props')"" />
                       <Import Project='packages\Microsoft.CodeCoverage.15.9.0\build\netstandard1.0\Microsoft.CodeCoverage.props' Condition=""Exists('packages\Microsoft.CodeCoverage.15.9.0\build\netstandard1.0\Microsoft.CodeCoverage.props')"" />
                       <Import Project='$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props' Condition=""Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"" />
                       <PropertyGroup>
@@ -609,13 +609,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                         </PropertyGroup>
                         <Error Condition=""!Exists('packages\Microsoft.CodeCoverage.15.9.0\build\netstandard1.0\Microsoft.CodeCoverage.props')"" Text=""$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.CodeCoverage.15.9.0\build\netstandard1.0\Microsoft.CodeCoverage.props'))"" />
                         <Error Condition=""!Exists('packages\Microsoft.CodeCoverage.15.9.0\build\netstandard1.0\Microsoft.CodeCoverage.targets')"" Text=""$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.CodeCoverage.15.9.0\build\netstandard1.0\Microsoft.CodeCoverage.targets'))"" />
-                        <Error Condition=""!Exists('packages\Microsoft.NET.Test.Sdk.15.9.0\build\net462\Microsoft.Net.Test.Sdk.props')"" Text=""$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.NET.Test.Sdk.15.9.0\build\net462\Microsoft.Net.Test.Sdk.props'))"" />
-                        <Error Condition=""!Exists('packages\Microsoft.NET.Test.Sdk.15.9.0\build\net462\Microsoft.Net.Test.Sdk.targets')"" Text=""$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.NET.Test.Sdk.15.9.0\build\net462\Microsoft.Net.Test.Sdk.targets'))"" />
+                        <Error Condition=""!Exists('packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.props')"" Text=""$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.props'))"" />
+                        <Error Condition=""!Exists('packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.targets')"" Text=""$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.targets'))"" />
                         <Error Condition=""!Exists('packages\NUnit.3.11.0\build\NUnit.props')"" Text=""$([System.String]::Format('$(ErrorText)', 'packages\NUnit.3.11.0\build\NUnit.props'))"" />
                         <Error Condition=""!Exists('packages\NUnit3TestAdapter.{NuGetPackageVersion}\build\{LowestNetfxTarget}\NUnit3TestAdapter.props')"" Text=""$([System.String]::Format('$(ErrorText)', 'packages\NUnit3TestAdapter.{NuGetPackageVersion}\build\{LowestNetfxTarget}\NUnit3TestAdapter.props'))"" />
                       </Target>
                       <Import Project='packages\Microsoft.CodeCoverage.15.9.0\build\netstandard1.0\Microsoft.CodeCoverage.targets' Condition=""Exists('packages\Microsoft.CodeCoverage.15.9.0\build\netstandard1.0\Microsoft.CodeCoverage.targets')"" />
-                      <Import Project='packages\Microsoft.NET.Test.Sdk.15.9.0\build\net462\Microsoft.Net.Test.Sdk.targets' Condition=""Exists('packages\Microsoft.NET.Test.Sdk.15.9.0\build\net462\Microsoft.Net.Test.Sdk.targets')"" />
+                      <Import Project='packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.targets' Condition=""Exists('packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.targets')"" />
                     </Project>");
 
             AddPackagesConfig(workspace);
