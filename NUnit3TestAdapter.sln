@@ -49,12 +49,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github", "github", "{062B17
 	ProjectSection(SolutionItems) = preProject
 		.github\dependabot.yml = .github\dependabot.yml
 		.github\ISSUE_TEMPLATE.md = .github\ISSUE_TEMPLATE.md
+		.github\workflows\sonarbuild.yml.UnderWork = .github\workflows\sonarbuild.yml.UnderWork
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{7D708804-B2F1-4A31-A9FB-85A0C7433200}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\NUnit3TestAdapter.Cake.CI.yml = .github\workflows\NUnit3TestAdapter.Cake.CI.yml
-		.github\workflows\sonarbuild.yml = .github\workflows\sonarbuild.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "netcoreapp3.1", "netcoreapp3.1", "{2F940513-5B8F-45A5-A188-7C5D03D1B50D}"

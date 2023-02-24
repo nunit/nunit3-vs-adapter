@@ -1,5 +1,5 @@
 version: 3.11.{build}
-image: Visual Studio 2019
+image: Visual Studio 2022
 
 build_script:
   - ps: .\build.ps1 -Target "Appveyor"
@@ -9,7 +9,6 @@ test: off
 
 artifacts:
 - path: package\*.nupkg
-- path: package\*.vsix
 - path: package\*.zip
 
 deploy:
