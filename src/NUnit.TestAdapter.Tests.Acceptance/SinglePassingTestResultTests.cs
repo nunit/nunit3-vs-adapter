@@ -471,10 +471,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                       </PropertyGroup>
                       <ItemGroup>
                         <Reference Include='Microsoft.VisualStudio.CodeCoverage.Shim, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL'>
-                          <HintPath>packages\Microsoft.CodeCoverage.15.9.0\lib\net462\Microsoft.VisualStudio.CodeCoverage.Shim.dll</HintPath>
+                          <HintPath>packages\Microsoft.CodeCoverage.15.9.0\lib\net45\Microsoft.VisualStudio.CodeCoverage.Shim.dll</HintPath>
                         </Reference>
                         <Reference Include='nunit.framework, Version=3.11.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL'>
-                          <HintPath>packages\NUnit.3.11.0\lib\net462\nunit.framework.dll</HintPath>
+                          <HintPath>packages\NUnit.3.11.0\lib\net45\nunit.framework.dll</HintPath>
                         </Reference>
                         <Reference Include='System' />
                         <Reference Include='System.Core' />
@@ -574,10 +574,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                       </PropertyGroup>
                       <ItemGroup>
                         <Reference Include='Microsoft.VisualStudio.CodeCoverage.Shim, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL'>
-                          <HintPath>packages\Microsoft.CodeCoverage.15.9.0\lib\net462\Microsoft.VisualStudio.CodeCoverage.Shim.dll</HintPath>
+                          <HintPath>packages\Microsoft.CodeCoverage.15.9.0\lib\net45\Microsoft.VisualStudio.CodeCoverage.Shim.dll</HintPath>
                         </Reference>
                         <Reference Include='nunit.framework, Version=3.11.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL'>
-                          <HintPath>packages\NUnit.3.11.0\lib\net462\nunit.framework.dll</HintPath>
+                          <HintPath>packages\NUnit.3.11.0\lib\net45\nunit.framework.dll</HintPath>
                         </Reference>
                         <Reference Include='System' />
                         <Reference Include='System.Data' />
