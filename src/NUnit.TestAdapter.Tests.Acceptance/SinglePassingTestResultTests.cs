@@ -537,7 +537,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                         <AssemblyName>Test</AssemblyName>
                         <FileAlignment>512</FileAlignment>
                         <MyType>Windows</MyType>
-                        <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+                        <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
                         <Deterministic>true</Deterministic>
                         <NuGetPackageImportStamp>
                         </NuGetPackageImportStamp>
