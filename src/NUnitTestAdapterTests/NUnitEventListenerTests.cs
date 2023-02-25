@@ -23,14 +23,17 @@
 
 using System;
 using System.Collections.Generic;
-#if NET35
+#if NET462
 using System.Runtime.Remoting;
 #endif
 using System.Xml;
+
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+
 using NSubstitute;
+
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Dump;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
@@ -73,7 +76,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void TestStarted_CallsRecordStartCorrectly()
         {
             listener.OnTestEvent("<start-test id='123' name='FakeTestMethod'/>");
-            Assert.That(testLog.Events.Count, Is.EqualTo(1));
+            Assert.That(testLog.Events, Has.Count.EqualTo(1));
             Assert.That(
                 testLog.Events[0].EventType,
                 Is.EqualTo(FakeFrameworkHandle.EventType.RecordStart));
@@ -89,10 +92,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         public void TestFinished_CallsRecordEnd_Then_RecordResult()
         {
             listener.TestFinished(new NUnitTestEventTestCase(FakeTestData.GetResultNode().AsString()));
-            Assert.That(testLog.Events.Count, Is.EqualTo(2));
-            Assert.That(testLog.Events[0].EventType, Is.EqualTo(FakeFrameworkHandle.EventType.RecordEnd));
-            Assert.That(
-                testLog.Events[1].EventType, Is.EqualTo(FakeFrameworkHandle.EventType.RecordResult));
+            Assert.That(testLog.Events, Has.Count.EqualTo(2));
+            Assert.Multiple(() =>
+            {
+                Assert.That(testLog.Events[0].EventType, Is.EqualTo(FakeFrameworkHandle.EventType.RecordEnd));
+                Assert.That(
+                    testLog.Events[1].EventType, Is.EqualTo(FakeFrameworkHandle.EventType.RecordResult));
+            });
         }
 
         [Test]
@@ -124,7 +130,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             testcase.Output.Returns($"{data}");
             settings.ConsoleOut.Returns(1);
             listener.TestFinished(testcase);
-            Assert.That(testLog.Events.Count, Is.EqualTo(0));
+            Assert.That(testLog.Events, Is.Empty);
         }
 
 
@@ -187,24 +193,24 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         #endregion
 
         #region Listener Lifetime Tests
-#if NET35
+#if NET462
         [Test]
         public void Listener_LeaseLifetimeWillNotExpire()
         {
             testLog = new FakeFrameworkHandle();
-            var settings = Substitute.For<IAdapterSettings>();
-            settings.CollectSourceInformation.Returns(true);
-            using (var testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings))
-            {
-                var localInstance = (MarshalByRefObject)Activator.CreateInstance(typeof(NUnitEventListener), testLog, testConverter, null);
+            var adapterSettings = Substitute.For<IAdapterSettings>();
+            adapterSettings.CollectSourceInformation.Returns(true);
+            var discoveryConverter = Substitute.For<IDiscoveryConverter>();
+            using var testConverter = new TestConverter(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, adapterSettings, discoveryConverter);
+            var executor = Substitute.For<INUnit3TestExecutor>();
+            var localInstance = (MarshalByRefObject)Activator.CreateInstance(typeof(NUnitEventListener), testConverter, executor);
 
-                RemotingServices.Marshal(localInstance);
+            RemotingServices.Marshal(localInstance);
 
-                var lifetime = ((MarshalByRefObject)localInstance).GetLifetimeService();
+            var lifetime = ((MarshalByRefObject)localInstance).GetLifetimeService();
 
-                // A null lifetime (as opposed to an ILease) means the object has an infinite lifetime
-                Assert.IsNull(lifetime);
-            }
+            // A null lifetime (as opposed to an ILease) means the object has an infinite lifetime
+            Assert.That(lifetime, Is.Null);
         }
 #endif
         #endregion
@@ -214,13 +220,19 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         private void VerifyTestCase(TestCase ourCase)
         {
             Assert.That(ourCase, Is.Not.Null, "TestCase not set");
-            Assert.That(ourCase.DisplayName, Is.EqualTo(FakeTestData.DisplayName));
-            Assert.That(ourCase.FullyQualifiedName, Is.EqualTo(FakeTestData.FullyQualifiedName));
-            Assert.That(ourCase.Source, Is.EqualTo(FakeTestData.AssemblyPath));
+            Assert.Multiple(() =>
+            {
+                Assert.That(ourCase.DisplayName, Is.EqualTo(FakeTestData.DisplayName));
+                Assert.That(ourCase.FullyQualifiedName, Is.EqualTo(FakeTestData.FullyQualifiedName));
+                Assert.That(ourCase.Source, Is.EqualTo(FakeTestData.AssemblyPath));
+            });
             if (ourCase.CodeFilePath != null) // Unavailable if not running under VS
             {
-                Assert.That(ourCase.CodeFilePath, Is.SamePath(FakeTestData.CodeFile));
-                Assert.That(ourCase.LineNumber, Is.EqualTo(FakeTestData.LineNumber));
+                Assert.Multiple(() =>
+                {
+                    Assert.That(ourCase.CodeFilePath, Is.SamePath(FakeTestData.CodeFile));
+                    Assert.That(ourCase.LineNumber, Is.EqualTo(FakeTestData.LineNumber));
+                });
             }
         }
 
@@ -228,11 +240,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             Assert.That(ourResult, Is.Not.Null, "TestResult not set");
             VerifyTestCase(ourResult.TestCase);
-
-            Assert.That(ourResult.ComputerName, Is.EqualTo(Environment.MachineName));
-            Assert.That(ourResult.Outcome, Is.EqualTo(TestOutcome.Passed));
-            Assert.That(ourResult.ErrorMessage, Is.EqualTo(null));
-            Assert.That(ourResult.Duration, Is.EqualTo(TimeSpan.FromSeconds(1.234)));
+            Assert.Multiple(() =>
+            {
+                Assert.That(ourResult.ComputerName, Is.EqualTo(Environment.MachineName));
+                Assert.That(ourResult.Outcome, Is.EqualTo(TestOutcome.Passed));
+                Assert.That(ourResult.ErrorMessage, Is.EqualTo(null));
+                Assert.That(ourResult.Duration, Is.EqualTo(TimeSpan.FromSeconds(1.234)));
+            });
         }
 
         #endregion

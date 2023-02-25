@@ -419,10 +419,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
             workspace.AddFile("packages.config", $@"
                 <?xml version='1.0' encoding='utf-8'?>
                 <packages>
-                    <package id='Microsoft.CodeCoverage' version='15.9.0' targetFramework='net45' />
-                    <package id='Microsoft.NET.Test.Sdk' version='15.9.0' targetFramework='net45' />
-                    <package id='NUnit' version='3.11.0' targetFramework='net45' />
-                    <package id='NUnit3TestAdapter' version='{NuGetPackageVersion}' targetFramework='net45' />
+                    <package id='Microsoft.CodeCoverage' version='15.9.0' targetFramework='net462' />
+                    <package id='Microsoft.NET.Test.Sdk' version='15.9.0' targetFramework='net462' />
+                    <package id='NUnit' version='3.11.0' targetFramework='net462' />
+                    <package id='NUnit3TestAdapter' version='{NuGetPackageVersion}' targetFramework='net462' />
                 </packages>");
         }
 
@@ -446,7 +446,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                         <AppDesignerFolder>Properties</AppDesignerFolder>
                         <RootNamespace>Test</RootNamespace>
                         <AssemblyName>Test</AssemblyName>
-                        <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+                        <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
                         <FileAlignment>512</FileAlignment>
                         <Deterministic>true</Deterministic>
                         <NuGetPackageImportStamp>
@@ -537,7 +537,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                         <AssemblyName>Test</AssemblyName>
                         <FileAlignment>512</FileAlignment>
                         <MyType>Windows</MyType>
-                        <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+                        <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
                         <Deterministic>true</Deterministic>
                         <NuGetPackageImportStamp>
                         </NuGetPackageImportStamp>

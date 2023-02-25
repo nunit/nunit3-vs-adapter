@@ -180,7 +180,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             });
         }
 
-#if NET46
+#if NET462
         [Test]
         public void WhenAssemblyIsNative()
         {

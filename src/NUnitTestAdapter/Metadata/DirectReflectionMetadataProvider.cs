@@ -27,7 +27,7 @@ using System.Linq;
 using System.Reflection;
 using NUnit.VisualStudio.TestAdapter.Internal;
 
-#if !NET35
+#if !NET462
 using System.Runtime.Loader;
 #endif
 
@@ -40,11 +40,7 @@ namespace NUnit.VisualStudio.TestAdapter.Metadata
             var type = TryGetSingleMethod(assemblyPath, reflectedTypeName, methodName)?.DeclaringType;
             if (type == null) return null;
 
-#if NET35
-            if (type.IsGenericType)
-#else
             if (type.IsConstructedGenericType)
-#endif
             {
                 type = type.GetGenericTypeDefinition();
             }
@@ -88,7 +84,7 @@ namespace NUnit.VisualStudio.TestAdapter.Metadata
         {
             try
             {
-#if !NET35
+#if !NET462
                 var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
 #else
                 var assembly = Assembly.LoadFrom(assemblyPath);

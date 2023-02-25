@@ -26,7 +26,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-#if NET35
+#if NET462
 using System.Runtime.Remoting.Channels;
 #endif
 using System.Linq;
@@ -62,7 +62,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         protected NUnitTestAdapter()
         {
-#if !NET35
+#if !NET462
             AdapterVersion = typeof(NUnitTestAdapter).GetTypeInfo().Assembly.GetName().Version.ToString();
 #else
             AdapterVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
@@ -313,7 +313,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// </summary>
         protected static void CleanUpRegisteredChannels()
         {
-#if NET35
+#if NET462
             foreach (var chan in ChannelServices.RegisteredChannels)
                 ChannelServices.UnregisterChannel(chan);
 #endif

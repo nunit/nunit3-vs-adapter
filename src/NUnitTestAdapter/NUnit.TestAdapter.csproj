@@ -6,7 +6,7 @@
     <RootNamespace>NUnit.VisualStudio.TestAdapter</RootNamespace>
     <!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
     <!-- For testing and debugging-->
-    <TargetFrameworks>net35;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net462;netcoreapp3.1</TargetFrameworks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <SourceLinkOriginUrl>https://github.com/nunit/nunit3-vs-adapter</SourceLinkOriginUrl>
     <SourceLinkCreate>true</SourceLinkCreate>
@@ -17,23 +17,24 @@
     <Authors>Charlie Poole, Terje Sandstrom</Authors>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net35'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net462'">
     <!-- Suppress errors from https://github.com/dotnet/sdk/issues/1897-->
     <DisableHandlePackageFileConflicts>false</DisableHandlePackageFileConflicts>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="SourceLink.Create.CommandLine" Version="2.8.3" PrivateAssets="All" />
-    <PackageReference Include="nunit.engine" Version="3.15.2" />
+    <PackageReference Include="nunit.engine" Version="3.16.3" />
     <PackageReference Include="TestCentric.Metadata" Version="1.7.1" Aliases="TestCentric" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net35'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="11.0.0" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="15.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="3.1.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -52,13 +53,5 @@
       <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' == 'Microsoft.VisualStudio.TestPlatform.ObjectModel'" />
     </ItemGroup>
   </Target>
-
-  <!-- Before RemoveReferencesToEmbeddedAssembles (our thing in Common.props which disappears the ReferencePath that we need here). -->
-  <!--<Target Name="AddReferencesAsEmbeddedResources" BeforeTargets="RemoveReferencesToEmbeddedAssembles">
-    <ItemGroup>
-      --><!-- Add Mono.Cecil.dll as an embedded reference named ‘Assemblies/Mono.Cecil.dll’ --><!--
-      <EmbeddedResource Include="@(ReferencePath)" Condition="'%(Filename)' == 'Mono.Cecil'" KeepMetadata="x" LogicalName="Assemblies/%(Filename)%(Extension)" />
-    </ItemGroup>
-  </Target>-->
 
 </Project>

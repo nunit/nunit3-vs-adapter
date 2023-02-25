@@ -28,7 +28,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-#if !NET35
+#if !NET462
 using System.Runtime.Loader;
 #endif
 
@@ -39,14 +39,14 @@ namespace NUnit.VisualStudio.TestAdapter
         [ModuleInitializer]
         public static void EnsureInitialized()
         {
-#if NET35
+#if NET462
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
 #else
             AssemblyLoadContext.Default.Resolving += Default_Resolving;
 #endif
         }
 
-#if NET35
+#if NET462
         private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
         {
             using (var stream = TryGetResourceAssemblyStream(new AssemblyName(args.Name)))
@@ -78,13 +78,13 @@ namespace NUnit.VisualStudio.TestAdapter
             if (properCasing == null) return null;
 
             return typeof(EmbeddedAssemblyResolution)
-#if !NET35
+#if !NET462
                 .GetTypeInfo()
 #endif
                 .Assembly.GetManifestResourceStream(@"Assemblies/" + properCasing + ".dll");
         }
 
-#if NET35
+#if NET462
         private static byte[] ReadToEnd(this Stream stream)
         {
             if (stream == null) throw new ArgumentNullException(nameof(stream));

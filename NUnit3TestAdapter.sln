@@ -38,14 +38,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NUnit.TestAdapter.Tests", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NUnit3AdapterExternalTests", "src\NUnit3AdapterExternalTests\NUnit3AdapterExternalTests.csproj", "{A4EA819A-D77D-46D3-B2B7-2C754DBD2BC7}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "net35", "net35", "{D41249E3-C080-4B66-8CBD-99CE4D309A10}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "net462", "net462", "{D41249E3-C080-4B66-8CBD-99CE4D309A10}"
 	ProjectSection(SolutionItems) = preProject
-		nuget\net35\NUnit3TestAdapter.props = nuget\net35\NUnit3TestAdapter.props
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "netcoreapp2.1", "netcoreapp2.1", "{A9584E41-6ECE-44B4-A504-41795A65DA5F}"
-	ProjectSection(SolutionItems) = preProject
-		nuget\netcoreapp2.1\NUnit3TestAdapter.props = nuget\netcoreapp2.1\NUnit3TestAdapter.props
+		nuget\net462\NUnit3TestAdapter.props = nuget\net462\NUnit3TestAdapter.props
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NUnit.TestAdapter.Tests.Acceptance", "src\NUnit.TestAdapter.Tests.Acceptance\NUnit.TestAdapter.Tests.Acceptance.csproj", "{3FAC7EE0-664F-4B11-918B-8E0FF865EE4C}"
@@ -54,6 +49,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github", "github", "{062B17
 	ProjectSection(SolutionItems) = preProject
 		.github\dependabot.yml = .github\dependabot.yml
 		.github\ISSUE_TEMPLATE.md = .github\ISSUE_TEMPLATE.md
+		.github\workflows\sonarbuild.yml.UnderWork = .github\workflows\sonarbuild.yml.UnderWork
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{7D708804-B2F1-4A31-A9FB-85A0C7433200}"
@@ -102,7 +98,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{D41249E3-C080-4B66-8CBD-99CE4D309A10} = {DE347D88-F6ED-4031-AFC2-318F63E39BC9}
-		{A9584E41-6ECE-44B4-A504-41795A65DA5F} = {DE347D88-F6ED-4031-AFC2-318F63E39BC9}
 		{062B1763-73C8-4B5A-92DF-C66A36C43CE1} = {7CE30108-5D81-4850-BE6B-C8BCA35D3592}
 		{7D708804-B2F1-4A31-A9FB-85A0C7433200} = {062B1763-73C8-4B5A-92DF-C66A36C43CE1}
 		{2F940513-5B8F-45A5-A188-7C5D03D1B50D} = {DE347D88-F6ED-4031-AFC2-318F63E39BC9}

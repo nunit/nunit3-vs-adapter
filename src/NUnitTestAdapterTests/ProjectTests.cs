@@ -30,7 +30,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     [TestFixture]
     public class ProjectTests
     {
-#if NET35
+#if NET462
         [Test]
         public void ThatTheReferenceToMicrosoftTestObjectModelPointsToVS2012Version()
         {
