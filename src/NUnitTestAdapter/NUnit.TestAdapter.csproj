@@ -24,7 +24,7 @@
 
   <ItemGroup>
     <PackageReference Include="SourceLink.Create.CommandLine" Version="2.8.3" PrivateAssets="All" />
-    <PackageReference Include="nunit.engine" Version="3.16.3" />
+    <PackageReference Include="nunit.engine" Version="3.15.3-net8-3153-1" />
     <PackageReference Include="TestCentric.Metadata" Version="1.7.1" Aliases="TestCentric" />
   </ItemGroup>
 

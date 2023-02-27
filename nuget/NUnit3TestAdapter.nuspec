@@ -8,8 +8,8 @@
     <license type="expression">MIT</license>
     <projectUrl>https://docs.nunit.org/articles/vs-test-adapter/Index.html</projectUrl>
     <repository type="git" url="https://github.com/nunit/nunit3-vs-adapter"/>
-    <icon>images\nunit_256.png</icon>
-    <readme>README.md</readme>
+    <icon>nunit_256.png</icon>
+    <readme>docs\README.md</readme>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <summary>NUnit3 adapter for running tests in Visual Studio and DotNet. Works with NUnit 3.x, use the NUnit 2 adapter for 2.x tests.</summary>
     <description>
@@ -26,8 +26,8 @@
     <developmentDependency>false</developmentDependency>
   </metadata>
   <files>
-    <file src="images\nunit_256.png" target="" />
-    <file src="README.md" target="docs\" />
+    <file src="..\..\images\nunit_256.png" target="" />
+    <file src="..\..\README.md" target="docs\" />
 
     <file src="build\net462\NUnit3.TestAdapter.dll" target="build\net462\NUnit3.TestAdapter.dll" />
     <file src="build\net462\NUnit3.TestAdapter.pdb" target="build\net462\NUnit3.TestAdapter.pdb" />
