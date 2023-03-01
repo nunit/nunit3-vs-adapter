@@ -13,7 +13,7 @@ var configuration = Argument("configuration", "Release");
 //////////////////////////////////////////////////////////////////////
 
 var version = "4.4.1";
-var modifier = "-alpha.1";
+var modifier = "";
 
 
 var dbgSuffix = configuration.ToLower() == "debug" ? "-dbg" : "";
