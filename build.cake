@@ -12,7 +12,7 @@ var configuration = Argument("configuration", "Release");
 // SET PACKAGE VERSION
 //////////////////////////////////////////////////////////////////////
 
-var version = "4.4.1";
+var version = "4.4.2";
 var modifier = "";
 
 
