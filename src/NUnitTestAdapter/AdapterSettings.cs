@@ -712,7 +712,8 @@ namespace NUnit.VisualStudio.TestAdapter
     public enum ExplicitModeEnum
     {
         Strict,
-        Relaxed
+        Relaxed,
+        None
     }
 
     public enum OutputXmlFolderMode

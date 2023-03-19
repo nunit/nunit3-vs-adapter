@@ -8,11 +8,12 @@
     <license type="expression">MIT</license>
     <projectUrl>https://docs.nunit.org/articles/vs-test-adapter/Index.html</projectUrl>
     <repository type="git" url="https://github.com/nunit/nunit3-vs-adapter"/>
-    <iconUrl>https://cdn.rawgit.com/nunit/resources/master/images/icon/nunit_256.png</iconUrl>
+    <icon>nunit_256.png</icon>
+    <readme>docs\README.md</readme>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <summary>NUnit3 adapter for running tests in Visual Studio and DotNet. Works with NUnit 3.x, use the NUnit 2 adapter for 2.x tests.</summary>
     <description>
-      The NUnit3 TestAdapter for Visual Studio, all versions from 2012 and onwards, and DotNet (incl. .Net core).
+      The NUnit3 TestAdapter for Visual Studio, all versions from 2012 and onwards, and DotNet (incl. .Net core), versions .net framework 4.6.2 or higher, .net core 3.1, .net 5 or higher.
 
       Note that this package ONLY contains the adapter, not the NUnit framework.
       For VS 2017 and forward, you should add this package to every test project in your solution. (Earlier versions only require a single adapter package per solution.)
@@ -25,6 +26,9 @@
     <developmentDependency>false</developmentDependency>
   </metadata>
   <files>
+    <file src="..\..\images\nunit_256.png" target="" />
+    <file src="..\..\README.md" target="docs\" />
+
     <file src="build\net462\NUnit3.TestAdapter.dll" target="build\net462\NUnit3.TestAdapter.dll" />
     <file src="build\net462\NUnit3.TestAdapter.pdb" target="build\net462\NUnit3.TestAdapter.pdb" />
     <file src="build\net462\nunit.engine.dll" target="build\net462\nunit.engine.dll" />
@@ -40,7 +44,7 @@
     <file src="build\netcoreapp3.1\nunit.engine.core.dll" target="build\netcoreapp3.1\nunit.engine.core.dll" />
     <file src="build\netcoreapp3.1\testcentric.engine.metadata.dll" target="build\netcoreapp3.1\testcentric.engine.metadata.dll"/>
     <file src="build\netcoreapp3.1\NUnit3TestAdapter.props" target="build\netcoreapp3.1\NUnit3TestAdapter.props" />
-    <file src="build\netcoreapp3.1\Microsoft.Extensions.DependencyModel.dll" target="build\netcoreapp3.1\Microsoft.Extensions.DependencyModel.dll" />
+
 
   </files>
 </package>
