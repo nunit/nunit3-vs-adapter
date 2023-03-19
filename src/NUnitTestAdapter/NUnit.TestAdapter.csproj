@@ -4,12 +4,21 @@
     <AssemblyName>NUnit3.TestAdapter</AssemblyName>
     <!--<AssemblyName>NUnit3.TestAdapterDebug</AssemblyName>-->
     <RootNamespace>NUnit.VisualStudio.TestAdapter</RootNamespace>
-    <!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <!-- For testing and debugging-->
-    <TargetFrameworks>net462;netcoreapp3.1</TargetFrameworks>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <!--<TargetFrameworks>net462;netcoreapp3.1</TargetFrameworks>-->
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <SourceLinkOriginUrl>https://github.com/nunit/nunit3-vs-adapter</SourceLinkOriginUrl>
     <SourceLinkCreate>true</SourceLinkCreate>
+    <AssemblyVersion>4.5.0.0</AssemblyVersion>
+    <FileVersion>4.5.0.0</FileVersion>
+    <NeutralLanguage>en</NeutralLanguage>
+    <Title>NUnit3 Test Adapter for Visual Studio</Title>
+    <Copyright>Copyright © 2011-2021 Charlie Poole, 2014-2023 Terje Sandstrom</Copyright>
+    <Description>A package containing the NUnit3 TestAdapter for Visual Studio 2012 onwards.
+        The package works with Visual Studio 2012 and newer, dotnet test and VSTest.Console.</Description>
+    <Company>NUnit Project</Company>
+    <Product>NUnit3TestAdapter</Product>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -24,7 +33,7 @@
 
   <ItemGroup>
     <PackageReference Include="SourceLink.Create.CommandLine" Version="2.8.3" PrivateAssets="All" />
-    <PackageReference Include="nunit.engine" Version="3.15.3-net8-3153-1" />
+    <PackageReference Include="nunit.engine" Version="3.15.4-pre00001" />
     <PackageReference Include="TestCentric.Metadata" Version="1.7.1" Aliases="TestCentric" />
   </ItemGroup>
 
