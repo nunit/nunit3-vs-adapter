@@ -13,9 +13,9 @@ var configuration = Argument("configuration", "Release");
 //////////////////////////////////////////////////////////////////////
 
 
-var version = "4.4.2";
+var version = "4.5.0";
 
-var modifier = "";
+var modifier = "-alpha.3";
 
 
 var dbgSuffix = configuration.ToLower() == "debug" ? "-dbg" : "";
