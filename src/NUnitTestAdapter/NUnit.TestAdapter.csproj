@@ -46,6 +46,7 @@
     <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="1.1.2" />
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="15.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.TestPlatform.AdapterUtilities" Version="*" PrivateAssets="All" />
   </ItemGroup>
 
   <Target Name="PreventTestPlatformObjectModelCopyLocal" AfterTargets="ResolveReferences">

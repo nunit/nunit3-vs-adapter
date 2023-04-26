@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.TestPlatform.AdapterUtilities;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
@@ -231,6 +232,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
 
             testCase.AddTraitsFromTestNode(testNode, TraitsCache, _logger, adapterSettings);
+            SetTestExplorerProperties(testCase, testNode);
 
             return testCase;
 
@@ -244,6 +246,52 @@ namespace NUnit.VisualStudio.TestAdapter
                 testCase.LineNumber = lineNumber != null ? Convert.ToInt32(lineNumber.Value) : 1;
                 return true;
             }
+        }
+
+        internal static void SetTestExplorerProperties(TestCase testCase, NUnitTestCase testNode)
+        {
+            testCase.SetManagedMethod(testNode.ClassName);
+            testCase.SetManagedMethod(testNode.MethodName);
+
+            testCase.SetHierarchy(GetHierarchy(testNode));
+        }
+
+        internal static string[] GetHierarchy(NUnitTestCase testNode)
+        {
+            var hier = testNode
+                .Properties
+                .FirstOrDefault(x => string.Equals(x.Name, HierarchyConstants.HierarchyPropertyId, StringComparison.Ordinal));
+
+            string[] ar;
+            ar = new string[HierarchyConstants.Levels.TotalLevelCount];
+            if (hier is not null && !string.IsNullOrWhiteSpace(hier.Value))
+            {
+                var provided = hier.Value.Split('|');
+                Array.Copy(provided, ar, Math.Min(ar.Length, provided.Length));
+            }
+
+            if (string.IsNullOrWhiteSpace(ar[HierarchyConstants.Levels.NamespaceIndex]))
+            {
+                var idx = testNode.ClassName.LastIndexOf('.');
+                var ns = idx > 0 ? testNode.ClassName.Substring(0, idx) : testNode.ClassName;
+                ar[HierarchyConstants.Levels.NamespaceIndex] = ns;
+            }
+
+            if (string.IsNullOrWhiteSpace(ar[HierarchyConstants.Levels.ClassIndex]))
+            {
+                var idx = testNode.ClassName.LastIndexOf('.');
+                var csName = idx >= 0 && idx < (testNode.ClassName.Length - 1)
+                    ? testNode.ClassName.Substring(idx + 1)
+                    : testNode.ClassName;
+                ar[HierarchyConstants.Levels.ClassIndex] = csName;
+            }
+
+            if (string.IsNullOrWhiteSpace(ar[HierarchyConstants.Levels.TestGroupIndex]))
+            {
+                ar[HierarchyConstants.Levels.TestGroupIndex] = testNode.Name;
+            }
+
+            return ar;
         }
 
         private string CreateDisplayName(string fullyQualifiedName, string testNodeName)
