@@ -250,7 +250,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         internal static void SetTestExplorerProperties(TestCase testCase, NUnitTestCase testNode)
         {
-            testCase.SetManagedMethod(testNode.ClassName);
+            testCase.SetManagedType(testNode.ClassName);
             testCase.SetManagedMethod(testNode.MethodName);
 
             testCase.SetHierarchy(GetHierarchy(testNode));
