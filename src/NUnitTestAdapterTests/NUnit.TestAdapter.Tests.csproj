@@ -4,9 +4,8 @@
     <IsTestProject>true</IsTestProject>
     <RootNamespace>NUnit.VisualStudio.TestAdapter.Tests</RootNamespace>
     <AssemblyName>NUnit.VisualStudio.TestAdapter.Tests</AssemblyName>
-    <!--<TargetFrameworks>net462;netcoreapp3.1</TargetFrameworks>-->
-    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
-    <!-- For testing and debugging-->
+    <TargetFrameworks>net462;netcoreapp3.1</TargetFrameworks>
+    <!--<TargetFrameworks>netcoreapp3.1</TargetFrameworks>-->   <!-- For testing and debugging-->
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <LangVersion>latest</LangVersion>
