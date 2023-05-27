@@ -17,7 +17,6 @@ var version = "4.5.0";
 
 var modifier = "";
 
-
 var dbgSuffix = configuration.ToLower() == "debug" ? "-dbg" : "";
 var packageVersion = version + modifier + dbgSuffix;
 Information("Packageversion: "+packageVersion);
