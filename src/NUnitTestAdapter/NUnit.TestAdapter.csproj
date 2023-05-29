@@ -4,7 +4,7 @@
     <AssemblyName>NUnit3.TestAdapter</AssemblyName>
     <!--<AssemblyName>NUnit3.TestAdapterDebug</AssemblyName>-->
     <RootNamespace>NUnit.VisualStudio.TestAdapter</RootNamespace>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
     <!-- For testing and debugging-->
     <TargetFrameworks>net462;netcoreapp3.1</TargetFrameworks>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
