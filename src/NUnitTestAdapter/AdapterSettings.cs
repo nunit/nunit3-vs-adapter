@@ -33,110 +33,6 @@ using NUnit.Engine;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-    public interface IAdapterSettings
-    {
-        int MaxCpuCount { get; }
-        string ResultsDirectory { get; }
-        string TargetPlatform { get; }
-        string TargetFrameworkVersion { get; }
-        string TestAdapterPaths { get; }
-        bool CollectSourceInformation { get; }
-        IDictionary<string, string> TestProperties { get; }
-        InternalTraceLevel InternalTraceLevelEnum { get; }
-        string WorkDirectory { get; }
-        string Where { get; }
-        int DefaultTimeout { get; }
-        int NumberOfTestWorkers { get; }
-        bool ShadowCopyFiles { get; }
-        int Verbosity { get; }
-        bool UseVsKeepEngineRunning { get; }
-        string BasePath { get; }
-        string PrivateBinPath { get; }
-        int? RandomSeed { get; }
-        bool RandomSeedSpecified { get; }
-        bool InProcDataCollectorsAvailable { get; }
-        // ReSharper disable once UnusedMemberInSuper.Global
-        bool CollectDataForEachTestSeparately { get; }  // Used implicitly by MS
-        bool SynchronousEvents { get; }
-        string DomainUsage { get; }
-        bool DumpXmlTestDiscovery { get; }
-        bool DumpXmlTestResults { get; }
-
-        bool DumpVsInput { get; }
-
-        bool PreFilter { get; }
-
-        /// <summary>
-        ///  Syntax documentation <see cref="https://github.com/nunit/docs/wiki/Template-Based-Test-Naming"/>.
-        /// </summary>
-        string DefaultTestNamePattern { get; }
-
-        VsTestCategoryType VsTestCategoryType { get; }
-        string TestOutputXml { get; }
-        bool UseTestOutputXml { get; }
-        OutputXmlFolderMode OutputXmlFolderMode { get; }
-
-        /// <summary>
-        /// For retry runs create a new file for each run.
-        /// </summary>
-        bool NewOutputXmlFileForEachRun { get; }
-
-        /// <summary>
-        /// True if test run is triggered in an IDE/Editor context.
-        /// </summary>
-        bool DesignMode { get; }
-
-        /// <summary>
-        /// If true, an adapter shouldn't create appdomains to run tests.
-        /// </summary>
-        bool DisableAppDomain { get; }
-
-        /// <summary>
-        /// If true, an adapter should disable any test case parallelization.
-        /// </summary>
-        bool DisableParallelization { get; }
-
-        bool ShowInternalProperties { get; }
-
-        bool UseParentFQNForParametrizedTests { get; }
-
-        bool UseNUnitIdforTestCaseId { get; }
-
-        int ConsoleOut { get; }
-        bool StopOnError { get; }
-        TestOutcome MapWarningTo { get; }
-        bool UseTestNameInConsoleOutput { get; }
-        DisplayNameOptions DisplayName { get; }
-        char FullnameSeparator { get; }
-        DiscoveryMethod DiscoveryMethod { get; }
-        bool SkipNonTestAssemblies { get; }
-
-        int AssemblySelectLimit { get; }
-
-        bool UseNUnitFilter { get; }
-        bool IncludeStackTraceForSuites { get; }
-
-
-        void Load(IDiscoveryContext context, TestLogger testLogger = null);
-        void Load(string settingsXml);
-        void SaveRandomSeed(string dirname);
-        void RestoreRandomSeed(string dirname);
-
-        bool EnsureAttachmentFileScheme { get; }
-
-        // For Internal Development use
-        bool FreakMode { get; }  // displays metadata instead of real data in Test Explorer
-        bool Debug { get; }
-        bool DebugExecution { get; }
-        bool DebugDiscovery { get; }
-
-        // Filter control
-        ExplicitModeEnum ExplicitMode { get; }
-        bool SkipExecutionWhenNoTests { get; }
-        string TestOutputFolder { get; }
-        string SetTestOutputFolder(string workDirectory);
-    }
-
     public enum VsTestCategoryType
     {
         NUnit,
@@ -196,6 +92,8 @@ namespace NUnit.VisualStudio.TestAdapter
         /// If true, an adapter should disable any test case parallelization.
         /// </summary>
         public bool DisableParallelization { get; private set; }
+
+        public bool AllowParallelWithDebugger { get; private set; }
 
         /// <summary>
         /// True if test run is triggered in an IDE/Editor context.
@@ -524,6 +422,7 @@ namespace NUnit.VisualStudio.TestAdapter
             CollectSourceInformation = GetInnerTextAsBool(runConfiguration, nameof(CollectSourceInformation), true);
             DisableAppDomain = GetInnerTextAsBool(runConfiguration, nameof(DisableAppDomain), false);
             DisableParallelization = GetInnerTextAsBool(runConfiguration, nameof(DisableParallelization), false);
+            AllowParallelWithDebugger = GetInnerTextAsBool(runConfiguration, nameof(AllowParallelWithDebugger), false);
             DesignMode = GetInnerTextAsBool(runConfiguration, nameof(DesignMode), false);
             CollectDataForEachTestSeparately =
                 GetInnerTextAsBool(runConfiguration, nameof(CollectDataForEachTestSeparately), false);
