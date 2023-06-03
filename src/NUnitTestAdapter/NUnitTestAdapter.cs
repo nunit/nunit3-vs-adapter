@@ -198,7 +198,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 TestLog.Debug("    Setting ShadowCopyFiles to true");
             }
 
-            if (Debugger.IsAttached)
+            if (Debugger.IsAttached && !Settings.AllowParallelWithDebugger)
             {
                 package.Settings[PackageSettings.NumberOfTestWorkers] = 0;
                 TestLog.Debug("    Setting NumberOfTestWorkers to zero for Debugging");

@@ -27,7 +27,7 @@ using System.Linq;
 using System.Reflection;
 using NUnit.VisualStudio.TestAdapter.Internal;
 
-#if !NET462
+#if !NET462 && !NETSTANDARD
 using System.Runtime.Loader;
 #endif
 
@@ -84,7 +84,7 @@ namespace NUnit.VisualStudio.TestAdapter.Metadata
         {
             try
             {
-#if !NET462
+#if !NET462 && !NETSTANDARD
                 var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
 #else
                 var assembly = Assembly.LoadFrom(assemblyPath);
