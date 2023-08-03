@@ -119,6 +119,7 @@ namespace NUnit.VisualStudio.TestAdapter
         public string WorkDirectory { get; private set; }
         public string Where { get; private set; }
         public string TestOutputXml { get; private set; }
+        public string TestOutputXmlFileNameWithoutExtension { get; private set; }
         public bool UseTestOutputXml => !string.IsNullOrEmpty(TestOutputXml) || OutputXmlFolderMode == OutputXmlFolderMode.UseResultDirectory;
 
         public OutputXmlFolderMode OutputXmlFolderMode { get; private set; } = OutputXmlFolderMode.RelativeToWorkFolder;
@@ -329,6 +330,7 @@ namespace NUnit.VisualStudio.TestAdapter
         private void ParseOutputXml(XmlNode nunitNode)
         {
             TestOutputXml = GetInnerTextWithLog(nunitNode, nameof(TestOutputXml));
+            TestOutputXmlFileNameWithoutExtension = GetInnerTextWithLog(nunitNode, nameof(TestOutputXmlFileNameWithoutExtension));
             if (Path.IsPathRooted(TestOutputXml))
             {
                 OutputXmlFolderMode = OutputXmlFolderMode.AsSpecified;

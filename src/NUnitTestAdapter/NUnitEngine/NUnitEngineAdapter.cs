@@ -163,7 +163,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             if (!settings.UseTestOutputXml)
                 return;
 
-            string path = GetXmlFilePath(testOutputXmlFolder, Path.GetFileNameWithoutExtension(assemblyPath), "xml");
+            string path = GetXmlFilePath(testOutputXmlFolder, GetTestOutputFileName(assemblyPath), "xml");
             var resultService = GetService<IResultService>();
 
             // Following null argument should work for nunit3 format. Empty array is OK as well.
@@ -171,6 +171,15 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             var resultWriter = resultService.GetResultWriter("nunit3", null);
             resultWriter.WriteResultFile(testResults.FullTopNode, path);
             logger.Info($"   Test results written to {path}");
+        }
+
+        public string GetTestOutputFileName(string assemblyPath)
+        {
+            if (string.IsNullOrWhiteSpace(settings.TestOutputXmlFileNameWithoutExtension))
+            {
+                return Path.GetFileNameWithoutExtension(assemblyPath);
+            }
+            return settings.TestOutputXmlFileNameWithoutExtension;
         }
 
         public string GetXmlFilePath(string folder, string defaultFileName, string extension)
