@@ -200,6 +200,15 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             return settings.TestOutputXmlFileName;
         }
 
+        public string GetTestOutputFileName(string assemblyPath)
+        {
+            if (string.IsNullOrWhiteSpace(settings.TestOutputXmlFileName))
+            {
+                return Path.GetFileNameWithoutExtension(assemblyPath);
+            }
+            return settings.TestOutputXmlFileName;
+        }
+
         public string GetXmlFilePath(string folder, string defaultFileName, string extension)
         {
             if (!settings.NewOutputXmlFileForEachRun)
