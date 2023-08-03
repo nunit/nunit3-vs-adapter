@@ -22,7 +22,9 @@
 // ***********************************************************************
 
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Threading;
 
 using NUnit.Engine;
 using NUnit.VisualStudio.TestAdapter.Internal;
@@ -163,14 +165,30 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             if (!settings.UseTestOutputXml)
                 return;
 
-            string path = GetXmlFilePath(testOutputXmlFolder, GetTestOutputFileName(assemblyPath), "xml");
             var resultService = GetService<IResultService>();
 
-            // Following null argument should work for nunit3 format. Empty array is OK as well.
-            // If you decide to handle other formats in the runsettings, it needs more work.
-            var resultWriter = resultService.GetResultWriter("nunit3", null);
-            resultWriter.WriteResultFile(testResults.FullTopNode, path);
-            logger.Info($"   Test results written to {path}");
+            using (Mutex mutex = new Mutex(false, string.IsNullOrWhiteSpace(assemblyPath) ? nameof(GenerateTestOutput) : Path.GetFileNameWithoutExtension(assemblyPath)))
+            {
+                bool received = false;
+                try
+                {
+                    received = mutex.WaitOne();
+                    string path = GetXmlFilePath(testOutputXmlFolder, GetTestOutputFileName(assemblyPath), "xml");
+
+                    // Following null argument should work for nunit3 format. Empty array is OK as well.
+                    // If you decide to handle other formats in the runsettings, it needs more work.
+                    var resultWriter = resultService.GetResultWriter("nunit3", null);
+                    resultWriter.WriteResultFile(testResults.FullTopNode, path);
+                    logger.Info($"   Test results written to {path}");
+                }
+                finally
+                {
+                    if (received)
+                    {
+                        mutex.ReleaseMutex();
+                    }
+                }
+            }
         }
 
         public string GetTestOutputFileName(string assemblyPath)
