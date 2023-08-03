@@ -173,7 +173,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                 try
                 {
                     received = mutex.WaitOne();
-                    string path = GetXmlFilePath(testOutputXmlFolder, Path.GetFileNameWithoutExtension(assemblyPath), "xml");
+                    string path = GetXmlFilePath(testOutputXmlFolder, GetTestOutputFileName(assemblyPath), "xml");
 
                     // Following null argument should work for nunit3 format. Empty array is OK as well.
                     // If you decide to handle other formats in the runsettings, it needs more work.
@@ -189,6 +189,15 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                     }
                 }
             }
+        }
+
+        public string GetTestOutputFileName(string assemblyPath)
+        {
+            if (string.IsNullOrWhiteSpace(settings.TestOutputXmlFileName))
+            {
+                return Path.GetFileNameWithoutExtension(assemblyPath);
+            }
+            return settings.TestOutputXmlFileName;
         }
 
         public string GetXmlFilePath(string folder, string defaultFileName, string extension)
