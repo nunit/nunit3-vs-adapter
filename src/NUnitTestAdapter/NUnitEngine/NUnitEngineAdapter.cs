@@ -167,7 +167,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
             var resultService = GetService<IResultService>();
 
-            using (Mutex mutex = new Mutex(false, assemblyPath))
+            using (Mutex mutex = new Mutex(false, string.IsNullOrWhiteSpace(assemblyPath) ? nameof(GenerateTestOutput) : assemblyPath))
             {
                 bool received = false;
                 try
