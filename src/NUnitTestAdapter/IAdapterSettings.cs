@@ -47,7 +47,7 @@ public interface IAdapterSettings
 
     VsTestCategoryType VsTestCategoryType { get; }
     string TestOutputXml { get; }
-    string TestOutputXmlFileNameWithoutExtension { get; }
+    string TestOutputXmlFileName { get; }
     bool UseTestOutputXml { get; }
     OutputXmlFolderMode OutputXmlFolderMode { get; }
 

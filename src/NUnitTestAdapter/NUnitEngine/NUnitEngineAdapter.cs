@@ -175,11 +175,11 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
         public string GetTestOutputFileName(string assemblyPath)
         {
-            if (string.IsNullOrWhiteSpace(settings.TestOutputXmlFileNameWithoutExtension))
+            if (string.IsNullOrWhiteSpace(settings.TestOutputXmlFileName))
             {
                 return Path.GetFileNameWithoutExtension(assemblyPath);
             }
-            return settings.TestOutputXmlFileNameWithoutExtension;
+            return settings.TestOutputXmlFileName;
         }
 
         public string GetXmlFilePath(string folder, string defaultFileName, string extension)

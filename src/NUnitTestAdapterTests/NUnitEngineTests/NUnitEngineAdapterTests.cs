@@ -20,7 +20,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         }
 
         [TestCase("", "myAssemblyFilename")]
-        [TestCase("<TestOutputXmlFileNameWithoutExtension>whateverFileName</TestOutputXmlFileNameWithoutExtension>", "whateverFileName")]
+        [TestCase("<TestOutputXmlFileName>whateverFileName</TestOutputXmlFileName>", "whateverFileName")]
         public void When_setting_up_defined_result_GetTestOutputFileName_returns_defined_filename(string testOutputXmlFileNameWithoutExtensionXmlNode, string expectedFileName)
         {
             var logger = Substitute.For<ITestLogger>();
