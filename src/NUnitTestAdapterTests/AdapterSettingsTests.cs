@@ -209,10 +209,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             _settings.Load(@"<RunSettings><NUnit><WorkDirectory>C:\Whatever</WorkDirectory><TestOutputXml>/my/work/dir</TestOutputXml></NUnit></RunSettings>");
             Assert.That(_settings.UseTestOutputXml);
             _settings.SetTestOutputFolder(_settings.WorkDirectory);
-            Assert.Multiple(() =>
-            {
-                Assert.That(_settings.TestOutputFolder, Does.Contain(@"/my/work/dir"));
-            });
+            Assert.That(_settings.TestOutputFolder, Does.Contain(@"/my/work/dir"));
         }
 
         /// <summary>
@@ -260,10 +257,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             _settings.Load(@"<RunSettings><NUnit><TestOutputXml>c:\whatever</TestOutputXml></NUnit></RunSettings>");
             Assert.That(_settings.UseTestOutputXml, "Settings not loaded properly");
             _settings.SetTestOutputFolder(_settings.WorkDirectory);
-            Assert.That(_settings.TestOutputFolder, Is.EqualTo(@"c:\whatever"), "Content not correct");
-            Assert.That(_settings.OutputXmlFolderMode, Is.EqualTo(OutputXmlFolderMode.AsSpecified), "Should be set default AsSpecified with absolute path in");
+            Assert.Multiple(() =>
+            {
+                Assert.That(_settings.TestOutputFolder, Is.EqualTo(@"c:\whatever"), "Content not correct");
+                Assert.That(_settings.OutputXmlFolderMode, Is.EqualTo(OutputXmlFolderMode.AsSpecified), "Should be set default AsSpecified with absolute path in");
+            });
         }
-
 
         [Test]
         public void NumberOfTestWorkersSetting()
