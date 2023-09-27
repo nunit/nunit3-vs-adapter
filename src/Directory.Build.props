@@ -15,19 +15,4 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" />
   </ItemGroup>
-
-  <Target Name="RemoveReferencesToEmbeddedAssembles" AfterTargets="ResolveAssemblyReferences">
-    <ItemGroup>
-      <!-- Don’t copy Mono.Cecil to the output directory. Useful for debugging the embedded loading mechanism. -->
-      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' == 'Mono.Cecil'" />
-
-      <!-- Important: remove references to Mono.Cecil at compile time. This is insurance.
-           If the compiled assembly has a reference to Mono.Cecil, the VSTest could try to load Mono.Cecil
-           while reflecting over the adapter types looking for interface implementations. Since VSTest would
-           be triggering the load of Mono.Cecil before we have a chance to handle AssemblyResolve, the load
-           would fail. VSTest does ignore the adapter assembly in this scenario. -->
-      <ReferencePath Remove="@(ReferencePath)" Condition="'%(ReferencePath.NuGetPackageId)' == 'Mono.Cecil'" />
-    </ItemGroup>
-  </Target>
-
 </Project>
