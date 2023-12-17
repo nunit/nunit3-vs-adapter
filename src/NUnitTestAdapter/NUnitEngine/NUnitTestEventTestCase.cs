@@ -48,11 +48,11 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             if (failureNode != null)
             {
                 Failure = new NUnitFailure(
-                    failureNode.SelectSingleNode("message")?.InnerText.UnEscapeUnicodeCharacters(),
-                    failureNode.SelectSingleNode("stack-trace")?.InnerText.UnEscapeUnicodeCharacters());
+                    failureNode.SelectSingleNode("message")?.InnerText.UnEscapeUnicodeColorCodesCharacters(),
+                    failureNode.SelectSingleNode("stack-trace")?.InnerText.UnEscapeUnicodeColorCodesCharacters());
             }
 
-            ReasonMessage = Node.SelectSingleNode("reason/message")?.InnerText.UnEscapeUnicodeCharacters();
+            ReasonMessage = Node.SelectSingleNode("reason/message")?.InnerText.UnEscapeUnicodeColorCodesCharacters();
         }
         public string ReasonMessage { get; }
 
@@ -73,7 +73,7 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                 int i = 1;
                 foreach (XmlNode assertionStacktraceNode in Node.SelectNodes("assertions/assertion/stack-trace"))
                 {
-                    stackTrace += $"{i++}) " + assertionStacktraceNode.InnerText.UnEscapeUnicodeCharacters();
+                    stackTrace += $"{i++}) " + assertionStacktraceNode.InnerText.UnEscapeUnicodeColorCodesCharacters();
                     stackTrace += "\n";
                 }
 
