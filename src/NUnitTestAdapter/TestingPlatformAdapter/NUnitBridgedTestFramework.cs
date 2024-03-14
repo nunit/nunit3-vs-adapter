@@ -11,8 +11,8 @@ using Microsoft.Testing.Extensions.VSTestBridge.Requests;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using NUnit.Engine;
-using NUnit.Engine.Internal;
+
+using NUnit.Framework.Internal;
 
 namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
 {
@@ -83,16 +83,14 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
                     return;
                 }
 
-                // TODO: Uncomment this line when InternalsVisibleTo is set up.
-                // var nopWriter = new InternalTraceWriter(new StreamWriter(Stream.Null));
+                var nopWriter = new InternalTraceWriter(new StreamWriter(Stream.Null));
 
                 // Initialize log level to be Off (see issue https://github.com/microsoft/testanywhere/issues/1369)
                 // because we don't have settings from the request available yet, and the internal tracer is static, so it would set to the
                 // level that is set by the first request and always keep it that way.
                 //
                 // Alternatively we could hook this up to a ILogger, and write the logs via a TextWriter.
-                // TODO: Uncomment this line when InternalsVisibleTo is set up.
-                // InternalTrace.Initialize(nopWriter, InternalTraceLevel.Off);
+                InternalTrace.Initialize(nopWriter, InternalTraceLevel.Off);
 
                 // When we allow the trace level to be set then we need to set the internal writer field only when the level is Off.
                 // In that case you will need to do something like this:
@@ -104,9 +102,8 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
                 //    traceWriterField.SetValue(null, nopWriter);
                 // }
 
-                // TODO: Uncomment these lines when InternalsVisibleTo is set up.
-                // FieldInfo traceWriterField = typeof(InternalTrace).GetField("traceWriter", BindingFlags.Static | BindingFlags.NonPublic)!;
-                // traceWriterField.SetValue(null, nopWriter);
+                FieldInfo traceWriterField = typeof(InternalTrace).GetField("traceWriter", BindingFlags.Static | BindingFlags.NonPublic)!;
+                traceWriterField.SetValue(null, nopWriter);
 
                 initialized = true;
             }
