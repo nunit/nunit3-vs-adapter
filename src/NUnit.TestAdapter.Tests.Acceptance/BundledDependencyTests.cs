@@ -19,7 +19,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                       <ItemGroup>
                         <PackageReference Include='Microsoft.NET.Test.Sdk' Version='*' />
                         <PackageReference Include='Mono.Cecil' Version='0.10.0-beta5' />
-                        <PackageReference Include='NUnit' Version='*' />
+                        <PackageReference Include='NUnit' Version='3.*' />
                         <PackageReference Include='NUnit3TestAdapter' Version='{NuGetPackageVersion}' />
                       </ItemGroup>
 
@@ -72,7 +72,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                       <ItemGroup>
                         <PackageReference Include='Microsoft.NET.Test.Sdk' Version='*' />
                         <PackageReference Include='Mono.Cecil' Version='0.10.0' />
-                        <PackageReference Include='NUnit' Version='*' />
+                        <PackageReference Include='NUnit' Version='3.*' />
                         <PackageReference Include='NUnit3TestAdapter' Version='{NuGetPackageVersion}' />
                       </ItemGroup>
                       <ItemGroup Condition=""'$(TargetFrameworkIdentifier)' == '.NETFramework'"">

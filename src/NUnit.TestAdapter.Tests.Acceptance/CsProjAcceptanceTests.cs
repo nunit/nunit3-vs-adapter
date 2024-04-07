@@ -21,7 +21,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
                       <ItemGroup>
                         <PackageReference Include='Microsoft.NET.Test.Sdk' Version='*' />
-                        <PackageReference Include='NUnit' Version='*' />
+                        <PackageReference Include='NUnit' Version='{NUnitVersion(framework)}' />
                         <PackageReference Include='NUnit3TestAdapter' Version='{NuGetPackageVersion}' />
                       </ItemGroup>
 
