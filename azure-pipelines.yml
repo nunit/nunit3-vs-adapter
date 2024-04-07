@@ -65,5 +65,5 @@ jobs:
         packageType: runtime
         version: 3.1.x
 
-    - powershell: .\build.ps1 --target=Acceptance --configuration=$(BuildConfiguration)
+    - powershell: .\build.ps1 --target=test --configuration=$(BuildConfiguration)
       displayName: Build and test
