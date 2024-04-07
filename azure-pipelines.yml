@@ -49,6 +49,11 @@ jobs:
         version: 7.x
         
     - task: UseDotNet@2
+      displayName: Install .NET Core 8.0 sdk
+      inputs:
+        version: 8.x
+        
+    - task: UseDotNet@2
       displayName: Install .NET Core 5.0 runtime
       inputs:
         packageType: runtime
