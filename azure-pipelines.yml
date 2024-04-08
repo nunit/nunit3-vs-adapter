@@ -22,6 +22,10 @@ jobs:
       inputs:
         version: 7.x    
     - task: UseDotNet@2
+      displayName: Install .NET Core 8.0 sdk
+      inputs:
+        version: 8.x    
+    - task: UseDotNet@2
       displayName: Install .NET Core 3.1 runtime
       inputs:
         packageType: runtime
@@ -45,6 +49,11 @@ jobs:
         version: 7.x
         
     - task: UseDotNet@2
+      displayName: Install .NET Core 8.0 sdk
+      inputs:
+        version: 8.x
+        
+    - task: UseDotNet@2
       displayName: Install .NET Core 5.0 runtime
       inputs:
         packageType: runtime
@@ -56,5 +65,5 @@ jobs:
         packageType: runtime
         version: 3.1.x
 
-    - powershell: .\build.ps1 --target=Acceptance --configuration=$(BuildConfiguration)
+    - powershell: .\build.ps1 --target=test --configuration=$(BuildConfiguration)
       displayName: Build and test

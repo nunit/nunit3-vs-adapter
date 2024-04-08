@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
@@ -16,6 +17,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         public const string Net50 = "net5.0";
         public const string Net60 = "net6.0";
         public const string Net70 = "net7.0";
+        public const string Net80 = "net8.0";
     }
 
     [Category("Acceptance")]
@@ -28,19 +30,109 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
         public const string LowestNetfxTarget = "net462";
         public const string LegacyProjectTargetFrameworkVersion = "v4.6.2";
 
-        public static IEnumerable<string> TargetFrameworks => new[]
+        protected static IEnumerable<string> TargetFrameworks => new[]
         {
             LowestNetfxTarget,
             Frameworks.NetCoreApp31
         };
 
-        public static IEnumerable<string> DotNetCliTargetFrameworks => new[]
+        protected static IEnumerable<string> DotNetCliTargetFrameworks => new[]
         {
             Frameworks.NetCoreApp31,
             Frameworks.Net50,
             Frameworks.Net60,
             Frameworks.Net70
         };
+
+        protected static IEnumerable<string> ModernDotNetCliTargetFrameworks => new[]
+        {
+            Frameworks.Net60,
+            Frameworks.Net70,
+            Frameworks.Net80
+        };
+
+        protected static string NUnit3 => "3.*";
+        protected static string NUnit4 => "4.*";
+
+        public class MultiFrameworkSource
+        {
+            public IEnumerable<string> Frameworks { get; set; } = DotNetCliTargetFrameworks;
+            public string NUnitVersion { get; set; } = NUnit3;
+
+            public static IEnumerable<MultiFrameworkSource> LegacyDotNetFrameworks => new List<MultiFrameworkSource> { new() };
+
+            public static IEnumerable<MultiFrameworkSource> ModernDotNetFrameworks => new List<MultiFrameworkSource>
+            {
+                new ()
+                {
+                    Frameworks = ModernDotNetCliTargetFrameworks,
+                    NUnitVersion = NUnit4
+                }
+            };
+
+            public static IEnumerable<MultiFrameworkSource> NetFxFrameworks => new List<MultiFrameworkSource>
+            {
+                new ()
+                {
+                    Frameworks = new List<string> { LowestNetfxTarget },
+                    NUnitVersion = NUnit4
+                }
+            };
+
+            public static IEnumerable<MultiFrameworkSource> AllFrameworks => LegacyDotNetFrameworks.Concat(ModernDotNetFrameworks).Concat(NetFxFrameworks);
+        }
+
+        public class SingleFrameworkSource
+        {
+            public string Framework { get; set; } = LowestNetfxTarget;
+            public string NUnitVersion { get; set; } = NUnit4;
+
+            public static IEnumerable<SingleFrameworkSource> NetFxFramework => new List<SingleFrameworkSource> { new() };
+
+            public static IEnumerable<SingleFrameworkSource> LegacyDotNetFramework => new List<SingleFrameworkSource>
+            {
+                new ()
+                {
+                    Framework = Frameworks.NetCoreApp31,
+                    NUnitVersion = NUnit3
+                },
+                new ()
+                {
+                    Framework = Frameworks.Net50,
+                    NUnitVersion = NUnit3
+                }
+            };
+
+            public static IEnumerable<SingleFrameworkSource> ModernDotNetFramework => new List<SingleFrameworkSource>
+            {
+                new ()
+                {
+                    Framework = Frameworks.Net60,
+                    NUnitVersion = NUnit4
+                },
+                new ()
+                {
+                    Framework = Frameworks.Net70,
+                    NUnitVersion = NUnit4
+                },
+                new ()
+                {
+                    Framework = Frameworks.Net80,
+                    NUnitVersion = NUnit4
+                }
+            };
+
+            public static IEnumerable<SingleFrameworkSource> AllFrameworks => NetFxFramework.Concat(LegacyDotNetFramework).Concat(ModernDotNetFramework);
+            public static IEnumerable<SingleFrameworkSource> AllFrameworksExceptNetFx => LegacyDotNetFramework.Concat(ModernDotNetFramework);
+        }
+
+        protected string NUnitVersion(string targetFramework) =>
+                targetFramework switch
+                {
+                    Frameworks.NetCoreApp31
+                    or Frameworks.Net50 => NUnit3,
+                    _ => NUnit4,
+                };
 
         private static readonly Lazy<(IsolatedWorkspaceManager Manager, string NupkgVersion, bool KeepWorkspaces)> Initialization = new(() =>
        {

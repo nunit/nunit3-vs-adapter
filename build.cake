@@ -1,5 +1,5 @@
-#tool vswhere&version=3.1.1
-#tool Microsoft.TestPlatform&version=17.7.2
+#tool vswhere&version=3.1.7
+#tool Microsoft.TestPlatform&version=17.9.0
 
 //////////////////////////////////////////////////////////////////////
 // ARGUMENTS
@@ -20,43 +20,6 @@ var modifier = "-beta.1";
 var dbgSuffix = configuration.ToLower() == "debug" ? "-dbg" : "";
 var packageVersion = version + modifier + dbgSuffix;
 Information("Packageversion: "+packageVersion);
-if (BuildSystem.IsRunningOnAppVeyor)
-{
-    var tag = AppVeyor.Environment.Repository.Tag;
-
-    if (tag.IsTag)
-    {
-        packageVersion = tag.Name;
-    }
-    else
-    {
-        var buildNumber = AppVeyor.Environment.Build.Number.ToString("00000");
-        var branch = AppVeyor.Environment.Repository.Branch.Replace(".", "").Replace("/", "");
-        var isPullRequest = AppVeyor.Environment.PullRequest.IsPullRequest;
-
-        if (branch == "master" && !isPullRequest)
-        {
-            packageVersion = version + "-dev-" + buildNumber + dbgSuffix;
-        }
-        else
-        {
-            var suffix = "-ci-" + buildNumber + dbgSuffix;
-
-            if (isPullRequest)
-                suffix += "-pr-" + AppVeyor.Environment.PullRequest.Number;
-            else
-                suffix += "-" + System.Text.RegularExpressions.Regex.Replace(branch, "[^0-9A-Za-z-]+", "-");
-
-            // Nuget limits "special version part" to 20 chars. Add one for the hyphen.
-            if (suffix.Length > 21)
-                suffix = suffix.Substring(0, 21);
-
-            packageVersion = version + suffix;
-        }
-    }
-
-    AppVeyor.UpdateBuildVersion(packageVersion);
-}
 
 var packageName = "NUnit3TestAdapter-" + packageVersion;
 
@@ -348,13 +311,6 @@ Task("CI")
     .IsDependentOn("Test")
     .IsDependentOn("Package")
     .IsDependentOn("Acceptance");
-
-Task("Appveyor")
-     .IsDependentOn("Build")
-     .IsDependentOn("Test")
-    .IsDependentOn("Package")
-    .IsDependentOn("Acceptance");
-
 
 Task("Default")
     .IsDependentOn("Build");
