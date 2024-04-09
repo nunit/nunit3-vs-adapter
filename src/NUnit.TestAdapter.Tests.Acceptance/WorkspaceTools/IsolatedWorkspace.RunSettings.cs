@@ -7,7 +7,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
     {
         private sealed class RunSettings
         {
-            private List<string> Arguments { get; } = new();
+            private List<string> Arguments { get; } = [];
 
             public string WorkingDirectory { get; }
             public string FileName { get; }

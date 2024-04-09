@@ -127,6 +127,14 @@ namespace NUnit.VisualStudio.TestAdapter
 
             filter ??= builder.FilterByWhere(Settings.Where);
 
+            RunAssemblies(sources, filter);
+
+            TestLog.Info($"NUnit Adapter {AdapterVersion}: Test execution complete");
+            Unload();
+        }
+
+        private void RunAssemblies(IEnumerable<string> sources, TestFilter filter)
+        {
             foreach (string assemblyName in sources)
             {
                 try
@@ -143,9 +151,6 @@ namespace NUnit.VisualStudio.TestAdapter
                     TestLog.Warning("Exception thrown executing tests", ex);
                 }
             }
-
-            TestLog.Info($"NUnit Adapter {AdapterVersion}: Test execution complete");
-            Unload();
         }
 
         private void SetRunTypeByStrings()
@@ -161,7 +166,7 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 
         /// <summary>
-        /// Called by the VisualStudio IDE when all or selected tests are to be run. Never called from TFS Build, except (at least 2022, probably also 2019) when vstest.console uses /test: then this is being used.
+        /// Called by the VisualStudio IDE when all or selected tests are to be run. Never called from TFS Build, except (at least 2022, probably also 2019) when 'vstest.console' uses /test: then this is being used.
         /// </summary>
         /// <param name="tests">The tests to be run.</param>
         /// <param name="runContext">The RunContext.</param>

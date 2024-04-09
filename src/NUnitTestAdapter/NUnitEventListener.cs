@@ -41,17 +41,18 @@ namespace NUnit.VisualStudio.TestAdapter
     /// NUnitEventListener implements the EventListener interface and
     /// translates each event into a message for the VS test platform.
     /// </summary>
-    public class NUnitEventListener :
+    public class NUnitEventListener(ITestConverterCommon testConverter, INUnit3TestExecutor executor)
+        :
 #if NET462
-        MarshalByRefObject,
+            MarshalByRefObject,
 #endif
-        ITestEventListener, IDisposable // Public for testing
+            ITestEventListener, IDisposable // Public for testing
     {
         private static readonly ICollection<INUnitTestEventTestOutput> EmptyNodes = new List<INUnitTestEventTestOutput>();
-        private ITestExecutionRecorder Recorder { get; }
-        private ITestConverterCommon TestConverter { get; }
-        private IAdapterSettings Settings { get; }
-        private Dictionary<string, ICollection<INUnitTestEventTestOutput>> OutputNodes { get; } = new();
+        private ITestExecutionRecorder Recorder { get; } = executor.FrameworkHandle;
+        private ITestConverterCommon TestConverter { get; } = testConverter;
+        private IAdapterSettings Settings { get; } = executor.Settings;
+        private Dictionary<string, ICollection<INUnitTestEventTestOutput>> OutputNodes { get; } = [];
 
 #if NET462
         public override object InitializeLifetimeService()
@@ -64,16 +65,7 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 #endif
 
-        private INUnit3TestExecutor Executor { get; }
-
-        public NUnitEventListener(ITestConverterCommon testConverter, INUnit3TestExecutor executor)
-        {
-            Executor = executor;
-            dumpXml = executor.Dump;
-            Settings = executor.Settings;
-            Recorder = executor.FrameworkHandle;
-            TestConverter = testConverter;
-        }
+        private INUnit3TestExecutor Executor { get; } = executor;
 
         #region ITestEventListener
 
@@ -153,7 +145,7 @@ namespace NUnit.VisualStudio.TestAdapter
         /// Collects up all text output messages in the current test, and outputs them here.
         /// Note:  Error and Progress are handled in TestOutput.
         /// </summary>
-        /// <param name="resultNode"></param>
+        /// <param name="resultNode">resultNode.</param>
         public void TestFinished(INUnitTestEventTestCase resultNode)
         {
             var testId = resultNode.Id;
@@ -165,7 +157,7 @@ namespace NUnit.VisualStudio.TestAdapter
             var result = TestConverter.GetVsTestResults(resultNode, outputNodes ?? EmptyNodes);
             if (Settings.ConsoleOut >= 1)
             {
-                if (!result.ConsoleOutput.IsNullOrWhiteSpace() && result.ConsoleOutput != NL)
+                if (!result.ConsoleOutput.IsNullOrWhiteSpace() && result.ConsoleOutput != Nl)
                 {
                     string msg = result.ConsoleOutput;
                     if (Settings.UseTestNameInConsoleOutput)
@@ -215,14 +207,14 @@ namespace NUnit.VisualStudio.TestAdapter
             }
         }
 
-        private static readonly string NL = Environment.NewLine;
-        private static readonly int NL_LENGTH = NL.Length;
-        private readonly IDumpXml dumpXml;
+        private static readonly string Nl = Environment.NewLine;
+        private static readonly int NlLength = Nl.Length;
+        private readonly IDumpXml dumpXml = executor.Dump;
 
         /// <summary>
         /// Error stream and Progress stream are both sent here.
         /// </summary>
-        /// <param name="outputNodeEvent"></param>
+        /// <param name="outputNodeEvent">outputNodeEvent.</param>
         public void TestOutput(INUnitTestEventTestOutput outputNodeEvent)
         {
             if (Settings.ConsoleOut == 0)
@@ -230,8 +222,8 @@ namespace NUnit.VisualStudio.TestAdapter
             string text = outputNodeEvent.Content;
 
             // Remove final newline since logger will add one
-            if (text.EndsWith(NL))
-                text = text.Substring(0, text.Length - NL_LENGTH);
+            if (text.EndsWith(Nl))
+                text = text.Substring(0, text.Length - NlLength);
 
             if (text.IsNullOrWhiteSpace())
             {

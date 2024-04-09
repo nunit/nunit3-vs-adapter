@@ -30,19 +30,12 @@ using NUnit.VisualStudio.TestAdapter.TestFilterConverter;
 
 namespace NUnit.VisualStudio.TestAdapter
 {
-    public class NUnitTestFilterBuilder
+    public class NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSettings settings)
     {
-        private readonly ITestFilterService _filterService;
+        private readonly ITestFilterService _filterService = filterService ?? throw new NUnitEngineException("TestFilterService is not available. Engine in use is incorrect version.");
 
         // ReSharper disable once StringLiteralTypo
         public static readonly TestFilter NoTestsFound = new ("<notestsfound/>");
-        private readonly IAdapterSettings settings;
-
-        public NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSettings settings)
-        {
-            this.settings = settings;
-            _filterService = filterService ?? throw new NUnitEngineException("TestFilterService is not available. Engine in use is incorrect version.");
-        }
 
         public TestFilter ConvertTfsFilterToNUnitFilter(IVsTestFilter vsFilter, IList<TestCase> loadedTestCases)
         {

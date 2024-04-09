@@ -103,15 +103,19 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             CheckNoTestCaseNodesExist(traitsCache);
 
             // Checking assembly level attribute.
-            CheckNodeProperties(traitsCache, "0-1009", new[] { new KeyValuePair<string, string>("Category", "AsmCat") });
+#pragma warning disable SA1010 // Opening square brackets should be spaced correctly
+            CheckNodeProperties(traitsCache, "0-1009", [new KeyValuePair<string, string>("Category", "AsmCat")]);
+
 
             // Checking Class level attributes base class & dervied class
-            CheckNodeProperties(traitsCache, "0-1000", new[] { new KeyValuePair<string, string>("Category", "BaseClass") });
-            CheckNodeProperties(traitsCache, "0-1002", new[] { new KeyValuePair<string, string>("Category", "DerivedClass"), new KeyValuePair<string, string>("Category", "BaseClass") });
+            CheckNodeProperties(traitsCache, "0-1000", [new KeyValuePair<string, string>("Category", "BaseClass")]);
+            CheckNodeProperties(traitsCache, "0-1002", [new KeyValuePair<string, string>("Category", "DerivedClass"), new KeyValuePair<string, string>("Category", "BaseClass")
+            ]);
 
             // Checking Nested class attributes.
-            CheckNodeProperties(traitsCache, "0-1005", new[] { new KeyValuePair<string, string>("Category", "NS1") });
-            CheckNodeProperties(traitsCache, "0-1007", new[] { new KeyValuePair<string, string>("Category", "NS2") });
+            CheckNodeProperties(traitsCache, "0-1005", [new KeyValuePair<string, string>("Category", "NS1")]);
+            CheckNodeProperties(traitsCache, "0-1007", [new KeyValuePair<string, string>("Category", "NS2")]);
+#pragma warning restore SA1010 // Opening square brackets should be spaced correctly
         }
 
         [Test]
@@ -165,7 +169,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             "StdErrMsgs:some stdErr")]
         public void CanMakeTestResultFromNUnitTestResult2(string output, string expectedMessages)
         {
-            var cachedTestCase = testConverterForXml.ConvertTestCase(fakeTestNode);
+            testConverterForXml.ConvertTestCase(fakeTestNode);
             var fakeResultNode = new NUnitTestEventTestCase(FakeTestData.GetResultNode());
             var outputNodes = output.Split(';').Select(i => new NUnitTestEventTestOutput(XmlHelper.CreateXmlNode(i.Trim()))).ToList();
             var outputNodesCollection = new List<INUnitTestEventTestOutput>(outputNodes);
@@ -181,7 +185,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void Attachments_CorrectAmountOfConvertedAttachments()
         {
-            var cachedTestCase = testConverterForXml.ConvertTestCase(fakeTestNode);
+            testConverterForXml.ConvertTestCase(fakeTestNode);
             var fakeResultNode = new NUnitTestEventTestCase(FakeTestData.GetResultNode());
 
             var testResults = testConverterForXml.GetVsTestResults(fakeResultNode, Enumerable.Empty<INUnitTestEventTestOutput>().ToList());
@@ -207,7 +211,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             const string fileUriScheme = "file://";
             const string errorMessage = "Path must start with file:// uri scheme";
 
-            var cachedTestCase = testConverterForXml.ConvertTestCase(fakeTestNode);
+            testConverterForXml.ConvertTestCase(fakeTestNode);
             var fakeResultNode = new NUnitTestEventTestCase(FakeTestData.GetResultNode().AsString());
 
             var testResults = testConverterForXml.GetVsTestResults(fakeResultNode, Enumerable.Empty<INUnitTestEventTestOutput>().ToList());
@@ -260,7 +264,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         private void CheckNodeProperties(IDictionary<string, TraitsFeature.CachedTestCaseInfo> cache, string id, KeyValuePair<string, string>[] kps)
         {
             Assert.That(cache.ContainsKey(id));
-            Assert.That(cache[id].Traits.Count, Is.EqualTo(kps.Count()));
+            Assert.That(cache[id].Traits.Count, Is.EqualTo(kps.Length));
             var info = cache[id];
 
             foreach (var kp in kps)

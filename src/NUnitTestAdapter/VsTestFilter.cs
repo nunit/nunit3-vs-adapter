@@ -32,8 +32,6 @@ namespace NUnit.VisualStudio.TestAdapter
     using System.Collections;
     // ReSharper disable once RedundantUsingDirective
     using System.Reflection;  // Needed for .net core 2.1
-    using Internal;  // Needed for reflection
-    using TestFilterConverter;
 
     public interface IVsTestFilter
     {
@@ -44,7 +42,7 @@ namespace NUnit.VisualStudio.TestAdapter
         IEnumerable<TestCase> CheckFilter(IEnumerable<TestCase> tests);
     }
 
-    public abstract class VsTestFilter : IVsTestFilter
+    public abstract class VsTestFilter(IRunContext runContext) : IVsTestFilter
     {
         /// <summary>
         /// Supported properties for filtering.
@@ -73,7 +71,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 ["TestCategory"] = categoryTrait,
                 ["Category"] = categoryTrait
             };
-            // Initialize the trait property map, since TFS doesnt know about traits
+            // Initialize the trait property map, since TFS doesn't know about traits
             TraitPropertyMap = new Dictionary<NTrait, TestProperty>(new NTraitNameComparer());
             var priorityProperty = TestProperty.Find("Priority") ??
                       TestProperty.Register("Priority", "Priority", typeof(string), typeof(TestCase));
@@ -82,16 +80,7 @@ namespace NUnit.VisualStudio.TestAdapter
                         TestProperty.Register("TestCategory", "TestCategory", typeof(string), typeof(TestCase));
             TraitPropertyMap[categoryTrait] = categoryProperty;
             // Initialize a merged list of properties and traits to fool TFS Build to think traits is properties
-            SupportedProperties = new List<string>();
-            SupportedProperties.AddRange(SupportedPropertiesCache.Keys);
-            SupportedProperties.AddRange(SupportedTraitCache.Keys);
-        }
-
-        private readonly IRunContext runContext;
-
-        protected VsTestFilter(IRunContext runContext)
-        {
-            this.runContext = runContext;
+            SupportedProperties = [.. SupportedPropertiesCache.Keys, .. SupportedTraitCache.Keys];
         }
 
 
@@ -110,7 +99,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
         /// <summary>
         /// Provides value of TestProperty corresponding to property name 'propertyName' as used in filter.
-        /// Return value should be a string for single valued property or array of strings for multi valued property (e.g. TestCategory).
+        /// Return value should be a string for single valued property or array of strings for multivalued property (e.g. TestCategory).
         /// </summary>
         public static object PropertyValueProvider(TestCase currentTest, string propertyName)
         {
@@ -194,12 +183,8 @@ namespace NUnit.VisualStudio.TestAdapter
                     : new VsTestFilterNonIde(context);
     }
 
-    public class VsTestFilterLegacy : VsTestFilter
+    public class VsTestFilterLegacy(IRunContext runContext) : VsTestFilter(runContext)
     {
-        public VsTestFilterLegacy(IRunContext runContext) : base(runContext)
-        {
-        }
-
         protected override bool CheckFilter(TestCase testCase)
         {
             var isExplicit = testCase.GetPropertyValue(CategoryList.NUnitExplicitProperty, false);
@@ -208,12 +193,8 @@ namespace NUnit.VisualStudio.TestAdapter
         }
     }
 
-    public class VsTestFilterIde : VsTestFilter
+    public class VsTestFilterIde(IRunContext runContext) : VsTestFilter(runContext)
     {
-        public VsTestFilterIde(IRunContext runContext) : base(runContext)
-        {
-        }
-
         protected override bool CheckFilter(TestCase testCase)
         {
             var isExplicit = testCase.GetPropertyValue(CategoryList.NUnitExplicitProperty, false);
@@ -222,12 +203,8 @@ namespace NUnit.VisualStudio.TestAdapter
         }
     }
 
-    public class VsTestFilterNonIde : VsTestFilter
+    public class VsTestFilterNonIde(IRunContext runContext) : VsTestFilter(runContext)
     {
-        public VsTestFilterNonIde(IRunContext runContext) : base(runContext)
-        {
-        }
-
         protected override bool CheckFilter(TestCase testCase)
         {
             return TfsTestCaseFilterExpression?.MatchTestCase(testCase, p => PropertyValueProvider(testCase, p)) != false;

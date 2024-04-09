@@ -6,21 +6,16 @@ using System.IO;
 namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
 {
     [DebuggerDisplay("{Directory,nq}")]
-    public sealed partial class IsolatedWorkspace : IDisposable
+    public sealed partial class IsolatedWorkspace(DirectoryMutex directoryMutex, ToolResolver toolResolver)
+        : IDisposable
     {
-        private readonly List<string> projectPaths = new();
-        private readonly ToolResolver toolResolver;
-        private readonly DirectoryMutex directoryMutex;
+        private readonly List<string> projectPaths = [];
+        private readonly ToolResolver toolResolver = toolResolver ?? throw new ArgumentNullException(nameof(toolResolver));
+        private readonly DirectoryMutex directoryMutex = directoryMutex ?? throw new ArgumentNullException(nameof(toolResolver));
 
         public bool DumpTestExecution { get; set; } = false;
 
         public string Directory => directoryMutex.DirectoryPath;
-
-        public IsolatedWorkspace(DirectoryMutex directoryMutex, ToolResolver toolResolver)
-        {
-            this.directoryMutex = directoryMutex ?? throw new ArgumentNullException(nameof(toolResolver));
-            this.toolResolver = toolResolver ?? throw new ArgumentNullException(nameof(toolResolver));
-        }
 
         public void Dispose() => directoryMutex.Dispose();
 

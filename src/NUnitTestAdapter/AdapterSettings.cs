@@ -52,19 +52,9 @@ namespace NUnit.VisualStudio.TestAdapter
         Current
     }
 
-    public class AdapterSettings : IAdapterSettings
+    public class AdapterSettings(ITestLogger logger) : IAdapterSettings
     {
-        private const string RANDOM_SEED_FILE = "nunit_random_seed.tmp";
-        private readonly ITestLogger _logger;
-
-        #region Constructor
-
-        public AdapterSettings(ITestLogger logger)
-        {
-            _logger = logger;
-        }
-
-        #endregion
+        private const string RandomSeedFile = "nunit_random_seed.tmp";
 
         #region Properties - General
 
@@ -235,7 +225,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             var nunitNode = doc.SelectSingleNode("RunSettings/NUnit");
             Verbosity = GetInnerTextAsInt(nunitNode, nameof(Verbosity), 0);
-            _logger.Verbosity = Verbosity;
+            logger.Verbosity = Verbosity;
 
             ExtractRunConfiguration(doc);
 
@@ -301,7 +291,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 inProcDataCollectorNode?.SelectSingleNode(
                     "InProcDataCollector[@uri='InProcDataCollector://Microsoft/LiveUnitTesting/1.0']") != null;
 
-            // TestPlatform can opt-in to run tests one at a time so that the InProcDataCollectors can collect the data for each one of them separately.
+            // TestPlatform can choose to opt in to run tests one at a time so that the InProcDataCollectors can collect the data for each one of them separately.
             // In that case, we need to ensure that tests do not run in parallel and the test started/test ended events are sent synchronously.
             if (CollectDataForEachTestSeparately || hasLiveUnitTestingDataCollector)
             {
@@ -311,7 +301,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 {
                     if (!InProcDataCollectorsAvailable)
                     {
-                        _logger.Info(
+                        logger.Info(
                             "CollectDataForEachTestSeparately is set, which is used to make InProcDataCollectors collect data for each test separately. No InProcDataCollectors can be found, thus the tests will run slower unnecessarily.");
                     }
                 }
@@ -438,7 +428,7 @@ namespace NUnit.VisualStudio.TestAdapter
             if (ok)
                 VsTestCategoryType = result;
             else
-                _logger.Warning($"Invalid value ({vsTestCategoryType}) for VsTestCategoryType, should be either NUnit or MsTest");
+                logger.Warning($"Invalid value ({vsTestCategoryType}) for VsTestCategoryType, should be either NUnit or MsTest");
         }
 
         private void MapDisplayName(string displaynameoptions)
@@ -449,7 +439,7 @@ namespace NUnit.VisualStudio.TestAdapter
             if (ok)
                 DisplayName = result;
             else
-                _logger.Warning($"Invalid value ({displaynameoptions}) for DisplayNameOptions, should be either Name, Fullname or FullnameSep");
+                logger.Warning($"Invalid value ({displaynameoptions}) for DisplayNameOptions, should be either Name, Fullname or FullnameSep");
         }
 
 
@@ -457,18 +447,18 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             try
             {
-                var path = Path.Combine(dirname, RANDOM_SEED_FILE);
+                var path = Path.Combine(dirname, RandomSeedFile);
                 File.WriteAllText(path, RandomSeed.Value.ToString());
             }
             catch (Exception ex)
             {
-                _logger.Warning("Failed to save random seed.", ex);
+                logger.Warning("Failed to save random seed.", ex);
             }
         }
 
         public void RestoreRandomSeed(string dirname)
         {
-            var fullPath = Path.Combine(dirname, RANDOM_SEED_FILE);
+            var fullPath = Path.Combine(dirname, RandomSeedFile);
             if (!File.Exists(fullPath))
                 return;
             try
@@ -478,7 +468,7 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             catch (Exception ex)
             {
-                _logger.Warning("Unable to restore random seed.", ex);
+                logger.Warning("Unable to restore random seed.", ex);
             }
         }
 
@@ -497,9 +487,9 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             else if (DisableParallelization && NumberOfTestWorkers > 0)
             {
-                if (_logger.Verbosity > 0)
+                if (logger.Verbosity > 0)
                 {
-                    _logger.Warning(
+                    logger.Warning(
                         $"DisableParallelization:{DisableParallelization} & NumberOfTestWorkers:{NumberOfTestWorkers} are conflicting settings, hence not running in parallel");
                 }
                 NumberOfTestWorkers = 0;
@@ -571,7 +561,7 @@ namespace NUnit.VisualStudio.TestAdapter
         {
             if (Verbosity >= 4)
             {
-                _logger.Info($"Setting: {xpath} = {res}");
+                logger.Info($"Setting: {xpath} = {res}");
             }
         }
 
@@ -584,7 +574,7 @@ namespace NUnit.VisualStudio.TestAdapter
 
             if (!ok)
             {
-                _logger.Warning(
+                logger.Warning(
                     $"Invalid value ({outcome}) for MapWarningTo, should be either Skipped,Failed,Passed or None");
                 return TestOutcome.Skipped;
             }
@@ -599,7 +589,7 @@ namespace NUnit.VisualStudio.TestAdapter
             bool ok = TryParse.EnumTryParse(setting, out T result);
             if (!ok)
             {
-                _logger.Warning(
+                logger.Warning(
                     $"Invalid value ({setting}) for {typeof(T)}");
                 return defaultValue;
             }

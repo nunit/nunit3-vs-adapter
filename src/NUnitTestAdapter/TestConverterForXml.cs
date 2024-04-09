@@ -68,7 +68,7 @@ namespace NUnit.VisualStudio.TestAdapter
             adapterSettings = settings;
             _logger = logger;
             _sourceAssembly = sourceAssembly;
-            _vsTestCaseMap = new Dictionary<string, TestCase>();
+            _vsTestCaseMap = [];
             TraitsCache = new Dictionary<string, TraitsFeature.CachedTestCaseInfo>();
 
             if (CollectSourceInformation)

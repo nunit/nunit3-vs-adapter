@@ -172,7 +172,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
             Utils.DeleteDirectoryRobust(Path.Combine(packageCachePath, NuGetPackageId));
         }
 
-        private static readonly Dictionary<string, List<IsolatedWorkspace>> WorkspacesByTestId = new();
+        private static readonly Dictionary<string, List<IsolatedWorkspace>> WorkspacesByTestId = [];
 
         protected static IsolatedWorkspace CreateWorkspace()
         {
@@ -184,7 +184,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
             lock (WorkspacesByTestId)
             {
                 if (!WorkspacesByTestId.TryGetValue(test.ID, out var workspaces))
-                    WorkspacesByTestId.Add(test.ID, workspaces = new List<IsolatedWorkspace>());
+                    WorkspacesByTestId.Add(test.ID, workspaces = []);
                 workspaces.Add(workspace);
             }
             return workspace;
