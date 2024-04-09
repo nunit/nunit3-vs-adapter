@@ -49,6 +49,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             recorder = Substitute.For<IFrameworkHandle>();
             converter = Substitute.For<ITestConverterCommon>();
             settings = Substitute.For<IAdapterSettings>();
+            settings.ConsoleOut.Returns(1);
             executor = Substitute.For<INUnit3TestExecutor>();
             executor.Settings.Returns(settings);
             executor.FrameworkHandle.Returns(recorder);
@@ -56,6 +57,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         [Test]
         public void ThatNormalTestOutputIsOutput()
+        {
+            var sut = new NUnitEventListener(converter, executor);
+            sut.OnTestEvent(TestOutputOut);
+            sut.OnTestEvent(TestFinish);
+
+            recorder.Received().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Is<string>(x => x.StartsWith("Whatever")));
+            converter.Received().GetVsTestResults(Arg.Any<NUnitTestEventTestCase>(), Arg.Is<ICollection<INUnitTestEventTestOutput>>(x => x.Count == 1));
+        }
+
+        [Test]
+        public void ThatProgressTestOutputIsOutput()
         {
             var sut = new NUnitEventListener(converter, executor);
             sut.OnTestEvent(TestOutputProgress);
@@ -74,6 +86,19 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             recorder.Received().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Is<string>(x => x.StartsWith("Whatever")));
             converter.Received().GetVsTestResults(Arg.Any<NUnitTestEventTestCase>(), Arg.Is<ICollection<INUnitTestEventTestOutput>>(x => x.Count == 1));
+        }
+
+        [Test]
+        public void ThatConsoleOutCanStopAllTestOutput()
+        {
+            settings.ConsoleOut.Returns(0);
+            var sut = new NUnitEventListener(converter, executor);
+            sut.OnTestEvent(TestOutputOut);
+            sut.OnTestEvent(TestOutputProgress);
+            sut.OnTestEvent(TestOutputError);
+            sut.OnTestEvent(TestFinish);
+
+            recorder.DidNotReceive().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Any<string>());
         }
 
         [Test]
