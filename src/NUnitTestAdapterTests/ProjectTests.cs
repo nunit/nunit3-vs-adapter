@@ -24,6 +24,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
+#if NET462
+using NUnit.Framework.Legacy;
+#endif
 
 namespace NUnit.VisualStudio.TestAdapter.Tests
 {
@@ -37,8 +40,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var dir = TestContext.CurrentContext.TestDirectory;
             var assembly = Assembly.LoadFrom(dir + "/NUnit3.TestAdapter.dll");
             var refNames = assembly.GetReferencedAssemblies().Where(ass => ass.Name == "Microsoft.VisualStudio.TestPlatform.ObjectModel").ToList();
-            Assert.IsTrue(refNames != null && refNames.Count == 1, "No reference to Microsoft.VisualStudio.TestPlatform.ObjectModel found");
-            Assert.IsTrue(refNames[0].Version.Major == 11, "Microsoft.VisualStudio.TestPlatform.ObjectModel must point to the 2012 version (11)");
+            ClassicAssert.IsTrue(refNames.Count == 1, "No reference to Microsoft.VisualStudio.TestPlatform.ObjectModel found");
+            ClassicAssert.IsTrue(refNames[0].Version.Major == 11, "Microsoft.VisualStudio.TestPlatform.ObjectModel must point to the 2012 version (11)");
         }
 #endif
 

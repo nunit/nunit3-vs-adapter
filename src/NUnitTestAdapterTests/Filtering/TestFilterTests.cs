@@ -23,8 +23,11 @@
 
 using System;
 using System.Collections.Generic;
+
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+
 using NSubstitute;
+
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
@@ -108,7 +111,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
             var tc = new TestCase("Test1", new Uri("executor://NUnitTestExecutor"), "NUnit.VSIX");
             var testFilter = VsTestFilterFactory.CreateVsTestFilter(settings, null);
             var obj = VsTestFilter.PropertyValueProvider(tc, "TestCategory");
-            Assert.IsNull(obj);
+            Assert.That(obj, Is.Null);
         }
 
         [Test]
