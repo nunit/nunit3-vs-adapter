@@ -24,139 +24,139 @@
 using System;
 using System.Text;
 
-namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
+namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter;
+
+public enum TokenKind
 {
-    public enum TokenKind
+    Eof,
+    Word,
+    FQN,
+    String, // Unused
+    Symbol
+}
+
+public class Token
+{
+    public Token(TokenKind kind) : this(kind, string.Empty) { }
+
+    public Token(TokenKind kind, char ch) : this(kind, ch.ToString()) { }
+
+    public Token(TokenKind kind, string text)
     {
-        Eof,
-        Word,
-        FQN,
-        String, // Unused
-        Symbol
+        Kind = kind;
+        Text = text;
     }
 
-    public class Token
+    public TokenKind Kind { get; }
+
+    public string Text { get; }
+
+    public int Pos { get; set; }
+
+    #region Equality Overrides
+
+    public override bool Equals(object obj) => obj is Token token && this == token;
+
+    public override int GetHashCode()
     {
-        public Token(TokenKind kind) : this(kind, string.Empty) { }
-
-        public Token(TokenKind kind, char ch) : this(kind, ch.ToString()) { }
-
-        public Token(TokenKind kind, string text)
-        {
-            Kind = kind;
-            Text = text;
-        }
-
-        public TokenKind Kind { get; }
-
-        public string Text { get; }
-
-        public int Pos { get; set; }
-
-        #region Equality Overrides
-
-        public override bool Equals(object obj) => obj is Token token && this == token;
-
-        public override int GetHashCode()
-        {
-            return Text.GetHashCode();
-        }
-
-        public override string ToString()
-        {
-            return Text != null
-                ? Kind + ":" + Text
-                : Kind.ToString();
-        }
-
-        public static bool operator ==(Token t1, Token t2)
-        {
-            bool t1Null = ReferenceEquals(t1, null);
-            bool t2Null = ReferenceEquals(t2, null);
-
-            return (t1Null && t2Null) || (!t1Null && !t2Null && (t1.Kind == t2.Kind && t1.Text == t2.Text));
-        }
-
-        public static bool operator !=(Token t1, Token t2) => !(t1 == t2);
-
-        #endregion
+        return Text.GetHashCode();
     }
 
-    /// <summary>
-    /// Tokenizer class performs lexical analysis for the TestSelectionParser.
-    /// It recognizes a very limited set of tokens: words, symbols and
-    /// quoted strings. This is sufficient for the simple DSL we use to
-    /// select which tests to run.
-    /// </summary>
-    public class Tokenizer
+    public override string ToString()
     {
-        private readonly string input;
-        private int index;
+        return Text != null
+            ? Kind + ":" + Text
+            : Kind.ToString();
+    }
 
-        private const char EOF_CHAR = '\0';
-        private const string WORD_BREAK_CHARS = "=~!()&|";
-        private readonly string[] dOubleCharSymbols = { "!=", "!~" };
+    public static bool operator ==(Token t1, Token t2)
+    {
+        bool t1Null = ReferenceEquals(t1, null);
+        bool t2Null = ReferenceEquals(t2, null);
 
-        private Token lookahead;
+        return (t1Null && t2Null) || (!t1Null && !t2Null && (t1.Kind == t2.Kind && t1.Text == t2.Text));
+    }
 
-        public Tokenizer(string input)
+    public static bool operator !=(Token t1, Token t2) => !(t1 == t2);
+
+    #endregion
+}
+
+/// <summary>
+/// Tokenizer class performs lexical analysis for the TestSelectionParser.
+/// It recognizes a very limited set of tokens: words, symbols and
+/// quoted strings. This is sufficient for the simple DSL we use to
+/// select which tests to run.
+/// </summary>
+public class Tokenizer
+{
+    private readonly string input;
+    private int index;
+
+    private const char EOF_CHAR = '\0';
+    private const string WORD_BREAK_CHARS = "=~!()&|";
+    private readonly string[] dOubleCharSymbols = { "!=", "!~" };
+
+    private Token lookahead;
+
+    public Tokenizer(string input)
+    {
+        this.input = input ?? throw new ArgumentNullException(nameof(input));
+        index = 0;
+    }
+
+    public Token LookAhead
+    {
+        get
         {
-            this.input = input ?? throw new ArgumentNullException(nameof(input));
-            index = 0;
+            if (lookahead == null)
+                lookahead = GetNextToken();
+
+            return lookahead;
         }
+    }
 
-        public Token LookAhead
+    public Token NextToken()
+    {
+        Token result = lookahead ?? GetNextToken();
+        lookahead = null;
+        return result;
+    }
+
+    private Token GetNextToken()
+    {
+        SkipBlanks();
+
+        var ch = NextChar;
+        int pos = index;
+
+        switch (ch)
         {
-            get
-            {
-                if (lookahead == null)
-                    lookahead = GetNextToken();
+            case EOF_CHAR:
+                return new Token(TokenKind.Eof) { Pos = pos };
 
-                return lookahead;
-            }
-        }
+            // Single char symbols
+            case '(':
+            case ')':
+            case '~':
+            case '&':
+            case '|':
+            case '=':
+                GetChar();
+                return new Token(TokenKind.Symbol, ch) { Pos = pos };
 
-        public Token NextToken()
-        {
-            Token result = lookahead ?? GetNextToken();
-            lookahead = null;
-            return result;
-        }
-
-        private Token GetNextToken()
-        {
-            SkipBlanks();
-
-            var ch = NextChar;
-            int pos = index;
-
-            switch (ch)
-            {
-                case EOF_CHAR:
-                    return new Token(TokenKind.Eof) { Pos = pos };
-
-                // Single char symbols
-                case '(':
-                case ')':
-                case '~':
-                case '&':
-                case '|':
-                case '=':
+            // Could be alone or start of a double char symbol
+            case '!':
+                GetChar();
+                foreach (string dbl in dOubleCharSymbols)
+                {
+                    if (ch != dbl[0] || NextChar != dbl[1])
+                        continue;
                     GetChar();
-                    return new Token(TokenKind.Symbol, ch) { Pos = pos };
+                    return new Token(TokenKind.Symbol, dbl) { Pos = pos };
+                }
 
-                // Could be alone or start of a double char symbol
-                case '!':
-                    GetChar();
-                    foreach (string dbl in dOubleCharSymbols)
-                    {
-                        if (ch != dbl[0] || NextChar != dbl[1])
-                            continue;
-                        GetChar();
-                        return new Token(TokenKind.Symbol, dbl) { Pos = pos };
-                    }
-
-                    return new Token(TokenKind.Symbol, ch);
+                return new Token(TokenKind.Symbol, ch);
 
 #if UNUSED
                 case '"':
@@ -165,25 +165,25 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
                     return GetString();
 #endif
 
-                default:
-                    // This is the only place in the tokenizer where
-                    // we don't know what we are getting at the start
-                    // of the input string. To avoid modifying the
-                    // overall design of the parser, the tokenizer
-                    // will return either a Word or an FQN and the
-                    // parser grammar has been changed to accept either
-                    // one of them in certain places.
-                    return GetWordOrFqn();
-            }
+            default:
+                // This is the only place in the tokenizer where
+                // we don't know what we are getting at the start
+                // of the input string. To avoid modifying the
+                // overall design of the parser, the tokenizer
+                // will return either a Word or an FQN and the
+                // parser grammar has been changed to accept either
+                // one of them in certain places.
+                return GetWordOrFqn();
         }
+    }
 
-        private bool IsWordChar(char c)
-        {
-            if (char.IsWhiteSpace(c) || c == EOF_CHAR)
-                return false;
+    private bool IsWordChar(char c)
+    {
+        if (char.IsWhiteSpace(c) || c == EOF_CHAR)
+            return false;
 
-            return WORD_BREAK_CHARS.IndexOf(c) < 0;
-        }
+        return WORD_BREAK_CHARS.IndexOf(c) < 0;
+    }
 
 #if UNUSED
         private Token GetWord()
@@ -218,86 +218,85 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
         }
 #endif
 
-        private Token GetWordOrFqn()
-        {
-            var sb = new StringBuilder();
-            int pos = index;
+    private Token GetWordOrFqn()
+    {
+        var sb = new StringBuilder();
+        int pos = index;
 
+        CollectWordChars(sb);
+
+        if (NextChar != '(')
+            return new Token(TokenKind.Word, sb.ToString()) { Pos = pos };
+
+        CollectBalancedParentheticalExpression(sb);
+
+        while (NextChar == '+' || NextChar == '.')
+        {
+            sb.Append(GetChar());
             CollectWordChars(sb);
-
-            if (NextChar != '(')
-                return new Token(TokenKind.Word, sb.ToString()) { Pos = pos };
-
-            CollectBalancedParentheticalExpression(sb);
-
-            while (NextChar == '+' || NextChar == '.')
-            {
-                sb.Append(GetChar());
-                CollectWordChars(sb);
-                if (NextChar == '(')
-                    CollectBalancedParentheticalExpression(sb);
-            }
-
-            return new Token(TokenKind.FQN, sb.ToString()) { Pos = pos };
-        }
-
-        private void CollectWordChars(StringBuilder sb)
-        {
-            while (IsWordChar(NextChar))
-                sb.Append(GetChar());
-        }
-
-        private void CollectBalancedParentheticalExpression(StringBuilder sb)
-        {
-            int depth = 0;
             if (NextChar == '(')
-            {
-                do
-                {
-                    var c = GetChar();
-                    sb.Append(c);
-                    if (c == '(')
-                        ++depth;
-                    else if (c == ')')
-                        --depth;
-                    else if (c == '"')
-                        CollectQuotedString(sb);
-                }
-                while (depth > 0);
-            }
+                CollectBalancedParentheticalExpression(sb);
         }
 
-        private void CollectQuotedString(StringBuilder sb)
+        return new Token(TokenKind.FQN, sb.ToString()) { Pos = pos };
+    }
+
+    private void CollectWordChars(StringBuilder sb)
+    {
+        while (IsWordChar(NextChar))
+            sb.Append(GetChar());
+    }
+
+    private void CollectBalancedParentheticalExpression(StringBuilder sb)
+    {
+        int depth = 0;
+        if (NextChar == '(')
         {
-            while (NextChar != EOF_CHAR)
+            do
             {
-                var ch = GetChar();
-
-                if (ch == '\\')
-                    ch = GetChar();
-                else if (ch == '"')
-                    break;
-                sb.Append(ch);
+                var c = GetChar();
+                sb.Append(c);
+                if (c == '(')
+                    ++depth;
+                else if (c == ')')
+                    --depth;
+                else if (c == '"')
+                    CollectQuotedString(sb);
             }
-
-            sb.Append('"');
+            while (depth > 0);
         }
+    }
 
-        /// <summary>
-        /// Get the next character in the input, consuming it.
-        /// </summary>
-        /// <returns>The next char.</returns>
-        private char GetChar() => index < input.Length ? input[index++] : EOF_CHAR;
-
-        /// <summary>
-        /// Peek ahead at the next character in input.
-        /// </summary>
-        private char NextChar => index < input.Length ? input[index] : EOF_CHAR;
-
-        private void SkipBlanks()
+    private void CollectQuotedString(StringBuilder sb)
+    {
+        while (NextChar != EOF_CHAR)
         {
-            while (char.IsWhiteSpace(NextChar))
-                index++;
+            var ch = GetChar();
+
+            if (ch == '\\')
+                ch = GetChar();
+            else if (ch == '"')
+                break;
+            sb.Append(ch);
         }
+
+        sb.Append('"');
+    }
+
+    /// <summary>
+    /// Get the next character in the input, consuming it.
+    /// </summary>
+    /// <returns>The next char.</returns>
+    private char GetChar() => index < input.Length ? input[index++] : EOF_CHAR;
+
+    /// <summary>
+    /// Peek ahead at the next character in input.
+    /// </summary>
+    private char NextChar => index < input.Length ? input[index] : EOF_CHAR;
+
+    private void SkipBlanks()
+    {
+        while (char.IsWhiteSpace(NextChar))
+            index++;
     }
 }

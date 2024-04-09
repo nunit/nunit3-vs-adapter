@@ -26,152 +26,136 @@ using System.Reflection;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
-namespace NUnit.VisualStudio.TestAdapter
+namespace NUnit.VisualStudio.TestAdapter;
+
+public interface ITestLogger
 {
-    public interface ITestLogger
+    void Error(string message);
+    void Error(string message, Exception ex);
+    void Warning(string message);
+    void Warning(string message, Exception ex);
+    void Info(string message);
+    int Verbosity { get; set; }
+    void Debug(string message);
+}
+
+/// <summary>
+/// TestLogger wraps an IMessageLogger and adds various
+/// utility methods for sending messages. Since the
+/// IMessageLogger is only provided when the discovery
+/// and execution objects are called, we use two-phase
+/// construction. Until Initialize is called, the logger
+/// simply swallows all messages without sending them
+/// anywhere.
+/// </summary>
+public class TestLogger(IMessageLogger messageLogger) : IMessageLogger, ITestLogger
+{
+    private IAdapterSettings adapterSettings;
+    private const string ExceptionFormat = "Exception {0}, {1}";
+
+    private IMessageLogger MessageLogger { get; } = messageLogger;
+
+    public int Verbosity { get; set; }
+
+    public TestLogger InitSettings(IAdapterSettings settings)
     {
-        void Error(string message);
-        void Error(string message, Exception ex);
-        void Warning(string message);
-        void Warning(string message, Exception ex);
-        void Info(string message);
-        int Verbosity { get; set; }
-        void Debug(string message);
+        adapterSettings = settings;
+        Verbosity = adapterSettings.Verbosity;
+        return this;
     }
 
-    /// <summary>
-    /// TestLogger wraps an IMessageLogger and adds various
-    /// utility methods for sending messages. Since the
-    /// IMessageLogger is only provided when the discovery
-    /// and execution objects are called, we use two-phase
-    /// construction. Until Initialize is called, the logger
-    /// simply swallows all messages without sending them
-    /// anywhere.
-    /// </summary>
-    public class TestLogger : IMessageLogger, ITestLogger
+    #region Error Messages
+
+    public void Error(string message)
+        => SendMessage(TestMessageLevel.Error, message);
+
+    public void Error(string message, Exception ex)
+        => SendMessage(TestMessageLevel.Error, message, ex);
+
+    #endregion
+
+    #region Warning Messages
+
+    public void Warning(string message)
+        => SendMessage(TestMessageLevel.Warning, message);
+
+    public void Warning(string message, Exception ex)
+        => SendMessage(TestMessageLevel.Warning, message, ex);
+
+    #endregion
+
+    #region Information Messages
+
+    public void Info(string message)
     {
-        private IAdapterSettings adapterSettings;
-        private const string EXCEPTION_FORMAT = "Exception {0}, {1}";
+        if (adapterSettings?.Verbosity >= 0)
+            SendMessage(TestMessageLevel.Informational, message);
+    }
 
-        private IMessageLogger MessageLogger { get; }
+    #endregion
 
-        public int Verbosity { get; set; }
+    #region Debug Messages
 
-        public TestLogger(IMessageLogger messageLogger)
+    public void Debug(string message)
+    {
+        if (adapterSettings?.Verbosity >= 5)
+            SendMessage(TestMessageLevel.Informational, message);
+    }
+
+    #endregion
+
+    #region SendMessage
+
+    public void SendMessage(TestMessageLevel testMessageLevel, string message)
+        => MessageLogger?.SendMessage(testMessageLevel, message);
+
+    public void SendMessage(TestMessageLevel testMessageLevel, string message, Exception ex)
+    {
+        switch (Verbosity)
         {
-            MessageLogger = messageLogger;
+            case 0:
+                var type = ex.GetType();
+                SendMessage(testMessageLevel, string.Format(ExceptionFormat, type, message));
+                SendMessage(testMessageLevel, ex.Message);
+                SendMessage(testMessageLevel, ex.StackTrace);
+                if (ex.InnerException != null)
+                {
+                    SendMessage(testMessageLevel, $"InnerException: {ex.InnerException}");
+                }
+                break;
+
+            default:
+                SendMessage(testMessageLevel, message);
+                SendMessage(testMessageLevel, ex.ToString());
+                SendMessage(testMessageLevel, ex.StackTrace);
+                break;
         }
+    }
+    #endregion
 
-        public TestLogger InitSettings(IAdapterSettings settings)
-        {
-            adapterSettings = settings;
-            Verbosity = adapterSettings.Verbosity;
-            return this;
-        }
-
-        #region Error Messages
-
-        public void Error(string message)
-        {
-            SendMessage(TestMessageLevel.Error, message);
-        }
-
-        public void Error(string message, Exception ex)
-        {
-            SendMessage(TestMessageLevel.Error, message, ex);
-        }
-
-        #endregion
-
-        #region Warning Messages
-
-        public void Warning(string message)
-        {
-            SendMessage(TestMessageLevel.Warning, message);
-        }
-
-        public void Warning(string message, Exception ex)
-        {
-            SendMessage(TestMessageLevel.Warning, message, ex);
-        }
-
-        #endregion
-
-        #region Information Messages
-
-        public void Info(string message)
-        {
-            if (adapterSettings?.Verbosity >= 0)
-                SendMessage(TestMessageLevel.Informational, message);
-        }
-
-        #endregion
-
-        #region Debug Messages
-
-        public void Debug(string message)
-        {
-            if (adapterSettings?.Verbosity >= 5)
-                SendMessage(TestMessageLevel.Informational, message);
-        }
-
-        #endregion
-
-        #region SendMessage
-
-        public void SendMessage(TestMessageLevel testMessageLevel, string message)
-        {
-            MessageLogger?.SendMessage(testMessageLevel, message);
-        }
-
-        public void SendMessage(TestMessageLevel testMessageLevel, string message, Exception ex)
-        {
-            switch (Verbosity)
-            {
-                case 0:
-                    var type = ex.GetType();
-                    SendMessage(testMessageLevel, string.Format(EXCEPTION_FORMAT, type, message));
-                    SendMessage(testMessageLevel, ex.Message);
-                    SendMessage(testMessageLevel, ex.StackTrace);
-                    if (ex.InnerException != null)
-                    {
-                        SendMessage(testMessageLevel, $"InnerException: {ex.InnerException}");
-                    }
-                    break;
-
-                default:
-                    SendMessage(testMessageLevel, message);
-                    SendMessage(testMessageLevel, ex.ToString());
-                    SendMessage(testMessageLevel, ex.StackTrace);
-                    break;
-            }
-        }
-        #endregion
-
-        #region SpecializedMessages
-        public void DebugRunfrom()
-        {
+    #region SpecializedMessages
+    public void DebugRunfrom()
+    {
 #if NET462
-            string fw = ".Net Framework";
+        string fw = ".Net Framework";
 #else
-            string fw = ".Net/ .Net Core";
+        string fw = ".Net/ .Net Core";
 #endif
-            var assLoc = Assembly.GetExecutingAssembly().Location;
-            Debug($"{fw} adapter running from {assLoc}");
-            Debug($"Current directory: {Environment.CurrentDirectory}");
-        }
-
-        public void InfoNoTests(bool discoveryResultsHasNoNUnitTests, string assemblyPath)
-        {
-            Info(discoveryResultsHasNoNUnitTests
-                ? "   NUnit couldn't find any tests in " + assemblyPath
-                : "   NUnit failed to load " + assemblyPath);
-        }
-
-        public void InfoNoTests(string assemblyPath)
-        {
-            Info($"   NUnit couldn't find any tests in {assemblyPath}");
-        }
-        #endregion
+        var assLoc = Assembly.GetExecutingAssembly().Location;
+        Debug($"{fw} adapter running from {assLoc}");
+        Debug($"Current directory: {Environment.CurrentDirectory}");
     }
+
+    public void InfoNoTests(bool discoveryResultsHasNoNUnitTests, string assemblyPath)
+    {
+        Info(discoveryResultsHasNoNUnitTests
+            ? "   NUnit couldn't find any tests in " + assemblyPath
+            : "   NUnit failed to load " + assemblyPath);
+    }
+
+    public void InfoNoTests(string assemblyPath)
+    {
+        Info($"   NUnit couldn't find any tests in {assemblyPath}");
+    }
+    #endregion
 }

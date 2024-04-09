@@ -24,67 +24,66 @@
 using System.Collections.Generic;
 using System.Xml;
 
-namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
+namespace NUnit.VisualStudio.TestAdapter.NUnitEngine;
+
+public interface INUnitTestCase : INUnitTestNode
 {
-    public interface INUnitTestCase : INUnitTestNode
+    bool IsTestCase { get; }
+    bool IsParameterizedMethod { get; }
+    string Type { get; }
+    string ClassName { get; }
+    string MethodName { get; }
+    RunStateEnum RunState { get; }
+    NUnitEventTestCase Parent { get; }
+}
+
+public enum RunStateEnum
+{
+    NA,
+    Runnable,
+    Explicit,
+    NotRunnable
+}
+
+public interface INUnitTestCasePropertyInfo
+{
+    RunStateEnum RunState { get; }
+    IEnumerable<NUnitProperty> Properties { get; }
+}
+
+public class NUnitEventTestCase : NUnitTestNode, INUnitTestCase, INUnitTestCasePropertyInfo
+{
+    public bool IsTestCase => !IsNull && Node.Name == "test-case";
+    public bool IsParameterizedMethod => Type == "ParameterizedMethod";
+    public string Type => Node.GetAttribute("type");
+    public string ClassName => Node.GetAttribute("classname");
+    public string MethodName => Node.GetAttribute("methodname");
+
+    private RunStateEnum runState = RunStateEnum.NA;
+
+    public RunStateEnum RunState
     {
-        bool IsTestCase { get; }
-        bool IsParameterizedMethod { get; }
-        string Type { get; }
-        string ClassName { get; }
-        string MethodName { get; }
-        RunStateEnum RunState { get; }
-        NUnitEventTestCase Parent { get; }
-    }
-
-    public enum RunStateEnum
-    {
-        NA,
-        Runnable,
-        Explicit,
-        NotRunnable
-    }
-
-    public interface INUnitTestCasePropertyInfo
-    {
-        RunStateEnum RunState { get; }
-        IEnumerable<NUnitProperty> Properties { get; }
-    }
-
-    public class NUnitEventTestCase : NUnitTestNode, INUnitTestCase, INUnitTestCasePropertyInfo
-    {
-        public bool IsTestCase => !IsNull && Node.Name == "test-case";
-        public bool IsParameterizedMethod => Type == "ParameterizedMethod";
-        public string Type => Node.GetAttribute("type");
-        public string ClassName => Node.GetAttribute("classname");
-        public string MethodName => Node.GetAttribute("methodname");
-
-        private RunStateEnum runState = RunStateEnum.NA;
-
-        public RunStateEnum RunState
+        get
         {
-            get
+            if (runState == RunStateEnum.NA)
             {
-                if (runState == RunStateEnum.NA)
+                runState = Node.GetAttribute("runstate") switch
                 {
-                    runState = Node.GetAttribute("runstate") switch
-                    {
-                        "Runnable" => RunStateEnum.Runnable,
-                        "Explicit" => RunStateEnum.Explicit,
-                        "NotRunnable" => RunStateEnum.NotRunnable,
-                        _ => runState
-                    };
-                }
-                return runState;
+                    "Runnable" => RunStateEnum.Runnable,
+                    "Explicit" => RunStateEnum.Explicit,
+                    "NotRunnable" => RunStateEnum.NotRunnable,
+                    _ => runState
+                };
             }
+            return runState;
         }
-
-        public NUnitEventTestCase(XmlNode testCase) : base(testCase)
-        {
-            if (Node.ParentNode != null)
-                Parent = new NUnitEventTestCase(Node.ParentNode);
-        }
-
-        public NUnitEventTestCase Parent { get; }
     }
+
+    public NUnitEventTestCase(XmlNode testCase) : base(testCase)
+    {
+        if (Node.ParentNode != null)
+            Parent = new NUnitEventTestCase(Node.ParentNode);
+    }
+
+    public NUnitEventTestCase Parent { get; }
 }

@@ -24,44 +24,43 @@
 using System;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
+namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes;
+
+class FakeRunSettings : IRunSettings
 {
-    class FakeRunSettings : IRunSettings
+    ISettingsProvider IRunSettings.GetSettings(string settingsName)
     {
-        ISettingsProvider IRunSettings.GetSettings(string settingsName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public virtual string SettingsXml => "<RunSettings><NUnit><SkipNonTestAssemblies>false</SkipNonTestAssemblies><Verbosity>5</Verbosity></NUnit></RunSettings>";
+        throw new NotImplementedException();
     }
 
-    class FakeRunSettingsForTestOutput : FakeRunSettings
+    public virtual string SettingsXml => "<RunSettings><NUnit><SkipNonTestAssemblies>false</SkipNonTestAssemblies><Verbosity>5</Verbosity></NUnit></RunSettings>";
+}
+
+class FakeRunSettingsForTestOutput : FakeRunSettings
+{
+    public override string SettingsXml => "<RunSettings><NUnit><TestOutputXml>TestResults</TestOutputXml><SkipNonTestAssemblies>false</SkipNonTestAssemblies></NUnit></RunSettings>";
+}
+
+class FakeRunSettingsForTestOutputAndWorkDir : FakeRunSettings
+{
+    private readonly string _testOutput;
+    private readonly string _workDir;
+
+    public FakeRunSettingsForTestOutputAndWorkDir(string testOutput, string workDir)
     {
-        public override string SettingsXml => "<RunSettings><NUnit><TestOutputXml>TestResults</TestOutputXml><SkipNonTestAssemblies>false</SkipNonTestAssemblies></NUnit></RunSettings>";
+        _workDir = workDir;
+        _testOutput = testOutput;
     }
+    public override string SettingsXml => $"<RunSettings><NUnit><WorkDirectory>{_workDir}</WorkDirectory><TestOutputXml>{_testOutput}</TestOutputXml><SkipNonTestAssemblies>false</SkipNonTestAssemblies></NUnit></RunSettings>";
+}
 
-    class FakeRunSettingsForTestOutputAndWorkDir : FakeRunSettings
+class FakeRunSettingsForWhere : FakeRunSettings
+{
+    private readonly string _where;
+
+    public FakeRunSettingsForWhere(string where)
     {
-        private readonly string _testOutput;
-        private readonly string _workDir;
-
-        public FakeRunSettingsForTestOutputAndWorkDir(string testOutput, string workDir)
-        {
-            _workDir = workDir;
-            _testOutput = testOutput;
-        }
-        public override string SettingsXml => $"<RunSettings><NUnit><WorkDirectory>{_workDir}</WorkDirectory><TestOutputXml>{_testOutput}</TestOutputXml><SkipNonTestAssemblies>false</SkipNonTestAssemblies></NUnit></RunSettings>";
+        _where = where;
     }
-
-    class FakeRunSettingsForWhere : FakeRunSettings
-    {
-        private readonly string _where;
-
-        public FakeRunSettingsForWhere(string where)
-        {
-            _where = where;
-        }
-        public override string SettingsXml => $"<RunSettings><NUnit><Where>{_where}</Where><SkipNonTestAssemblies>false</SkipNonTestAssemblies></NUnit></RunSettings>";
-    }
+    public override string SettingsXml => $"<RunSettings><NUnit><Where>{_where}</Where><SkipNonTestAssemblies>false</SkipNonTestAssemblies></NUnit></RunSettings>";
 }

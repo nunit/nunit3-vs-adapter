@@ -28,16 +28,16 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NSubstitute;
 using NUnit.Framework;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests
+namespace NUnit.VisualStudio.TestAdapter.Tests;
+
+/// <summary>
+/// Experimental tests used to deduce functionality of VSTest.
+/// </summary>
+public class VsExperimentalTests
 {
-    /// <summary>
-    /// Experimental tests used to deduce functionality of VSTest.
-    /// </summary>
-    public class VsExperimentalTests
+    [Test]
+    public void ThatCategoriesAreDistinct()
     {
-        [Test]
-        public void ThatCategoriesAreDistinct()
-        {
             var testCase = new TestCase(
                 "whatever",
                 new Uri(NUnitTestAdapter.ExecutorUri),
@@ -56,5 +56,4 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var returnedCategoryList = testCase.GetCategories();
             Assert.That(returnedCategoryList.Count(), Is.EqualTo(2), $"Found {testCase.GetCategories().Count()} category entries");
         }
-    }
 }

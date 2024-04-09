@@ -23,11 +23,10 @@
 
 using System;
 
-namespace NUnit.VisualStudio.TestAdapter.Metadata
+namespace NUnit.VisualStudio.TestAdapter.Metadata;
+
+public interface IMetadataProvider : IDisposable
 {
-    public interface IMetadataProvider : IDisposable
-    {
-        TypeInfo? GetDeclaringType(string assemblyPath, string reflectedTypeName, string methodName);
-        TypeInfo? GetStateMachineType(string assemblyPath, string reflectedTypeName, string methodName);
-    }
+    TypeInfo? GetDeclaringType(string assemblyPath, string reflectedTypeName, string methodName);
+    TypeInfo? GetStateMachineType(string assemblyPath, string reflectedTypeName, string methodName);
 }

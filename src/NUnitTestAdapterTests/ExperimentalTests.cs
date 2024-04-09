@@ -1,15 +1,14 @@
 ﻿using System.Reflection;
 using NUnit.Framework;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests
+namespace NUnit.VisualStudio.TestAdapter.Tests;
+
+[TestFixture]
+public class ExperimentalTests
 {
-    [TestFixture]
-    public class ExperimentalTests
+    [Test]
+    public void LocationTest()
     {
-        [Test]
-        public void LocationTest()
-        {
             var location = typeof(ExperimentalTests).GetTypeInfo().Assembly.Location;
         }
-    }
 }

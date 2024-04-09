@@ -27,130 +27,129 @@ using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
-namespace NUnit.VisualStudio.TestAdapter
-{
-    public static class TraitsFeature
-    {
-        public static void AddTrait(this TestCase testCase, string name, string value)
-        {
-            testCase?.Traits.Add(new Trait(name, value));
-        }
-        private const string NUnitTestCategoryLabel = "Category";
+namespace NUnit.VisualStudio.TestAdapter;
 
+public static class TraitsFeature
+{
+    public static void AddTrait(this TestCase testCase, string name, string value)
+    {
+        testCase?.Traits.Add(new Trait(name, value));
+    }
+    private const string NUnitTestCategoryLabel = "Category";
+
+
+    /// <summary>
+    /// Stores the information needed to initialize a <see cref="TestCase"/>
+    /// which can be inherited from an ancestor node during the conversion of test cases.
+    /// </summary>
+    public sealed class CachedTestCaseInfo
+    {
+        /// <summary>
+        /// Used to populate a test case’s <see cref="TestObject.Traits"/> collection.
+        /// Currently, the only effect this has is to add a Test Explorer grouping header
+        /// for each trait with the name “Name [Value]”, or for an empty value, “Name”.
+        /// </summary>
+        public List<Trait> Traits { get; } = new ();
 
         /// <summary>
-        /// Stores the information needed to initialize a <see cref="TestCase"/>
-        /// which can be inherited from an ancestor node during the conversion of test cases.
+        /// Used by <see cref="VsTestFilter"/>; does not affect the Test Explorer UI.
         /// </summary>
-        public sealed class CachedTestCaseInfo
+        public bool Explicit { get; set; }
+
+        // Eventually, we might split out the Categories collection and make this
+        // an immutable struct. (https://github.com/nunit/nunit3-vs-adapter/pull/457)
+    }
+
+    public static void AddTraitsFromTestNode(this TestCase testCase, NUnitDiscoveryTestCase testNCase,
+        IDictionary<string, CachedTestCaseInfo> traitsCache, ITestLogger logger, IAdapterSettings adapterSettings)
+    {
+        var ancestor = testNCase.Parent;
+        var key = ancestor?.Id;
+        var categoryList = new CategoryList(testCase, adapterSettings);
+        // Reading ancestor properties of a test-case node. And adding to the cache.
+        while (ancestor != null && !string.IsNullOrEmpty(key))
         {
-            /// <summary>
-            /// Used to populate a test case’s <see cref="TestObject.Traits"/> collection.
-            /// Currently, the only effect this has is to add a Test Explorer grouping header
-            /// for each trait with the name “Name [Value]”, or for an empty value, “Name”.
-            /// </summary>
-            public List<Trait> Traits { get; } = new ();
-
-            /// <summary>
-            /// Used by <see cref="VsTestFilter"/>; does not affect the Test Explorer UI.
-            /// </summary>
-            public bool Explicit { get; set; }
-
-            // Eventually, we might split out the Categories collection and make this
-            // an immutable struct. (https://github.com/nunit/nunit3-vs-adapter/pull/457)
+            AddingToCache(testCase, traitsCache, key, categoryList, ancestor, categoryList.ProcessTestCaseProperties);
+            ancestor = ancestor.Parent;
+            key = ancestor?.Id;
         }
 
-        public static void AddTraitsFromTestNode(this TestCase testCase, NUnitDiscoveryTestCase testNCase,
-            IDictionary<string, CachedTestCaseInfo> traitsCache, ITestLogger logger, IAdapterSettings adapterSettings)
-        {
-            var ancestor = testNCase.Parent;
-            var key = ancestor?.Id;
-            var categoryList = new CategoryList(testCase, adapterSettings);
-            // Reading ancestor properties of a test-case node. And adding to the cache.
-            while (ancestor != null && !string.IsNullOrEmpty(key))
-            {
-                AddingToCache(testCase, traitsCache, key, categoryList, ancestor, categoryList.ProcessTestCaseProperties);
-                ancestor = ancestor.Parent;
-                key = ancestor?.Id;
-            }
+        // No Need to store test-case properties in cache.
+        categoryList.ProcessTestCaseProperties(testNCase, false);
+        categoryList.UpdateCategoriesToVs();
+    }
 
-            // No Need to store test-case properties in cache.
-            categoryList.ProcessTestCaseProperties(testNCase, false);
-            categoryList.UpdateCategoriesToVs();
+    private static void AddingToCache<T>(TestCase testCase, IDictionary<string, CachedTestCaseInfo> traitsCache, string key, CategoryList categoryList, T ancestor, Func<T, bool, string, IDictionary<string, CachedTestCaseInfo>, IEnumerable<string>> processTestCaseProperties)
+    {
+        if (traitsCache.ContainsKey(key))
+        {
+            categoryList.AddRange(traitsCache[key].Traits.Where(o => o.Name == NUnitTestCategoryLabel)
+                .Select(prop => prop.Value).ToList());
+
+            if (traitsCache[key].Explicit)
+                testCase.SetPropertyValue(CategoryList.NUnitExplicitProperty, true);
+
+            var traitsList = traitsCache[key].Traits.Where(o => o.Name != NUnitTestCategoryLabel).ToList();
+            if (traitsList.Count > 0)
+                testCase.Traits.AddRange(traitsList);
         }
-
-        private static void AddingToCache<T>(TestCase testCase, IDictionary<string, CachedTestCaseInfo> traitsCache, string key, CategoryList categoryList, T ancestor, Func<T, bool, string, IDictionary<string, CachedTestCaseInfo>, IEnumerable<string>> processTestCaseProperties)
+        else
         {
-            if (traitsCache.ContainsKey(key))
+            processTestCaseProperties(ancestor, true, key, traitsCache);
+            // Adding entry to dictionary, so that we will not make SelectNodes call again.
+            if (categoryList.LastNodeListCount == 0 && !traitsCache.ContainsKey(key))
             {
-                categoryList.AddRange(traitsCache[key].Traits.Where(o => o.Name == NUnitTestCategoryLabel)
-                    .Select(prop => prop.Value).ToList());
-
-                if (traitsCache[key].Explicit)
-                    testCase.SetPropertyValue(CategoryList.NUnitExplicitProperty, true);
-
-                var traitsList = traitsCache[key].Traits.Where(o => o.Name != NUnitTestCategoryLabel).ToList();
-                if (traitsList.Count > 0)
-                    testCase.Traits.AddRange(traitsList);
+                traitsCache[key] = new CachedTestCaseInfo();
             }
-            else
-            {
-                processTestCaseProperties(ancestor, true, key, traitsCache);
-                // Adding entry to dictionary, so that we will not make SelectNodes call again.
-                if (categoryList.LastNodeListCount == 0 && !traitsCache.ContainsKey(key))
-                {
-                    traitsCache[key] = new CachedTestCaseInfo();
-                }
-            }
-        }
-
-        public static void AddTraitsFromXmlTestNode(this TestCase testCase, NUnitEventTestCase testNCase,
-            IDictionary<string, CachedTestCaseInfo> traitsCache, ITestLogger logger, IAdapterSettings adapterSettings)
-        {
-            var ancestor = testNCase.Parent;
-            var key = ancestor?.Id;
-            var categoryList = new CategoryList(testCase, adapterSettings);
-            // Reading ancestor properties of a test-case node. And adding to the cache.
-            while (ancestor != null && key != null)
-            {
-                AddingToCache(testCase, traitsCache, key, categoryList, ancestor, categoryList.ProcessTestCaseProperties);
-                ancestor = ancestor.Parent;
-                key = ancestor?.Id;
-            }
-
-            // No Need to store test-case properties in cache.
-            categoryList.ProcessTestCaseProperties(testNCase, false);
-            categoryList.UpdateCategoriesToVs();
-        }
-
-
-        public static IEnumerable<NTrait> GetTraits(this TestCase testCase)
-        {
-            var traits = new List<NTrait>();
-
-            if (testCase?.Traits != null)
-            {
-                traits.AddRange(from trait in testCase.Traits let name = trait.Name let value = trait.Value select new NTrait(name, value));
-            }
-            return traits;
-        }
-
-        public static IEnumerable<string> GetCategories(this TestCase testCase)
-        {
-            var categories = testCase.GetPropertyValue(CategoryList.NUnitTestCategoryProperty) as string[];
-            return categories;
         }
     }
 
-    public class NTrait
+    public static void AddTraitsFromXmlTestNode(this TestCase testCase, NUnitEventTestCase testNCase,
+        IDictionary<string, CachedTestCaseInfo> traitsCache, ITestLogger logger, IAdapterSettings adapterSettings)
     {
-        public string Name { get; }
-        public string Value { get; }
-
-        public NTrait(string name, string value)
+        var ancestor = testNCase.Parent;
+        var key = ancestor?.Id;
+        var categoryList = new CategoryList(testCase, adapterSettings);
+        // Reading ancestor properties of a test-case node. And adding to the cache.
+        while (ancestor != null && key != null)
         {
-            Name = name;
-            Value = value;
+            AddingToCache(testCase, traitsCache, key, categoryList, ancestor, categoryList.ProcessTestCaseProperties);
+            ancestor = ancestor.Parent;
+            key = ancestor?.Id;
         }
+
+        // No Need to store test-case properties in cache.
+        categoryList.ProcessTestCaseProperties(testNCase, false);
+        categoryList.UpdateCategoriesToVs();
+    }
+
+
+    public static IEnumerable<NTrait> GetTraits(this TestCase testCase)
+    {
+        var traits = new List<NTrait>();
+
+        if (testCase?.Traits != null)
+        {
+            traits.AddRange(from trait in testCase.Traits let name = trait.Name let value = trait.Value select new NTrait(name, value));
+        }
+        return traits;
+    }
+
+    public static IEnumerable<string> GetCategories(this TestCase testCase)
+    {
+        var categories = testCase.GetPropertyValue(CategoryList.NUnitTestCategoryProperty) as string[];
+        return categories;
+    }
+}
+
+public class NTrait
+{
+    public string Name { get; }
+    public string Value { get; }
+
+    public NTrait(string name, string value)
+    {
+        Name = name;
+        Value = value;
     }
 }

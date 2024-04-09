@@ -24,35 +24,34 @@ using System;
 using System.Threading.Tasks;
 using NUnit.Framework;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests
+namespace NUnit.VisualStudio.TestAdapter.Tests;
+
+public class AsyncTests
 {
-    public class AsyncTests
+    [Test]
+    public async Task TaskTestSuccess()
     {
-        [Test]
-        public async Task TaskTestSuccess()
-        {
             var result = await ReturnOne();
 
             Assert.That(result, Is.EqualTo(1));
         }
 
-        [TestCase(ExpectedResult = 1)]
-        public async Task<int> TaskTTestCaseWithResultCheckSuccess()
-        {
+    [TestCase(ExpectedResult = 1)]
+    public async Task<int> TaskTTestCaseWithResultCheckSuccess()
+    {
             return await ReturnOne();
         }
 
-        private static Task<int> ReturnOne()
-        {
+    private static Task<int> ReturnOne()
+    {
             return Task.Run(() => 1);
         }
 
-        private static Task ThrowException()
-        {
+    private static Task ThrowException()
+    {
             return Task.Run(() =>
             {
                 throw new InvalidOperationException();
             });
         }
-    }
 }

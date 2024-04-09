@@ -4,74 +4,74 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
-{
-    /// <summary>
-    /// FakeFrameworkHandle is used in all tests that require an
-    /// IFrameworkHandle, ITestExecutionRecorder or IMessageLogger.
-    /// </summary>
-    class FakeFrameworkHandle : IFrameworkHandle
-    {
-        #region Constructor
+namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
-        public FakeFrameworkHandle()
-        {
+/// <summary>
+/// FakeFrameworkHandle is used in all tests that require an
+/// IFrameworkHandle, ITestExecutionRecorder or IMessageLogger.
+/// </summary>
+class FakeFrameworkHandle : IFrameworkHandle
+{
+    #region Constructor
+
+    public FakeFrameworkHandle()
+    {
             Events = new List<Event>();
         }
 
-        #endregion
+    #endregion
 
-        #region Nested Types
+    #region Nested Types
 
-        public enum EventType
-        {
-            RecordStart,
-            RecordEnd,
-            RecordResult,
-            SendMessage
-        }
+    public enum EventType
+    {
+        RecordStart,
+        RecordEnd,
+        RecordResult,
+        SendMessage
+    }
 
-        public struct TextMessage
-        {
-            public TestMessageLevel Level { get; set; }
-            public string Text { get; set; }
-        }
+    public struct TextMessage
+    {
+        public TestMessageLevel Level { get; set; }
+        public string Text { get; set; }
+    }
 
-        public struct Event
-        {
-            public EventType EventType { get; set; }
-            public TestCase TestCase { get; set; }
-            public TestResult TestResult { get; set; }
-            public TestOutcome TestOutcome { get; set; }
-            public TextMessage Message { get; set; }
-        }
+    public struct Event
+    {
+        public EventType EventType { get; set; }
+        public TestCase TestCase { get; set; }
+        public TestResult TestResult { get; set; }
+        public TestOutcome TestOutcome { get; set; }
+        public TextMessage Message { get; set; }
+    }
 
-        #endregion
+    #endregion
 
-        #region Properties
+    #region Properties
 
-        public List<Event> Events { get; private set; }
+    public List<Event> Events { get; private set; }
 
-        #endregion
+    #endregion
 
-        #region IFrameworkHandle Members
+    #region IFrameworkHandle Members
 
-        bool IFrameworkHandle.EnableShutdownAfterTestRun
-        {
-            get; set;
-        }
+    bool IFrameworkHandle.EnableShutdownAfterTestRun
+    {
+        get; set;
+    }
 
-        int IFrameworkHandle.LaunchProcessWithDebuggerAttached(string filePath, string workingDirectory, string arguments, IDictionary<string, string> environmentVariables)
-        {
+    int IFrameworkHandle.LaunchProcessWithDebuggerAttached(string filePath, string workingDirectory, string arguments, IDictionary<string, string> environmentVariables)
+    {
             throw new NotImplementedException();
         }
 
-        #endregion
+    #endregion
 
-        #region ITestExecutionRecorder Members
+    #region ITestExecutionRecorder Members
 
-        void ITestExecutionRecorder.RecordStart(TestCase testCase)
-        {
+    void ITestExecutionRecorder.RecordStart(TestCase testCase)
+    {
             Events.Add(new Event
             {
                 EventType = EventType.RecordStart,
@@ -79,8 +79,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
             });
         }
 
-        void ITestExecutionRecorder.RecordResult(TestResult testResult)
-        {
+    void ITestExecutionRecorder.RecordResult(TestResult testResult)
+    {
             Events.Add(new Event
             {
                 EventType = EventType.RecordResult,
@@ -88,8 +88,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
             });
         }
 
-        void ITestExecutionRecorder.RecordEnd(TestCase testCase, TestOutcome outcome)
-        {
+    void ITestExecutionRecorder.RecordEnd(TestCase testCase, TestOutcome outcome)
+    {
             Events.Add(new Event
             {
                 EventType = EventType.RecordEnd,
@@ -98,17 +98,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
             });
         }
 
-        void ITestExecutionRecorder.RecordAttachments(IList<AttachmentSet> attachmentSets)
-        {
+    void ITestExecutionRecorder.RecordAttachments(IList<AttachmentSet> attachmentSets)
+    {
             throw new NotImplementedException();
         }
 
-        #endregion
+    #endregion
 
-        #region IMessageLogger
+    #region IMessageLogger
 
-        void IMessageLogger.SendMessage(TestMessageLevel testMessageLevel, string message)
-        {
+    void IMessageLogger.SendMessage(TestMessageLevel testMessageLevel, string message)
+    {
             var textMessage = new TextMessage
             {
                 Level = testMessageLevel,
@@ -122,6 +122,5 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
             });
         }
 
-        #endregion
-    }
+    #endregion
 }

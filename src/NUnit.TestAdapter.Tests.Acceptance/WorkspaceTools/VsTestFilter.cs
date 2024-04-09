@@ -1,49 +1,48 @@
-﻿namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools
+﻿namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools;
+
+public interface IFilterArgument
 {
-    public interface IFilterArgument
+    string CompletedArgument();
+    bool HasArguments { get; }
+}
+
+public abstract class VsTestFilter : IFilterArgument
+{
+    protected string Arguments { get; }
+    public bool HasArguments => Arguments.Length > 0;
+    protected VsTestFilter(string arguments)
     {
-        string CompletedArgument();
-        bool HasArguments { get; }
+        Arguments = arguments;
     }
 
-    public abstract class VsTestFilter : IFilterArgument
+    public abstract string CompletedArgument();
+
+    public static IFilterArgument NoFilter => new VsTestTestCaseFilter("");
+}
+
+
+
+public class VsTestTestCaseFilter : VsTestFilter
+{
+    public VsTestTestCaseFilter(string arguments) : base(arguments)
     {
-        protected string Arguments { get; }
-        public bool HasArguments => Arguments.Length > 0;
-        protected VsTestFilter(string arguments)
-        {
-            Arguments = arguments;
-        }
-
-        public abstract string CompletedArgument();
-
-        public static IFilterArgument NoFilter => new VsTestTestCaseFilter("");
     }
 
-
-
-    public class VsTestTestCaseFilter : VsTestFilter
+    public override string CompletedArgument()
     {
-        public VsTestTestCaseFilter(string arguments) : base(arguments)
-        {
-        }
-
-        public override string CompletedArgument()
-        {
-            var completeFilterStatement = $"/TestCaseFilter:{Arguments}";
-            return completeFilterStatement;
-        }
+        var completeFilterStatement = $"/TestCaseFilter:{Arguments}";
+        return completeFilterStatement;
     }
+}
 
-    public class VsTestTestsFilter : VsTestFilter
+public class VsTestTestsFilter : VsTestFilter
+{
+    public VsTestTestsFilter(string arguments) : base(arguments)
     {
-        public VsTestTestsFilter(string arguments) : base(arguments)
-        {
-        }
-        public override string CompletedArgument()
-        {
-            var completeFilterStatement = $"/Tests:{Arguments}";
-            return completeFilterStatement;
-        }
+    }
+    public override string CompletedArgument()
+    {
+        var completeFilterStatement = $"/Tests:{Arguments}";
+        return completeFilterStatement;
     }
 }

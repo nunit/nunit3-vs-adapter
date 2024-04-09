@@ -2,12 +2,12 @@ using System;
 using System.Globalization;
 using System.Text;
 
-namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
+namespace NUnit.VisualStudio.TestAdapter.NUnitEngine;
+
+internal static class UnicodeEscapeHelper
 {
-    internal static class UnicodeEscapeHelper
+    public static string UnEscapeUnicodeCharacters(this string text)
     {
-        public static string UnEscapeUnicodeCharacters(this string text)
-        {
             if (text == null)
                 return null;
 
@@ -34,8 +34,8 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
             return stringBuilder.ToString();
         }
 
-        private static bool TryUnEscapeOneCharacter(string text, int position, out char escapedChar, out int extraCharacterRead)
-        {
+    private static bool TryUnEscapeOneCharacter(string text, int position, out char escapedChar, out int extraCharacterRead)
+    {
             const string unicodeEscapeSample = "u0000";
 
             extraCharacterRead = 0;
@@ -52,5 +52,4 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
 
             return true;
         }
-    }
 }

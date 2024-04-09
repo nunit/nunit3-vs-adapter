@@ -28,86 +28,85 @@ using NUnit.Engine;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 using NUnit.VisualStudio.TestAdapter.TestFilterConverter;
 
-namespace NUnit.VisualStudio.TestAdapter
+namespace NUnit.VisualStudio.TestAdapter;
+
+public class NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSettings settings)
 {
-    public class NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSettings settings)
+    private readonly ITestFilterService _filterService = filterService ?? throw new NUnitEngineException("TestFilterService is not available. Engine in use is incorrect version.");
+
+    // ReSharper disable once StringLiteralTypo
+    public static readonly TestFilter NoTestsFound = new ("<notestsfound/>");
+
+    public TestFilter ConvertTfsFilterToNUnitFilter(IVsTestFilter vsFilter, IList<TestCase> loadedTestCases)
     {
-        private readonly ITestFilterService _filterService = filterService ?? throw new NUnitEngineException("TestFilterService is not available. Engine in use is incorrect version.");
+        var filteredTestCases = vsFilter.CheckFilter(loadedTestCases);
+        var testCases = filteredTestCases as TestCase[] ?? filteredTestCases.ToArray();
+        // TestLog.Info(string.Format("TFS Filter detected: LoadedTestCases {0}, Filtered Test Cases {1}", loadedTestCases.Count, testCases.Count()));
+        return testCases.Any() ? FilterByList(testCases) : NoTestsFound;
+    }
 
-        // ReSharper disable once StringLiteralTypo
-        public static readonly TestFilter NoTestsFound = new ("<notestsfound/>");
 
-        public TestFilter ConvertTfsFilterToNUnitFilter(IVsTestFilter vsFilter, IList<TestCase> loadedTestCases)
+    public TestFilter ConvertVsTestFilterToNUnitFilter(IVsTestFilter vsFilter, IDiscoveryConverter discovery)
+    {
+        if (settings.DiscoveryMethod == DiscoveryMethod.Legacy)
+            return ConvertTfsFilterToNUnitFilter(vsFilter, discovery.LoadedTestCases);
+        if (!settings.UseNUnitFilter)
+            return ConvertTfsFilterToNUnitFilter(vsFilter, discovery);
+        var result = ConvertVsTestFilterToNUnitFilter(vsFilter);
+        return result ?? ConvertTfsFilterToNUnitFilter(vsFilter, discovery);
+    }
+
+    /// <summary>
+    /// Used when running from command line, mode Non-Ide,  e.g. 'dotnet test --filter xxxxx'.  Reads the TfsTestCaseFilterExpression.
+    /// </summary>
+    public TestFilter ConvertVsTestFilterToNUnitFilter(IVsTestFilter vsFilter)
+    {
+        if (string.IsNullOrEmpty(vsFilter?.TfsTestCaseFilterExpression?.TestCaseFilterValue))
+            return null;
+        var parser = new TestFilterParser();
+        var filter = parser.Parse(vsFilter.TfsTestCaseFilterExpression.TestCaseFilterValue);
+        var tf = new TestFilter(filter);
+        return tf;
+    }
+
+
+    public TestFilter ConvertTfsFilterToNUnitFilter(IVsTestFilter vsFilter, IDiscoveryConverter discovery)
+    {
+        var filteredTestCases = vsFilter.CheckFilter(discovery.LoadedTestCases).ToList();
+        var explicitCases = discovery.GetExplicitTestCases(filteredTestCases).ToList();
+        bool isExplicit = filteredTestCases.Count == explicitCases.Count;
+        var tcs = isExplicit ? filteredTestCases : filteredTestCases.Except(explicitCases);
+        var testCases = tcs as TestCase[] ?? tcs.ToArray();
+        // TestLog.Info(string.Format("TFS Filter detected: LoadedTestCases {0}, Filtered Test Cases {1}", loadedTestCases.Count, testCases.Count()));
+        return testCases.Any() ? FilterByList(testCases) : NoTestsFound;
+    }
+
+    /// <summary>
+    /// Used when a Where statement is added as a runsettings parameter, either in a runsettings file or on the command line from dotnet using the '-- NUnit.Where .....' statement.
+    /// </summary>
+    public TestFilter FilterByWhere(string where)
+    {
+        if (string.IsNullOrEmpty(where))
+            return TestFilter.Empty;
+        var filterBuilder = _filterService.GetTestFilterBuilder();
+        filterBuilder.SelectWhere(where);
+        return filterBuilder.GetFilter();
+    }
+
+    public TestFilter FilterByList(IEnumerable<TestCase> testCases)
+    {
+        if (testCases.Count() > settings.AssemblySelectLimit)
         {
-            var filteredTestCases = vsFilter.CheckFilter(loadedTestCases);
-            var testCases = filteredTestCases as TestCase[] ?? filteredTestCases.ToArray();
-            // TestLog.Info(string.Format("TFS Filter detected: LoadedTestCases {0}, Filtered Test Cases {1}", loadedTestCases.Count, testCases.Count()));
-            return testCases.Any() ? FilterByList(testCases) : NoTestsFound;
+            // Need to log that filter has been set to empty due to AssemblySelectLimit
+            return TestFilter.Empty;
         }
 
-
-        public TestFilter ConvertVsTestFilterToNUnitFilter(IVsTestFilter vsFilter, IDiscoveryConverter discovery)
+        var filterBuilder = _filterService.GetTestFilterBuilder();
+        foreach (var testCase in testCases)
         {
-            if (settings.DiscoveryMethod == DiscoveryMethod.Legacy)
-                return ConvertTfsFilterToNUnitFilter(vsFilter, discovery.LoadedTestCases);
-            if (!settings.UseNUnitFilter)
-                return ConvertTfsFilterToNUnitFilter(vsFilter, discovery);
-            var result = ConvertVsTestFilterToNUnitFilter(vsFilter);
-            return result ?? ConvertTfsFilterToNUnitFilter(vsFilter, discovery);
+            filterBuilder.AddTest(testCase.FullyQualifiedName);
         }
 
-        /// <summary>
-        /// Used when running from command line, mode Non-Ide,  e.g. 'dotnet test --filter xxxxx'.  Reads the TfsTestCaseFilterExpression.
-        /// </summary>
-        public TestFilter ConvertVsTestFilterToNUnitFilter(IVsTestFilter vsFilter)
-        {
-            if (string.IsNullOrEmpty(vsFilter?.TfsTestCaseFilterExpression?.TestCaseFilterValue))
-                return null;
-            var parser = new TestFilterParser();
-            var filter = parser.Parse(vsFilter.TfsTestCaseFilterExpression.TestCaseFilterValue);
-            var tf = new TestFilter(filter);
-            return tf;
-        }
-
-
-        public TestFilter ConvertTfsFilterToNUnitFilter(IVsTestFilter vsFilter, IDiscoveryConverter discovery)
-        {
-            var filteredTestCases = vsFilter.CheckFilter(discovery.LoadedTestCases).ToList();
-            var explicitCases = discovery.GetExplicitTestCases(filteredTestCases).ToList();
-            bool isExplicit = filteredTestCases.Count == explicitCases.Count;
-            var tcs = isExplicit ? filteredTestCases : filteredTestCases.Except(explicitCases);
-            var testCases = tcs as TestCase[] ?? tcs.ToArray();
-            // TestLog.Info(string.Format("TFS Filter detected: LoadedTestCases {0}, Filtered Test Cases {1}", loadedTestCases.Count, testCases.Count()));
-            return testCases.Any() ? FilterByList(testCases) : NoTestsFound;
-        }
-
-        /// <summary>
-        /// Used when a Where statement is added as a runsettings parameter, either in a runsettings file or on the command line from dotnet using the '-- NUnit.Where .....' statement.
-        /// </summary>
-        public TestFilter FilterByWhere(string where)
-        {
-            if (string.IsNullOrEmpty(where))
-                return TestFilter.Empty;
-            var filterBuilder = _filterService.GetTestFilterBuilder();
-            filterBuilder.SelectWhere(where);
-            return filterBuilder.GetFilter();
-        }
-
-        public TestFilter FilterByList(IEnumerable<TestCase> testCases)
-        {
-            if (testCases.Count() > settings.AssemblySelectLimit)
-            {
-                // Need to log that filter has been set to empty due to AssemblySelectLimit
-                return TestFilter.Empty;
-            }
-
-            var filterBuilder = _filterService.GetTestFilterBuilder();
-            foreach (var testCase in testCases)
-            {
-                filterBuilder.AddTest(testCase.FullyQualifiedName);
-            }
-
-            return filterBuilder.GetFilter();
-        }
+        return filterBuilder.GetFilter();
     }
 }

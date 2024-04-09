@@ -1,12 +1,12 @@
 ﻿using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
+namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance;
+
+public sealed class ConsoleOutTests : CsProjAcceptanceTests
 {
-    public sealed class ConsoleOutTests : CsProjAcceptanceTests
+    protected override void AddTestsCs(IsolatedWorkspace workspace)
     {
-        protected override void AddTestsCs(IsolatedWorkspace workspace)
-        {
             workspace.AddFile("Issue774.cs", @"
                 using System;
                 using NUnit.Framework;
@@ -32,22 +32,21 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                 }");
         }
 
-        protected override string Framework => Frameworks.NetCoreApp31;
+    protected override string Framework => Frameworks.NetCoreApp31;
 
-        [Test, Platform("Win")]
-        public void DotNetTest()
-        {
+    [Test, Platform("Win")]
+    public void DotNetTest()
+    {
             var workspace = Build();
             var results = workspace.DotNetTest("", true, true, TestContext.WriteLine);
             Verify(2, 2, results);
         }
 
-        [Test, Platform("Win")]
-        public void VsTest()
-        {
+    [Test, Platform("Win")]
+    public void VsTest()
+    {
             var workspace = Build();
             var results = workspace.VSTest($@"bin\Debug\{Framework}\Test.dll", VsTestFilter.NoFilter);
             Verify(2, 2, results);
         }
-    }
 }

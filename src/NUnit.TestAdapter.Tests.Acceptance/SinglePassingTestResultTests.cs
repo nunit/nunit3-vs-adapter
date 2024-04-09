@@ -1,13 +1,13 @@
 ﻿using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
+namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance;
+
+public sealed class SinglePassingTestResultTests : AcceptanceTests
 {
-    public sealed class SinglePassingTestResultTests : AcceptanceTests
+    private void AddTestsCs(IsolatedWorkspace workspace)
     {
-        private void AddTestsCs(IsolatedWorkspace workspace)
-        {
-            workspace.AddFile("Tests.cs", @"
+        workspace.AddFile("Tests.cs", @"
                 using NUnit.Framework;
 
                 namespace Test
@@ -21,11 +21,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                         }
                     }
                 }");
-        }
+    }
 
-        private void AddTestsVb(IsolatedWorkspace workspace)
-        {
-            workspace.AddFile("Tests.vb", @"
+    private void AddTestsVb(IsolatedWorkspace workspace)
+    {
+        workspace.AddFile("Tests.vb", @"
                 Imports NUnit.Framework
 
                 Namespace Test
@@ -38,11 +38,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
                     End Class
                 End Namespace");
-        }
+    }
 
-        private IsolatedWorkspace CreateSingleTargetWorkspace(string fileName, SingleFrameworkSource source) =>
-            CreateWorkspace()
-                .AddProject(fileName, $@"
+    private IsolatedWorkspace CreateSingleTargetWorkspace(string fileName, SingleFrameworkSource source) =>
+        CreateWorkspace()
+            .AddProject(fileName, $@"
                     <Project Sdk='Microsoft.NET.Sdk'>
 
                       <PropertyGroup>
@@ -58,49 +58,49 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                     </Project>");
 
 
-        [TestCaseSource(typeof(SingleFrameworkSource), nameof(SingleFrameworkSource.AllFrameworks))]
-        [Platform("Win")]
-        public void Single_target_csproj(SingleFrameworkSource source)
-        {
-            var workspace = CreateSingleTargetWorkspace("Test.csproj", source);
-            AddTestsCs(workspace);
-            workspace.MsBuild(restore: true);
-            workspace.VSTest($@"bin\Debug\{source.Framework}\Test.dll", VsTestFilter.NoFilter)
-                .AssertSinglePassingTest();
-        }
+    [TestCaseSource(typeof(SingleFrameworkSource), nameof(SingleFrameworkSource.AllFrameworks))]
+    [Platform("Win")]
+    public void Single_target_csproj(SingleFrameworkSource source)
+    {
+        var workspace = CreateSingleTargetWorkspace("Test.csproj", source);
+        AddTestsCs(workspace);
+        workspace.MsBuild(restore: true);
+        workspace.VSTest($@"bin\Debug\{source.Framework}\Test.dll", VsTestFilter.NoFilter)
+            .AssertSinglePassingTest();
+    }
 
-        [TestCaseSource(typeof(SingleFrameworkSource), nameof(SingleFrameworkSource.AllFrameworksExceptNetFx))]
-        [Platform("Win")]
-        public void Single_target_csproj_dotnet_CLI(SingleFrameworkSource source)
-        {
-            var workspace = CreateSingleTargetWorkspace("Test.csproj", source);
-            AddTestsCs(workspace);
-            workspace.DotNetTest().AssertSinglePassingTest();
-        }
+    [TestCaseSource(typeof(SingleFrameworkSource), nameof(SingleFrameworkSource.AllFrameworksExceptNetFx))]
+    [Platform("Win")]
+    public void Single_target_csproj_dotnet_CLI(SingleFrameworkSource source)
+    {
+        var workspace = CreateSingleTargetWorkspace("Test.csproj", source);
+        AddTestsCs(workspace);
+        workspace.DotNetTest().AssertSinglePassingTest();
+    }
 
-        [TestCaseSource(typeof(SingleFrameworkSource), nameof(SingleFrameworkSource.AllFrameworks))]
-        [Platform("Win")]
-        public void Single_target_vbproj(SingleFrameworkSource source)
-        {
-            var workspace = CreateSingleTargetWorkspace("Test.vbproj", source);
-            AddTestsVb(workspace);
-            workspace.MsBuild(restore: true);
-            workspace.VSTest($@"bin\Debug\{source.Framework}\Test.dll", VsTestFilter.NoFilter)
-                .AssertSinglePassingTest();
-        }
+    [TestCaseSource(typeof(SingleFrameworkSource), nameof(SingleFrameworkSource.AllFrameworks))]
+    [Platform("Win")]
+    public void Single_target_vbproj(SingleFrameworkSource source)
+    {
+        var workspace = CreateSingleTargetWorkspace("Test.vbproj", source);
+        AddTestsVb(workspace);
+        workspace.MsBuild(restore: true);
+        workspace.VSTest($@"bin\Debug\{source.Framework}\Test.dll", VsTestFilter.NoFilter)
+            .AssertSinglePassingTest();
+    }
 
-        [TestCaseSource(typeof(SingleFrameworkSource), nameof(SingleFrameworkSource.AllFrameworksExceptNetFx))]
-        [Platform("Win")]
-        public void Single_target_vbproj_dotnet_CLI(SingleFrameworkSource source)
-        {
-            var workspace = CreateSingleTargetWorkspace("Test.vbproj", source);
-            AddTestsVb(workspace);
-            workspace.DotNetTest().AssertSinglePassingTest();
-        }
+    [TestCaseSource(typeof(SingleFrameworkSource), nameof(SingleFrameworkSource.AllFrameworksExceptNetFx))]
+    [Platform("Win")]
+    public void Single_target_vbproj_dotnet_CLI(SingleFrameworkSource source)
+    {
+        var workspace = CreateSingleTargetWorkspace("Test.vbproj", source);
+        AddTestsVb(workspace);
+        workspace.DotNetTest().AssertSinglePassingTest();
+    }
 
-        private IsolatedWorkspace CreateMultiTargetWorkspace(string fileName, MultiFrameworkSource source) =>
-            CreateWorkspace()
-                .AddProject(fileName, $@"
+    private IsolatedWorkspace CreateMultiTargetWorkspace(string fileName, MultiFrameworkSource source) =>
+        CreateWorkspace()
+            .AddProject(fileName, $@"
                     <Project Sdk='Microsoft.NET.Sdk'>
 
                         <PropertyGroup>
@@ -115,58 +115,58 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
                 </Project>");
 
-        [TestCaseSource(typeof(MultiFrameworkSource), nameof(MultiFrameworkSource.AllFrameworks))]
-        [Platform("Win")]
-        public void Multi_target_csproj(MultiFrameworkSource source)
-        {
-            var workspace = CreateMultiTargetWorkspace("Test.csproj", source);
-            AddTestsCs(workspace);
-            workspace.MsBuild(restore: true);
+    [TestCaseSource(typeof(MultiFrameworkSource), nameof(MultiFrameworkSource.AllFrameworks))]
+    [Platform("Win")]
+    public void Multi_target_csproj(MultiFrameworkSource source)
+    {
+        var workspace = CreateMultiTargetWorkspace("Test.csproj", source);
+        AddTestsCs(workspace);
+        workspace.MsBuild(restore: true);
 
-            foreach (var targetFramework in source.Frameworks)
-            {
-                workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll", VsTestFilter.NoFilter)
-                    .AssertSinglePassingTest();
-            }
+        foreach (var targetFramework in source.Frameworks)
+        {
+            workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll", VsTestFilter.NoFilter)
+                .AssertSinglePassingTest();
         }
+    }
 
-        [TestCaseSource(typeof(MultiFrameworkSource), nameof(MultiFrameworkSource.AllFrameworks))]
-        public void Multi_target_csproj_dotnet_CLI(MultiFrameworkSource source)
+    [TestCaseSource(typeof(MultiFrameworkSource), nameof(MultiFrameworkSource.AllFrameworks))]
+    public void Multi_target_csproj_dotnet_CLI(MultiFrameworkSource source)
+    {
+        var workspace = CreateMultiTargetWorkspace("Test.csproj", source);
+        AddTestsCs(workspace);
+        workspace.DotNetTest().AssertSinglePassingTest();
+    }
+
+    [TestCaseSource(typeof(MultiFrameworkSource), nameof(MultiFrameworkSource.AllFrameworks))]
+    [Platform("Win")]
+    public void Multi_target_vbproj(MultiFrameworkSource source)
+    {
+        var workspace = CreateMultiTargetWorkspace("Test.vbproj", source);
+        AddTestsVb(workspace);
+        workspace.MsBuild(restore: true);
+
+        foreach (var targetFramework in source.Frameworks)
         {
-            var workspace = CreateMultiTargetWorkspace("Test.csproj", source);
-            AddTestsCs(workspace);
-            workspace.DotNetTest().AssertSinglePassingTest();
+            workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll", VsTestFilter.NoFilter)
+                .AssertSinglePassingTest();
         }
+    }
 
-        [TestCaseSource(typeof(MultiFrameworkSource), nameof(MultiFrameworkSource.AllFrameworks))]
-        [Platform("Win")]
-        public void Multi_target_vbproj(MultiFrameworkSource source)
-        {
-            var workspace = CreateMultiTargetWorkspace("Test.vbproj", source);
-            AddTestsVb(workspace);
-            workspace.MsBuild(restore: true);
+    [TestCaseSource(typeof(MultiFrameworkSource), nameof(MultiFrameworkSource.AllFrameworks))]
+    public void Multi_target_vbproj_dotnet_CLI(MultiFrameworkSource source)
+    {
+        var workspace = CreateMultiTargetWorkspace("Test.vbproj", source);
+        AddTestsVb(workspace);
+        workspace.DotNetTest().AssertSinglePassingTest();
+    }
 
-            foreach (var targetFramework in source.Frameworks)
-            {
-                workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll", VsTestFilter.NoFilter)
-                    .AssertSinglePassingTest();
-            }
-        }
-
-        [TestCaseSource(typeof(MultiFrameworkSource), nameof(MultiFrameworkSource.AllFrameworks))]
-        public void Multi_target_vbproj_dotnet_CLI(MultiFrameworkSource source)
-        {
-            var workspace = CreateMultiTargetWorkspace("Test.vbproj", source);
-            AddTestsVb(workspace);
-            workspace.DotNetTest().AssertSinglePassingTest();
-        }
-
-        [Test, Platform("Win")]
-        public void Legacy_csproj_with_PackageReference()
-        {
-            var workspace = CreateWorkspace();
-            var nuvers = NuGetPackageVersion;
-            workspace.AddProject("Test.csproj", $@"
+    [Test, Platform("Win")]
+    public void Legacy_csproj_with_PackageReference()
+    {
+        var workspace = CreateWorkspace();
+        var nuvers = NuGetPackageVersion;
+        workspace.AddProject("Test.csproj", $@"
                     <?xml version='1.0' encoding='utf-8'?>
                     <Project ToolsVersion='15.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                       <Import Project='$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props' Condition=""Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"" />
@@ -224,19 +224,19 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                       <Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets' />
                     </Project>");
 
-            AddTestsCs(workspace);
+        AddTestsCs(workspace);
 
-            workspace.MsBuild(restore: true);
+        workspace.MsBuild(restore: true);
 
-            var result = workspace.VSTest(@"bin\Debug\Test.dll", VsTestFilter.NoFilter);
-            result.AssertSinglePassingTest();
-        }
+        var result = workspace.VSTest(@"bin\Debug\Test.dll", VsTestFilter.NoFilter);
+        result.AssertSinglePassingTest();
+    }
 
-        [Test, Platform("Win")]
-        public void Legacy_vbproj_with_PackageReference()
-        {
-            var workspace = CreateWorkspace()
-                .AddProject("Test.vbproj", $@"
+    [Test, Platform("Win")]
+    public void Legacy_vbproj_with_PackageReference()
+    {
+        var workspace = CreateWorkspace()
+            .AddProject("Test.vbproj", $@"
                     <?xml version='1.0' encoding='utf-8'?>
                     <Project ToolsVersion='15.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                       <Import Project='$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props' Condition=""Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"" />
@@ -317,17 +317,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                       <Import Project='$(MSBuildToolsPath)\Microsoft.VisualBasic.targets' />
                     </Project>");
 
-            AddTestsVb(workspace);
+        AddTestsVb(workspace);
 
-            workspace.MsBuild(restore: true);
+        workspace.MsBuild(restore: true);
 
-            workspace.VSTest(@"bin\Debug\Test.dll", VsTestFilter.NoFilter)
-                .AssertSinglePassingTest();
-        }
+        workspace.VSTest(@"bin\Debug\Test.dll", VsTestFilter.NoFilter)
+            .AssertSinglePassingTest();
+    }
 
-        private static void AddPackagesConfig(IsolatedWorkspace workspace)
-        {
-            workspace.AddFile("packages.config", $@"
+    private static void AddPackagesConfig(IsolatedWorkspace workspace)
+    {
+        workspace.AddFile("packages.config", $@"
                 <?xml version='1.0' encoding='utf-8'?>
                 <packages>
                     <package id='Microsoft.CodeCoverage' version='15.9.0' targetFramework='net462' />
@@ -335,13 +335,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                     <package id='NUnit' version='3.11.0' targetFramework='net462' />
                     <package id='NUnit3TestAdapter' version='{NuGetPackageVersion}' targetFramework='net462' />
                 </packages>");
-        }
+    }
 
-        [Test, Platform("Win")]
-        public void Legacy_csproj_with_packages_config()
-        {
-            var workspace = CreateWorkspace()
-                .AddProject("Test.csproj", $@"
+    [Test, Platform("Win")]
+    public void Legacy_csproj_with_packages_config()
+    {
+        var workspace = CreateWorkspace()
+            .AddProject("Test.csproj", $@"
                     <?xml version='1.0' encoding='utf-8'?>
                     <Project ToolsVersion='15.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                       <Import Project='packages\NUnit3TestAdapter.{NuGetPackageVersion}\build\{LowestNetfxTarget}\NUnit3TestAdapter.props' Condition=""Exists('packages\NUnit3TestAdapter.{NuGetPackageVersion}\build\{LowestNetfxTarget}\NUnit3TestAdapter.props')"" />
@@ -416,22 +416,22 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                       <Import Project='packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.targets' Condition=""Exists('packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.targets')"" />
                     </Project>");
 
-            AddPackagesConfig(workspace);
-            AddTestsCs(workspace);
+        AddPackagesConfig(workspace);
+        AddTestsCs(workspace);
 
-            workspace.NuGetRestore(packagesDirectory: "packages");
+        workspace.NuGetRestore(packagesDirectory: "packages");
 
-            workspace.MsBuild();
+        workspace.MsBuild();
 
-            workspace.VSTest(@"bin\Debug\Test.dll", VsTestFilter.NoFilter)
-                .AssertSinglePassingTest();
-        }
+        workspace.VSTest(@"bin\Debug\Test.dll", VsTestFilter.NoFilter)
+            .AssertSinglePassingTest();
+    }
 
-        [Test, Platform("Win")]
-        public void Legacy_vbproj_with_packages_config()
-        {
-            var workspace = CreateWorkspace()
-                .AddProject("Test.vbproj", $@"
+    [Test, Platform("Win")]
+    public void Legacy_vbproj_with_packages_config()
+    {
+        var workspace = CreateWorkspace()
+            .AddProject("Test.vbproj", $@"
                     <?xml version='1.0' encoding='utf-8'?>
                     <Project ToolsVersion='15.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                       <Import Project='packages\NUnit3TestAdapter.{NuGetPackageVersion}\build\{LowestNetfxTarget}\NUnit3TestAdapter.props' Condition=""Exists('packages\NUnit3TestAdapter.{NuGetPackageVersion}\build\{LowestNetfxTarget}\NUnit3TestAdapter.props')"" />
@@ -529,13 +529,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                       <Import Project='packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.targets' Condition=""Exists('packages\Microsoft.NET.Test.Sdk.15.9.0\build\net45\Microsoft.Net.Test.Sdk.targets')"" />
                     </Project>");
 
-            AddPackagesConfig(workspace);
-            AddTestsVb(workspace);
+        AddPackagesConfig(workspace);
+        AddTestsVb(workspace);
 
-            workspace.NuGetRestore(packagesDirectory: "packages");
-            workspace.MsBuild();
-            workspace.VSTest(@"bin\Debug\Test.dll", VsTestFilter.NoFilter)
-                .AssertSinglePassingTest();
-        }
+        workspace.NuGetRestore(packagesDirectory: "packages");
+        workspace.MsBuild();
+        workspace.VSTest(@"bin\Debug\Test.dll", VsTestFilter.NoFilter)
+            .AssertSinglePassingTest();
     }
 }

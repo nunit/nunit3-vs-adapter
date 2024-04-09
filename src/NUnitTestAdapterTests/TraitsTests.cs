@@ -9,13 +9,13 @@ using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 // ReSharper disable StringLiteralTypo
 
-namespace NUnit.VisualStudio.TestAdapter.Tests
+namespace NUnit.VisualStudio.TestAdapter.Tests;
+
+public class TestDataForTraits
 {
-    public class TestDataForTraits
-    {
-        #region TestXml Data
-        const string TestXml =
-   @"<test-suite
+    #region TestXml Data
+    const string TestXml =
+        @"<test-suite
 				id='121'
 				name='FakeTestData'
 				fullname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData'
@@ -36,28 +36,28 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 				</test-case>
 			</test-suite>";
 
-        /// <summary>
-        /// [Category("BaseClass")]
-        /// public class Class1
-        /// {
-        ///    [Category("Base")]
-        ///    [Test]
-        ///    public void nUnitTest()
-        ///    {
-        ///
-        ///    }
-        /// }
-        ///
-        /// [Category("DerivedClass")]
-        /// public class ClassD : Class1
-        /// {
-        ///    [Category("Derived")]
-        ///    [Test]
-        ///    public void dNUnitTest()
-        ///    { }
-        /// }.
-        /// </summary>
-        const string XmlHierarchyOfClasses = @"<test-run id='2' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' testcasecount='5'>
+    /// <summary>
+    /// [Category("BaseClass")]
+    /// public class Class1
+    /// {
+    ///    [Category("Base")]
+    ///    [Test]
+    ///    public void nUnitTest()
+    ///    {
+    ///
+    ///    }
+    /// }
+    ///
+    /// [Category("DerivedClass")]
+    /// public class ClassD : Class1
+    /// {
+    ///    [Category("Derived")]
+    ///    [Test]
+    ///    public void dNUnitTest()
+    ///    { }
+    /// }.
+    /// </summary>
+    const string XmlHierarchyOfClasses = @"<test-run id='2' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' testcasecount='5'>
 	<test-suite type='Assembly' id='0-1009' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' runstate='Runnable' testcasecount='5'>
 		<properties>
 			<property name='_PID' value='6164' />
@@ -94,28 +94,28 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 	</test-suite>
 </test-run>";
 
-        /// <summary>
-        /// [Category("NS1")]
-        /// public class NestedClasses
-        /// {
-        ///    [Category("NS11")]
-        ///    [Test]
-        ///    public void NC11()
-        ///    {
-        ///    }
-        ///
-        ///    [Category("NS2")]
-        ///    public class NestedClass2
-        ///    {
-        ///        [Category("NS21")]
-        ///        [Test]
-        ///        public void NC21()
-        ///        {
-        ///        }
-        ///    }
-        /// }.
-        /// </summary>
-        const string XmlNestedClasses = @"<test-run id='2' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' testcasecount='5'>
+    /// <summary>
+    /// [Category("NS1")]
+    /// public class NestedClasses
+    /// {
+    ///    [Category("NS11")]
+    ///    [Test]
+    ///    public void NC11()
+    ///    {
+    ///    }
+    ///
+    ///    [Category("NS2")]
+    ///    public class NestedClass2
+    ///    {
+    ///        [Category("NS21")]
+    ///        [Test]
+    ///        public void NC21()
+    ///        {
+    ///        }
+    ///    }
+    /// }.
+    /// </summary>
+    const string XmlNestedClasses = @"<test-run id='2' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' testcasecount='5'>
 	<test-suite type='Assembly' id='0-1009' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' runstate='Runnable' testcasecount='5'>
 		<properties>
 			<property name='_PID' value='6164' />
@@ -146,21 +146,21 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 	</test-suite>
 </test-run>";
 
-        /// <summary>
-        /// [Category("ClassLevel")]
-        /// public class ManyTests
-        /// {
-        ///    [TestCase(1), Category("TestCase level")]
-        ///   [TestCase(2)]
-        ///    [Category("MethodLevel")]
-        ///    public void ThatWeExist(int n)
-        ///    {
-        ///        Assert.IsTrue(true);
-        ///    }
-        /// }.
-        /// </summary>
-        const string TestXmlParameterizedData =
-            @"<test-suite type='Assembly' id='4-1004' name='ClassLibrary11.dll' fullname='C:\Users\Terje\documents\visual studio 2017\Projects\ClassLibrary11\ClassLibrary11\bin\Debug\ClassLibrary11.dll' runstate='Runnable' testcasecount='2'>
+    /// <summary>
+    /// [Category("ClassLevel")]
+    /// public class ManyTests
+    /// {
+    ///    [TestCase(1), Category("TestCase level")]
+    ///   [TestCase(2)]
+    ///    [Category("MethodLevel")]
+    ///    public void ThatWeExist(int n)
+    ///    {
+    ///        Assert.IsTrue(true);
+    ///    }
+    /// }.
+    /// </summary>
+    const string TestXmlParameterizedData =
+        @"<test-suite type='Assembly' id='4-1004' name='ClassLibrary11.dll' fullname='C:\Users\Terje\documents\visual studio 2017\Projects\ClassLibrary11\ClassLibrary11\bin\Debug\ClassLibrary11.dll' runstate='Runnable' testcasecount='2'>
 	<properties>
 		<property name='_PID' value='10904' />
 		<property name='_APPDOMAIN' value='domain-aa3de7f5-ClassLibrary11.dll' />
@@ -182,20 +182,20 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 	</test-suite>
 </test-suite>";
 
-        /// <summary>
-        /// [Category("ClassLevel")]
-        /// public class StandardClass
-        /// {
-        ///   [Category("MethodLevel")]
-        ///   [Test]
-        ///   public void ThatWeExist()
-        ///   {
-        ///       Assert.IsTrue(true);
-        ///   }
-        /// }.
-        /// </summary>
-        private const string TestXmlStandardClass =
-            @"<test-suite type='Assembly' id='5-1002' name='ClassLibrary11.dll' fullname='C:\Users\Terje\documents\visual studio 2017\Projects\ClassLibrary11\ClassLibrary11\bin\Debug\ClassLibrary11.dll' runstate='Runnable' testcasecount='1'>
+    /// <summary>
+    /// [Category("ClassLevel")]
+    /// public class StandardClass
+    /// {
+    ///   [Category("MethodLevel")]
+    ///   [Test]
+    ///   public void ThatWeExist()
+    ///   {
+    ///       Assert.IsTrue(true);
+    ///   }
+    /// }.
+    /// </summary>
+    private const string TestXmlStandardClass =
+        @"<test-suite type='Assembly' id='5-1002' name='ClassLibrary11.dll' fullname='C:\Users\Terje\documents\visual studio 2017\Projects\ClassLibrary11\ClassLibrary11\bin\Debug\ClassLibrary11.dll' runstate='Runnable' testcasecount='1'>
 	<properties>
 		<property name='_PID' value='10904' />
 		<property name='_APPDOMAIN' value='domain-aa3de7f5-ClassLibrary11.dll' />
@@ -218,19 +218,19 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
 
 
-        /// <summary>
-        ///  [TestCase(1, 2, ExpectedResult = 3, Category="Single")]
-        ///  [TestCase(4, 5, ExpectedResult = 9)]
-        ///  [TestCase(27, 30, ExpectedResult = 57)]
-        ///  public int SumTests(int a, int b)
-        ///  {
-        ///    var sut = new Calculator();
-        ///
-        ///    return sut.Sum(a, b);
-        /// }.
-        /// </summary>
-        private const string TestCaseWithCategory =
-            @"<test-suite type='Assembly' id='3-1005' name='ClassLibrary11.dll' fullname='C:\Users\Terje\documents\visual studio 2017\Projects\ClassLibrary11\ClassLibrary11\bin\Debug\ClassLibrary11.dll' runstate='Runnable' testcasecount='3'>
+    /// <summary>
+    ///  [TestCase(1, 2, ExpectedResult = 3, Category="Single")]
+    ///  [TestCase(4, 5, ExpectedResult = 9)]
+    ///  [TestCase(27, 30, ExpectedResult = 57)]
+    ///  public int SumTests(int a, int b)
+    ///  {
+    ///    var sut = new Calculator();
+    ///
+    ///    return sut.Sum(a, b);
+    /// }.
+    /// </summary>
+    private const string TestCaseWithCategory =
+        @"<test-suite type='Assembly' id='3-1005' name='ClassLibrary11.dll' fullname='C:\Users\Terje\documents\visual studio 2017\Projects\ClassLibrary11\ClassLibrary11\bin\Debug\ClassLibrary11.dll' runstate='Runnable' testcasecount='3'>
    <properties>
 	  <property name='_PID' value='23304' />
 	  <property name='_APPDOMAIN' value='domain-aa3de7f5-ClassLibrary11.dll' />
@@ -250,28 +250,28 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
    </test-suite>
 </test-suite>";
 
-        // [Category("BaseClass")]
-        // public class TestBase
-        // {
-        // [Category("BaseMethod")]
-        // [Test]
-        // public void TestItBase()
-        // {
-        // Assert.That(true);
-        // }
-        // }
-        // [Category("DerivedClass")]
-        // public class Derived : TestBase
-        // {
-        // [Category("DerivedMethod")]
-        // [Test]
-        // public void TestItDerived()
-        // {
-        // Assert.That(true);
-        // }
-        // }
-        private const string TestCaseWithInheritedTestsInSameAssembly =
-            @"<test-suite type='Assembly' id='0-1005' name='ClassLibrary11.dll' fullname='C:\Users\Terje\documents\visual studio 2017\Projects\ClassLibrary11\ClassLibrary11\bin\Debug\ClassLibrary11.dll' runstate='Runnable' testcasecount='3'>
+    // [Category("BaseClass")]
+    // public class TestBase
+    // {
+    // [Category("BaseMethod")]
+    // [Test]
+    // public void TestItBase()
+    // {
+    // Assert.That(true);
+    // }
+    // }
+    // [Category("DerivedClass")]
+    // public class Derived : TestBase
+    // {
+    // [Category("DerivedMethod")]
+    // [Test]
+    // public void TestItDerived()
+    // {
+    // Assert.That(true);
+    // }
+    // }
+    private const string TestCaseWithInheritedTestsInSameAssembly =
+        @"<test-suite type='Assembly' id='0-1005' name='ClassLibrary11.dll' fullname='C:\Users\Terje\documents\visual studio 2017\Projects\ClassLibrary11\ClassLibrary11\bin\Debug\ClassLibrary11.dll' runstate='Runnable' testcasecount='3'>
 	  <properties>
 		 <property name='_PID' value='27456' />
 		 <property name='_APPDOMAIN' value='domain-aa3de7f5-ClassLibrary11.dll' />
@@ -306,28 +306,28 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 	  </test-suite>
    </test-suite>";
 
-        // [Category("BaseClass")]
-        // public abstract class TestBase
-        // {
-        // [Category("BaseMethod")]
-        // [Test]
-        // public void TestItBase()
-        // {
-        // Assert.That(true);
-        // }
-        // }
-        // [Category("DerivedClass")]
-        // public class Derived : TestBase
-        // {
-        // [Category("DerivedMethod")]
-        // [Test]
-        // public void TestItDerived()
-        // {
-        // Assert.That(true);
-        // }
-        // }
-        private const string TestCaseWithAbstractInheritedTestsInSameAssembly =
-            @"<test-suite type='Assembly' id='0-1003' name='ClassLibrary11.dll' fullname='C:\Users\Terje\documents\visual studio 2017\Projects\ClassLibrary11\ClassLibrary11\bin\Debug\ClassLibrary11.dll' runstate='Runnable' testcasecount='2'>
+    // [Category("BaseClass")]
+    // public abstract class TestBase
+    // {
+    // [Category("BaseMethod")]
+    // [Test]
+    // public void TestItBase()
+    // {
+    // Assert.That(true);
+    // }
+    // }
+    // [Category("DerivedClass")]
+    // public class Derived : TestBase
+    // {
+    // [Category("DerivedMethod")]
+    // [Test]
+    // public void TestItDerived()
+    // {
+    // Assert.That(true);
+    // }
+    // }
+    private const string TestCaseWithAbstractInheritedTestsInSameAssembly =
+        @"<test-suite type='Assembly' id='0-1003' name='ClassLibrary11.dll' fullname='C:\Users\Terje\documents\visual studio 2017\Projects\ClassLibrary11\ClassLibrary11\bin\Debug\ClassLibrary11.dll' runstate='Runnable' testcasecount='2'>
 	  <properties>
 		 <property name='_PID' value='47684' />
 		 <property name='_APPDOMAIN' value='domain-aa3de7f5-ClassLibrary11.dll' />
@@ -353,242 +353,241 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 </test-suite>";
 
 
-        #endregion
+    #endregion
 
-        public XmlNode XmlForNestedClasses => XmlHelper.CreateXmlNode(XmlNestedClasses);
-        public XmlNode XmlForHierarchyOfClasses => XmlHelper.CreateXmlNode(XmlHierarchyOfClasses);
-        public XmlNode XmlForParameterizedTests => XmlHelper.CreateXmlNode(TestXmlParameterizedData);
-        public XmlNode XmlForStandardTest => XmlHelper.CreateXmlNode(TestXmlStandardClass);
+    public XmlNode XmlForNestedClasses => XmlHelper.CreateXmlNode(XmlNestedClasses);
+    public XmlNode XmlForHierarchyOfClasses => XmlHelper.CreateXmlNode(XmlHierarchyOfClasses);
+    public XmlNode XmlForParameterizedTests => XmlHelper.CreateXmlNode(TestXmlParameterizedData);
+    public XmlNode XmlForStandardTest => XmlHelper.CreateXmlNode(TestXmlStandardClass);
 
-        public XmlNode XmlForTestCaseWithCategory => XmlHelper.CreateXmlNode(TestCaseWithCategory);
+    public XmlNode XmlForTestCaseWithCategory => XmlHelper.CreateXmlNode(TestCaseWithCategory);
 
-        public XmlNode XmlForTestCaseWithInheritedTestsInSameAssembly => XmlHelper.CreateXmlNode(TestCaseWithInheritedTestsInSameAssembly);
-        public XmlNode XmlForTestCaseWithAbstractInheritedTestsInSameAssembly => XmlHelper.CreateXmlNode(TestCaseWithAbstractInheritedTestsInSameAssembly);
+    public XmlNode XmlForTestCaseWithInheritedTestsInSameAssembly => XmlHelper.CreateXmlNode(TestCaseWithInheritedTestsInSameAssembly);
+    public XmlNode XmlForTestCaseWithAbstractInheritedTestsInSameAssembly => XmlHelper.CreateXmlNode(TestCaseWithAbstractInheritedTestsInSameAssembly);
+}
+
+[Category(nameof(TestTraits))]
+public class TestTraits
+{
+    private TestConverterForXml testconverter;
+    private List<TestCase> testcaselist;
+    private TestDataForTraits testDataForTraits;
+
+
+    [SetUp]
+    public void SetUp()
+    {
+        testDataForTraits = new TestDataForTraits();
+        var messagelogger = Substitute.For<IMessageLogger>();
+        var adaptersettings = Substitute.For<IAdapterSettings>();
+        adaptersettings.Verbosity.Returns(5);
+        var testlogger = new TestLogger(messagelogger);
+        testlogger.InitSettings(adaptersettings);
+        var settings = Substitute.For<IAdapterSettings>();
+        settings.CollectSourceInformation.Returns(false);
+        testconverter = new TestConverterForXml(testlogger, "whatever", settings);
+        testcaselist = new List<TestCase>();
     }
 
-    [Category(nameof(TestTraits))]
-    public class TestTraits
+    [TearDown]
+    public void TearDown()
     {
-        private TestConverterForXml testconverter;
-        private List<TestCase> testcaselist;
-        private TestDataForTraits testDataForTraits;
+        testconverter.Dispose();
+    }
+
+    [Test]
+    public void ThatParameterizedTestsHaveTraits()
+    {
+        var xml = testDataForTraits.XmlForParameterizedTests;
+
+        ProcessXml2TestCase(xml);
+
+        Assert.That(testcaselist.Count, Is.EqualTo(2), "Wrong number of testcases found");
+        var testcase1 = testcaselist.FirstOrDefault(o => o.DisplayName == "ThatWeExist(1)");
+        Assert.That(testcase1, Is.Not.Null, "Didn't find the first testcase");
+        Assert.That(testcase1.GetCategories().Count(), Is.EqualTo(3), "Wrong number of categories for first test case");
+
+        var testcase2 = testcaselist.FirstOrDefault(o => o.DisplayName == "ThatWeExist(2)");
+        Assert.That(testcase2, Is.Not.Null, "Didn't find the second testcase");
+        Assert.That(testcase2.GetCategories().Count(), Is.EqualTo(3), "Wrong number of categories for second test case");
+    }
+
+    [Test]
+    public void ThatDerivedClassesHaveTraits()
+    {
+        var xml = testDataForTraits.XmlForHierarchyOfClasses;
+
+        ProcessXml2TestCase(xml);
+
+        Assert.That(testcaselist.Count, Is.EqualTo(3), "Wrong number of testcases found");
+        var testcase1 = testcaselist.FirstOrDefault(o => o.DisplayName == "dNUnitTest");
+        Assert.That(testcase1, Is.Not.Null, "Didn't find the  testcase");
+        VerifyCategoriesOnly(testcase1, 3, "derived");
+    }
+
+    [Test]
+    public void ThatNestedClassesHaveTraits()
+    {
+        var xml = testDataForTraits.XmlForNestedClasses;
+
+        ProcessXml2TestCase(xml);
+
+        Assert.That(testcaselist.Count, Is.EqualTo(2), "Wrong number of testcases found");
+        var testcase1 = testcaselist.FirstOrDefault(o => o.DisplayName == "NC21");
+        Assert.That(testcase1, Is.Not.Null, "Didn't find the  testcase");
+        VerifyCategoriesOnly(testcase1, 2, "nested");
+    }
 
 
-        [SetUp]
-        public void SetUp()
+    [Test]
+    public void ThatInheritedConcreteClassesHaveTraits()
+    {
+        var xml = testDataForTraits.XmlForTestCaseWithInheritedTestsInSameAssembly;
+        ProcessXml2TestCase(xml);
+        Assert.That(testcaselist.Count, Is.EqualTo(3), "Wrong number of testcases found");
+        var uniqueTraits = UniqueCategories();
+        Assert.That(uniqueTraits.Count(), Is.EqualTo(4), "Wrong number of traits");
+        string searchTrait = "BaseClass";
+        var tcWithTrait = TcWithTrait(searchTrait);
+        Assert.That(tcWithTrait.Count(), Is.EqualTo(3), $"Wrong number of testcases found for trait={searchTrait}");
+    }
+
+    private IEnumerable<TestCase> TcWithTrait(string searchTrait)
+    {
+        return testcaselist.Where(o => o.GetCategories().Contains(searchTrait));
+    }
+
+    private IEnumerable<string> UniqueCategories()
+    {
+        var traits = new List<string>();
+        foreach (var tc in testcaselist)
         {
-            testDataForTraits = new TestDataForTraits();
-            var messagelogger = Substitute.For<IMessageLogger>();
-            var adaptersettings = Substitute.For<IAdapterSettings>();
-            adaptersettings.Verbosity.Returns(5);
-            var testlogger = new TestLogger(messagelogger);
-            testlogger.InitSettings(adaptersettings);
-            var settings = Substitute.For<IAdapterSettings>();
-            settings.CollectSourceInformation.Returns(false);
-            testconverter = new TestConverterForXml(testlogger, "whatever", settings);
-            testcaselist = new List<TestCase>();
+            traits.AddRange(tc.GetCategories());
         }
+        var uniqueTraits = traits.Distinct();
+        return uniqueTraits;
+    }
 
-        [TearDown]
-        public void TearDown()
+
+    [Test]
+    public void ThatInheritedAbstractClassesHaveTraits()
+    {
+        var xml = testDataForTraits.XmlForTestCaseWithAbstractInheritedTestsInSameAssembly;
+        ProcessXml2TestCase(xml);
+        Assert.That(testcaselist.Count, Is.EqualTo(2), "Wrong number of testcases found");
+        var uniqueTraits = UniqueCategories();
+        Assert.That(uniqueTraits.Count(), Is.EqualTo(4), "Wrong number of traits");
+        string searchTrait = "BaseClass";
+        var tcWithTrait = TcWithTrait(searchTrait);
+        Assert.That(tcWithTrait.Count(), Is.EqualTo(2), $"Wrong number of testcases found for trait={searchTrait}");
+    }
+
+
+    private void ProcessXml2TestCase(XmlNode xml)
+    {
+        foreach (XmlNode node in xml.SelectNodes("//test-case"))
         {
-            testconverter.Dispose();
+            var testcase = testconverter.ConvertTestCase(new NUnitEventTestCase(node));
+            testcaselist.Add(testcase);
         }
+    }
 
-        [Test]
-        public void ThatParameterizedTestsHaveTraits()
+
+    [Test]
+    public void ThatStandardClassHasTraits()
+    {
+        var xml = testDataForTraits.XmlForStandardTest;
+
+        ProcessXml2TestCase(xml);
+
+        Assert.That(testcaselist.Count, Is.EqualTo(1), "Wrong number of testcases found");
+        var testcase1 = testcaselist.FirstOrDefault(o => o.DisplayName == "ThatWeExist");
+        Assert.That(testcase1, Is.Not.Null, "Didn't find the  testcase");
+
+        VerifyCategoriesOnly(testcase1, 2, "first");
+    }
+
+    [Test]
+    public void ThatTestCaseHasTraits()
+    {
+        var xml = testDataForTraits.XmlForTestCaseWithCategory;
+
+        ProcessXml2TestCase(xml);
+
+        Assert.That(testcaselist.Count, Is.EqualTo(3), "Wrong number of testcases found");
+        var testcasesWithCategories = testcaselist.Where(o => o.GetCategories()?.FirstOrDefault() != null).ToList();
+        Assert.That(testcasesWithCategories, Is.Not.Null, "Didn't find the  testcases");
+        Assert.That(testcasesWithCategories.Count, Is.EqualTo(1), "Wrong number of testcases with categories, should be only 1");
+        var tc = testcasesWithCategories.FirstOrDefault();
+        VerifyCategoriesOnly(tc, 1, "simple");
+        Assert.That(tc.GetCategories().First(), Is.EqualTo("Single"));
+    }
+
+
+    private void VerifyCategoriesOnly(TestCase testcase, int expectedCategories, string forTest)
+    {
+        var categories = testcase.GetCategories();
+        Assert.Multiple(() =>
         {
-            var xml = testDataForTraits.XmlForParameterizedTests;
+            Assert.That(categories.Count(), Is.EqualTo(expectedCategories), $"Wrong number of categories for {forTest} testcase");
+            Assert.That(testcase.Traits.Any(), Is.False, "There should be no traits");
+        });
+    }
 
-            ProcessXml2TestCase(xml);
+    private static IReadOnlyList<TestCase> GetTestCases(string xml)
+    {
+        var settings = Substitute.For<IAdapterSettings>();
+        settings.CollectSourceInformation.Returns(false);
+        using var converter = new TestConverterForXml(
+            new TestLogger(new MessageLoggerStub()),
+            "unused",
+            settings);
+        return converter.ConvertTestCases(xml);
+    }
 
-            Assert.That(testcaselist.Count, Is.EqualTo(2), "Wrong number of testcases found");
-            var testcase1 = testcaselist.FirstOrDefault(o => o.DisplayName == "ThatWeExist(1)");
-            Assert.That(testcase1, Is.Not.Null, "Didn't find the first testcase");
-            Assert.That(testcase1.GetCategories().Count(), Is.EqualTo(3), "Wrong number of categories for first test case");
-
-            var testcase2 = testcaselist.FirstOrDefault(o => o.DisplayName == "ThatWeExist(2)");
-            Assert.That(testcase2, Is.Not.Null, "Didn't find the second testcase");
-            Assert.That(testcase2.GetCategories().Count(), Is.EqualTo(3), "Wrong number of categories for second test case");
-        }
-
-        [Test]
-        public void ThatDerivedClassesHaveTraits()
-        {
-            var xml = testDataForTraits.XmlForHierarchyOfClasses;
-
-            ProcessXml2TestCase(xml);
-
-            Assert.That(testcaselist.Count, Is.EqualTo(3), "Wrong number of testcases found");
-            var testcase1 = testcaselist.FirstOrDefault(o => o.DisplayName == "dNUnitTest");
-            Assert.That(testcase1, Is.Not.Null, "Didn't find the  testcase");
-            VerifyCategoriesOnly(testcase1, 3, "derived");
-       }
-
-        [Test]
-        public void ThatNestedClassesHaveTraits()
-        {
-            var xml = testDataForTraits.XmlForNestedClasses;
-
-            ProcessXml2TestCase(xml);
-
-            Assert.That(testcaselist.Count, Is.EqualTo(2), "Wrong number of testcases found");
-            var testcase1 = testcaselist.FirstOrDefault(o => o.DisplayName == "NC21");
-            Assert.That(testcase1, Is.Not.Null, "Didn't find the  testcase");
-            VerifyCategoriesOnly(testcase1, 2, "nested");
-        }
-
-
-        [Test]
-        public void ThatInheritedConcreteClassesHaveTraits()
-        {
-            var xml = testDataForTraits.XmlForTestCaseWithInheritedTestsInSameAssembly;
-            ProcessXml2TestCase(xml);
-            Assert.That(testcaselist.Count, Is.EqualTo(3), "Wrong number of testcases found");
-            var uniqueTraits = UniqueCategories();
-            Assert.That(uniqueTraits.Count(), Is.EqualTo(4), "Wrong number of traits");
-            string searchTrait = "BaseClass";
-            var tcWithTrait = TcWithTrait(searchTrait);
-            Assert.That(tcWithTrait.Count(), Is.EqualTo(3), $"Wrong number of testcases found for trait={searchTrait}");
-        }
-
-        private IEnumerable<TestCase> TcWithTrait(string searchTrait)
-        {
-            return testcaselist.Where(o => o.GetCategories().Contains(searchTrait));
-        }
-
-        private IEnumerable<string> UniqueCategories()
-        {
-            var traits = new List<string>();
-            foreach (var tc in testcaselist)
-            {
-                traits.AddRange(tc.GetCategories());
-            }
-            var uniqueTraits = traits.Distinct();
-            return uniqueTraits;
-        }
-
-
-        [Test]
-        public void ThatInheritedAbstractClassesHaveTraits()
-        {
-            var xml = testDataForTraits.XmlForTestCaseWithAbstractInheritedTestsInSameAssembly;
-            ProcessXml2TestCase(xml);
-            Assert.That(testcaselist.Count, Is.EqualTo(2), "Wrong number of testcases found");
-            var uniqueTraits = UniqueCategories();
-            Assert.That(uniqueTraits.Count(), Is.EqualTo(4), "Wrong number of traits");
-            string searchTrait = "BaseClass";
-            var tcWithTrait = TcWithTrait(searchTrait);
-            Assert.That(tcWithTrait.Count(), Is.EqualTo(2), $"Wrong number of testcases found for trait={searchTrait}");
-        }
-
-
-        private void ProcessXml2TestCase(XmlNode xml)
-        {
-            foreach (XmlNode node in xml.SelectNodes("//test-case"))
-            {
-                var testcase = testconverter.ConvertTestCase(new NUnitEventTestCase(node));
-                testcaselist.Add(testcase);
-            }
-        }
-
-
-        [Test]
-        public void ThatStandardClassHasTraits()
-        {
-            var xml = testDataForTraits.XmlForStandardTest;
-
-            ProcessXml2TestCase(xml);
-
-            Assert.That(testcaselist.Count, Is.EqualTo(1), "Wrong number of testcases found");
-            var testcase1 = testcaselist.FirstOrDefault(o => o.DisplayName == "ThatWeExist");
-            Assert.That(testcase1, Is.Not.Null, "Didn't find the  testcase");
-
-            VerifyCategoriesOnly(testcase1, 2, "first");
-        }
-
-        [Test]
-        public void ThatTestCaseHasTraits()
-        {
-            var xml = testDataForTraits.XmlForTestCaseWithCategory;
-
-            ProcessXml2TestCase(xml);
-
-            Assert.That(testcaselist.Count, Is.EqualTo(3), "Wrong number of testcases found");
-            var testcasesWithCategories = testcaselist.Where(o => o.GetCategories()?.FirstOrDefault() != null).ToList();
-            Assert.That(testcasesWithCategories, Is.Not.Null, "Didn't find the  testcases");
-            Assert.That(testcasesWithCategories.Count, Is.EqualTo(1), "Wrong number of testcases with categories, should be only 1");
-            var tc = testcasesWithCategories.FirstOrDefault();
-            VerifyCategoriesOnly(tc, 1, "simple");
-            Assert.That(tc.GetCategories().First(), Is.EqualTo("Single"));
-        }
-
-
-        private void VerifyCategoriesOnly(TestCase testcase, int expectedCategories, string forTest)
-        {
-            var categories = testcase.GetCategories();
-            Assert.Multiple(() =>
-            {
-                Assert.That(categories.Count(), Is.EqualTo(expectedCategories), $"Wrong number of categories for {forTest} testcase");
-                Assert.That(testcase.Traits.Any(), Is.False, "There should be no traits");
-            });
-        }
-
-        private static IReadOnlyList<TestCase> GetTestCases(string xml)
-        {
-            var settings = Substitute.For<IAdapterSettings>();
-            settings.CollectSourceInformation.Returns(false);
-            using var converter = new TestConverterForXml(
-                new TestLogger(new MessageLoggerStub()),
-                "unused",
-                settings);
-            return converter.ConvertTestCases(xml);
-        }
-
-        [Test]
-        public static void ThatExplicitTestCaseHasExplicitTrait()
-        {
-            var testCase = GetTestCases(
-                @"<test-suite id='1' name='Fixture' fullname='Fixture' classname='Fixture'>
+    [Test]
+    public static void ThatExplicitTestCaseHasExplicitTrait()
+    {
+        var testCase = GetTestCases(
+            @"<test-suite id='1' name='Fixture' fullname='Fixture' classname='Fixture'>
 					<test-case id='2' name='Test' fullname='Fixture.Test' methodname='Test' classname='Fixture' runstate='Explicit' />
 				</test-suite>").Single();
 
-            Assert.That(testCase.Traits, Has.One.With.Property("Name").EqualTo("Explicit"));
-        }
+        Assert.That(testCase.Traits, Has.One.With.Property("Name").EqualTo("Explicit"));
+    }
 
-        [Test]
-        public static void ThatTestCaseWithExplicitParentHasExplicitTrait()
-        {
-            var testCase = GetTestCases(
-                @"<test-suite id='1' name='Fixture' fullname='Fixture' classname='Fixture' runstate='Explicit'>
+    [Test]
+    public static void ThatTestCaseWithExplicitParentHasExplicitTrait()
+    {
+        var testCase = GetTestCases(
+            @"<test-suite id='1' name='Fixture' fullname='Fixture' classname='Fixture' runstate='Explicit'>
 					<test-case id='2' name='Test' fullname='Fixture.Test' methodname='Test' classname='Fixture'/>
 				</test-suite>").Single();
 
-            Assert.That(testCase.Traits, Has.One.With.Property("Name").EqualTo("Explicit"));
-        }
+        Assert.That(testCase.Traits, Has.One.With.Property("Name").EqualTo("Explicit"));
+    }
 
-        [Test]
-        public static void ThatMultipleChildTestCasesWithExplicitParentHaveExplicitTraits()
-        {
-            var testCases = GetTestCases(
-                @"<test-suite id='1' name='Fixture' fullname='Fixture' classname='Fixture' runstate='Explicit'>
+    [Test]
+    public static void ThatMultipleChildTestCasesWithExplicitParentHaveExplicitTraits()
+    {
+        var testCases = GetTestCases(
+            @"<test-suite id='1' name='Fixture' fullname='Fixture' classname='Fixture' runstate='Explicit'>
 					<test-case id='2' name='Test' fullname='Fixture.Test' methodname='Test' classname='Fixture'/>
 					<test-case id='3' name='Test2' fullname='Fixture.Test2' methodname='Test2' classname='Fixture'/>
 				</test-suite>");
 
-            foreach (var testCase in testCases)
-                Assert.That(testCase.Traits, Has.One.With.Property("Name").EqualTo("Explicit"));
-        }
+        foreach (var testCase in testCases)
+            Assert.That(testCase.Traits, Has.One.With.Property("Name").EqualTo("Explicit"));
+    }
 
-        [Test]
-        public static void ThatExplicitTraitValueIsEmptyString()
-        {
-            var testCase = GetTestCases(
-                @"<test-suite id='1' name='Fixture' fullname='Fixture' classname='Fixture'>
+    [Test]
+    public static void ThatExplicitTraitValueIsEmptyString()
+    {
+        var testCase = GetTestCases(
+            @"<test-suite id='1' name='Fixture' fullname='Fixture' classname='Fixture'>
 					<test-case id='2' name='Test' fullname='Fixture.Test' methodname='Test' classname='Fixture' runstate='Explicit' />
 				</test-suite>").Single();
 
-            Assert.That(testCase.Traits, Has.One.With.Property("Name").EqualTo("Explicit").And.Property("Value").SameAs(string.Empty));
-        }
+        Assert.That(testCase.Traits, Has.One.With.Property("Name").EqualTo("Explicit").And.Property("Value").SameAs(string.Empty));
     }
 }

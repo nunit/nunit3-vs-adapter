@@ -30,27 +30,26 @@ using NSubstitute;
 
 using NUnit.Framework;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests
-{
-    [TestFixture]
-    public class NUnit3TestDiscovererTests
-    {
-        [Test]
-        public void VerifyNUnit3TestDiscovererHasCategoryAttribute()
-        {
-            var attribute = typeof(NUnit3TestDiscoverer).GetTypeInfo().GetCustomAttribute(typeof(System.ComponentModel.CategoryAttribute));
-            Assert.That(attribute, Is.Not.Null);
-            Assert.That((attribute as System.ComponentModel.CategoryAttribute)?.Category, Is.EqualTo("managed"));
-        }
+namespace NUnit.VisualStudio.TestAdapter.Tests;
 
-        [Test]
-        public void ThatDiscovererNUnitEngineAdapterIsInitialized()
-        {
-            var sut = new NUnit3TestDiscoverer();
-            Assert.That(sut.NUnitEngineAdapter, Is.Not.Null);
-            var dc = Substitute.For<IDiscoveryContext>();
-            sut.DiscoverTests(new List<string>(), dc, null, null);
-            Assert.That(sut.NUnitEngineAdapter, Is.Not.Null);
-        }
+[TestFixture]
+public class NUnit3TestDiscovererTests
+{
+    [Test]
+    public void VerifyNUnit3TestDiscovererHasCategoryAttribute()
+    {
+        var attribute = typeof(NUnit3TestDiscoverer).GetTypeInfo().GetCustomAttribute(typeof(System.ComponentModel.CategoryAttribute));
+        Assert.That(attribute, Is.Not.Null);
+        Assert.That((attribute as System.ComponentModel.CategoryAttribute)?.Category, Is.EqualTo("managed"));
+    }
+
+    [Test]
+    public void ThatDiscovererNUnitEngineAdapterIsInitialized()
+    {
+        var sut = new NUnit3TestDiscoverer();
+        Assert.That(sut.NUnitEngineAdapter, Is.Not.Null);
+        var dc = Substitute.For<IDiscoveryContext>();
+        sut.DiscoverTests(new List<string>(), dc, null, null);
+        Assert.That(sut.NUnitEngineAdapter, Is.Not.Null);
     }
 }

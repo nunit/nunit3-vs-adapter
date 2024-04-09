@@ -21,22 +21,21 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-namespace NUnit.VisualStudio.TestAdapter
+namespace NUnit.VisualStudio.TestAdapter;
+
+public class NavigationData
 {
-    public class NavigationData
+    public static readonly NavigationData Invalid = new (null, 0);
+
+    public NavigationData(string filePath, int lineNumber)
     {
-        public static readonly NavigationData Invalid = new (null, 0);
-
-        public NavigationData(string filePath, int lineNumber)
-        {
-            FilePath = filePath;
-            LineNumber = lineNumber;
-        }
-
-        public string FilePath { get; }
-
-        public int LineNumber { get; }
-
-        public bool IsValid => !string.IsNullOrEmpty(FilePath);
+        FilePath = filePath;
+        LineNumber = lineNumber;
     }
+
+    public string FilePath { get; }
+
+    public int LineNumber { get; }
+
+    public bool IsValid => !string.IsNullOrEmpty(FilePath);
 }
