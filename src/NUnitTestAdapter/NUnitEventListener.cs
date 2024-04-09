@@ -31,7 +31,6 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 using NUnit.Engine;
-using NUnit.VisualStudio.TestAdapter;
 using NUnit.VisualStudio.TestAdapter.Dump;
 using NUnit.VisualStudio.TestAdapter.Internal;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
@@ -49,10 +48,10 @@ namespace NUnit.VisualStudio.TestAdapter
         ITestEventListener, IDisposable // Public for testing
     {
         private static readonly ICollection<INUnitTestEventTestOutput> EmptyNodes = new List<INUnitTestEventTestOutput>();
-        private readonly ITestExecutionRecorder recorder;
-        private readonly ITestConverterCommon testConverter;
-        private readonly IAdapterSettings settings;
-        private readonly Dictionary<string, ICollection<INUnitTestEventTestOutput>> outputNodes = new();
+        private ITestExecutionRecorder Recorder { get; }
+        private ITestConverterCommon TestConverter { get; }
+        private IAdapterSettings Settings { get; }
+        private Dictionary<string, ICollection<INUnitTestEventTestOutput>> OutputNodes { get; } = new();
 
 #if NET462
         public override object InitializeLifetimeService()
@@ -65,15 +64,15 @@ namespace NUnit.VisualStudio.TestAdapter
         }
 #endif
 
-        private readonly INUnit3TestExecutor executor;
+        private INUnit3TestExecutor Executor { get; }
 
         public NUnitEventListener(ITestConverterCommon testConverter, INUnit3TestExecutor executor)
         {
-            this.executor = executor;
+            Executor = executor;
             dumpXml = executor.Dump;
-            settings = executor.Settings;
-            recorder = executor.FrameworkHandle;
-            this.testConverter = testConverter;
+            Settings = executor.Settings;
+            Recorder = executor.FrameworkHandle;
+            TestConverter = testConverter;
         }
 
         #region ITestEventListener
@@ -105,8 +104,8 @@ namespace NUnit.VisualStudio.TestAdapter
             }
             catch (Exception ex)
             {
-                recorder.SendMessage(TestMessageLevel.Warning, $"Error processing {node.Name} event for {node.FullName}");
-                recorder.SendMessage(TestMessageLevel.Warning, ex.ToString());
+                Recorder.SendMessage(TestMessageLevel.Warning, $"Error processing {node.Name} event for {node.FullName}");
+                Recorder.SendMessage(TestMessageLevel.Warning, ex.ToString());
             }
         }
 
@@ -143,51 +142,56 @@ namespace NUnit.VisualStudio.TestAdapter
 
         public void TestStarted(INUnitTestEventStartTest testNode)
         {
-            var ourCase = testConverter.GetCachedTestCase(testNode.Id);
+            var ourCase = TestConverter.GetCachedTestCase(testNode.Id);
 
             // Simply ignore any TestCase not found in the cache
             if (ourCase != null)
-                recorder.RecordStart(ourCase);
+                Recorder.RecordStart(ourCase);
         }
 
+        /// <summary>
+        /// Collects up all text output messages in the current test, and outputs them here.
+        /// Note:  Error and Progress are handled in TestOutput.
+        /// </summary>
+        /// <param name="resultNode"></param>
         public void TestFinished(INUnitTestEventTestCase resultNode)
         {
             var testId = resultNode.Id;
-            if (this.outputNodes.TryGetValue(testId, out var outputNodes))
+            if (OutputNodes.TryGetValue(testId, out var outputNodes))
             {
-                this.outputNodes.Remove(testId);
+                OutputNodes.Remove(testId);
             }
 
-            var result = testConverter.GetVsTestResults(resultNode, outputNodes ?? EmptyNodes);
-            if (settings.ConsoleOut >= 1)
+            var result = TestConverter.GetVsTestResults(resultNode, outputNodes ?? EmptyNodes);
+            if (Settings.ConsoleOut >= 1)
             {
                 if (!result.ConsoleOutput.IsNullOrWhiteSpace() && result.ConsoleOutput != NL)
                 {
                     string msg = result.ConsoleOutput;
-                    if (settings.UseTestNameInConsoleOutput)
+                    if (Settings.UseTestNameInConsoleOutput)
                         msg = $"{resultNode.Name}: {msg}";
-                    var messageLevel = settings.ConsoleOut == 1
+                    var messageLevel = Settings.ConsoleOut == 1
                         ? TestMessageLevel.Informational
                         : TestMessageLevel.Warning;
-                    recorder.SendMessage(messageLevel, msg);
+                    Recorder.SendMessage(messageLevel, msg);
                 }
                 if (!resultNode.ReasonMessage.IsNullOrWhiteSpace())
                 {
-                    recorder.SendMessage(TestMessageLevel.Informational, $"{resultNode.Name}: {resultNode.ReasonMessage}");
+                    Recorder.SendMessage(TestMessageLevel.Informational, $"{resultNode.Name}: {resultNode.ReasonMessage}");
                 }
             }
 
             if (result.TestCaseResult != null)
             {
-                recorder.RecordEnd(result.TestCaseResult.TestCase, result.TestCaseResult.Outcome);
+                Recorder.RecordEnd(result.TestCaseResult.TestCase, result.TestCaseResult.Outcome);
                 foreach (var vsResult in result.TestResults)
                 {
-                    recorder.RecordResult(vsResult);
+                    Recorder.RecordResult(vsResult);
                 }
 
-                if (result.TestCaseResult.Outcome == TestOutcome.Failed && settings.StopOnError)
+                if (result.TestCaseResult.Outcome == TestOutcome.Failed && Settings.StopOnError)
                 {
-                    executor.StopRun();
+                    Executor.StopRun();
                 }
             }
         }
@@ -199,15 +203,15 @@ namespace NUnit.VisualStudio.TestAdapter
             var site = resultNode.Site();
             if (site != NUnitTestEvent.SiteType.Setup && site != NUnitTestEvent.SiteType.TearDown)
                 return;
-            recorder.SendMessage(TestMessageLevel.Warning, $"{site} failed for test fixture {resultNode.FullName}");
+            Recorder.SendMessage(TestMessageLevel.Warning, $"{site} failed for test fixture {resultNode.FullName}");
 
             if (resultNode.HasFailure)
             {
                 string msg = resultNode.FailureMessage;
                 var stackNode = resultNode.StackTrace;
-                if (!string.IsNullOrEmpty(stackNode) && settings.IncludeStackTraceForSuites)
+                if (!string.IsNullOrEmpty(stackNode) && Settings.IncludeStackTraceForSuites)
                     msg += $"\nStackTrace: {stackNode}";
-                recorder.SendMessage(TestMessageLevel.Warning, msg);
+                Recorder.SendMessage(TestMessageLevel.Warning, msg);
             }
         }
 
@@ -215,8 +219,14 @@ namespace NUnit.VisualStudio.TestAdapter
         private static readonly int NL_LENGTH = NL.Length;
         private readonly IDumpXml dumpXml;
 
+        /// <summary>
+        /// Error stream and Progress stream are both sent here.
+        /// </summary>
+        /// <param name="outputNodeEvent"></param>
         public void TestOutput(INUnitTestEventTestOutput outputNodeEvent)
         {
+            if (Settings.ConsoleOut == 0)
+                return;
             string text = outputNodeEvent.Content;
 
             // Remove final newline since logger will add one
@@ -231,10 +241,10 @@ namespace NUnit.VisualStudio.TestAdapter
             string testId = outputNodeEvent.TestId;
             if (!string.IsNullOrEmpty(testId))
             {
-                if (!this.outputNodes.TryGetValue(testId, out var outputNodes))
+                if (!OutputNodes.TryGetValue(testId, out var outputNodes))
                 {
                     outputNodes = new List<INUnitTestEventTestOutput>();
-                    this.outputNodes.Add(testId, outputNodes);
+                    OutputNodes.Add(testId, outputNodes);
                 }
 
                 outputNodes.Add(outputNodeEvent);
@@ -244,7 +254,7 @@ namespace NUnit.VisualStudio.TestAdapter
                 ? TestMessageLevel.Warning
                 : TestMessageLevel.Informational;
 
-            recorder.SendMessage(testMessageLevel, text);
+            Recorder.SendMessage(testMessageLevel, text);
         }
     }
 }
