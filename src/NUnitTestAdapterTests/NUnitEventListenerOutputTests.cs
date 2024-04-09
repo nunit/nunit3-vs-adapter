@@ -49,6 +49,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             recorder = Substitute.For<IFrameworkHandle>();
             converter = Substitute.For<ITestConverterCommon>();
             settings = Substitute.For<IAdapterSettings>();
+            settings.ConsoleOut.Returns(1);
             executor = Substitute.For<INUnit3TestExecutor>();
             executor.Settings.Returns(settings);
             executor.FrameworkHandle.Returns(recorder);
