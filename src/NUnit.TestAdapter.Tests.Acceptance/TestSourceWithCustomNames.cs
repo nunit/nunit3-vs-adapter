@@ -1,13 +1,13 @@
 ﻿using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
+namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance;
+
+public sealed class TestSourceWithCustomNames : AcceptanceTests
 {
-    public sealed class TestSourceWithCustomNames : AcceptanceTests
+    private static void AddTestsCs(IsolatedWorkspace workspace)
     {
-        private static void AddTestsCs(IsolatedWorkspace workspace)
-        {
-            workspace.AddFile("Tests.cs", @"
+        workspace.AddFile("Tests.cs", @"
                 using System;
                 using System.Collections;
                 using System.Collections.Generic;
@@ -79,19 +79,19 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
                     }
                 }");
-        }
+    }
 
-        [Test, Platform("Win")]
-        [TestCaseSource(typeof(SingleFrameworkSource), nameof(SingleFrameworkSource.AllFrameworks))]
-        public static void Single_target_csproj(SingleFrameworkSource source)
-        {
-            var valuetupleItemgroup = source.Framework is "netcoreapp3.1" or "net5.0" ? @"
+    [Test, Platform("Win")]
+    [TestCaseSource(typeof(SingleFrameworkSource), nameof(SingleFrameworkSource.AllFrameworks))]
+    public static void Single_target_csproj(SingleFrameworkSource source)
+    {
+        var valuetupleItemgroup = source.Framework is "netcoreapp3.1" or "net5.0" ? @"
                       <ItemGroup>
                         <Reference Include=""System.ValueTuple"" />
                       </ItemGroup>" : "";
-            TestContext.WriteLine($"Testing {source.Framework}");
-            var workspace = CreateWorkspace()
-                .AddProject("Test.csproj", $@"
+        TestContext.WriteLine($"Testing {source.Framework}");
+        var workspace = CreateWorkspace()
+            .AddProject("Test.csproj", $@"
                     <Project Sdk='Microsoft.NET.Sdk'>
 
                       <PropertyGroup>
@@ -109,27 +109,26 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
 
                     </Project>");
 
-            AddTestsCs(workspace);
+        AddTestsCs(workspace);
 
-            workspace.MsBuild(restore: true);
+        workspace.MsBuild(restore: true);
 
-            var results = workspace.VSTest($@"bin\Debug\{source.Framework}\Test.dll", VsTestFilter.NoFilter);
+        var results = workspace.VSTest($@"bin\Debug\{source.Framework}\Test.dll", VsTestFilter.NoFilter);
 
-            // Total Tests =
-            //              3 from PassingTestStr/TestCaseSourceMethod
-            //              1 from UnitTest_TestCaseWithTuple_TestIsNotExecuted
-            //              1 from TestA/SourceA
-            //              1 from TestB/SourceB
-            //              1 from TestC/SourceC
-            //              2 from EqualsTest/EqualsData
-            //-------------------
-            //              9 Total Tests
+        // Total Tests =
+        //              3 from PassingTestStr/TestCaseSourceMethod
+        //              1 from UnitTest_TestCaseWithTuple_TestIsNotExecuted
+        //              1 from TestA/SourceA
+        //              1 from TestB/SourceB
+        //              1 from TestC/SourceC
+        //              2 from EqualsTest/EqualsData
+        //-------------------
+        //              9 Total Tests
 
 
 
-            Assert.That(results.Counters.Total, Is.EqualTo(9), "Total tests counter did not match expectation");
-            Assert.That(results.Counters.Executed, Is.EqualTo(9), "Executed tests counter did not match expectation");
-            Assert.That(results.Counters.Passed, Is.EqualTo(9), "Passed tests counter did not match expectation");
-        }
+        Assert.That(results.Counters.Total, Is.EqualTo(9), "Total tests counter did not match expectation");
+        Assert.That(results.Counters.Executed, Is.EqualTo(9), "Executed tests counter did not match expectation");
+        Assert.That(results.Counters.Passed, Is.EqualTo(9), "Passed tests counter did not match expectation");
     }
 }

@@ -155,7 +155,10 @@ namespace NUnit.Tests
             { }
 
             [Test]
+            // ReSharper disable once NUnit.MethodWithParametersAndTestAttribute
+#pragma warning disable IDE0060 // Remove unused parameter
             public void NotRunnableTest(int a, int b)
+#pragma warning restore IDE0060 // Remove unused parameter
             {
             }
 

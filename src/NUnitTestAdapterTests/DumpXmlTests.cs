@@ -26,14 +26,14 @@ using NSubstitute;
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Dump;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests
+namespace NUnit.VisualStudio.TestAdapter.Tests;
+
+[Category(nameof(DumpXml))]
+public class DumpXmlTests
 {
-    [Category(nameof(DumpXml))]
-    public class DumpXmlTests
+    [Test]
+    public void ThatWritingClearsBuffer()
     {
-        [Test]
-        public void ThatWritingClearsBuffer()
-        {
             string res = "";
             var file = Substitute.For<IFile>();
             file.WriteAllText(Arg.Any<string>(), Arg.Do<string>(o => res = o));
@@ -49,9 +49,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(res, Does.Not.Contain(string1));
         }
 
-        [Test]
-        public void ThatRandomNameContainsValidCharacters()
-        {
+    [Test]
+    public void ThatRandomNameContainsValidCharacters()
+    {
             var sut = new DumpXml("whatever");
             var res = sut.RandomName();
             Assert.That(res, Does.EndWith(".dump"));
@@ -62,12 +62,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             Assert.That(rg.IsMatch(part1));
         }
 
-        [TestCase(@"C:\MyFolder\Whatever.dll", @"C:\MyFolder\Dump\D_Whatever.dll.dump")]
-        [TestCase(@"C:\MyFolder\Whatever.dll", @"C:\MyFolder\Dump")]
-        [TestCase(@"C:\MyFolder\Whatever.dll", @"C:\MyFolder")]
-        [Platform("Win")]
-        public void ThatPathIsCorrectlyParsedInDiscoveryPhase(string path, string expected)
-        {
+    [TestCase(@"C:\MyFolder\Whatever.dll", @"C:\MyFolder\Dump\D_Whatever.dll.dump")]
+    [TestCase(@"C:\MyFolder\Whatever.dll", @"C:\MyFolder\Dump")]
+    [TestCase(@"C:\MyFolder\Whatever.dll", @"C:\MyFolder")]
+    [Platform("Win")]
+    public void ThatPathIsCorrectlyParsedInDiscoveryPhase(string path, string expected)
+    {
             var file = Substitute.For<IFile>();
             var sut = new DumpXml(path, file);
             sut.AddString("whatever");
@@ -75,12 +75,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             file.Received().WriteAllText(Arg.Is<string>(o => o.StartsWith(expected, StringComparison.OrdinalIgnoreCase)), Arg.Any<string>());
         }
 
-        [TestCase(@"/some/Folder/Whatever.dll", @"/some/Folder/Dump/D_Whatever.dll.dump")]
-        [TestCase(@"/some/Folder/Whatever.dll", @"/some/Folder/Dump")]
-        [TestCase(@"/some/Folder/Whatever.dll", @"/some/Folder")]
-        [Platform("Unix")]
-        public void ThatPathIsCorrectlyParsedInDiscoveryPhaseOnUnix(string path, string expected)
-        {
+    [TestCase(@"/some/Folder/Whatever.dll", @"/some/Folder/Dump/D_Whatever.dll.dump")]
+    [TestCase(@"/some/Folder/Whatever.dll", @"/some/Folder/Dump")]
+    [TestCase(@"/some/Folder/Whatever.dll", @"/some/Folder")]
+    [Platform("Unix")]
+    public void ThatPathIsCorrectlyParsedInDiscoveryPhaseOnUnix(string path, string expected)
+    {
             var file = Substitute.For<IFile>();
             var sut = new DumpXml(path, file);
             sut.AddString("whatever");
@@ -89,9 +89,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         }
 
 
-        [Test]
-        public void ThatEmptyContainsHeaders()
-        {
+    [Test]
+    public void ThatEmptyContainsHeaders()
+    {
             string res = "";
             var file = Substitute.For<IFile>();
             file.WriteAllText(Arg.Any<string>(), Arg.Do<string>(o => res = o));
@@ -101,5 +101,4 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             var sarray = res.Split('\n');
             Assert.That(sarray.Length, Is.GreaterThanOrEqualTo(3));
         }
-    }
 }

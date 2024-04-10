@@ -27,35 +27,34 @@ using System;
 using System.Runtime.Serialization;
 #endif
 
-namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
+namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter;
+
+/// <summary>
+/// TestSelectionParserException is thrown when an error
+/// is found while parsing the selection expression.
+/// </summary>
+#if !NETSTANDARD1_6
+[Serializable]
+#endif
+public class TestFilterParserException : Exception
 {
     /// <summary>
-    /// TestSelectionParserException is thrown when an error
-    /// is found while parsing the selection expression.
+    /// Initializes a new instance of the <see cref="TestFilterParserException"/> class.
+    /// Construct with a message.
     /// </summary>
-#if !NETSTANDARD1_6
-    [Serializable]
-#endif
-    public class TestFilterParserException : Exception
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TestFilterParserException"/> class.
-        /// Construct with a message.
-        /// </summary>
-        public TestFilterParserException(string message) : base(message) { }
+    public TestFilterParserException(string message) : base(message) { }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TestFilterParserException"/> class.
-        /// Construct with a message and inner exception.
-        /// </summary>
-        public TestFilterParserException(string message, Exception innerException) : base(message, innerException) { }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TestFilterParserException"/> class.
+    /// Construct with a message and inner exception.
+    /// </summary>
+    public TestFilterParserException(string message, Exception innerException) : base(message, innerException) { }
 
 #if !NETSTANDARD1_6
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TestFilterParserException"/> class.
-        /// Serialization constructor.
-        /// </summary>
-        public TestFilterParserException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TestFilterParserException"/> class.
+    /// Serialization constructor.
+    /// </summary>
+    public TestFilterParserException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 #endif
-    }
 }

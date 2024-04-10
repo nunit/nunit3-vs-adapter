@@ -24,29 +24,28 @@
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Internal;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests
+namespace NUnit.VisualStudio.TestAdapter.Tests;
+
+public class ExtensionsTests
 {
-    public class ExtensionsTests
+    [TestCase("\t\t\t")]
+    [TestCase("    \t")]
+    [TestCase("  ")]
+    [TestCase("")]
+    [TestCase(null)]
+    [TestCase("\r\n")]
+    public void ThatIsNullOrWhiteSpaceHandlesTabs(string value)
     {
-        [TestCase("\t\t\t")]
-        [TestCase("    \t")]
-        [TestCase("  ")]
-        [TestCase("")]
-        [TestCase(null)]
-        [TestCase("\r\n")]
-        public void ThatIsNullOrWhiteSpaceHandlesTabs(string value)
-        {
             var res = StringExtensions.IsNullOrWhiteSpace(value);
             Assert.That(res);
         }
 
-        [TestCase("\t42")]
-        [TestCase("   42")]
-        [TestCase("42\n\r")]
-        public void ThatIsNullOrWhiteSpaceHandlesNonWhiteSpace(string value)
-        {
+    [TestCase("\t42")]
+    [TestCase("   42")]
+    [TestCase("42\n\r")]
+    public void ThatIsNullOrWhiteSpaceHandlesNonWhiteSpace(string value)
+    {
             var res = StringExtensions.IsNullOrWhiteSpace(value);
             Assert.That(res, Is.False);
         }
-    }
 }

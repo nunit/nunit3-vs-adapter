@@ -27,13 +27,13 @@ using NSubstitute;
 using NUnit.Engine;
 using NUnit.Framework;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
+namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering;
+
+public class NUnitTestFilterBuilderTests
 {
-    public class NUnitTestFilterBuilderTests
+    [Test]
+    public void ThatConvertTfsFilterToNUnitFilterHandlesNoTests()
     {
-        [Test]
-        public void ThatConvertTfsFilterToNUnitFilterHandlesNoTests()
-        {
             var filterService = Substitute.For<ITestFilterService>();
             var settings = Substitute.For<IAdapterSettings>();
             settings.AssemblySelectLimit.Returns(2000);
@@ -44,9 +44,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
             Assert.That(results, Is.EqualTo(NUnitTestFilterBuilder.NoTestsFound));
         }
 
-        [Test]
-        public void ThatWhereFilterIsAdded()
-        {
+    [Test]
+    public void ThatWhereFilterIsAdded()
+    {
             var filterService = Substitute.For<ITestFilterService>();
             var settings = Substitute.For<IAdapterSettings>();
             settings.AssemblySelectLimit.Returns(2000);
@@ -57,5 +57,4 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
             sut.FilterByWhere(where);
             testFilterBuilder.Received().SelectWhere(Arg.Is<string>(x => x == where));
         }
-    }
 }

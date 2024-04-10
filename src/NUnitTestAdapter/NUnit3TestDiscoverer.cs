@@ -21,7 +21,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -29,173 +28,173 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Xml;
+
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
+
 using NUnit.Engine;
 using NUnit.VisualStudio.TestAdapter.Dump;
 using NUnit.VisualStudio.TestAdapter.Internal;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
-namespace NUnit.VisualStudio.TestAdapter
-{
+namespace NUnit.VisualStudio.TestAdapter;
 #if !NET462
-    [FileExtension(".appx")]
+[FileExtension(".appx")]
 #endif
-    [FileExtension(".dll")]
-    [FileExtension(".exe")]
-    [DefaultExecutorUri(NUnit3TestExecutor.ExecutorUri)]
-    [Category("managed")]
-    public sealed class NUnit3TestDiscoverer : NUnitTestAdapter, ITestDiscoverer
+[FileExtension(".dll")]
+[FileExtension(".exe")]
+[DefaultExecutorUri(ExecutorUri)]
+[Category("managed")]
+public sealed class NUnit3TestDiscoverer : NUnitTestAdapter, ITestDiscoverer
+{
+    private DumpXml dumpXml;
+
+    #region ITestDiscoverer Members
+
+    public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger messageLogger, ITestCaseDiscoverySink discoverySink)
     {
-        private DumpXml dumpXml;
+        Initialize(discoveryContext, messageLogger);
+        CheckIfDebug();
+        TestLog.Info($"NUnit Adapter {AdapterVersion}: Test discovery starting");
 
-        #region ITestDiscoverer Members
+        // Ensure any channels registered by other adapters are unregistered
+        CleanUpRegisteredChannels();
 
-        public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger messageLogger, ITestCaseDiscoverySink discoverySink)
+        if (Settings.InProcDataCollectorsAvailable && sources.Count() > 1)
         {
-            Initialize(discoveryContext, messageLogger);
-            CheckIfDebug();
-            TestLog.Info($"NUnit Adapter {AdapterVersion}: Test discovery starting");
+            TestLog.Error("Unexpected to discover tests in multiple assemblies when InProcDataCollectors specified in run configuration.");
+            Unload();
+            return;
+        }
 
-            // Ensure any channels registered by other adapters are unregistered
-            CleanUpRegisteredChannels();
-
-            if (Settings.InProcDataCollectorsAvailable && sources.Count() > 1)
+        foreach (string sourceAssembly in sources)
+        {
+            string sourceAssemblyPath = Path.IsPathRooted(sourceAssembly) ? sourceAssembly : Path.Combine(Directory.GetCurrentDirectory(), sourceAssembly);
+            TestLog.Debug("Processing " + sourceAssembly);
+            if (Settings.DumpXmlTestDiscovery)
             {
-                TestLog.Error("Unexpected to discover tests in multiple assemblies when InProcDataCollectors specified in run configuration.");
-                Unload();
-                return;
+                dumpXml = new DumpXml(sourceAssemblyPath);
             }
 
-            foreach (string sourceAssembly in sources)
+            try
             {
-                string sourceAssemblyPath = Path.IsPathRooted(sourceAssembly) ? sourceAssembly : Path.Combine(Directory.GetCurrentDirectory(), sourceAssembly);
-                TestLog.Debug("Processing " + sourceAssembly);
-                if (Settings.DumpXmlTestDiscovery)
-                {
-                    dumpXml = new DumpXml(sourceAssemblyPath);
-                }
+                var package = CreateTestPackage(sourceAssemblyPath, null);
+                NUnitEngineAdapter.CreateRunner(package);
+                var results = NUnitEngineAdapter.Explore();
+                dumpXml?.AddString(results.AsString());
 
-                try
+                if (results.IsRunnable)
                 {
-                    var package = CreateTestPackage(sourceAssemblyPath, null);
-                    NUnitEngineAdapter.CreateRunner(package);
-                    var results = NUnitEngineAdapter.Explore();
-                    dumpXml?.AddString(results.AsString());
-
-                    if (results.IsRunnable)
+                    int cases;
+                    using (var testConverter = new TestConverterForXml(TestLog, sourceAssemblyPath, Settings))
                     {
-                        int cases;
-                        using (var testConverter = new TestConverterForXml(TestLog, sourceAssemblyPath, Settings))
-                        {
-                            var timing = new TimingLogger(Settings, TestLog);
-                            cases = ProcessTestCases(results, discoverySink, testConverter);
-                            timing.LogTime("Discovery/Processing/Converting:");
-                        }
+                        var timing = new TimingLogger(Settings, TestLog);
+                        cases = ProcessTestCases(results, discoverySink, testConverter);
+                        timing.LogTime("Discovery/Processing/Converting:");
+                    }
 
-                        TestLog.Debug($"Discovered {cases} test cases");
-                        // Only save if seed is not specified in runsettings
-                        // This allows workaround in case there is no valid
-                        // location in which the seed may be saved.
-                        if (cases > 0 && !Settings.RandomSeedSpecified)
-                            Settings.SaveRandomSeed(Path.GetDirectoryName(sourceAssemblyPath));
+                    TestLog.Debug($"Discovered {cases} test cases");
+                    // Only save if seed is not specified in runsettings
+                    // This allows workaround in case there is no valid
+                    // location in which the seed may be saved.
+                    if (cases > 0 && !Settings.RandomSeedSpecified)
+                        Settings.SaveRandomSeed(Path.GetDirectoryName(sourceAssemblyPath));
+                }
+                else
+                {
+                    if (results.HasNoNUnitTests)
+                    {
+                        if (Settings.Verbosity > 0)
+                            TestLog.Info("Assembly contains no NUnit 3.0 tests: " + sourceAssembly);
                     }
                     else
                     {
-                        if (results.HasNoNUnitTests)
-                        {
-                            if (Settings.Verbosity > 0)
-                                TestLog.Info("Assembly contains no NUnit 3.0 tests: " + sourceAssembly);
-                        }
-                        else
-                        {
-                            TestLog.Info("NUnit failed to load " + sourceAssembly);
-                        }
+                        TestLog.Info("NUnit failed to load " + sourceAssembly);
                     }
                 }
-                catch (NUnitEngineException e)
-                {
-                    if (e.InnerException is BadImageFormatException)
-                    {
-                        // we skip the native c++ binaries that we don't support.
-                        TestLog.Warning("Assembly not supported: " + sourceAssembly);
-                    }
-                    else
-                    {
-                        TestLog.Warning("Exception thrown discovering tests in " + sourceAssembly, e);
-                    }
-                }
-                catch (BadImageFormatException)
+            }
+            catch (NUnitEngineException e)
+            {
+                if (e.InnerException is BadImageFormatException)
                 {
                     // we skip the native c++ binaries that we don't support.
                     TestLog.Warning("Assembly not supported: " + sourceAssembly);
                 }
-                catch (FileNotFoundException ex)
+                else
                 {
-                    // Either the NUnit framework was not referenced by the test assembly
-                    // or some other error occurred. Not a problem if not an NUnit assembly.
-                    TestLog.Warning("Dependent Assembly " + ex.FileName + " of " + sourceAssembly + " not found. Can be ignored if not an NUnit project.");
-                }
-                catch (FileLoadException ex)
-                {
-                    // Attempts to load an invalid assembly, or an assembly with missing dependencies
-                    TestLog.Warning("Assembly " + ex.FileName + " loaded through " + sourceAssembly + " failed. Assembly is ignored. Correct deployment of dependencies if this is an error.");
-                }
-                catch (TypeLoadException ex)
-                {
-                    if (ex.TypeName == "NUnit.Framework.Api.FrameworkController")
-                        TestLog.Warning("   Skipping NUnit 2.x test assembly");
-                    else
-                        TestLog.Warning("Exception thrown discovering tests in " + sourceAssembly, ex);
-                }
-                catch (Exception ex)
-                {
-                    TestLog.Warning("Exception thrown discovering tests in " + sourceAssembly, ex);
-                }
-                finally
-                {
-                    dumpXml?.DumpForDiscovery();
-                    NUnitEngineAdapter?.CloseRunner();
+                    TestLog.Warning("Exception thrown discovering tests in " + sourceAssembly, e);
                 }
             }
-
-            TestLog.Info($"NUnit Adapter {AdapterVersion}: Test discovery complete");
-
-            Unload();
-        }
-
-        #endregion
-
-        #region Helper Methods
-
-        private int ProcessTestCases(NUnitResults results, ITestCaseDiscoverySink discoverySink, TestConverterForXml testConverterForXml)
-        {
-            int cases = 0;
-            foreach (XmlNode testNode in results.TestCases())
+            catch (BadImageFormatException)
             {
-                try
-                {
-                    var testCase = testConverterForXml.ConvertTestCase(new NUnitEventTestCase(testNode));
-                    discoverySink.SendTestCase(testCase);
-                    cases += 1;
-                }
-                catch (Exception ex)
-                {
-                    TestLog.Warning("Exception converting " + testNode.GetAttribute("fullname"), ex);
-                }
+                // we skip the native c++ binaries that we don't support.
+                TestLog.Warning("Assembly not supported: " + sourceAssembly);
             }
-
-            return cases;
+            catch (FileNotFoundException ex)
+            {
+                // Either the NUnit framework was not referenced by the test assembly
+                // or some other error occurred. Not a problem if not an NUnit assembly.
+                TestLog.Warning("Dependent Assembly " + ex.FileName + " of " + sourceAssembly + " not found. Can be ignored if not an NUnit project.");
+            }
+            catch (FileLoadException ex)
+            {
+                // Attempts to load an invalid assembly, or an assembly with missing dependencies
+                TestLog.Warning("Assembly " + ex.FileName + " loaded through " + sourceAssembly + " failed. Assembly is ignored. Correct deployment of dependencies if this is an error.");
+            }
+            catch (TypeLoadException ex)
+            {
+                if (ex.TypeName == "NUnit.Framework.Api.FrameworkController")
+                    TestLog.Warning("   Skipping NUnit 2.x test assembly");
+                else
+                    TestLog.Warning("Exception thrown discovering tests in " + sourceAssembly, ex);
+            }
+            catch (Exception ex)
+            {
+                TestLog.Warning("Exception thrown discovering tests in " + sourceAssembly, ex);
+            }
+            finally
+            {
+                dumpXml?.DumpForDiscovery();
+                NUnitEngineAdapter?.CloseRunner();
+            }
         }
 
-        private void CheckIfDebug()
-        {
-            if (!Settings.DebugDiscovery)
-                return;
-            if (!Debugger.IsAttached)
-                Debugger.Launch();
-        }
-        #endregion
+        TestLog.Info($"NUnit Adapter {AdapterVersion}: Test discovery complete");
+
+        Unload();
     }
+
+    #endregion
+
+    #region Helper Methods
+
+    private int ProcessTestCases(NUnitResults results, ITestCaseDiscoverySink discoverySink, TestConverterForXml testConverterForXml)
+    {
+        int cases = 0;
+        foreach (XmlNode testNode in results.TestCases())
+        {
+            try
+            {
+                var testCase = testConverterForXml.ConvertTestCase(new NUnitEventTestCase(testNode));
+                discoverySink.SendTestCase(testCase);
+                cases += 1;
+            }
+            catch (Exception ex)
+            {
+                TestLog.Warning("Exception converting " + testNode.GetAttribute("fullname"), ex);
+            }
+        }
+
+        return cases;
+    }
+
+    private void CheckIfDebug()
+    {
+        if (!Settings.DebugDiscovery)
+            return;
+        if (!Debugger.IsAttached)
+            Debugger.Launch();
+    }
+    #endregion
 }
