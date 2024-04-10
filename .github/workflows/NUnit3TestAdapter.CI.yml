@@ -1,4 +1,5 @@
-name: NUnit3TestAdapter.Cake.CI
+
+name: NUnit3TestAdapter.CI
 
 on: [push, pull_request,workflow_dispatch]
 

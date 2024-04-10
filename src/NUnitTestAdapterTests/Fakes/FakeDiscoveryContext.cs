@@ -25,16 +25,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
-class FakeDiscoveryContext : IDiscoveryContext
+class FakeDiscoveryContext(IRunSettings runSettings) : IDiscoveryContext
 {
-    public FakeDiscoveryContext(IRunSettings runSettings)
-    {
-            RunSettings = runSettings;
-        }
-
-    #region IDiscoveryContextMembers
-
-    public IRunSettings RunSettings { get;  }
-
-    #endregion
+    public IRunSettings RunSettings { get;  } = runSettings;
 }

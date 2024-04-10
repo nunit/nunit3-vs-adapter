@@ -1,0 +1,59 @@
+﻿name: NUnit3TestAdapter.Myget.Publish
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - release
+      - 'v3'
+      - myget
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: pwsh
+jobs:
+  build-windows:
+    name: Windows Build
+    runs-on: windows-latest
+
+    steps:
+    - name: ⤵️ Checkout Source
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: 🛠️ Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          3.1.x
+          5.0.x
+          6.0.x
+          7.0.x
+          8.0.x
+        
+    - name: 🛠️ Install dotnet tools
+      run: dotnet tool restore
+
+    - name: 🔨 Build 
+      run: dotnet tool run dotnet-cake  --configuration=Release
+
+    - name: 📦 Package
+      run: dotnet tool run dotnet-cake --target=Package 
+
+    - name: 💾 Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Package
+        path: package
+
+    - name: Publish nupkg and snupkg to Myget.org
+      run: |
+          foreach($file in (Get-ChildItem package -Recurse -Include *.nupkg)) {
+              dotnet nuget push $file --api-key "${{ secrets.PUBLISHMYGET }}" --source https://www.myget.org/F/nunit/api/v3/index.json --skip-duplicate
+          }
+          foreach($file in (Get-ChildItem "package" -Recurse -Include *.snupkg)) {
+              dotnet nuget push $file --api-key "${{ secrets.PUBLISHMYGET }}" --source https://www.myget.org/F/nunit/api/v3/index.json --skip-duplicate
+          } 
