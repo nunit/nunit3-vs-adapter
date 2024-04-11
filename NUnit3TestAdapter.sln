@@ -52,7 +52,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github", "github", "{062B17
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{7D708804-B2F1-4A31-A9FB-85A0C7433200}"
 	ProjectSection(SolutionItems) = preProject
-		.github\workflows\NUnit3TestAdapter.Cake.CI.yml = .github\workflows\NUnit3TestAdapter.Cake.CI.yml
+		.github\workflows\NUnit3TestAdapter.CI.yml = .github\workflows\NUnit3TestAdapter.CI.yml
+		.github\workflows\NUnit3TestAdapter.Myget.Publish.yml = .github\workflows\NUnit3TestAdapter.Myget.Publish.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "netcoreapp3.1", "netcoreapp3.1", "{2F940513-5B8F-45A5-A188-7C5D03D1B50D}"
