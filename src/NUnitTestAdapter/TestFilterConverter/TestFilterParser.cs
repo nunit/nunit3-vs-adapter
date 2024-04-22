@@ -29,32 +29,32 @@ using System.Text;
 // Missing XML Docs
 #pragma warning disable 1591
 
-namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
+namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter;
+
+public class TestFilterParser
 {
-    public class TestFilterParser
+    private Tokenizer _tokenizer;
+
+    private static readonly Token LPAREN = new(TokenKind.Symbol, "(");
+    private static readonly Token RPAREN = new(TokenKind.Symbol, ")");
+    private static readonly Token AND_OP = new(TokenKind.Symbol, "&");
+    private static readonly Token OR_OP = new(TokenKind.Symbol, "|");
+    private static readonly Token NOT_OP = new(TokenKind.Symbol, "!");
+
+    private static readonly Token EQ_OP = new(TokenKind.Symbol, "=");
+    private static readonly Token NE_OP = new(TokenKind.Symbol, "!=");
+    private static readonly Token CONTAINS_OP = new(TokenKind.Symbol, "~");
+    private static readonly Token NOTCONTAINS_OP = new(TokenKind.Symbol, "!~");
+
+    private static readonly Token[] AND_OPS = { AND_OP };
+    private static readonly Token[] OR_OPS = { OR_OP };
+    private static readonly Token[] EQ_OPS = { EQ_OP };
+    private static readonly Token[] REL_OPS = { EQ_OP, NE_OP, CONTAINS_OP, NOTCONTAINS_OP };
+
+    private static readonly Token EOF = new(TokenKind.Eof);
+
+    public string Parse(string input)
     {
-        private Tokenizer _tokenizer;
-
-        private static readonly Token LPAREN = new(TokenKind.Symbol, "(");
-        private static readonly Token RPAREN = new(TokenKind.Symbol, ")");
-        private static readonly Token AND_OP = new(TokenKind.Symbol, "&");
-        private static readonly Token OR_OP = new(TokenKind.Symbol, "|");
-        private static readonly Token NOT_OP = new(TokenKind.Symbol, "!");
-
-        private static readonly Token EQ_OP = new(TokenKind.Symbol, "=");
-        private static readonly Token NE_OP = new(TokenKind.Symbol, "!=");
-        private static readonly Token CONTAINS_OP = new(TokenKind.Symbol, "~");
-        private static readonly Token NOTCONTAINS_OP = new(TokenKind.Symbol, "!~");
-
-        private static readonly Token[] AND_OPS = { AND_OP };
-        private static readonly Token[] OR_OPS = { OR_OP };
-        private static readonly Token[] EQ_OPS = { EQ_OP };
-        private static readonly Token[] REL_OPS = { EQ_OP, NE_OP, CONTAINS_OP, NOTCONTAINS_OP };
-
-        private static readonly Token EOF = new(TokenKind.Eof);
-
-        public string Parse(string input)
-        {
             _tokenizer = new Tokenizer(input);
 
             if (_tokenizer.LookAhead == EOF)
@@ -67,11 +67,11 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
             return result;
         }
 
-        /// <summary>
-        /// Parse a single term or an or expression, returning the xml.
-        /// </summary>
-        public string ParseFilterExpression()
-        {
+    /// <summary>
+    /// Parse a single term or an or expression, returning the xml.
+    /// </summary>
+    public string ParseFilterExpression()
+    {
             var terms = new List<string> { ParseFilterTerm() };
 
             while (LookingAt(OR_OPS))
@@ -93,11 +93,11 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
             return sb.ToString();
         }
 
-        /// <summary>
-        /// Parse a single element or an and expression and return the xml.
-        /// </summary>
-        public string ParseFilterTerm()
-        {
+    /// <summary>
+    /// Parse a single element or an and expression and return the xml.
+    /// </summary>
+    public string ParseFilterTerm()
+    {
             var elements = new List<string> { ParseFilterCondition() };
 
             while (LookingAt(AND_OPS))
@@ -119,12 +119,12 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
             return sb.ToString();
         }
 
-        /// <summary>
-        /// Parse a single filter element such as a category expression
-        /// and return the xml representation of the filter.
-        /// </summary>
-        public string ParseFilterCondition()
-        {
+    /// <summary>
+    /// Parse a single filter element such as a category expression
+    /// and return the xml representation of the filter.
+    /// </summary>
+    public string ParseFilterCondition()
+    {
             if (LookingAt(LPAREN, NOT_OP))
                 return ParseExpressionInParentheses();
 
@@ -158,28 +158,28 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
             }
         }
 
-        private string UnEscape(string rhs)
-        {
+    private string UnEscape(string rhs)
+    {
             return rhs.Replace(@"\(", "(").Replace(@"\)", ")");
         }
 
-        private static string EmitFullNameFilter(Token op, string value)
-        {
+    private static string EmitFullNameFilter(Token op, string value)
+    {
             return EmitFilter("test", op, value);
         }
 
-        private static string EmitCategoryFilter(Token op, string value)
-        {
+    private static string EmitCategoryFilter(Token op, string value)
+    {
             return EmitFilter("cat", op, value);
         }
 
-        private static string EmitNameFilter(Token op, string value)
-        {
+    private static string EmitNameFilter(Token op, string value)
+    {
             return EmitFilter("name", op, value);
         }
 
-        private static string EmitFilter(string lhs, Token op, string rhs)
-        {
+    private static string EmitFilter(string lhs, Token op, string rhs)
+    {
             rhs = EscapeRhsValue(op, rhs);
 
             if (op == EQ_OP)
@@ -194,8 +194,8 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
             throw new TestFilterParserException($"Invalid operator {op.Text} at position {op.Pos}");
         }
 
-        private static string EmitPropertyFilter(Token op, string name, string value)
-        {
+    private static string EmitPropertyFilter(Token op, string name, string value)
+    {
             value = EscapeRhsValue(op, value);
 
             if (op == EQ_OP)
@@ -210,16 +210,16 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
             throw new TestFilterParserException($"Invalid operator {op.Text} at position {op.Pos}");
         }
 
-        private static string EscapeRhsValue(Token op, string rhs)
-        {
+    private static string EscapeRhsValue(Token op, string rhs)
+    {
             if (op == CONTAINS_OP || op == NOTCONTAINS_OP)
                 rhs = EscapeRegexChars(rhs);
 
             return XmlEscape(rhs);
         }
 
-        private string ParseExpressionInParentheses()
-        {
+    private string ParseExpressionInParentheses()
+    {
             var op = Expect(LPAREN, NOT_OP);
 
             if (op == NOT_OP) Expect(LPAREN);
@@ -234,9 +234,9 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
             return result;
         }
 
-        // Require a token of one or more kinds
-        private Token Expect(params TokenKind[] kinds)
-        {
+    // Require a token of one or more kinds
+    private Token Expect(params TokenKind[] kinds)
+    {
             var token = NextToken();
 
             if (kinds.Any(kind => token.Kind == kind))
@@ -247,9 +247,9 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
             throw InvalidTokenError(token);
         }
 
-        // Require a token from a list of tokens
-        private Token Expect(params Token[] valid)
-        {
+    // Require a token from a list of tokens
+    private Token Expect(params Token[] valid)
+    {
             var token = NextToken();
 
             if (valid.Any(item => token == item))
@@ -260,31 +260,31 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
             throw InvalidTokenError(token);
         }
 
-        private Exception InvalidTokenError(Token token)
-        {
+    private Exception InvalidTokenError(Token token)
+    {
             return new TestFilterParserException(string.Format(
                 $"Unexpected {token.Kind} '{token.Text}' at position {token.Pos} in selection expression."));
         }
 
-        private Token LookAhead => _tokenizer.LookAhead;
+    private Token LookAhead => _tokenizer.LookAhead;
 
-        private bool LookingAt(params Token[] tokens)
-        {
+    private bool LookingAt(params Token[] tokens)
+    {
             return tokens.Any(token => LookAhead == token);
         }
 
-        private Token NextToken()
-        {
+    private Token NextToken()
+    {
             return _tokenizer.NextToken();
         }
 
-        // Since we use a regular expression to implement
-        // the contains operator, we must escape all chars
-        // that have a special meaning in a regex.
-        private const string REGEX_CHARS = @".[]{}()*+?|^$\";
+    // Since we use a regular expression to implement
+    // the contains operator, we must escape all chars
+    // that have a special meaning in a regex.
+    private const string REGEX_CHARS = @".[]{}()*+?|^$\";
 
-        private static string EscapeRegexChars(string input)
-        {
+    private static string EscapeRegexChars(string input)
+    {
             var sb = new StringBuilder();
 
             foreach (var c in input)
@@ -297,10 +297,10 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
             return sb.ToString();
         }
 
-        // Since the NUnit filter is represented in XML
-        // contents of each element must be escaped.
-        private static string XmlEscape(string text)
-        {
+    // Since the NUnit filter is represented in XML
+    // contents of each element must be escaped.
+    private static string XmlEscape(string text)
+    {
             return text
                 .Replace("&", "&amp;")
                 .Replace("\"", "&quot;")
@@ -308,5 +308,4 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter
                 .Replace(">", "&gt;")
                 .Replace("'", "&apos;");
         }
-    }
 }

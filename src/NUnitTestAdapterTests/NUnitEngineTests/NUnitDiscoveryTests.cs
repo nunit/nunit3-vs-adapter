@@ -7,15 +7,15 @@ using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 // ReSharper disable StringLiteralTypo
 
-namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
-{
-    public class NUnitDiscoveryTests
-    {
-        private ITestLogger logger;
-        private IAdapterSettings settings;
+namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests;
 
-        private const string FullDiscoveryXml =
-            @"<test-run id='2' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' testcasecount='108'>
+public class NUnitDiscoveryTests
+{
+    private ITestLogger logger;
+    private IAdapterSettings settings;
+
+    private const string FullDiscoveryXml =
+        @"<test-run id='2' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' testcasecount='108'>
    <test-suite type='Assembly' id='0-1157' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' runstate='Runnable' testcasecount='108'>
       <properties>
          <property name='_PID' value='9856' />
@@ -454,44 +454,44 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
    </test-suite>
 </test-run>";
 
-        [SetUp]
-        public void SetUp()
+    [SetUp]
+    public void SetUp()
+    {
+        logger = Substitute.For<ITestLogger>();
+        settings = Substitute.For<IAdapterSettings>();
+        settings.DiscoveryMethod.Returns(DiscoveryMethod.Legacy);
+    }
+
+
+    [Test]
+    public void ThatWeCanParseDiscoveryXml()
+    {
+        var sut = new DiscoveryConverter(logger, settings);
+        var ndr = sut.ConvertXml(
+            new NUnitResults(XmlHelper.CreateXmlNode(FullDiscoveryXml)));
+
+        Assert.That(ndr.Id, Is.EqualTo("2"));
+        Assert.That(ndr.TestAssembly, Is.Not.Null, "Missing test assembly");
+        Assert.That(ndr.TestAssembly.NUnitDiscoveryProperties.Properties.Count(), Is.EqualTo(2));
+        Assert.That(ndr.TestAssembly.NUnitDiscoveryProperties.AllInternal);
+        var suite = ndr.TestAssembly.TestSuites.SingleOrDefault();
+        Assert.That(suite, Is.Not.Null, "No top level suite");
+        var fixturesCount = suite.TestFixtures.Count();
+        var genericFixturesCount = suite.GenericFixtures.Count();
+        var parameterizedFicturesCount = suite.ParameterizedFixtures.Count();
+        var setupFixturesCount = suite.SetUpFixtures.Count();
+        Assert.Multiple(() =>
         {
-            logger = Substitute.For<ITestLogger>();
-            settings = Substitute.For<IAdapterSettings>();
-            settings.DiscoveryMethod.Returns(DiscoveryMethod.Legacy);
-        }
+            Assert.That(fixturesCount, Is.EqualTo(12), nameof(fixturesCount));
+            Assert.That(genericFixturesCount, Is.EqualTo(2), nameof(genericFixturesCount));
+            Assert.That(parameterizedFicturesCount, Is.EqualTo(1), nameof(parameterizedFicturesCount));
+            Assert.That(setupFixturesCount, Is.EqualTo(1), nameof(setupFixturesCount));
+        });
+    }
 
 
-        [Test]
-        public void ThatWeCanParseDiscoveryXml()
-        {
-            var sut = new DiscoveryConverter(logger, settings);
-            var ndr = sut.ConvertXml(
-                new NUnitResults(XmlHelper.CreateXmlNode(FullDiscoveryXml)));
-
-            Assert.That(ndr.Id, Is.EqualTo("2"));
-            Assert.That(ndr.TestAssembly, Is.Not.Null, "Missing test assembly");
-            Assert.That(ndr.TestAssembly.NUnitDiscoveryProperties.Properties.Count(), Is.EqualTo(2));
-            Assert.That(ndr.TestAssembly.NUnitDiscoveryProperties.AllInternal);
-            var suite = ndr.TestAssembly.TestSuites.SingleOrDefault();
-            Assert.That(suite, Is.Not.Null, "No top level suite");
-            var fixturesCount = suite.TestFixtures.Count();
-            var genericFixturesCount = suite.GenericFixtures.Count();
-            var parameterizedFicturesCount = suite.ParameterizedFixtures.Count();
-            var setupFixturesCount = suite.SetUpFixtures.Count();
-            Assert.Multiple(() =>
-            {
-                Assert.That(fixturesCount, Is.EqualTo(12), nameof(fixturesCount));
-                Assert.That(genericFixturesCount, Is.EqualTo(2), nameof(genericFixturesCount));
-                Assert.That(parameterizedFicturesCount, Is.EqualTo(1), nameof(parameterizedFicturesCount));
-                Assert.That(setupFixturesCount, Is.EqualTo(1), nameof(setupFixturesCount));
-            });
-        }
-
-
-        private const string SimpleTestXml =
-            @"<test-run id='2' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' testcasecount='1'>
+    private const string SimpleTestXml =
+        @"<test-run id='2' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' testcasecount='1'>
    <test-suite type='Assembly' id='0-1160' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' runstate='Runnable' testcasecount='1'>
       <test-suite type='TestSuite' id='0-1161' name='NUnitTestDemo' fullname='NUnitTestDemo' runstate='Runnable' testcasecount='1'>
          <test-suite type='TestFixture' id='0-1162' name='SimpleTests' fullname='NUnitTestDemo.SimpleTests' runstate='Runnable' testcasecount='1'>
@@ -506,115 +506,115 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
    </test-suite>
 </test-run>";
 
-        [Test]
-        public void ThatTestCaseHasAllData()
+    [Test]
+    public void ThatTestCaseHasAllData()
+    {
+        var sut = new DiscoveryConverter(logger, settings);
+        var ndr = sut.ConvertXml(
+            new NUnitResults(XmlHelper.CreateXmlNode(SimpleTestXml)));
+        var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
+        var testCase = topLevelSuite.TestFixtures.First().TestCases.First();
+        Assert.Multiple(() =>
         {
-            var sut = new DiscoveryConverter(logger, settings);
-            var ndr = sut.ConvertXml(
-                new NUnitResults(XmlHelper.CreateXmlNode(SimpleTestXml)));
-            var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
-            var testCase = topLevelSuite.TestFixtures.First().TestCases.First();
-            Assert.Multiple(() =>
-            {
-                Assert.That(testCase.Id, Is.EqualTo("0-1074"), "Id fails");
-                Assert.That(testCase.Name, Is.EqualTo("TestSucceeds"), "Name fails");
-                Assert.That(testCase.FullName, Is.EqualTo("NUnitTestDemo.SimpleTests.TestSucceeds"), "Fullname fails");
-                Assert.That(testCase.MethodName, Is.EqualTo("TestSucceeds"), "Methodname fails");
-                Assert.That(testCase.ClassName, Is.EqualTo("NUnitTestDemo.SimpleTests"), "Classname fails");
-                Assert.That(testCase.RunState, Is.EqualTo(RunStateEnum.Runnable), "Runstate fails");
-                Assert.That(testCase.Seed, Is.EqualTo(296066266), "Seed fails");
-                Assert.That(
-                    testCase.NUnitDiscoveryProperties.Properties.Single(o => o.Name == "Category").Value,
-                    Is.EqualTo("Whatever"));
-                Assert.That(testCase.Parent, Is.Not.Null, "Parent missing");
-            });
-        }
+            Assert.That(testCase.Id, Is.EqualTo("0-1074"), "Id fails");
+            Assert.That(testCase.Name, Is.EqualTo("TestSucceeds"), "Name fails");
+            Assert.That(testCase.FullName, Is.EqualTo("NUnitTestDemo.SimpleTests.TestSucceeds"), "Fullname fails");
+            Assert.That(testCase.MethodName, Is.EqualTo("TestSucceeds"), "Methodname fails");
+            Assert.That(testCase.ClassName, Is.EqualTo("NUnitTestDemo.SimpleTests"), "Classname fails");
+            Assert.That(testCase.RunState, Is.EqualTo(RunStateEnum.Runnable), "Runstate fails");
+            Assert.That(testCase.Seed, Is.EqualTo(296066266), "Seed fails");
+            Assert.That(
+                testCase.NUnitDiscoveryProperties.Properties.Single(o => o.Name == "Category").Value,
+                Is.EqualTo("Whatever"));
+            Assert.That(testCase.Parent, Is.Not.Null, "Parent missing");
+        });
+    }
 
 
 
 
-        [Test]
-        public void ThatNumberOfTestCasesAreCorrect()
+    [Test]
+    public void ThatNumberOfTestCasesAreCorrect()
+    {
+        var sut = new DiscoveryConverter(logger, settings);
+        var ndr = sut.ConvertXml(
+            new NUnitResults(XmlHelper.CreateXmlNode(FullDiscoveryXml)));
+        var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
+        var count = topLevelSuite.TestCaseCount;
+        Assert.That(count, Is.EqualTo(108));
+        var actualCount = topLevelSuite.NoOfActualTestCases;
+
+        Assert.Multiple(() =>
         {
-            var sut = new DiscoveryConverter(logger, settings);
-            var ndr = sut.ConvertXml(
-                new NUnitResults(XmlHelper.CreateXmlNode(FullDiscoveryXml)));
-            var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
-            var count = topLevelSuite.TestCaseCount;
-            Assert.That(count, Is.EqualTo(108));
-            var actualCount = topLevelSuite.NoOfActualTestCases;
+            // Special count checks for some
+            Assert.That(topLevelSuite.GenericFixtures.Sum(o => o.NoOfActualTestCases), Is.EqualTo(3),
+                "Generic fixtures counts fails in itself");
 
-            Assert.Multiple(() =>
-            {
-                // Special count checks for some
-                Assert.That(topLevelSuite.GenericFixtures.Sum(o => o.NoOfActualTestCases), Is.EqualTo(3),
-                    "Generic fixtures counts fails in itself");
+            // Test Case count checks
+            Assert.That(actualCount, Is.EqualTo(count), "Actual count doesn't match given count");
+            Assert.That(
+                topLevelSuite.TestFixtures.Where(o => o.Name == "AsyncTests").Sum(o => o.NoOfActualTestCases),
+                Is.EqualTo(7), "Asynctests wrong");
+            Assert.That(
+                topLevelSuite.TestFixtures.Where(o => o.Name == "ConfigFileTests").Sum(o => o.NoOfActualTestCases),
+                Is.EqualTo(2), "ConfigFileTests wrong");
+            Assert.That(
+                topLevelSuite.TestFixtures.Where(o => o.Name == "ExplicitClass").Sum(o => o.NoOfActualTestCases),
+                Is.EqualTo(1), "ExplicitClass wrong");
+            Assert.That(
+                topLevelSuite.TestFixtures.Where(o => o.Name == "FixtureWithApartmentAttributeOnClass")
+                    .Sum(o => o.NoOfActualTestCases),
+                Is.EqualTo(1), "FixtureWithApartmentAttributeOnClass wrong");
+            Assert.That(
+                topLevelSuite.TestFixtures.Where(o => o.Name == "FixtureWithApartmentAttributeOnMethod")
+                    .Sum(o => o.NoOfActualTestCases),
+                Is.EqualTo(1), "FixtureWithApartmentAttributeOnMethod wrong");
+            Assert.That(
+                topLevelSuite.GenericFixtures.Where(o => o.Name == "GenericTests_IList<TList>")
+                    .Sum(o => o.NoOfActualTestCases),
+                Is.EqualTo(2), "GenericTests_IList&lt;TList&gt; wrong");
+            Assert.That(
+                topLevelSuite.GenericFixtures.Where(o => o.Name == "GenericTests<T>")
+                    .Sum(o => o.NoOfActualTestCases),
+                Is.EqualTo(1), "GenericTests&lt;T&gt; wrong");
+            Assert.That(
+                topLevelSuite.TestFixtures.Where(o => o.Name == "InheritedTestDerivedClass")
+                    .Sum(o => o.NoOfActualTestCases),
+                Is.EqualTo(1), "InheritedTestDerivedClass wrong");
+            Assert.That(
+                topLevelSuite.TestFixtures.Where(o => o.Name == "OneTimeSetUpTests")
+                    .Sum(o => o.NoOfActualTestCases),
+                Is.EqualTo(2), "OneTimeSetUpTests wrong");
+            Assert.That(
+                topLevelSuite.ParameterizedFixtures.Where(o => o.Name == "ParameterizedTestFixture")
+                    .Sum(o => o.NoOfActualTestCases),
+                Is.EqualTo(6), "ParameterizedTestFixture wrong");
+            Assert.That(
+                topLevelSuite.TestFixtures.Where(o => o.Name == "ParameterizedTests")
+                    .Sum(o => o.NoOfActualTestCases),
+                Is.EqualTo(23), "ParameterizedTests wrong");
+            Assert.That(
+                topLevelSuite.SetUpFixtures.Where(o => o.Name == "SetUpFixture").Sum(o => o.NoOfActualTestCases),
+                Is.EqualTo(2), "SetUpFixture wrong");
+            Assert.That(
+                topLevelSuite.TestFixtures.Where(o => o.Name == "SimpleTests").Sum(o => o.NoOfActualTestCases),
+                Is.EqualTo(20), "SimpleTests wrong");
+            Assert.That(
+                topLevelSuite.TestFixtures.Where(o => o.Name == "TestCaseSourceTests")
+                    .Sum(o => o.NoOfActualTestCases),
+                Is.EqualTo(3), "TestCaseSourceTests wrong");
+            Assert.That(
+                topLevelSuite.TestFixtures.Where(o => o.Name == "TextOutputTests").Sum(o => o.NoOfActualTestCases),
+                Is.EqualTo(9), "TextOutputTests wrong");
+            Assert.That(
+                topLevelSuite.TestFixtures.Where(o => o.Name == "Theories").Sum(o => o.NoOfActualTestCases),
+                Is.EqualTo(27), "Theories wrong");
+        });
+        Assert.That(ndr.TestAssembly.AllTestCases.Count, Is.EqualTo(108));
+    }
 
-                // Test Case count checks
-                Assert.That(actualCount, Is.EqualTo(count), "Actual count doesn't match given count");
-                Assert.That(
-                    topLevelSuite.TestFixtures.Where(o => o.Name == "AsyncTests").Sum(o => o.NoOfActualTestCases),
-                    Is.EqualTo(7), "Asynctests wrong");
-                Assert.That(
-                    topLevelSuite.TestFixtures.Where(o => o.Name == "ConfigFileTests").Sum(o => o.NoOfActualTestCases),
-                    Is.EqualTo(2), "ConfigFileTests wrong");
-                Assert.That(
-                    topLevelSuite.TestFixtures.Where(o => o.Name == "ExplicitClass").Sum(o => o.NoOfActualTestCases),
-                    Is.EqualTo(1), "ExplicitClass wrong");
-                Assert.That(
-                    topLevelSuite.TestFixtures.Where(o => o.Name == "FixtureWithApartmentAttributeOnClass")
-                        .Sum(o => o.NoOfActualTestCases),
-                    Is.EqualTo(1), "FixtureWithApartmentAttributeOnClass wrong");
-                Assert.That(
-                    topLevelSuite.TestFixtures.Where(o => o.Name == "FixtureWithApartmentAttributeOnMethod")
-                        .Sum(o => o.NoOfActualTestCases),
-                    Is.EqualTo(1), "FixtureWithApartmentAttributeOnMethod wrong");
-                Assert.That(
-                    topLevelSuite.GenericFixtures.Where(o => o.Name == "GenericTests_IList<TList>")
-                        .Sum(o => o.NoOfActualTestCases),
-                    Is.EqualTo(2), "GenericTests_IList&lt;TList&gt; wrong");
-                Assert.That(
-                    topLevelSuite.GenericFixtures.Where(o => o.Name == "GenericTests<T>")
-                        .Sum(o => o.NoOfActualTestCases),
-                    Is.EqualTo(1), "GenericTests&lt;T&gt; wrong");
-                Assert.That(
-                    topLevelSuite.TestFixtures.Where(o => o.Name == "InheritedTestDerivedClass")
-                        .Sum(o => o.NoOfActualTestCases),
-                    Is.EqualTo(1), "InheritedTestDerivedClass wrong");
-                Assert.That(
-                    topLevelSuite.TestFixtures.Where(o => o.Name == "OneTimeSetUpTests")
-                        .Sum(o => o.NoOfActualTestCases),
-                    Is.EqualTo(2), "OneTimeSetUpTests wrong");
-                Assert.That(
-                    topLevelSuite.ParameterizedFixtures.Where(o => o.Name == "ParameterizedTestFixture")
-                        .Sum(o => o.NoOfActualTestCases),
-                    Is.EqualTo(6), "ParameterizedTestFixture wrong");
-                Assert.That(
-                    topLevelSuite.TestFixtures.Where(o => o.Name == "ParameterizedTests")
-                        .Sum(o => o.NoOfActualTestCases),
-                    Is.EqualTo(23), "ParameterizedTests wrong");
-                Assert.That(
-                    topLevelSuite.SetUpFixtures.Where(o => o.Name == "SetUpFixture").Sum(o => o.NoOfActualTestCases),
-                    Is.EqualTo(2), "SetUpFixture wrong");
-                Assert.That(
-                    topLevelSuite.TestFixtures.Where(o => o.Name == "SimpleTests").Sum(o => o.NoOfActualTestCases),
-                    Is.EqualTo(20), "SimpleTests wrong");
-                Assert.That(
-                    topLevelSuite.TestFixtures.Where(o => o.Name == "TestCaseSourceTests")
-                        .Sum(o => o.NoOfActualTestCases),
-                    Is.EqualTo(3), "TestCaseSourceTests wrong");
-                Assert.That(
-                    topLevelSuite.TestFixtures.Where(o => o.Name == "TextOutputTests").Sum(o => o.NoOfActualTestCases),
-                    Is.EqualTo(9), "TextOutputTests wrong");
-                Assert.That(
-                    topLevelSuite.TestFixtures.Where(o => o.Name == "Theories").Sum(o => o.NoOfActualTestCases),
-                    Is.EqualTo(27), "Theories wrong");
-            });
-            Assert.That(ndr.TestAssembly.AllTestCases.Count, Is.EqualTo(108));
-        }
-
-        private const string SetupFixtureXml =
-            @"<test-run id='2' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' testcasecount='2'>
+    private const string SetupFixtureXml =
+        @"<test-run id='2' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' testcasecount='2'>
    <test-suite type='Assembly' id='0-1160' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' runstate='Runnable' testcasecount='2'>
       <test-suite type='TestSuite' id='0-1161' name='NUnitTestDemo' fullname='NUnitTestDemo' runstate='Runnable' testcasecount='2'>
          <test-suite type='SetUpFixture' id='0-1162' name='SetUpFixture' fullname='NUnitTestDemo.SetUpFixture.SetUpFixture' runstate='Runnable' testcasecount='2'>
@@ -629,45 +629,45 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
    </test-suite>
 </test-run>";
 
-        [Test]
-        public void ThatSetUpFixtureWorks()
-        {
-            var sut = new DiscoveryConverter(logger, settings);
-            var ndr = sut.ConvertXml(
-                new NUnitResults(XmlHelper.CreateXmlNode(SetupFixtureXml)));
-            var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
+    [Test]
+    public void ThatSetUpFixtureWorks()
+    {
+        var sut = new DiscoveryConverter(logger, settings);
+        var ndr = sut.ConvertXml(
+            new NUnitResults(XmlHelper.CreateXmlNode(SetupFixtureXml)));
+        var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
 
-            Assert.That(topLevelSuite.SetUpFixtures.Count, Is.EqualTo(1), "Setupfixture count");
-            foreach (var setupFixture in topLevelSuite.SetUpFixtures)
+        Assert.That(topLevelSuite.SetUpFixtures.Count, Is.EqualTo(1), "Setupfixture count");
+        foreach (var setupFixture in topLevelSuite.SetUpFixtures)
+        {
+            Assert.That(setupFixture.TestFixtures.Count, Is.EqualTo(2), "Test fixtures count");
+            Assert.That(setupFixture.RunState, Is.EqualTo(RunStateEnum.Runnable),
+                "Runstate fails for setupfixture");
+            foreach (var testFixture in setupFixture.TestFixtures)
             {
-                Assert.That(setupFixture.TestFixtures.Count, Is.EqualTo(2), "Test fixtures count");
-                Assert.That(setupFixture.RunState, Is.EqualTo(RunStateEnum.Runnable),
-                    "Runstate fails for setupfixture");
-                foreach (var testFixture in setupFixture.TestFixtures)
+                Assert.That(testFixture.RunState, Is.EqualTo(RunStateEnum.Runnable),
+                    "Runstate fails for testFixture");
+                Assert.That(testFixture.TestCases.Count, Is.EqualTo(1), "Testcase count per fixture");
+                foreach (var testCase in testFixture.TestCases)
                 {
-                    Assert.That(testFixture.RunState, Is.EqualTo(RunStateEnum.Runnable),
-                        "Runstate fails for testFixture");
-                    Assert.That(testFixture.TestCases.Count, Is.EqualTo(1), "Testcase count per fixture");
-                    foreach (var testCase in testFixture.TestCases)
+                    Assert.Multiple(() =>
                     {
-                        Assert.Multiple(() =>
-                        {
-                            Assert.That(testCase.Name, Does.StartWith("Test"), "Name is wrong");
-                            Assert.That(testCase.FullName, Does.StartWith("NUnitTestDemo.SetUpFixture.TestFixture"));
-                            Assert.That(testCase.MethodName, Does.StartWith("Test"), "MethodName is wrong");
-                            Assert.That(testCase.ClassName, Does.StartWith("NUnitTestDemo.SetUpFixture.TestFixture"),
-                                "Name is wrong");
-                            Assert.That(testCase.RunState, Is.EqualTo(RunStateEnum.Runnable),
-                                "Runstate fails for testCase");
-                            Assert.That(testCase.Seed, Is.GreaterThan(0), "Seed missing");
-                        });
-                    }
+                        Assert.That(testCase.Name, Does.StartWith("Test"), "Name is wrong");
+                        Assert.That(testCase.FullName, Does.StartWith("NUnitTestDemo.SetUpFixture.TestFixture"));
+                        Assert.That(testCase.MethodName, Does.StartWith("Test"), "MethodName is wrong");
+                        Assert.That(testCase.ClassName, Does.StartWith("NUnitTestDemo.SetUpFixture.TestFixture"),
+                            "Name is wrong");
+                        Assert.That(testCase.RunState, Is.EqualTo(RunStateEnum.Runnable),
+                            "Runstate fails for testCase");
+                        Assert.That(testCase.Seed, Is.GreaterThan(0), "Seed missing");
+                    });
                 }
             }
         }
+    }
 
-        private const string ParameterizedMethodXml =
-            @"<test-run id='2' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' testcasecount='3'>
+    private const string ParameterizedMethodXml =
+        @"<test-run id='2' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' testcasecount='3'>
    <test-suite type='Assembly' id='0-1160' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' runstate='Runnable' testcasecount='3'>
       <test-suite type='TestSuite' id='0-1161' name='NUnitTestDemo' fullname='NUnitTestDemo' runstate='Runnable' testcasecount='3'>
          <test-suite type='TestFixture' id='0-1162' name='TestCaseSourceTests' fullname='NUnitTestDemo.TestCaseSourceTests' runstate='Runnable' testcasecount='3'>
@@ -682,36 +682,36 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
 </test-run>";
 
 
-        [Test]
-        public void ThatParameterizedMethodsWorks()
-        {
-            var sut = new DiscoveryConverter(logger, settings);
-            var ndr = sut.ConvertXml(
-                new NUnitResults(XmlHelper.CreateXmlNode(ParameterizedMethodXml)));
-            var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
-            Assert.That(topLevelSuite.TestCaseCount, Is.EqualTo(3), "Count number from NUnit is wrong");
-            Assert.That(topLevelSuite.TestFixtures.Count, Is.EqualTo(1), "Missing text fixture");
-            Assert.That(topLevelSuite.TestFixtures.Single().ParameterizedMethods.Count(), Is.EqualTo(1),
-                "Missing parameterizedMethod");
-            Assert.That(
-                topLevelSuite.TestFixtures.Single().ParameterizedMethods.Single().TestCases.Count,
-                Is.EqualTo(3));
-        }
+    [Test]
+    public void ThatParameterizedMethodsWorks()
+    {
+        var sut = new DiscoveryConverter(logger, settings);
+        var ndr = sut.ConvertXml(
+            new NUnitResults(XmlHelper.CreateXmlNode(ParameterizedMethodXml)));
+        var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
+        Assert.That(topLevelSuite.TestCaseCount, Is.EqualTo(3), "Count number from NUnit is wrong");
+        Assert.That(topLevelSuite.TestFixtures.Count, Is.EqualTo(1), "Missing text fixture");
+        Assert.That(topLevelSuite.TestFixtures.Single().ParameterizedMethods.Count(), Is.EqualTo(1),
+            "Missing parameterizedMethod");
+        Assert.That(
+            topLevelSuite.TestFixtures.Single().ParameterizedMethods.Single().TestCases.Count,
+            Is.EqualTo(3));
+    }
 
-        [Test]
-        public void ThatTheoryWorks()
-        {
-            var sut = new DiscoveryConverter(logger, settings);
-            var ndr = sut.ConvertXml(
-                new NUnitResults(XmlHelper.CreateXmlNode(FullDiscoveryXml)));
-            var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
-            var theoryFixture = topLevelSuite.TestFixtures.FirstOrDefault(o => o.Name == "Theories");
-            Assert.That(theoryFixture, Is.Not.Null);
-        }
+    [Test]
+    public void ThatTheoryWorks()
+    {
+        var sut = new DiscoveryConverter(logger, settings);
+        var ndr = sut.ConvertXml(
+            new NUnitResults(XmlHelper.CreateXmlNode(FullDiscoveryXml)));
+        var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
+        var theoryFixture = topLevelSuite.TestFixtures.FirstOrDefault(o => o.Name == "Theories");
+        Assert.That(theoryFixture, Is.Not.Null);
+    }
 
 
-        private const string ExplicitXml =
-            @"<test-run id='2' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' testcasecount='3'>
+    private const string ExplicitXml =
+        @"<test-run id='2' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' testcasecount='3'>
    <test-suite type='Assembly' id='0-1160' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' runstate='Runnable' testcasecount='3'>
       <test-suite type='TestSuite' id='0-1161' name='NUnitTestDemo' fullname='NUnitTestDemo' runstate='Runnable' testcasecount='3'>
          <test-suite type='TestFixture' id='0-1162' name='ExplicitClass' fullname='NUnitTestDemo.ExplicitClass' runstate='Explicit' testcasecount='1'>
@@ -733,8 +733,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
    </test-suite>
 </test-run>";
 
-        private const string ExplicitQuickTestXml =
-            @"<test-run id='0' name='NUnit.VisualStudio.TestAdapter.Tests.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter\src\NUnitTestAdapterTests\bin\Debug\netcoreapp3.1\NUnit.VisualStudio.TestAdapter.Tests.dll' runstate='Runnable' testcasecount='1'>
+    private const string ExplicitQuickTestXml =
+        @"<test-run id='0' name='NUnit.VisualStudio.TestAdapter.Tests.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter\src\NUnitTestAdapterTests\bin\Debug\netcoreapp3.1\NUnit.VisualStudio.TestAdapter.Tests.dll' runstate='Runnable' testcasecount='1'>
    <test-suite type='Assembly' id='0-1358' name='NUnit.VisualStudio.TestAdapter.Tests.dll' fullname='D:/repos/NUnit/nunit3-vs-adapter/src/NUnitTestAdapterTests/bin/Debug/netcoreapp3.1/NUnit.VisualStudio.TestAdapter.Tests.dll' runstate='Runnable' testcasecount='1'>
       <test-suite type='TestSuite' id='0-1359' name='NUnit' fullname='NUnit' runstate='Runnable' testcasecount='1'>
          <test-suite type='TestSuite' id='0-1360' name='VisualStudio' fullname='NUnit.VisualStudio' runstate='Runnable' testcasecount='1'>
@@ -751,64 +751,64 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
 </test-run>";
 
 
-        [TestCase(ExplicitXml, 3, TestName = nameof(ThatExplicitWorks) + "." + nameof(ExplicitXml))]
-        public void ThatExplicitWorks(string xml, int count)
+    [TestCase(ExplicitXml, 3, TestName = nameof(ThatExplicitWorks) + "." + nameof(ExplicitXml))]
+    public void ThatExplicitWorks(string xml, int count)
+    {
+        var sut = new DiscoveryConverter(logger, settings);
+        var ndr = sut.ConvertXml(
+            new NUnitResults(XmlHelper.CreateXmlNode(xml)));
+        var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
+        Assert.Multiple(() =>
         {
-            var sut = new DiscoveryConverter(logger, settings);
-            var ndr = sut.ConvertXml(
-                new NUnitResults(XmlHelper.CreateXmlNode(xml)));
-            var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
-            Assert.Multiple(() =>
+            var first = topLevelSuite.TestFixtures.First();
+            Assert.That(first.IsExplicit, $"First {first.Id} failed");
+            var second = topLevelSuite.TestFixtures.Skip(1).First();
+            Assert.That(second.IsExplicit, $"Second {first.Id} failed");
+            var third = topLevelSuite.TestFixtures.Skip(2).First();
+            Assert.That(third.IsExplicit, $"Third {first.Id} failed");
+        });
+        Assert.That(topLevelSuite.IsExplicit, "TopLevelsuite failed");
+        Assert.That(ndr.TestAssembly.AllTestCases.Count(), Is.EqualTo(count), "Count failed");
+        Assert.Multiple(() =>
+        {
+            foreach (var testCase in ndr.TestAssembly.AllTestCases)
             {
-                var first = topLevelSuite.TestFixtures.First();
-                Assert.That(first.IsExplicit, $"First {first.Id} failed");
-                var second = topLevelSuite.TestFixtures.Skip(1).First();
-                Assert.That(second.IsExplicit, $"Second {first.Id} failed");
-                var third = topLevelSuite.TestFixtures.Skip(2).First();
-                Assert.That(third.IsExplicit, $"Third {first.Id} failed");
-            });
+                Assert.That(testCase.IsExplicitReverse, $"Failed for {testCase.Id}");
+            }
+        });
+    }
+
+
+    [TestCase(ExplicitQuickTestXml, 1, TestName = nameof(ThatExplicitWorks2) + "." + nameof(ExplicitQuickTestXml))]
+    public void ThatExplicitWorks2(string xml, int count)
+    {
+        var sut = new DiscoveryConverter(logger, settings);
+        var ndr = sut.ConvertXml(
+            new NUnitResults(XmlHelper.CreateXmlNode(xml)));
+        var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
+        Assert.Multiple(() =>
+        {
             Assert.That(topLevelSuite.IsExplicit, "TopLevelsuite failed");
-            Assert.That(ndr.TestAssembly.AllTestCases.Count(), Is.EqualTo(count), "Count failed");
-            Assert.Multiple(() =>
-            {
-                foreach (var testCase in ndr.TestAssembly.AllTestCases)
-                {
-                    Assert.That(testCase.IsExplicitReverse, $"Failed for {testCase.Id}");
-                }
-            });
-        }
+            var first = topLevelSuite.TestSuites.First();
+            Assert.That(first.IsExplicit, $"First {first.Id} failed");
+        });
 
-
-        [TestCase(ExplicitQuickTestXml, 1, TestName = nameof(ThatExplicitWorks2) + "." + nameof(ExplicitQuickTestXml))]
-        public void ThatExplicitWorks2(string xml, int count)
+        Assert.That(ndr.TestAssembly.AllTestCases.Count(), Is.EqualTo(count), "Count failed");
+        Assert.Multiple(() =>
         {
-            var sut = new DiscoveryConverter(logger, settings);
-            var ndr = sut.ConvertXml(
-                new NUnitResults(XmlHelper.CreateXmlNode(xml)));
-            var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
-            Assert.Multiple(() =>
+            foreach (var testCase in ndr.TestAssembly.AllTestCases)
             {
-                Assert.That(topLevelSuite.IsExplicit, "TopLevelsuite failed");
-                var first = topLevelSuite.TestSuites.First();
-                Assert.That(first.IsExplicit, $"First {first.Id} failed");
-            });
-
-            Assert.That(ndr.TestAssembly.AllTestCases.Count(), Is.EqualTo(count), "Count failed");
-            Assert.Multiple(() =>
-            {
-                foreach (var testCase in ndr.TestAssembly.AllTestCases)
-                {
-                    Assert.That(testCase.IsExplicitReverse, $"Failed for {testCase.Id}");
-                }
-            });
-        }
+                Assert.That(testCase.IsExplicitReverse, $"Failed for {testCase.Id}");
+            }
+        });
+    }
 
 
 
 
 
-        private const string NotExplicitXml =
-            @"<test-run id='2' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' testcasecount='3'>
+    private const string NotExplicitXml =
+        @"<test-run id='2' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' testcasecount='3'>
    <test-suite type='Assembly' id='0-1160' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' runstate='Runnable' testcasecount='3'>
       <test-suite type='TestSuite' id='0-1161' name='NUnitTestDemo' fullname='NUnitTestDemo' runstate='Runnable' testcasecount='3'>
          <test-suite type='TestFixture' id='0-1162' name='ExplicitClass' fullname='NUnitTestDemo.ExplicitClass' runstate='Explicit' testcasecount='1'>
@@ -836,18 +836,18 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
 </test-run>";
 
 
-        [Test]
-        public void ThatExplicitWorksWhenOneTestIsNotExplicit()
-        {
-            var sut = new DiscoveryConverter(logger, settings);
-            var ndr = sut.ConvertXml(
-                new NUnitResults(XmlHelper.CreateXmlNode(NotExplicitXml)));
-            var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
-            Assert.That(topLevelSuite.IsExplicit, Is.False);
-        }
+    [Test]
+    public void ThatExplicitWorksWhenOneTestIsNotExplicit()
+    {
+        var sut = new DiscoveryConverter(logger, settings);
+        var ndr = sut.ConvertXml(
+            new NUnitResults(XmlHelper.CreateXmlNode(NotExplicitXml)));
+        var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
+        Assert.That(topLevelSuite.IsExplicit, Is.False);
+    }
 
-        private const string AsyncTestsXml =
-            @"<test-run id='2' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' testcasecount='7'>
+    private const string AsyncTestsXml =
+        @"<test-run id='2' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' testcasecount='7'>
    <test-suite type='Assembly' id='0-1160' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' runstate='Runnable' testcasecount='7'>
       <test-suite type='TestSuite' id='0-1161' name='NUnitTestDemo' fullname='NUnitTestDemo' runstate='Runnable' testcasecount='7'>
          <test-suite type='TestFixture' id='0-1162' name='AsyncTests' fullname='NUnitTestDemo.AsyncTests' runstate='Runnable' testcasecount='7'>
@@ -888,18 +888,18 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
 
 
 
-        [Test]
-        public void ThatAsyncTestsHasSevenTests()
-        {
-            var sut = new DiscoveryConverter(logger, settings);
-            var ndr = sut.ConvertXml(
-                new NUnitResults(XmlHelper.CreateXmlNode(AsyncTestsXml)));
-            var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
-            Assert.That(topLevelSuite.NoOfActualTestCases, Is.EqualTo(7));
-        }
+    [Test]
+    public void ThatAsyncTestsHasSevenTests()
+    {
+        var sut = new DiscoveryConverter(logger, settings);
+        var ndr = sut.ConvertXml(
+            new NUnitResults(XmlHelper.CreateXmlNode(AsyncTestsXml)));
+        var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
+        Assert.That(topLevelSuite.NoOfActualTestCases, Is.EqualTo(7));
+    }
 
-        private const string ParameterizedTestFixtureXml =
-            @"<test-run id='2' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' testcasecount='6'>
+    private const string ParameterizedTestFixtureXml =
+        @"<test-run id='2' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' testcasecount='6'>
    <test-suite type='Assembly' id='0-1160' name='CSharpTestDemo.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter-demo\solutions\vs2017\CSharpTestDemo\bin\Debug\CSharpTestDemo.dll' runstate='Runnable' testcasecount='6'>
       <test-suite type='TestSuite' id='0-1161' name='NUnitTestDemo' fullname='NUnitTestDemo' runstate='Runnable' testcasecount='6'>
          <test-suite type='ParameterizedFixture' id='0-1162' name='ParameterizedTestFixture' fullname='NUnitTestDemo.ParameterizedTestFixture' runstate='Runnable' testcasecount='6'>
@@ -921,19 +921,19 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
 </test-run>";
 
 
-        [Test]
-        public void ThatParameterizedTestFixtureHasSixTests()
-        {
-            var sut = new DiscoveryConverter(logger, settings);
-            var ndr = sut.ConvertXml(
-                new NUnitResults(XmlHelper.CreateXmlNode(ParameterizedTestFixtureXml)));
-            var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
-            Assert.That(topLevelSuite.NoOfActualTestCases, Is.EqualTo(6));
-        }
+    [Test]
+    public void ThatParameterizedTestFixtureHasSixTests()
+    {
+        var sut = new DiscoveryConverter(logger, settings);
+        var ndr = sut.ConvertXml(
+            new NUnitResults(XmlHelper.CreateXmlNode(ParameterizedTestFixtureXml)));
+        var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
+        Assert.That(topLevelSuite.NoOfActualTestCases, Is.EqualTo(6));
+    }
 
 
-        private const string DotnetXml =
-            @"<test-run id='2' name='Filtering.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter.issues\Issue497\bin\Debug\net461\Filtering.dll' testcasecount='20000'>
+    private const string DotnetXml =
+        @"<test-run id='2' name='Filtering.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter.issues\Issue497\bin\Debug\net461\Filtering.dll' testcasecount='20000'>
    <test-suite type='Assembly' id='0-21501' name='Filtering.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter.issues\Issue497\bin\Debug\net461\Filtering.dll' runstate='Runnable' testcasecount='20000'>
             <properties>
                <property name='Something' value='Foo' />
@@ -971,31 +971,31 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
     </test-suite>
 </test-run>";
 
-        /// <summary>
-        /// The dotnetxml has no top level suite, but fixtures directly under assembly.
-        /// </summary>
-        [Test]
-        public void ThatDotNetTestWorks()
+    /// <summary>
+    /// The dotnetxml has no top level suite, but fixtures directly under assembly.
+    /// </summary>
+    [Test]
+    public void ThatDotNetTestWorks()
+    {
+        var sut = new DiscoveryConverter(logger, settings);
+        var ndr = sut.ConvertXml(
+            new NUnitResults(XmlHelper.CreateXmlNode(DotnetXml)));
+        var fixtures = ndr.TestAssembly.TestFixtures;
+        Assert.That(fixtures.Count(), Is.EqualTo(3), "Didnt find all fixtures");
+        foreach (var fixture in fixtures)
         {
-            var sut = new DiscoveryConverter(logger, settings);
-            var ndr = sut.ConvertXml(
-                new NUnitResults(XmlHelper.CreateXmlNode(DotnetXml)));
-            var fixtures = ndr.TestAssembly.TestFixtures;
-            Assert.That(fixtures.Count(), Is.EqualTo(3), "Didnt find all fixtures");
-            foreach (var fixture in fixtures)
-            {
-                Assert.That(fixture.TestCases.Count, Is.EqualTo(3),
-                    "Didnt find all testcases for fixture");
-            }
-
-            Assert.That(ndr.TestAssembly.TestSuites.Count, Is.EqualTo(1));
-            var suite = ndr.TestAssembly.TestSuites.Single();
-            Assert.That(suite.TestFixtures.Count, Is.EqualTo(1));
-            Assert.That(suite.TestCaseCount, Is.EqualTo(2));
+            Assert.That(fixture.TestCases.Count, Is.EqualTo(3),
+                "Didnt find all testcases for fixture");
         }
 
-        private const string MixedExplicitTestSourceXmlForNUnit312 =
-            @"<test-run id='0' name='Issue545.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter.issues\Issue545\Issue545\bin\Debug\Issue545.dll' runstate='Runnable' testcasecount='3'>
+        Assert.That(ndr.TestAssembly.TestSuites.Count, Is.EqualTo(1));
+        var suite = ndr.TestAssembly.TestSuites.Single();
+        Assert.That(suite.TestFixtures.Count, Is.EqualTo(1));
+        Assert.That(suite.TestCaseCount, Is.EqualTo(2));
+    }
+
+    private const string MixedExplicitTestSourceXmlForNUnit312 =
+        @"<test-run id='0' name='Issue545.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter.issues\Issue545\Issue545\bin\Debug\Issue545.dll' runstate='Runnable' testcasecount='3'>
    <test-suite type='Assembly' id='0-1007' name='Issue545.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter.issues\Issue545\Issue545\bin\Debug\Issue545.dll' runstate='Runnable' testcasecount='3'>
       <test-suite type='TestSuite' id='0-1008' name='Issue545' fullname='Issue545' runstate='Runnable' testcasecount='3'>
          <test-suite type='TestFixture' id='0-1009' name='FooTests' fullname='Issue545.FooTests' runstate='Runnable' testcasecount='3'>
@@ -1009,11 +1009,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
    </test-suite>
 </test-run>";
 
-        /// <summary>
-        /// See issue 1041 at https://github.com/nunit/nunit3-vs-adapter/issues/1044
-        /// </summary>
-        private const string MixedExplicitTestSourceXmlForIssue1041 =
-            @"<test-run id='0' name='Issue1044.dll' fullname='d:\repos\NUnit\nunit3-vs-adapter.issues\Issue1044\bin\Debug\net7.0\Issue1044.dll' runstate='Runnable' testcasecount='4'>
+    /// <summary>
+    /// See issue 1041 at https://github.com/nunit/nunit3-vs-adapter/issues/1044
+    /// </summary>
+    private const string MixedExplicitTestSourceXmlForIssue1041 =
+        @"<test-run id='0' name='Issue1044.dll' fullname='d:\repos\NUnit\nunit3-vs-adapter.issues\Issue1044\bin\Debug\net7.0\Issue1044.dll' runstate='Runnable' testcasecount='4'>
    <test-suite type='Assembly' id='0-1009' name='Issue1044.dll' fullname='d:/repos/NUnit/nunit3-vs-adapter.issues/Issue1044/bin/Debug/net7.0/Issue1044.dll' runstate='Runnable' testcasecount='4'>
       <environment framework-version='3.13.3.0' clr-version='7.0.0' os-version='Microsoft Windows 10.0.19044' platform='Win32NT' cwd='d:\repos\NUnit\nunit3-vs-adapter.issues\Issue1044\bin\Debug\net7.0' machine-name='DESKTOP-SIATMVB' user='TerjeSandstrom' user-domain='AzureAD' culture='en-US' uiculture='en-US' os-architecture='x64' />
       <settings>
@@ -1045,23 +1045,23 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
    </test-suite>
 </test-run>";
 
-        [TestCase(MixedExplicitTestSourceXmlForIssue1041, 2, 4)]
-        [TestCase(MixedExplicitTestSourceXmlForNUnit312, 1, 3)]
-        public void ThatMixedExplicitTestSourceWorks(string xml, int expectedRunnable, int expectedAll)
+    [TestCase(MixedExplicitTestSourceXmlForIssue1041, 2, 4)]
+    [TestCase(MixedExplicitTestSourceXmlForNUnit312, 1, 3)]
+    public void ThatMixedExplicitTestSourceWorks(string xml, int expectedRunnable, int expectedAll)
+    {
+        var sut = new DiscoveryConverter(logger, settings);
+        var ndr = sut.ConvertXml(
+            new NUnitResults(XmlHelper.CreateXmlNode(xml)));
+        Assert.Multiple(() =>
         {
-            var sut = new DiscoveryConverter(logger, settings);
-            var ndr = sut.ConvertXml(
-                new NUnitResults(XmlHelper.CreateXmlNode(xml)));
-            Assert.Multiple(() =>
-            {
-                Assert.That(ndr.IsExplicit, Is.False, "Explicit check fails");
-                Assert.That(ndr.TestAssembly.RunnableTestCases.Count, Is.EqualTo(expectedRunnable), "Runnable number fails");
-                Assert.That(ndr.TestAssembly.AllTestCases.Count, Is.EqualTo(expectedAll), "Can't find all testcases");
-            });
-        }
+            Assert.That(ndr.IsExplicit, Is.False, "Explicit check fails");
+            Assert.That(ndr.TestAssembly.RunnableTestCases.Count, Is.EqualTo(expectedRunnable), "Runnable number fails");
+            Assert.That(ndr.TestAssembly.AllTestCases.Count, Is.EqualTo(expectedAll), "Can't find all testcases");
+        });
+    }
 
-        private const string ExplicitRun =
-            @"<test-run id='0' name='Issue545.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter.issues\Issue545\Issue545\bin\Debug\Issue545.dll' runstate='Runnable' testcasecount='2'>
+    private const string ExplicitRun =
+        @"<test-run id='0' name='Issue545.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter.issues\Issue545\Issue545\bin\Debug\Issue545.dll' runstate='Runnable' testcasecount='2'>
    <test-suite type='Assembly' id='0-1007' name='Issue545.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter.issues\Issue545\Issue545\bin\Debug\Issue545.dll' runstate='Runnable' testcasecount='2'>
       <test-suite type='TestSuite' id='0-1008' name='Issue545' fullname='Issue545' runstate='Runnable' testcasecount='2'>
          <test-suite type='TestFixture' id='0-1009' name='FooTests' fullname='Issue545.FooTests' runstate='Runnable' testcasecount='2'>
@@ -1074,33 +1074,33 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
    </test-suite>
 </test-run>";
 
-        [Test]
-        public void ThatExplicitRunWorks()
+    [Test]
+    public void ThatExplicitRunWorks()
+    {
+        var sut = new DiscoveryConverter(logger, settings);
+        var ndr = sut.ConvertXml(
+            new NUnitResults(XmlHelper.CreateXmlNode(ExplicitRun)));
+        Assert.Multiple(() =>
         {
-            var sut = new DiscoveryConverter(logger, settings);
-            var ndr = sut.ConvertXml(
-                new NUnitResults(XmlHelper.CreateXmlNode(ExplicitRun)));
-            Assert.Multiple(() =>
-            {
-                Assert.That(ndr.IsExplicit, "Explicit check fails");
-                Assert.That(ndr.TestAssembly.AllTestCases.Count, Is.EqualTo(2), "All testcases number fails");
-                Assert.That(ndr.TestAssembly.AllTestCases.Count, Is.EqualTo(2), "Can't find all testcases");
-                Assert.That(ndr.TestAssembly.TestSuites.First().IsExplicit, "Test suite don't match explicit");
-                Assert.That(
-                    ndr.TestAssembly.TestSuites.First().TestFixtures.First().IsExplicit,
-                    "Test fixture don't match explicit");
-                Assert.That(
-                    ndr.TestAssembly.TestSuites.First().TestFixtures.First().ParameterizedMethods.First().IsExplicit,
-                    "Parameterized method don't match explicit");
-                Assert.That(
-                    ndr.TestAssembly.TestSuites.First().TestFixtures.First().ParameterizedMethods.First().RunState,
-                    Is.EqualTo(RunStateEnum.Explicit), "Runstate fails for parameterizedfixture");
-            });
-        }
+            Assert.That(ndr.IsExplicit, "Explicit check fails");
+            Assert.That(ndr.TestAssembly.AllTestCases.Count, Is.EqualTo(2), "All testcases number fails");
+            Assert.That(ndr.TestAssembly.AllTestCases.Count, Is.EqualTo(2), "Can't find all testcases");
+            Assert.That(ndr.TestAssembly.TestSuites.First().IsExplicit, "Test suite don't match explicit");
+            Assert.That(
+                ndr.TestAssembly.TestSuites.First().TestFixtures.First().IsExplicit,
+                "Test fixture don't match explicit");
+            Assert.That(
+                ndr.TestAssembly.TestSuites.First().TestFixtures.First().ParameterizedMethods.First().IsExplicit,
+                "Parameterized method don't match explicit");
+            Assert.That(
+                ndr.TestAssembly.TestSuites.First().TestFixtures.First().ParameterizedMethods.First().RunState,
+                Is.EqualTo(RunStateEnum.Explicit), "Runstate fails for parameterizedfixture");
+        });
+    }
 
 
-        private const string SetupFixtureIssue770 =
-            @"<test-run id='0' name='TestLib.dll' fullname='d:\repos\NUnit\nunit3-vs-adapter.issues\Issue770\TestLib\bin\Debug\netcoreapp3.1\TestLib.dll' runstate='Runnable' testcasecount='1'>
+    private const string SetupFixtureIssue770 =
+        @"<test-run id='0' name='TestLib.dll' fullname='d:\repos\NUnit\nunit3-vs-adapter.issues\Issue770\TestLib\bin\Debug\netcoreapp3.1\TestLib.dll' runstate='Runnable' testcasecount='1'>
    <test-suite type='Assembly' id='0-1005' name='TestLib.dll' fullname='d:/repos/NUnit/nunit3-vs-adapter.issues/Issue770/TestLib/bin/Debug/netcoreapp3.1/TestLib.dll' runstate='Runnable' testcasecount='1'>
       <test-suite type='SetUpFixture' id='0-1006' name='[default namespace]' fullname='SetupF' runstate='Runnable' testcasecount='1'>
          <test-suite type='TestSuite' id='0-1007' name='L' fullname='L' runstate='Runnable' testcasecount='1'>
@@ -1113,17 +1113,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
 </test-run>";
 
 
-        [Test]
-        public void ThatSetUpFixtureWorksIssue770()
-        {
-            var sut = new DiscoveryConverter(logger, settings);
-            var ndr = sut.ConvertXml(
-                new NUnitResults(XmlHelper.CreateXmlNode(SetupFixtureIssue770)));
-            Assert.That(ndr, Is.Not.Null);
-        }
+    [Test]
+    public void ThatSetUpFixtureWorksIssue770()
+    {
+        var sut = new DiscoveryConverter(logger, settings);
+        var ndr = sut.ConvertXml(
+            new NUnitResults(XmlHelper.CreateXmlNode(SetupFixtureIssue770)));
+        Assert.That(ndr, Is.Not.Null);
+    }
 
-        private const string SetupFixtureIssue824 =
-            @"<test-run id='0' name='Issue824.dll' fullname='d:\repos\NUnit\nunit3-vs-adapter.issues\Issue824\bin\Debug\net5.0\Issue824.dll' runstate='Runnable' testcasecount='2'>
+    private const string SetupFixtureIssue824 =
+        @"<test-run id='0' name='Issue824.dll' fullname='d:\repos\NUnit\nunit3-vs-adapter.issues\Issue824\bin\Debug\net5.0\Issue824.dll' runstate='Runnable' testcasecount='2'>
    <test-suite type='Assembly' id='0-1012' name='Issue824.dll' fullname='d:/repos/NUnit/nunit3-vs-adapter.issues/Issue824/bin/Debug/net5.0/Issue824.dll' runstate='Runnable' testcasecount='2'>
       <environment framework-version='3.13.1.0' clr-version='5.0.4' os-version='Microsoft Windows 10.0.18363' platform='Win32NT' cwd='d:\repos\NUnit\nunit3-vs-adapter.issues\Issue824\bin\Debug\net5.0' machine-name='DESKTOP-SIATMVB' user='TerjeSandstrom' user-domain='AzureAD' culture='en-US' uiculture='en-US' os-architecture='x64' />
             <test-suite type='SetUpFixture' id='0-1013' name='[default namespace]' fullname='GlobalSetUpFixture' runstate='Runnable' testcasecount='2'>
@@ -1146,17 +1146,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
 </test-run>";
 
 
-        [Test]
-        public void ThatSetUpFixtureWorksIssue824()
-        {
-            var sut = new DiscoveryConverter(logger, settings);
-            var ndr = sut.ConvertXml(
-                new NUnitResults(XmlHelper.CreateXmlNode(SetupFixtureIssue824)));
-            Assert.That(ndr, Is.Not.Null);
-        }
+    [Test]
+    public void ThatSetUpFixtureWorksIssue824()
+    {
+        var sut = new DiscoveryConverter(logger, settings);
+        var ndr = sut.ConvertXml(
+            new NUnitResults(XmlHelper.CreateXmlNode(SetupFixtureIssue824)));
+        Assert.That(ndr, Is.Not.Null);
+    }
 
-        private const string SetupFixtureIssue884 =
-            @"<test-run id='0' name='NUnitTestAdapterIssueRepro.dll' fullname='d:\repos\NUnit\nunitissues_otherrepos\Issue884\NUnitTestAdapterIssueRepro\bin\Debug\netcoreapp3.1\NUnitTestAdapterIssueRepro.dll' runstate='Runnable' testcasecount='3'>
+    private const string SetupFixtureIssue884 =
+        @"<test-run id='0' name='NUnitTestAdapterIssueRepro.dll' fullname='d:\repos\NUnit\nunitissues_otherrepos\Issue884\NUnitTestAdapterIssueRepro\bin\Debug\netcoreapp3.1\NUnitTestAdapterIssueRepro.dll' runstate='Runnable' testcasecount='3'>
    <test-suite type='Assembly' id='0-1010' name='NUnitTestAdapterIssueRepro.dll' fullname='d:/repos/NUnit/nunitissues_otherrepos/Issue884/NUnitTestAdapterIssueRepro/bin/Debug/netcoreapp3.1/NUnitTestAdapterIssueRepro.dll' runstate='Runnable' testcasecount='3'>
       <environment framework-version='3.13.2.0' clr-version='3.1.19' os-version='Microsoft Windows 10.0.19042' platform='Win32NT' cwd='d:\repos\NUnit\nunitissues_otherrepos\Issue884\NUnitTestAdapterIssueRepro\bin\Debug\netcoreapp3.1' machine-name='DESKTOP-SIATMVB' user='TerjeSandstrom' user-domain='AzureAD' culture='en-US' uiculture='en-US' os-architecture='x64' />
       <properties>
@@ -1179,16 +1179,16 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
    </test-suite>
 </test-run>";
 
-        [Test]
-        public void ThatSetUpFixtureWorksIssue884()
-        {
-            var sut = new DiscoveryConverter(logger, settings);
-            var ndr = sut.ConvertXml(
-                new NUnitResults(XmlHelper.CreateXmlNode(SetupFixtureIssue884)));
-            Assert.That(ndr, Is.Not.Null);
-        }
+    [Test]
+    public void ThatSetUpFixtureWorksIssue884()
+    {
+        var sut = new DiscoveryConverter(logger, settings);
+        var ndr = sut.ConvertXml(
+            new NUnitResults(XmlHelper.CreateXmlNode(SetupFixtureIssue884)));
+        Assert.That(ndr, Is.Not.Null);
+    }
 
-        private const string GenericIssue918 = @"<test-run id='0' name='Issue918.dll' fullname='d:\repos\NUnit\nunit3-vs-adapter.issues\Issue918\bin\Debug\net6.0\Issue918.dll' runstate='Runnable' testcasecount='1'>
+    private const string GenericIssue918 = @"<test-run id='0' name='Issue918.dll' fullname='d:\repos\NUnit\nunit3-vs-adapter.issues\Issue918\bin\Debug\net6.0\Issue918.dll' runstate='Runnable' testcasecount='1'>
    <test-suite type='Assembly' id='0-1004' name='Issue918.dll' fullname='d:/repos/NUnit/nunit3-vs-adapter.issues/Issue918/bin/Debug/net6.0/Issue918.dll' runstate='Runnable' testcasecount='1'>
       <environment framework-version='3.13.2.0' clr-version='6.0.0' os-version='Microsoft Windows 10.0.19042' platform='Win32NT' cwd='d:\repos\NUnit\nunit3-vs-adapter.issues\Issue918\bin\Debug\net6.0' machine-name='DESKTOP-SIATMVB' user='TerjeSandstrom' user-domain='AzureAD' culture='en-US' uiculture='en-US' os-architecture='x64' />
       <properties>
@@ -1207,18 +1207,18 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
    </test-suite>
 </test-run>";
 
-        [Test]
-        public void ThatGenericFixturesWorksIssue918()
-        {
-            var sut = new DiscoveryConverter(logger, settings);
-            var ndr = sut.ConvertXml(
-                new NUnitResults(XmlHelper.CreateXmlNode(GenericIssue918)));
-            Assert.That(ndr, Is.Not.Null);
-        }
+    [Test]
+    public void ThatGenericFixturesWorksIssue918()
+    {
+        var sut = new DiscoveryConverter(logger, settings);
+        var ndr = sut.ConvertXml(
+            new NUnitResults(XmlHelper.CreateXmlNode(GenericIssue918)));
+        Assert.That(ndr, Is.Not.Null);
+    }
 
 
-        private const string ExtractFixturesHandlesProperties =
-            @"<test-run id='0' name='Issue824.dll' fullname='d:\repos\NUnit\nunit3-vs-adapter.issues\Issue824\bin\Debug\net5.0\Issue824.dll' runstate='Runnable' testcasecount='2'>
+    private const string ExtractFixturesHandlesProperties =
+        @"<test-run id='0' name='Issue824.dll' fullname='d:\repos\NUnit\nunit3-vs-adapter.issues\Issue824\bin\Debug\net5.0\Issue824.dll' runstate='Runnable' testcasecount='2'>
    <test-suite type='Assembly' id='0-1012' name='Issue824.dll' fullname='d:/repos/NUnit/nunit3-vs-adapter.issues/Issue824/bin/Debug/net5.0/Issue824.dll' runstate='Runnable' testcasecount='2'>
       <environment framework-version='3.13.1.0' clr-version='5.0.4' os-version='Microsoft Windows 10.0.18363' platform='Win32NT' cwd='d:\repos\NUnit\nunit3-vs-adapter.issues\Issue824\bin\Debug\net5.0' machine-name='DESKTOP-SIATMVB' user='TerjeSandstrom' user-domain='AzureAD' culture='en-US' uiculture='en-US' os-architecture='x64' />
             <test-suite type='ParameterizedFixture' id='0-1253' name='Issue3848' fullname='nunit.v3.Issue3848' runstate='Runnable' testcasecount='4'>
@@ -1237,15 +1237,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
 </test-suite>
 </test-run>";
 
-        [Test]
-        public void ThatExtractFixturesHandlesProperties()
-        {
-            var sut = new DiscoveryConverter(logger, settings);
-            XmlNode node = null;
-            Assert.DoesNotThrow(() => node = XmlHelper.CreateXmlNode(ExtractFixturesHandlesProperties));
-            var ndr = sut.ConvertXml(
-                new NUnitResults(node));
-            Assert.That(ndr, Is.Not.Null);
-        }
+    [Test]
+    public void ThatExtractFixturesHandlesProperties()
+    {
+        var sut = new DiscoveryConverter(logger, settings);
+        XmlNode node = null;
+        Assert.DoesNotThrow(() => node = XmlHelper.CreateXmlNode(ExtractFixturesHandlesProperties));
+        var ndr = sut.ConvertXml(
+            new NUnitResults(node));
+        Assert.That(ndr, Is.Not.Null);
     }
 }

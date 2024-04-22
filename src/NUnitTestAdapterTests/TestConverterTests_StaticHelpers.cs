@@ -28,22 +28,22 @@ using NUnit.Engine;
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests
+namespace NUnit.VisualStudio.TestAdapter.Tests;
+
+[Category("TestConverter")]
+public class TestConverterTestsGetTestOutcome
 {
-    [Category("TestConverter")]
-    public class TestConverterTestsGetTestOutcome
+    [TestCase("<test-case result='Failed' label='Cancelled'/>", TestOutcome.Failed)]
+    [TestCase("<test-case result='Failed' label='Error'/>", TestOutcome.Failed)]
+    [TestCase("<test-case result='Failed'/>", TestOutcome.Failed)]
+    [TestCase("<test-case result='Skipped' label='Ignored'/>", TestOutcome.Skipped)]
+    [TestCase("<test-case result='Inconclusive'/>", TestOutcome.None)]
+    [TestCase("<test-case result='Failed' label='NotRunnable'/>", TestOutcome.Failed)]
+    [TestCase("<test-case result='Skipped'/>", TestOutcome.None)]
+    [TestCase("<test-case result='Passed'/>", TestOutcome.Passed)]
+    [TestCase("<test-case result='Warning'/>", TestOutcome.Skipped)]
+    public void ResultStateToTestOutcome(string result, TestOutcome expected)
     {
-        [TestCase("<test-case result='Failed' label='Cancelled'/>", TestOutcome.Failed)]
-        [TestCase("<test-case result='Failed' label='Error'/>", TestOutcome.Failed)]
-        [TestCase("<test-case result='Failed'/>", TestOutcome.Failed)]
-        [TestCase("<test-case result='Skipped' label='Ignored'/>", TestOutcome.Skipped)]
-        [TestCase("<test-case result='Inconclusive'/>", TestOutcome.None)]
-        [TestCase("<test-case result='Failed' label='NotRunnable'/>", TestOutcome.Failed)]
-        [TestCase("<test-case result='Skipped'/>", TestOutcome.None)]
-        [TestCase("<test-case result='Passed'/>", TestOutcome.Passed)]
-        [TestCase("<test-case result='Warning'/>", TestOutcome.Skipped)]
-        public void ResultStateToTestOutcome(string result, TestOutcome expected)
-        {
             var resultNode = new NUnitTestEventTestCase(XmlHelper.CreateXmlNode(result));
             var logger = Substitute.For<ITestLogger>();
             var settings = Substitute.For<IAdapterSettings>();
@@ -55,5 +55,4 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             Assert.That(res, Is.EqualTo(expected), $"In: {result}, out: {res.ToString()} expected: {expected.ToString()} ");
         }
-    }
 }

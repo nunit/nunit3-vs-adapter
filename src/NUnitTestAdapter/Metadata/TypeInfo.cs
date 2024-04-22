@@ -23,28 +23,17 @@
 
 using System;
 using System.Reflection;
-using NUnit.VisualStudio.TestAdapter.Internal;
 
-namespace NUnit.VisualStudio.TestAdapter.Metadata
-{
+namespace NUnit.VisualStudio.TestAdapter.Metadata;
 #if NET462
-    [Serializable]
+[Serializable]
 #endif
-    public struct TypeInfo
+public readonly struct TypeInfo(string assemblyPath, string fullName)
+{
+    public TypeInfo(Type type) : this(type.GetTypeInfo().Assembly.Location, type.FullName)
     {
-        public TypeInfo(Type type)
-        {
-            AssemblyPath = type.GetTypeInfo().Assembly.Location;
-            FullName = type.FullName;
-        }
-
-        public TypeInfo(string assemblyPath, string fullName)
-        {
-            AssemblyPath = assemblyPath;
-            FullName = fullName;
-        }
-
-        public string AssemblyPath { get; }
-        public string FullName { get; }
     }
+
+    public string AssemblyPath { get; } = assemblyPath;
+    public string FullName { get; } = fullName;
 }

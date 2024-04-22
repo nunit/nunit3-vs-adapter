@@ -24,35 +24,34 @@
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
+namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests;
+
+public class NUnitTestCaseTests
 {
-    public class NUnitTestCaseTests
+    private const string XmlRunnable = @"<test-case id='0-1007' name='Test2M' fullname='TestWarnings.Test4.Test2M' methodname='Test2M' classname='TestWarnings.Test4' runstate='Runnable' seed='882017471' />";
+
+    private const string XmlExplicit = @"<test-case id='0-1007' name='Test2M' fullname='TestWarnings.Test4.Test2M' methodname='Test2M' classname='TestWarnings.Test4' runstate='Explicit' seed='882017471' />";
+
+    private const string XmlNone = @"<test-case id='0-1007' name='Test2M' fullname='TestWarnings.Test4.Test2M' methodname='Test2M' classname='TestWarnings.Test4' seed='882017471' />";
+
+
+    [Test]
+    public void ThatRunStateIsHandledForRunnable()
     {
-        private const string XmlRunnable = @"<test-case id='0-1007' name='Test2M' fullname='TestWarnings.Test4.Test2M' methodname='Test2M' classname='TestWarnings.Test4' runstate='Runnable' seed='882017471' />";
-
-        private const string XmlExplicit = @"<test-case id='0-1007' name='Test2M' fullname='TestWarnings.Test4.Test2M' methodname='Test2M' classname='TestWarnings.Test4' runstate='Explicit' seed='882017471' />";
-
-        private const string XmlNone = @"<test-case id='0-1007' name='Test2M' fullname='TestWarnings.Test4.Test2M' methodname='Test2M' classname='TestWarnings.Test4' seed='882017471' />";
-
-
-        [Test]
-        public void ThatRunStateIsHandledForRunnable()
-        {
             var sut = new NUnitEventTestCase(XmlHelper.CreateXmlNode(XmlRunnable));
             Assert.That(sut.RunState, Is.EqualTo(RunStateEnum.Runnable));
         }
-        [Test]
-        public void ThatRunStateIsHandledForExplicit()
-        {
+    [Test]
+    public void ThatRunStateIsHandledForExplicit()
+    {
             var sut = new NUnitEventTestCase(XmlHelper.CreateXmlNode(XmlExplicit));
             Assert.That(sut.RunState, Is.EqualTo(RunStateEnum.Explicit));
         }
 
-        [Test]
-        public void ThatRunStateIsHandledForNone()
-        {
+    [Test]
+    public void ThatRunStateIsHandledForNone()
+    {
             var sut = new NUnitEventTestCase(XmlHelper.CreateXmlNode(XmlNone));
             Assert.That(sut.RunState, Is.EqualTo(RunStateEnum.NA));
         }
-    }
 }

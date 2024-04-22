@@ -23,69 +23,65 @@
 
 using System.Xml;
 
-namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
+namespace NUnit.VisualStudio.TestAdapter.NUnitEngine;
+
+public interface INUnitTestEventTestOutput
 {
-    public interface INUnitTestEventTestOutput
-    {
-        NUnitTestEventTestOutput.Streams Stream { get; }
-        string TestId { get; }
-        string TestName { get; }
-
-        /// <summary>
-        /// Returns the output information.
-        /// </summary>
-        string Content { get; }
-
-        bool IsProgressStream { get; }
-        bool IsErrorStream { get; }
-        bool IsNullOrEmptyStream { get; }
-    }
+    NUnitTestEventTestOutput.Streams Stream { get; }
+    string TestId { get; }
+    string TestName { get; }
 
     /// <summary>
-    /// Handles the 'test-output' event.
+    /// Returns the output information.
     /// </summary>
-    public class NUnitTestEventTestOutput : NUnitTestEvent, INUnitTestEventTestOutput
+    string Content { get; }
+
+    bool IsProgressStream { get; }
+    bool IsErrorStream { get; }
+    bool IsNullOrEmptyStream { get; }
+}
+
+/// <summary>
+/// Handles the 'test-output' event.
+/// </summary>
+public class NUnitTestEventTestOutput(XmlNode node) : NUnitTestEvent(node), INUnitTestEventTestOutput
+{
+    public enum Streams
     {
-        public enum Streams
-        {
-            NoIdea,
-            Error,
-            Progress
-        }
-
-        public Streams Stream { get; }
-        public string TestId => Node.GetAttribute("testid");
-
-        public string TestName => Node.GetAttribute("testname");
-
-
-        public NUnitTestEventTestOutput(INUnitTestEventForXml theEvent) : this(theEvent.Node)
-        {
-            if (theEvent.Node.Name != "test-output")
-                throw new NUnitEventWrongTypeException($"Expected 'test-output', got {theEvent.Node.Name}");
-        }
-        public NUnitTestEventTestOutput(XmlNode node) : base(node)
-        {
-            Stream = node.GetAttribute("stream") switch
-            {
-                "Error" => Streams.Error,
-                "Progress" => Streams.Progress,
-                _ => Streams.NoIdea
-            };
-        }
-
-        public bool IsProgressStream => Stream == Streams.Progress;
-        public bool IsErrorStream => Stream == Streams.Error;
-
-        public bool IsNullOrEmptyStream => Stream == Streams.NoIdea;
-
-        /// <summary>
-        /// Returns the output information.
-        /// </summary>
-        public string Content => Node.InnerText;
-
-        // Notes:
-        // The input doesnt have any id, but used testid instead.
-        // Properties FullName and Name is not in use
+        NoIdea,
+        Error,
+        Progress
     }
+
+    public Streams Stream { get; } = node.GetAttribute("stream") switch
+    {
+        "Error" => Streams.Error,
+        "Progress" => Streams.Progress,
+        _ => Streams.NoIdea
+    };
+
+    public string TestId => Node.GetAttribute("testid");
+
+    public string TestName => Node.GetAttribute("testname");
+
+
+    public NUnitTestEventTestOutput(INUnitTestEventForXml theEvent) : this(theEvent.Node)
+    {
+        if (theEvent.Node.Name != "test-output")
+            throw new NUnitEventWrongTypeException($"Expected 'test-output', got {theEvent.Node.Name}");
+    }
+
+    public bool IsProgressStream => Stream == Streams.Progress;
+    public bool IsErrorStream => Stream == Streams.Error;
+
+    public bool IsNullOrEmptyStream => Stream == Streams.NoIdea;
+
+    /// <summary>
+    /// Returns the output information.
+    /// </summary>
+    public string Content => Node.InnerText;
+
+    // Notes:
+    // The input doesnt have any id, but used testid instead.
+    // Properties FullName and Name is not in use
 }

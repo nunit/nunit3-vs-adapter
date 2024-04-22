@@ -22,199 +22,182 @@
 // ***********************************************************************
 
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
 
 using NUnit.Engine;
 using NUnit.VisualStudio.TestAdapter.Internal;
 
-namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
+namespace NUnit.VisualStudio.TestAdapter.NUnitEngine;
+
+public interface INUnitEngineAdapter
 {
-    public interface INUnitEngineAdapter
+    NUnitResults Explore();
+    void CloseRunner();
+    NUnitResults Explore(TestFilter filter);
+    NUnitResults Run(ITestEventListener listener, TestFilter filter);
+    void StopRun();
+
+    T GetService<T>()
+        where T : class;
+
+    void GenerateTestOutput(NUnitResults testResults, string assemblyPath, string testOutputXmlFolder);
+    string GetXmlFilePath(string folder, string defaultFileName, string extension);
+}
+
+public class NUnitEngineAdapter : INUnitEngineAdapter, IDisposable
+{
+    private IAdapterSettings settings;
+    private ITestLogger logger;
+    private TestPackage package;
+    private ITestEngine TestEngine { get; set; }
+    private ITestRunner Runner { get; set; }
+
+    internal event Action<ITestEngine> InternalEngineCreated;
+
+    public bool EngineEnabled => TestEngine != null;
+
+    public void Initialize()
     {
-        NUnitResults Explore();
-        void CloseRunner();
-        NUnitResults Explore(TestFilter filter);
-        NUnitResults Run(ITestEventListener listener, TestFilter filter);
-        void StopRun();
+#if NET462
+        var engineX = new TestEngine();
+#else
+        var engineX = TestEngineActivator.CreateInstance() ?? new TestEngine();
+#endif
 
-        T GetService<T>()
-            where T : class;
-
-        void GenerateTestOutput(NUnitResults testResults, string assemblyPath, string testOutputXmlFolder);
-        string GetXmlFilePath(string folder, string defaultFileName, string extension);
+        InternalEngineCreated?.Invoke(engineX);
+        TestEngine = engineX;
+        var tmpPath = Path.Combine(Path.GetTempPath(), "NUnit.Engine");
+        if (!Directory.Exists(tmpPath))
+            Directory.CreateDirectory(tmpPath);
+        TestEngine.WorkDirectory = tmpPath;
+        TestEngine.InternalTraceLevel = InternalTraceLevel.Off;
     }
 
-    public class NUnitEngineAdapter : INUnitEngineAdapter, IDisposable
+    public void InitializeSettingsAndLogging(IAdapterSettings setting, ITestLogger testLog)
     {
-        private IAdapterSettings settings;
-        private ITestLogger logger;
-        private TestPackage package;
-        private ITestEngine TestEngine { get; set; }
-        private ITestRunner Runner { get; set; }
+        logger = testLog;
+        settings = setting;
+    }
 
-        internal event Action<ITestEngine> InternalEngineCreated;
+    public void CreateRunner(TestPackage testPackage)
+    {
+        package = testPackage;
+        Runner = TestEngine.GetRunner(package);
+    }
 
-        public bool EngineEnabled => TestEngine != null;
+    public NUnitResults Explore()
+        => Explore(TestFilter.Empty);
 
-        public void Initialize()
+    public NUnitResults Explore(TestFilter filter)
+    {
+        var timing = new TimingLogger(settings, logger);
+        var results = new NUnitResults(Runner.Explore(filter));
+        return LogTiming(filter, timing, results);
+    }
+
+    public NUnitResults Run(ITestEventListener listener, TestFilter filter)
+    {
+        var timing = new TimingLogger(settings, logger);
+        var results = new NUnitResults(Runner.Run(listener, filter));
+        return LogTiming(filter, timing, results);
+    }
+
+    private NUnitResults LogTiming(TestFilter filter, TimingLogger timing, NUnitResults results)
+    {
+        timing.LogTime($"Execution engine run time with filter length {filter.Text.Length}");
+        if (filter.Text.Length < 300)
+            logger.Debug($"Filter: {filter.Text}");
+        return results;
+    }
+
+    public T GetService<T>()
+        where T : class
+    {
+        var service = TestEngine.Services.GetService<T>();
+        if (service == null)
         {
-#if NET462
-            var engineX = new TestEngine();
-#else
-            var engineX = TestEngineActivator.CreateInstance();
-#endif
-            if (engineX == null)
-                engineX = new TestEngine();
-
-            InternalEngineCreated?.Invoke(engineX);
-            TestEngine = engineX;
-            var tmpPath = Path.Combine(Path.GetTempPath(), "NUnit.Engine");
-            if (!Directory.Exists(tmpPath))
-                Directory.CreateDirectory(tmpPath);
-            TestEngine.WorkDirectory = tmpPath;
-            TestEngine.InternalTraceLevel = InternalTraceLevel.Off;
+            logger.Warning($"Engine GetService can't create service {typeof(T)}.");
         }
+        return service;
+    }
 
-        public void InitializeSettingsAndLogging(IAdapterSettings setting, ITestLogger testLog)
+    public void StopRun()
+        => Runner?.StopRun(true);
+
+    public void CloseRunner()
+    {
+        if (Runner == null)
+            return;
+        if (Runner.IsTestRunning)
+            Runner.StopRun(true);
+
+        try
         {
-            logger = testLog;
-            settings = setting;
-#if EnableTraceLevelAtInitialization
-            
-#endif
+            Runner.Unload();
+            Runner.Dispose();
         }
-
-        public void CreateRunner(TestPackage testPackage)
+        catch (NUnitEngineUnloadException ex)
         {
-            package = testPackage;
-            Runner = TestEngine.GetRunner(package);
+            logger.Warning($"Engine encountered NUnitEngineUnloadException :  {ex.Message}");
         }
+        Runner = null;
+    }
 
-        public NUnitResults Explore()
+    public void Dispose()
+    {
+        CloseRunner();
+        TestEngine?.Dispose();
+    }
+
+    public void GenerateTestOutput(NUnitResults testResults, string assemblyPath, string testOutputXmlFolder)
+    {
+        if (!settings.UseTestOutputXml)
+            return;
+
+        var resultService = GetService<IResultService>();
+
+        using Mutex mutex = new Mutex(false, string.IsNullOrWhiteSpace(assemblyPath) ? nameof(GenerateTestOutput) : Path.GetFileNameWithoutExtension(assemblyPath));
+        bool received = false;
+        try
         {
-            return Explore(TestFilter.Empty);
+            received = mutex.WaitOne();
+            string path = GetXmlFilePath(testOutputXmlFolder, GetTestOutputFileName(assemblyPath), "xml");
+
+            // Following null argument should work for nunit3 format. Empty array is OK as well.
+            // If you decide to handle other formats in the runsettings, it needs more work.
+            var resultWriter = resultService.GetResultWriter("nunit3", null);
+            resultWriter.WriteResultFile(testResults.FullTopNode, path);
+            logger.Info($"   Test results written to {path}");
         }
-
-        public NUnitResults Explore(TestFilter filter)
+        finally
         {
-            var timing = new TimingLogger(settings, logger);
-            var results = new NUnitResults(Runner.Explore(filter));
-            return LogTiming(filter, timing, results);
-        }
-
-        public NUnitResults Run(ITestEventListener listener, TestFilter filter)
-        {
-            var timing = new TimingLogger(settings, logger);
-            var results = new NUnitResults(Runner.Run(listener, filter));
-            return LogTiming(filter, timing, results);
-        }
-
-        private NUnitResults LogTiming(TestFilter filter, TimingLogger timing, NUnitResults results)
-        {
-            timing.LogTime($"Execution engine run time with filter length {filter.Text.Length}");
-            if (filter.Text.Length < 300)
-                logger.Debug($"Filter: {filter.Text}");
-            return results;
-        }
-
-        public T GetService<T>()
-            where T : class
-        {
-            var service = TestEngine.Services.GetService<T>();
-            if (service == null)
+            if (received)
             {
-                logger.Warning($"Engine GetService can't create service {typeof(T)}.");
-            }
-            return service;
-        }
-
-        public void StopRun()
-        {
-            Runner?.StopRun(true);
-        }
-
-        public void CloseRunner()
-        {
-            if (Runner == null)
-                return;
-            if (Runner.IsTestRunning)
-                Runner.StopRun(true);
-
-            try
-            {
-                Runner.Unload();
-                Runner.Dispose();
-            }
-            catch (NUnitEngineUnloadException ex)
-            {
-                logger.Warning($"Engine encountered NUnitEngineUnloadException :  {ex.Message}");
-            }
-            Runner = null;
-        }
-
-        public void Dispose()
-        {
-            CloseRunner();
-            TestEngine?.Dispose();
-        }
-
-        public void GenerateTestOutput(NUnitResults testResults, string assemblyPath, string testOutputXmlFolder)
-        {
-            if (!settings.UseTestOutputXml)
-                return;
-
-            var resultService = GetService<IResultService>();
-
-            using (Mutex mutex = new Mutex(false, string.IsNullOrWhiteSpace(assemblyPath) ? nameof(GenerateTestOutput) : Path.GetFileNameWithoutExtension(assemblyPath)))
-            {
-                bool received = false;
-                try
-                {
-                    received = mutex.WaitOne();
-                    string path = GetXmlFilePath(testOutputXmlFolder, GetTestOutputFileName(assemblyPath), "xml");
-
-                    // Following null argument should work for nunit3 format. Empty array is OK as well.
-                    // If you decide to handle other formats in the runsettings, it needs more work.
-                    var resultWriter = resultService.GetResultWriter("nunit3", null);
-                    resultWriter.WriteResultFile(testResults.FullTopNode, path);
-                    logger.Info($"   Test results written to {path}");
-                }
-                finally
-                {
-                    if (received)
-                    {
-                        mutex.ReleaseMutex();
-                    }
-                }
+                mutex.ReleaseMutex();
             }
         }
+    }
 
-        public string GetTestOutputFileName(string assemblyPath)
+    public string GetTestOutputFileName(string assemblyPath)
+        => string.IsNullOrWhiteSpace(settings.TestOutputXmlFileName)
+            ? Path.GetFileNameWithoutExtension(assemblyPath)
+            : settings.TestOutputXmlFileName;
+
+    public string GetXmlFilePath(string folder, string defaultFileName, string extension)
+    {
+        if (!settings.NewOutputXmlFileForEachRun)
         {
-            if (string.IsNullOrWhiteSpace(settings.TestOutputXmlFileName))
-            {
-                return Path.GetFileNameWithoutExtension(assemblyPath);
-            }
-            return settings.TestOutputXmlFileName;
+            // overwrite the existing file
+            return Path.Combine(folder, $"{defaultFileName}.{extension}");
         }
-
-        public string GetXmlFilePath(string folder, string defaultFileName, string extension)
+        // allways create a new file
+        int i = 1;
+        while (true)
         {
-            if (!settings.NewOutputXmlFileForEachRun)
-            {
-                // overwrite the existing file
-                return Path.Combine(folder, $"{defaultFileName}.{extension}");
-            }
-            // allways create a new file
-            int i = 1;
-            while (true)
-            {
-                string path = Path.Combine(folder, $"{defaultFileName}.{i++}.{extension}");
-                if (!File.Exists(path))
-                    return path;
-            }
+            string path = Path.Combine(folder, $"{defaultFileName}.{i++}.{extension}");
+            if (!File.Exists(path))
+                return path;
         }
     }
 }

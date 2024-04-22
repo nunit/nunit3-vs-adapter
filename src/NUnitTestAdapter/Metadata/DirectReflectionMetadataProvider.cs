@@ -25,84 +25,82 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using NUnit.VisualStudio.TestAdapter.Internal;
 
 #if !NET462 && !NETSTANDARD
 using System.Runtime.Loader;
 #endif
 
-namespace NUnit.VisualStudio.TestAdapter.Metadata
+namespace NUnit.VisualStudio.TestAdapter.Metadata;
+
+internal sealed class DirectReflectionMetadataProvider : IMetadataProvider
 {
-    internal sealed class DirectReflectionMetadataProvider : IMetadataProvider
+    public TypeInfo? GetDeclaringType(string assemblyPath, string reflectedTypeName, string methodName)
     {
-        public TypeInfo? GetDeclaringType(string assemblyPath, string reflectedTypeName, string methodName)
+        var type = TryGetSingleMethod(assemblyPath, reflectedTypeName, methodName)?.DeclaringType;
+        if (type == null) return null;
+
+        if (type.IsConstructedGenericType)
         {
-            var type = TryGetSingleMethod(assemblyPath, reflectedTypeName, methodName)?.DeclaringType;
-            if (type == null) return null;
-
-            if (type.IsConstructedGenericType)
-            {
-                type = type.GetGenericTypeDefinition();
-            }
-
-            return new TypeInfo(type);
+            type = type.GetGenericTypeDefinition();
         }
 
-        public TypeInfo? GetStateMachineType(string assemblyPath, string reflectedTypeName, string methodName)
+        return new TypeInfo(type);
+    }
+
+    public TypeInfo? GetStateMachineType(string assemblyPath, string reflectedTypeName, string methodName)
+    {
+        var method = TryGetSingleMethod(assemblyPath, reflectedTypeName, methodName);
+        if (method == null) return null;
+
+        var candidate = (Type)null;
+
+        foreach (var attributeData in CustomAttributeData.GetCustomAttributes(method))
         {
-            var method = TryGetSingleMethod(assemblyPath, reflectedTypeName, methodName);
-            if (method == null) return null;
-
-            var candidate = (Type)null;
-
-            foreach (var attributeData in CustomAttributeData.GetCustomAttributes(method))
+            for (var current = attributeData.Constructor.DeclaringType; current != null; current = current.GetTypeInfo().BaseType)
             {
-                for (var current = attributeData.Constructor.DeclaringType; current != null; current = current.GetTypeInfo().BaseType)
-                {
-                    if (current.FullName != "System.Runtime.CompilerServices.StateMachineAttribute") continue;
+                if (current.FullName != "System.Runtime.CompilerServices.StateMachineAttribute") continue;
 
-                    var parameters = attributeData.Constructor.GetParameters();
-                    for (var i = 0; i < parameters.Length; i++)
+                var parameters = attributeData.Constructor.GetParameters();
+                for (var i = 0; i < parameters.Length; i++)
+                {
+                    if (parameters[i].Name != "stateMachineType") continue;
+                    if (attributeData.ConstructorArguments[i].Value is Type argument)
                     {
-                        if (parameters[i].Name != "stateMachineType") continue;
-                        if (attributeData.ConstructorArguments[i].Value is Type argument)
-                        {
-                            if (candidate != null)
-                                return null;
-                            candidate = argument;
-                        }
+                        if (candidate != null)
+                            return null;
+                        candidate = argument;
                     }
                 }
             }
-
-            if (candidate == null)
-                return null;
-            return new TypeInfo(candidate);
         }
 
-        private static MethodInfo TryGetSingleMethod(string assemblyPath, string reflectedTypeName, string methodName)
+        if (candidate == null)
+            return null;
+        return new TypeInfo(candidate);
+    }
+
+    private static MethodInfo TryGetSingleMethod(string assemblyPath, string reflectedTypeName, string methodName)
+    {
+        try
         {
-            try
-            {
 #if !NET462 && !NETSTANDARD
-                var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
+            var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
 #else
-                var assembly = Assembly.LoadFrom(assemblyPath);
+            var assembly = Assembly.LoadFrom(assemblyPath);
 #endif
 
-                var type = assembly.GetType(reflectedTypeName, throwOnError: false);
+            var type = assembly.GetType(reflectedTypeName, throwOnError: false);
 
-                var methods = type?.GetMethods().Where(m => m.Name == methodName).Take(2).ToList();
-                return methods?.Count == 1 ? methods[0] : null;
-            }
-            catch (FileNotFoundException)
-            {
-                return null;
-            }
+            var methods = type?.GetMethods().Where(m => m.Name == methodName).Take(2).ToList();
+            return methods?.Count == 1 ? methods[0] : null;
         }
-
-        void IDisposable.Dispose()
+        catch (FileNotFoundException)
         {
+            return null;
         }
+    }
+
+    void IDisposable.Dispose()
+    {
     }
 }

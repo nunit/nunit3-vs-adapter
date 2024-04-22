@@ -29,18 +29,18 @@ using NSubstitute;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests
+namespace NUnit.VisualStudio.TestAdapter.Tests;
+
+/// <summary>
+/// Helper methods for testing against test cases.
+/// </summary>
+internal static class TestCaseUtils
 {
     /// <summary>
-    /// Helper methods for testing against test cases.
+    /// Knows how to convert an entire XML fragment.
     /// </summary>
-    internal static class TestCaseUtils
+    public static IReadOnlyList<TestCase> ConvertTestCases(this TestConverterForXml testConverterForXml, string xml)
     {
-        /// <summary>
-        /// Knows how to convert an entire XML fragment.
-        /// </summary>
-        public static IReadOnlyList<TestCase> ConvertTestCases(this TestConverterForXml testConverterForXml, string xml)
-        {
             if (testConverterForXml == null) throw new ArgumentNullException(nameof(testConverterForXml));
 
             var fragment = new XmlDocument().CreateDocumentFragment();
@@ -55,8 +55,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             return testCases;
         }
 
-        public static IReadOnlyCollection<TestCase> ConvertTestCases(string xml)
-        {
+    public static IReadOnlyCollection<TestCase> ConvertTestCases(string xml)
+    {
             var settings = Substitute.For<IAdapterSettings>();
             settings.CollectSourceInformation.Returns(false);
             using (var testConverter = new TestConverterForXml(
@@ -67,5 +67,4 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 return testConverter.ConvertTestCases(xml);
             }
         }
-    }
 }

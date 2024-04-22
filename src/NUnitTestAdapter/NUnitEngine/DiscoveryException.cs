@@ -24,27 +24,26 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
+namespace NUnit.VisualStudio.TestAdapter.NUnitEngine;
+
+[Serializable]
+public class DiscoveryException : Exception
 {
-    [Serializable]
-    public class DiscoveryException : Exception
+    public DiscoveryException()
     {
-        public DiscoveryException()
-        {
-        }
+    }
 
-        public DiscoveryException(string message) : base(message)
-        {
-        }
+    public DiscoveryException(string message) : base(message)
+    {
+    }
 
-        public DiscoveryException(string message, Exception inner) : base(message, inner)
-        {
-        }
+    public DiscoveryException(string message, Exception inner) : base(message, inner)
+    {
+    }
 
-        protected DiscoveryException(
-            SerializationInfo info,
-            StreamingContext context) : base(info, context)
-        {
-        }
+    protected DiscoveryException(
+        SerializationInfo info,
+        StreamingContext context) : base(info, context)
+    {
     }
 }

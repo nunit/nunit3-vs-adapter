@@ -26,38 +26,37 @@ using System.Collections.Generic;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
+namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes;
+
+class FakeRunContext : FakeDiscoveryContext, IRunContext
 {
-    class FakeRunContext : FakeDiscoveryContext, IRunContext
+    public FakeRunContext() : base(new FakeRunSettings())
     {
-        public FakeRunContext() : base(new FakeRunSettings())
-        {
-        }
-
-
-        public FakeRunContext(FakeRunSettings fakeRunSettings) : base(fakeRunSettings)
-        {
-        }
-
-        #region IRunContext Members
-
-        bool IRunContext.InIsolation => throw new NotImplementedException();
-
-        bool IRunContext.IsBeingDebugged => throw new NotImplementedException();
-
-        bool IRunContext.IsDataCollectionEnabled => throw new NotImplementedException();
-
-        bool IRunContext.KeepAlive => true;
-
-        string IRunContext.TestRunDirectory => throw new NotImplementedException();
-
-        ITestCaseFilterExpression IRunContext.GetTestCaseFilter(IEnumerable<string> supportedProperties, Func<string, TestProperty> propertyProvider)
-        {
-            return null;  // as if we don't have a TFS Build, equal to testing from VS
-        }
-
-        #endregion
-
-        public string SolutionDirectory => throw new NotImplementedException();
     }
+
+
+    public FakeRunContext(FakeRunSettings fakeRunSettings) : base(fakeRunSettings)
+    {
+    }
+
+    #region IRunContext Members
+
+    bool IRunContext.InIsolation => throw new NotImplementedException();
+
+    bool IRunContext.IsBeingDebugged => throw new NotImplementedException();
+
+    bool IRunContext.IsDataCollectionEnabled => throw new NotImplementedException();
+
+    bool IRunContext.KeepAlive => true;
+
+    string IRunContext.TestRunDirectory => throw new NotImplementedException();
+
+    ITestCaseFilterExpression IRunContext.GetTestCaseFilter(IEnumerable<string> supportedProperties, Func<string, TestProperty> propertyProvider)
+    {
+        return null;  // as if we don't have a TFS Build, equal to testing from VS
+    }
+
+    #endregion
+
+    public string SolutionDirectory => throw new NotImplementedException();
 }

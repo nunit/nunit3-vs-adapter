@@ -24,27 +24,27 @@
 using System.Xml;
 using NUnit.VisualStudio.TestAdapter.Dump;
 
-namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
+namespace NUnit.VisualStudio.TestAdapter.NUnitEngine;
+
+public class NUnitTestEventHeader : INUnitTestEventForXml
 {
-    public class NUnitTestEventHeader : INUnitTestEventForXml
+    public enum EventType
     {
-        public enum EventType
-        {
-            NoIdea,
-            StartTest,  // Match: A test was started
-            TestCase,   // Match: A test was finished
-            TestSuite,  // Match: A suite was finished
-            TestOutput, // Match: Test output, not part of test results, but should be added to it
-            StartRun,  // Currently not used
-            StartSuite // Currently not used
-        }
-        public XmlNode Node { get; }
-        public string AsString() => Node.AsString();
-        public string FullName => Node.GetAttribute("fullname");
-        public string Name => Node.GetAttribute("name");
-        public EventType Type { get; }
-        public NUnitTestEventHeader(string sNode)
-        {
+        NoIdea,
+        StartTest,  // Match: A test was started
+        TestCase,   // Match: A test was finished
+        TestSuite,  // Match: A suite was finished
+        TestOutput, // Match: Test output, not part of test results, but should be added to it
+        StartRun,  // Currently not used
+        StartSuite // Currently not used
+    }
+    public XmlNode Node { get; }
+    public string AsString() => Node.AsString();
+    public string FullName => Node.GetAttribute("fullname");
+    public string Name => Node.GetAttribute("name");
+    public EventType Type { get; }
+    public NUnitTestEventHeader(string sNode)
+    {
             Node = XmlHelper.CreateXmlNode(sNode);
             Type = Node.Name switch
             {
@@ -57,5 +57,4 @@ namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
                 _ => EventType.NoIdea
             };
         }
-    }
 }

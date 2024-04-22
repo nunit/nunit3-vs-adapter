@@ -26,20 +26,20 @@ using System.Linq;
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
+namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests;
+
+public class NUnitTestEventsTests
 {
-    public class NUnitTestEventsTests
-    {
-        private const string StartSuite = @"<start-suite id = '0-1073' parentId='0-1141' name='SimpleTests' fullname='NUnitTestDemo.SimpleTests' type='TestFixture' />";
-        private readonly string testSuite = @"<test-suite type='TestFixture' id='0-1073' name='SimpleTests' fullname='NUnitTestDemo.SimpleTests' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' testcasecount='20' result='Failed' site='Child' start-time='2020-01-24 13:02:55Z' end-time='2020-01-24 13:02:55Z' duration='0.032827' total='15' passed='6' failed='8' warnings='0' inconclusive='1' skipped='0' asserts='11' parentId='0-1141'>
+    private const string StartSuite = @"<start-suite id = '0-1073' parentId='0-1141' name='SimpleTests' fullname='NUnitTestDemo.SimpleTests' type='TestFixture' />";
+    private readonly string testSuite = @"<test-suite type='TestFixture' id='0-1073' name='SimpleTests' fullname='NUnitTestDemo.SimpleTests' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' testcasecount='20' result='Failed' site='Child' start-time='2020-01-24 13:02:55Z' end-time='2020-01-24 13:02:55Z' duration='0.032827' total='15' passed='6' failed='8' warnings='0' inconclusive='1' skipped='0' asserts='11' parentId='0-1141'>
    <failure>
       <message><![CDATA[One or more child tests had errors]]></message>
    </failure>
 </test-suite>";
 
-        [Test]
-        public void ThatTestEventIsParsedForTestSuite()
-        {
+    [Test]
+    public void ThatTestEventIsParsedForTestSuite()
+    {
             var sut = new NUnitTestEventSuiteFinished(testSuite);
             Assert.Multiple(() =>
             {
@@ -53,11 +53,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
             Assert.That(sut.FailureMessage, Is.EqualTo("One or more child tests had errors"));
         }
 
-        private readonly string startTest = @"<start-test id='0-1139' parentId='0-1138' name='Test2' fullname='NUnitTestDemo.SetUpFixture.TestFixture2.Test2' type='TestMethod' />";
+    private readonly string startTest = @"<start-test id='0-1139' parentId='0-1138' name='Test2' fullname='NUnitTestDemo.SetUpFixture.TestFixture2.Test2' type='TestMethod' />";
 
-        [Test]
-        public void ThatTestEventIsParsedForStartTest()
-        {
+    [Test]
+    public void ThatTestEventIsParsedForStartTest()
+    {
             var sut = new NUnitTestEventStartTest(startTest);
             Assert.Multiple(() =>
             {
@@ -69,8 +69,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
             });
         }
 
-        private readonly string testCaseFailing =
-            @"<test-case id='0-1076' name='TestFails' fullname='NUnitTestDemo.SimpleTests.TestFails' methodname='TestFails' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' seed='325575216' result='Failed' start-time='2020-01-23 18:07:42Z' end-time='2020-01-23 18:07:42Z' duration='0.001060' asserts='1' parentId='0-1073'>
+    private readonly string testCaseFailing =
+        @"<test-case id='0-1076' name='TestFails' fullname='NUnitTestDemo.SimpleTests.TestFails' methodname='TestFails' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' seed='325575216' result='Failed' start-time='2020-01-23 18:07:42Z' end-time='2020-01-23 18:07:42Z' duration='0.001060' asserts='1' parentId='0-1073'>
    <properties>
       <property name='Expect' value='Failure' />
    </properties>
@@ -91,9 +91,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
       </assertion>
    </assertions>
 </test-case>";
-        [Test]
-        public void ThatTestEventIsParsedForFailingTestCase()
-        {
+    [Test]
+    public void ThatTestEventIsParsedForFailingTestCase()
+    {
             var sut = new NUnitTestEventTestCase(testCaseFailing);
             Assert.Multiple(() =>
             {
@@ -108,9 +108,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
             });
         }
 
-        [Test]
-        public void ThatTestCasePropertiesAreParsedWhenFailing()
-        {
+    [Test]
+    public void ThatTestCasePropertiesAreParsedWhenFailing()
+    {
             var sut = new NUnitTestEventTestCase(testCaseFailing);
             Assert.That(sut.Properties, Is.Not.Null);
             Assert.That(sut.Properties.Count, Is.EqualTo(1));
@@ -120,9 +120,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
             Assert.That(property.Value, Is.EqualTo("Failure"));
         }
 
-        [Test]
-        public void ThatTestCaseFailureIsParsedWhenFailing()
-        {
+    [Test]
+    public void ThatTestCaseFailureIsParsedWhenFailing()
+    {
             var sut = new NUnitTestEventTestCase(testCaseFailing);
             var failure = sut.Failure;
             Assert.That(failure, Is.Not.Null);
@@ -134,14 +134,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
         }
 
 
-        private readonly string testCaseSucceeds = @"<test-case id='0-1006' name='AsyncTaskTestSucceeds' fullname='NUnitTestDemo.AsyncTests.AsyncTaskTestSucceeds' methodname='AsyncTaskTestSucceeds' classname='NUnitTestDemo.AsyncTests' runstate='Runnable' seed='1350317088' result='Passed' start-time='2020-01-23 18:07:42Z' end-time='2020-01-23 18:07:42Z' duration='0.001131' asserts='1' parentId='0-1004'>
+    private readonly string testCaseSucceeds = @"<test-case id='0-1006' name='AsyncTaskTestSucceeds' fullname='NUnitTestDemo.AsyncTests.AsyncTaskTestSucceeds' methodname='AsyncTaskTestSucceeds' classname='NUnitTestDemo.AsyncTests' runstate='Runnable' seed='1350317088' result='Passed' start-time='2020-01-23 18:07:42Z' end-time='2020-01-23 18:07:42Z' duration='0.001131' asserts='1' parentId='0-1004'>
    <properties>
       <property name='Expect' value='Pass' />
    </properties>
 </test-case>";
-        [Test]
-        public void ThatTestEventIsParsedForSuccessTestCase()
-        {
+    [Test]
+    public void ThatTestEventIsParsedForSuccessTestCase()
+    {
             var sut = new NUnitTestEventTestCase(testCaseSucceeds);
             Assert.Multiple(() =>
             {
@@ -153,14 +153,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
             });
         }
 
-        private readonly string testSuiteFinished = @"<test-suite type='TestFixture' id='0-1094' name='TextOutputTests' fullname='NUnitTestDemo.TextOutputTests' classname='NUnitTestDemo.TextOutputTests' runstate='Runnable' testcasecount='9' result='Passed' start-time='2020-01-23 18:07:42Z' end-time='2020-01-23 18:07:42Z' duration='0.018222' total='9' passed='9' failed='0' warnings='0' inconclusive='0' skipped='0' asserts='0' parentId='0-1141'>
+    private readonly string testSuiteFinished = @"<test-suite type='TestFixture' id='0-1094' name='TextOutputTests' fullname='NUnitTestDemo.TextOutputTests' classname='NUnitTestDemo.TextOutputTests' runstate='Runnable' testcasecount='9' result='Passed' start-time='2020-01-23 18:07:42Z' end-time='2020-01-23 18:07:42Z' duration='0.018222' total='9' passed='9' failed='0' warnings='0' inconclusive='0' skipped='0' asserts='0' parentId='0-1141'>
    <properties>
       <property name='Expect' value='Pass' />
    </properties>
 </test-suite>";
-        [Test]
-        public void ThatTestEventIsParsedForFinishSuite()
-        {
+    [Test]
+    public void ThatTestEventIsParsedForFinishSuite()
+    {
             var sut = new NUnitTestEventSuiteFinished(testSuiteFinished);
             Assert.Multiple(() =>
             {
@@ -172,8 +172,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
             });
         }
 
-        private readonly string testSuiteFinishedWithReason =
-            @"<test-suite type='ParameterizedMethod' id='0-1043' name='TestCaseWarns' fullname='NUnitTestDemo.ParameterizedTests.TestCaseWarns' classname='NUnitTestDemo.ParameterizedTests' runstate='Runnable' testcasecount='1' result='Warning' site='Child' start-time='2020-01-26 12:45:23Z' end-time='2020-01-26 12:45:23Z' duration='0.001552' total='0' passed='0' failed='0' warnings='1' inconclusive='0' skipped='0' asserts='1' parentId='0-1031'>
+    private readonly string testSuiteFinishedWithReason =
+        @"<test-suite type='ParameterizedMethod' id='0-1043' name='TestCaseWarns' fullname='NUnitTestDemo.ParameterizedTests.TestCaseWarns' classname='NUnitTestDemo.ParameterizedTests' runstate='Runnable' testcasecount='1' result='Warning' site='Child' start-time='2020-01-26 12:45:23Z' end-time='2020-01-26 12:45:23Z' duration='0.001552' total='0' passed='0' failed='0' warnings='1' inconclusive='0' skipped='0' asserts='1' parentId='0-1031'>
    <properties>
       <property name='Expect' value='Warning' />
    </properties>
@@ -182,15 +182,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
    </reason>
 </test-suite>";
 
-        [Test]
-        public void ThatTestEventIsParsedForFinishSuiteWithReason()
-        {
+    [Test]
+    public void ThatTestEventIsParsedForFinishSuiteWithReason()
+    {
             var sut = new NUnitTestEventSuiteFinished(testSuiteFinishedWithReason);
             Assert.That(sut.HasReason);
             Assert.That(sut.ReasonMessage, Is.EqualTo("One or more child tests had warnings"));
             Assert.That(sut.HasFailure, Is.False);
         }
-        private readonly string testCaseSucceedsWithOutputAndReason = @"<test-case id='0-1074' name='TestSucceeds' fullname='NUnitTestDemo.SimpleTests.TestSucceeds' methodname='TestSucceeds' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' seed='1232497275' result='Passed' start-time='2020-01-24 11:18:32Z' end-time='2020-01-24 11:18:32Z' duration='0.016868' asserts='1' parentId='0-1073'>
+    private readonly string testCaseSucceedsWithOutputAndReason = @"<test-case id='0-1074' name='TestSucceeds' fullname='NUnitTestDemo.SimpleTests.TestSucceeds' methodname='TestSucceeds' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' seed='1232497275' result='Passed' start-time='2020-01-24 11:18:32Z' end-time='2020-01-24 11:18:32Z' duration='0.016868' asserts='1' parentId='0-1073'>
    <properties>
       <property name='Expect' value='Pass' />
    </properties>
@@ -201,32 +201,32 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
 ]]></output>
 </test-case>";
 
-        [Test]
-        public void ThatTestEventIsParsedForTestCaseWithReason()
-        {
+    [Test]
+    public void ThatTestEventIsParsedForTestCaseWithReason()
+    {
             var sut = new NUnitTestEventTestCase(testCaseSucceedsWithOutputAndReason);
             Assert.That(sut.HasReason);
             Assert.That(sut.ReasonMessage, Is.EqualTo("One or more child tests had warnings"));
         }
 
-        private readonly string testSuiteFinishedWithFailure = @"<test-suite type='ParameterizedMethod' id='0-1072' name='TestCaseWithRandomParameterWithFixedNaming' fullname='NUnitTestDemo.ParameterizedTests.TestCaseWithRandomParameterWithFixedNaming' classname='NUnitTestDemo.ParameterizedTests' runstate='Runnable' testcasecount='2' result='Failed' site='Child' start-time='2020-01-26 12:45:23Z' end-time='2020-01-26 12:45:23Z' duration='0.000101' total='2' passed='1' failed='1' warnings='0' inconclusive='0' skipped='0' asserts='0' parentId='0-1031'>
+    private readonly string testSuiteFinishedWithFailure = @"<test-suite type='ParameterizedMethod' id='0-1072' name='TestCaseWithRandomParameterWithFixedNaming' fullname='NUnitTestDemo.ParameterizedTests.TestCaseWithRandomParameterWithFixedNaming' classname='NUnitTestDemo.ParameterizedTests' runstate='Runnable' testcasecount='2' result='Failed' site='Child' start-time='2020-01-26 12:45:23Z' end-time='2020-01-26 12:45:23Z' duration='0.000101' total='2' passed='1' failed='1' warnings='0' inconclusive='0' skipped='0' asserts='0' parentId='0-1031'>
    <failure>
       <message><![CDATA[One or more child tests had errors]]></message>
    </failure>
 </test-suite>";
 
-        [Test]
-        public void ThatTestEventIsParsedForFinishSuiteWithFailure()
-        {
+    [Test]
+    public void ThatTestEventIsParsedForFinishSuiteWithFailure()
+    {
             var sut = new NUnitTestEventSuiteFinished(testSuiteFinishedWithFailure);
             Assert.That(sut.HasFailure);
             Assert.That(sut.FailureMessage, Is.EqualTo("One or more child tests had errors"));
         }
 
-        /// <summary>
-        /// Exception in OneTimeSetUp
-        /// </summary>
-        private readonly string testSuiteFinishedWithFailureAndStackTrace = @"<test-suite type='TestFixture' id='0-1000' name='Tests' fullname='Issue671.Tests' classname='Issue671.Tests' runstate='Runnable' testcasecount='2' result='Failed' label='Error' site='SetUp' start-time='2021-05-29T09:34:10.2386869Z' end-time='2021-05-29T09:34:10.2532435Z' duration='0.014557' total='2' passed='0' failed='2' warnings='0' inconclusive='0' skipped='0' asserts='0'>
+    /// <summary>
+    /// Exception in OneTimeSetUp
+    /// </summary>
+    private readonly string testSuiteFinishedWithFailureAndStackTrace = @"<test-suite type='TestFixture' id='0-1000' name='Tests' fullname='Issue671.Tests' classname='Issue671.Tests' runstate='Runnable' testcasecount='2' result='Failed' label='Error' site='SetUp' start-time='2021-05-29T09:34:10.2386869Z' end-time='2021-05-29T09:34:10.2532435Z' duration='0.014557' total='2' passed='0' failed='2' warnings='0' inconclusive='0' skipped='0' asserts='0'>
             <failure>
                <message><![CDATA[System.Exception : oops Deep Down]]></message>
                <stack-trace><![CDATA[   at Issue671.SomeWhereDeepDown.WhatDoWeDoHere() in d:\repos\NUnit\nunit3-vs-adapter.issues\Issue671\UnitTest1.cs:line 44
@@ -244,9 +244,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
             </test-case>
          </test-suite>";
 
-        [Test]
-        public void ThatTestEventIsParsedForFinishSuiteWithExceptionInOneTimeSetUp()
-        {
+    [Test]
+    public void ThatTestEventIsParsedForFinishSuiteWithExceptionInOneTimeSetUp()
+    {
             var sut = new NUnitTestEventSuiteFinished(testSuiteFinishedWithFailureAndStackTrace);
             Assert.That(sut.HasFailure);
             Assert.That(sut.FailureMessage.Length, Is.GreaterThan(0));
@@ -255,16 +255,16 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
 
 
 
-        private readonly string testCaseSucceedsWithOutput = @"<test-case id='0-1074' name='TestSucceeds' fullname='NUnitTestDemo.SimpleTests.TestSucceeds' methodname='TestSucceeds' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' seed='1232497275' result='Passed' start-time='2020-01-24 11:18:32Z' end-time='2020-01-24 11:18:32Z' duration='0.016868' asserts='1' parentId='0-1073'>
+    private readonly string testCaseSucceedsWithOutput = @"<test-case id='0-1074' name='TestSucceeds' fullname='NUnitTestDemo.SimpleTests.TestSucceeds' methodname='TestSucceeds' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' seed='1232497275' result='Passed' start-time='2020-01-24 11:18:32Z' end-time='2020-01-24 11:18:32Z' duration='0.016868' asserts='1' parentId='0-1073'>
    <properties>
       <property name='Expect' value='Pass' />
    </properties>
    <output><![CDATA[Simple test running
 ]]></output>
 </test-case>";
-        [Test]
-        public void ThatTestEventIsParsedForSuccessTestCaseWithOutput()
-        {
+    [Test]
+    public void ThatTestEventIsParsedForSuccessTestCaseWithOutput()
+    {
             var sut = new NUnitTestEventTestCase(testCaseSucceedsWithOutput);
             Assert.Multiple(() =>
             {
@@ -278,7 +278,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
             });
         }
 
-        private readonly string testCaseFails = @"<test-case id='0-1076' name='TestFails' fullname='NUnitTestDemo.SimpleTests.TestFails' methodname='TestFails' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' seed='299199212' result='Failed' start-time='2020-01-26 12:45:23Z' end-time='2020-01-26 12:45:23Z' duration='0.000959' asserts='1' parentId='0-1073'>
+    private readonly string testCaseFails = @"<test-case id='0-1076' name='TestFails' fullname='NUnitTestDemo.SimpleTests.TestFails' methodname='TestFails' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' seed='299199212' result='Failed' start-time='2020-01-26 12:45:23Z' end-time='2020-01-26 12:45:23Z' duration='0.000959' asserts='1' parentId='0-1073'>
    <properties>
       <property name='Expect' value='Failure' />
    </properties>
@@ -300,9 +300,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
    </assertions>
 </test-case>";
 
-        [Test]
-        public void ThatTestCaseFailsCanBeParsed()
-        {
+    [Test]
+    public void ThatTestCaseFailsCanBeParsed()
+    {
             var sut = new NUnitTestEventTestCase(testCaseFails);
             Assert.That(sut.Properties.Count, Is.EqualTo(1));
             Assert.That(sut.HasFailure);
@@ -313,7 +313,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
             });
         }
 
-        private readonly string testCaseFailsWithReason = @"<test-case id='0-1086' name='TestIsIgnored_Assert' fullname='NUnitTestDemo.SimpleTests.TestIsIgnored_Assert' methodname='TestIsIgnored_Assert' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' seed='202557333' result='Skipped' label='Ignored' start-time='2020-01-26 12:45:23Z' end-time='2020-01-26 12:45:23Z' duration='0.000540' asserts='0' parentId='0-1073'>
+    private readonly string testCaseFailsWithReason = @"<test-case id='0-1086' name='TestIsIgnored_Assert' fullname='NUnitTestDemo.SimpleTests.TestIsIgnored_Assert' methodname='TestIsIgnored_Assert' classname='NUnitTestDemo.SimpleTests' runstate='Runnable' seed='202557333' result='Skipped' label='Ignored' start-time='2020-01-26 12:45:23Z' end-time='2020-01-26 12:45:23Z' duration='0.000540' asserts='0' parentId='0-1073'>
    <properties>
       <property name='Expect' value='Ignore' />
    </properties>
@@ -322,24 +322,23 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
    </reason>
 </test-case>";
 
-        [Test]
-        public void ThatTestCaseFailsCanBeParsedWithReason()
-        {
+    [Test]
+    public void ThatTestCaseFailsCanBeParsedWithReason()
+    {
             var sut = new NUnitTestEventTestCase(testCaseFailsWithReason);
             Assert.That(sut.ReasonMessage, Is.EqualTo("Ignoring this test deliberately"));
         }
 
-        private readonly string testCaseExplicitFixtureTime =
-            @"<test-case id='0-1001' name='ExplicitTest' fullname='NUnit3VSIssue811.Explicit.ExplicitTest' methodname='ExplicitTest' classname='NUnit3VSIssue811.Explicit' runstate='Runnable' seed='1980958818' result='Skipped' label='Explicit' site='Parent' start-time='0001-01-01T00:00:00.0000000' end-time='0001-01-01T00:00:00.0000000' duration='0.000000' asserts='0' parentId='0-1000'/>";
+    private readonly string testCaseExplicitFixtureTime =
+        @"<test-case id='0-1001' name='ExplicitTest' fullname='NUnit3VSIssue811.Explicit.ExplicitTest' methodname='ExplicitTest' classname='NUnit3VSIssue811.Explicit' runstate='Runnable' seed='1980958818' result='Skipped' label='Explicit' site='Parent' start-time='0001-01-01T00:00:00.0000000' end-time='0001-01-01T00:00:00.0000000' duration='0.000000' asserts='0' parentId='0-1000'/>";
 
-        /// <summary>
-        /// Issue 811.
-        /// </summary>
-        [Test]
-        public void ThatExplicitTestFixtureWorksWithZeroStartTime()
-        {
+    /// <summary>
+    /// Issue 811.
+    /// </summary>
+    [Test]
+    public void ThatExplicitTestFixtureWorksWithZeroStartTime()
+    {
             var sut = new NUnitTestEventTestCase(testEvent: testCaseExplicitFixtureTime);
             Assert.DoesNotThrow(code: () => sut.StartTime());
         }
-    }
 }

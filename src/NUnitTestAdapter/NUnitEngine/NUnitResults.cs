@@ -25,49 +25,48 @@ using System.Linq;
 using System.Xml;
 using NUnit.VisualStudio.TestAdapter.Dump;
 
-namespace NUnit.VisualStudio.TestAdapter.NUnitEngine
+namespace NUnit.VisualStudio.TestAdapter.NUnitEngine;
+
+public class NUnitResults
 {
-    public class NUnitResults
+    public enum SkipReason
     {
-        public enum SkipReason
-        {
-            NoNUnitTests,
-            LoadFailure
-        }
+        NoNUnitTests,
+        LoadFailure
+    }
 
 
-        public XmlNode TopNode { get; }
+    public XmlNode TopNode { get; }
 
-        public bool IsRunnable { get; }
+    public bool IsRunnable { get; }
 
-        public string AsString() => FullTopNode.AsString();
+    public string AsString() => FullTopNode.AsString();
 
-        public XmlNode FullTopNode { get; }
-        public NUnitResults(XmlNode results)
-        {
-            FullTopNode = results;
-            // Currently, this will always be the case but it might change
-            TopNode = results.Name == "test-run" ? results.FirstChild : results;
-            // ReSharper disable once StringLiteralTypo
-            IsRunnable = TopNode.GetAttribute("runstate") == "Runnable";
-        }
+    public XmlNode FullTopNode { get; }
+    public NUnitResults(XmlNode results)
+    {
+        FullTopNode = results;
+        // Currently, this will always be the case but it might change
+        TopNode = results.Name == "test-run" ? results.FirstChild : results;
+        // ReSharper disable once StringLiteralTypo
+        IsRunnable = TopNode.GetAttribute("runstate") == "Runnable";
+    }
 
 
-        public SkipReason WhatSkipReason()
-        {
-            var msgNode = TopNode.SelectSingleNode("properties/property[@name='_SKIPREASON']");
-            return msgNode != null &&
-                   new[] { "contains no tests", "Has no TestFixtures" }.Any(msgNode.GetAttribute("value")
-                       .Contains)
-                ? SkipReason.NoNUnitTests
-                : SkipReason.LoadFailure;
-        }
+    public SkipReason WhatSkipReason()
+    {
+        var msgNode = TopNode.SelectSingleNode("properties/property[@name='_SKIPREASON']");
+        return msgNode != null &&
+               new[] { "contains no tests", "Has no TestFixtures" }.Any(msgNode.GetAttribute("value")
+                   .Contains)
+            ? SkipReason.NoNUnitTests
+            : SkipReason.LoadFailure;
+    }
 
-        public bool HasNoNUnitTests => WhatSkipReason() == SkipReason.NoNUnitTests;
+    public bool HasNoNUnitTests => WhatSkipReason() == SkipReason.NoNUnitTests;
 
-        public XmlNodeList TestCases()
-        {
-            return TopNode.SelectNodes("//test-case");
-        }
+    public XmlNodeList TestCases()
+    {
+        return TopNode.SelectNodes("//test-case");
     }
 }

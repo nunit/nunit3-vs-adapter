@@ -1,15 +1,15 @@
 ﻿using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
+namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance;
+
+public sealed class BundledDependencyTests : AcceptanceTests
 {
-    public sealed class BundledDependencyTests : AcceptanceTests
+    [Test, Platform("Win")]
+    public static void User_tests_get_the_version_of_Mono_Cecil_referenced_from_the_test_project()
     {
-        [Test, Platform("Win")]
-        public static void User_tests_get_the_version_of_Mono_Cecil_referenced_from_the_test_project()
-        {
-            var workspace = CreateWorkspace()
-                .AddProject("Test.csproj", $@"
+        var workspace = CreateWorkspace()
+            .AddProject("Test.csproj", $@"
                     <Project Sdk='Microsoft.NET.Sdk'>
 
                       <PropertyGroup>
@@ -19,7 +19,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                       <ItemGroup>
                         <PackageReference Include='Microsoft.NET.Test.Sdk' Version='*' />
                         <PackageReference Include='Mono.Cecil' Version='0.10.0-beta5' />
-                        <PackageReference Include='NUnit' Version='*' />
+                        <PackageReference Include='NUnit' Version='3.*' />
                         <PackageReference Include='NUnit3TestAdapter' Version='{NuGetPackageVersion}' />
                       </ItemGroup>
 
@@ -28,7 +28,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                       </ItemGroup>
 
                     </Project>")
-                .AddFile("BundledDependencyTests.cs", @"
+            .AddFile("BundledDependencyTests.cs", @"
                     using System.Diagnostics;
                     using System.Reflection;
                     using NUnit.Framework;
@@ -50,19 +50,19 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                         }
                     }");
 
-            workspace.MsBuild(restore: true);
+        workspace.MsBuild(restore: true);
 
-            foreach (var targetFramework in TargetFrameworks)
-            {
-                workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll", VsTestFilter.NoFilter);
-            }
-        }
-
-        [Test, Platform("Win")]
-        public static void Engine_uses_its_bundled_version_of_Mono_Cecil_instead_of_the_version_referenced_by_the_test_project()
+        foreach (var targetFramework in TargetFrameworks)
         {
-            var workspace = CreateWorkspace()
-                .AddProject("Test.csproj", $@"
+            workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll", VsTestFilter.NoFilter);
+        }
+    }
+
+    [Test, Platform("Win")]
+    public static void Engine_uses_its_bundled_version_of_Mono_Cecil_instead_of_the_version_referenced_by_the_test_project()
+    {
+        var workspace = CreateWorkspace()
+            .AddProject("Test.csproj", $@"
                     <Project Sdk='Microsoft.NET.Sdk'>
 
                       <PropertyGroup>
@@ -72,7 +72,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                       <ItemGroup>
                         <PackageReference Include='Microsoft.NET.Test.Sdk' Version='*' />
                         <PackageReference Include='Mono.Cecil' Version='0.10.0' />
-                        <PackageReference Include='NUnit' Version='*' />
+                        <PackageReference Include='NUnit' Version='3.*' />
                         <PackageReference Include='NUnit3TestAdapter' Version='{NuGetPackageVersion}' />
                       </ItemGroup>
                       <ItemGroup Condition=""'$(TargetFrameworkIdentifier)' == '.NETFramework'"">
@@ -89,7 +89,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                       </ItemGroup>
 
                     </Project>")
-                .AddFile("BundledDependencyTests.cs", @"
+            .AddFile("BundledDependencyTests.cs", @"
                     using System.Diagnostics;
                     using System.Reflection;
                     using NUnit.Framework;
@@ -110,7 +110,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                             Assert.That(versionBlock.ProductVersion, Is.EqualTo(""0.10.0.0""));
                         }
                     }")
-                .AddFile("TestNUnitEngineExtension.cs", @"
+            .AddFile("TestNUnitEngineExtension.cs", @"
                     using NUnit.Engine;
                     using NUnit.Engine.Extensibility;
 
@@ -125,15 +125,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                         {
                         }
                     }")
-                .AddFile("test.addins", @"
+            .AddFile("test.addins", @"
                     ﻿Test.dll");
 
-            workspace.MsBuild(restore: true);
+        workspace.MsBuild(restore: true);
 
-            foreach (var targetFramework in TargetFrameworks)
-            {
-                workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll", VsTestFilter.NoFilter);
-            }
+        foreach (var targetFramework in TargetFrameworks)
+        {
+            workspace.VSTest($@"bin\Debug\{targetFramework}\Test.dll", VsTestFilter.NoFilter);
         }
     }
 }

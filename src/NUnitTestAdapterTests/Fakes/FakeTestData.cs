@@ -25,19 +25,19 @@ using System.IO;
 using System.Reflection;
 using System.Xml;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
-{
-    /// <summary>
-    /// FakeTestData provides xml data representing a test.
-    /// </summary>
-    public static class FakeTestData
-    {
-        // ReSharper disable once UnusedMember.Local
-        private static void FakeTestCase() { } // LineNumber should be this line
+namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
-        #region TestXmls
-        public const string TestXml =
-            @"<test-suite
+/// <summary>
+/// FakeTestData provides xml data representing a test.
+/// </summary>
+public static class FakeTestData
+{
+    // ReSharper disable once UnusedMember.Local
+    private static void FakeTestCase() { } // LineNumber should be this line
+
+    #region TestXmls
+    public const string TestXml =
+        @"<test-suite
                 id='121'
                 name='FakeTestData'
                 fullname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData'
@@ -58,7 +58,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
                 </test-case>
             </test-suite>";
 
-        public const string HierarchyTestXml = @"<test-run id='2' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' testcasecount='5'>
+    public const string HierarchyTestXml = @"<test-run id='2' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' testcasecount='5'>
     <test-suite type='Assembly' id='0-1009' name='nUnitClassLibrary.dll' fullname='C:\Users\navb\source\repos\nUnitClassLibrary\nUnitClassLibrary\bin\Debug\nUnitClassLibrary.dll' runstate='Runnable' testcasecount='5'>
         <properties>
             <property name='Category' value='AsmCat' />
@@ -115,10 +115,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
         </test-suite>
     </test-suite>
 </test-run>";
-        #endregion
+    #endregion
 
-        public const string ResultXml =
-            @"<test-suite
+    public const string ResultXml =
+        @"<test-suite
                 id='121'
                 name='FakeTestData'
                 fullname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData'
@@ -172,32 +172,31 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes
                 </test-case>
             </test-suite>";
 
-        public const string DisplayName = "FakeTestCase";
+    public const string DisplayName = "FakeTestCase";
 
-        public const string FullyQualifiedName = "NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData.FakeTestCase";
+    public const string FullyQualifiedName = "NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData.FakeTestCase";
 
-        public static readonly string AssemblyPath =
-            typeof(FakeTestData).GetTypeInfo().Assembly.ManifestModule.FullyQualifiedName;
+    public static readonly string AssemblyPath =
+        typeof(FakeTestData).GetTypeInfo().Assembly.ManifestModule.FullyQualifiedName;
 
-        public static readonly string CodeFile = Path.Combine(Path.GetDirectoryName(AssemblyPath), @"..\..\..\Fakes\FakeTestData.cs");
+    public static readonly string CodeFile = Path.Combine(Path.GetDirectoryName(AssemblyPath), @"..\..\..\Fakes\FakeTestData.cs");
 
-        // NOTE: If the location of the FakeTestCase method defined
-        // above changes, update the value of LineNumber.
-        public const int LineNumber = 36;
+    // NOTE: If the location of the FakeTestCase method defined
+    // above changes, update the value of LineNumber.
+    public const int LineNumber = 36;
 
-        public static XmlNode GetTestNode()
-        {
-            return XmlHelper.CreateXmlNode(TestXml).SelectSingleNode("test-case");
-        }
+    public static XmlNode GetTestNode()
+    {
+        return XmlHelper.CreateXmlNode(TestXml).SelectSingleNode("test-case");
+    }
 
-        public static XmlNodeList GetTestNodes()
-        {
-            return XmlHelper.CreateXmlNode(HierarchyTestXml).SelectNodes("//test-case");
-        }
+    public static XmlNodeList GetTestNodes()
+    {
+        return XmlHelper.CreateXmlNode(HierarchyTestXml).SelectNodes("//test-case");
+    }
 
-        public static XmlNode GetResultNode()
-        {
-            return XmlHelper.CreateXmlNode(ResultXml).SelectSingleNode("test-case");
-        }
+    public static XmlNode GetResultNode()
+    {
+        return XmlHelper.CreateXmlNode(ResultXml).SelectSingleNode("test-case");
     }
 }

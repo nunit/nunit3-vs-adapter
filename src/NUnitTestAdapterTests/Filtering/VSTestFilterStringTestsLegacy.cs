@@ -26,20 +26,20 @@ using System.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NUnit.Framework;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
+namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering;
+
+public static class VSTestFilterStringTestsLegacy
 {
-    public static class VSTestFilterStringTestsLegacy
+    [TestCase(null, new[] { "NonExplicitParent.NonExplicitTest" })]
+    [TestCase("", new[] { "NonExplicitParent.NonExplicitTest" })]
+    [TestCase("TestCategory = CategoryThatMatchesNothing", new string[0])]
+    [TestCase("MeaninglessName", new string[0])]
+    [TestCase("TestCategory != CategoryThatMatchesNothing", new[] { "NonExplicitParent.NonExplicitTest" })]
+    [TestCase("TestCategory = SomeCat", new[] { "NonExplicitParent.NonExplicitTest" })]
+    [TestCase("TestCategory != SomeCat", new string[0])]
+    public static void NoFiltersIncludeExplicitTests(string vsTestFilterString, IReadOnlyCollection<string> nonExplicitTestIds)
     {
-        [TestCase(null, new[] { "NonExplicitParent.NonExplicitTest" })]
-        [TestCase("", new[] { "NonExplicitParent.NonExplicitTest" })]
-        [TestCase("TestCategory = CategoryThatMatchesNothing", new string[0])]
-        [TestCase("MeaninglessName", new string[0])]
-        [TestCase("TestCategory != CategoryThatMatchesNothing", new[] { "NonExplicitParent.NonExplicitTest" })]
-        [TestCase("TestCategory = SomeCat", new[] { "NonExplicitParent.NonExplicitTest" })]
-        [TestCase("TestCategory != SomeCat", new string[0])]
-        public static void NoFiltersIncludeExplicitTests(string vsTestFilterString, IReadOnlyCollection<string> nonExplicitTestIds)
-        {
-            var result = ApplyFilter(vsTestFilterString, @"
+        var result = ApplyFilter(vsTestFilterString, @"
                 <test-suite id='1' name='NonExplicitParent' fullname='NonExplicitParent'>
                     <test-case id='2' name='NonExplicitTest' fullname='NonExplicitParent.NonExplicitTest'>
                         <properties>
@@ -60,15 +60,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering
                     </test-case>
                 </test-suite>");
 
-            Assert.That(from test in result select test.FullyQualifiedName, Is.EquivalentTo(nonExplicitTestIds));
-        }
+        Assert.That(from test in result select test.FullyQualifiedName, Is.EquivalentTo(nonExplicitTestIds));
+    }
 
-        private static IEnumerable<TestCase> ApplyFilter(string vsTestFilterString, string testCasesXml)
-        {
-            var filter = FilteringTestUtils.CreateTestFilter(string.IsNullOrEmpty(vsTestFilterString) ? null :
-                FilteringTestUtils.CreateVSTestFilterExpression(vsTestFilterString));
+    private static IEnumerable<TestCase> ApplyFilter(string vsTestFilterString, string testCasesXml)
+    {
+        var filter = FilteringTestUtils.CreateTestFilter(string.IsNullOrEmpty(vsTestFilterString) ? null :
+            FilteringTestUtils.CreateVSTestFilterExpression(vsTestFilterString));
 
-            return filter.CheckFilter(TestCaseUtils.ConvertTestCases(testCasesXml));
-        }
+        return filter.CheckFilter(TestCaseUtils.ConvertTestCases(testCasesXml));
     }
 }

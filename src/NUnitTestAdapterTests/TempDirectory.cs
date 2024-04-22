@@ -25,23 +25,22 @@ using System;
 using System.IO;
 using IO = System.IO;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests
-{
-    internal sealed class TempDirectory : IDisposable
-    {
-        public string Path { get; }
+namespace NUnit.VisualStudio.TestAdapter.Tests;
 
-        public TempDirectory()
-        {
+internal sealed class TempDirectory : IDisposable
+{
+    public string Path { get; }
+
+    public TempDirectory()
+    {
             Path = IO.Path.Combine(IO.Path.GetTempPath(), IO.Path.GetRandomFileName());
             Directory.CreateDirectory(Path);
         }
 
-        public void Dispose()
-        {
+    public void Dispose()
+    {
             Utils.DeleteDirectoryRobust(Path);
         }
 
-        public static implicit operator string(TempDirectory tempDirectory) => tempDirectory.Path;
-    }
+    public static implicit operator string(TempDirectory tempDirectory) => tempDirectory.Path;
 }

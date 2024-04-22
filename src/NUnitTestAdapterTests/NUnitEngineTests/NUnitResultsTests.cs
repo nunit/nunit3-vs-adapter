@@ -27,8 +27,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests
-{
-    public class NUnitResultsTests
-    { }
-}
+namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests;
+
+public class NUnitResultsTests
+{ }

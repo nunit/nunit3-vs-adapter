@@ -1,13 +1,13 @@
 ﻿using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools;
 
-namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
+namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance;
+
+public sealed class PropertyTests : CsProjAcceptanceTests
 {
-    public sealed class PropertyTests : CsProjAcceptanceTests
+    protected override void AddTestsCs(IsolatedWorkspace workspace)
     {
-        protected override void AddTestsCs(IsolatedWorkspace workspace)
-        {
-            workspace.AddFile("Issue779.cs", @"
+        workspace.AddFile("Issue779.cs", @"
                 using System;
                 using NUnit.Framework;
 
@@ -29,30 +29,29 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance
                         }
                     }
                 }");
-        }
+    }
 
-        protected override string Framework => Frameworks.NetCoreApp31;
+    protected override string Framework => Frameworks.NetCoreApp31;
 
-        [Test, Platform("Win")]
-        [TestCase("Bug=99999", 0, 0)]
-        [TestCase("Bug=12345", 1, 1)]
-        [TestCase("Bug!=12345", 1, 1)]
-        public void DotNetTest(string filter, int executed, int total)
-        {
-            var workspace = Build();
-            var results = workspace.DotNetTest(filter, true, true, TestContext.WriteLine);
-            Verify(executed, total, results);
-        }
+    [Test, Platform("Win")]
+    [TestCase("Bug=99999", 0, 0)]
+    [TestCase("Bug=12345", 1, 1)]
+    [TestCase("Bug!=12345", 1, 1)]
+    public void DotNetTest(string filter, int executed, int total)
+    {
+        var workspace = Build();
+        var results = workspace.DotNetTest(filter, true, true, TestContext.WriteLine);
+        Verify(executed, total, results);
+    }
 
-        [Test, Platform("Win")]
-        [TestCase("Bug=99999", 0, 0)]
-        [TestCase("Bug=12345", 1, 1)]
-        [TestCase("Bug!=12345", 1, 1)]
-        public void VsTest(string filter, int executed, int total)
-        {
-            var workspace = Build();
-            var results = workspace.VSTest($@"bin\Debug\{Framework}\Test.dll", new VsTestTestCaseFilter(filter));
-            Verify(executed, total, results);
-        }
+    [Test, Platform("Win")]
+    [TestCase("Bug=99999", 0, 0)]
+    [TestCase("Bug=12345", 1, 1)]
+    [TestCase("Bug!=12345", 1, 1)]
+    public void VsTest(string filter, int executed, int total)
+    {
+        var workspace = Build();
+        var results = workspace.VSTest($@"bin\Debug\{Framework}\Test.dll", new VsTestTestCaseFilter(filter));
+        Verify(executed, total, results);
     }
 }
