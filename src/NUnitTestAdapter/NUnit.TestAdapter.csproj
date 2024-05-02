@@ -34,7 +34,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Testing.Extensions.VSTestBridge" Version="1.1.0" />
     <PackageReference Include="SourceLink.Create.CommandLine" Version="2.8.3" PrivateAssets="All" />
-	<PackageReference Include="nunit" Version="3.14.0" />
+	  <PackageReference Include="nunit" Version="3.14.0" />
     <PackageReference Include="nunit.engine" Version="3.17.0" />
     <PackageReference Include="TestCentric.Metadata" Version="3.0.2" Aliases="TestCentric" />
   </ItemGroup>
