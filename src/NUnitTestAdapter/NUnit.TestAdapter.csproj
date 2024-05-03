@@ -32,17 +32,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Testing.Extensions.VSTestBridge" Version="1.1.0" />
     <PackageReference Include="SourceLink.Create.CommandLine" Version="2.8.3" PrivateAssets="All" />
+	  <PackageReference Include="nunit" Version="3.14.0" />
     <PackageReference Include="nunit.engine" Version="3.17.0" />
     <PackageReference Include="TestCentric.Metadata" Version="3.0.2" Aliases="TestCentric" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
-    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="11.0.0" PrivateAssets="All" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
-    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="15.0.0" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>

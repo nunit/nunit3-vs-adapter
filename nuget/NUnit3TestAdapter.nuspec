@@ -24,6 +24,17 @@
     <tags>test visualstudio testadapter nunit nunit3 dotnet</tags>
 
     <developmentDependency>false</developmentDependency>
+
+    <dependencies>
+      <group targetFramework="net462">
+        <dependency id="Microsoft.Testing.Extensions.VSTestBridge" version="1.1.0" />
+        <dependency id="Microsoft.Testing.Platform.MSBuild" version="1.1.0" />
+      </group>
+      <group targetFramework="netcoreapp3.1">
+        <dependency id="Microsoft.Testing.Extensions.VSTestBridge" version="1.1.0" />
+        <dependency id="Microsoft.Testing.Platform.MSBuild" version="1.1.0" />
+      </group>
+    </dependencies>
   </metadata>
   <files>
     <file src="..\..\images\nunit_256.png" target="" />
@@ -36,6 +47,7 @@
     <file src="build\net462\nunit.engine.core.dll" target="build\net462\nunit.engine.core.dll" />
     <file src="build\net462\testcentric.engine.metadata.dll" target="build\net462\testcentric.engine.metadata.dll"/>
     <file src="build\net462\NUnit3TestAdapter.props" target="build\net462\NUnit3TestAdapter.props" />
+    <file src="build\net462\NUnit3TestAdapter.targets" target="build\net462\NUnit3TestAdapter.targets" />
 
     <file src="build\netcoreapp3.1\NUnit3.TestAdapter.dll" target="build\netcoreapp3.1\NUnit3.TestAdapter.dll" />
     <file src="build\netcoreapp3.1\NUnit3.TestAdapter.pdb" target="build\netcoreapp3.1\NUnit3.TestAdapter.pdb" />
@@ -44,6 +56,7 @@
     <file src="build\netcoreapp3.1\nunit.engine.core.dll" target="build\netcoreapp3.1\nunit.engine.core.dll" />
     <file src="build\netcoreapp3.1\testcentric.engine.metadata.dll" target="build\netcoreapp3.1\testcentric.engine.metadata.dll"/>
     <file src="build\netcoreapp3.1\NUnit3TestAdapter.props" target="build\netcoreapp3.1\NUnit3TestAdapter.props" />
+    <file src="build\netcoreapp3.1\NUnit3TestAdapter.targets" target="build\netcoreapp3.1\NUnit3TestAdapter.targets" />
 
 
   </files>

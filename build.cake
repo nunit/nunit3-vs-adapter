@@ -225,6 +225,7 @@ Task("CreateWorkingImage")
         CreateDirectory(net462Dir);
         CopyFiles(net462Files, net462Dir);
         CopyFileToDirectory("nuget/net462/NUnit3TestAdapter.props", net462Dir);
+        CopyFileToDirectory("nuget/net462/NUnit3TestAdapter.targets", net462Dir);
 
         var netcoreDir = PACKAGE_IMAGE_DIR + "build/" + NETCOREAPP_TFM;
         DotNetCorePublish(ADAPTER_PROJECT, new DotNetCorePublishSettings
@@ -234,6 +235,7 @@ Task("CreateWorkingImage")
             Framework = NETCOREAPP_TFM
         });
         CopyFileToDirectory($"nuget/{NETCOREAPP_TFM}/NUnit3TestAdapter.props", netcoreDir);
+        CopyFileToDirectory($"nuget/{NETCOREAPP_TFM}/NUnit3TestAdapter.targets", netcoreDir);
     });
 
 Task("PackageZip")
