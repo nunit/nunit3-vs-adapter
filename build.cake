@@ -13,9 +13,9 @@ var configuration = Argument("configuration", "Release");
 //////////////////////////////////////////////////////////////////////
 
 
-var version = "4.6.0";
+var version = "5.0.0";
 
-var modifier = "-beta.2";
+var modifier = "-beta.1";
 
 var dbgSuffix = configuration.ToLower() == "debug" ? "-dbg" : "";
 var packageVersion = version + modifier + dbgSuffix;
