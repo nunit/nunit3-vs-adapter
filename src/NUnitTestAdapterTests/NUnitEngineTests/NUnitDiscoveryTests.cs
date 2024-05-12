@@ -980,8 +980,8 @@ public class NUnitDiscoveryTests
         var sut = new DiscoveryConverter(logger, settings);
         var ndr = sut.ConvertXml(
             new NUnitResults(XmlHelper.CreateXmlNode(DotnetXml)));
-        var fixtures = ndr.TestAssembly.TestFixtures;
-        Assert.That(fixtures.Count(), Is.EqualTo(3), "Didnt find all fixtures");
+        var fixtures = ndr.TestAssembly.TestFixtures.ToList();
+        Assert.That(fixtures.Count, Is.EqualTo(3), "Didnt find all fixtures");
         foreach (var fixture in fixtures)
         {
             Assert.That(fixture.TestCases.Count, Is.EqualTo(3),
@@ -1010,7 +1010,7 @@ public class NUnitDiscoveryTests
 </test-run>";
 
     /// <summary>
-    /// See issue 1041 at https://github.com/nunit/nunit3-vs-adapter/issues/1044
+    /// See issue 1041 at https://github.com/nunit/nunit3-vs-adapter/issues/1044.
     /// </summary>
     private const string MixedExplicitTestSourceXmlForIssue1041 =
         @"<test-run id='0' name='Issue1044.dll' fullname='d:\repos\NUnit\nunit3-vs-adapter.issues\Issue1044\bin\Debug\net7.0\Issue1044.dll' runstate='Runnable' testcasecount='4'>

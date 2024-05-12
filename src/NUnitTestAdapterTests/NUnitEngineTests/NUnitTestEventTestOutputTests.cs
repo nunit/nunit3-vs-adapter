@@ -6,16 +6,16 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests;
 public class NUnitTestEventTestOutputTests
 {
     private const string OutputProgress =
-        @"<test-output stream='Progress' testid='0-1001' testname='Something.TestClass.Whatever'><![CDATA[Whatever]]></test-output>";
+        "<test-output stream='Progress' testid='0-1001' testname='Something.TestClass.Whatever'><![CDATA[Whatever]]></test-output>";
 
     private const string OutputOut =
-        @"<test-output stream='Out' testid='0-1001' testname='Something.TestClass.Whatever'><![CDATA[Whatever]]></test-output>";
+        "<test-output stream='Out' testid='0-1001' testname='Something.TestClass.Whatever'><![CDATA[Whatever]]></test-output>";
 
     private const string OutputError =
-        @"<test-output stream='Error' testid='0-1001' testname='Something.TestClass.Whatever'><![CDATA[Whatever]]></test-output>";
+        "<test-output stream='Error' testid='0-1001' testname='Something.TestClass.Whatever'><![CDATA[Whatever]]></test-output>";
 
     private const string BlankTestOutput =
-        @"<test-output stream='Progress' testid='0-1001' testname='Something.TestClass.Whatever'><![CDATA[   ]]></test-output>";
+        "<test-output stream='Progress' testid='0-1001' testname='Something.TestClass.Whatever'><![CDATA[   ]]></test-output>";
 
 
 

@@ -29,17 +29,10 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering;
 
-public sealed class TestDoubleFilterExpression : ITestCaseFilterExpression
+public sealed class TestDoubleFilterExpression(string testCaseFilterValue, Func<Func<string, object>, bool> predicate)
+    : ITestCaseFilterExpression
 {
-    private readonly Func<Func<string, object>, bool> predicate;
-
-    public TestDoubleFilterExpression(string testCaseFilterValue, Func<Func<string, object>, bool> predicate)
-    {
-            TestCaseFilterValue = testCaseFilterValue;
-            this.predicate = predicate;
-        }
-
-    public string TestCaseFilterValue { get; }
+    public string TestCaseFilterValue { get; } = testCaseFilterValue;
 
     public bool MatchTestCase(TestCase testCase, Func<string, object> propertyValueProvider)
     {

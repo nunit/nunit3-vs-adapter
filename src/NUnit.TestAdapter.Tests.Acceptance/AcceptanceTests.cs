@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
 
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
@@ -277,7 +276,6 @@ public abstract class AcceptanceTests
 
         var path = selected?.FullName;
 
-        return path is null ? null :
-            Path.GetFileNameWithoutExtension(path).Substring(packageId.Length + 1);
+        return Path.GetFileNameWithoutExtension(path)?.Substring(packageId.Length + 1) ?? "";
     }
 }

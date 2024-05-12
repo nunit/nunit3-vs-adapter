@@ -75,9 +75,9 @@ public class DumpXmlTests
             file.Received().WriteAllText(Arg.Is<string>(o => o.StartsWith(expected, StringComparison.OrdinalIgnoreCase)), Arg.Any<string>());
         }
 
-    [TestCase(@"/some/Folder/Whatever.dll", @"/some/Folder/Dump/D_Whatever.dll.dump")]
-    [TestCase(@"/some/Folder/Whatever.dll", @"/some/Folder/Dump")]
-    [TestCase(@"/some/Folder/Whatever.dll", @"/some/Folder")]
+    [TestCase("/some/Folder/Whatever.dll", "/some/Folder/Dump/D_Whatever.dll.dump")]
+    [TestCase("/some/Folder/Whatever.dll", "/some/Folder/Dump")]
+    [TestCase("/some/Folder/Whatever.dll", "/some/Folder")]
     [Platform("Unix")]
     public void ThatPathIsCorrectlyParsedInDiscoveryPhaseOnUnix(string path, string expected)
     {

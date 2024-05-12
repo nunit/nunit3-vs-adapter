@@ -40,12 +40,12 @@ public sealed class FilterTests : CsProjAcceptanceTests
 
     [Test, Platform("Win")]
     [TestCase(NoFilter, 2, 3)]
-    [TestCase(@"TestCategory=FooGroup", 1, 2)]
-    [TestCase(@"TestCategory!=BarGroup", 1, 2)]
-    [TestCase(@"TestCategory=IsExplicit", 1, 1)]
-    [TestCase(@"FullyQualifiedName=Filter.Tests.Foo", 1, 1)]
-    [TestCase(@"FullyQualifiedName!=Filter.Tests.Foo", 1, 1)]
-    [TestCase(@"TestCategory!=AllGroup", 0, 0)]
+    [TestCase("TestCategory=FooGroup", 1, 2)]
+    [TestCase("TestCategory!=BarGroup", 1, 2)]
+    [TestCase("TestCategory=IsExplicit", 1, 1)]
+    [TestCase("FullyQualifiedName=Filter.Tests.Foo", 1, 1)]
+    [TestCase("FullyQualifiedName!=Filter.Tests.Foo", 1, 1)]
+    [TestCase("TestCategory!=AllGroup", 0, 0)]
     // [TestCase(@"TestThatDontExistHere", 0, 0)]
     // [TestCase(@"FullyQualifiedName~Filter.Tests.Foo", 1, 1)]
     // [TestCase(@"FullyQualifiedName~Foo", 1, 1)]
@@ -58,11 +58,11 @@ public sealed class FilterTests : CsProjAcceptanceTests
 
     [Test, Platform("Win")]
     [TestCase(NoFilter, 2, 3)]
-    [TestCase(@"TestCategory=FooGroup", 1, 2)]
-    [TestCase(@"TestCategory!=BarGroup", 1, 2)]
-    [TestCase(@"TestCategory=IsExplicit", 1, 1)]
-    [TestCase(@"FullyQualifiedName=Filter.Tests.Foo", 1, 1)]
-    [TestCase(@"TestCategory=XXXX", 0, 0)]
+    [TestCase("TestCategory=FooGroup", 1, 2)]
+    [TestCase("TestCategory!=BarGroup", 1, 2)]
+    [TestCase("TestCategory=IsExplicit", 1, 1)]
+    [TestCase("FullyQualifiedName=Filter.Tests.Foo", 1, 1)]
+    [TestCase("TestCategory=XXXX", 0, 0)]
     public void Filter_VSTest(string filter, int executed, int total)
     {
             var workspace = Build();
@@ -84,7 +84,7 @@ public sealed class FilterTests : CsProjAcceptanceTests
     public void Filter_DotNetTest_NUnitWhere(string filter, int executed, int total)
     {
             var workspace = Build();
-            var nunitWhere = $@"NUnit.Where={filter}";
+            var nunitWhere = $"NUnit.Where={filter}";
             var results = workspace.DotNetTest(nunitWhere, true, true, TestContext.WriteLine);
             Verify(executed, total, results);
         }
