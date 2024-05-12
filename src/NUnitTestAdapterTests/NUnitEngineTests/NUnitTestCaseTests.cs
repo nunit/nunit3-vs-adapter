@@ -28,11 +28,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.NUnitEngineTests;
 
 public class NUnitTestCaseTests
 {
-    private const string XmlRunnable = @"<test-case id='0-1007' name='Test2M' fullname='TestWarnings.Test4.Test2M' methodname='Test2M' classname='TestWarnings.Test4' runstate='Runnable' seed='882017471' />";
+    private const string XmlRunnable = "<test-case id='0-1007' name='Test2M' fullname='TestWarnings.Test4.Test2M' methodname='Test2M' classname='TestWarnings.Test4' runstate='Runnable' seed='882017471' />";
 
-    private const string XmlExplicit = @"<test-case id='0-1007' name='Test2M' fullname='TestWarnings.Test4.Test2M' methodname='Test2M' classname='TestWarnings.Test4' runstate='Explicit' seed='882017471' />";
+    private const string XmlExplicit = "<test-case id='0-1007' name='Test2M' fullname='TestWarnings.Test4.Test2M' methodname='Test2M' classname='TestWarnings.Test4' runstate='Explicit' seed='882017471' />";
 
-    private const string XmlNone = @"<test-case id='0-1007' name='Test2M' fullname='TestWarnings.Test4.Test2M' methodname='Test2M' classname='TestWarnings.Test4' seed='882017471' />";
+    private const string XmlNone = "<test-case id='0-1007' name='Test2M' fullname='TestWarnings.Test4.Test2M' methodname='Test2M' classname='TestWarnings.Test4' seed='882017471' />";
 
 
     [Test]

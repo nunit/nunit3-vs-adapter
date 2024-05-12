@@ -209,7 +209,7 @@ public class AdapterSettingsTests
         _settings.Load(@"<RunSettings><NUnit><WorkDirectory>C:\Whatever</WorkDirectory><TestOutputXml>/my/work/dir</TestOutputXml></NUnit></RunSettings>");
         Assert.That(_settings.UseTestOutputXml);
         _settings.SetTestOutputFolder(_settings.WorkDirectory);
-        Assert.That(_settings.TestOutputFolder, Does.Contain(@"/my/work/dir"));
+        Assert.That(_settings.TestOutputFolder, Does.Contain("/my/work/dir"));
     }
 
     /// <summary>

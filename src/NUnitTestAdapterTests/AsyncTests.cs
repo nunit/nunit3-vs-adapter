@@ -49,9 +49,6 @@ public class AsyncTests
 
     private static Task ThrowException()
     {
-            return Task.Run(() =>
-            {
-                throw new InvalidOperationException();
-            });
+            return Task.Run(() => throw new InvalidOperationException());
         }
 }
