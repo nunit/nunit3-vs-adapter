@@ -9,7 +9,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v4.1.1
+    - uses: actions/checkout@v4.1.5
     - uses: actions/setup-dotnet@v4
       with:
         dotnet-version: |
