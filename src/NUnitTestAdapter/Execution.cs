@@ -80,6 +80,10 @@ public abstract class Execution(IExecutionContext ctx)
             }
             return testFilter;
         }
+        if (testFilter.IsPartitionFilter())
+        {
+            return testFilter;
+        }
         var filterBuilder = CreateTestFilterBuilder();
         return filterBuilder.FilterByList(discovery.LoadedTestCases);
     }

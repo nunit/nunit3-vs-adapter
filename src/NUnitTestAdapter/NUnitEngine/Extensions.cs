@@ -43,6 +43,9 @@ public static class Extensions
     public static bool IsCategoryFilter(this TestFilter filter) =>
         filter != TestFilter.Empty && filter.Text.Contains("<cat>");
 
+    public static bool IsPartitionFilter(this TestFilter filter) =>
+        filter != TestFilter.Empty && filter.Text.Contains("<partition>");
+
     public static bool IsNegativeCategoryFilter(this TestFilter filter) =>
         filter.IsCategoryFilter() && filter.Text.Contains("<not><cat>");
 }
