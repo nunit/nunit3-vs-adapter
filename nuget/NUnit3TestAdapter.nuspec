@@ -27,12 +27,12 @@
 
     <dependencies>
       <group targetFramework="net462">
-        <dependency id="Microsoft.Testing.Extensions.VSTestBridge" version="1.1.0" />
-        <dependency id="Microsoft.Testing.Platform.MSBuild" version="1.1.0" />
+        <dependency id="Microsoft.Testing.Extensions.VSTestBridge" version="1.2.1" />
+        <dependency id="Microsoft.Testing.Platform.MSBuild" version="1.2.1" />
       </group>
       <group targetFramework="netcoreapp3.1">
-        <dependency id="Microsoft.Testing.Extensions.VSTestBridge" version="1.1.0" />
-        <dependency id="Microsoft.Testing.Platform.MSBuild" version="1.1.0" />
+        <dependency id="Microsoft.Testing.Extensions.VSTestBridge" version="1.2.1" />
+        <dependency id="Microsoft.Testing.Platform.MSBuild" version="1.2.1" />
       </group>
     </dependencies>
   </metadata>
