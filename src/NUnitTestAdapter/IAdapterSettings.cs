@@ -91,6 +91,7 @@ public interface IAdapterSettings
     char FullnameSeparator { get; }
     DiscoveryMethod DiscoveryMethod { get; }
     bool SkipNonTestAssemblies { get; }
+    bool ThrowOnEachFailureUnderDebugger { get; }
 
     int AssemblySelectLimit { get; }
 
