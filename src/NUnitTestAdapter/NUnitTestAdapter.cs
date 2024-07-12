@@ -250,6 +250,9 @@ public abstract class NUnitTestAdapter
         if (Settings.SkipNonTestAssemblies)
             package.Settings[PackageSettings.SkipNonTestAssemblies] = true;
 
+        if (Settings.ThrowOnEachFailureUnderDebugger)
+            package.Settings[PackageSettings.ThrowOnEachFailureUnderDebugger] = true;
+
         // Always run one assembly at a time in process in its own domain
         package.Settings[PackageSettings.ProcessModel] = "InProcess";
 

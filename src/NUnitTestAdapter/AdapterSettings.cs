@@ -150,6 +150,7 @@ public class AdapterSettings(ITestLogger logger) : IAdapterSettings
     public bool UseNUnitIdforTestCaseId { get; private set; }  // default is false.
     public int ConsoleOut { get; private set; }
     public bool StopOnError { get; private set; }
+    public bool ThrowOnEachFailureUnderDebugger { get; private set; }
 
     public DiscoveryMethod DiscoveryMethod { get; private set; } = DiscoveryMethod.Current;
     public bool SkipNonTestAssemblies { get; private set; }
@@ -257,6 +258,7 @@ public class AdapterSettings(ITestLogger logger) : IAdapterSettings
         IncludeStackTraceForSuites = GetInnerTextAsBool(nunitNode, nameof(IncludeStackTraceForSuites), true);
         EnsureAttachmentFileScheme = GetInnerTextAsBool(nunitNode, nameof(EnsureAttachmentFileScheme), false);
         SkipExecutionWhenNoTests = GetInnerTextAsBool(nunitNode, nameof(SkipExecutionWhenNoTests), false);
+        ThrowOnEachFailureUnderDebugger = GetInnerTextAsBool(nunitNode, nameof(ThrowOnEachFailureUnderDebugger), false);
 
         // Engine settings
         DiscoveryMethod = MapEnum(GetInnerText(nunitNode, nameof(DiscoveryMethod), Verbosity > 0), DiscoveryMethod.Current);

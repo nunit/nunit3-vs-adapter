@@ -192,6 +192,11 @@ public static class PackageSettings
     public const string StopOnError = "StopOnError";
 
     /// <summary>
+    /// If true, asserts in multiple asserts block will throw first-chance exception on failure.
+    /// </summary>
+    public const string ThrowOnEachFailureUnderDebugger = "ThrowOnEachFailureUnderDebugger";
+
+    /// <summary>
     /// If true, use of the event queue is suppressed and test events are synchronous.
     /// </summary>
     public const string SynchronousEvents = "SynchronousEvents";
