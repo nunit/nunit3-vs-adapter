@@ -127,6 +127,7 @@ public class EmptyAssemblyDiscoveryTests : ITestCaseDiscoverySink
     static readonly string EmptyAssemblyPath =
         Path.Combine(TestContext.CurrentContext.TestDirectory, "empty-assembly.dll");
 
+    // [Ignore("This test fails in the engine when loading an empty test, with a TargetInvocationException  exception")]
     [TestCaseSource(typeof(TestDiscoveryDataProvider), nameof(TestDiscoveryDataProvider.TestDiscoveryData))]
     public void VerifyLoading(IDiscoveryContext context)
     {
