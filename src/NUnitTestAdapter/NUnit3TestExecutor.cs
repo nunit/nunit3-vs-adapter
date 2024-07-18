@@ -31,6 +31,7 @@ using System.Reflection;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 using NUnit.Engine;
 using NUnit.VisualStudio.TestAdapter.Dump;
@@ -142,7 +143,7 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
                 string assemblyPath = Path.IsPathRooted(assemblyName)
                     ? assemblyName
                     : Path.Combine(Directory.GetCurrentDirectory(), assemblyName);
-                RunAssembly(assemblyPath, null, filter);
+                RunAssembly(assemblyPath, null, filter, assemblyName);
             }
             catch (Exception ex)
             {
@@ -205,13 +206,13 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
                 var filterBuilder = CreateTestFilterBuilder();
                 var filter = filterBuilder.FilterByList(assemblyGroup);
 
-                RunAssembly(assemblyPath, assemblyGroup, filter);
+                RunAssembly(assemblyPath, assemblyGroup, filter, assemblyName);
             }
             catch (Exception ex)
             {
                 if (ex is TargetInvocationException) { ex = ex.InnerException; }
 
-                TestLog.Warning("Exception thrown executing tests", ex);
+                TestLog.Error("Exception thrown executing tests", ex);
             }
 
             assemblytiming.LogTime($"Executing {assemblyGroup.Key} time ");
@@ -274,7 +275,8 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
         TestLog.Debug("EnableShutdown: " + enableShutdown);
     }
 
-    private void RunAssembly(string assemblyPath, IGrouping<string, TestCase> testCases, TestFilter filter)
+    private void RunAssembly(string assemblyPath, IGrouping<string, TestCase> testCases, TestFilter filter,
+        string assemblyName)
     {
         LogActionAndSelection(assemblyPath, filter);
         RestoreRandomSeed(assemblyPath);
@@ -326,6 +328,20 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
             if (ex is TargetInvocationException)
                 ex = ex.InnerException;
             TestLog.Warning("   Exception thrown executing tests in " + assemblyPath, ex);
+            var tc = new TestCase(assemblyName, new Uri(NUnit3TestExecutor.ExecutorUri), assemblyName)
+            {
+                DisplayName = assemblyName,
+                FullyQualifiedName = assemblyName,
+                Id = Guid.NewGuid(),
+                CodeFilePath = assemblyPath,
+                LineNumber = 0,
+            };
+            FrameworkHandle.RecordResult(new TestResult(tc)
+            {
+                Outcome = TestOutcome.Failed,
+                ErrorMessage = ex.ToString(),
+                ErrorStackTrace = ex.StackTrace,
+            });
         }
         finally
         {

@@ -123,7 +123,8 @@ public sealed class NUnit3TestDiscoverer : NUnitTestAdapter, ITestDiscoverer
                 }
                 else
                 {
-                    TestLog.Warning("Exception thrown discovering tests in " + sourceAssembly, e);
+                    TestLog.Error("Exception thrown discovering tests in " + sourceAssembly, e);
+                    // throw; // This causes the VerifyLoading test to fail. It can't load the Empty assembly, which happens regardless of this, just when rethrowing it shows up.
                 }
             }
             catch (BadImageFormatException)
@@ -145,13 +146,19 @@ public sealed class NUnit3TestDiscoverer : NUnitTestAdapter, ITestDiscoverer
             catch (TypeLoadException ex)
             {
                 if (ex.TypeName == "NUnit.Framework.Api.FrameworkController")
+                {
                     TestLog.Warning("   Skipping NUnit 2.x test assembly");
+                }
                 else
-                    TestLog.Warning("Exception thrown discovering tests in " + sourceAssembly, ex);
+                {
+                    TestLog.Error("Exception thrown discovering tests in " + sourceAssembly, ex);
+                    throw;
+                }
             }
             catch (Exception ex)
             {
-                TestLog.Warning("Exception thrown discovering tests in " + sourceAssembly, ex);
+                TestLog.Error("Exception thrown discovering tests in " + sourceAssembly, ex);
+                throw;
             }
             finally
             {
