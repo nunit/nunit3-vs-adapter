@@ -15,12 +15,4 @@
     <PackageReference Include="NUnit" Version="4.1.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Update="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Update="StyleCop.Analyzers" Version="1.2.0-beta.556" />
-  </ItemGroup>
-
 </Project>

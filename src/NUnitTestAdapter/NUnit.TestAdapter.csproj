@@ -10,11 +10,11 @@
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <SourceLinkOriginUrl>https://github.com/nunit/nunit3-vs-adapter</SourceLinkOriginUrl>
     <SourceLinkCreate>true</SourceLinkCreate>
-    <AssemblyVersion>4.5.0.0</AssemblyVersion>
-    <FileVersion>4.5.0.0</FileVersion>
+    <AssemblyVersion>4.6.0.0</AssemblyVersion>
+    <FileVersion>4.6.0.0</FileVersion>
     <NeutralLanguage>en</NeutralLanguage>
     <Title>NUnit3 Test Adapter for Visual Studio</Title>
-    <Copyright>Copyright © 2011-2021 Charlie Poole, 2014-2023 Terje Sandstrom</Copyright>
+    <Copyright>Copyright © 2011-2021 Charlie Poole, 2014-2024 Terje Sandstrom</Copyright>
     <Description>A package containing the NUnit3 TestAdapter for Visual Studio 2012 onwards.
         The package works with Visual Studio 2012 and newer, dotnet test and VSTest.Console.</Description>
     <Company>NUnit Project</Company>
@@ -33,7 +33,7 @@
 
   <ItemGroup>
     <PackageReference Include="SourceLink.Create.CommandLine" Version="2.8.3" PrivateAssets="All" />
-    <PackageReference Include="nunit.engine" Version="3.17.0" />
+    <PackageReference Include="nunit.engine" Version="3.18.1" />
     <PackageReference Include="TestCentric.Metadata" Version="3.0.2" Aliases="TestCentric" />
   </ItemGroup>
 
@@ -47,14 +47,6 @@
 
   <ItemGroup>
     <Folder Include="TestFilterConverter\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Update="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Update="StyleCop.Analyzers" Version="1.2.0-beta.556" />
   </ItemGroup>
 
   <Target Name="PreventTestPlatformObjectModelCopyLocal" AfterTargets="ResolveReferences">
