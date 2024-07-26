@@ -36,7 +36,7 @@ public class ExtensionsTests
     [TestCase("\r\n")]
     public void ThatIsNullOrWhiteSpaceHandlesTabs(string value)
     {
-            var res = StringExtensions.IsNullOrWhiteSpace(value);
+            var res = value.IsNullOrWhiteSpace();
             Assert.That(res);
         }
 
@@ -45,7 +45,7 @@ public class ExtensionsTests
     [TestCase("42\n\r")]
     public void ThatIsNullOrWhiteSpaceHandlesNonWhiteSpace(string value)
     {
-            var res = StringExtensions.IsNullOrWhiteSpace(value);
+            var res = value.IsNullOrWhiteSpace();
             Assert.That(res, Is.False);
         }
 }

@@ -41,11 +41,11 @@ public static class FilteringTestUtils
         var filterExpressionWrapper =
             filterExpressionWrapperType.GetTypeInfo()
                 .GetConstructor(new[] { typeof(string) })
-                .Invoke(new object[] { filter });
+                .Invoke([filter]);
 
         return (ITestCaseFilterExpression)Type.GetType("Microsoft.VisualStudio.TestPlatform.Common.Filtering.TestCaseFilterExpression, Microsoft.VisualStudio.TestPlatform.Common", throwOnError: true).GetTypeInfo()
             .GetConstructor(new[] { filterExpressionWrapperType })
-            .Invoke(new[] { filterExpressionWrapper });
+            .Invoke([filterExpressionWrapper]);
     }
 
     public static VsTestFilter CreateTestFilter(ITestCaseFilterExpression filterExpression)

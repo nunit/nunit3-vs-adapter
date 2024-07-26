@@ -42,13 +42,13 @@ public sealed class ParanthesisTests : CsProjAcceptanceTests
     }
 
     [Test, Platform("Win")]
-    [TestCase(@"FullyQualifiedName=Issue919.Foo.Bzzt", 1, 1)] // Sanity check
+    [TestCase("FullyQualifiedName=Issue919.Foo.Bzzt", 1, 1)] // Sanity check
     [TestCase(@"FullyQualifiedName=Issue919.Foo.Bar\(1\)", 0, 0)]
     [TestCase(@"FullyQualifiedName=Issue919.Foo.Baz\(1\)", 1, 1)]
-    [TestCase(@"Name=Bzzt", 1, 1)] // Sanity check
+    [TestCase("Name=Bzzt", 1, 1)] // Sanity check
     [TestCase(@"Name=Bar\(1\)", 0, 0)]
     [TestCase(@"Name=Baz\(1\)", 1, 1)]
-    [TestCase(@"", 2, 2)]
+    [TestCase("", 2, 2)]
     public void VsTestTestCases(string filter, int executed, int total)
     {
         var workspace = Build();
@@ -58,7 +58,7 @@ public sealed class ParanthesisTests : CsProjAcceptanceTests
     }
 
     [Test, Platform("Win")]
-    [TestCase(@"Bzzt", 1, 1)] // Sanity check
+    [TestCase("Bzzt", 1, 1)] // Sanity check
     [TestCase(@"Bar\(1\)", 0, 0)]
     [TestCase(@"Baz\(1\)", 1, 1)]
     public void VsTestTests(string filter, int executed, int total)
@@ -69,13 +69,13 @@ public sealed class ParanthesisTests : CsProjAcceptanceTests
     }
 
     [Test, Platform("Win")]
-    [TestCase(@"FullyQualifiedName=Issue919.Foo.Bzzt", 1, 1)] // Sanity check
+    [TestCase("FullyQualifiedName=Issue919.Foo.Bzzt", 1, 1)] // Sanity check
     [TestCase(@"FullyQualifiedName=Issue919.Foo.Bar\(1\)", 0, 0)]
     [TestCase(@"FullyQualifiedName=Issue919.Foo.Baz\(1\)", 1, 1)]
-    [TestCase(@"Name=Bzzt", 1, 1)] // Sanity check
+    [TestCase("Name=Bzzt", 1, 1)] // Sanity check
     [TestCase(@"Name=Bar\(1\)", 0, 0)]
     [TestCase(@"Name=Baz\(1\)", 1, 1)]
-    [TestCase(@"", 2, 2)]
+    [TestCase("", 2, 2)]
     public void DotnetTestCases(string filter, int executed, int total)
     {
         var workspace = Build();
