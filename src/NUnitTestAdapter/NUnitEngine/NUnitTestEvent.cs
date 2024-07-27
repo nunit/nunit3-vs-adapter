@@ -127,7 +127,7 @@ public abstract class NUnitTestEvent : NUnitTestNode, INUnitTestEvent
 
     public string MethodName => Node.GetAttribute("methodname");
     public string ClassName => Node.GetAttribute("classname");
-    public string Output => Node.SelectSingleNode("output")?.InnerText.UnEscapeUnicodeCharacters();
+    public string Output => Node.SelectSingleNode("output")?.InnerText.UnEscapeUnicodeColorCodesCharacters();
 
 
     public CheckedTime StartTime()
@@ -165,7 +165,7 @@ public abstract class NUnitTestEvent : NUnitTestNode, INUnitTestEvent
             foreach (XmlNode attachment in Node.SelectNodes("attachments/attachment"))
             {
                 var path = attachment.SelectSingleNode("filePath")?.InnerText ?? string.Empty;
-                var description = attachment.SelectSingleNode("description")?.InnerText.UnEscapeUnicodeCharacters();
+                var description = attachment.SelectSingleNode("description")?.InnerText.UnEscapeUnicodeColorCodesCharacters();
                 nUnitAttachments.Add(new NUnitAttachment(path, description));
             }
             return nUnitAttachments;
