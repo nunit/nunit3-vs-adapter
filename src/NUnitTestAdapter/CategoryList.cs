@@ -57,7 +57,7 @@ public class CategoryList
 
     private readonly NUnitProperty explicitTrait = new (ExplicitTraitName, ExplicitTraitValue);
 
-    private readonly List<string> categorylist = new ();
+    private readonly List<string> categorylist = [];
     private readonly TestCase testCase;
     private readonly IAdapterSettings settings;
     private readonly bool showInternalProperties;

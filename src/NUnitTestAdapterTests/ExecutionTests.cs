@@ -30,10 +30,10 @@ public class ExecutionTests
         discovery.NoOfLoadedTestCases.Returns(1);
         discovery.IsDiscoveryMethodCurrent.Returns(true);
 
-        discovery.LoadedTestCases.Returns(new List<TestCase>
-        {
+        discovery.LoadedTestCases.Returns(
+        [
             new ("A", new Uri(NUnitTestAdapter.ExecutorUri), "line 23")
-        });
+        ]);
         filter = new TestFilter("<filter><or>A<or>B</or></or></filter>");
     }
 

@@ -32,17 +32,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SourceLink.Create.CommandLine" Version="2.8.3" PrivateAssets="All" />
-    <PackageReference Include="nunit.engine" Version="3.18.1" />
-    <PackageReference Include="TestCentric.Metadata" Version="3.0.2" Aliases="TestCentric" />
+    <PackageReference Include="SourceLink.Create.CommandLine"  PrivateAssets="All" />
+    <PackageReference Include="nunit.engine" />
+    <PackageReference Include="TestCentric.Metadata" Aliases="TestCentric" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
-    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="11.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" VersionOverride="11.0.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
-    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" Version="15.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" VersionOverride="15.0.0" />
   </ItemGroup>
 
   <ItemGroup>

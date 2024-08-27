@@ -45,7 +45,7 @@ public class ResultSummary
 
     public ResultSummary(IEnumerable<TestResult> results)
     {
-            summary = new Dictionary<TestOutcome, int>();
+            summary = [];
 
             foreach (TestResult result in results)
             {
@@ -103,10 +103,10 @@ public class TestFilteringTests
             executor.RunTests(new[] { mockAssemblyPath }, context, fakeFramework);
 
             var completedRuns = fakeFramework.Events.Where(e => e.EventType == FakeFrameworkHandle.EventType.RecordEnd).ToList();
-            TestContext.WriteLine(" ");
+            TestContext.Out.WriteLine(" ");
             foreach (var test in completedRuns)
             {
-                TestContext.WriteLine($"{test.TestCase.DisplayName}:{test.TestOutcome}");
+                TestContext.Out.WriteLine($"{test.TestCase.DisplayName}:{test.TestOutcome}");
             }
 
             Assert.Multiple(() =>
@@ -155,15 +155,15 @@ public class TestExecutionTests
     {
             foreach (var ev in testLog.Events)
             {
-                TestContext.Write(ev.EventType + ": ");
+                TestContext.Out.Write(ev.EventType + ": ");
                 if (ev.TestResult != null)
-                    TestContext.WriteLine("{0} {1}", ev.TestResult.TestCase.FullyQualifiedName, ev.TestResult.Outcome);
+                    TestContext.Out.WriteLine("{0} {1}", ev.TestResult.TestCase.FullyQualifiedName, ev.TestResult.Outcome);
                 else if (ev.TestCase != null)
-                    TestContext.WriteLine(ev.TestCase.FullyQualifiedName);
+                    TestContext.Out.WriteLine(ev.TestCase.FullyQualifiedName);
                 else if (ev.Message.Text != null)
-                    TestContext.WriteLine(ev.Message.Text);
+                    TestContext.Out.WriteLine(ev.Message.Text);
                 else
-                    TestContext.WriteLine();
+                    TestContext.Out.WriteLine();
             }
         }
 
@@ -210,8 +210,8 @@ public class TestExecutionTests
     [TestCaseSource(nameof(Outcomes))]
     public int TestOutcomeTotalsAreCorrect(TestOutcome outcome)
     {
-            TestContext.WriteLine(" ");
-            TestContext.WriteLine($"Looking for outcome: {outcome}");
+            TestContext.Out.WriteLine(" ");
+            TestContext.Out.WriteLine($"Looking for outcome: {outcome}");
             return testLog.Events
                 .Count(e => e.EventType == FakeFrameworkHandle.EventType.RecordResult && e.TestResult.Outcome == outcome);
         }

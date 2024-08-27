@@ -16,7 +16,7 @@ class FakeFrameworkHandle : IFrameworkHandle
 
     public FakeFrameworkHandle()
     {
-            Events = new List<Event>();
+            Events = [];
         }
 
     #endregion

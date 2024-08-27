@@ -161,7 +161,7 @@ public abstract class NUnitTestEvent : NUnitTestNode, INUnitTestEvent
         {
             if (nUnitAttachments != null)
                 return nUnitAttachments;
-            nUnitAttachments = new List<NUnitAttachment>();
+            nUnitAttachments = [];
             foreach (XmlNode attachment in Node.SelectNodes("attachments/attachment"))
             {
                 var path = attachment.SelectSingleNode("filePath")?.InnerText ?? string.Empty;

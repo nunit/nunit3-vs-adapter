@@ -49,7 +49,7 @@ public static class TraitsFeature
         /// Currently, the only effect this has is to add a Test Explorer grouping header
         /// for each trait with the name “Name [Value]”, or for an empty value, “Name”.
         /// </summary>
-        public List<Trait> Traits { get; } = new ();
+        public List<Trait> Traits { get; } = [];
 
         /// <summary>
         /// Used by <see cref="VsTestFilter"/>; does not affect the Test Explorer UI.

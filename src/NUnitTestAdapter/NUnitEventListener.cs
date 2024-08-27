@@ -48,7 +48,7 @@ public class NUnitEventListener(ITestConverterCommon testConverter, INUnit3TestE
 #endif
         ITestEventListener, IDisposable // Public for testing
 {
-    private static readonly ICollection<INUnitTestEventTestOutput> EmptyNodes = new List<INUnitTestEventTestOutput>();
+    private static readonly ICollection<INUnitTestEventTestOutput> EmptyNodes = [];
     private ITestExecutionRecorder Recorder { get; } = executor.FrameworkHandle;
     private ITestConverterCommon TestConverter { get; } = testConverter;
     private IAdapterSettings Settings { get; } = executor.Settings;
@@ -235,7 +235,7 @@ public class NUnitEventListener(ITestConverterCommon testConverter, INUnit3TestE
         {
             if (!OutputNodes.TryGetValue(testId, out var outputNodes))
             {
-                outputNodes = new List<INUnitTestEventTestOutput>();
+                outputNodes = [];
                 OutputNodes.Add(testId, outputNodes);
             }
 
