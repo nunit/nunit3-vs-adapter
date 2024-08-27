@@ -96,6 +96,7 @@ public sealed class TestSourceWithCustomNames : AcceptanceTests
 
                       <PropertyGroup>
                         <TargetFramework>{source.Framework}</TargetFramework>
+                        <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally><Deterministic>false</Deterministic>
                       </PropertyGroup>
 
                       <ItemGroup>

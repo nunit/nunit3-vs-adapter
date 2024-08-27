@@ -17,6 +17,7 @@ public abstract class CsProjAcceptanceTests : AcceptanceTests
 
                       <PropertyGroup>
                         <TargetFramework>{framework}</TargetFramework>
+                        <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally><Deterministic>false</Deterministic>
                       </PropertyGroup>
 
                       <ItemGroup>
