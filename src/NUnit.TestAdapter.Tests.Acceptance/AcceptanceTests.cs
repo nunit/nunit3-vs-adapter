@@ -136,12 +136,12 @@ public abstract class AcceptanceTests
     private static readonly Lazy<(IsolatedWorkspaceManager Manager, string NupkgVersion, bool KeepWorkspaces)> Initialization = new(() =>
     {
         var directory = TestContext.Parameters["ProjectWorkspaceDirectory"]
-                        ?? TryAutoDetectProjectWorkspaceDirectory()
-                        ?? throw new InvalidOperationException("The test parameter ProjectWorkspaceDirectory must be set in order to run this test.");
+                        ?? TryAutoDetectProjectWorkspaceDirectory()  // Walks the directory tree up to find the project workspace directory, named ".acceptance"
+                        ?? throw new InvalidOperationException("Either The test parameter ProjectWorkspaceDirectory must be set in order to run this test, or the `.acceptance` folder has not been found.  Run cmd line `build -t acceptance` first");
 
         var nupkgDirectory = TestContext.Parameters["TestNupkgDirectory"]
-                             ?? TryAutoDetectTestNupkgDirectory(NuGetPackageId)
-                             ?? throw new InvalidOperationException("The test parameter TestNupkgDirectory must be set in order to run this test.");
+                             ?? TryAutoDetectTestNupkgDirectory(NuGetPackageId)  // Walks the directory tree up to find the test nupkg directory, named "package"
+                             ?? throw new InvalidOperationException("The test parameter TestNupkgDirectory must be set in order to run this test, or the packages have not been created, run cmdline `build -t package` first");
 
         var nupkgVersion = TryGetTestNupkgVersion(nupkgDirectory, packageId: NuGetPackageId)
                            ?? throw new InvalidOperationException($"No NuGet package with the ID {NuGetPackageId} was found in {nupkgDirectory}.");

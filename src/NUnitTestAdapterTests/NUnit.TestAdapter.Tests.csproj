@@ -15,6 +15,7 @@
   <ItemGroup>
     <PackageReference Include="NSubstitute" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
@@ -23,7 +24,7 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
     <PackageReference Include="NUnit" VersionOverride="4.2.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" VersionOverride="11.0.0" />
   </ItemGroup>
 

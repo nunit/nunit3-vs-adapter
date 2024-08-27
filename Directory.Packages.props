@@ -17,6 +17,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageVersion>
+    <PackageVersion Include="Castle.Core" Version="5.1.1" />
   </ItemGroup>
 
   <ItemGroup>
