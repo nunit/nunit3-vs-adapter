@@ -53,7 +53,7 @@ public class TestDiscoveryTests : ITestCaseDiscoverySink
     static readonly string MockAssemblyPath =
         Path.Combine(TestContext.CurrentContext.TestDirectory, "mock-assembly.dll");
 
-    private readonly List<TestCase> testCases = new();
+    private readonly List<TestCase> testCases = [];
 
     private readonly IDiscoveryContext _context;
 

@@ -100,7 +100,7 @@ public class DiscoveryConverter(ITestLogger logger, IAdapterSettings settings) :
 
     public bool HasExplicitTests => NoOfExplicitTestCases > 0;
 
-    private readonly List<TestCase> loadedTestCases = new();
+    private readonly List<TestCase> loadedTestCases = [];
     public IList<TestCase> LoadedTestCases => loadedTestCases;
 
     public int NoOfLoadedTestCases => loadedTestCases.Count;
@@ -134,7 +134,7 @@ public class DiscoveryConverter(ITestLogger logger, IAdapterSettings settings) :
     public IList<TestCase> Convert(NUnitResults discoveryResults, string assemblyPath)
     {
         if (discoveryResults == null)
-            return new List<TestCase>();
+            return [];
         AssemblyPath = assemblyPath;
         var timing = new TimingLogger(Settings, TestLog);
         if (Settings.DiscoveryMethod != DiscoveryMethod.Legacy)

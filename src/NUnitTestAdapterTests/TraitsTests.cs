@@ -386,7 +386,7 @@ public class TestTraits
         var settings = Substitute.For<IAdapterSettings>();
         settings.CollectSourceInformation.Returns(false);
         testconverter = new TestConverterForXml(testlogger, "whatever", settings);
-        testcaselist = new List<TestCase>();
+        testcaselist = [];
     }
 
     [TearDown]

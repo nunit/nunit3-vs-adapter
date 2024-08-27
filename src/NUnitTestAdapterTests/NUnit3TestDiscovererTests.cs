@@ -49,7 +49,7 @@ public class NUnit3TestDiscovererTests
         var sut = new NUnit3TestDiscoverer();
         Assert.That(sut.NUnitEngineAdapter, Is.Not.Null);
         var dc = Substitute.For<IDiscoveryContext>();
-        sut.DiscoverTests(new List<string>(), dc, null, null);
+        sut.DiscoverTests([], dc, null, null);
         Assert.That(sut.NUnitEngineAdapter, Is.Not.Null);
     }
 }
