@@ -130,7 +130,9 @@ namespace NUnit.Tests
             { Assert.Pass("Succeeded!"); }
 
             [Test]
+#pragma warning disable NUnit1026 // The test or setup/teardown method is not public
             protected static void MockTest5()
+#pragma warning restore NUnit1026 // The test or setup/teardown method is not public
             { }
 
             [Test]
@@ -153,12 +155,14 @@ namespace NUnit.Tests
             [Category("Special")]
             public void ExplicitlyRunTest()
             { }
-
-            [Test]
             // ReSharper disable once NUnit.MethodWithParametersAndTestAttribute
+
+#pragma warning disable NUnit1027 // Remove unused parameter
+            [Test]
 #pragma warning disable IDE0060 // Remove unused parameter
             public void NotRunnableTest(int a, int b)
 #pragma warning restore IDE0060 // Remove unused parameter
+#pragma warning restore NUnit1027
             {
             }
 
@@ -246,7 +250,11 @@ namespace NUnit.Tests
         public const int Tests = 1;
         public const int Suites = 1;
 
+#pragma warning disable IDE0290 // Use primary constructor
+#pragma warning disable IDE0060 // Remove unused parameter
         public BadFixture(int val) { }
+#pragma warning restore IDE0060 // Remove unused parameter
+#pragma warning restore IDE0290 // Use primary constructor
 
         [Test]
         public void SomeTest() { }
@@ -267,7 +275,9 @@ namespace NUnit.Tests
 
         [TestCase(2, 4)]
         [TestCase(9.2, 11.7)]
+#pragma warning disable IDE0060 // Remove unused parameter
         public void GenericMethod<T>(T x, T y)
+#pragma warning restore IDE0060 // Remove unused parameter
         {
         }
     }
@@ -279,7 +289,11 @@ namespace NUnit.Tests
         public const int Tests = 4;
         public const int Suites = 3;
 
+#pragma warning disable IDE0290 // Use primary constructor
+#pragma warning disable IDE0060 // Remove unused parameter
         public ParameterizedFixture(int num) { }
+#pragma warning restore IDE0060 // Remove unused parameter
+#pragma warning restore IDE0290 // Use primary constructor
 
         [Test]
         public void Test1() { }
@@ -298,7 +312,11 @@ namespace NUnit.Tests
     [TestFixture(11.5)]
     public class GenericFixture<T>
     {
+#pragma warning disable IDE0290 // Use primary constructor
+#pragma warning disable IDE0060 // Remove unused parameter
         public GenericFixture(T num) { }
+#pragma warning restore IDE0060 // Remove unused parameter
+#pragma warning restore IDE0290 // Use primary constructor
 
         [Test]
         public void Test1() { }

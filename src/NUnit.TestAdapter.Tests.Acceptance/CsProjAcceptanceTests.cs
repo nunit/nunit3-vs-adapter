@@ -17,6 +17,7 @@ public abstract class CsProjAcceptanceTests : AcceptanceTests
 
                       <PropertyGroup>
                         <TargetFramework>{framework}</TargetFramework>
+                        <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally><Deterministic>false</Deterministic>
                       </PropertyGroup>
 
                       <ItemGroup>
@@ -39,9 +40,9 @@ public abstract class CsProjAcceptanceTests : AcceptanceTests
 
     protected void Verify(int executed, int total, VSTestResult results)
     {
-        TestContext.WriteLine(" ");
+        TestContext.Out.WriteLine(" ");
         foreach (var error in results.RunErrors)
-            TestContext.WriteLine(error);
+            TestContext.Out.WriteLine(error);
         Assert.Multiple(() =>
         {
             Assert.That(results.Counters.Total, Is.EqualTo(total),

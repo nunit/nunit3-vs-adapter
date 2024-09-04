@@ -105,7 +105,7 @@ public class NUnitDiscoveryTestRun(BaseProperties baseProps) : NUnitDiscoverySui
 
 public class NUnitDiscoveryProperties
 {
-    private List<NUnitProperty> TheProperties { get; } = new();
+    private List<NUnitProperty> TheProperties { get; } = [];
     public IEnumerable<NUnitProperty> Properties => TheProperties;
 
     public void Add(NUnitProperty p) => TheProperties.Add(p);
@@ -124,7 +124,7 @@ public class NUnitDiscoveryTestSuite(BaseProperties theBase, INUnitDiscoverySuit
 public sealed class NUnitDiscoveryTestAssembly(BaseProperties theBase, NUnitDiscoveryTestRun parent)
     : NUnitDiscoveryTestSuite(theBase, parent)
 {
-    private readonly List<NUnitDiscoveryTestCase> allTestCases = new();
+    private readonly List<NUnitDiscoveryTestCase> allTestCases = [];
 
     /// <summary>
     /// If all testcases are Explicit, we can run this one.
@@ -152,12 +152,12 @@ public sealed class NUnitDiscoveryTestAssembly(BaseProperties theBase, NUnitDisc
 public sealed class NUnitDiscoveryTestFixture(BaseProperties theBase, string classname, INUnitDiscoverySuiteBase parent)
     : NUnitDiscoveryCanHaveTestCases(theBase, parent, classname)
 {
-    private readonly List<NUnitDiscoveryParameterizedMethod> parameterizedMethods = new();
+    private readonly List<NUnitDiscoveryParameterizedMethod> parameterizedMethods = [];
     public IEnumerable<NUnitDiscoveryParameterizedMethod> ParameterizedMethods => parameterizedMethods;
 
-    private readonly List<NUnitDiscoveryTheory> theories = new();
+    private readonly List<NUnitDiscoveryTheory> theories = [];
 
-    private readonly List<NUnitDiscoveryGenericMethod> genericMethods = new();
+    private readonly List<NUnitDiscoveryGenericMethod> genericMethods = [];
     public IEnumerable<NUnitDiscoveryTheory> Theories => theories;
 
     public override int NoOfActualTestCases =>
@@ -257,7 +257,7 @@ public abstract class NUnitDiscoveryCanHaveTestCases(
     string classname)
     : NUnitDiscoverySuiteBase(theBase, parent), INUnitDiscoveryCanHaveTestCases
 {
-    private readonly List<NUnitDiscoveryTestCase> testCases = new();
+    private readonly List<NUnitDiscoveryTestCase> testCases = [];
 
     public IEnumerable<NUnitDiscoveryTestCase> TestCases => testCases;
     public virtual int NoOfActualTestCases => testCases.Count;
@@ -284,7 +284,7 @@ public interface INUnitDiscoveryCanHaveTestFixture : INUnitDiscoverySuiteBase
 public abstract class NUnitDiscoveryCanHaveTestFixture(BaseProperties theBase, INUnitDiscoverySuiteBase parent)
     : NUnitDiscoverySuiteBase(theBase, parent), INUnitDiscoveryCanHaveTestFixture
 {
-    private readonly List<NUnitDiscoveryTestFixture> testFixtures = new();
+    private readonly List<NUnitDiscoveryTestFixture> testFixtures = [];
 
     public IEnumerable<NUnitDiscoveryTestFixture> TestFixtures => testFixtures;
 
@@ -294,11 +294,11 @@ public abstract class NUnitDiscoveryCanHaveTestFixture(BaseProperties theBase, I
     }
 
 
-    private readonly List<NUnitDiscoveryTestSuite> testSuites = new();
+    private readonly List<NUnitDiscoveryTestSuite> testSuites = [];
 
-    private readonly List<NUnitDiscoveryGenericFixture> genericFixtures = new();
-    private readonly List<NUnitDiscoverySetUpFixture> setUpFixtures = new();
-    private readonly List<NUnitDiscoveryParameterizedTestFixture> parameterizedFixtures = new();
+    private readonly List<NUnitDiscoveryGenericFixture> genericFixtures = [];
+    private readonly List<NUnitDiscoverySetUpFixture> setUpFixtures = [];
+    private readonly List<NUnitDiscoveryParameterizedTestFixture> parameterizedFixtures = [];
 
 
     public IEnumerable<NUnitDiscoveryTestSuite> TestSuites => testSuites;

@@ -21,7 +21,7 @@ public abstract class NUnitTestNode : INUnitTestNode
 
     public bool IsNull => Node == null;
 
-    private readonly List<NUnitProperty> properties = new ();
+    private readonly List<NUnitProperty> properties = [];
     public IEnumerable<NUnitProperty> Properties => properties;
     public string Seed => Node.GetAttribute("seed");
 

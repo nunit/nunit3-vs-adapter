@@ -14,6 +14,7 @@ public sealed class BundledDependencyTests : AcceptanceTests
 
                       <PropertyGroup>
                         <TargetFrameworks>{string.Join(";", TargetFrameworks)}</TargetFrameworks>
+                        <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally><Deterministic>false</Deterministic>
                       </PropertyGroup>
 
                       <ItemGroup>
@@ -67,6 +68,7 @@ public sealed class BundledDependencyTests : AcceptanceTests
 
                       <PropertyGroup>
                         <TargetFrameworks>{string.Join(";", TargetFrameworks)}</TargetFrameworks>
+                        <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally><Deterministic>false</Deterministic>
                       </PropertyGroup>
 
                       <ItemGroup>
