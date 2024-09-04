@@ -7,7 +7,7 @@
 
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.11.0" />
     <PackageVersion Include="NSubstitute" Version="5.1.0" />
-    <PackageVersion Include="nunit" Version="4.2.1" />
+    <PackageVersion Include="nunit" Version="4.2.2" />
     <PackageVersion Include="nunit.engine" Version="3.18.1" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.6.0" />
     <PackageVersion Include="SourceLink.Create.CommandLine" Version="2.8.3" />

@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
-    <PackageReference Include="NUnit" VersionOverride="4.2.1" />
+    <PackageReference Include="NUnit"  />
     
     <PackageReference Include="Microsoft.TestPlatform.ObjectModel" VersionOverride="11.0.0" />
   </ItemGroup>
