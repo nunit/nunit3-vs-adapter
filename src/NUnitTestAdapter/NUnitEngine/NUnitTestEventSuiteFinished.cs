@@ -28,10 +28,10 @@ public class NUnitTestEventSuiteFinished : NUnitTestEvent, INUnitTestEventSuiteF
         var failureNode = Node.SelectSingleNode("failure");
         if (failureNode != null)
         {
-            FailureMessage = failureNode.SelectSingleNode("message")?.InnerText.UnEscapeUnicodeCharacters();
-            StackTrace = failureNode.SelectSingleNode("stack-trace")?.InnerText.UnEscapeUnicodeCharacters();
+            FailureMessage = failureNode.SelectSingleNode("message")?.InnerText.UnEscapeUnicodeColorCodesCharacters();
+            StackTrace = failureNode.SelectSingleNode("stack-trace")?.InnerText.UnEscapeUnicodeColorCodesCharacters();
         }
-        ReasonMessage = Node.SelectSingleNode("reason/message")?.InnerText.UnEscapeUnicodeCharacters();
+        ReasonMessage = Node.SelectSingleNode("reason/message")?.InnerText.UnEscapeUnicodeColorCodesCharacters();
     }
 
     public string ReasonMessage { get; }
