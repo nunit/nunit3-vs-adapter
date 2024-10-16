@@ -47,6 +47,7 @@ public sealed class SinglePassingTestResultTests : AcceptanceTests
 
                       <PropertyGroup>
                         <TargetFramework>{source.Framework}</TargetFramework>
+                        <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
                       </PropertyGroup>
 
                       <ItemGroup>
@@ -105,6 +106,7 @@ public sealed class SinglePassingTestResultTests : AcceptanceTests
 
                         <PropertyGroup>
                             <TargetFrameworks>{string.Join(";", source.Frameworks)}</TargetFrameworks>
+                            <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
                         </PropertyGroup>
 
                         <ItemGroup>
@@ -181,6 +183,7 @@ public sealed class SinglePassingTestResultTests : AcceptanceTests
                         <TargetFrameworkVersion>{LegacyProjectTargetFrameworkVersion}</TargetFrameworkVersion>
                         <FileAlignment>512</FileAlignment>
                         <Deterministic>true</Deterministic>
+                        <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally><Deterministic>false</Deterministic>
                       </PropertyGroup>
                       <PropertyGroup Condition="" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' "">
                         <DebugSymbols>true</DebugSymbols>
@@ -251,6 +254,7 @@ public sealed class SinglePassingTestResultTests : AcceptanceTests
                         <MyType>Windows</MyType>
                         <TargetFrameworkVersion>{LegacyProjectTargetFrameworkVersion}</TargetFrameworkVersion>
                         <Deterministic>true</Deterministic>
+                        <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally><Deterministic>false</Deterministic>
                       </PropertyGroup>
                       <PropertyGroup Condition="" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' "">
                         <DebugSymbols>true</DebugSymbols>

@@ -89,13 +89,14 @@ public sealed class TestSourceWithCustomNames : AcceptanceTests
                       <ItemGroup>
                         <Reference Include=""System.ValueTuple"" />
                       </ItemGroup>" : "";
-        TestContext.WriteLine($"Testing {source.Framework}");
+        TestContext.Out.WriteLine($"Testing {source.Framework}");
         var workspace = CreateWorkspace()
             .AddProject("Test.csproj", $@"
                     <Project Sdk='Microsoft.NET.Sdk'>
 
                       <PropertyGroup>
                         <TargetFramework>{source.Framework}</TargetFramework>
+                        <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally><Deterministic>false</Deterministic>
                       </PropertyGroup>
 
                       <ItemGroup>

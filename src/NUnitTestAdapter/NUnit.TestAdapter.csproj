@@ -10,8 +10,8 @@
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <SourceLinkOriginUrl>https://github.com/nunit/nunit3-vs-adapter</SourceLinkOriginUrl>
     <SourceLinkCreate>true</SourceLinkCreate>
-    <AssemblyVersion>4.6.0.0</AssemblyVersion>
-    <FileVersion>4.6.0.0</FileVersion>
+    <AssemblyVersion>5.0.0.0</AssemblyVersion>
+    <FileVersion>5.0.0.0</FileVersion>
     <NeutralLanguage>en</NeutralLanguage>
     <Title>NUnit3 Test Adapter for Visual Studio</Title>
     <Copyright>Copyright © 2011-2021 Charlie Poole, 2014-2024 Terje Sandstrom</Copyright>
@@ -32,10 +32,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Testing.Extensions.VSTestBridge" Version="1.3.1" />
-    <PackageReference Include="SourceLink.Create.CommandLine" Version="2.8.3" PrivateAssets="All" />
-    <PackageReference Include="nunit.engine" Version="3.18.1" />
-    <PackageReference Include="TestCentric.Metadata" Version="3.0.2" Aliases="TestCentric" />
+      <PackageReference Include="Microsoft.Testing.Extensions.VSTestBridge" />
+      <PackageReference Include="SourceLink.Create.CommandLine"  PrivateAssets="All" />
+    <PackageReference Include="nunit.engine" />
+    <PackageReference Include="TestCentric.Metadata" Aliases="TestCentric" />
   </ItemGroup>
 
   <ItemGroup>

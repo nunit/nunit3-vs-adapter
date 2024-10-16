@@ -29,26 +29,26 @@ public abstract class AcceptanceTests
     public const string LowestNetfxTarget = "net462";
     public const string LegacyProjectTargetFrameworkVersion = "v4.6.2";
 
-    protected static IEnumerable<string> TargetFrameworks => new[]
-    {
+    protected static IEnumerable<string> TargetFrameworks =>
+    [
         LowestNetfxTarget,
         Frameworks.NetCoreApp31
-    };
+    ];
 
-    protected static IEnumerable<string> DotNetCliTargetFrameworks => new[]
-    {
+    protected static IEnumerable<string> DotNetCliTargetFrameworks =>
+    [
         Frameworks.NetCoreApp31,
         Frameworks.Net50,
         Frameworks.Net60,
         Frameworks.Net70
-    };
+    ];
 
-    protected static IEnumerable<string> ModernDotNetCliTargetFrameworks => new[]
-    {
+    protected static IEnumerable<string> ModernDotNetCliTargetFrameworks =>
+    [
         Frameworks.Net60,
         Frameworks.Net70,
         Frameworks.Net80
-    };
+    ];
 
     protected static string NUnit3 => "3.*";
     protected static string NUnit4 => "4.*";
@@ -58,25 +58,25 @@ public abstract class AcceptanceTests
         public IEnumerable<string> Frameworks { get; set; } = DotNetCliTargetFrameworks;
         public string NUnitVersion { get; set; } = NUnit3;
 
-        public static IEnumerable<MultiFrameworkSource> LegacyDotNetFrameworks => new List<MultiFrameworkSource> { new() };
+        public static IEnumerable<MultiFrameworkSource> LegacyDotNetFrameworks => [new()];
 
-        public static IEnumerable<MultiFrameworkSource> ModernDotNetFrameworks => new List<MultiFrameworkSource>
-        {
+        public static IEnumerable<MultiFrameworkSource> ModernDotNetFrameworks =>
+        [
             new ()
             {
                 Frameworks = ModernDotNetCliTargetFrameworks,
                 NUnitVersion = NUnit4
             }
-        };
+        ];
 
-        public static IEnumerable<MultiFrameworkSource> NetFxFrameworks => new List<MultiFrameworkSource>
-        {
+        public static IEnumerable<MultiFrameworkSource> NetFxFrameworks =>
+        [
             new ()
             {
-                Frameworks = new List<string> { LowestNetfxTarget },
+                Frameworks = [LowestNetfxTarget],
                 NUnitVersion = NUnit4
             }
-        };
+        ];
 
         public static IEnumerable<MultiFrameworkSource> AllFrameworks => LegacyDotNetFrameworks.Concat(ModernDotNetFrameworks).Concat(NetFxFrameworks);
     }
@@ -86,10 +86,10 @@ public abstract class AcceptanceTests
         public string Framework { get; set; } = LowestNetfxTarget;
         public string NUnitVersion { get; set; } = NUnit4;
 
-        public static IEnumerable<SingleFrameworkSource> NetFxFramework => new List<SingleFrameworkSource> { new() };
+        public static IEnumerable<SingleFrameworkSource> NetFxFramework => [new()];
 
-        public static IEnumerable<SingleFrameworkSource> LegacyDotNetFramework => new List<SingleFrameworkSource>
-        {
+        public static IEnumerable<SingleFrameworkSource> LegacyDotNetFramework =>
+        [
             new ()
             {
                 Framework = Frameworks.NetCoreApp31,
@@ -100,10 +100,10 @@ public abstract class AcceptanceTests
                 Framework = Frameworks.Net50,
                 NUnitVersion = NUnit3
             }
-        };
+        ];
 
-        public static IEnumerable<SingleFrameworkSource> ModernDotNetFramework => new List<SingleFrameworkSource>
-        {
+        public static IEnumerable<SingleFrameworkSource> ModernDotNetFramework =>
+        [
             new ()
             {
                 Framework = Frameworks.Net60,
@@ -119,7 +119,7 @@ public abstract class AcceptanceTests
                 Framework = Frameworks.Net80,
                 NUnitVersion = NUnit4
             }
-        };
+        ];
 
         public static IEnumerable<SingleFrameworkSource> AllFrameworks => NetFxFramework.Concat(LegacyDotNetFramework).Concat(ModernDotNetFramework);
         public static IEnumerable<SingleFrameworkSource> AllFrameworksExceptNetFx => LegacyDotNetFramework.Concat(ModernDotNetFramework);
@@ -136,12 +136,12 @@ public abstract class AcceptanceTests
     private static readonly Lazy<(IsolatedWorkspaceManager Manager, string NupkgVersion, bool KeepWorkspaces)> Initialization = new(() =>
     {
         var directory = TestContext.Parameters["ProjectWorkspaceDirectory"]
-                        ?? TryAutoDetectProjectWorkspaceDirectory()
-                        ?? throw new InvalidOperationException("The test parameter ProjectWorkspaceDirectory must be set in order to run this test.");
+                        ?? TryAutoDetectProjectWorkspaceDirectory()  // Walks the directory tree up to find the project workspace directory, named ".acceptance"
+                        ?? throw new InvalidOperationException("Either The test parameter ProjectWorkspaceDirectory must be set in order to run this test, or the `.acceptance` folder has not been found.  Run cmd line `build -t acceptance` first");
 
         var nupkgDirectory = TestContext.Parameters["TestNupkgDirectory"]
-                             ?? TryAutoDetectTestNupkgDirectory(NuGetPackageId)
-                             ?? throw new InvalidOperationException("The test parameter TestNupkgDirectory must be set in order to run this test.");
+                             ?? TryAutoDetectTestNupkgDirectory(NuGetPackageId)  // Walks the directory tree up to find the test nupkg directory, named "package"
+                             ?? throw new InvalidOperationException("The test parameter TestNupkgDirectory must be set in order to run this test, or the packages have not been created, run cmdline `build -t package` first");
 
         var nupkgVersion = TryGetTestNupkgVersion(nupkgDirectory, packageId: NuGetPackageId)
                            ?? throw new InvalidOperationException($"No NuGet package with the ID {NuGetPackageId} was found in {nupkgDirectory}.");
@@ -162,7 +162,7 @@ public abstract class AcceptanceTests
             downloadCachePath: Path.Combine(directory, ".toolcache"));
 
         if (keepWorkspaces) manager.PreserveDirectory("The KeepWorkspaces test parameter was set to true.");
-        TestContext.WriteLine($"Directory: {directory}, NugetPackageDirectory {nupkgDirectory},NugetPackageVersion: {nupkgVersion}");
+        TestContext.Out.WriteLine($"Directory: {directory}, NugetPackageDirectory {nupkgDirectory},NugetPackageVersion: {nupkgVersion}");
         return (manager, nupkgVersion, keepWorkspaces);
     });
 
@@ -224,7 +224,9 @@ public abstract class AcceptanceTests
         }
     }
 
+#pragma warning disable NUnit1028 // The non-test method is public
     internal static void OnGlobalTeardown()
+#pragma warning restore NUnit1028 // The non-test method is public
     {
         if (!Initialization.IsValueCreated) return;
 
