@@ -24,14 +24,7 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
     <PackageReference Include="NUnit"  />
-	  <!--<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />-->
-
-	  <!--<PackageReference Include="Microsoft.TestPlatform.ObjectModel" VersionOverride="11.0.0" />-->
   </ItemGroup>
-
-  <!--<ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
-    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" VersionOverride="17.11.0" />
-  </ItemGroup>-->
 
   <ItemGroup>
     <ProjectReference Include="..\empty-assembly\empty-assembly.csproj" />
