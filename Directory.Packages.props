@@ -11,7 +11,7 @@
     <PackageVersion Include="nunit.engine" Version="3.18.1" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.6.0" />
     <PackageVersion Include="SourceLink.Create.CommandLine" Version="2.8.3" />
-    <PackageVersion Include="TestCentric.Metadata" Version="3.0.2" />
+    <PackageVersion Include="TestCentric.Metadata" Version="3.0.3" />
     <PackageVersion Include="Microsoft.TestPlatform.ObjectModel" Version="17.11.0" PrivateAssets="All"/>
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.11.0" >
       <PrivateAssets>all</PrivateAssets>
