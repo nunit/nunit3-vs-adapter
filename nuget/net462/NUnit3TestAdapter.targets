@@ -4,6 +4,7 @@
   <!-- Handle the coexistance between Microsoft.Testing.Platform and Microsoft.NET.Test.Sdk  -->
   <PropertyGroup>
     <GenerateTestingPlatformEntryPoint Condition=" '$(GenerateTestingPlatformEntryPoint)' == '' ">$(EnableNUnitRunner)</GenerateTestingPlatformEntryPoint>
+    <GenerateSelfRegisteredExtensions Condition=" '$(GenerateSelfRegisteredExtensions)' == '' ">$(EnableNUnitRunner)</GenerateSelfRegisteredExtensions>
     <GenerateProgramFile Condition=" '$(EnableNUnitRunner)' == 'true' ">false</GenerateProgramFile>
   </PropertyGroup>   
     
