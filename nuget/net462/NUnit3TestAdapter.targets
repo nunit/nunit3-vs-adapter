@@ -5,6 +5,7 @@
   <PropertyGroup>
     <GenerateTestingPlatformEntryPoint Condition=" '$(GenerateTestingPlatformEntryPoint)' == '' ">$(EnableNUnitRunner)</GenerateTestingPlatformEntryPoint>
     <GenerateSelfRegisteredExtensions Condition=" '$(GenerateSelfRegisteredExtensions)' == '' ">$(EnableNUnitRunner)</GenerateSelfRegisteredExtensions>
+    <DisableTestingPlatformServerCapability Condition=" '$(EnableNUnitRunner)' == 'false' or '$(EnableNUnitRunner)' == '' " >true</DisableTestingPlatformServerCapability>
     <GenerateProgramFile Condition=" '$(EnableNUnitRunner)' == 'true' ">false</GenerateProgramFile>
   </PropertyGroup>   
     
