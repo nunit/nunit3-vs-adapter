@@ -38,15 +38,12 @@ public abstract class AcceptanceTests
     protected static IEnumerable<string> DotNetCliTargetFrameworks =>
     [
         Frameworks.NetCoreApp31,
-        Frameworks.Net50,
         Frameworks.Net60,
-        Frameworks.Net70
     ];
 
     protected static IEnumerable<string> ModernDotNetCliTargetFrameworks =>
     [
         Frameworks.Net60,
-        Frameworks.Net70,
         Frameworks.Net80
     ];
 
@@ -95,11 +92,6 @@ public abstract class AcceptanceTests
                 Framework = Frameworks.NetCoreApp31,
                 NUnitVersion = NUnit3
             },
-            new ()
-            {
-                Framework = Frameworks.Net50,
-                NUnitVersion = NUnit3
-            }
         ];
 
         public static IEnumerable<SingleFrameworkSource> ModernDotNetFramework =>
@@ -107,11 +99,6 @@ public abstract class AcceptanceTests
             new ()
             {
                 Framework = Frameworks.Net60,
-                NUnitVersion = NUnit4
-            },
-            new ()
-            {
-                Framework = Frameworks.Net70,
                 NUnitVersion = NUnit4
             },
             new ()
@@ -128,8 +115,7 @@ public abstract class AcceptanceTests
     protected string NUnitVersion(string targetFramework) =>
         targetFramework switch
         {
-            Frameworks.NetCoreApp31
-                or Frameworks.Net50 => NUnit3,
+            Frameworks.NetCoreApp31 => NUnit3,
             _ => NUnit4,
         };
 

@@ -6,7 +6,6 @@ on:
       - main
       - master
       - release
-      - 'v3'
       - myget
   workflow_dispatch:
 
@@ -27,9 +26,7 @@ jobs:
       with:
         dotnet-version: |
           3.1.x
-          5.0.x
           6.0.x
-          7.0.x
           8.0.x
            
     - name: Build  
@@ -46,6 +43,4 @@ jobs:
           foreach($file in (Get-ChildItem package -Recurse -Include *.nupkg)) {
               dotnet nuget push $file --api-key "${{ secrets.PUBLISHMYGET }}" --source https://www.myget.org/F/nunit/api/v3/index.json --skip-duplicate
           }
-          foreach($file in (Get-ChildItem "package" -Recurse -Include *.snupkg)) {
-              dotnet nuget push $file --api-key "${{ secrets.PUBLISHMYGET }}" --source https://www.myget.org/F/nunit/api/v3/index.json --skip-duplicate
-          } 
+

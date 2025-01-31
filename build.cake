@@ -1,5 +1,5 @@
 #tool vswhere&version=3.1.7
-#tool Microsoft.TestPlatform&version=17.9.0
+#tool Microsoft.TestPlatform&version=17.12.0
 
 //////////////////////////////////////////////////////////////////////
 // ARGUMENTS
