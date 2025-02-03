@@ -37,14 +37,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
             ITestExecutor executor = new NUnit3TestExecutor();
             using (cancellationToken.Register(executor.Cancel))
             {
-                if (request.VSTestFilter.TestCases is { } testCases)
-                {
-                    executor.RunTests(testCases, request.RunContext, request.FrameworkHandle);
-                }
-                else
-                {
-                    executor.RunTests(request.AssemblyPaths, request.RunContext, request.FrameworkHandle);
-                }
+                executor.RunTests(request.AssemblyPaths, request.RunContext, request.FrameworkHandle);
             }
 
             return Task.CompletedTask;
