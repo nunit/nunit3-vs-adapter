@@ -63,6 +63,7 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
     IExecutionContext
 {
     #region Properties
+    private bool IsMTP { get; }
 
     private RunType RunType { get; set; }
 
@@ -86,6 +87,11 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
     // to throw an exception. So if you consider doing this, beware!
 
     #endregion
+
+    public NUnit3TestExecutor(bool isMTP = false)
+    {
+        IsMTP = isMTP;
+    }
 
     #region ITestExecutor Implementation
 
@@ -124,6 +130,10 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
         {
             var vsTestFilter = VsTestFilterFactory.CreateVsTestFilter(Settings, runContext);
             filter = builder.ConvertVsTestFilterToNUnitFilter(vsTestFilter);
+        }
+        else if (RunType == RunType.Ide && IsMTP)
+        {
+            filter = builder.ConvertVsTestFilterToNUnitFilter(VsTestFilter);
         }
 
         filter ??= builder.FilterByWhere(Settings.Where);
