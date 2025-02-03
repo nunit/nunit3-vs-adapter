@@ -88,7 +88,12 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
 
     #endregion
 
-    public NUnit3TestExecutor(bool isMTP = false)
+    public NUnit3TestExecutor()
+        : this(false)
+    {
+    }
+
+    internal NUnit3TestExecutor(bool isMTP)
     {
         IsMTP = isMTP;
     }
