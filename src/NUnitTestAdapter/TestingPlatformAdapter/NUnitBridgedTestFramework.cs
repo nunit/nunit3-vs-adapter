@@ -34,7 +34,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
         protected override Task SynchronizedRunTestsAsync(VSTestRunTestExecutionRequest request, IMessageBus messageBus,
             CancellationToken cancellationToken)
         {
-            ITestExecutor executor = new NUnit3TestExecutor();
+            ITestExecutor executor = new NUnit3TestExecutor(isMTP: true);
             using (cancellationToken.Register(executor.Cancel))
             {
                 executor.RunTests(request.AssemblyPaths, request.RunContext, request.FrameworkHandle);
