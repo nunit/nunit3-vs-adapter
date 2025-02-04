@@ -6,6 +6,7 @@ on:
       - main
       - master
       - release
+      - vnext
       - myget
   workflow_dispatch:
 
