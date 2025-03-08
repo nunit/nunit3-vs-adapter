@@ -97,8 +97,7 @@ public interface IAdapterSettings
 
     bool UseNUnitFilter { get; }
     bool IncludeStackTraceForSuites { get; }
-
-
+    bool IncludeStackTrace { get;  }
     void Load(IDiscoveryContext context, TestLogger testLogger = null);
     void Load(string settingsXml);
     void SaveRandomSeed(string dirname);

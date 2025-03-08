@@ -1,5 +1,5 @@
 // ***********************************************************************
-// Copyright (c) 2011-2021 Charlie Poole, 2011 - 2022 Terje Sandstrom
+// Copyright (c) 2011-2021 Charlie Poole, 2011 - 2025 Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -111,7 +111,8 @@ public sealed class TestConverter : IDisposable, ITestConverter
                 case TestOutcome.NotFound:
                     {
                         testCaseResult.ErrorMessage = resultNode.Failure?.Message;
-                        testCaseResult.ErrorStackTrace = resultNode.FailureStackTrace;
+                        if (adapterSettings.IncludeStackTrace)
+                            testCaseResult.ErrorStackTrace = resultNode.FailureStackTrace;
                         break;
                     }
                 case TestOutcome.Skipped:
