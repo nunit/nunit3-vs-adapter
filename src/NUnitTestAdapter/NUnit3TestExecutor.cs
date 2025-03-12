@@ -306,9 +306,9 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
             TestLog.DebugRunfrom();
             // var discoveryResults = RunType == RunType.CommandLineCurrentNUnit ? null : NUnitEngineAdapter.Explore(filter);
             var discoveryResults = NUnitEngineAdapter.Explore(filter);
-            Dump?.AddString(discoveryResults?.AsString() ?? " No discovery");
+            Dump?.AddString(discoveryResults.AsString());
 
-            if (discoveryResults?.IsRunnable ?? true)
+            if (discoveryResults.IsRunnable)
             {
                 var discovery = new DiscoveryConverter(TestLog, Settings);
                 discovery.Convert(discoveryResults, assemblyPath);
@@ -319,12 +319,12 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
                 }
                 else
                 {
-                    TestLog.InfoNoTests(assemblyPath);
+                    TestLog.InfoNoRunnableTests(discoveryResults, assemblyPath);
                 }
             }
             else
             {
-                TestLog.InfoNoTests(discoveryResults.HasNoNUnitTests, assemblyPath);
+                TestLog.InfoNoRunnableTests(discoveryResults, assemblyPath);
             }
         }
         catch (Exception ex) when (ex is BadImageFormatException || ex.InnerException is BadImageFormatException)

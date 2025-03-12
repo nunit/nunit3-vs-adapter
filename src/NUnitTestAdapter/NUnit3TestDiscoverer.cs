@@ -103,15 +103,7 @@ public sealed class NUnit3TestDiscoverer : NUnitTestAdapter, ITestDiscoverer
                 }
                 else
                 {
-                    if (results.HasNoNUnitTests)
-                    {
-                        if (Settings.Verbosity > 0)
-                            TestLog.Info("Assembly contains no NUnit 3.0 tests: " + sourceAssembly);
-                    }
-                    else
-                    {
-                        TestLog.Info("NUnit failed to load " + sourceAssembly);
-                    }
+                    TestLog.InfoNoRunnableTests(results, sourceAssembly);
                 }
             }
             catch (NUnitEngineException e)

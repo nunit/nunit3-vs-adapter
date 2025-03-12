@@ -26,6 +26,8 @@ using System.Reflection;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
+using NUnit.VisualStudio.TestAdapter.NUnitEngine;
+
 namespace NUnit.VisualStudio.TestAdapter;
 
 public interface ITestLogger
@@ -146,11 +148,12 @@ public class TestLogger(IMessageLogger messageLogger) : IMessageLogger, ITestLog
         Debug($"Current directory: {Environment.CurrentDirectory}");
     }
 
-    public void InfoNoTests(bool discoveryResultsHasNoNUnitTests, string assemblyPath)
+    public void InfoNoRunnableTests(NUnitResults results, string assemblyPath)
     {
-        Info(discoveryResultsHasNoNUnitTests
-            ? "   NUnit couldn't find any tests in " + assemblyPath
-            : "   NUnit failed to load " + assemblyPath);
+        string reason = results.SkipReason() ?? "Failed to load";
+        Info(results.TestCaseCount > 0 ?
+            $"   NUnit couldn't run the {results.TestCaseCount} discovered tests: {reason}" :
+            $"   NUnit couldn't find any tests in {assemblyPath}");
     }
 
     public void InfoNoTests(string assemblyPath)
