@@ -12,7 +12,7 @@
       DO NOT CHANGE THE GUID, IT'S A WELL KNOWN EXTENSION POINT AND THIS EXTENSION NEEDS TO BE REGISTERED AT THE END
       WE HAVE CODE INSIDE THE TASK 'TestingPlatformEntryPoint' TO ENSURE THE ORDER OF THE REGISTRATION BASED ON THIS GUID
     -->
-    <TestingPlatformBuilderHook Include="2E8E7F63-61DB-4EDB-A21E-5BF48279A7B8" Condition=" $(GenerateTestingPlatformEntryPoint) == 'true' " >
+    <TestingPlatformBuilderHook Include="2E8E7F63-61DB-4EDB-A21E-5BF48279A7B8" >
       <DisplayName>NUnit</DisplayName>
       <TypeFullName>NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter.TestingPlatformBuilderHook</TypeFullName>
     </TestingPlatformBuilderHook>
