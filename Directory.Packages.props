@@ -17,7 +17,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageVersion>
     <PackageVersion Include="Castle.Core" Version="5.1.1" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.VSTestBridge" Version="1.5.3" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.VSTestBridge" Version="1.6.3" />
   </ItemGroup>
   <ItemGroup>
     <GlobalPackageReference Include="NUnit.Analyzers" Version="4.6.0">
