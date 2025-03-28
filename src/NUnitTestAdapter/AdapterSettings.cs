@@ -1,5 +1,5 @@
 // ***********************************************************************
-// Copyright (c) 2014-2021 Charlie Poole, 2014-2022 Terje Sandstrom
+// Copyright (c) 2014-2021 Charlie Poole, 2014-2025 Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -158,6 +158,8 @@ public class AdapterSettings(ITestLogger logger) : IAdapterSettings
     public bool UseNUnitFilter { get; private set; }
     public bool IncludeStackTraceForSuites { get; private set; }
 
+    public bool IncludeStackTrace { get; private set; }
+
     public VsTestCategoryType VsTestCategoryType { get; private set; } = VsTestCategoryType.NUnit;
 
     /// <summary>
@@ -256,6 +258,7 @@ public class AdapterSettings(ITestLogger logger) : IAdapterSettings
         StopOnError = GetInnerTextAsBool(nunitNode, nameof(StopOnError), false);
         UseNUnitFilter = GetInnerTextAsBool(nunitNode, nameof(UseNUnitFilter), true);
         IncludeStackTraceForSuites = GetInnerTextAsBool(nunitNode, nameof(IncludeStackTraceForSuites), true);
+        IncludeStackTrace = GetInnerTextAsBool(nunitNode, nameof(IncludeStackTrace), true);
         EnsureAttachmentFileScheme = GetInnerTextAsBool(nunitNode, nameof(EnsureAttachmentFileScheme), false);
         SkipExecutionWhenNoTests = GetInnerTextAsBool(nunitNode, nameof(SkipExecutionWhenNoTests), false);
         ThrowOnEachFailureUnderDebugger = GetInnerTextAsBool(nunitNode, nameof(ThrowOnEachFailureUnderDebugger), false);

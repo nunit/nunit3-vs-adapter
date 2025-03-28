@@ -1,5 +1,5 @@
 #tool vswhere&version=3.1.7
-#tool Microsoft.TestPlatform&version=17.9.0
+#tool Microsoft.TestPlatform&version=17.12.0
 
 //////////////////////////////////////////////////////////////////////
 // ARGUMENTS
@@ -13,7 +13,7 @@ var configuration = Argument("configuration", "Release");
 //////////////////////////////////////////////////////////////////////
 
 
-var version = "4.6.0";
+var version = "5.0.1";
 
 var modifier = "";
 
@@ -225,6 +225,7 @@ Task("CreateWorkingImage")
         CreateDirectory(net462Dir);
         CopyFiles(net462Files, net462Dir);
         CopyFileToDirectory("nuget/net462/NUnit3TestAdapter.props", net462Dir);
+        CopyFileToDirectory("nuget/net462/NUnit3TestAdapter.targets", net462Dir);
 
         var netcoreDir = PACKAGE_IMAGE_DIR + "build/" + NETCOREAPP_TFM;
         DotNetCorePublish(ADAPTER_PROJECT, new DotNetCorePublishSettings
@@ -234,6 +235,7 @@ Task("CreateWorkingImage")
             Framework = NETCOREAPP_TFM
         });
         CopyFileToDirectory($"nuget/{NETCOREAPP_TFM}/NUnit3TestAdapter.props", netcoreDir);
+        CopyFileToDirectory($"nuget/{NETCOREAPP_TFM}/NUnit3TestAdapter.targets", netcoreDir);
     });
 
 Task("PackageZip")

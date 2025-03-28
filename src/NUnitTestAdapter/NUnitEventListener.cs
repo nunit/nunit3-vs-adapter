@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2021 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2021 Charlie Poole, 2014-2025 Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -195,7 +195,7 @@ public class NUnitEventListener(ITestConverterCommon testConverter, INUnit3TestE
         var site = resultNode.Site();
         if (site != NUnitTestEvent.SiteType.Setup && site != NUnitTestEvent.SiteType.TearDown)
             return;
-        Recorder.SendMessage(TestMessageLevel.Warning, $"{site} failed for test fixture {resultNode.FullName}");
+        Recorder.SendMessage(TestMessageLevel.Error, $"{site} failed for test fixture {resultNode.FullName}");
 
         if (resultNode.HasFailure)
         {
@@ -203,7 +203,7 @@ public class NUnitEventListener(ITestConverterCommon testConverter, INUnit3TestE
             var stackNode = resultNode.StackTrace;
             if (!string.IsNullOrEmpty(stackNode) && Settings.IncludeStackTraceForSuites)
                 msg += $"\nStackTrace: {stackNode}";
-            Recorder.SendMessage(TestMessageLevel.Warning, msg);
+            Recorder.SendMessage(TestMessageLevel.Error, msg);
         }
     }
 

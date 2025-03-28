@@ -33,18 +33,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests;
 [TestFixture]
 public class ProjectTests
 {
-#if NET462
-    [Test]
-    public void ThatTheReferenceToMicrosoftTestObjectModelPointsToVS2012Version()
-    {
-        var dir = TestContext.CurrentContext.TestDirectory;
-        var assembly = Assembly.LoadFrom(dir + "/NUnit3.TestAdapter.dll");
-        var refNames = assembly.GetReferencedAssemblies().Where(ass => ass.Name == "Microsoft.VisualStudio.TestPlatform.ObjectModel").ToList();
-        ClassicAssert.IsTrue(refNames.Count == 1, "No reference to Microsoft.VisualStudio.TestPlatform.ObjectModel found");
-        ClassicAssert.IsTrue(refNames[0].Version.Major == 11, "Microsoft.VisualStudio.TestPlatform.ObjectModel must point to the 2012 version (11)");
-    }
-#endif
-
     [Test]
     public void ThatTheTestAdapterEndsWithTestAdapterDll()
     {
