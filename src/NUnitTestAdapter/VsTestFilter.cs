@@ -57,6 +57,7 @@ public abstract class VsTestFilter(IRunContext runContext) : IVsTestFilter
         // Initialize the property cache
         SupportedPropertiesCache = new Dictionary<string, TestProperty>(StringComparer.OrdinalIgnoreCase)
         {
+            ["Id"] = TestCaseProperties.Id,
             ["FullyQualifiedName"] = TestCaseProperties.FullyQualifiedName,
             ["Name"] = TestCaseProperties.DisplayName,
             ["TestCategory"] = CategoryList.NUnitTestCategoryProperty,
