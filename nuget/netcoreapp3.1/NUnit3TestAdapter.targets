@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <!-- Handle the coexistance between Microsoft.Testing.Platform and Microsoft.NET.Test.Sdk  -->
+  <!-- Handle the coexistence between Microsoft.Testing.Platform and Microsoft.NET.Test.Sdk  -->
   <PropertyGroup>
-    <GenerateTestingPlatformEntryPoint Condition=" '$(GenerateTestingPlatformEntryPoint)' == '' ">$(EnableNUnitRunner)</GenerateTestingPlatformEntryPoint>
-    <GenerateSelfRegisteredExtensions Condition=" '$(GenerateSelfRegisteredExtensions)' == '' ">$(EnableNUnitRunner)</GenerateSelfRegisteredExtensions>
-    <DisableTestingPlatformServerCapability Condition=" '$(EnableNUnitRunner)' == 'false' or '$(EnableNUnitRunner)' == '' " >true</DisableTestingPlatformServerCapability>
+    <EnableNUnitRunner Condition=" '$(EnableNUnitRunner)' == '' ">false</EnableNUnitRunner>
+    <IsTestingPlatformApplication>$(EnableNUnitRunner)</IsTestingPlatformApplication>
+
     <GenerateProgramFile Condition=" '$(EnableNUnitRunner)' == 'true' ">false</GenerateProgramFile>
-  </PropertyGroup>   
+  </PropertyGroup>
     
   <Choose>
     <!-- Avoid false warning about missing reference (msbuild bug) -->
