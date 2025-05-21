@@ -40,7 +40,7 @@ public readonly struct VSTestResult
     public static VSTestResult Load(ProcessRunResult processRunResult, string trxFilePath)
     {
         Assert.That(trxFilePath, Does.Exist);
-        Assert.That(new FileInfo(trxFilePath).Length, Is.GreaterThan(0), "TRX file is empty");
+        Assert.That(new FileInfo(trxFilePath).Length, Is.GreaterThan(0),  "TRX file is empty");
         var trx = XDocument.Load(trxFilePath);
 
         var ns = (XNamespace)"http://microsoft.com/schemas/VisualStudio/TeamTest/2010";

@@ -100,7 +100,7 @@ public sealed class TestSourceWithCustomNames : AcceptanceTests
                       </PropertyGroup>
 
                       <ItemGroup>
-                        <PackageReference Include='Microsoft.NET.Test.Sdk' Version='17.13.0' />
+                        <PackageReference Include='Microsoft.NET.Test.Sdk' Version='{MicrosoftTestSdkVersion}' />
                         <PackageReference Include='NUnit' Version='{source.NUnitVersion}' />
                         <PackageReference Include='NUnit3TestAdapter' Version='{NuGetPackageVersion}' />
                         <PackageReference Include='System.ValueTuple' Version='4.5.0' />
