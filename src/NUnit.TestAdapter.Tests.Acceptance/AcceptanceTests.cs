@@ -23,7 +23,7 @@ public class Frameworks
 public abstract class AcceptanceTests
 {
     public static string NuGetPackageId => "NUnit3TestAdapter";
-
+    public const string MicrosoftTestSdkVersion = "17.13.0";
     public static string NuGetPackageVersion => Initialization.Value.NupkgVersion;
 
     public const string LowestNetfxTarget = "net462";
