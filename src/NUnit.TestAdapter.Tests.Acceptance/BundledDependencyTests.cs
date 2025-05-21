@@ -18,7 +18,7 @@ public sealed class BundledDependencyTests : AcceptanceTests
                       </PropertyGroup>
 
                       <ItemGroup>
-                        <PackageReference Include='Microsoft.NET.Test.Sdk' Version='*' />
+                        <PackageReference Include='Microsoft.NET.Test.Sdk' Version='17.13.0' />
                         <PackageReference Include='Mono.Cecil' Version='0.10.0-beta5' />
                         <PackageReference Include='NUnit' Version='3.*' />
                         <PackageReference Include='NUnit3TestAdapter' Version='{NuGetPackageVersion}' />
@@ -72,7 +72,7 @@ public sealed class BundledDependencyTests : AcceptanceTests
                       </PropertyGroup>
 
                       <ItemGroup>
-                        <PackageReference Include='Microsoft.NET.Test.Sdk' Version='*' />
+                        <PackageReference Include='Microsoft.NET.Test.Sdk' Version='17.13.0' />
                         <PackageReference Include='Mono.Cecil' Version='0.10.0' />
                         <PackageReference Include='NUnit' Version='3.*' />
                         <PackageReference Include='NUnit3TestAdapter' Version='{NuGetPackageVersion}' />
