@@ -9,6 +9,10 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
+    <PropertyGroup>
+        <DisableTestingPlatformServerCapability>true</DisableTestingPlatformServerCapability>
+    </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="nunit" />
     <PackageReference Include="NUnit3TestAdapter"  />
