@@ -140,9 +140,18 @@ public abstract class VsTestFilter(IRunContext runContext) : IVsTestFilter
             var testCaseType = typeof(TestCase);
             var property = testCaseType.GetTypeInfo().GetProperty("Traits");
             if (property == null)
-                return null;
+                return Array.Empty<string>();
+
             var traits = property.GetValue(testCase, null) as IEnumerable;
-            return (from object t in traits let name = t.GetType().GetTypeInfo().GetProperty("Name").GetValue(t, null) as string where name == traitName select t.GetType().GetProperty("Value").GetValue(t, null) as string).ToArray();
+            if (traits == null)
+                return Array.Empty<string>();
+
+            return (from object t in traits
+                    let name = t.GetType().GetTypeInfo().GetProperty("Name")?.GetValue(t, null) as string
+                    where name == traitName
+                    select t.GetType().GetProperty("Value")?.GetValue(t, null) as string)
+                .Where(v => v != null)
+                .ToArray()!;
         };
     }
 
