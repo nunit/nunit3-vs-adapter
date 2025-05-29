@@ -19,9 +19,9 @@ public class TimingLogger
 
     public TimingLogger ReStart()
     {
-        if (settings.Verbosity < 5)
+        if (settings.Verbosity < 5 || Stopwatch == null)
             return this;
-        Stopwatch.StartNew();
+        Stopwatch.Restart();
         return this;
     }
 
