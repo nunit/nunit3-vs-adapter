@@ -95,7 +95,7 @@ public class Tokenizer
 
     private const char EOF_CHAR = '\0';
     private const string WORD_BREAK_CHARS = "=~!()&|";
-    private readonly string[] dOubleCharSymbols = { "!=", "!~" };
+    private readonly string[] doubleCharSymbols = { "!=", "!~" };
 
     private Token lookahead;
 
@@ -148,7 +148,7 @@ public class Tokenizer
             // Could be alone or start of a double char symbol
             case '!':
                 GetChar();
-                foreach (string dbl in dOubleCharSymbols)
+                foreach (string dbl in doubleCharSymbols)
                 {
                     if (ch != dbl[0] || NextChar != dbl[1])
                         continue;
