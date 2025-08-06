@@ -15,8 +15,19 @@
 
   <ItemGroup>
     <PackageReference Include="nunit" />
-    <PackageReference Include="NUnit3TestAdapter"  />
+    <PackageReference Include="NUnit3TestAdapter" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageVersion Update="NUnit.Analyzers" Version="4.9.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="NUnit.Analyzers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
 </Project>
