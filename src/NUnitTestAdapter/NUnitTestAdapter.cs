@@ -162,12 +162,12 @@ public abstract class NUnitTestAdapter
 
     public void InitializeForbiddenFolders()
     {
-        ForbiddenFolders = new[]
+        ForbiddenFolders = [.. new[]
         {
             Environment.GetEnvironmentVariable("ProgramW6432"),
             Environment.GetEnvironmentVariable("ProgramFiles(x86)"),
             Environment.GetEnvironmentVariable("windir"),
-        }.Where(o => !string.IsNullOrEmpty(o)).Select(o => o.ToLower() + @"\").ToList();
+        }.Where(o => !string.IsNullOrEmpty(o)).Select(o => o.ToLower() + @"\")];
     }
 
     private void SetCurrentWorkingDirectory()
@@ -216,7 +216,7 @@ public abstract class NUnitTestAdapter
 
             foreach (var testCase in testCases)
             {
-                int end = testCase.FullyQualifiedName.IndexOfAny(new[] { '(', '<' });
+                int end = testCase.FullyQualifiedName.IndexOfAny(['(', '<']);
                 prefilters.Add(
                     end > 0 ? testCase.FullyQualifiedName.Substring(0, end) : testCase.FullyQualifiedName);
             }
