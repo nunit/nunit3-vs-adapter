@@ -37,7 +37,15 @@
     <PackageReference Include="nunit.engine" />
     <PackageReference Include="TestCentric.Metadata" Aliases="TestCentric" />
   </ItemGroup>
+   
+  <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
+    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" VersionOverride="15.0.0" />
+  </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+    <PackageReference Include="Microsoft.TestPlatform.ObjectModel" VersionOverride="15.0.0" />
+  </ItemGroup>
+   
   <ItemGroup>
     <Folder Include="TestFilterConverter\" />
   </ItemGroup>
