@@ -17,15 +17,4 @@
     <ProjectCapability Include="TestContainer" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageVersion Update="NUnit.Analyzers" Version="4.9.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Update="NUnit.Analyzers">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
-
 </Project>
