@@ -40,9 +40,13 @@ The NUnit 3 Test Adapter is Open Source software released under the [![](https:/
 
 Visual Studio 2022 is the recommended version to build and test the adapter.
 
-Use `.\build -t test` at the command line to build and run complete tests.
+Use `.\build` at the command line to build (compile) the solution.
 
-To create a package use `.\build -t package`
+Use `.\build -t test` at the command line to build and run unit tests.
+
+Use `.\build -t acceptance` at the command line to build and run acceptance tests.
+
+Use `.\build -t package` to create a package.
 
 To run and debug tests on .NET Framework, load `DisableAppDomain.runsettings`.
 

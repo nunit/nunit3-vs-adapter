@@ -20,6 +20,8 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
         {
         }
 
+        protected override bool UseFullyQualifiedNameAsTestNodeUid => true;
+
         /// <inheritdoc />
         protected override Task SynchronizedDiscoverTestsAsync(VSTestDiscoverTestExecutionRequest request, IMessageBus messageBus,
             CancellationToken cancellationToken)

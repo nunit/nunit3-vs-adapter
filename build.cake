@@ -13,7 +13,7 @@ var configuration = Argument("configuration", "Release");
 //////////////////////////////////////////////////////////////////////
 
 
-var version = "5.0.1";
+var version = "5.1.0";
 
 var modifier = "";
 
