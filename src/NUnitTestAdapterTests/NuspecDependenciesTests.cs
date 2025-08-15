@@ -292,7 +292,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             {
                 List<string> csProjPackagesForFramework = csprojPackages.Select(x => x.Package).ToList().Except(packagesToIgnore).ToList();
                 List<string> nuspecPackagesForFramework = nuspecPackages.Select(x => x.Package).ToList();
-                var missingPackages = csProjPackagesForFramework.Except(nuspecPackagesForFramework).ToList().Except(packagesToIgnore);
+                var missingPackages = csProjPackagesForFramework.Except(nuspecPackagesForFramework).ToList();
 
                 Assert.Multiple(() =>
                 {
