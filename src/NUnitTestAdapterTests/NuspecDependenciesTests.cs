@@ -31,10 +31,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         private List<string> PackagesToIgnore =>
         [
-            "SourceLink.Create.CommandLine",
-            "nunit.engine",
-            "TestCentric.Metadata",
-            "Microsoft.Testing.Platform.MSBuild"
+            "SourceLink.Create.CommandLine",  // Only used a as a development dependency in the adapter, so is only in csproj
+            "nunit.engine",  // Is to be embedded - 3 files, so don't need to be in dependency list in nuspec, but must be in file list
+            "TestCentric.Metadata",  // Only one file is embedded in the package, is in the file list
+            "Microsoft.Testing.Platform.MSBuild"  // Must be in dependency list in nuspec, but dont need to be a package reference in csproj
         ];
 
         public NuspecDependenciesTests(string nuspecPath, string csProjPath)
@@ -61,7 +61,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void AllPackagesInNuspecIsInCsproj()
         {
-            VerifyDependencies.CheckNuspecPackages(_nuspecPackages, _csprojPackages,PackagesToIgnore);
+            VerifyDependencies.CheckNuspecPackages(_nuspecPackages, _csprojPackages, PackagesToIgnore);
         }
 
         private sealed class PackageWithVersion : IEquatable<PackageWithVersion>
@@ -249,8 +249,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         private sealed class VerifyDependencies
         {
-            public static void ComparePackages(Dictionary<string, List<PackageWithVersion>> csprojPackages,
-                Dictionary<string, List<PackageWithVersion>> nuspecPackages, List<string> packagesToIgnore)
+            public static void ComparePackages(
+                Dictionary<string, List<PackageWithVersion>> csprojPackages,
+                Dictionary<string, List<PackageWithVersion>> nuspecPackages,
+                List<string> packagesToIgnore)
             {
                 // Iterate through the frameworks in the csprojPackages dictionary
                 foreach (var csprojFramework in csprojPackages.Keys)
@@ -306,8 +308,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 });
             }
 
-            public static void CheckNuspecPackages(Dictionary<string, List<PackageWithVersion>> nuspecPackages,
-                Dictionary<string, List<PackageWithVersion>> csprojPackages, List<string> packagesToIgnore)
+            public static void CheckNuspecPackages(
+                Dictionary<string, List<PackageWithVersion>> nuspecPackages,
+                Dictionary<string, List<PackageWithVersion>> csprojPackages,
+                List<string> packagesToIgnore)
             {
                 // Extract all packages from csproj
                 var allCsprojPackages = csprojPackages.Values.SelectMany(x => x).Select(x => x.Package).ToList();
