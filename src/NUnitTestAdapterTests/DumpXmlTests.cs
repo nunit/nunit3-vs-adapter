@@ -26,6 +26,10 @@ using NSubstitute;
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.Dump;
 
+#if NET462_OR_GREATER
+using NUnit.Framework.Legacy;
+#endif
+
 namespace NUnit.VisualStudio.TestAdapter.Tests;
 
 [Category(nameof(DumpXml))]
@@ -47,7 +51,10 @@ public class DumpXmlTests
             sut.DumpForDiscovery();
             Assert.That(res, Does.Contain(string2));
             Assert.That(res, Does.Not.Contain(string1));
-        }
+#if NET462_OR_GREATER
+            ClassicAssert.AreEqual(4, 4);
+#endif
+    }
 
     [Test]
     public void ThatRandomNameContainsValidCharacters()
