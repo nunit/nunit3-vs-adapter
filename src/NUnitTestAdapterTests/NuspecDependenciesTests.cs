@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+
 using NUnit.Framework;
 
 #nullable enable
@@ -28,6 +29,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         private const string Root = "../../../../../";
         private const string NotSpecified = nameof(NotSpecified);
 
+        private List<string> PackagesToIgnore =>
+        [
+            "SourceLink.Create.CommandLine",
+            "nunit.engine",
+            "TestCentric.Metadata",
+            "Microsoft.Testing.Platform.MSBuild"
+        ];
+
         public NuspecDependenciesTests(string nuspecPath, string csProjPath)
         {
             _nuspecPath = Path.GetFullPath($"{Root}/nuget/{nuspecPath}");
@@ -46,13 +55,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         [Test]
         public void AllPackagesInCsprojIsInNuspec()
         {
-            VerifyDependencies.ComparePackages(_csprojPackages, _nuspecPackages);
+            VerifyDependencies.ComparePackages(_csprojPackages, _nuspecPackages, PackagesToIgnore);
         }
 
         [Test]
         public void AllPackagesInNuspecIsInCsproj()
         {
-            VerifyDependencies.CheckNuspecPackages(_nuspecPackages, _csprojPackages);
+            VerifyDependencies.CheckNuspecPackages(_nuspecPackages, _csprojPackages,PackagesToIgnore);
         }
 
         private sealed class PackageWithVersion : IEquatable<PackageWithVersion>
@@ -240,7 +249,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         private sealed class VerifyDependencies
         {
-            public static void ComparePackages(Dictionary<string, List<PackageWithVersion>> csprojPackages, Dictionary<string, List<PackageWithVersion>> nuspecPackages)
+            public static void ComparePackages(Dictionary<string, List<PackageWithVersion>> csprojPackages,
+                Dictionary<string, List<PackageWithVersion>> nuspecPackages, List<string> packagesToIgnore)
             {
                 // Iterate through the frameworks in the csprojPackages dictionary
                 foreach (var csprojFramework in csprojPackages.Keys)
@@ -253,7 +263,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                         {
                             foreach (var framework in nuspecPackages.Keys)
                             {
-                                MatchForSingleFramework(framework, csprojPackages[csprojFramework], nuspecPackages[framework]);
+                                MatchForSingleFramework(framework, csprojPackages[csprojFramework], nuspecPackages[framework], packagesToIgnore);
                             }
                         });
                     }
@@ -270,16 +280,17 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                         Assert.That(matchingNuspecFramework, Is.Not.Null, $"Framework '{csprojFramework}' is in .csproj but not in .nuspec.");
 
                         // Find packages in csproj that are missing in nuspec
-                        MatchForSingleFramework(matchingNuspecFramework, csprojPackages[csprojFramework], nuspecPackages[matchingNuspecFramework]);
+                        MatchForSingleFramework(matchingNuspecFramework, csprojPackages[csprojFramework], nuspecPackages[matchingNuspecFramework], packagesToIgnore);
                     }
                 }
             }
 
-            private static void MatchForSingleFramework(string framework, List<PackageWithVersion> csprojPackages, List<PackageWithVersion> nuspecPackages)
+            private static void MatchForSingleFramework(string framework, List<PackageWithVersion> csprojPackages,
+                List<PackageWithVersion> nuspecPackages, List<string> packagesToIgnore)
             {
-                List<string> csProjPackagesForFramework = csprojPackages.Select(x => x.Package).ToList();
+                List<string> csProjPackagesForFramework = csprojPackages.Select(x => x.Package).ToList().Except(packagesToIgnore).ToList();
                 List<string> nuspecPackagesForFramework = nuspecPackages.Select(x => x.Package).ToList();
-                var missingPackages = csProjPackagesForFramework.Except(nuspecPackagesForFramework).ToList();
+                var missingPackages = csProjPackagesForFramework.Except(nuspecPackagesForFramework).ToList().Except(packagesToIgnore);
 
                 Assert.Multiple(() =>
                 {
@@ -287,7 +298,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                     Assert.That(missingPackages, Is.Empty,
                         $"Missing packages in framework '{framework}' in .nuspec: {string.Join(", ", missingPackages)}");
 
-                    foreach (var pair in csprojPackages)
+                    foreach (var pair in csprojPackages.Where(o => !packagesToIgnore.Contains(o.Package)))
                     {
                         var nuspecVersion = nuspecPackages.First(x => x.Package == pair.Package).Version;
                         Assert.That(nuspecVersion, Is.EqualTo(pair.Version), $"Package {pair.Package} in .csproj should have version '{pair.Version}' in .nuspec");
@@ -295,7 +306,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 });
             }
 
-            public static void CheckNuspecPackages(Dictionary<string, List<PackageWithVersion>> nuspecPackages, Dictionary<string, List<PackageWithVersion>> csprojPackages)
+            public static void CheckNuspecPackages(Dictionary<string, List<PackageWithVersion>> nuspecPackages,
+                Dictionary<string, List<PackageWithVersion>> csprojPackages, List<string> packagesToIgnore)
             {
                 // Extract all packages from csproj
                 var allCsprojPackages = csprojPackages.Values.SelectMany(x => x).Select(x => x.Package).ToList();
@@ -304,7 +316,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 var allNuspecPackages = nuspecPackages.Values.SelectMany(x => x).Select(x => x.Package).ToList();
 
                 // Find packages in nuspec that are missing in csproj
-                var missingPackages = allNuspecPackages.Except(allCsprojPackages).ToList();
+                var missingPackages = allNuspecPackages.Except(allCsprojPackages).Except(packagesToIgnore).ToList();
                 Assert.That(missingPackages, Is.Empty, $"Packages in .nuspec that are not in .csproj and should be deleted from nuspec: {string.Join(", ", missingPackages)}");
             }
         }
