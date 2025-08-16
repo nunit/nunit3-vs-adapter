@@ -16,11 +16,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     /// Checks that the csproj of the framework projects are reflected correctly in the nuspec files.
     /// </summary>
     [TestFixture("NUnit3TestAdapter.nuspec", "NUnitTestAdapter/NUnit.TestAdapter.csproj")]
-    internal sealed class NuspecDependenciesTests
+    internal sealed class NuspecDependenciesTests(string nuspecPath, string csProjPath)
     {
-        private readonly string _nuspecPath;
-        private readonly string _csprojPath;
-        private readonly string _propsPath;
+        private readonly string _nuspecPath = Path.GetFullPath($"{Root}/nuget/{nuspecPath}");
+        private readonly string _csprojPath = Path.GetFullPath($"{Root}/src/{csProjPath}");
+        private readonly string _propsPath = Path.GetFullPath($"{Root}/Directory.Packages.props");
 
         private Dictionary<string, List<PackageWithVersion>> _nuspecPackages;
         private Dictionary<string, List<PackageWithVersion>> _csprojPackages;
@@ -36,13 +36,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             "TestCentric.Metadata",  // Only one file is embedded in the package, is in the file list
             "Microsoft.Testing.Platform.MSBuild"  // Must be in dependency list in nuspec, but dont need to be a package reference in csproj
         ];
-
-        public NuspecDependenciesTests(string nuspecPath, string csProjPath)
-        {
-            _nuspecPath = Path.GetFullPath($"{Root}/nuget/{nuspecPath}");
-            _csprojPath = Path.GetFullPath($"{Root}/src/{csProjPath}");
-            _propsPath = Path.GetFullPath($"{Root}/Directory.Packages.props");
-        }
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -64,16 +57,10 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             VerifyDependencies.CheckNuspecPackages(_nuspecPackages, _csprojPackages, PackagesToIgnore);
         }
 
-        private sealed class PackageWithVersion : IEquatable<PackageWithVersion>
+        private sealed class PackageWithVersion(string package, string version) : IEquatable<PackageWithVersion>
         {
-            public PackageWithVersion(string package, string version)
-            {
-                Package = package;
-                Version = version;
-            }
-
-            public string Package { get; }
-            public string Version { get; }
+            public string Package { get; } = package;
+            public string Version { get; } = version;
 
             public override int GetHashCode()
             {
@@ -149,7 +136,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
                     if (!string.IsNullOrEmpty(condition) && condition!.Contains("TargetFrameworkIdentifier"))
                     {
-                        var split = condition.Split(new[] { "==" }, StringSplitOptions.RemoveEmptyEntries);
+                        var split = condition.Split(["=="], StringSplitOptions.RemoveEmptyEntries);
                         framework = split[1].Trim().Replace("'", string.Empty);
                     }
 
@@ -183,7 +170,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
                     if (!groupedPackages.TryGetValue(framework, out List<PackageWithVersion>? versionedReferencesForFramework))
                     {
-                        versionedReferencesForFramework = new List<PackageWithVersion>();
+                        versionedReferencesForFramework = [];
                         groupedPackages[framework] = versionedReferencesForFramework;
                     }
 
