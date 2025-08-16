@@ -134,7 +134,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                     var condition = itemGroup.Attribute("Condition")?.Value;
                     string framework = NotSpecified;
 
-                    if (!string.IsNullOrEmpty(condition) && condition.Contains("TargetFrameworkIdentifier"))
+                    if (!string.IsNullOrEmpty(condition) && condition!.Contains("TargetFrameworkIdentifier"))
                     {
                         var split = condition.Split(["=="], StringSplitOptions.RemoveEmptyEntries);
                         framework = split[1].Trim().Replace("'", string.Empty);
