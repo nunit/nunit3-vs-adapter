@@ -134,7 +134,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                     var condition = itemGroup.Attribute("Condition")?.Value;
                     string framework = NotSpecified;
 
-                    if (!string.IsNullOrEmpty(condition) && condition!.Contains("TargetFrameworkIdentifier"))
+                    if (!string.IsNullOrEmpty(condition) && condition.Contains("TargetFrameworkIdentifier"))
                     {
                         var split = condition.Split(["=="], StringSplitOptions.RemoveEmptyEntries);
                         framework = split[1].Trim().Replace("'", string.Empty);
@@ -279,7 +279,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             {
                 List<string> csProjPackagesForFramework = csprojPackages.Select(x => x.Package).ToList().Except(packagesToIgnore).ToList();
                 List<string> nuspecPackagesForFramework = nuspecPackages.Select(x => x.Package).ToList();
-                var missingPackages = csProjPackagesForFramework.Except(nuspecPackagesForFramework).ToList().Except(packagesToIgnore);
+                var missingPackages = csProjPackagesForFramework.Except(nuspecPackagesForFramework).ToList();
 
                 Assert.Multiple(() =>
                 {
