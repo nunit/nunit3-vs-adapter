@@ -10,9 +10,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
         public static void AddExtensions(ITestApplicationBuilder testApplicationBuilder, string[] arguments)
 #pragma warning restore IDE0060 // Remove unused parameter
         {
-#pragma warning disable SA1010 // Opening square brackets should be spaced correctly - FP from StyleCop
             testApplicationBuilder.AddNUnit(() => [Assembly.GetEntryAssembly()!]);
-#pragma warning restore SA1010 // Opening square brackets should be spaced correctly
         }
     }
 }
