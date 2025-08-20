@@ -18,18 +18,14 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
     [TestFixture("NUnit3TestAdapter.nuspec", "NUnitTestAdapter/NUnit.TestAdapter.csproj")]
     internal sealed class NuspecDependenciesTests(string nuspecPath, string csProjPath)
     {
+        private const string Root = "../../../../../";
+        private const string NotSpecified = nameof(NotSpecified);
+
         private readonly string _nuspecPath = Path.GetFullPath($"{Root}/nuget/{nuspecPath}");
         private readonly string _csprojPath = Path.GetFullPath($"{Root}/src/{csProjPath}");
         private readonly string _propsPath = Path.GetFullPath($"{Root}/Directory.Packages.props");
 
-        private Dictionary<string, List<PackageWithVersion>> _nuspecPackages;
-        private Dictionary<string, List<PackageWithVersion>> _csprojPackages;
-        private Dictionary<string, string> _csprojPackageVersions;
-
-        private const string Root = "../../../../../";
-        private const string NotSpecified = nameof(NotSpecified);
-
-        private List<string> PackagesToIgnore =>
+        private static readonly HashSet<string> PackagesToIgnore =
         [
             "SourceLink.Create.CommandLine",  // Only used a as a development dependency in the adapter, so is only in csproj
             "nunit.engine",  // Is to be embedded - 3 files, so don't need to be in dependency list in nuspec, but must be in file list
@@ -37,24 +33,28 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             "Microsoft.Testing.Platform.MSBuild"  // Must be in dependency list in nuspec, but dont need to be a package reference in csproj
         ];
 
+        private Dictionary<string, List<PackageWithVersion>> _nuspecPackages;
+        private Dictionary<string, List<PackageWithVersion>> _csprojPackages;
+        private Dictionary<string, string> _csprojPackageVersions;
+
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
-            _nuspecPackages = NuspecReader.ExtractNuspecPackages(_nuspecPath);
-            _csprojPackageVersions = PackageVersionReader.ExtractPackageVersions(_propsPath);
-            _csprojPackages = CsprojReader.ExtractCsprojPackages(_csprojPath, _csprojPackageVersions);
+            _nuspecPackages = NuspecReader.ExtractNuspecPackages(_nuspecPath, PackagesToIgnore);
+            _csprojPackageVersions = PackageVersionReader.ExtractPackageVersions(_propsPath, PackagesToIgnore);
+            _csprojPackages = CsprojReader.ExtractCsprojPackages(_csprojPath, _csprojPackageVersions, PackagesToIgnore);
         }
 
         [Test]
         public void AllPackagesInCsprojIsInNuspec()
         {
-            VerifyDependencies.ComparePackages(_csprojPackages, _nuspecPackages, PackagesToIgnore);
+            VerifyDependencies.ComparePackages(_csprojPackages, _nuspecPackages);
         }
 
         [Test]
         public void AllPackagesInNuspecIsInCsproj()
         {
-            VerifyDependencies.CheckNuspecPackages(_nuspecPackages, _csprojPackages, PackagesToIgnore);
+            VerifyDependencies.CheckNuspecPackages(_nuspecPackages, _csprojPackages);
         }
 
         private sealed class PackageWithVersion(string package, string version) : IEquatable<PackageWithVersion>
@@ -83,7 +83,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         private static class PackageVersionReader
         {
             // Function to extract packages from the .csproj file
-            public static Dictionary<string, string> ExtractPackageVersions(string path)
+            public static Dictionary<string, string> ExtractPackageVersions(
+                string path, HashSet<string> packagesToIgnore)
             {
                 Assert.That(path, Does.Exist, $"props file at {path} not found.");
                 string xml = File.ReadAllText(path);
@@ -100,7 +101,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                         var package = packageReference.Attribute("Include")?.Value;
                         var version = packageReference.Attribute("Version")?.Value;
 
-                        if (package is not null && version is not null)
+                        if (package is not null && version is not null && !packagesToIgnore.Contains(package))
                         {
                             if (packageVersions.TryGetValue(package, out string? previousVersion))
                             {
@@ -121,7 +122,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             // Function to extract packages from the .csproj file
             public static Dictionary<string, List<PackageWithVersion>> ExtractCsprojPackages(
                 string path,
-                Dictionary<string, string> packageVersions)
+                Dictionary<string, string> packageVersions,
+                HashSet<string> packagesToIgnore)
             {
                 Assert.That(path, Does.Exist, $"Csproj file at {path} not found.");
                 string xml = File.ReadAllText(path);
@@ -144,6 +146,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                                                      .Select(pr => pr.Attribute("Include")?.Value)
                                                      .Where(include => !string.IsNullOrEmpty(include)) // Ensure it's non-null and non-empty
                                                      .Select(include => include!) // Use non-null assertion to ensure the result is a List<string>
+                                                     .Where(include => !packagesToIgnore.Contains(include)) // Filter out ignored packages
                                                      .ToList();
 
                     var packageReferencesWithVersion = new List<PackageWithVersion>(packageReferences.Count);
@@ -183,7 +186,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
         private static class NuspecReader
         {
-            public static Dictionary<string, List<PackageWithVersion>> ExtractNuspecPackages(string path)
+            public static Dictionary<string, List<PackageWithVersion>> ExtractNuspecPackages(
+                string path, HashSet<string> packagesToIgnore)
             {
                 Assert.That(path, Does.Exist, $"Nuspec file at {path} not found.");
                 string xml = File.ReadAllText(path);
@@ -213,7 +217,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                             var id = dependency.Attribute("id")?.Value;
                             var version = dependency.Attribute("version")?.Value;
 
-                            if (id is not null && version is not null)
+                            if (id is not null && version is not null && !packagesToIgnore.Contains(id))
                             {
                                 versionedDependencies.Add(new PackageWithVersion(id, version));
                             }
@@ -238,8 +242,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
         {
             public static void ComparePackages(
                 Dictionary<string, List<PackageWithVersion>> csprojPackages,
-                Dictionary<string, List<PackageWithVersion>> nuspecPackages,
-                List<string> packagesToIgnore)
+                Dictionary<string, List<PackageWithVersion>> nuspecPackages)
             {
                 // Iterate through the frameworks in the csprojPackages dictionary
                 foreach (var csprojFramework in csprojPackages.Keys)
@@ -252,7 +255,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                         {
                             foreach (var framework in nuspecPackages.Keys)
                             {
-                                MatchForSingleFramework(framework, csprojPackages[csprojFramework], nuspecPackages[framework], packagesToIgnore);
+                                MatchForSingleFramework(framework, csprojPackages[csprojFramework], nuspecPackages[framework]);
                             }
                         });
                     }
@@ -269,15 +272,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                         Assert.That(matchingNuspecFramework, Is.Not.Null, $"Framework '{csprojFramework}' is in .csproj but not in .nuspec.");
 
                         // Find packages in csproj that are missing in nuspec
-                        MatchForSingleFramework(matchingNuspecFramework, csprojPackages[csprojFramework], nuspecPackages[matchingNuspecFramework], packagesToIgnore);
+                        MatchForSingleFramework(matchingNuspecFramework, csprojPackages[csprojFramework], nuspecPackages[matchingNuspecFramework]);
                     }
                 }
             }
 
             private static void MatchForSingleFramework(string framework, List<PackageWithVersion> csprojPackages,
-                List<PackageWithVersion> nuspecPackages, List<string> packagesToIgnore)
+                List<PackageWithVersion> nuspecPackages)
             {
-                List<string> csProjPackagesForFramework = csprojPackages.Select(x => x.Package).ToList().Except(packagesToIgnore).ToList();
+                List<string> csProjPackagesForFramework = csprojPackages.Select(x => x.Package).ToList();
                 List<string> nuspecPackagesForFramework = nuspecPackages.Select(x => x.Package).ToList();
                 var missingPackages = csProjPackagesForFramework.Except(nuspecPackagesForFramework).ToList();
 
@@ -287,7 +290,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                     Assert.That(missingPackages, Is.Empty,
                         $"Missing packages in framework '{framework}' in .nuspec: {string.Join(", ", missingPackages)}");
 
-                    foreach (var pair in csprojPackages.Where(o => !packagesToIgnore.Contains(o.Package)))
+                    foreach (var pair in csprojPackages)
                     {
                         var nuspecVersion = nuspecPackages.First(x => x.Package == pair.Package).Version;
                         Assert.That(nuspecVersion, Is.EqualTo(pair.Version), $"Package {pair.Package} in .csproj should have version '{pair.Version}' in .nuspec");
@@ -297,8 +300,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
 
             public static void CheckNuspecPackages(
                 Dictionary<string, List<PackageWithVersion>> nuspecPackages,
-                Dictionary<string, List<PackageWithVersion>> csprojPackages,
-                List<string> packagesToIgnore)
+                Dictionary<string, List<PackageWithVersion>> csprojPackages)
             {
                 // Extract all packages from csproj
                 var allCsprojPackages = csprojPackages.Values.SelectMany(x => x).Select(x => x.Package).ToList();
@@ -307,7 +309,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                 var allNuspecPackages = nuspecPackages.Values.SelectMany(x => x).Select(x => x.Package).ToList();
 
                 // Find packages in nuspec that are missing in csproj
-                var missingPackages = allNuspecPackages.Except(allCsprojPackages).Except(packagesToIgnore).ToList();
+                var missingPackages = allNuspecPackages.Except(allCsprojPackages).ToList();
                 Assert.That(missingPackages, Is.Empty, $"Packages in .nuspec that are not in .csproj and should be deleted from nuspec: {string.Join(", ", missingPackages)}");
             }
         }
