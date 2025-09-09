@@ -2,8 +2,6 @@
 
 The NUnit 3 Test Adapter runs NUnit 3.x and higher tests in Visual Studio 2012 and newer.
 
-
-
 You can download the latest release version ![](https://img.shields.io/github/release-date/nunit/nunit3-vs-adapter.svg?style=flat)
 
 [![NuGet Version](https://img.shields.io/nuget/v/NUnit3TestAdapter.svg)](https://www.nuget.org/packages/NUnit3TestAdapter)  ![](https://img.shields.io/nuget/dt/NUnit3TestAdapter.svg?style=flat)
@@ -11,8 +9,6 @@ You can download the latest release version ![](https://img.shields.io/github/re
 or the latest developer build version
 
 [![MyGet version](https://img.shields.io/myget/nunit/vpre/NUnit3TestAdapter.svg?label=Myget%3A%20Latest%20pre-release&style=flat)](https://www.myget.org/feed/nunit/package/nuget/NUnit3TestAdapter)
-
-
 
 ##### Builds on master
 ![NUnit3TestAdapter.CI](https://img.shields.io/github/actions/workflow/status/nunit/nunit3-vs-adapter/NUnit3TestAdapter.CI.yml?branch=master)
@@ -28,21 +24,21 @@ The [NUnit3TestAdapter wiki](https://docs.nunit.org/articles/vs-test-adapter/Ind
 
 Also check the [release notes](https://docs.nunit.org/articles/vs-test-adapter/Adapter-Release-Notes.html).
 
-
-
 ## License ##
 
-
 The NUnit 3 Test Adapter is Open Source software released under the [![](https://img.shields.io/github/license/nunit/nunit3-vs-adapter.svg?style=flat)](https://nunit.org/nuget/nunit3-license.txt).
-
 
 ## Developing
 
 Visual Studio 2022 is the recommended version to build and test the adapter.
 
-Use `.\build -t test` at the command line to build and run complete tests.
+Use `.\build` at the command line to build (compile) the solution.
 
-To create a package use `.\build -t package`
+Use `.\build -t test` at the command line to build and run unit tests.
+
+Use `.\build -t acceptance` at the command line to build and run acceptance tests.
+
+Use `.\build -t package` to create a package.
 
 To run and debug tests on .NET Framework, load `DisableAppDomain.runsettings`.
 
@@ -63,8 +59,8 @@ set breakpoints and watch variables, [follow these steps](https://github.com/nun
 
 * This adapter works with NUnit 3.0 and higher only. Use the NUnit 2 Adapter to run NUnit 2.x tests.
 
-
 ## Announcements
+
 * From version 3.9 the NUnit3TestAdapter will stop supporting Visual Studio 2012 RTM (!), note only RTM, the later updates will still be supported fully. If you're using VS 2012 and want to update NUnit3TestAdapter, please update your Visual Studio RTM to any of the subsequent updates (Update 1-5)
-* From version 3.16 the NUnit3TestAdapter will stop supporting .net core 1 
+* From version 3.16 the NUnit3TestAdapter will stop supporting .net core 1
 * From version 4.0 the NUnit3TestAdapter will only be released as a nuget package, the VSIX is deprecated.

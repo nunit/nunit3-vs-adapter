@@ -47,7 +47,7 @@ public class DumpXmlTests
             sut.DumpForDiscovery();
             Assert.That(res, Does.Contain(string2));
             Assert.That(res, Does.Not.Contain(string1));
-        }
+    }
 
     [Test]
     public void ThatRandomNameContainsValidCharacters()

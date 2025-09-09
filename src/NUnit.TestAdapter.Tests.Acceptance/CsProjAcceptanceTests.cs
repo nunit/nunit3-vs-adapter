@@ -21,7 +21,7 @@ public abstract class CsProjAcceptanceTests : AcceptanceTests
                       </PropertyGroup>
 
                       <ItemGroup>
-                        <PackageReference Include='Microsoft.NET.Test.Sdk' Version='*' />
+                        <PackageReference Include='Microsoft.NET.Test.Sdk' Version='{MicrosoftTestSdkVersion}' />
                         <PackageReference Include='NUnit' Version='{NUnitVersion(framework)}' />
                         <PackageReference Include='NUnit3TestAdapter' Version='{NuGetPackageVersion}' />
                       </ItemGroup>

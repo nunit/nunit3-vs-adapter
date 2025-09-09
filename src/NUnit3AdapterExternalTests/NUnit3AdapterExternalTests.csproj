@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
-    <PackageReference Include="NUnit"  />
+    <PackageReference Include="NUnit" />
   </ItemGroup>
 
 </Project>
