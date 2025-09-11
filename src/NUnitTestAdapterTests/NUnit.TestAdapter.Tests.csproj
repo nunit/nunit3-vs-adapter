@@ -4,8 +4,7 @@
     <IsTestProject>true</IsTestProject>
     <RootNamespace>NUnit.VisualStudio.TestAdapter.Tests</RootNamespace>
     <AssemblyName>NUnit.VisualStudio.TestAdapter.Tests</AssemblyName>
-    <TargetFrameworks>net462;netcoreapp3.1</TargetFrameworks>
-    <!--<TargetFrameworks>netcoreapp3.1</TargetFrameworks>-->
+    <TargetFrameworks>net462;net8.0</TargetFrameworks>
     <!-- For testing and debugging-->
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
@@ -23,11 +22,7 @@
     <PackageReference Include="TestCentric.Metadata" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
-    <PackageReference Include="NUnit" VersionOverride="3.14.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
+  <ItemGroup>
     <PackageReference Include="NUnit" />
   </ItemGroup>
 

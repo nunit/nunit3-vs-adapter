@@ -3,15 +3,10 @@
   <PropertyGroup>
     <AssemblyName>NUnit.VisualStudio.TestAdapter.ExternalTests</AssemblyName>
     <RootNamespace>NUnit.VisualStudio.TestAdapter.Tests</RootNamespace>
-    <TargetFrameworks>net462;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net462;net8.0</TargetFrameworks>
   </PropertyGroup>
 
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
-    <PackageReference Include="NUnit" VersionOverride="3.14.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
+  <ItemGroup>
     <PackageReference Include="NUnit" />
   </ItemGroup>
 

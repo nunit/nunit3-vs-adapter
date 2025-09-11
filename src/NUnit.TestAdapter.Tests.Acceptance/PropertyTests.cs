@@ -31,7 +31,7 @@ public sealed class PropertyTests : CsProjAcceptanceTests
                 }");
     }
 
-    protected override string Framework => Frameworks.NetCoreApp31;
+    protected override string Framework => Frameworks.Net80;
 
     [Test, Platform("Win")]
     [TestCase("Bug=99999", 0, 0)]

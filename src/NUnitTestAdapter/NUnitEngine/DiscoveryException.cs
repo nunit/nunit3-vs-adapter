@@ -26,7 +26,9 @@ using System.Runtime.Serialization;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
+#if NETFRAMEWORK
 [Serializable]
+#endif
 public class DiscoveryException : Exception
 {
     public DiscoveryException()
@@ -41,9 +43,11 @@ public class DiscoveryException : Exception
     {
     }
 
+#if NETFRAMEWORK
     protected DiscoveryException(
         SerializationInfo info,
         StreamingContext context) : base(info, context)
     {
     }
+#endif
 }

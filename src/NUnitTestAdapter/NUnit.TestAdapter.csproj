@@ -4,9 +4,8 @@
     <AssemblyName>NUnit3.TestAdapter</AssemblyName>
     <!--<AssemblyName>NUnit3.TestAdapterDebug</AssemblyName>-->
     <RootNamespace>NUnit.VisualStudio.TestAdapter</RootNamespace>
-    <!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
     <!-- For testing and debugging-->
-    <TargetFrameworks>net462;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net462;net8.0</TargetFrameworks>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <SourceLinkOriginUrl>https://github.com/nunit/nunit3-vs-adapter</SourceLinkOriginUrl>
     <SourceLinkCreate>true</SourceLinkCreate>

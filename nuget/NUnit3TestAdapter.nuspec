@@ -27,12 +27,12 @@
 
     <dependencies>
       <group targetFramework="net462">
-        <dependency id="Microsoft.Testing.Extensions.VSTestBridge" version="1.7.3" />
-        <dependency id="Microsoft.Testing.Platform.MSBuild" version="1.7.3" />
+        <dependency id="Microsoft.Testing.Extensions.VSTestBridge" version="2.0.0-preview.25452.10" />
+        <dependency id="Microsoft.Testing.Platform.MSBuild" version="2.0.0-preview.25452.10" />
       </group>
-      <group targetFramework="netcoreapp3.1">
-        <dependency id="Microsoft.Testing.Extensions.VSTestBridge" version="1.7.3" />
-        <dependency id="Microsoft.Testing.Platform.MSBuild" version="1.7.3" />
+      <group targetFramework="net8.0">
+        <dependency id="Microsoft.Testing.Extensions.VSTestBridge" version="2.0.0-preview.25452.10" />
+        <dependency id="Microsoft.Testing.Platform.MSBuild" version="2.0.0-preview.25452.10" />
       </group>
     </dependencies>
   </metadata>
@@ -49,14 +49,14 @@
     <file src="build\net462\NUnit3TestAdapter.props" target="build\net462\NUnit3TestAdapter.props" />
     <file src="build\net462\NUnit3TestAdapter.targets" target="build\net462\NUnit3TestAdapter.targets" />
 
-    <file src="build\netcoreapp3.1\NUnit3.TestAdapter.dll" target="build\netcoreapp3.1\NUnit3.TestAdapter.dll" />
-    <file src="build\netcoreapp3.1\NUnit3.TestAdapter.pdb" target="build\netcoreapp3.1\NUnit3.TestAdapter.pdb" />
-    <file src="build\netcoreapp3.1\nunit.engine.dll" target="build\netcoreapp3.1\nunit.engine.dll" />
-    <file src="build\netcoreapp3.1\nunit.engine.api.dll" target="build\netcoreapp3.1\nunit.engine.api.dll" />
-    <file src="build\netcoreapp3.1\nunit.engine.core.dll" target="build\netcoreapp3.1\nunit.engine.core.dll" />
-    <file src="build\netcoreapp3.1\testcentric.engine.metadata.dll" target="build\netcoreapp3.1\testcentric.engine.metadata.dll"/>
-    <file src="build\netcoreapp3.1\NUnit3TestAdapter.props" target="build\netcoreapp3.1\NUnit3TestAdapter.props" />
-    <file src="build\netcoreapp3.1\NUnit3TestAdapter.targets" target="build\netcoreapp3.1\NUnit3TestAdapter.targets" />
+    <file src="build\net8.0\NUnit3.TestAdapter.dll" target="build\net8.0\NUnit3.TestAdapter.dll" />
+    <file src="build\net8.0\NUnit3.TestAdapter.pdb" target="build\net8.0\NUnit3.TestAdapter.pdb" />
+    <file src="build\net8.0\nunit.engine.dll" target="build\net8.0\nunit.engine.dll" />
+    <file src="build\net8.0\nunit.engine.api.dll" target="build\net8.0\nunit.engine.api.dll" />
+    <file src="build\net8.0\nunit.engine.core.dll" target="build\net8.0\nunit.engine.core.dll" />
+    <file src="build\net8.0\testcentric.engine.metadata.dll" target="build\net8.0\testcentric.engine.metadata.dll"/>
+    <file src="build\net8.0\NUnit3TestAdapter.props" target="build\net8.0\NUnit3TestAdapter.props" />
+    <file src="build\net8.0\NUnit3TestAdapter.targets" target="build\net8.0\NUnit3TestAdapter.targets" />
 
 
   </files>

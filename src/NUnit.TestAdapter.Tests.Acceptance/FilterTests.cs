@@ -36,7 +36,7 @@ public sealed class FilterTests : CsProjAcceptanceTests
                 }");
         }
 
-    protected override string Framework => Frameworks.NetCoreApp31;
+    protected override string Framework => Frameworks.Net80;
 
     [Test, Platform("Win")]
     [TestCase(NoFilter, 2, 3)]

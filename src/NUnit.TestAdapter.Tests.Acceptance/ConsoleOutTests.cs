@@ -32,7 +32,7 @@ public sealed class ConsoleOutTests : CsProjAcceptanceTests
                 }");
         }
 
-    protected override string Framework => Frameworks.NetCoreApp31;
+    protected override string Framework => Frameworks.Net80;
 
     [Test, Platform("Win")]
     public void DotNetTest()

@@ -219,8 +219,9 @@ public class NUnitFailure
     }
 }
 
-
+#if NETFRAMEWORK
 [Serializable]
+#endif
 public class NUnitEventWrongTypeException : Exception
 {
     // For guidelines regarding the creation of new exception types, see
@@ -240,9 +241,11 @@ public class NUnitEventWrongTypeException : Exception
     {
     }
 
+#if NETFRAMEWORK
     protected NUnitEventWrongTypeException(
         SerializationInfo info,
         StreamingContext context) : base(info, context)
     {
     }
+#endif
 }
