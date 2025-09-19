@@ -26,7 +26,8 @@ Also check the [release notes](https://docs.nunit.org/articles/vs-test-adapter/A
 
 ## License ##
 
-The NUnit 3 Test Adapter is Open Source software released under the [![](https://img.shields.io/github/license/nunit/nunit3-vs-adapter.svg?style=flat)](https://nunit.org/nuget/nunit3-license.txt).
+The NUnit 3 Test Adapter is Open Source software released under the [![MIT license](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/nunit/nunit3-vs-adapter/blob/main/LICENSE).
+
 
 ## Developing
 
