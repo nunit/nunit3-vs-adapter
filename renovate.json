@@ -1,5 +1,12 @@
 {
   "extends": [
     "github>nunit/.github"
+  ],
+  "packageRules": [
+    {
+      "matchPackageNames": ["nunit.engine"],
+      "allowedVersions": "3.18.1", 
+      "enabled": false
+    }
   ]
 }
