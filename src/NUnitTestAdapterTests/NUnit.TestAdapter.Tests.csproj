@@ -39,12 +39,6 @@
     <None Update="temp.snk" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
-  <Target Name="PreventTestPlatformObjectModelCopyLocal" AfterTargets="ResolveReferences">
-    <ItemGroup>
-      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' == 'Microsoft.VisualStudio.TestPlatform.ObjectModel'" />
-    </ItemGroup>
-  </Target>
-
   <ItemGroup>
     <PackageVersion Update="NUnit.Analyzers" Version="4.9.2" />
   </ItemGroup>
