@@ -58,10 +58,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\NUnit3TestAdapter.Myget.Publish.yml = .github\workflows\NUnit3TestAdapter.Myget.Publish.yml
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "netcoreapp3.1", "netcoreapp3.1", "{2F940513-5B8F-45A5-A188-7C5D03D1B50D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "net8.0", "net8.0", "{2F940513-5B8F-45A5-A188-7C5D03D1B50D}"
 	ProjectSection(SolutionItems) = preProject
-		nuget\netcoreapp3.1\NUnit3TestAdapter.props = nuget\netcoreapp3.1\NUnit3TestAdapter.props
-		nuget\netcoreapp3.1\NUnit3TestAdapter.targets = nuget\netcoreapp3.1\NUnit3TestAdapter.targets
+		nuget\net8.0\NUnit3TestAdapter.props = nuget\net8.0\NUnit3TestAdapter.props
+		nuget\net8.0\NUnit3TestAdapter.targets = nuget\net8.0\NUnit3TestAdapter.targets
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{3D1159FD-FC4D-4750-87EA-F477B3912B3C}"
