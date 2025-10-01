@@ -107,7 +107,7 @@ public sealed class FixtureTests : CsProjAcceptanceTests
                 }");
         }
 
-    protected override string Framework => Frameworks.NetCoreApp31;
+    protected override string Framework => Frameworks.Net80;
 
     [Test, Platform("Win")]
     [TestCase("TestCategory=869", 2, 2)]

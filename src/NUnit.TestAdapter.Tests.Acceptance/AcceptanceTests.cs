@@ -12,10 +12,6 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance;
 
 public class Frameworks
 {
-    public const string NetCoreApp31 = "netcoreapp3.1";
-    public const string Net50 = "net5.0";
-    public const string Net60 = "net6.0";
-    public const string Net70 = "net7.0";
     public const string Net80 = "net8.0";
 }
 
@@ -23,7 +19,7 @@ public class Frameworks
 public abstract class AcceptanceTests
 {
     public static string NuGetPackageId => "NUnit3TestAdapter";
-    public const string MicrosoftTestSdkVersion = "17.13.0";
+    public const string MicrosoftTestSdkVersion = "17.14.1";
     public static string NuGetPackageVersion => Initialization.Value.NupkgVersion;
 
     public const string LowestNetfxTarget = "net462";
@@ -32,18 +28,11 @@ public abstract class AcceptanceTests
     protected static IEnumerable<string> TargetFrameworks =>
     [
         LowestNetfxTarget,
-        Frameworks.NetCoreApp31
-    ];
-
-    protected static IEnumerable<string> DotNetCliTargetFrameworks =>
-    [
-        Frameworks.NetCoreApp31,
-        Frameworks.Net60,
+        Frameworks.Net80
     ];
 
     protected static IEnumerable<string> ModernDotNetCliTargetFrameworks =>
     [
-        Frameworks.Net60,
         Frameworks.Net80
     ];
 
@@ -52,7 +41,7 @@ public abstract class AcceptanceTests
 
     public class MultiFrameworkSource
     {
-        public IEnumerable<string> Frameworks { get; set; } = DotNetCliTargetFrameworks;
+        public IEnumerable<string> Frameworks { get; set; } = ModernDotNetCliTargetFrameworks;
         public string NUnitVersion { get; set; } = NUnit3;
 
         public static IEnumerable<MultiFrameworkSource> LegacyDotNetFrameworks => [new()];
@@ -85,22 +74,8 @@ public abstract class AcceptanceTests
 
         public static IEnumerable<SingleFrameworkSource> NetFxFramework => [new()];
 
-        public static IEnumerable<SingleFrameworkSource> LegacyDotNetFramework =>
-        [
-            new ()
-            {
-                Framework = Frameworks.NetCoreApp31,
-                NUnitVersion = NUnit3
-            },
-        ];
-
         public static IEnumerable<SingleFrameworkSource> ModernDotNetFramework =>
         [
-            new ()
-            {
-                Framework = Frameworks.Net60,
-                NUnitVersion = NUnit4
-            },
             new ()
             {
                 Framework = Frameworks.Net80,
@@ -108,14 +83,13 @@ public abstract class AcceptanceTests
             }
         ];
 
-        public static IEnumerable<SingleFrameworkSource> AllFrameworks => NetFxFramework.Concat(LegacyDotNetFramework).Concat(ModernDotNetFramework);
-        public static IEnumerable<SingleFrameworkSource> AllFrameworksExceptNetFx => LegacyDotNetFramework.Concat(ModernDotNetFramework);
+        public static IEnumerable<SingleFrameworkSource> AllFrameworks => NetFxFramework.Concat(ModernDotNetFramework);
+        public static IEnumerable<SingleFrameworkSource> AllFrameworksExceptNetFx => ModernDotNetFramework;
     }
 
     protected string NUnitVersion(string targetFramework) =>
         targetFramework switch
         {
-            Frameworks.NetCoreApp31 => NUnit3,
             _ => NUnit4,
         };
 
