@@ -52,7 +52,7 @@ See https://github.com/nunit/docs/wiki/Packaging-the-V3-Adapter for more details
 
 ## Debugger source-stepping
 
-The NuGet package and the VSIX contain source-linked PDBs for the adapter.
+The NuGet package contain source-linked PDBs for the adapter.
 If you’re in the middle of a debugging session and realize you’d like to be able to step into NUnit adapter code,
 set breakpoints and watch variables, [follow these steps](https://github.com/nunit/docs/wiki/Adapter-Source-Stepping).
 
