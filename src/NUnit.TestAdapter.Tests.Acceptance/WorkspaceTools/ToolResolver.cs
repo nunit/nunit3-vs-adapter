@@ -90,13 +90,10 @@ public sealed class ToolResolver
             ProcessUtils.Run(
                     Environment.CurrentDirectory,
                     VSWhere,
-                    arguments.Concat(new[] { "-prerelease" }))
+                    arguments.Concat(["-prerelease"]))
                 .ThrowIfError()
                 .StdOut;
 
-        if (!string.IsNullOrEmpty(prereleaseInstallationPath))
-            return prereleaseInstallationPath;
-
-        return null;
+        return !string.IsNullOrEmpty(prereleaseInstallationPath) ? prereleaseInstallationPath : null;
     }
 }

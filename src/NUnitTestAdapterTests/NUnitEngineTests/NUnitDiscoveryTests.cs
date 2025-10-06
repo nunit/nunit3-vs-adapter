@@ -778,7 +778,6 @@ public class NUnitDiscoveryTests
         });
     }
 
-
     [TestCase(ExplicitQuickTestXml, 1, TestName = nameof(ThatExplicitWorks2) + "." + nameof(ExplicitQuickTestXml))]
     public void ThatExplicitWorks2(string xml, int count)
     {
@@ -844,6 +843,8 @@ public class NUnitDiscoveryTests
             new NUnitResults(XmlHelper.CreateXmlNode(NotExplicitXml)));
         var topLevelSuite = ndr.TestAssembly.TestSuites.Single();
         Assert.That(topLevelSuite.IsExplicit, Is.False);
+        Assert.That(ndr.TestAssembly.NoOfExplicitTestCases, Is.EqualTo(3));
+        Assert.That(ndr.TestAssembly.RunnableTestCases.Count, Is.EqualTo(1));
     }
 
     private const string AsyncTestsXml =

@@ -9,7 +9,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance;
 internal static class Utils
 {
     private static readonly char[] InvalidFileNameChars = Path.GetInvalidFileNameChars()
-        .Concat(new[] { '"' }) // VSTest strips quotes from the test assembly path and fails to locate the .deps.json in the same directory
+        .Concat(['"']) // VSTest strips quotes from the test assembly path and fails to locate the .deps.json in the same directory
         .Distinct().ToArray();
 
     public static string GetSafeFilename(string arbitraryString, bool allowDirectorySeparators = false)

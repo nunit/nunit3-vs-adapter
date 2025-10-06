@@ -31,10 +31,12 @@ using System.Reflection;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 using NUnit.Engine;
 using NUnit.VisualStudio.TestAdapter.Dump;
+
+
+using NUnit.VisualStudio.TestAdapter.ExecutionProcesses;
 using NUnit.VisualStudio.TestAdapter.Internal;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
@@ -304,7 +306,6 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
             CreateTestOutputFolder();
             Dump?.StartDiscoveryInExecution(testCases, filter, package);
             TestLog.DebugRunfrom();
-            // var discoveryResults = RunType == RunType.CommandLineCurrentNUnit ? null : NUnitEngineAdapter.Explore(filter);
             var discoveryResults = NUnitEngineAdapter.Explore(filter);
             Dump?.AddString(discoveryResults.AsString());
 

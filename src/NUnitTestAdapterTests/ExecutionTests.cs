@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NSubstitute;
 using NUnit.Engine;
 using NUnit.Framework;
+
+using NUnit.VisualStudio.TestAdapter.ExecutionProcesses;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests;
