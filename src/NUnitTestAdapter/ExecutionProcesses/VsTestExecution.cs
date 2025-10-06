@@ -19,7 +19,7 @@ public class VsTestExecution(IExecutionContext ctx) : Execution(ctx)
 
     public TestFilter CheckVsTestFilter(TestFilter filter, IDiscoveryConverter discovery, IVsTestFilter vsTestFilter)
     {
-        // If we have a VSTest TestFilter, convert it to a nunit filter
+        // If we have a VSTest TestFilter, convert it to a NUnit filter
         if (vsTestFilter == null || vsTestFilter.IsEmpty)
             return filter;
         TestLog.Debug($"TfsFilter used, length: {vsTestFilter.TfsTestCaseFilterExpression?.TestCaseFilterValue.Length}");
