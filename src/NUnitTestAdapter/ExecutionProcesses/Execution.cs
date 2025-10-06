@@ -9,6 +9,7 @@ namespace NUnit.VisualStudio.TestAdapter.ExecutionProcesses;
 
 public abstract class Execution(IExecutionContext ctx)
 {
+    private const string ExcludeExplicitTests = "<not><prop name='Explicit'>true</prop></not>";
     protected string TestOutputXmlFolder => ctx.TestOutputXmlFolder;
     protected ITestLogger TestLog => ctx.Log;
     protected IAdapterSettings Settings => ctx.Settings;
@@ -59,14 +60,14 @@ public abstract class Execution(IExecutionContext ctx)
         {
             if (!discovery.IsExplicitRun && discovery.HasExplicitTests && Settings.ExplicitMode is ExplicitModeEnum.Strict)
             {
-                var filterExt = new TestFilter("<not><prop name='Explicit'>true</prop></not>");
+                var filterExt = new TestFilter(ExcludeExplicitTests);
                 var combiner = new TestFilterCombiner(testFilter, filterExt);
                 return combiner.GetFilter();
             }
 
             if (discovery.IsExplicitRun && Settings.ExplicitMode is ExplicitModeEnum.None)
             {
-                var filterExt = new TestFilter("<not><prop name='Explicit'>true</prop></not>");
+                var filterExt = new TestFilter(ExcludeExplicitTests);
                 var combiner = new TestFilterCombiner(testFilter, filterExt);
                 return combiner.GetFilter();
             }
