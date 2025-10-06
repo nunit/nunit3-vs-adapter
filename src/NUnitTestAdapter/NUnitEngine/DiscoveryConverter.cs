@@ -51,6 +51,12 @@ public interface IDiscoveryConverter
     int NoOfExplicitTestCases { get; }
     bool HasExplicitTests { get; }
     IEnumerable<TestCase> GetExplicitTestCases(IEnumerable<TestCase> filteredTestCases);
+
+    /// <summary>
+    /// Returns loaded tests that are not explicit.
+    /// Effectively: LoadedTestCases minus explicit tests.
+    /// </summary>
+    IEnumerable<TestCase> GetLoadedNonExplicitTestCases();
 }
 
 public class DiscoveryConverter(ITestLogger logger, IAdapterSettings settings) : IDiscoveryConverter
@@ -128,6 +134,30 @@ public class DiscoveryConverter(ITestLogger logger, IAdapterSettings settings) :
                 explicitCases.Add(tc);
         }
         return explicitCases;
+    }
+
+    /// <summary>
+    /// Returns loaded tests that are not explicit by subtracting explicit tests from the loaded set.
+    /// </summary>
+    public IEnumerable<TestCase> GetLoadedNonExplicitTestCases()
+    {
+        if (LoadedTestCases == null || LoadedTestCases.Count == 0)
+            return Enumerable.Empty<TestCase>();
+
+        IEnumerable<TestCase> explicitCases;
+        // Try using NUnit discovery information when available
+        if (TestRun != null && CurrentTestAssembly != null && AllTestCases != null)
+        {
+            explicitCases = GetExplicitTestCases(LoadedTestCases);
+        }
+        else
+        {
+            // Fallback: detect explicit via trait if discovery model is not available (e.g., Legacy)
+            explicitCases = LoadedTestCases.Where(tc => tc.Traits.Any(t => t.Name == "Explicit"));
+        }
+
+        var explicitSet = new HashSet<string>(explicitCases.Select(tc => tc.FullyQualifiedName));
+        return LoadedTestCases.Where(tc => !explicitSet.Contains(tc.FullyQualifiedName));
     }
 
 

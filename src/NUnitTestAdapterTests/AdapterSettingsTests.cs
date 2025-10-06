@@ -365,6 +365,15 @@ public class AdapterSettingsTests
         Assert.That(_settings.DefaultTestNamePattern, Is.EqualTo("{m}{a:1000}"));
     }
 
+    [TestCase("None", ExplicitModeEnum.None)]
+    [TestCase("Relaxed", ExplicitModeEnum.Relaxed)]
+    [TestCase("Strict", ExplicitModeEnum.Strict)]
+    public void ExplicitMode(string explicitMode, ExplicitModeEnum expected)
+    {
+        _settings.Load($"<RunSettings><NUnit><ExplicitMode>{explicitMode}</ExplicitMode></NUnit></RunSettings>");
+        Assert.That(_settings.ExplicitMode, Is.EqualTo(expected));
+    }
+
     [Test]
     public void CollectDataForEachTestSeparately()
     {

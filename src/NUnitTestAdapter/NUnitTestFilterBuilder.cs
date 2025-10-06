@@ -23,7 +23,9 @@
 
 using System.Collections.Generic;
 using System.Linq;
+
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+
 using NUnit.Engine;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 using NUnit.VisualStudio.TestAdapter.TestFilterConverter;
@@ -35,7 +37,7 @@ public class NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSe
     private readonly ITestFilterService _filterService = filterService ?? throw new NUnitEngineException("TestFilterService is not available. Engine in use is incorrect version.");
 
     // ReSharper disable once StringLiteralTypo
-    public static readonly TestFilter NoTestsFound = new ("<notestsfound/>");
+    public static readonly TestFilter NoTestsFound = new("<notestsfound/>");
 
     public TestFilter ConvertTfsFilterToNUnitFilter(IVsTestFilter vsFilter, IList<TestCase> loadedTestCases)
     {
@@ -66,6 +68,12 @@ public class NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSe
         var parser = new TestFilterParser();
         var filter = parser.Parse(vsFilter.TfsTestCaseFilterExpression.TestCaseFilterValue);
         var tf = new TestFilter(filter);
+        if (settings.ExplicitMode == ExplicitModeEnum.None)
+        {
+            var tfExplicitNone = new TestFilter("<not><prop name='Explicit'>true</prop></not>");
+            var combiner = new TestFilterCombiner(tf, tfExplicitNone);
+            return combiner.GetFilter();
+        }
         return tf;
     }
 
@@ -74,7 +82,7 @@ public class NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSe
     {
         var filteredTestCases = vsFilter.CheckFilter(discovery.LoadedTestCases).ToList();
         var explicitCases = discovery.GetExplicitTestCases(filteredTestCases).ToList();
-        bool isExplicit = filteredTestCases.Count == explicitCases.Count;
+        bool isExplicit = filteredTestCases.Count == explicitCases.Count && settings.ExplicitMode != ExplicitModeEnum.None;
         var tcs = isExplicit ? filteredTestCases : filteredTestCases.Except(explicitCases);
         var testCases = tcs as TestCase[] ?? tcs.ToArray();
         // TestLog.Info(string.Format("TFS Filter detected: LoadedTestCases {0}, Filtered Test Cases {1}", loadedTestCases.Count, testCases.Count()));
@@ -90,6 +98,12 @@ public class NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSe
             return TestFilter.Empty;
         var filterBuilder = _filterService.GetTestFilterBuilder();
         filterBuilder.SelectWhere(where);
+        if (settings.ExplicitMode == ExplicitModeEnum.None)
+        {
+            var tfExplicitNone = new TestFilter("<not><prop name='Explicit'>true</prop></not>");
+            var combiner = new TestFilterCombiner(filterBuilder.GetFilter(), tfExplicitNone);
+            return combiner.GetFilter();
+        }
         return filterBuilder.GetFilter();
     }
 
@@ -98,6 +112,11 @@ public class NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSe
         if (testCases.Count() > settings.AssemblySelectLimit)
         {
             // Need to log that filter has been set to empty due to AssemblySelectLimit
+            if (settings.ExplicitMode == ExplicitModeEnum.None)
+            {
+                var tfExplicitNone = new TestFilter("<not><prop name='Explicit'>true</prop></not>");
+                return tfExplicitNone;
+            }
             return TestFilter.Empty;
         }
 

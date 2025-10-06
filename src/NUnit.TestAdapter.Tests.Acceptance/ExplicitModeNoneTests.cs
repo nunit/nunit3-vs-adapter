@@ -3,7 +3,7 @@ using NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance;
 
-public sealed class FilterTests : CsProjAcceptanceTests
+public sealed class ExplicitNoneTests : CsProjAcceptanceTests
 {
     protected override void AddTestsCs(IsolatedWorkspace workspace)
     {
@@ -15,7 +15,7 @@ public sealed class FilterTests : CsProjAcceptanceTests
                     public class Tests
                     {
         
-                        [Test,Category(""FooGroup""),Category(""AllGroup"")]
+                        [Test,Explicit,Category(""FooGroup""),Category(""AllGroup"")]
                         public void Foo()
                         {
                             Assert.Pass();
@@ -27,7 +27,7 @@ public sealed class FilterTests : CsProjAcceptanceTests
                             Assert.Pass();
                         }
 
-                        [Test, Category(""BarGroup""),Category(""AllGroup"")]
+                        [Test,Explicit, Category(""BarGroup""),Category(""AllGroup"")]
                         public void Bar()
                         {
                             Assert.Pass();
@@ -39,58 +39,57 @@ public sealed class FilterTests : CsProjAcceptanceTests
     protected override string Framework => Frameworks.NetCoreApp31;
 
     [Test, Platform("Win")]
-    [TestCase(NoFilter, 2, 3)]
-    [TestCase("TestCategory=FooGroup", 1, 2)]
-    [TestCase("TestCategory!=BarGroup", 1, 2)]
-    [TestCase("TestCategory=IsExplicit", 1, 1)]
-    [TestCase("FullyQualifiedName=Filter.Tests.Foo", 1, 1)]
-    [TestCase("FullyQualifiedName!=Filter.Tests.Foo", 1, 1)]
+    [TestCase(NoFilter, 0, 3)]
+    [TestCase("TestCategory=FooGroup", 0, 2)]
+    [TestCase("TestCategory!=BarGroup", 0, 2)]
+    [TestCase("TestCategory=IsExplicit", 0, 1)]
+    [TestCase("FullyQualifiedName=Filter.Tests.Foo", 0, 1)]
+    [TestCase("FullyQualifiedName!=Filter.Tests.Foo", 0, 2)]
     [TestCase("TestCategory!=AllGroup", 0, 0)]
-    // [TestCase(@"TestThatDontExistHere", 0, 0)]
-    // [TestCase(@"FullyQualifiedName~Filter.Tests.Foo", 1, 1)]
-    // [TestCase(@"FullyQualifiedName~Foo", 1, 1)]
     public void Filter_DotNetTest(string filter, int executed, int total)
     {
         var workspace = Build();
-        var results = workspace.DotNetTest(filter, true, true, TestContext.WriteLine);
+        workspace.ExplicitMode = "None";
+        var results = workspace.DotNetTest(filter, false, true, TestContext.WriteLine);
         Verify(executed, total, results);
     }
 
     [Test, Platform("Win")]
-    [TestCase(NoFilter, 2, 3)]
-    [TestCase("TestCategory=FooGroup", 1, 2)]
-    [TestCase("TestCategory!=BarGroup", 1, 2)]
-    [TestCase("TestCategory=IsExplicit", 1, 1)]
-    [TestCase("FullyQualifiedName=Filter.Tests.Foo", 1, 1)]
+    [TestCase(NoFilter, 0, 3)]
+    [TestCase("TestCategory=FooGroup", 0, 2)]
+    [TestCase("TestCategory!=BarGroup", 0, 2)]
+    [TestCase("TestCategory=IsExplicit", 0, 1)]
+    [TestCase("FullyQualifiedName=Filter.Tests.Foo", 0, 1)]
     [TestCase("TestCategory=XXXX", 0, 0)]
     public void Filter_VSTest(string filter, int executed, int total)
     {
         var workspace = Build();
+        workspace.ExplicitMode = "None";
         var results = workspace.VSTest($@"bin\Debug\{Framework}\Test.dll", new VsTestTestCaseFilter(filter));
         Verify(executed, total, results);
     }
 
     [Test, Platform("Win")]
-    [TestCase(NoFilter, 2, 3)]
-    [TestCase("Category=FooGroup", 1, 1)]
-    [TestCase("cat==FooGroup", 1, 2)]
-    [TestCase("cat!=FooGroup", 1, 1)]
-    [TestCase("Category!=BarGroup", 1, 1)]
-    [TestCase("Category=IsExplicit", 1, 1)]
-    [TestCase("test==Filter.Tests.Foo", 1, 1)]
-    [TestCase("name==Foo", 1, 1)]
-    [TestCase("name!=Bar", 1, 1)]
-    // [TestCase("test=~Foo", 1, 1)]
+    [TestCase(NoFilter, 0, 3)]
+    [TestCase("Category=FooGroup", 0, 2)]
+    [TestCase("cat==FooGroup", 0, 2)]
+    [TestCase("cat!=FooGroup", 0, 1)]
+    [TestCase("Category!=BarGroup", 0, 2)]
+    [TestCase("Category=IsExplicit", 0, 1)]
+    [TestCase("test==Filter.Tests.Foo", 0, 1)]
+    [TestCase("name==Foo", 0, 1)]
+    [TestCase("name!=Bar", 0, 2)]
     public void Filter_DotNetTest_NUnitWhere(string filter, int executed, int total)
     {
         var workspace = Build();
+        workspace.ExplicitMode = "None";
         var nunitWhere = $"NUnit.Where={filter}";
-        var results = workspace.DotNetTest(nunitWhere, true, true, TestContext.WriteLine);
+        var results = workspace.DotNetTest(nunitWhere, false, true, TestContext.WriteLine);
         Verify(executed, total, results);
     }
 
-    [TestCase("", 2, 3)]
-    [TestCase("Category=IsExplicit", 0, 1)]
+    [TestCase("", 0, 3)]
+    [TestCase("TestCategory=IsExplicit", 0, 1)]
     public void DotNetTest_ExplicitModeIsNone(string filter, int executed, int total)
     {
         var workspace = Build();
