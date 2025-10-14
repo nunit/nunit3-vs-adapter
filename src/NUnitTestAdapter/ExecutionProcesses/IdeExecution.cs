@@ -7,9 +7,7 @@ public class IdeExecution(IExecutionContext ctx) : Execution(ctx)
 {
     public override TestFilter CheckFilterInCurrentMode(TestFilter filter, IDiscoveryConverter discovery)
     {
-        if (!discovery.IsDiscoveryMethodCurrent)
-            return filter;
-        if (filter.IsEmpty())
+        if (!discovery.IsDiscoveryMethodCurrent || filter.IsEmpty())
             return filter;
         filter = CheckFilter(filter, discovery);
         return filter;
