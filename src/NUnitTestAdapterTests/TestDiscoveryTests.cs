@@ -182,6 +182,7 @@ public class FailuresInDiscovery : ITestCaseDiscoverySink
     }
 
 #if NET462
+    [Ignore("Waiting for nullref issue in engine to be fixed")]
     [Test]
     public void WhenAssemblyIsNative()
     {
@@ -190,11 +191,11 @@ public class FailuresInDiscovery : ITestCaseDiscoverySink
         var path = Path.Combine(TestContext.CurrentContext.TestDirectory, "NativeTests.dll");
         Assert.That(File.Exists(path));
         TestAdapterUtils.CreateDiscoverer().DiscoverTests(
-            new[] { path },
+            [path],
             context,
             messageLoggerStub,
             this);
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(testcaseWasSent, Is.False);
             Assert.That(messageLoggerStub.WarningMessages.Count(), Is.EqualTo(1));
@@ -203,7 +204,7 @@ public class FailuresInDiscovery : ITestCaseDiscoverySink
             Assert.That(warningmsg, Is.Not.Null);
             if (!string.IsNullOrEmpty(warningmsg))
                 Assert.That(warningmsg, Does.Contain("Assembly not supported"));
-        });
+        }
     }
 #endif
 
