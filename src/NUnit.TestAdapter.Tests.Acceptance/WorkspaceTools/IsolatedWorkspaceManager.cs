@@ -43,11 +43,7 @@ public sealed class IsolatedWorkspaceManager : IDisposable
     }
 
     public IsolatedWorkspace CreateWorkspace(string name)
-    {
-        return new (
-            Utils.CreateMutexDirectory(workspaceDirectory.DirectoryPath, name),
-            toolResolver);
-    }
+        => new (Utils.CreateMutexDirectory(workspaceDirectory.DirectoryPath, name), toolResolver);
 
     /// <summary>
     /// Prevents the workspace directory from being deleted when <see cref="Dispose"/> is called.

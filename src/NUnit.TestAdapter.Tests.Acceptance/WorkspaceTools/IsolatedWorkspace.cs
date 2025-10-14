@@ -15,6 +15,10 @@ public sealed partial class IsolatedWorkspace(DirectoryMutex directoryMutex, Too
 
     public bool DumpTestExecution { get; set; } = false;
 
+    public bool DebugTestRun { get; set; } = false;
+
+    public string ExplicitMode { get; set; } = string.Empty;  // Empty means we don't set it, but rely on default.
+
     public string Directory => directoryMutex.DirectoryPath;
 
     public void Dispose() => directoryMutex.Dispose();
@@ -68,7 +72,8 @@ public sealed partial class IsolatedWorkspace(DirectoryMutex directoryMutex, Too
             .Add("test")
             .AddIf(noBuild, "--no-build")
             .Add("-v:n")
-            .Add("--logger").Add("trx;LogFileName=" + tempTrxFile);
+            .Add("--logger")
+            .Add("trx;LogFileName=" + tempTrxFile);
 
         bool hasNUnitWhere = filterArgument.StartsWith("NUnit.Where");
 
@@ -86,6 +91,15 @@ public sealed partial class IsolatedWorkspace(DirectoryMutex directoryMutex, Too
                 dotnettest.Add("--");
             dotnettest.Add("NUnit.Verbosity=5");
         }
+
+        if (ExplicitMode != string.Empty)
+        {
+            bool hasPrefix = hasNUnitWhere || verbose;
+            if (!hasPrefix)
+                dotnettest.Add("--");
+            dotnettest.Add($"NUnit.ExplicitMode={ExplicitMode}");
+        }
+
         log?.Invoke($"\n{dotnettest.ArgumentsAsEscapedString}");
         var result = dotnettest.Run(throwOnError: false);
 
@@ -107,7 +121,7 @@ public sealed partial class IsolatedWorkspace(DirectoryMutex directoryMutex, Too
     {
         ConfigureRun(toolResolver.NuGet)
             .Add("restore")
-            .AddRangeIf(packagesDirectory != null, new[] { "-PackagesDirectory", packagesDirectory })
+            .AddRangeIf(packagesDirectory != null, ["-PackagesDirectory", packagesDirectory])
             .Run();
     }
 
@@ -134,6 +148,14 @@ public sealed partial class IsolatedWorkspace(DirectoryMutex directoryMutex, Too
 
         if (DumpTestExecution)
             vstest.Add("--").Add("NUnit.DumpXmlTestResults=true");
+
+        if (ExplicitMode != string.Empty)
+        {
+            bool hasPrefix = DumpTestExecution;
+            if (!hasPrefix)
+                vstest.Add("--");
+            vstest.Add($"NUnit.ExplicitMode={ExplicitMode}");
+        }
 
         var result = vstest.Run(throwOnError: false);
 

@@ -46,9 +46,9 @@ public abstract class CsProjAcceptanceTests : AcceptanceTests
         Assert.Multiple(() =>
         {
             Assert.That(results.Counters.Total, Is.EqualTo(total),
-                $"Total tests counter did not match expectation\n{results.ProcessRunResult.StdOut}");
+                $"Total tests counter did not match expectation {results.Counters.Total} versus expected {total}\n{results.ProcessRunResult.StdOut}");
             Assert.That(results.Counters.Executed, Is.EqualTo(executed),
-                "Executed tests counter did not match expectation");
+                $"Executed tests counter did not match expectation {results.Counters.Executed} versus expected {executed}");
             Assert.That(results.Counters.Passed, Is.EqualTo(executed), "Passed tests counter did not match expectation");
         });
     }

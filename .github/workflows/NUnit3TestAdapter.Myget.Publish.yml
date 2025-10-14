@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - master
       - release
       - vnext
       - myget
@@ -20,10 +19,10 @@ jobs:
 
     steps:
     - name: ⤵Checkout Source
-      uses: actions/checkout@v4.1.7
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
     - name: 🛠️ Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # v5
       with:
         dotnet-version: |
           3.1.x
@@ -34,7 +33,7 @@ jobs:
       run: .\build.ps1 -t QuickRelease
 
     - name: 💾 Upload build artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
       with:
         name: Package
         path: package

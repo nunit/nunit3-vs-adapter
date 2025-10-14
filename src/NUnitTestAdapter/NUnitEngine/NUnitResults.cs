@@ -21,8 +21,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-using System;
-using System.Linq;
 using System.Xml;
 using NUnit.VisualStudio.TestAdapter.Dump;
 
@@ -42,7 +40,7 @@ public class NUnitResults
     public NUnitResults(XmlNode results)
     {
         FullTopNode = results;
-        // Currently, this will always be the case but it might change
+        // Currently, this will always be the case, but it might change
         TopNode = results.Name == "test-run" ? results.FirstChild : results;
 
         int.TryParse(TopNode.GetAttribute("testcasecount"), out int testcasecount);

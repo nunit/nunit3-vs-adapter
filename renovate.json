@@ -1,0 +1,27 @@
+{
+  "extends": [
+    "github>nunit/.github"
+  ],
+  "packageRules": [
+    {
+      "matchPackageNames": [
+        "nunit.engine"
+      ],
+      "allowedVersions": "3.18.1",
+      "enabled": false
+    },
+    {
+      "matchManagers": [
+        "nuget"
+      ],
+      "matchPackageNames": [
+        "Microsoft.NET.Test.Sdk"
+      ],
+      "matchFileNames": [
+        "src/NUnitTestAdapterTests/NUnit.TestAdapter.Tests.csproj"
+      ],
+      "matchCurrentVersion": "17.13.0",
+      "allowedVersions": "17.13.0"
+    }
+  ]
+}

@@ -9,11 +9,11 @@
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <SourceLinkOriginUrl>https://github.com/nunit/nunit3-vs-adapter</SourceLinkOriginUrl>
     <SourceLinkCreate>true</SourceLinkCreate>
-    <AssemblyVersion>5.1.0.0</AssemblyVersion>
-    <FileVersion>5.1.0.0</FileVersion>
+    <AssemblyVersion>5.2.0.0</AssemblyVersion>
+    <FileVersion>5.2.0.0</FileVersion>
     <NeutralLanguage>en</NeutralLanguage>
     <Title>NUnit3 Test Adapter for Visual Studio</Title>
-    <Copyright>Copyright © 2011-2021 Charlie Poole, 2014-2025 Terje Sandstrom</Copyright>
+    <Copyright>Copyright © 2011-2021 Charlie Poole, 2014-2026 Terje Sandstrom</Copyright>
     <Description>A package containing the NUnit3 TestAdapter for Visual Studio 2012 onwards.
         The package works with Visual Studio 2012 and newer, dotnet test and VSTest.Console.</Description>
     <Company>NUnit Project</Company>
@@ -46,16 +46,5 @@
       <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' == 'Microsoft.VisualStudio.TestPlatform.ObjectModel'" />
     </ItemGroup>
   </Target>
-
-  <ItemGroup>
-    <PackageVersion Update="NUnit.Analyzers" Version="4.9.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Update="NUnit.Analyzers">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
 
 </Project>

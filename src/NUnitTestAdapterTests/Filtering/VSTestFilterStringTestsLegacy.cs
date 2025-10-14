@@ -59,8 +59,8 @@ public static class VSTestFilterStringTestsLegacy
                         </properties>
                     </test-case>
                 </test-suite>");
-
-        Assert.That(from test in result select test.FullyQualifiedName, Is.EquivalentTo(nonExplicitTestIds));
+        var fqn = from test in result select test.FullyQualifiedName;
+        Assert.That(fqn, Is.EquivalentTo(nonExplicitTestIds));
     }
 
     private static IEnumerable<TestCase> ApplyFilter(string vsTestFilterString, string testCasesXml)
