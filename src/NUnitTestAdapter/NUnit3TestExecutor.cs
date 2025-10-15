@@ -344,7 +344,7 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
         catch (Exception ex)
         {
             if (ex is TargetInvocationException)
-                ex = ex.InnerException!;
+                ex = ex.InnerException ?? ex;
             TestLog.Warning("   Exception thrown executing tests in " + assemblyPath, ex);
             var tc = new TestCase(assemblyName, new Uri(NUnit3TestExecutor.ExecutorUri), assemblyName)
             {
