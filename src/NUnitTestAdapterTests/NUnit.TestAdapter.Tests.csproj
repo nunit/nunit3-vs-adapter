@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
-    <PackageReference Include="NUnit" VersionOverride="3.14.0" />
+    <PackageReference Include="NUnit" VersionOverride="4.4.0" />
       <PackageVersion Update="Microsoft.NET.Test.Sdk" Version="17.13.0" />
   </ItemGroup>
 
