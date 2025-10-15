@@ -26,15 +26,11 @@
     <developmentDependency>false</developmentDependency>
 
     <dependencies>
-      <group targetFramework="net462">
         <dependency id="Microsoft.Testing.Extensions.VSTestBridge" version="2.0.1" />
         <dependency id="Microsoft.Testing.Platform.MSBuild" version="2.0.1" />
-      </group>
-      <group targetFramework="net8.0">
-        <dependency id="Microsoft.Testing.Extensions.VSTestBridge" version="2.0.1" />
-        <dependency id="Microsoft.Testing.Platform.MSBuild" version="2.0.1" />
-      </group>
+        <dependency id="Microsoft.Extensions.DependencyModel" version="8.0.2" />
     </dependencies>
+
   </metadata>
   <files>
     <file src="..\..\images\nunit_256.png" target="" />

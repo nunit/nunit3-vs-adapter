@@ -13,10 +13,6 @@ jobs:
     - uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # v5
       with:
         dotnet-version: |
-          3.1.x
-          5.0.x
-          6.0.x
-          7.0.x
           8.0.x
     - name: Build with cake
       run: .\build.ps1 -t CI
