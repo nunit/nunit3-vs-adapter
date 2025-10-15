@@ -15,8 +15,7 @@
         <Title>NUnit3 Test Adapter for Visual Studio</Title>
         <Copyright>Copyright © 2011-2021 Charlie Poole, 2014-2026 Terje Sandstrom</Copyright>
         <Description>
-            A package containing the NUnit3 TestAdapter for Visual Studio 2012 onwards.
-            The package works with Visual Studio 2012 and newer, dotnet test and VSTest.Console.
+            A package containing the NUnit3 TestAdapter for Visual Studio, DotNet test and VSTest.Console.
         </Description>
         <Company>NUnit Project</Company>
         <Product>NUnit3TestAdapter</Product>
@@ -38,10 +37,6 @@
         <PackageReference Include="nunit.engine" />
         <PackageReference Include="TestCentric.Metadata" Aliases="TestCentric" />
         <PackageReference Include="Microsoft.Extensions.DependencyModel" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <Folder Include="TestFilterConverter\" />
     </ItemGroup>
 
     <Target Name="PreventTestPlatformObjectModelCopyLocal" AfterTargets="ResolveReferences">
