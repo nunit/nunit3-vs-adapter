@@ -12,14 +12,14 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
 {
-    internal sealed class NUnitBridgedTestFramework : SynchronizedSingleSessionVSTestBridgedTestFramework
+    internal sealed class NUnitBridgedTestFramework(
+        NUnitExtension extension,
+        Func<IEnumerable<Assembly>> getTestAssemblies,
+        IServiceProvider serviceProvider,
+        ITestFrameworkCapabilities capabilities)
+        : SynchronizedSingleSessionVSTestBridgedTestFramework(extension, getTestAssemblies, serviceProvider,
+            capabilities)
     {
-        public NUnitBridgedTestFramework(NUnitExtension extension, Func<IEnumerable<Assembly>> getTestAssemblies,
-            IServiceProvider serviceProvider, ITestFrameworkCapabilities capabilities)
-            : base(extension, getTestAssemblies, serviceProvider, capabilities)
-        {
-        }
-
         protected override bool UseFullyQualifiedNameAsTestNodeUid => true;
 
         /// <inheritdoc />

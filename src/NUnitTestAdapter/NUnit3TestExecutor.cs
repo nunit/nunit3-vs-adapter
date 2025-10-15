@@ -117,7 +117,9 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
 #if REVERSEENGINEERING
         var st = new StackTrace();
         var frames = st.GetFrames();
+#pragma warning disable SYSLIB0012
         var filenames = frames?.Select(x => x.GetMethod()?.DeclaringType?.Assembly.CodeBase).Distinct().ToList();
+#pragma warning restore SYSLIB0012
 #endif
         InitializeForExecution(runContext, frameworkHandle);
         TestLog.Debug($"RunTests by IEnumerable<string>,({sources.Count()} entries), called from {WhoIsCallingUsEntry}");
@@ -342,7 +344,7 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
         catch (Exception ex)
         {
             if (ex is TargetInvocationException)
-                ex = ex.InnerException;
+                ex = ex.InnerException ?? ex;
             TestLog.Warning("   Exception thrown executing tests in " + assemblyPath, ex);
             var tc = new TestCase(assemblyName, new Uri(NUnit3TestExecutor.ExecutorUri), assemblyName)
             {

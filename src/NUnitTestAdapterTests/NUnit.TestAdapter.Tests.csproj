@@ -4,8 +4,7 @@
     <IsTestProject>true</IsTestProject>
     <RootNamespace>NUnit.VisualStudio.TestAdapter.Tests</RootNamespace>
     <AssemblyName>NUnit.VisualStudio.TestAdapter.Tests</AssemblyName>
-    <TargetFrameworks>net462;netcoreapp3.1</TargetFrameworks>
-    <!--<TargetFrameworks>netcoreapp3.1</TargetFrameworks>-->
+    <TargetFrameworks>net462;net8.0</TargetFrameworks>
     <!-- For testing and debugging-->
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
@@ -24,12 +23,7 @@
 
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
-    <PackageReference Include="NUnit" VersionOverride="3.14.0" />
-      <PackageVersion Update="Microsoft.NET.Test.Sdk" Version="17.13.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
+  <ItemGroup>
     <PackageReference Include="NUnit" />
   </ItemGroup>
 
@@ -45,11 +39,5 @@
     <Compile Update="NavigationDataTests.cs" CopyToOutputDirectory="PreserveNewest" />
     <None Update="temp.snk" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
-
-  <Target Name="PreventTestPlatformObjectModelCopyLocal" AfterTargets="ResolveReferences">
-    <ItemGroup>
-      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' == 'Microsoft.VisualStudio.TestPlatform.ObjectModel'" />
-    </ItemGroup>
-  </Target>
 
  </Project>

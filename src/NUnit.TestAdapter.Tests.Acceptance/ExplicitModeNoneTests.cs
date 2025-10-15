@@ -3,6 +3,13 @@ using NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance;
 
+/// <summary>
+/// Something in this test is not working when run in parallel with other tests.
+/// It affects running within Visual Studio, so we mark it as NonParallelizable.
+/// Running from command line seems to work either way.
+/// Suspicion is that it may be related to the use of reflection of internal types, see FilteringTestUtils.
+/// </summary>
+[NonParallelizable]
 public sealed class ExplicitNoneTests : CsProjAcceptanceTests
 {
     protected override void AddTestsCs(IsolatedWorkspace workspace)
@@ -36,7 +43,7 @@ public sealed class ExplicitNoneTests : CsProjAcceptanceTests
                 }");
     }
 
-    protected override string Framework => Frameworks.NetCoreApp31;
+    protected override string Framework => Frameworks.Net80;
 
     [Test, Platform("Win")]
     [TestCase(NoFilter, 0, 3)]

@@ -1,51 +1,48 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <AssemblyName>NUnit3.TestAdapter</AssemblyName>
-    <!--<AssemblyName>NUnit3.TestAdapterDebug</AssemblyName>-->
-    <RootNamespace>NUnit.VisualStudio.TestAdapter</RootNamespace>
-    <!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
-    <!-- For testing and debugging-->
-    <TargetFrameworks>net462;netcoreapp3.1</TargetFrameworks>
-    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-    <SourceLinkOriginUrl>https://github.com/nunit/nunit3-vs-adapter</SourceLinkOriginUrl>
-    <SourceLinkCreate>true</SourceLinkCreate>
-    <AssemblyVersion>5.2.0.0</AssemblyVersion>
-    <FileVersion>5.2.0.0</FileVersion>
-    <NeutralLanguage>en</NeutralLanguage>
-    <Title>NUnit3 Test Adapter for Visual Studio</Title>
-    <Copyright>Copyright © 2011-2021 Charlie Poole, 2014-2026 Terje Sandstrom</Copyright>
-    <Description>A package containing the NUnit3 TestAdapter for Visual Studio 2012 onwards.
-        The package works with Visual Studio 2012 and newer, dotnet test and VSTest.Console.</Description>
-    <Company>NUnit Project</Company>
-    <Product>NUnit3TestAdapter</Product>
-  </PropertyGroup>
+    <PropertyGroup>
+        <AssemblyName>NUnit3.TestAdapter</AssemblyName>
+        <!--<AssemblyName>NUnit3.TestAdapterDebug</AssemblyName>-->
+        <RootNamespace>NUnit.VisualStudio.TestAdapter</RootNamespace>
+        <!-- For testing and debugging-->
+        <TargetFrameworks>net462;net8.0</TargetFrameworks>
+        <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+        <SourceLinkOriginUrl>https://github.com/nunit/nunit3-vs-adapter</SourceLinkOriginUrl>
+        <SourceLinkCreate>true</SourceLinkCreate>
+        <AssemblyVersion>6.0.0.0</AssemblyVersion>
+        <FileVersion>6.0.0.0</FileVersion>
+        <NeutralLanguage>en</NeutralLanguage>
+        <Title>NUnit3 Test Adapter for Visual Studio</Title>
+        <Copyright>Copyright © 2011-2021 Charlie Poole, 2014-2026 Terje Sandstrom</Copyright>
+        <Description>
+            A package containing the NUnit3 TestAdapter for Visual Studio, DotNet test and VSTest.Console.
+        </Description>
+        <Company>NUnit Project</Company>
+        <Product>NUnit3TestAdapter</Product>
+    </PropertyGroup>
 
-  <PropertyGroup>
-    <PackageId>NUnit3TestAdapter</PackageId>
-    <Authors>Charlie Poole, Terje Sandstrom</Authors>
-  </PropertyGroup>
+    <PropertyGroup>
+        <PackageId>NUnit3TestAdapter</PackageId>
+        <Authors>Charlie Poole, Terje Sandstrom</Authors>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net462'">
-    <!-- Suppress errors from https://github.com/dotnet/sdk/issues/1897-->
-    <DisableHandlePackageFileConflicts>false</DisableHandlePackageFileConflicts>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(TargetFramework)' == 'net462'">
+        <!-- Suppress errors from https://github.com/dotnet/sdk/issues/1897-->
+        <DisableHandlePackageFileConflicts>false</DisableHandlePackageFileConflicts>
+    </PropertyGroup>
 
-  <ItemGroup>
-      <PackageReference Include="Microsoft.Testing.Extensions.VSTestBridge" />
-      <PackageReference Include="SourceLink.Create.CommandLine" PrivateAssets="All" />
-    <PackageReference Include="nunit.engine" />
-    <PackageReference Include="TestCentric.Metadata" Aliases="TestCentric" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="TestFilterConverter\" />
-  </ItemGroup>
-
-  <Target Name="PreventTestPlatformObjectModelCopyLocal" AfterTargets="ResolveReferences">
     <ItemGroup>
-      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' == 'Microsoft.VisualStudio.TestPlatform.ObjectModel'" />
+        <PackageReference Include="Microsoft.Testing.Extensions.VSTestBridge" />
+        <PackageReference Include="SourceLink.Create.CommandLine" PrivateAssets="All" />
+        <PackageReference Include="nunit.engine" />
+        <PackageReference Include="TestCentric.Metadata" Aliases="TestCentric" />
+        <PackageReference Include="Microsoft.Extensions.DependencyModel" />
     </ItemGroup>
-  </Target>
+
+    <Target Name="PreventTestPlatformObjectModelCopyLocal" AfterTargets="ResolveReferences">
+        <ItemGroup>
+            <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' == 'Microsoft.VisualStudio.TestPlatform.ObjectModel'" />
+        </ItemGroup>
+    </Target>
 
 </Project>

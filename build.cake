@@ -1,5 +1,5 @@
 #tool vswhere&version=3.1.7
-#tool Microsoft.TestPlatform&version=17.12.0
+#tool Microsoft.TestPlatform&version=17.14.1
 
 //////////////////////////////////////////////////////////////////////
 // ARGUMENTS
@@ -13,9 +13,9 @@ var configuration = Argument("configuration", "Release");
 //////////////////////////////////////////////////////////////////////
 
 
-var version = "5.2.0";
+var version = "6.0.0";
 
-var modifier = "";
+var modifier = "-alpha.2";
 
 var dbgSuffix = configuration.ToLower() == "debug" ? "-dbg" : "";
 var packageVersion = version + modifier + dbgSuffix;
@@ -36,10 +36,10 @@ var BIN_DIR = PROJECT_DIR + "bin/" + configuration + "/";
 
 var ADAPTER_PROJECT = SRC_DIR + "NUnitTestAdapter/NUnit.TestAdapter.csproj";
 
-var NETCOREAPP_TFM = "netcoreapp3.1";
+var NET8_TFM = "net8.0";
 
 var ADAPTER_BIN_DIR_NET462 = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/net462/";
-var ADAPTER_BIN_DIR_NETCOREAPP = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/{NETCOREAPP_TFM}/";
+var ADAPTER_BIN_DIR_NETCOREAPP = SRC_DIR + $"NUnitTestAdapter/bin/{configuration}/{NET8_TFM}/";
 
 var BIN_DIRS = new [] {
     PROJECT_DIR + "src/empty-assembly/bin",
@@ -136,7 +136,7 @@ string GetTestAssemblyPath(string framework)
 
 foreach (var (framework, vstestFramework, adapterDir) in new[] {
     ("net462", "Framework45", ADAPTER_BIN_DIR_NET462),
-    (NETCOREAPP_TFM, NETCOREAPP_TFM, ADAPTER_BIN_DIR_NETCOREAPP)
+    (NET8_TFM, NET8_TFM, ADAPTER_BIN_DIR_NETCOREAPP)
 })
 {
     Task($"VSTest-{framework}")
@@ -227,15 +227,15 @@ Task("CreateWorkingImage")
         CopyFileToDirectory("nuget/net462/NUnit3TestAdapter.props", net462Dir);
         CopyFileToDirectory("nuget/net462/NUnit3TestAdapter.targets", net462Dir);
 
-        var netcoreDir = PACKAGE_IMAGE_DIR + "build/" + NETCOREAPP_TFM;
+        var netcoreDir = PACKAGE_IMAGE_DIR + "build/" + NET8_TFM;
         DotNetCorePublish(ADAPTER_PROJECT, new DotNetCorePublishSettings
         {
             Configuration = configuration,
             OutputDirectory = netcoreDir,
-            Framework = NETCOREAPP_TFM
+            Framework = NET8_TFM
         });
-        CopyFileToDirectory($"nuget/{NETCOREAPP_TFM}/NUnit3TestAdapter.props", netcoreDir);
-        CopyFileToDirectory($"nuget/{NETCOREAPP_TFM}/NUnit3TestAdapter.targets", netcoreDir);
+        CopyFileToDirectory($"nuget/{NET8_TFM}/NUnit3TestAdapter.props", netcoreDir);
+        CopyFileToDirectory($"nuget/{NET8_TFM}/NUnit3TestAdapter.targets", netcoreDir);
     });
 
 Task("PackageZip")
@@ -267,9 +267,9 @@ Task("Rebuild")
 
 Task("Test")
     .IsDependentOn("VSTest-net462")
-    .IsDependentOn("VSTest-" + NETCOREAPP_TFM)
+    .IsDependentOn("VSTest-" + NET8_TFM)
     .IsDependentOn("DotnetTest-net462")
-    .IsDependentOn("DotnetTest-" + NETCOREAPP_TFM);
+    .IsDependentOn("DotnetTest-" + NET8_TFM);
 
 Task("Package")
     .IsDependentOn("PackageZip")

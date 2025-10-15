@@ -30,7 +30,7 @@ public sealed class ParanthesisTests : CsProjAcceptanceTests
                }");
     }
 
-    protected override string Framework => Frameworks.NetCoreApp31;
+    protected override string Framework => Frameworks.Net80;
 
     [Test, Platform("Win")]
     [TestCase]

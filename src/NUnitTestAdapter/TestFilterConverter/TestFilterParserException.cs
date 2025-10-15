@@ -23,9 +23,7 @@
 
 using System;
 
-#if !NETSTANDARD1_6
 using System.Runtime.Serialization;
-#endif
 
 namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter;
 
@@ -33,7 +31,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter;
 /// TestSelectionParserException is thrown when an error
 /// is found while parsing the selection expression.
 /// </summary>
-#if !NETSTANDARD1_6
+#if NETFRAMEWORK // https://learn.microsoft.com/dotnet/fundamentals/syslib-diagnostics/syslib0051
 [Serializable]
 #endif
 public class TestFilterParserException : Exception
@@ -50,7 +48,7 @@ public class TestFilterParserException : Exception
     /// </summary>
     public TestFilterParserException(string message, Exception innerException) : base(message, innerException) { }
 
-#if !NETSTANDARD1_6
+#if NETFRAMEWORK
     /// <summary>
     /// Initializes a new instance of the <see cref="TestFilterParserException"/> class.
     /// Serialization constructor.
