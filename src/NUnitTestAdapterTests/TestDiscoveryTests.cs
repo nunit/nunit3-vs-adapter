@@ -181,12 +181,17 @@ public class FailuresInDiscovery : ITestCaseDiscoverySink
         });
     }
 
-#if NET462
-    [Ignore("Waiting for nullref issue in engine to be fixed")]
+
     [Test]
     public void WhenAssemblyIsNative()
     {
-        var context = new FakeDiscoveryContext(null);
+#if NET462
+        const string expectedWarning = "Unmanaged libraries or applications are not supported";
+#else
+        const string expectedWarning = "Format of the executable (.exe) or library (.dll) is invalid.";
+#endif
+        var runsettings = new FakeRunSettingsForVerbosity(1);
+        var context = new FakeDiscoveryContext(runsettings);
         var messageLoggerStub = new MessageLoggerStub();
         var path = Path.Combine(TestContext.CurrentContext.TestDirectory, "NativeTests.dll");
         Assert.That(File.Exists(path));
@@ -203,10 +208,10 @@ public class FailuresInDiscovery : ITestCaseDiscoverySink
             string warningmsg = messageLoggerStub.WarningMessages.Select(o => o.Item2).FirstOrDefault();
             Assert.That(warningmsg, Is.Not.Null);
             if (!string.IsNullOrEmpty(warningmsg))
-                Assert.That(warningmsg, Does.Contain("Assembly not supported"));
+                Assert.That(warningmsg, Does.Contain(expectedWarning));
         }
     }
-#endif
+
 
     public void SendTestCase(TestCase discoveredTest)
     {

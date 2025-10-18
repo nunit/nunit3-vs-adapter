@@ -103,6 +103,8 @@ public sealed class NUnit3TestDiscoverer : NUnitTestAdapter, ITestDiscoverer
                 }
                 else
                 {
+                    if (Settings.Verbosity > 0)
+                        messageLogger.SendMessage(TestMessageLevel.Warning, $"Skip reason: {results.SkipReason()}");
                     TestLog.InfoNoRunnableTests(results, sourceAssembly);
                 }
             }
