@@ -65,7 +65,7 @@ class FakeRunSettingsForWhere : FakeRunSettings
     public override string SettingsXml => $"<RunSettings><NUnit><Where>{_where}</Where><SkipNonTestAssemblies>false</SkipNonTestAssemblies></NUnit></RunSettings>";
 }
 
-class FakeRunSettingsForVerbosity(int verbosity) : FakeRunSettings
+internal class FakeRunSettingsForVerbosity(int verbosity) : FakeRunSettings
 {
     public override string SettingsXml => $"<RunSettings><NUnit><Verbosity>{verbosity}</Verbosity><SkipNonTestAssemblies>false</SkipNonTestAssemblies></NUnit></RunSettings>";
 }
