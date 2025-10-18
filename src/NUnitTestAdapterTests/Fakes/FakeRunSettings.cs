@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2012-2021 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2012-2021 Charlie Poole, 2014-2026 Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -63,4 +63,9 @@ class FakeRunSettingsForWhere : FakeRunSettings
         _where = where;
     }
     public override string SettingsXml => $"<RunSettings><NUnit><Where>{_where}</Where><SkipNonTestAssemblies>false</SkipNonTestAssemblies></NUnit></RunSettings>";
+}
+
+class FakeRunSettingsForVerbosity(int verbosity) : FakeRunSettings
+{
+    public override string SettingsXml => $"<RunSettings><NUnit><Verbosity>{verbosity}</Verbosity><SkipNonTestAssemblies>false</SkipNonTestAssemblies></NUnit></RunSettings>";
 }

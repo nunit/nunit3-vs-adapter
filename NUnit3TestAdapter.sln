@@ -58,7 +58,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\NUnit3TestAdapter.Myget.Publish.yml = .github\workflows\NUnit3TestAdapter.Myget.Publish.yml
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "net8.0", "net8.0", "{2F940513-5B8F-45A5-A188-7C5D03D1B50D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "net8", "net8", "{2F940513-5B8F-45A5-A188-7C5D03D1B50D}"
 	ProjectSection(SolutionItems) = preProject
 		nuget\net8.0\NUnit3TestAdapter.props = nuget\net8.0\NUnit3TestAdapter.props
 		nuget\net8.0\NUnit3TestAdapter.targets = nuget\net8.0\NUnit3TestAdapter.targets
