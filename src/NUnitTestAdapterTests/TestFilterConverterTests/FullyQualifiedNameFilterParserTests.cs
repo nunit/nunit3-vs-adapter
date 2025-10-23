@@ -60,7 +60,7 @@ public class FullyQualifiedNameFilterParserTests
     [TestCase(null)]
     [TestCase("")]
     [TestCase("   ")]
-    public void Should_return_empty_collection_when_filter_is_missing(string? filter)
+    public void Should_return_empty_collection_when_filter_is_missing(string filter)
     {
         var result = FullyQualifiedNameFilterParser.GetFullyQualifiedNames(filter);
 
