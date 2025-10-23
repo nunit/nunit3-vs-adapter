@@ -53,7 +53,7 @@ class FakeRunContext : FakeDiscoveryContext, IRunContext
 
     ITestCaseFilterExpression IRunContext.GetTestCaseFilter(IEnumerable<string> supportedProperties, Func<string, TestProperty> propertyProvider)
     {
-        return null;  // as if we don't have a TFS Build, equal to testing from VS
+        return null;  // as if we don't have a Azure Devops Pipeline Build, equal to testing from VS
     }
 
     #endregion

@@ -35,7 +35,10 @@ using System.Reflection;  // Needed for .net core 2.1
 
 public interface IVsTestFilter
 {
-    ITestCaseFilterExpression TfsTestCaseFilterExpression { get; }
+    /// <summary>
+    /// Microsoft Test Case Filter Expression.
+    /// </summary>
+    ITestCaseFilterExpression MsTestCaseFilterExpression { get; }
 
     bool IsEmpty { get; }
 
@@ -85,10 +88,10 @@ public abstract class VsTestFilter(IRunContext runContext) : IVsTestFilter
 
 
     private ITestCaseFilterExpression testCaseFilterExpression;
-    public ITestCaseFilterExpression TfsTestCaseFilterExpression =>
+    public ITestCaseFilterExpression MsTestCaseFilterExpression =>
         testCaseFilterExpression ??= runContext.GetTestCaseFilter(SupportedProperties, PropertyProvider);
 
-    public bool IsEmpty => TfsTestCaseFilterExpression == null || TfsTestCaseFilterExpression.TestCaseFilterValue == string.Empty;
+    public bool IsEmpty => MsTestCaseFilterExpression == null || MsTestCaseFilterExpression.TestCaseFilterValue == string.Empty;
 
     public IEnumerable<TestCase> CheckFilter(IEnumerable<TestCase> tests)
     {
@@ -189,7 +192,7 @@ public class VsTestFilterLegacy(IRunContext runContext) : VsTestFilter(runContex
     {
         var isExplicit = testCase.GetPropertyValue(CategoryList.NUnitExplicitProperty, false);
 
-        return !isExplicit && TfsTestCaseFilterExpression?.MatchTestCase(testCase, p => PropertyValueProvider(testCase, p)) != false;
+        return !isExplicit && MsTestCaseFilterExpression?.MatchTestCase(testCase, p => PropertyValueProvider(testCase, p)) != false;
     }
 }
 
@@ -199,7 +202,7 @@ public class VsTestFilterIde(IRunContext runContext) : VsTestFilter(runContext)
     {
         var isExplicit = testCase.GetPropertyValue(CategoryList.NUnitExplicitProperty, false);
 
-        return !isExplicit && TfsTestCaseFilterExpression?.MatchTestCase(testCase, p => PropertyValueProvider(testCase, p)) != false;
+        return !isExplicit && MsTestCaseFilterExpression?.MatchTestCase(testCase, p => PropertyValueProvider(testCase, p)) != false;
     }
 }
 
@@ -207,7 +210,7 @@ public class VsTestFilterNonIde(IRunContext runContext) : VsTestFilter(runContex
 {
     protected override bool CheckFilter(TestCase testCase)
     {
-        return TfsTestCaseFilterExpression?.MatchTestCase(testCase, p => PropertyValueProvider(testCase, p)) != false;
+        return MsTestCaseFilterExpression?.MatchTestCase(testCase, p => PropertyValueProvider(testCase, p)) != false;
     }
 }
 

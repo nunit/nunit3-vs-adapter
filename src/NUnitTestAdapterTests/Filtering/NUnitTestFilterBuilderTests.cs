@@ -32,15 +32,15 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering;
 public class NUnitTestFilterBuilderTests
 {
     [Test]
-    public void ThatConvertTfsFilterToNUnitFilterHandlesNoTests()
+    public void ThatConvertMsFilterToNUnitFilterHandlesNoTests()
     {
             var filterService = Substitute.For<ITestFilterService>();
             var settings = Substitute.For<IAdapterSettings>();
             settings.AssemblySelectLimit.Returns(2000);
             var sut = new NUnitTestFilterBuilder(filterService, settings);
             var loadedTestCases = new List<TestCase>();
-            var tfsFilter = Substitute.For<IVsTestFilter>();
-            var results = sut.ConvertTfsFilterToNUnitFilter(tfsFilter, loadedTestCases);
+            var msFilter = Substitute.For<IVsTestFilter>();
+            var results = sut.ConvertMsFilterToNUnitFilter(msFilter, loadedTestCases);
             Assert.That(results, Is.EqualTo(NUnitTestFilterBuilder.NoTestsFound));
         }
 
