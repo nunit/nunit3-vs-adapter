@@ -224,11 +224,12 @@ public static class FullyQualifiedNameFilterParser
             {
                 depth--;
 
-                if (depth < 0)
-                    return false;
-
-                if (depth == 0 && index != span.Length - 1)
-                    return false;
+                switch (depth)
+                {
+                    case < 0:
+                    case 0 when index != span.Length - 1:
+                        return false;
+                }
             }
         }
 
