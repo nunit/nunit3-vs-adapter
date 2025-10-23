@@ -48,7 +48,7 @@ public static class FullyQualifiedNameFilterParser
     /// </summary>
     /// <param name="filterString">The raw filter string provided by the test platform.</param>
     /// <returns>The normalized filter string or <see cref="string.Empty"/> when unsupported.</returns>
-    public static string GetFullyQualifiedNameFilterOrEmpty(string? filterString)
+    public static string GetFullyQualifiedNameFilterOrEmpty(string filterString)
     {
         if (string.IsNullOrWhiteSpace(filterString))
             return string.Empty;
@@ -69,7 +69,7 @@ public static class FullyQualifiedNameFilterParser
         var candidateString = span.ToString();
         var candidate = candidateString.AsSpan();
 
-        if (!candidateString.Contains(FullyQualifiedNamePrefix, StringComparison.Ordinal))
+        if (!candidateString.Contains(FullyQualifiedNamePrefix, StringComparison.OrdinalIgnoreCase))
             return string.Empty;
 
         if (OtherPropertyPattern.IsMatch(candidateString))
@@ -155,26 +155,26 @@ public static class FullyQualifiedNameFilterParser
     /// </summary>
     /// <param name="filterString">The raw filter string provided by the test platform.</param>
     /// <returns>A read-only list of the fully qualified names contained in the filter.</returns>
-    public static IReadOnlyList<string> GetFullyQualifiedNames(string? filterString)
+    public static IReadOnlyList<string> GetFullyQualifiedNames(string filterString)
     {
         if (string.IsNullOrWhiteSpace(filterString))
-            return Array.Empty<string>();
+            return [];
 
         var trimmed = filterString.Trim();
 
         if (trimmed.Length == 0)
-            return Array.Empty<string>();
+            return [];
 
-        if (trimmed[0] == '(' && trimmed[^1] == ')' && trimmed.Length > 1)
+        if (trimmed[0] == '(' && trimmed[trimmed.Length - 1] == ')' && trimmed.Length > 1)
             trimmed = trimmed.Substring(1, trimmed.Length - 2);
 
         if (trimmed.Length == 0)
-            return Array.Empty<string>();
+            return [];
 
-        var segments = trimmed.Split(new[] { "|" + FullyQualifiedNamePrefix }, StringSplitOptions.None);
+        var segments = trimmed.Split(["|" + FullyQualifiedNamePrefix], StringSplitOptions.None);
 
         if (segments.Length == 0)
-            return Array.Empty<string>();
+            return [];
 
         var result = new List<string>(segments.Length);
 
@@ -197,7 +197,7 @@ public static class FullyQualifiedNameFilterParser
         }
 
         return result;
-}
+    }
 
     private static ReadOnlySpan<char> TrimWhitespace(ReadOnlySpan<char> span)
     {
@@ -217,7 +217,7 @@ public static class FullyQualifiedNameFilterParser
     {
         inner = span;
 
-        if (span.Length < 2 || span[0] != '(' || span[^1] != ')')
+        if (span.Length < 2 || span[0] != '(' || span[span.Length - 1] != ')')
             return false;
 
         var depth = 0;
@@ -263,7 +263,8 @@ public static class FullyQualifiedNameFilterParser
 
         var property = span.Slice(index, FullyQualifiedNameProperty.Length);
 
-        if (!property.Equals(FullyQualifiedNameProperty, StringComparison.Ordinal))
+        // Fix for CS0176: Use static string.Equals instead of instance Equals
+        if (!string.Equals(property.ToString(), FullyQualifiedNameProperty, StringComparison.Ordinal))
             return false;
 
         index += FullyQualifiedNameProperty.Length;
@@ -292,5 +293,13 @@ public static class FullyQualifiedNameFilterParser
         }
 
         return (escapeCount & 1) == 1;
+    }
+}
+
+public static class StringExtensions
+{
+    public static bool Contains(this string source, string toCheck, StringComparison comparison)
+    {
+        return source?.IndexOf(toCheck, comparison) >= 0;
     }
 }
