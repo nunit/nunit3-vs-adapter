@@ -83,7 +83,7 @@ public class NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSe
     /// </summary>
     public TestFilter ConvertVsTestFilterToNUnitFilterForMTP(IVsTestFilter vsFilter)
     {
-        var msFilter = vsFilter?.MsTestCaseFilterExpression.TestCaseFilterValue;
+        var msFilter = vsFilter?.MsTestCaseFilterExpression?.TestCaseFilterValue;
         dump?.AddString($@"\n\n<MsFilter>\n{msFilter}\n</MsFilter>\n");
         if (string.IsNullOrEmpty(msFilter))
             return null;
