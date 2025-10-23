@@ -34,7 +34,6 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter;
 public static class FullyQualifiedNameFilterParser
 {
     private const string FullyQualifiedNameProperty = "FullyQualifiedName";
-    private const string FullyQualifiedNamePrefix = FullyQualifiedNameProperty + "=";
     private const char OrOperator = '|';
     private const char AndOperator = '&';
 
@@ -177,7 +176,7 @@ public static class FullyQualifiedNameFilterParser
     }
 
     /// <summary>
-    /// Splits on start or '|' only when followed by "FullyQualifiedName" and '='
+    /// Splits on start or '|' only when followed by "FullyQualifiedName" and '='.
     /// </summary>
     /// <returns>Returns the values after '=' up to the next '|' (or end), trimmed.</returns>
     public static List<string> SplitOnFullyQualifiedName(string input)
