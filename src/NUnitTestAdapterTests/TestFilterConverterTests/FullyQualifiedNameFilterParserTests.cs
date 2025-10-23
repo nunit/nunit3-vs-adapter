@@ -1,5 +1,5 @@
 // ***********************************************************************
-// Copyright (c) 2024 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2021 Charlie Poole, 2014-2025 Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -58,13 +58,25 @@ public class FullyQualifiedNameFilterParserTests
     }
 
     [Test]
+    public void Should_extract_fully_qualified_names_from_testhost_filter_with_new_method()
+    {
+        const string filter = """(FullyQualifiedName=Issue1332.MyTest.TestMethod\(" \"Code block\", @ \"Test\"    app",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("'Code block' @ \"Test\" \" app",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("\"   \"",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("\"",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("\"\"",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("\"Code block\" @ \"Test\" \" app",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("\"Code block\" \"This is a test\" ",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("\"Code\" \" block\" ",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("\"Code\" \"block\"",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("\"Code\"\"block\"",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("Code @ Test",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("Code @",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("Code",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("null",System.Collections.Generic.List`1[System.String]\))""";
+
+        var result = FullyQualifiedNameFilterParser.CheckFullyQualifiedNameFilter(filter);
+
+        Assert.That(result, Is.True);
+    }
+
+
+
+    [Test]
     public void Should_return_filter_when_only_fully_qualified_names_are_present()
     {
         const string filter = "(FullyQualifiedName=Issue1332.MyTest.TestMethod|FullyQualifiedName=Issue1332.MyTest.OtherTest)";
 
-        var result = FullyQualifiedNameFilterParser.GetFullyQualifiedNameFilterOrEmpty(filter);
+        var result = FullyQualifiedNameFilterParser.CheckFullyQualifiedNameFilter(filter);
 
-        Assert.That(result, Is.EqualTo(filter));
+        Assert.That(result, Is.True);
     }
 
     [TestCase("FullyQualifiedName=Issue1332.MyTest.TestMethod")]
@@ -73,9 +85,9 @@ public class FullyQualifiedNameFilterParserTests
     [TestCase("((FullyQualifiedName=Issue1332.MyTest.TestMethod|FullyQualifiedName=Issue1332.MyTest.OtherTest))")]
     public void Should_allow_whitespace_and_parentheses_in_fully_qualified_name_filter(string filter)
     {
-        var result = FullyQualifiedNameFilterParser.GetFullyQualifiedNameFilterOrEmpty(filter);
+        var result = FullyQualifiedNameFilterParser.CheckFullyQualifiedNameFilter(filter);
 
-        Assert.That(result, Is.EqualTo(filter));
+        Assert.That(result, Is.True);
     }
 
     [TestCase(null)]
@@ -95,7 +107,7 @@ public class FullyQualifiedNameFilterParserTests
 
         var result = FullyQualifiedNameFilterParser.GetFullyQualifiedNames(filter);
 
-        Assert.That(result, Is.EqualTo(new[] { "Issue1332.MyTest.TestMethod" }));
+        Assert.That(result, Is.EqualTo(["Issue1332.MyTest.TestMethod"]));
     }
 
     [TestCase("(Name=Something|FullyQualifiedName=Issue1332.MyTest.TestMethod)")]
@@ -105,9 +117,9 @@ public class FullyQualifiedNameFilterParserTests
     [TestCase("(FullyQualifiedName=Issue1332.MyTest.TestMethod&FullyQualifiedName=Issue1332.MyTest.OtherTest)")]
     public void Should_return_empty_filter_when_other_properties_are_present(string filter)
     {
-        var result = FullyQualifiedNameFilterParser.GetFullyQualifiedNameFilterOrEmpty(filter);
+        var result = FullyQualifiedNameFilterParser.CheckFullyQualifiedNameFilter(filter);
 
-        Assert.That(result, Is.EqualTo(string.Empty));
+        Assert.That(result, Is.False);
     }
 
     [Test]
@@ -115,17 +127,17 @@ public class FullyQualifiedNameFilterParserTests
     {
         const string filter = """(FullyQualifiedName=Issue1332.MyTest.TestMethod\(" \"Code block\", @ \"Test\"    app",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("'Code block' @ \"Test\" \" app",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("\"   \"",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("\"",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("\"\"",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("\"Code block\" @ \"Test\" \" app",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("\"Code block\" \"This is a test\" ",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("\"Code\" \" block\" ",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("\"Code\" \"block\"",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("\"Code\"\"block\"",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("Code @ Test",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("Code @",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("Code",System.Collections.Generic.List`1[System.String]\)|FullyQualifiedName=Issue1332.MyTest.TestMethod\("null",System.Collections.Generic.List`1[System.String]\))""";
 
-        var result = FullyQualifiedNameFilterParser.GetFullyQualifiedNameFilterOrEmpty(filter);
+        var result = FullyQualifiedNameFilterParser.CheckFullyQualifiedNameFilter(filter);
 
-        Assert.That(result, Is.EqualTo(filter));
+        Assert.That(result, Is.True);
     }
 
     [TestCase("(FullyQualifiedName=Issue1332.MyTest.TestMethod|)")]
     [TestCase("FullyQualifiedName=Issue1332.MyTest.TestMethod|")]
     public void Should_return_empty_filter_when_expression_has_trailing_or(string filter)
     {
-        var result = FullyQualifiedNameFilterParser.GetFullyQualifiedNameFilterOrEmpty(filter);
+        var result = FullyQualifiedNameFilterParser.CheckFullyQualifiedNameFilter(filter);
 
-        Assert.That(result, Is.EqualTo(string.Empty));
+        Assert.That(result, Is.False);
     }
 }

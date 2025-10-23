@@ -1,5 +1,5 @@
 // ***********************************************************************
-// Copyright (c) 2024 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2021 Charlie Poole, 2014-2025 Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -43,34 +43,34 @@ public static class FullyQualifiedNameFilterParser
         RegexOptions.Compiled);
 
     /// <summary>
-    /// Returns the original filter string when it can be handled exclusively by
-    /// fully qualified name parsing; otherwise returns <see cref="string.Empty"/>.
+    /// Returns true when original filter string can be handled exclusively by
+    /// fully qualified name parsing; otherwise returns false.
     /// </summary>
     /// <param name="filterString">The raw filter string provided by the test platform.</param>
-    /// <returns>The normalized filter string or <see cref="string.Empty"/> when unsupported.</returns>
-    public static string GetFullyQualifiedNameFilterOrEmpty(string filterString)
+    /// <returns>false when unsupported.</returns>
+    public static bool CheckFullyQualifiedNameFilter(string filterString)
     {
         if (string.IsNullOrWhiteSpace(filterString))
-            return string.Empty;
+            return false;
 
         var span = TrimWhitespace(filterString.AsSpan());
 
         if (span.Length == 0)
-            return string.Empty;
+            return false;
 
         while (TryStripOuterParentheses(span, out var inner))
         {
             span = TrimWhitespace(inner);
 
             if (span.Length == 0)
-                return string.Empty;
+                return false;
         }
 
         var candidateString = span.ToString();
         var candidate = candidateString.AsSpan();
 
         if (OtherPropertyPattern.IsMatch(candidateString))
-            return string.Empty;
+            return false;
 
         var index = 0;
         var parsedClause = false;
@@ -84,12 +84,12 @@ public static class FullyQualifiedNameFilterParser
                 break;
 
             if (!TryConsumeFullyQualifiedName(candidate, ref index))
-                return string.Empty;
+                return false;
 
             SkipWhitespace(candidate, ref index);
 
             if (index >= candidate.Length || candidate[index] != '=')
-                return string.Empty;
+                return false;
 
             index++;
 
@@ -104,7 +104,7 @@ public static class FullyQualifiedNameFilterParser
                     break;
 
                 if (ch == AndOperator && !IsEscaped(candidate, index))
-                    return string.Empty;
+                    return false;
 
                 if (!char.IsWhiteSpace(ch))
                     hasValue = true;
@@ -113,7 +113,7 @@ public static class FullyQualifiedNameFilterParser
             }
 
             if (!hasValue)
-                return string.Empty;
+                return false;
 
             var trailing = index - 1;
 
@@ -121,14 +121,14 @@ public static class FullyQualifiedNameFilterParser
                 trailing--;
 
             if (trailing < valueStart)
-                return string.Empty;
+                return false;
 
             SkipWhitespace(candidate, ref index);
 
             if (index < candidate.Length)
             {
                 if (candidate[index] != OrOperator)
-                    return string.Empty;
+                    return false;
 
                 index++;
                 endedWithOperator = true;
@@ -141,10 +141,7 @@ public static class FullyQualifiedNameFilterParser
             parsedClause = true;
         }
 
-        if (!parsedClause || endedWithOperator)
-            return string.Empty;
-
-        return filterString!;
+        return parsedClause && !endedWithOperator;
     }
 
     /// <summary>
@@ -154,12 +151,8 @@ public static class FullyQualifiedNameFilterParser
     /// <returns>A read-only list of the fully qualified names contained in the filter.</returns>
     public static IReadOnlyList<string> GetFullyQualifiedNames(string filterString)
     {
+        var trimmed = filterString?.Trim();
         if (string.IsNullOrWhiteSpace(filterString))
-            return [];
-
-        var trimmed = filterString.Trim();
-
-        if (trimmed.Length == 0)
             return [];
 
         if (trimmed[0] == '(' && trimmed[trimmed.Length - 1] == ')' && trimmed.Length > 1)
