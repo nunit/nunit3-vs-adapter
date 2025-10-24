@@ -21,6 +21,9 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
+using System;
+using System.Collections.Generic;
+
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.TestFilterConverter;
 
@@ -51,10 +54,15 @@ public class FullyQualifiedNameFilterParserTests
             """Issue1332.MyTest.TestMethod\("Code",System.Collections.Generic.List`1[System.String]\)""",
             """Issue1332.MyTest.TestMethod\("null",System.Collections.Generic.List`1[System.String]\)"""
         };
+        List<string> exp = new List<string>();
+        foreach (var line in expected)
+        {
+            exp.Add(FullyQualifiedNameFilterParser.Unescape(line));
+        }
 
         var result = FullyQualifiedNameFilterParser.GetFullyQualifiedNames(filter);
 
-        Assert.That(result, Is.EqualTo(expected));
+        Assert.That(result, Is.EqualTo(exp));
     }
 
     [Test]

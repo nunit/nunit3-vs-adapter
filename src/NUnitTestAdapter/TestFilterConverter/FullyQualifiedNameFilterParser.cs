@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2024 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2021 Charlie Poole, 2014-2025 Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text.RegularExpressions;
 
 namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter;
@@ -189,10 +190,27 @@ public static class FullyQualifiedNameFilterParser
         foreach (Match m in Regex.Matches(input, pattern))
         {
             var value = m.Groups[1].Value.Trim();
-            if (value.Length > 0) result.Add(value);
+            if (value.Length > 0)
+                result.Add(Unescape(value));
         }
 
         return result;
+    }
+
+    public static string Unescape(string input)
+    {
+        if (string.IsNullOrEmpty(input)) return input;
+
+        // 1) Decode &quot;, &amp;, etc.
+        var s = WebUtility.HtmlDecode(input);
+
+        // 2) Unescape C#-style sequences: \", \\, \n, \uXXXX, etc.
+        s = Regex.Unescape(s);
+
+        // 3) Clean up escaped parentheses often present in filter payloads
+        s = s.Replace(@"\(", "(").Replace(@"\)", ")");
+
+        return s;
     }
 
     private static ReadOnlySpan<char> TrimWhitespace(ReadOnlySpan<char> span)

@@ -103,7 +103,7 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
     #region ITestExecutor Implementation
 
     /// <summary>
-    /// Called by dotnet test, and TFS Build
+    /// Called by dotnet test, and Azure Devops Pipeline Build
     /// to run either all or selected tests. In the latter case, a filter is provided
     /// as part of the run context.
     /// </summary>
@@ -133,7 +133,7 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
         }
 
         SetRunTypeByStrings();
-        var builder = CreateTestFilterBuilder();
+        var builder = CreateTestFilterBuilder(Dump);
         TestFilter filter = null;
         if (RunType == RunType.CommandLineCurrentNUnit)
         {
@@ -142,7 +142,7 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
         }
         else if (RunType == RunType.Ide && IsMTP)
         {
-            filter = builder.ConvertVsTestFilterToNUnitFilter(VsTestFilter);
+            filter = builder.ConvertVsTestFilterToNUnitFilterForMTP(VsTestFilter);
         }
 
         filter ??= builder.FilterByWhere(Settings.Where);
@@ -186,7 +186,7 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
     }
 
     /// <summary>
-    /// Called by the VisualStudio IDE when all or selected tests are to be run. Never called from TFS Build, except (at least 2022, probably also 2019) when 'vstest.console' uses /test: then this is being used.
+    /// Called by the VisualStudio IDE when all or selected tests are to be run. Never called from Azure Devops Pipeline Build, except (at least 2022, probably also 2019) when 'vstest.console' uses /test: then this is being used.
     /// </summary>
     /// <param name="tests">The tests to be run.</param>
     /// <param name="runContext">The RunContext.</param>
@@ -222,7 +222,7 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
                     ? assemblyName
                     : Path.Combine(Directory.GetCurrentDirectory(), assemblyName);
 
-                var filterBuilder = CreateTestFilterBuilder();
+                var filterBuilder = CreateTestFilterBuilder(Dump);
                 var filter = filterBuilder.FilterByList(assemblyGroup);
 
                 RunAssembly(assemblyPath, assemblyGroup, filter, assemblyName);
@@ -395,7 +395,7 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
     }
 
 
-    private NUnitTestFilterBuilder CreateTestFilterBuilder() => new(NUnitEngineAdapter.GetService<ITestFilterService>(), Settings);
+    private NUnitTestFilterBuilder CreateTestFilterBuilder(IDumpXml dump = null) => new(NUnitEngineAdapter.GetService<ITestFilterService>(), Settings, dump);
 
     /// <summary>
     /// Must be called after WorkDir have been set.
