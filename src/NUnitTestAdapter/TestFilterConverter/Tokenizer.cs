@@ -35,21 +35,15 @@ public enum TokenKind
     Symbol
 }
 
-public class Token
+public class Token(TokenKind kind, string text)
 {
     public Token(TokenKind kind) : this(kind, string.Empty) { }
 
     public Token(TokenKind kind, char ch) : this(kind, ch.ToString()) { }
 
-    public Token(TokenKind kind, string text)
-    {
-        Kind = kind;
-        Text = text;
-    }
+    public TokenKind Kind { get; } = kind;
 
-    public TokenKind Kind { get; }
-
-    public string Text { get; }
+    public string Text { get; } = text;
 
     public int Pos { get; set; }
 
@@ -88,9 +82,9 @@ public class Token
 /// quoted strings. This is sufficient for the simple DSL we use to
 /// select which tests to run.
 /// </summary>
-public class Tokenizer
+public class Tokenizer(string input)
 {
-    private readonly string input;
+    private readonly string input = input ?? throw new ArgumentNullException(nameof(input));
     private int index;
 
     private const char EOF_CHAR = '\0';
@@ -98,12 +92,6 @@ public class Tokenizer
     private readonly string[] doubleCharSymbols = { "!=", "!~" };
 
     private Token lookahead;
-
-    public Tokenizer(string input)
-    {
-        this.input = input ?? throw new ArgumentNullException(nameof(input));
-        index = 0;
-    }
 
     public Token LookAhead
     {

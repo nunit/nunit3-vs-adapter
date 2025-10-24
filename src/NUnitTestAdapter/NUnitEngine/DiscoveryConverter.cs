@@ -142,7 +142,7 @@ public class DiscoveryConverter(ITestLogger logger, IAdapterSettings settings) :
     public IEnumerable<TestCase> GetLoadedNonExplicitTestCases()
     {
         if (LoadedTestCases == null || LoadedTestCases.Count == 0)
-            return Enumerable.Empty<TestCase>();
+            return [];
 
         IEnumerable<TestCase> explicitCases;
         // Try using NUnit discovery information when available
