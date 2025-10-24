@@ -84,7 +84,7 @@ public class Token(TokenKind kind, string text)
 /// </summary>
 public class Tokenizer(string input)
 {
-    private readonly string input = input ?? throw new ArgumentNullException(nameof(input));
+    private readonly string input = input;
     private int index;
 
     private const char EOF_CHAR = '\0';
