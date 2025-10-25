@@ -350,7 +350,7 @@ public sealed class TestConverter : IDisposable, ITestConverter
 
     /// <summary>
     /// Looks for attachments in a results node and if any attachments are found they
-    /// are returned"/>.
+    /// are returned."/>.
     /// </summary>
     /// <param name="resultNode">xml node for test result.</param>
     /// <returns>attachments to be added to the test, it will be empty if no attachments are found.</returns>
@@ -378,7 +378,7 @@ public sealed class TestConverter : IDisposable, ITestConverter
             }
             try
             {
-                // We only support absolute paths since we dont lookup working directory here
+                // We only support absolute paths since we don't check the working directory here
                 // any problem with path will throw an exception
                 var fileUri = new Uri(path, UriKind.Absolute);
                 attachmentSet.Attachments.Add(new UriDataAttachment(fileUri, description));

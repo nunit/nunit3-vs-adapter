@@ -20,7 +20,8 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
-#define REVERSEENGINEERING
+
+// #define REVERSEENGINEERING
 
 using System;
 using System.Collections.Generic;
@@ -106,6 +107,7 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
     /// Called by dotnet test, and Azure Devops Pipeline Build
     /// to run either all or selected tests. In the latter case, a filter is provided
     /// as part of the run context.
+    /// Also called from MTP - when run from the IDE.
     /// </summary>
     /// <param name="sources">Sources to be run.</param>
     /// <param name="runContext">Context to use when executing the tests.</param>
@@ -132,7 +134,7 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
             return;
         }
 
-        SetRunTypeByStrings();
+        RunType = GetRunType();
         var builder = CreateTestFilterBuilder(Dump);
         TestFilter filter = null;
         if (RunType == RunType.CommandLineCurrentNUnit)
@@ -173,16 +175,17 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
         }
     }
 
-    private void SetRunTypeByStrings()
+    private RunType GetRunType()
     {
-        RunType = !Settings.DesignMode
+        var runType = !Settings.DesignMode
             ? Settings.DiscoveryMethod == DiscoveryMethod.Legacy
                 ? RunType.CommandLineLegacy
                 : Settings.UseNUnitFilter
                     ? RunType.CommandLineCurrentNUnit
                     : RunType.CommandLineCurrentVSTest
             : RunType.Ide;
-        TestLog.Debug($"Runtype: {RunType}");
+        TestLog.Debug($"Runtype: {runType}");
+        return runType;
     }
 
     /// <summary>

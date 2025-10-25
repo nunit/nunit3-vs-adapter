@@ -26,6 +26,11 @@ using System.Text;
 
 namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter;
 
+#if !NET6_0_OR_GREATER
+#pragma warning disable CA1510
+#endif
+
+
 public enum TokenKind
 {
     Eof,
@@ -35,21 +40,15 @@ public enum TokenKind
     Symbol
 }
 
-public class Token
+public class Token(TokenKind kind, string text)
 {
     public Token(TokenKind kind) : this(kind, string.Empty) { }
 
     public Token(TokenKind kind, char ch) : this(kind, ch.ToString()) { }
 
-    public Token(TokenKind kind, string text)
-    {
-        Kind = kind;
-        Text = text;
-    }
+    public TokenKind Kind { get; } = kind;
 
-    public TokenKind Kind { get; }
-
-    public string Text { get; }
+    public string Text { get; } = text;
 
     public int Pos { get; set; }
 
@@ -99,10 +98,20 @@ public class Tokenizer
 
     private Token lookahead;
 
+    /// <summary>
+    /// The Tokenizer class performs lexical analysis for the TestSelectionParser.
+    /// It recognizes a very limited set of tokens: words, symbols and
+    /// quoted strings. This is sufficient for the simple DSL we use to
+    /// select which tests to run.
+    /// </summary>
     public Tokenizer(string input)
     {
-        this.input = input ?? throw new ArgumentNullException(nameof(input));
-        index = 0;
+        if (input == null)
+        {
+            throw new ArgumentNullException(nameof(input));
+        }
+
+        this.input = input;
     }
 
     public Token LookAhead
@@ -300,3 +309,4 @@ public class Tokenizer
             index++;
     }
 }
+
