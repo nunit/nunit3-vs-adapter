@@ -10,8 +10,8 @@ or the latest developer build version
 
 [![MyGet version](https://img.shields.io/myget/nunit/vpre/NUnit3TestAdapter.svg?label=Myget%3A%20Latest%20pre-release&style=flat)](https://www.myget.org/feed/nunit/package/nuget/NUnit3TestAdapter)
 
-##### Builds on master
-![NUnit3TestAdapter.CI](https://img.shields.io/github/actions/workflow/status/nunit/nunit3-vs-adapter/NUnit3TestAdapter.CI.yml?branch=master)
+##### Builds on main
+![NUnit3TestAdapter.CI](https://img.shields.io/github/actions/workflow/status/nunit/nunit3-vs-adapter/NUnit3TestAdapter.CI.yml?branch=main)
 
 ##### Support
 
