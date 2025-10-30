@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+    <!-- keep DisableAppDomain = false behavior -->
+    <RunConfiguration>
+        <DisableAppDomain>True</DisableAppDomain>
+        <!-- optional: keep results tidy -->
+        <ResultsDirectory>TestResults</ResultsDirectory>
+    </RunConfiguration>
+
+    <DataCollectionRunSettings>
+        <DataCollectors>
+            <DataCollector friendlyName="XPlat Code Coverage">
+                <Configuration>
+                    <!-- Cobertura is what we’ll feed to ReportGenerator -->
+                    <Format>cobertura</Format>
+                    <!-- (optional) exclude test assemblies from coverage -->
+                    <ExcludeByFile>**/*Tests*.cs</ExcludeByFile>
+                </Configuration>
+            </DataCollector>
+        </DataCollectors>
+    </DataCollectionRunSettings>
+    <NUnit>
+        <Verbosity>5</Verbosity>
+        <DumpXmlTestResults>true</DumpXmlTestResults>
+        <DumpXmlTestDiscovery>true</DumpXmlTestDiscovery>
+        <DiscoveryMethod>Current</DiscoveryMethod>
+    </NUnit>
+</RunSettings>

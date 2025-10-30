@@ -15,7 +15,7 @@ var configuration = Argument("configuration", "Release");
 
 var version = "6.0.0";
 
-var modifier = "-alpha.100";
+var modifier = "-alpha.101";
 
 var dbgSuffix = configuration.ToLower() == "debug" ? "-dbg" : "";
 var packageVersion = version + modifier + dbgSuffix;
@@ -129,6 +129,8 @@ Task("Build")
 // TEST
 //////////////////////////////////////////////////////////////////////
 
+var TEST_RESULTS_DIR = MakeAbsolute(Directory("TestResults"));
+
 string GetTestAssemblyPath(string framework)
 {
     return SRC_DIR + $"NUnitTestAdapterTests/bin/{configuration}/{framework}/NUnit.VisualStudio.TestAdapter.Tests.dll";
@@ -148,8 +150,11 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
                 TestAdapterPath = adapterDir,
                 // Enables the tests to run against the correct version of Microsoft.VisualStudio.TestPlatform.ObjectModel.dll.
                 // (The DLL they are compiled against depends on VS2012 at runtime.)
-                SettingsFile = File("DisableAppDomain.runsettings"),
-                Logger = $"trx;LogFileName=VSTest-{framework}.trx"
+                // Enable Coverlet via the runsettings
+                SettingsFile = File("Coverlet.runsettings"),
+                // Put TRX in a known place with a stable name
+                Logger = $"trx;LogFileName=VSTest-{framework}.trx",
+                ResultsDirectory = TEST_RESULTS_DIR
             });
 
             PublishTestResults($"VSTest-{framework}.trx");
@@ -167,9 +172,11 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
                 Framework = framework,
                 NoBuild = true,
                 TestAdapterPath = adapterDir,
-                Settings = File("DisableAppDomain.runsettings"),
+                // Enable Coverlet via the runsettings
+                Settings = File("Coverlet.runsettings"),
+                // We rely on the collector in runsettings, so no extra args needed
                 Logger = $"trx;LogFileName=DotnetTest-{framework}.trx",
-                ResultsDirectory = MakeAbsolute(Directory("TestResults"))
+                ResultsDirectory = TEST_RESULTS_DIR
             });
 
             PublishTestResults($"DotnetTest-{framework}.trx");

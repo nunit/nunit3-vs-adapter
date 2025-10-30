@@ -1,43 +1,44 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <IsTestProject>true</IsTestProject>
-    <RootNamespace>NUnit.VisualStudio.TestAdapter.Tests</RootNamespace>
-    <AssemblyName>NUnit.VisualStudio.TestAdapter.Tests</AssemblyName>
-    <TargetFrameworks>net462;net8.0</TargetFrameworks>
-    <!-- For testing and debugging-->
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
+    <PropertyGroup>
+        <IsTestProject>true</IsTestProject>
+        <RootNamespace>NUnit.VisualStudio.TestAdapter.Tests</RootNamespace>
+        <AssemblyName>NUnit.VisualStudio.TestAdapter.Tests</AssemblyName>
+        <TargetFrameworks>net462;net8.0</TargetFrameworks>
+        <!-- For testing and debugging-->
+        <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+        <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
 
     <PropertyGroup>
         <DisableTestingPlatformServerCapability>true</DisableTestingPlatformServerCapability>
     </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="NSubstitute" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
-    <PackageReference Include="TestCentric.Metadata" />
-      <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <ItemGroup>
+        <PackageReference Include="NSubstitute" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+        <PackageReference Include="TestCentric.Metadata" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="coverlet.collector" />
 
-  </ItemGroup>
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="NUnit" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="NUnit" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\empty-assembly\empty-assembly.csproj" />
-    <ProjectReference Include="..\mock-assembly\mock-assembly.csproj" />
-    <ProjectReference Include="..\NUnitTestAdapter\NUnit.TestAdapter.csproj" />
-    <ProjectReference Include="..\NUnit3AdapterExternalTests\NUnit3AdapterExternalTests.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\empty-assembly\empty-assembly.csproj" />
+        <ProjectReference Include="..\mock-assembly\mock-assembly.csproj" />
+        <ProjectReference Include="..\NUnitTestAdapter\NUnit.TestAdapter.csproj" />
+        <ProjectReference Include="..\NUnit3AdapterExternalTests\NUnit3AdapterExternalTests.csproj" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="..\native-assembly\NativeTests.dll" Link="NativeTests.dll" CopyToOutputDirectory="PreserveNewest" />
-    <Compile Update="NavigationDataTests.cs" CopyToOutputDirectory="PreserveNewest" />
-    <None Update="temp.snk" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
+    <ItemGroup>
+        <Content Include="..\native-assembly\NativeTests.dll" Link="NativeTests.dll" CopyToOutputDirectory="PreserveNewest" />
+        <Compile Update="NavigationDataTests.cs" CopyToOutputDirectory="PreserveNewest" />
+        <None Update="temp.snk" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
 
- </Project>
+</Project>

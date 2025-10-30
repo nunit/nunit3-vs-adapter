@@ -1,19 +1,52 @@
+﻿ name: NUnit3TestAdapter.CI
 
-name: NUnit3TestAdapter.CI
+ on: [push, pull_request,workflow_dispatch]
 
-on: [push, pull_request,workflow_dispatch]
+ jobs:
+   build:
 
-jobs:
-  build:
+     runs-on: windows-latest
 
-    runs-on: windows-latest
+     steps:
+       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+       - uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # v5
+         with:
+           dotnet-version: |
+             8.0.x
+       - name: 🛠️ Build with cake
+         run: .\build.ps1 -t CI
+         shell: pwsh
 
-    steps:
-    - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-    - uses: actions/setup-dotnet@d4c94342e560b34958eacfc5d055d21461ed1c5d # v5
-      with:
-        dotnet-version: |
-          8.0.x
-    - name: Build with cake
-      run: .\build.ps1 -t CI
-      shell: pwsh
+      # -------------- Test results surfaced as a rich "Tests" check --------------
+
+       - name: 🧪 Publish test results to Checks
+         if: ${{ always() }}
+         uses: EnricoMi/publish-unit-test-result-action@v2
+         with:
+          files: |
+            TestResults/**/*.trx
+            TestResults/**/*.xml
+          check_name: "Tests (Windows)"
+          comment_mode: failures
+
+      # -------------- Coverage report (Markdown summary + HTML site) --------------
+       - name: 📈 Generate coverage report (summary + HTML)
+         if: ${{ always() }}
+         uses: danielpalme/ReportGenerator-GitHub-Action@v5
+         with:
+          reports: 'TestResults/**/coverage.cobertura.xml'
+          targetdir: ${{ runner.temp }}/coveragereport
+          reporttypes: 'Html;MarkdownSummaryGithub;Badges'
+          assemblyfilters: '-*.Tests'
+
+       - name: 🧾 Add coverage summary to job
+         if: ${{ always() }}
+         shell: pwsh
+         run: Get-Content -Raw "${{ runner.temp }}\coveragereport\SummaryGithub.md" | Out-File -Append $env:GITHUB_STEP_SUMMARY
+
+       - name: 💾 Upload coverage HTML
+         if: ${{ always() }}
+         uses: actions/upload-artifact@v4
+         with:
+          name: Coverage report (Windows)
+          path: ${{ runner.temp }}/coveragereport
