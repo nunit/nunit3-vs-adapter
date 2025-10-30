@@ -152,9 +152,8 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
                 // (The DLL they are compiled against depends on VS2012 at runtime.)
                 // Enable Coverlet via the runsettings
                 SettingsFile = File("Coverlet.runsettings"),
-                // Put TRX in a known place with a stable name
                 Logger = $"trx;LogFileName=VSTest-{framework}.trx",
-                ResultsDirectory = TEST_RESULTS_DIR
+                ArgumentCustomization = args => args.AppendSwitchQuoted("/ResultsDirectory", ":", TEST_RESULTS_DIR.FullPath)
             });
 
             PublishTestResults($"VSTest-{framework}.trx");
