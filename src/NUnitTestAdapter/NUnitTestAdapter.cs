@@ -35,7 +35,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Common;
-using NUnit.Engine;
+// using NUnit.Engine;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
 
@@ -188,26 +188,29 @@ public abstract class NUnitTestAdapter
         return ForbiddenFolders.Any(o => checkDir.StartsWith(o, StringComparison.OrdinalIgnoreCase));
     }
 
-    protected TestPackage CreateTestPackage(string assemblyName, IGrouping<string, TestCase> testCases)
+    protected NUnit.Engine.TestPackage CreateTestPackage(string assemblyName, IGrouping<string, TestCase> testCases)
     {
-        var package = new TestPackage(assemblyName);
+        var package = new NUnit.Engine.TestPackage(assemblyName);
 
         if (Settings.ShadowCopyFiles)
         {
-            package.Settings[PackageSettings.ShadowCopyFiles] = true;
+            package.AddSetting(SettingDefinitions.ShadowCopyFiles.WithValue(true));
             TestLog.Debug("    Setting ShadowCopyFiles to true");
         }
 
         if (Debugger.IsAttached && !Settings.AllowParallelWithDebugger)
         {
-            package.Settings[PackageSettings.NumberOfTestWorkers] = 0;
+            package.AddSetting(SettingDefinitions.NumberOfTestWorkers.WithValue(0));
             TestLog.Debug("    Setting NumberOfTestWorkers to zero for Debugging");
         }
         else
         {
             int workers = Settings.NumberOfTestWorkers;
             if (workers >= 0)
-                package.Settings[PackageSettings.NumberOfTestWorkers] = workers;
+            {
+                package.AddSetting(SettingDefinitions.NumberOfTestWorkers.WithValue(workers));
+                TestLog.Debug($"    Setting NumberOfTestWorkers to {workers} for Debugging");
+            }
         }
 
         if (Settings.PreFilter && testCases != null)
@@ -220,58 +223,58 @@ public abstract class NUnitTestAdapter
                 prefilters.Add(
                     end > 0 ? testCase.FullyQualifiedName.Substring(0, end) : testCase.FullyQualifiedName);
             }
-
-            package.Settings[PackageSettings.LOAD] = prefilters;
+            package.AddSetting(SettingDefinitions.LOAD.WithValue(prefilters));
         }
 
-        package.Settings[PackageSettings.SynchronousEvents] = Settings.SynchronousEvents;
+        package.AddSetting(SettingDefinitions.SynchronousEvents.WithValue(Settings.SynchronousEvents));
 
         int timeout = Settings.DefaultTimeout;
         if (timeout > 0)
-            package.Settings[PackageSettings.DefaultTimeout] = timeout;
+            package.AddSetting(SettingDefinitions.DefaultTimeout.WithValue(timeout));
 
-        package.Settings[PackageSettings.InternalTraceLevel] = Settings.InternalTraceLevelEnum.ToString();
+        package.AddSetting(SettingDefinitions.InternalTraceLevel.WithValue(Settings.InternalTraceLevelEnum.ToString()));
 
         if (Settings.BasePath != null)
-            package.Settings[PackageSettings.BasePath] = Settings.BasePath;
+            package.AddSetting(SettingDefinitions.BasePath.WithValue(Settings.BasePath));
 
         if (Settings.PrivateBinPath != null)
-            package.Settings[PackageSettings.PrivateBinPath] = Settings.PrivateBinPath;
+            package.AddSetting(SettingDefinitions.PrivateBinPath.WithValue(Settings.PrivateBinPath));
 
         if (Settings.RandomSeed.HasValue)
-            package.Settings[PackageSettings.RandomSeed] = Settings.RandomSeed;
+            package.AddSetting(SettingDefinitions.RandomSeed.WithValue(Settings.RandomSeed));
 
-        if (Settings.TestProperties.Count > 0)
-            SetTestParameters(package.Settings, Settings.TestProperties);
+        // TODO:  Check this
+        // if (Settings.TestProperties.Count > 0)
+        //    SetTestParameters(package.Settings, Settings.TestProperties);
 
         if (Settings.StopOnError)
-            package.Settings[PackageSettings.StopOnError] = true;
+            package.AddSetting(SettingDefinitions.StopOnError.WithValue(true));
 
         if (Settings.SkipNonTestAssemblies)
-            package.Settings[PackageSettings.SkipNonTestAssemblies] = true;
+            package.AddSetting(SettingDefinitions.SkipNonTestAssemblies.WithValue(true));
 
         if (Settings.ThrowOnEachFailureUnderDebugger)
-            package.Settings[PackageSettings.ThrowOnEachFailureUnderDebugger] = true;
+            package.AddSetting(SettingDefinitions.ThrowOnEachFailureUnderDebugger.WithValue(true));
 
         // Always run one assembly at a time in process in its own domain
-        package.Settings[PackageSettings.ProcessModel] = "InProcess";
+        // package.AddSetting(SettingDefinitions.ProcessModel.WithValue("InProcess"));
 
-        package.Settings[PackageSettings.DomainUsage] = Settings.DomainUsage ?? "Single";
+        // package.AddSetting(SettingDefinitions.DomainUsage.WithValue(Settings.DomainUsage ?? "Single"));
 
         if (Settings.DefaultTestNamePattern != null)
         {
-            package.Settings[PackageSettings.DefaultTestNamePattern] = Settings.DefaultTestNamePattern;
+            package.AddSetting(SettingDefinitions.DefaultTestNamePattern.WithValue(Settings.DefaultTestNamePattern));
         }
         else
         {
             // Force truncation of string arguments to test cases
-            package.Settings[PackageSettings.DefaultTestNamePattern] = "{m}{a}";
+            package.AddSetting(SettingDefinitions.DefaultTestNamePattern.WithValue("{m}{a}"));
         }
 
         return SetWorkDir(assemblyName, package);
     }
 
-    private TestPackage SetWorkDir(string assemblyName, TestPackage package)
+    private NUnit.Engine.TestPackage SetWorkDir(string assemblyName, NUnit.Engine.TestPackage package)
     {
         // Set the work directory to the assembly location unless a setting is provided
         string workDir = Settings.WorkDirectory;
@@ -281,7 +284,7 @@ public abstract class NUnitTestAdapter
             workDir = Path.Combine(Path.GetDirectoryName(assemblyName), workDir);
         if (!Directory.Exists(workDir))
             Directory.CreateDirectory(workDir);
-        package.Settings[PackageSettings.WorkDirectory] = workDir;
+        package.AddSetting(SettingDefinitions.WorkDirectory.WithValue(workDir));
         WorkDir = workDir;
         Directory.SetCurrentDirectory(workDir);
         TestLog.Debug($"Workdir set to: {WorkDir}");

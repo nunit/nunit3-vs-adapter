@@ -62,7 +62,7 @@ public class NUnitEngineAdapter : INUnitEngineAdapter, IDisposable
 #if NET462
         var engineX = new TestEngine();
 #else
-        var engineX = TestEngineActivator.CreateInstance() ?? new TestEngine();
+        var engineX = new TestEngine(); // TODO: TestEngineActivator.CreateInstance() ?? new TestEngine();
 #endif
 
         InternalEngineCreated?.Invoke(engineX);
