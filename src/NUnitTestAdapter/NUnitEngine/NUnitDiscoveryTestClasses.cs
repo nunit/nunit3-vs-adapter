@@ -49,7 +49,7 @@ public abstract class NUnitDiscoverySuiteBase : INUnitDiscoverySuiteBase
     public string Id { get; }
     public string Name { get; }
     public string FullName { get; }
-    public int TestCaseCount { get; }
+    public int TestCaseCount { get; set; }
     public RunStateEnum RunState { get; }
     public INUnitDiscoverySuiteBase Parent { get; }
 

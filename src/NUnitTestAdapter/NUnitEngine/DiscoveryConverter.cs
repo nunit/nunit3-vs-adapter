@@ -21,6 +21,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -438,8 +439,8 @@ public class DiscoveryConverter(ITestLogger logger, IAdapterSettings settings) :
     private static BaseProperties ExtractSuiteBasePropertiesClass(XElement node)
     {
         string dId = node.Attribute(NUnitXmlAttributeNames.Id).Value;
-        string dName = node.Attribute(NUnitXmlAttributeNames.Name).Value;
-        string dFullname = node.Attribute(NUnitXmlAttributeNames.Fullname).Value;
+        string dName = node.Attribute(NUnitXmlAttributeNames.Name)?.Value ?? "?";
+        string dFullname = node.Attribute(NUnitXmlAttributeNames.Fullname)?.Value ?? "?";
         var dRunstate = ExtractRunState(node);
         const char apo = '\'';
         var tcs = node.Attribute(NUnitXmlAttributeNames.Testcasecount)?.Value.Trim(apo);
@@ -454,12 +455,34 @@ public class DiscoveryConverter(ITestLogger logger, IAdapterSettings settings) :
         return bp;
     }
 
+    private static BaseProperties ExtractTestRunProperties(XElement node)
+    {
+        string dId = node.Attribute(NUnitXmlAttributeNames.Id).Value;
+        var dRunstate = ExtractRunState(node);
+        const char apo = '\'';
+        var tcs = node.Attribute(NUnitXmlAttributeNames.Testcasecount)?.Value.Trim(apo);
+        int dTestcasecount = int.Parse(tcs ?? "1", CultureInfo.InvariantCulture);
+        var bp = new BaseProperties(dId, "", "", dTestcasecount, dRunstate);
+
+        foreach (var propnode in node.Elements("properties").Elements("property"))
+        {
+            var prop = new NUnitProperty(propnode);
+            bp.Properties.Add(prop);
+        }
+        return bp;
+    }
+
 
     private NUnitDiscoveryTestRun ExtractTestRun(XDocument node)
     {
-        var sb = ExtractSuiteBasePropertiesClass(node.Root);
-        var tr = new NUnitDiscoveryTestRun(sb);
-        return tr;
+        var tr = ExtractTestRunProperties(node.Root);
+        var firstSuite = node.Root?.Element("test-suite");
+        if (firstSuite == null)
+            throw new InvalidOperationException("No <test-suite> element found under <test-run>.");
+
+        var sb = ExtractSuiteBasePropertiesClass(firstSuite);
+        var tsuite = new NUnitDiscoveryTestRun(sb) { TestCaseCount = tr.TestCaseCount };
+        return tsuite;
     }
 
 
