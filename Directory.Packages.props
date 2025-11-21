@@ -11,14 +11,14 @@
     <PackageVersion Include="NUnit3TestAdapter" Version="5.2.0" />
     <PackageVersion Include="SourceLink.Create.CommandLine" Version="2.8.3" />
     <PackageVersion Include="TestCentric.Metadata" Version="3.0.4" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0">
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageVersion>
     <PackageVersion Include="Castle.Core" Version="5.2.1" />
     <PackageVersion Include="Microsoft.Testing.Extensions.VSTestBridge" Version="2.0.2" />
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.0.2" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="8.0.2" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="10.0.0" />
   </ItemGroup>
   <ItemGroup>
     <GlobalPackageReference Include="NUnit.Analyzers" Version="4.11.2">
