@@ -31,7 +31,7 @@ The NUnit 3 Test Adapter is Open Source software released under the [![MIT licen
 
 ## Developing
 
-Visual Studio 2022 is the recommended version to build and test the adapter.
+Visual Studio 2026 is the recommended version to build and test the adapter.
 
 Use `.\build` at the command line to build (compile) the solution.
 
@@ -65,3 +65,5 @@ set breakpoints and watch variables, [follow these steps](https://github.com/nun
 * From version 3.9 the NUnit3TestAdapter will stop supporting Visual Studio 2012 RTM (!), note only RTM, the later updates will still be supported fully. If you're using VS 2012 and want to update NUnit3TestAdapter, please update your Visual Studio RTM to any of the subsequent updates (Update 1-5)
 * From version 3.16 the NUnit3TestAdapter will stop supporting .net core 1
 * From version 4.0 the NUnit3TestAdapter will only be released as a nuget package, the VSIX is deprecated.
+* From version 5.0 the NUnit3TestAdapter will support MTP 1.X.
+* From version 6.0 the NUnit3TestAdapter will support MTP 2.0, and stop supporting .net core 3. Lowest version will be .net 8.0.
