@@ -50,7 +50,7 @@ public interface INUnitTestEvent : INUnitTestNode
     NUnitTestEvent.SiteType Site();
 }
 
-public abstract class NUnitTestEvent : NUnitTestNode, INUnitTestEvent
+public abstract class NUnitTestEvent(XmlNode node) : NUnitTestNode(node), INUnitTestEvent
 {
     public enum ResultType
     {
@@ -121,10 +121,6 @@ public abstract class NUnitTestEvent : NUnitTestNode, INUnitTestEvent
     protected NUnitTestEvent(string testEvent) : this(XmlHelper.CreateXmlNode(testEvent))
     { }
 
-    protected NUnitTestEvent(XmlNode node) : base(node)
-    {
-    }
-
     public string MethodName => Node.GetAttribute("methodname");
     public string ClassName => Node.GetAttribute("classname");
     public string Output => Node.SelectSingleNode("output")?.InnerText.UnEscapeUnicodeColorCodesCharacters();
@@ -174,49 +170,29 @@ public abstract class NUnitTestEvent : NUnitTestNode, INUnitTestEvent
 }
 
 
-public class NUnitAttachment
+public class NUnitAttachment(string path, string description)
 {
-    public NUnitAttachment(string path, string description)
-    {
-        FilePath = path;
-        Description = description;
-    }
+    public string FilePath { get; } = path;
 
-    public string FilePath { get; }
-
-    public string Description { get; }
+    public string Description { get; } = description;
 }
 
-public class NUnitProperty
+public class NUnitProperty(string name, string value)
 {
-    public string Name { get; }
-    public string Value { get; }
+    public string Name { get; } = name;
+    public string Value { get; } = value;
 
     public bool IsInternal => Name.StartsWith("_", StringComparison.Ordinal);
 
-    public NUnitProperty(string name, string value)
+    public NUnitProperty(XElement node) : this(node.Attribute("name").Value, node.Attribute("value").Value)
     {
-        Name = name;
-        Value = value;
-    }
-
-    public NUnitProperty(XElement node)
-    {
-        Name = node.Attribute("name").Value;
-        Value = node.Attribute("value").Value;
     }
 }
 
-public class NUnitFailure
+public class NUnitFailure(string message, string stacktrace)
 {
-    public string Message { get; }
-    public string Stacktrace { get; }
-
-    public NUnitFailure(string message, string stacktrace)
-    {
-        Message = message;
-        Stacktrace = stacktrace;
-    }
+    public string Message { get; } = message;
+    public string Stacktrace { get; } = stacktrace;
 }
 
 #if NETFRAMEWORK
