@@ -33,7 +33,6 @@
       <group targetFramework="net8.0">
         <dependency id="Microsoft.Testing.Extensions.VSTestBridge" version="2.0.2" />
         <dependency id="Microsoft.Testing.Platform.MSBuild" version="2.0.2" />
-        <dependency id="Microsoft.Extensions.DependencyModel" version="8.0.2" />
       </group>
 
     </dependencies>
