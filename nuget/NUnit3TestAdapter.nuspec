@@ -60,7 +60,7 @@
     <file src="build\net8.0\testcentric.engine.metadata.dll" target="build\net8.0\testcentric.engine.metadata.dll"/>
     <file src="build\net8.0\Microsoft.Extensions.DependencyModel.dll" target="build\net8.0\Microsoft.Extensions.DependencyModel.dll"/>
 
-      <file src="build\net8.0\NUnit3TestAdapter.props" target="build\net8.0\NUnit3TestAdapter.props" />
+    <file src="build\net8.0\NUnit3TestAdapter.props" target="build\net8.0\NUnit3TestAdapter.props" />
     <file src="build\net8.0\NUnit3TestAdapter.targets" target="build\net8.0\NUnit3TestAdapter.targets" />
 
 
