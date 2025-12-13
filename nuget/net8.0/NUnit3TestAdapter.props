@@ -1,43 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <ItemGroup>
-    <!--
+    <ItemGroup>
+        <!--
       !!! IMPORTANT !!!
       DO NOT CHANGE THE GUID, IT'S A WELL KNOWN EXTENSION POINT AND THIS EXTENSION NEEDS TO BE REGISTERED AT THE END
       WE HAVE CODE INSIDE THE TASK 'TestingPlatformEntryPoint' TO ENSURE THE ORDER OF THE REGISTRATION BASED ON THIS GUID
     -->
-    <TestingPlatformBuilderHook Include="2E8E7F63-61DB-4EDB-A21E-5BF48279A7B8" >
-      <DisplayName>NUnit</DisplayName>
-      <TypeFullName>NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter.TestingPlatformBuilderHook</TypeFullName>
-    </TestingPlatformBuilderHook>
-  </ItemGroup>    
-    
-  <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)NUnit3.TestAdapter.pdb" Condition="Exists('$(MSBuildThisFileDirectory)NUnit3.TestAdapter.pdb')">
-      <Link>NUnit3.TestAdapter.pdb</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Visible>False</Visible>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)nunit.engine.dll">
-      <Link>nunit.engine.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Visible>False</Visible>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)nunit.engine.api.dll">
-      <Link>nunit.engine.api.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Visible>False</Visible>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)nunit.engine.core.dll">
-      <Link>nunit.engine.core.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Visible>False</Visible>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)testcentric.engine.metadata.dll">
-      <Link>testcentric.engine.metadata.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Visible>False</Visible>
-    </None>
-  </ItemGroup>
+        <TestingPlatformBuilderHook Include="2E8E7F63-61DB-4EDB-A21E-5BF48279A7B8" >
+            <DisplayName>NUnit</DisplayName>
+            <TypeFullName>NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter.TestingPlatformBuilderHook</TypeFullName>
+        </TestingPlatformBuilderHook>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="$(MSBuildThisFileDirectory)NUnit3.TestAdapter.pdb" Condition="Exists('$(MSBuildThisFileDirectory)NUnit3.TestAdapter.pdb')">
+            <Link>NUnit3.TestAdapter.pdb</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <Visible>False</Visible>
+        </None>
+        <None Include="$(MSBuildThisFileDirectory)nunit.engine.dll">
+            <Link>nunit.engine.dll</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <Visible>False</Visible>
+        </None>
+        <None Include="$(MSBuildThisFileDirectory)nunit.engine.api.dll">
+            <Link>nunit.engine.api.dll</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <Visible>False</Visible>
+        </None>
+        <None Include="$(MSBuildThisFileDirectory)nunit.engine.core.dll">
+            <Link>nunit.engine.core.dll</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <Visible>False</Visible>
+        </None>
+        <None Include="$(MSBuildThisFileDirectory)testcentric.engine.metadata.dll">
+            <Link>testcentric.engine.metadata.dll</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <Visible>False</Visible>
+        </None>
+        <None Include="$(MSBuildThisFileDirectory)Microsoft.Extensions.DependencyModel.dll">
+            <Link>Microsoft.Extensions.DependencyModel.dll</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <Visible>False</Visible>
+        </None>
+    </ItemGroup>
 </Project>
