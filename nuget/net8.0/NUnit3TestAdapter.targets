@@ -4,7 +4,7 @@
   <!-- Handle the coexistence between Microsoft.Testing.Platform and Microsoft.NET.Test.Sdk  -->
   <PropertyGroup>
     <EnableNUnitRunner Condition=" '$(EnableNUnitRunner)' == '' ">false</EnableNUnitRunner>
-    <IsTestingPlatformApplication>$(EnableNUnitRunner)</IsTestingPlatformApplication>
+    <IsTestingPlatformApplication Condition=" '$(IsTestingPlatformApplication)' == '' ">$(EnableNUnitRunner)</IsTestingPlatformApplication>
 
     <GenerateProgramFile Condition=" '$(EnableNUnitRunner)' == 'true' ">false</GenerateProgramFile>
   </PropertyGroup>
