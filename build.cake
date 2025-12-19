@@ -15,7 +15,7 @@ var configuration = Argument("configuration", "Release");
 
 var version = "6.0.1";
 
-var modifier = "-alpha.4";
+var modifier = "-alpha.5";
 
 var dbgSuffix = configuration.ToLower() == "debug" ? "-dbg" : "";
 var packageVersion = version + modifier + dbgSuffix;
