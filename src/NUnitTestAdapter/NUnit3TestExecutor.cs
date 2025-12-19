@@ -251,6 +251,7 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
 
     void ITestExecutor.Cancel()
     {
+        TestLog.Debug("Trace: Cancel - starting to StopRun");
         StopRun();
     }
 
