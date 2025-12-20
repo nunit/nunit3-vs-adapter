@@ -36,7 +36,6 @@
         <PackageReference Include="SourceLink.Create.CommandLine" PrivateAssets="All" />
         <PackageReference Include="nunit.engine" />
         <PackageReference Include="TestCentric.Metadata" Aliases="TestCentric" />
-        <PackageReference Include="Microsoft.Extensions.DependencyModel" />
     </ItemGroup>
 
     <Target Name="PreventTestPlatformObjectModelCopyLocal" AfterTargets="ResolveReferences">
