@@ -173,18 +173,25 @@ public class NUnitEventListener(ITestConverterCommon testConverter, INUnit3TestE
             }
         }
 
-        if (result.TestCaseResult != null)
+        try
         {
-            Recorder.RecordEnd(result.TestCaseResult.TestCase, result.TestCaseResult.Outcome);
-            foreach (var vsResult in result.TestResults)
+            if (result.TestCaseResult != null)
             {
-                Recorder.RecordResult(vsResult);
-            }
+                Recorder.RecordEnd(result.TestCaseResult.TestCase, result.TestCaseResult.Outcome);
+                foreach (var vsResult in result.TestResults)
+                {
+                    Recorder.RecordResult(vsResult);
+                }
 
-            if (result.TestCaseResult.Outcome == TestOutcome.Failed && Settings.StopOnError)
-            {
-                Executor.StopRun();
+                if (result.TestCaseResult.Outcome == TestOutcome.Failed && Settings.StopOnError)
+                {
+                    Executor.StopRun();
+                }
             }
+        }
+        catch (System.OperationCanceledException) // MTP throws this if RecordEnd is called after cancellation
+        {
+            Executor.StopRun();
         }
     }
 
