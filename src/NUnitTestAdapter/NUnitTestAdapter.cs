@@ -143,11 +143,6 @@ public abstract class NUnitTestAdapter
         try
         {
             Settings.Load(context, TestLog);
-            NUnitEngineAdapter.Initialize(Settings);
-            NUnitEngineAdapter.InitializeSettingsAndLogging(Settings, TestLog);
-            TestLog.Verbosity = Settings.Verbosity;
-            InitializeForbiddenFolders();
-            SetCurrentWorkingDirectory();
         }
         catch (Exception e)
         {
@@ -158,6 +153,12 @@ public abstract class NUnitTestAdapter
         {
             TestLog.DebugRunfrom();
         }
+        TestLog.Verbosity = Settings.Verbosity;
+        NUnitEngineAdapter.Initialize(Settings);
+        NUnitEngineAdapter.InitializeSettingsAndLogging(Settings, TestLog);
+        InitializeForbiddenFolders();
+        SetCurrentWorkingDirectory();
+
     }
 
     public void InitializeForbiddenFolders()
