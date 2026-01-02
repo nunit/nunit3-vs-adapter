@@ -139,12 +139,12 @@ public abstract class NUnitTestAdapter
     {
         TestLog = new TestLogger(messageLogger);
         Settings = new AdapterSettings(TestLog);
-        NUnitEngineAdapter.Initialize(Settings);
-        NUnitEngineAdapter.InitializeSettingsAndLogging(Settings, TestLog);
         TestLog.InitSettings(Settings);
         try
         {
             Settings.Load(context, TestLog);
+            NUnitEngineAdapter.Initialize(Settings);
+            NUnitEngineAdapter.InitializeSettingsAndLogging(Settings, TestLog);
             TestLog.Verbosity = Settings.Verbosity;
             InitializeForbiddenFolders();
             SetCurrentWorkingDirectory();
