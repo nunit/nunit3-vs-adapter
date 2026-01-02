@@ -158,7 +158,6 @@ public abstract class NUnitTestAdapter
         NUnitEngineAdapter.InitializeSettingsAndLogging(Settings, TestLog);
         InitializeForbiddenFolders();
         SetCurrentWorkingDirectory();
-
     }
 
     public void InitializeForbiddenFolders()
