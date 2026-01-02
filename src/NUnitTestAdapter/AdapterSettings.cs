@@ -145,6 +145,8 @@ public class AdapterSettings(ITestLogger logger) : IAdapterSettings
 
     public string DomainUsage { get; private set; }
 
+    public bool UseDefaultAssemblyLoadContext { get; private set; }
+
     public bool ShowInternalProperties { get; private set; }
     public bool UseParentFQNForParametrizedTests { get; private set; }  // Default is false.  True can fix certain test name patterns, but may have side effects.
     public bool UseNUnitIdforTestCaseId { get; private set; }  // default is false.
@@ -192,6 +194,7 @@ public class AdapterSettings(ITestLogger logger) : IAdapterSettings
     public bool Debug { get; private set; }
     public bool DebugExecution { get; private set; }
     public bool DebugDiscovery { get; private set; }
+    public bool DebugEngine { get; private set; }
 
     #endregion
 
@@ -270,7 +273,7 @@ public class AdapterSettings(ITestLogger logger) : IAdapterSettings
 
 
         ExplicitMode = MapEnum(GetInnerText(nunitNode, nameof(ExplicitMode), Verbosity > 0), ExplicitModeEnum.Strict);
-
+        UseDefaultAssemblyLoadContext = GetInnerTextAsBool(nunitNode, nameof(UseDefaultAssemblyLoadContext), true);
 
         ExtractNUnitDiagnosticSettings(nunitNode);
 
@@ -370,11 +373,13 @@ public class AdapterSettings(ITestLogger logger) : IAdapterSettings
         DumpXmlTestResults = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestResults), false);
         DumpVsInput = GetInnerTextAsBool(nunitNode, nameof(DumpVsInput), false);
         FreakMode = GetInnerTextAsBool(nunitNode, nameof(FreakMode), false);
-        InternalTraceLevel = GetInnerTextWithLog(nunitNode, nameof(InternalTraceLevel), "Off", "Error", "Warning", "Info", "Verbose", "Debug");
+        InternalTraceLevel = GetInnerTextWithLog(nunitNode, nameof(InternalTraceLevel), "Off", "Error", "Warning", "Info", "Verbose", "Debug") ??
+                             "Off";
         InternalTraceLevelEnum = ParseInternalTraceLevel(InternalTraceLevel);
         Debug = GetInnerTextAsBool(nunitNode, nameof(Debug), false);
         DebugExecution = Debug || GetInnerTextAsBool(nunitNode, nameof(DebugExecution), false);
         DebugDiscovery = Debug || GetInnerTextAsBool(nunitNode, nameof(DebugDiscovery), false);
+        DebugEngine = GetInnerTextAsBool(nunitNode, nameof(DebugEngine), false);
     }
 
     private InternalTraceLevel ParseInternalTraceLevel(string s)

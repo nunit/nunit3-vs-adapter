@@ -137,9 +137,9 @@ public abstract class NUnitTestAdapter
     // Discover or Execute method must call this method.
     protected void Initialize(IDiscoveryContext context, IMessageLogger messageLogger)
     {
-        NUnitEngineAdapter.Initialize();
         TestLog = new TestLogger(messageLogger);
         Settings = new AdapterSettings(TestLog);
+        NUnitEngineAdapter.Initialize(Settings);
         NUnitEngineAdapter.InitializeSettingsAndLogging(Settings, TestLog);
         TestLog.InitSettings(Settings);
         try
@@ -192,6 +192,8 @@ public abstract class NUnitTestAdapter
     {
         var package = new TestPackage(assemblyName);
 
+
+
         if (Settings.ShadowCopyFiles)
         {
             package.Settings[PackageSettings.ShadowCopyFiles] = true;
@@ -225,12 +227,14 @@ public abstract class NUnitTestAdapter
         }
 
         package.Settings[PackageSettings.SynchronousEvents] = Settings.SynchronousEvents;
+        package.Settings[PackageSettings.UseDefaultAssemblyLoadContext] = Settings.UseDefaultAssemblyLoadContext;
 
         int timeout = Settings.DefaultTimeout;
         if (timeout > 0)
             package.Settings[PackageSettings.DefaultTimeout] = timeout;
 
         package.Settings[PackageSettings.InternalTraceLevel] = Settings.InternalTraceLevelEnum.ToString();
+        package.Settings[PackageSettings.DebugAgent] = Settings.DebugEngine;
 
         if (Settings.BasePath != null)
             package.Settings[PackageSettings.BasePath] = Settings.BasePath;

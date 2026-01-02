@@ -10,7 +10,7 @@
         <SourceLinkOriginUrl>https://github.com/nunit/nunit3-vs-adapter</SourceLinkOriginUrl>
         <SourceLinkCreate>true</SourceLinkCreate>
         <AssemblyVersion>6.0.0.0</AssemblyVersion>
-        <FileVersion>6.0.0.0</FileVersion>
+        <FileVersion>6.0.2.100</FileVersion>
         <NeutralLanguage>en</NeutralLanguage>
         <Title>NUnit3 Test Adapter for Visual Studio</Title>
         <Copyright>Copyright © 2011-2021 Charlie Poole, 2014-2026 Terje Sandstrom</Copyright>

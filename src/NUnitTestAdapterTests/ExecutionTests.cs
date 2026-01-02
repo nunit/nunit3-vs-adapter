@@ -23,7 +23,7 @@ public class ExecutionTests
         settings.AssemblySelectLimit.Returns(10);
         ctx.Settings.Returns(settings);
         var engineAdapter = new NUnitEngineAdapter();
-        engineAdapter.Initialize();
+        engineAdapter.Initialize(settings);
         ctx.EngineAdapter.Returns(engineAdapter);
         settings.DiscoveryMethod.Returns(DiscoveryMethod.Current);
         discovery = Substitute.For<IDiscoveryConverter>();

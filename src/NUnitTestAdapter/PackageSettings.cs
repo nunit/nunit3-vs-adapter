@@ -69,6 +69,14 @@ public static class PackageSettings
     /// </summary>
     public const string ActiveConfig = "ActiveConfig";
 
+
+    /// <summary>
+    /// Bool indicating whether to always use the default AssemblyLoadContext. Default is true.
+    /// Default is false in the engine, which means the engine will determine to use it or not.
+    /// </summary>
+    public const string UseDefaultAssemblyLoadContext = nameof(UseDefaultAssemblyLoadContext);
+
+
     /// <summary>
     /// Bool indicating whether the engine should determine the private
     /// bin path by examining the paths to all the tests. Defaults to

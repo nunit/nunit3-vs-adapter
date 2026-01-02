@@ -33,6 +33,9 @@ public interface IAdapterSettings
     bool CollectDataForEachTestSeparately { get; }  // Used implicitly by MS
     bool SynchronousEvents { get; }
     string DomainUsage { get; }
+
+    bool UseDefaultAssemblyLoadContext { get; }
+
     bool DumpXmlTestDiscovery { get; }
     bool DumpXmlTestResults { get; }
 
@@ -115,5 +118,6 @@ public interface IAdapterSettings
     ExplicitModeEnum ExplicitMode { get; }
     bool SkipExecutionWhenNoTests { get; }
     string TestOutputFolder { get; }
+    bool DebugEngine { get; }
     string SetTestOutputFolder(string workDirectory);
 }
