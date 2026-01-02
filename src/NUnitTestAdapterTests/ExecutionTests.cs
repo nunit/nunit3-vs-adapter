@@ -21,9 +21,10 @@ public class ExecutionTests
         ctx = Substitute.For<IExecutionContext>();
         var settings = Substitute.For<IAdapterSettings>();
         settings.AssemblySelectLimit.Returns(10);
+        settings.InternalTraceLevelEnum.Returns(InternalTraceLevel.Off);
         ctx.Settings.Returns(settings);
         var engineAdapter = new NUnitEngineAdapter();
-        engineAdapter.Initialize();
+        engineAdapter.Initialize(settings);
         ctx.EngineAdapter.Returns(engineAdapter);
         settings.DiscoveryMethod.Returns(DiscoveryMethod.Current);
         discovery = Substitute.For<IDiscoveryConverter>();

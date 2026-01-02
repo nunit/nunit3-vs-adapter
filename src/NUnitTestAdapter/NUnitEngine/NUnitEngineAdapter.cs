@@ -57,7 +57,7 @@ public class NUnitEngineAdapter : INUnitEngineAdapter, IDisposable
 
     public bool EngineEnabled => TestEngine != null;
 
-    public void Initialize()
+    public void Initialize(IAdapterSettings adapterSettings)
     {
 #if NET462
         var engineX = new TestEngine();
@@ -71,7 +71,7 @@ public class NUnitEngineAdapter : INUnitEngineAdapter, IDisposable
         if (!Directory.Exists(tmpPath))
             Directory.CreateDirectory(tmpPath);
         TestEngine.WorkDirectory = tmpPath;
-        TestEngine.InternalTraceLevel = InternalTraceLevel.Off;
+        TestEngine.InternalTraceLevel = adapterSettings.InternalTraceLevelEnum;
     }
 
     public void InitializeSettingsAndLogging(IAdapterSettings setting, ITestLogger testLog)
