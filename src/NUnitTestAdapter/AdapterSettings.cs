@@ -1,5 +1,5 @@
 // ***********************************************************************
-// Copyright (c) 2014-2021 Charlie Poole, 2014-2025 Terje Sandstrom
+// Copyright (c) 2014-2021 Charlie Poole, 2014-2026 Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
