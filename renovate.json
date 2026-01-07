@@ -7,7 +7,7 @@
       "matchPackageNames": [
         "nunit.engine"
       ],
-      "allowedVersions": "3.18.1",
+      "allowedVersions": "3.22.0",
       "enabled": false
     },
     {

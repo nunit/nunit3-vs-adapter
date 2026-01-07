@@ -192,8 +192,6 @@ public abstract class NUnitTestAdapter
     {
         var package = new TestPackage(assemblyName);
 
-
-
         if (Settings.ShadowCopyFiles)
         {
             package.Settings[PackageSettings.ShadowCopyFiles] = true;
