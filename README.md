@@ -11,6 +11,7 @@ or the latest developer build version
 [![MyGet version](https://img.shields.io/myget/nunit/vpre/NUnit3TestAdapter.svg?label=Myget%3A%20Latest%20pre-release&style=flat)](https://www.myget.org/feed/nunit/package/nuget/NUnit3TestAdapter)
 
 ##### Builds on main
+
 ![NUnit3TestAdapter.CI](https://img.shields.io/github/actions/workflow/status/nunit/nunit3-vs-adapter/NUnit3TestAdapter.CI.yml?branch=main)
 
 ##### Support
@@ -28,8 +29,7 @@ Also check the [release notes](https://docs.nunit.org/articles/vs-test-adapter/A
 
 The NUnit 3 Test Adapter is Open Source software released under the [![MIT license](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/nunit/nunit3-vs-adapter/blob/main/LICENSE).
 
-
-## Developing
+## Development
 
 Visual Studio 2026 is the recommended version to build and test the adapter.
 
