@@ -30,8 +30,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             "SourceLink.Create.CommandLine",  // Only used a as a development dependency in the adapter, so is only in csproj
             "nunit.engine",  // Is to be embedded - 3 files, so don't need to be in dependency list in nuspec, but must be in file list
             "TestCentric.Metadata",  // Only one file is embedded in the package, is in the file list
-            "Microsoft.Testing.Platform.MSBuild",  // Must be in dependency list in nuspec, but dont need to be a package reference in csproj
-            "Microsoft.Extensions.DependencyModel"  // Must be in dependency list in nuspec for version resolution (required by nunit.engine for net8.0), but dont need to be a package reference in csproj
+            "Microsoft.Testing.Platform.MSBuild",  // Must be in dependency list in nuspec, but don't need to be a package reference in csproj
+            "Microsoft.Extensions.DependencyModel"  // Must be in dependency list in nuspec for version resolution (required by nunit.engine for net8.0), but don't need to be a package reference in csproj
         ];
 
         private Dictionary<string, List<PackageWithVersion>> _nuspecPackages;
