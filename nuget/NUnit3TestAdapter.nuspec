@@ -33,6 +33,7 @@
       <group targetFramework="net8.0">
         <dependency id="Microsoft.Testing.Extensions.VSTestBridge" version="2.0.2" />
         <dependency id="Microsoft.Testing.Platform.MSBuild" version="2.0.2" />
+        <dependency id="Microsoft.Extensions.DependencyModel" version="8.0.2" />
       </group>
 
     </dependencies>
@@ -57,7 +58,6 @@
     <file src="build\net8.0\nunit.engine.api.dll" target="build\net8.0\nunit.engine.api.dll" />
     <file src="build\net8.0\nunit.engine.core.dll" target="build\net8.0\nunit.engine.core.dll" />
     <file src="build\net8.0\testcentric.engine.metadata.dll" target="build\net8.0\testcentric.engine.metadata.dll"/>
-    <file src="build\net8.0\Microsoft.Extensions.DependencyModel.dll" target="build\net8.0\Microsoft.Extensions.DependencyModel.dll"/>
 
     <file src="build\net8.0\NUnit3TestAdapter.props" target="build\net8.0\NUnit3TestAdapter.props" />
     <file src="build\net8.0\NUnit3TestAdapter.targets" target="build\net8.0\NUnit3TestAdapter.targets" />
