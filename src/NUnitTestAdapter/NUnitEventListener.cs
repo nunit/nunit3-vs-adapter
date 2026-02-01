@@ -71,6 +71,12 @@ public class NUnitEventListener(ITestConverterCommon testConverter, INUnit3TestE
 
     public void OnTestEvent(string report)
     {
+        if (Executor.IsCancelled)
+        {
+            // Stop processing events when cancelled
+            return;
+        }
+
         var node = new NUnitTestEventHeader(report);
         dumpXml?.AddTestEvent(node.AsString());
         try
@@ -134,6 +140,11 @@ public class NUnitEventListener(ITestConverterCommon testConverter, INUnit3TestE
 
     public void TestStarted(INUnitTestEventStartTest testNode)
     {
+        if (Executor.IsCancelled)
+        {
+            return;
+        }
+
         var ourCase = TestConverter.GetCachedTestCase(testNode.Id);
 
         // Simply ignore any TestCase not found in the cache
@@ -148,6 +159,11 @@ public class NUnitEventListener(ITestConverterCommon testConverter, INUnit3TestE
     /// <param name="resultNode">resultNode.</param>
     public void TestFinished(INUnitTestEventTestCase resultNode)
     {
+        if (Executor.IsCancelled)
+        {
+            return;
+        }
+
         var testId = resultNode.Id;
         if (OutputNodes.TryGetValue(testId, out var outputNodes))
         {
@@ -190,6 +206,11 @@ public class NUnitEventListener(ITestConverterCommon testConverter, INUnit3TestE
 
     public void SuiteFinished(INUnitTestEventSuiteFinished resultNode)
     {
+        if (Executor.IsCancelled)
+        {
+            return;
+        }
+
         if (!resultNode.IsFailed)
             return;
         var site = resultNode.Site();
@@ -217,6 +238,11 @@ public class NUnitEventListener(ITestConverterCommon testConverter, INUnit3TestE
     /// <param name="outputNodeEvent">outputNodeEvent.</param>
     public void TestOutput(INUnitTestEventTestOutput outputNodeEvent)
     {
+        if (Executor.IsCancelled)
+        {
+            return;
+        }
+
         if (Settings.ConsoleOut == 0)
             return;
         string text = outputNodeEvent.Content;

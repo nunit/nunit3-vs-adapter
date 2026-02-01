@@ -46,6 +46,7 @@ public interface IDumpXml
     void DumpForExecution();
     void DumpVSInputFilter(TestFilter filter, string info);
     void StartExecution(TestFilter filter, string atExecution);
+    void AddCancellationMessage();
 }
 
 public class DumpXml : IDumpXml
@@ -164,6 +165,12 @@ public class DumpXml : IDumpXml
     {
         DumpVSInputFilter(filter, atExecution);
         AddString($"\n\n<NUnitExecution>{assemblyPath}</NUnitExecution>\n\n");
+    }
+
+    public void AddCancellationMessage()
+    {
+        AddString($"<CancellationTime>{DateTime.Now:yyyy-MM-dd HH:mm:ss}</CancellationTime>\n");
+        AddString("<Status>Execution was cancelled</Status>\n");
     }
 
     public static IDumpXml CreateDump(string path, IGrouping<string, TestCase> testCases, IAdapterSettings settings)

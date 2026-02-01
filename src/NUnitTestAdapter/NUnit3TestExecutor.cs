@@ -49,6 +49,7 @@ public interface INUnit3TestExecutor
     IDumpXml Dump { get; }
     IAdapterSettings Settings { get; }
     IFrameworkHandle FrameworkHandle { get; }
+    bool IsCancelled { get; }
 }
 
 public enum RunType
@@ -67,6 +68,7 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
 {
     #region Properties
     private bool IsMTP { get; }
+    private volatile bool _cancelled = false;
 
     private RunType RunType { get; set; }
 
@@ -81,6 +83,8 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
     public INUnitEngineAdapter EngineAdapter => NUnitEngineAdapter;
 
     public string TestOutputXmlFolder { get; set; } = "";
+
+    public bool IsCancelled => _cancelled;
 
     // NOTE: an earlier version of this code had a FilterBuilder
     // property. This seemed to make sense, because we instantiate
@@ -151,7 +155,18 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
 
         RunAssemblies(sources, filter);
 
-        TestLog.Info($"NUnit Adapter {AdapterVersion}: Test execution complete");
+        if (_cancelled)
+        {
+            TestLog.Info($"NUnit Adapter {AdapterVersion}: Test execution cancelled");
+            Dump?.AddString("<ExecutionResult>Test execution was cancelled</ExecutionResult>\n");
+        }
+        else
+        {
+            TestLog.Info($"NUnit Adapter {AdapterVersion}: Test execution complete");
+            Dump?.AddString("<ExecutionResult>Test execution completed normally</ExecutionResult>\n");
+        }
+
+        Dump?.DumpForExecution();
         Unload();
     }
 
@@ -159,6 +174,13 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
     {
         foreach (string assemblyName in sources)
         {
+            if (_cancelled)
+            {
+                TestLog.Debug("Execution cancelled, stopping assembly processing");
+                Dump?.AddString("<AssemblyProcessing>Cancelled before processing remaining assemblies</AssemblyProcessing>\n");
+                break;
+            }
+
             try
             {
                 string assemblyPath = Path.IsPathRooted(assemblyName)
@@ -217,6 +239,13 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
 
         foreach (var assemblyGroup in assemblyGroups)
         {
+            if (_cancelled)
+            {
+                TestLog.Debug("Execution cancelled, stopping assembly group processing");
+                Dump?.AddString("<AssemblyGroupProcessing>Cancelled before processing remaining assembly groups</AssemblyGroupProcessing>\n");
+                break;
+            }
+
             var assemblytiming = new TimingLogger(Settings, TestLog);
             try
             {
@@ -241,7 +270,18 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
         }
 
         timing.LogTime("Total execution time");
-        TestLog.Info($"NUnit Adapter {AdapterVersion}: Test execution complete");
+        if (_cancelled)
+        {
+            TestLog.Info($"NUnit Adapter {AdapterVersion}: Test execution cancelled");
+            Dump?.AddString("<ExecutionResult>Test execution was cancelled</ExecutionResult>\n");
+        }
+        else
+        {
+            TestLog.Info($"NUnit Adapter {AdapterVersion}: Test execution complete");
+            Dump?.AddString("<ExecutionResult>Test execution completed normally</ExecutionResult>\n");
+        }
+
+        Dump?.DumpForExecution();
         Unload();
     }
 
@@ -251,7 +291,9 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
 
     void ITestExecutor.Cancel()
     {
-        TestLog.Debug("Trace: Cancel - starting to StopRun");
+        TestLog.Debug("Trace: Cancel - starting cancellation process");
+        _cancelled = true;
+        Dump?.AddCancellationMessage();
         StopRun();
     }
 
@@ -301,6 +343,13 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
     private void RunAssembly(string assemblyPath, IGrouping<string, TestCase> testCases, TestFilter filter,
         string assemblyName)
     {
+        if (_cancelled)
+        {
+            TestLog.Debug($"Execution cancelled, skipping assembly {assemblyPath}");
+            Dump?.AddString($"<AssemblySkipped>Cancelled before processing {assemblyPath}</AssemblySkipped>\n");
+            return;
+        }
+
         LogActionAndSelection(assemblyPath, filter);
         RestoreRandomSeed(assemblyPath);
         Dump = DumpXml.CreateDump(assemblyPath, testCases, Settings);
