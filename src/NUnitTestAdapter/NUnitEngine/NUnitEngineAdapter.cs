@@ -24,8 +24,10 @@
 using System;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 
 using NUnit.Engine;
+using NUnit.VisualStudio.TestAdapter.Dump;
 using NUnit.VisualStudio.TestAdapter.Internal;
 
 namespace NUnit.VisualStudio.TestAdapter.NUnitEngine;
@@ -37,6 +39,7 @@ public interface INUnitEngineAdapter
     NUnitResults Explore(TestFilter filter);
     NUnitResults Run(ITestEventListener listener, TestFilter filter);
     void StopRun();
+    void SetDump(IDumpXml dumpXml);
 
     T GetService<T>()
         where T : class;
@@ -49,6 +52,7 @@ public class NUnitEngineAdapter : INUnitEngineAdapter, IDisposable
 {
     private IAdapterSettings settings;
     private ITestLogger logger;
+    private IDumpXml dump;
     private TestPackage package;
     private ITestEngine TestEngine { get; set; }
     private ITestRunner Runner { get; set; }
@@ -80,10 +84,19 @@ public class NUnitEngineAdapter : INUnitEngineAdapter, IDisposable
         settings = setting;
     }
 
+    public void SetDump(IDumpXml dumpXml)
+    {
+        dump = dumpXml;
+    }
+
     public void CreateRunner(TestPackage testPackage)
     {
+        logger?.Debug("NUnitEngineAdapter.CreateRunner() - starting");
+        dump?.AddString("<EngineLog>NUnitEngineAdapter.CreateRunner() - starting</EngineLog>\n");
         package = testPackage;
         Runner = TestEngine.GetRunner(package);
+        logger?.Debug("NUnitEngineAdapter.CreateRunner() - completed");
+        dump?.AddString("<EngineLog>NUnitEngineAdapter.CreateRunner() - completed</EngineLog>\n");
     }
 
     public NUnitResults Explore()
@@ -91,15 +104,23 @@ public class NUnitEngineAdapter : INUnitEngineAdapter, IDisposable
 
     public NUnitResults Explore(TestFilter filter)
     {
+        logger?.Debug("NUnitEngineAdapter.Explore() - starting");
+        dump?.AddString("<EngineLog>NUnitEngineAdapter.Explore() - starting</EngineLog>\n");
         var timing = new TimingLogger(settings, logger);
         var results = new NUnitResults(Runner.Explore(filter));
+        logger?.Debug($"NUnitEngineAdapter.Explore() - completed, results: {(results.IsRunnable ? "runnable" : "not runnable")}");
+        dump?.AddString($"<EngineLog>NUnitEngineAdapter.Explore() - completed, results: {(results.IsRunnable ? "runnable" : "not runnable")}</EngineLog>\n");
         return LogTiming(filter, timing, results);
     }
 
     public NUnitResults Run(ITestEventListener listener, TestFilter filter)
     {
+        logger?.Debug("NUnitEngineAdapter.Run() - starting");
+        dump?.AddString("<EngineLog>NUnitEngineAdapter.Run() - starting</EngineLog>\n");
         var timing = new TimingLogger(settings, logger);
         var results = new NUnitResults(Runner.Run(listener, filter));
+        logger?.Debug("NUnitEngineAdapter.Run() - completed");
+        dump?.AddString("<EngineLog>NUnitEngineAdapter.Run() - completed</EngineLog>\n");
         return LogTiming(filter, timing, results);
     }
 
@@ -107,7 +128,7 @@ public class NUnitEngineAdapter : INUnitEngineAdapter, IDisposable
     {
         timing.LogTime($"Execution engine run time with filter length {filter.Text.Length}");
         if (filter.Text.Length < 300)
-            logger.Debug($"Filter: {filter.Text}");
+            logger?.Debug($"Filter: {filter.Text}");
         return results;
     }
 
@@ -117,31 +138,79 @@ public class NUnitEngineAdapter : INUnitEngineAdapter, IDisposable
         var service = TestEngine.Services.GetService<T>();
         if (service == null)
         {
-            logger.Warning($"Engine GetService can't create service {typeof(T)}.");
+            logger?.Warning($"Engine GetService can't create service {typeof(T)}.");
         }
         return service;
     }
 
     public void StopRun()
-        => Runner?.StopRun(true);
-
-    public void CloseRunner()
     {
-        if (Runner == null)
-            return;
-        if (Runner.IsTestRunning)
-            Runner.StopRun(true);
+        var stopStartTime = DateTime.Now.ToString("HH:mm:ss.fff");
+        logger?.Debug($"NUnitEngineAdapter.StopRun() - starting at {stopStartTime}");
+        dump?.AddString($"<EngineLog>{stopStartTime} - NUnitEngineAdapter.StopRun() - starting</EngineLog>\n");
 
         try
         {
+            // Use a timeout for StopRun to prevent indefinite hanging
+            var stopTask = Task.Run(() => Runner?.StopRun(true));
+            var timeoutMs = 5000; // 5 second timeout
+
+            if (stopTask.Wait(timeoutMs))
+            {
+                var stopEndTime = DateTime.Now.ToString("HH:mm:ss.fff");
+                logger?.Debug($"NUnitEngineAdapter.StopRun() - completed normally at {stopEndTime}");
+                dump?.AddString($"<EngineLog>{stopEndTime} - NUnitEngineAdapter.StopRun() - completed normally</EngineLog>\n");
+            }
+            else
+            {
+                var timeoutTime = DateTime.Now.ToString("HH:mm:ss.fff");
+                logger?.Warning($"NUnitEngineAdapter.StopRun() - TIMEOUT after {timeoutMs}ms at {timeoutTime}");
+                dump?.AddString($"<EngineLog>{timeoutTime} - NUnitEngineAdapter.StopRun() - TIMEOUT after {timeoutMs}ms, proceeding anyway</EngineLog>\n");
+
+                // Don't wait for the hanging StopRun - let it run in background
+                // This allows the adapter to continue with cleanup
+            }
+        }
+        catch (Exception ex)
+        {
+            var errorTime = DateTime.Now.ToString("HH:mm:ss.fff");
+            logger?.Warning($"Exception in StopRun at {errorTime}: {ex.Message}");
+            dump?.AddString($"<EngineLog>{errorTime} - StopRun exception: {ex.Message}</EngineLog>\n");
+        }
+    }
+
+    public void CloseRunner()
+    {
+        logger?.Debug("NUnitEngineAdapter.CloseRunner() - starting");
+        dump?.AddString("<EngineLog>NUnitEngineAdapter.CloseRunner() - starting</EngineLog>\n");
+        if (Runner == null)
+        {
+            logger?.Debug("NUnitEngineAdapter.CloseRunner() - runner is null, returning");
+            dump?.AddString("<EngineLog>NUnitEngineAdapter.CloseRunner() - runner is null, returning</EngineLog>\n");
+            return;
+        }
+        if (Runner.IsTestRunning)
+        {
+            logger?.Debug("NUnitEngineAdapter.CloseRunner() - test is running, stopping first");
+            dump?.AddString("<EngineLog>NUnitEngineAdapter.CloseRunner() - test is running, stopping first</EngineLog>\n");
+            Runner.StopRun(true);
+        }
+
+        try
+        {
+            logger?.Debug("NUnitEngineAdapter.CloseRunner() - unloading and disposing runner");
+            dump?.AddString("<EngineLog>NUnitEngineAdapter.CloseRunner() - unloading and disposing runner</EngineLog>\n");
             Runner.Unload();
             Runner.Dispose();
         }
         catch (NUnitEngineUnloadException ex)
         {
-            logger.Warning($"Engine encountered NUnitEngineUnloadException :  {ex.Message}");
+            logger?.Warning($"Engine encountered NUnitEngineUnloadException :  {ex.Message}");
+            dump?.AddString($"<EngineLog>Engine encountered NUnitEngineUnloadException: {ex.Message}</EngineLog>\n");
         }
         Runner = null;
+        logger?.Debug("NUnitEngineAdapter.CloseRunner() - completed");
+        dump?.AddString("<EngineLog>NUnitEngineAdapter.CloseRunner() - completed</EngineLog>\n");
     }
 
     public void Dispose()
@@ -168,7 +237,7 @@ public class NUnitEngineAdapter : INUnitEngineAdapter, IDisposable
             // If you decide to handle other formats in the runsettings, it needs more work.
             var resultWriter = resultService.GetResultWriter("nunit3", null);
             resultWriter.WriteResultFile(testResults.FullTopNode, path);
-            logger.Info($"   Test results written to {path}");
+            logger?.Info($"   Test results written to {path}");
         }
         finally
         {
@@ -196,7 +265,7 @@ public class NUnitEngineAdapter : INUnitEngineAdapter, IDisposable
         while (true)
         {
             string path = Path.Combine(folder, $"{defaultFileName}.{i++}.{extension}");
-            if (!File.Exists(path))
+            if (!System.IO.File.Exists(path))
                 return path;
         }
     }

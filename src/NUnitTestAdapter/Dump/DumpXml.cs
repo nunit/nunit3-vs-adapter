@@ -44,6 +44,7 @@ public interface IDumpXml
     void AddTestEvent(string text);
     void StartDiscoveryInExecution(IGrouping<string, TestCase> testCases, TestFilter filter, TestPackage package);
     void DumpForExecution();
+    void AppendToExistingDump(); // New method for appending
     void DumpVSInputFilter(TestFilter filter, string info);
     void StartExecution(TestFilter filter, string atExecution);
     void AddCancellationMessage();
@@ -98,6 +99,44 @@ public class DumpXml : IDumpXml
         var dumpfolder = Path.Combine(directory, "Dump");
         var path = Path.Combine(dumpfolder, $"E_{filename}.dump");
         Dump2File(path);
+    }
+
+    public void AppendToExistingDump()
+    {
+        var dumpfolder = Path.Combine(directory, "Dump");
+        var path = Path.Combine(dumpfolder, $"E_{filename}.dump");
+        AppendToFile(path);
+    }
+
+    private void AppendToFile(string path)
+    {
+        EnsurePathExist(path);
+        // Don't add Rootend for append operations - file should already be valid XML
+        // Instead, we need to insert before the closing tag
+        if (System.IO.File.Exists(path))
+        {
+            // Read existing content, remove closing tag, append new content, add closing tag
+            var existingContent = System.IO.File.ReadAllText(path);
+            if (existingContent.Contains("</NUnitXml>"))
+            {
+                existingContent = existingContent.Replace("</NUnitXml>", "");
+                var newContent = existingContent + txt + Rootend;
+                file.WriteAllText(path, newContent);
+            }
+            else
+            {
+                // File doesn't have proper XML structure, just append
+                file.WriteAllText(path, existingContent + txt);
+            }
+        }
+        else
+        {
+            // File doesn't exist, create it normally
+            Dump2File(path);
+            return;
+        }
+
+        txt = new StringBuilder(); // Reset for next use
     }
 
     public string RandomName()

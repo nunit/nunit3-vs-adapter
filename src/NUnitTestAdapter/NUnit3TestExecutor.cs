@@ -26,9 +26,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
@@ -67,6 +70,7 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
     IExecutionContext
 {
     #region Properties
+    private readonly object _dumpLock = new object();
     private bool IsMTP { get; }
     private volatile bool _cancelled = false;
 
@@ -138,40 +142,105 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
             return;
         }
 
-        RunType = GetRunType();
-        var builder = CreateTestFilterBuilder(Dump);
-        TestFilter filter = null;
-        if (RunType == RunType.CommandLineCurrentNUnit)
+        // Create early dump to track setup phase
+        var firstSource = sources.FirstOrDefault();
+        if (firstSource != null)
         {
-            var vsTestFilter = VsTestFilterFactory.CreateVsTestFilter(Settings, runContext);
-            filter = builder.ConvertVsTestFilterToNUnitFilter(vsTestFilter);
-        }
-        else if (RunType == RunType.Ide && IsMTP)
-        {
-            filter = builder.ConvertVsTestFilterToNUnitFilterForMTP(VsTestFilter);
-        }
-
-        filter ??= builder.FilterByWhere(Settings.Where);
-
-        RunAssemblies(sources, filter);
-
-        if (_cancelled)
-        {
-            TestLog.Info($"NUnit Adapter {AdapterVersion}: Test execution cancelled");
-            Dump?.AddString("<ExecutionResult>Test execution was cancelled</ExecutionResult>\n");
+            Dump = DumpXml.CreateDump(firstSource, null, Settings);
+            Dump?.AddString($"<SetupPhase>Starting execution of {sources.Count()} sources</SetupPhase>\n");
+            TestLog.Debug("Early dump created for setup phase tracking");
         }
         else
         {
-            TestLog.Info($"NUnit Adapter {AdapterVersion}: Test execution complete");
-            Dump?.AddString("<ExecutionResult>Test execution completed normally</ExecutionResult>\n");
+            TestLog.Debug("No sources found - cannot create early dump");
         }
 
-        Dump?.DumpForExecution();
+        bool shouldRunAssemblies = true;
+
+        if (_cancelled)
+        {
+            TestLog.Debug("Execution cancelled before RunType determination");
+            Dump?.AddString("<CancelledAt>Before RunType determination</CancelledAt>\n");
+            shouldRunAssemblies = false;
+        }
+
+        if (shouldRunAssemblies)
+        {
+            RunType = GetRunType();
+            Dump?.AddString($"<RunType>{RunType}</RunType>\n");
+
+            if (_cancelled)
+            {
+                TestLog.Debug("Execution cancelled before filter creation");
+                Dump?.AddString("<CancelledAt>Before filter creation</CancelledAt>\n");
+                shouldRunAssemblies = false;
+            }
+        }
+
+        if (shouldRunAssemblies)
+        {
+            var builder = CreateTestFilterBuilder(Dump);
+            TestFilter filter = null;
+            if (RunType == RunType.CommandLineCurrentNUnit)
+            {
+                var vsTestFilter = VsTestFilterFactory.CreateVsTestFilter(Settings, runContext);
+                filter = builder.ConvertVsTestFilterToNUnitFilter(vsTestFilter);
+            }
+            else if (RunType == RunType.Ide && IsMTP)
+            {
+                filter = builder.ConvertVsTestFilterToNUnitFilterForMTP(VsTestFilter);
+            }
+
+            filter ??= builder.FilterByWhere(Settings.Where);
+            Dump?.AddString($"<Filter>{filter?.Text ?? "null"}</Filter>\n");
+
+            if (_cancelled)
+            {
+                TestLog.Debug("Execution cancelled before RunAssemblies");
+                Dump?.AddString("<CancelledAt>Before RunAssemblies call</CancelledAt>\n");
+                shouldRunAssemblies = false;
+            }
+
+            if (shouldRunAssemblies)
+            {
+                TestLog.Debug("About to call RunAssemblies");
+                RunAssemblies(sources, filter);
+                TestLog.Debug("RunAssemblies completed or stopped");
+            }
+        }
+
+        // Cleanup and final reporting
+        lock (_dumpLock)
+        {
+            if (_cancelled)
+            {
+                TestLog.Info($"NUnit Adapter {AdapterVersion}: Test execution cancelled");
+                Dump?.AddString("<ExecutionResult>Test execution was cancelled</ExecutionResult>\n");
+            }
+            else
+            {
+                TestLog.Info($"NUnit Adapter {AdapterVersion}: Test execution complete");
+                Dump?.AddString("<ExecutionResult>Test execution completed normally</ExecutionResult>\n");
+            }
+
+            // Always append to show the complete sequence
+            Dump?.AddString($"<FinalCleanup>{DateTime.Now:HH:mm:ss.fff}</FinalCleanup>\n");
+
+            // Dump active threads for debugging
+            if (IsMTP)
+            {
+                DumpActiveThreads();
+            }
+
+            Dump?.AppendToExistingDump();
+        }
         Unload();
     }
 
     private void RunAssemblies(IEnumerable<string> sources, TestFilter filter)
     {
+        Dump?.AddString($"<RunAssembliesStart>Processing {sources.Count()} assemblies</RunAssembliesStart>\n");
+
         foreach (string assemblyName in sources)
         {
             if (_cancelled)
@@ -183,6 +252,7 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
 
             try
             {
+                Dump?.AddString($"<ProcessingAssembly>{assemblyName}</ProcessingAssembly>\n");
                 string assemblyPath = Path.IsPathRooted(assemblyName)
                     ? assemblyName
                     : Path.Combine(Directory.GetCurrentDirectory(), assemblyName);
@@ -193,8 +263,11 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
                 if (ex is TargetInvocationException) { ex = ex.InnerException; }
 
                 TestLog.Warning("Exception thrown executing tests", ex);
+                Dump?.AddString($"<AssemblyException>{ex.Message}</AssemblyException>\n");
             }
         }
+
+        Dump?.AddString("<RunAssembliesEnd>Assembly processing completed</RunAssembliesEnd>\n");
     }
 
     private RunType GetRunType()
@@ -281,6 +354,12 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
             Dump?.AddString("<ExecutionResult>Test execution completed normally</ExecutionResult>\n");
         }
 
+        // Dump active threads for MTP scenarios
+        if (IsMTP)
+        {
+            DumpActiveThreads();
+        }
+
         Dump?.DumpForExecution();
         Unload();
     }
@@ -291,10 +370,33 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
 
     void ITestExecutor.Cancel()
     {
-        TestLog.Debug("Trace: Cancel - starting cancellation process");
+        var cancelTime = DateTime.Now.ToString("HH:mm:ss.fff");
+        TestLog.Debug($"Trace: Cancel - starting cancellation process at {cancelTime}");
         _cancelled = true;
-        Dump?.AddCancellationMessage();
+
+        // Thread-safe access to dump
+        lock (_dumpLock)
+        {
+            if (Dump != null)
+            {
+                TestLog.Debug("Cancel - adding cancellation message to dump");
+                Dump.AddString($"<CancelRequested>{cancelTime}</CancelRequested>\n");
+                Dump.AddCancellationMessage();
+
+                // IMMEDIATELY write dump to see if Cancel() is actually called
+                Dump.DumpForExecution();
+                TestLog.Debug("Cancel - dump written immediately");
+            }
+            else
+            {
+                TestLog.Debug("Cancel called but no active dump found");
+            }
+        }
+
+        var stopTime = DateTime.Now.ToString("HH:mm:ss.fff");
+        TestLog.Debug($"About to call StopRun at {stopTime}");
         StopRun();
+        TestLog.Debug("StopRun completed");
     }
 
     #endregion
@@ -303,7 +405,119 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
 
     public void Dispose()
     {
-        // TODO: Nothing here at the moment. Check what needs disposing, if anything. Otherwise, remove.
+        try
+        {
+            TestLog.Debug($"NUnit3TestExecutor.Dispose() called - IsMTP: {IsMTP}, Cancelled: {_cancelled}");
+
+            // Enhanced disposal for MTP scenarios
+            if (IsMTP && _cancelled)
+            {
+                TestLog.Debug("Performing aggressive MTP cancellation cleanup");
+
+                // Ensure engine is fully stopped and disposed
+                try
+                {
+                    NUnitEngineAdapter?.StopRun();
+                    Thread.Sleep(100); // Give it time to stop
+                    NUnitEngineAdapter?.CloseRunner();
+                    NUnitEngineAdapter?.Dispose();
+                    TestLog.Debug("MTP cleanup - engine disposed");
+                }
+                catch (Exception ex)
+                {
+                    TestLog.Debug($"Exception during MTP engine cleanup: {ex.Message}");
+                }
+            }
+            else
+            {
+                // Normal cleanup
+                NUnitEngineAdapter?.CloseRunner();
+                NUnitEngineAdapter?.Dispose();
+            }
+
+            // Dump active threads for debugging
+            DumpActiveThreads();
+
+            // Final dump if needed
+            if (Dump != null && IsMTP)
+            {
+                try
+                {
+                    var disposeTime = DateTime.Now.ToString("HH:mm:ss.fff");
+                    Dump.AddString($"<Disposed>{disposeTime} - Executor disposed - MTP: {IsMTP}, Cancelled: {_cancelled}</Disposed>\n");
+                    Dump.AppendToExistingDump();
+                }
+                catch
+                {
+                    // Ignore dump errors during disposal
+                }
+            }
+
+            TestLog.Debug("NUnit3TestExecutor disposal completed");
+        }
+        catch (Exception ex)
+        {
+            TestLog.Debug($"Exception during executor disposal: {ex.Message}");
+        }
+    }
+
+    [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "ProcessThread.StartTime is supported on Windows where this diagnostic tool is used")]
+    private void DumpActiveThreads()
+    {
+        try
+        {
+            var threadDumpTime = DateTime.Now.ToString("HH:mm:ss.fff");
+            var currentProcess = Process.GetCurrentProcess();
+            TestLog.Debug($"=== ACTIVE THREADS DUMP at {threadDumpTime} ===");
+            TestLog.Debug($"Process: {currentProcess.ProcessName} (PID: {currentProcess.Id})");
+
+            var managedThreads = Process.GetCurrentProcess().Threads;
+            TestLog.Debug($"Total OS threads: {managedThreads.Count}");
+
+            foreach (ProcessThread thread in managedThreads)
+            {
+                try
+                {
+                    // For both .NET Framework and .NET 8.0 on Windows, StartTime should be available
+                    TestLog.Debug($"Thread ID: {thread.Id}, State: {thread.ThreadState}, Start Time: {thread.StartTime}");
+                }
+                catch
+                {
+                    // Some thread info might not be accessible
+                    TestLog.Debug($"Thread ID: {thread.Id} - Info not accessible");
+                }
+            }
+
+            // Also dump current managed thread info
+            try
+            {
+                TestLog.Debug($"Current managed thread: {Thread.CurrentThread.ManagedThreadId}, IsBackground: {Thread.CurrentThread.IsBackground}, IsAlive: {Thread.CurrentThread.IsAlive}");
+                TestLog.Debug($"Thread state: {Thread.CurrentThread.ThreadState}");
+            }
+            catch (Exception ex)
+            {
+                TestLog.Debug($"Error getting managed thread info: {ex.Message}");
+            }
+
+            TestLog.Debug($"=== END THREADS DUMP ===");
+
+            // Also add to XML dump if available
+            if (Dump != null)
+            {
+                try
+                {
+                    Dump.AddString($"<ThreadDiagnostics>{threadDumpTime} - Process: {currentProcess.ProcessName}, OS Threads: {managedThreads.Count}, Current Thread: {Thread.CurrentThread.ManagedThreadId}</ThreadDiagnostics>\n");
+                }
+                catch
+                {
+                    // Ignore dump errors
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            TestLog.Debug($"Exception during thread dump: {ex.Message}");
+        }
     }
 
     #endregion
@@ -352,26 +566,79 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
 
         LogActionAndSelection(assemblyPath, filter);
         RestoreRandomSeed(assemblyPath);
-        Dump = DumpXml.CreateDump(assemblyPath, testCases, Settings);
+
+        // Thread-safe dump management - preserve setup dump
+        lock (_dumpLock)
+        {
+            if (Dump == null)
+            {
+                Dump = DumpXml.CreateDump(assemblyPath, testCases, Settings);
+            }
+            else
+            {
+                // Add assembly info to existing dump (preserve setup logging)
+                Dump?.AddString($"<AssemblyExecution>{assemblyPath}</AssemblyExecution>\n");
+            }
+        }
 
         try
         {
+            TestLog.Debug("About to create test package");
             var package = CreateTestPackage(assemblyPath, testCases);
+
+            if (_cancelled)
+            {
+                TestLog.Debug("Execution cancelled after creating test package");
+                Dump?.AddString("<PackageCreated>Cancelled after creating test package</PackageCreated>\n");
+                return;
+            }
+
+            TestLog.Debug("About to create NUnit engine runner");
+            // Pass dump to engine adapter so it can log to dump files
+            NUnitEngineAdapter.SetDump(Dump);
             NUnitEngineAdapter.CreateRunner(package);
+
+            if (_cancelled)
+            {
+                TestLog.Debug("Execution cancelled after creating runner");
+                Dump?.AddString("<RunnerCreated>Cancelled after creating runner</RunnerCreated>\n");
+                return;
+            }
+
             CreateTestOutputFolder();
             Dump?.StartDiscoveryInExecution(testCases, filter, package);
             TestLog.DebugRunfrom();
+
+            TestLog.Debug("About to call NUnitEngineAdapter.Explore()");
             var discoveryResults = NUnitEngineAdapter.Explore(filter);
+            TestLog.Debug("NUnitEngineAdapter.Explore() completed");
             Dump?.AddString(discoveryResults.AsString());
+
+            if (_cancelled)
+            {
+                TestLog.Debug("Execution cancelled after discovery phase");
+                Dump?.AddString("<DiscoveryCompleted>Cancelled after discovery phase</DiscoveryCompleted>\n");
+                return;
+            }
 
             if (discoveryResults.IsRunnable)
             {
                 var discovery = new DiscoveryConverter(TestLog, Settings);
                 discovery.Convert(discoveryResults, assemblyPath);
+
+                if (_cancelled)
+                {
+                    TestLog.Debug("Execution cancelled after discovery conversion");
+                    Dump?.AddString("<DiscoveryConverted>Cancelled after discovery conversion</DiscoveryConverted>\n");
+                    return;
+                }
+
                 if (!Settings.SkipExecutionWhenNoTests || discovery.AllTestCases.Any())
                 {
+                    TestLog.Debug("About to start test execution");
                     var ea = ExecutionFactory.Create(this);
                     ea.Run(filter, discovery, this);
+                    TestLog.Debug("Test execution completed or stopped");
                 }
                 else
                 {
@@ -416,10 +683,29 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
         }
         finally
         {
-            Dump?.DumpForExecution();
+            var finalizeTime = DateTime.Now.ToString("HH:mm:ss.fff");
+            if (_cancelled)
+            {
+                TestLog.Debug("Assembly processing completed - execution was cancelled");
+                Dump?.AddString($"<ForcedTermination>{finalizeTime}</ForcedTermination>\n");
+            }
+            else
+            {
+                TestLog.Debug("Assembly processing completed normally");
+            }
+
+            // Only dump if this is a standalone assembly run (not part of sources run)
+            // For sources run, the main RunTests method handles the final dump
+            if (testCases != null) // This indicates it's a TestCase run, not a Sources run
+            {
+                Dump?.DumpForExecution();
+            }
+
             try
             {
+                TestLog.Debug("About to close NUnit engine runner");
                 NUnitEngineAdapter?.CloseRunner();
+                TestLog.Debug("NUnit engine runner closed");
             }
             catch (Exception ex)
             {
@@ -477,7 +763,37 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
 
     public void StopRun()
     {
-        NUnitEngineAdapter?.StopRun();
+        var stopStartTime = DateTime.Now.ToString("HH:mm:ss.fff");
+        TestLog.Debug($"StopRun called - attempting to stop engine at {stopStartTime}");
+
+        try
+        {
+            // Use timeout for MTP scenarios to prevent hanging
+            if (IsMTP)
+            {
+                var stopTask = Task.Run(() => NUnitEngineAdapter?.StopRun());
+                var timeoutMs = 3000; // 3 second timeout for MTP
+
+                if (stopTask.Wait(timeoutMs))
+                {
+                    TestLog.Debug("MTP engine stop completed within timeout");
+                }
+                else
+                {
+                    TestLog.Warning($"MTP engine stop TIMEOUT after {timeoutMs}ms - continuing anyway");
+                }
+            }
+            else
+            {
+                // Normal non-MTP scenarios
+                NUnitEngineAdapter?.StopRun();
+                TestLog.Debug("Engine stop completed");
+            }
+        }
+        catch (Exception ex)
+        {
+            TestLog.Warning($"Exception during StopRun: {ex.Message}");
+        }
     }
 
     public IDumpXml Dump { get; private set; }
