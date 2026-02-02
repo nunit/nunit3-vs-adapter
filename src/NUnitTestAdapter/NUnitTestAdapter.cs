@@ -25,11 +25,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
+using System.Linq;
 #if NET462
 using System.Runtime.Remoting.Channels;
 #endif
-using System.Linq;
+using System.Reflection;
 using System.Text;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;

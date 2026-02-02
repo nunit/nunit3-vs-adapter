@@ -19,6 +19,9 @@ indent_size = 2
 indent_size = 4
 tab_width = 4
 
+# StyleCop suppressions
+dotnet_diagnostic.SA1629.severity = none
+
 # New line preferences
 end_of_line = crlf
 insert_final_newline = false

@@ -4,31 +4,54 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-
 using Microsoft.Testing.Extensions.VSTestBridge;
 using Microsoft.Testing.Extensions.VSTestBridge.Requests;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
+using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Messages;
+using Microsoft.Testing.Platform.TestHost;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
 {
-    internal sealed class NUnitBridgedTestFramework(
-        NUnitExtension extension,
-        Func<IEnumerable<Assembly>> getTestAssemblies,
-        IServiceProvider serviceProvider,
-        ITestFrameworkCapabilities capabilities)
-        : SynchronizedSingleSessionVSTestBridgedTestFramework(
-            extension,
-            getTestAssemblies,
-            serviceProvider,
-            capabilities)
+    internal sealed class NUnitBridgedTestFramework : SynchronizedSingleSessionVSTestBridgedTestFramework
     {
         private readonly CancellationTokenSource _internalCts = new();
         private bool _testSessionActive = false;
         private IMessageBus _currentMessageBus;
         private Timer _terminationTimer;
         private volatile bool _disposed = false;
+
+        /// <summary>
+        /// Gets the current NUnit framework instance for cancellation scenarios.
+        /// This provides direct access to the IDataProducer implementation.
+        /// Per TestFX Copilot guidance: NUnitBridgedTestFramework IS the IDataProducer.
+        /// </summary>
+        public static NUnitBridgedTestFramework CurrentInstance { get; private set; }
+
+        /// <summary>
+        /// Gets the current message bus for direct MTP communication
+        /// </summary>
+        public static IMessageBus CurrentMessageBus { get; private set; }
+
+        /// <summary>
+        /// Gets the current session UID for MTP operations
+        /// </summary>
+        public static object CurrentSessionUid { get; private set; }
+
+        public NUnitBridgedTestFramework(
+            NUnitExtension extension,
+            Func<IEnumerable<Assembly>> getTestAssemblies,
+            IServiceProvider serviceProvider,
+            ITestFrameworkCapabilities capabilities)
+            : base(extension, getTestAssemblies, serviceProvider, capabilities)
+        {
+            // Set the current instance for cancellation access (TestFX Copilot pattern)
+            CurrentInstance = this;
+
+            // Note: Can't use LogToDump here since we don't have access to NUnit3TestExecutor yet
+            // This will be logged later when the executor is created
+        }
 
         protected override bool UseFullyQualifiedNameAsTestNodeUid => true;
 
@@ -48,6 +71,11 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
         {
             _currentMessageBus = messageBus;
             _testSessionActive = true;
+
+            // CRITICAL: Register session components for direct access (TestFX Copilot pattern)
+            // Store static references for clean access from NUnit3TestExecutor
+            CurrentMessageBus = messageBus;
+            CurrentSessionUid = request.Session?.SessionUid;
 
             ITestExecutor executor = new NUnit3TestExecutor(isMTP: true);
 
@@ -285,6 +313,16 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
                 catch
                 {
                     // Ignore disposal exceptions
+                }
+
+                // Clear static references (TestFX Copilot pattern)
+                if (CurrentInstance == this)
+                {
+                    CurrentInstance = null;
+                    CurrentMessageBus = null;
+                    CurrentSessionUid = null;
+                    // Note: Can't use LogToDump here since NUnit3TestExecutor may be disposed
+                    // This clearing will be silent but that's acceptable for disposal
                 }
             }
 

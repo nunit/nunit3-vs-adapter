@@ -121,27 +121,22 @@ public class DumpXml : IDumpXml
         // Instead, we need to insert before the closing tag
         if (System.IO.File.Exists(path))
         {
-            System.Diagnostics.Debug.WriteLine($"DEBUG: AppendToFile - File exists: {path}");
             // Read existing content, remove closing tag, append new content, add closing tag
             var existingContent = System.IO.File.ReadAllText(path);
-            System.Diagnostics.Debug.WriteLine($"DEBUG: AppendToFile - Existing content length: {existingContent.Length}");
             if (existingContent.Contains("</NUnitXml>"))
             {
                 existingContent = existingContent.Replace("</NUnitXml>", "");
                 var newContent = existingContent + txt + Rootend;
                 file.WriteAllText(path, newContent);
-                System.Diagnostics.Debug.WriteLine($"DEBUG: AppendToFile - Appended to existing XML, new length: {newContent.Length}");
             }
             else
             {
                 // File doesn't have proper XML structure, just append
                 file.WriteAllText(path, existingContent + txt);
-                System.Diagnostics.Debug.WriteLine($"DEBUG: AppendToFile - Appended to non-XML file");
             }
         }
         else
         {
-            System.Diagnostics.Debug.WriteLine($"DEBUG: AppendToFile - File doesn't exist, creating new: {path}");
             // File doesn't exist, create it normally
             Dump2File(path);
             return;

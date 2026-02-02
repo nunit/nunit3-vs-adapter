@@ -149,7 +149,11 @@ public class NUnitEventListener(ITestConverterCommon testConverter, INUnit3TestE
 
         // Simply ignore any TestCase not found in the cache
         if (ourCase != null)
+        {
+            // Track running test for MTP session management
+            Executor.TrackRunningTest(ourCase);
             Recorder.RecordStart(ourCase);
+        }
     }
 
     /// <summary>
@@ -191,6 +195,9 @@ public class NUnitEventListener(ITestConverterCommon testConverter, INUnit3TestE
 
         if (result.TestCaseResult != null)
         {
+            // Untrack the test since it's completing normally
+            Executor.UntrackRunningTest(result.TestCaseResult.TestCase);
+
             Recorder.RecordEnd(result.TestCaseResult.TestCase, result.TestCaseResult.Outcome);
             foreach (var vsResult in result.TestResults)
             {
