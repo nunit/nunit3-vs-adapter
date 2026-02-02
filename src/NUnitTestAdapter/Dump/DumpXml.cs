@@ -48,6 +48,12 @@ public interface IDumpXml
     void DumpVSInputFilter(TestFilter filter, string info);
     void StartExecution(TestFilter filter, string atExecution);
     void AddCancellationMessage();
+    void AddXmlElement(string xmlElement, string content);
+
+    /// <summary>
+    /// Adds a single linefeed
+    /// </summary>
+    void AddLf();
 }
 
 public class DumpXml : IDumpXml
@@ -115,22 +121,27 @@ public class DumpXml : IDumpXml
         // Instead, we need to insert before the closing tag
         if (System.IO.File.Exists(path))
         {
+            System.Diagnostics.Debug.WriteLine($"DEBUG: AppendToFile - File exists: {path}");
             // Read existing content, remove closing tag, append new content, add closing tag
             var existingContent = System.IO.File.ReadAllText(path);
+            System.Diagnostics.Debug.WriteLine($"DEBUG: AppendToFile - Existing content length: {existingContent.Length}");
             if (existingContent.Contains("</NUnitXml>"))
             {
                 existingContent = existingContent.Replace("</NUnitXml>", "");
                 var newContent = existingContent + txt + Rootend;
                 file.WriteAllText(path, newContent);
+                System.Diagnostics.Debug.WriteLine($"DEBUG: AppendToFile - Appended to existing XML, new length: {newContent.Length}");
             }
             else
             {
                 // File doesn't have proper XML structure, just append
                 file.WriteAllText(path, existingContent + txt);
+                System.Diagnostics.Debug.WriteLine($"DEBUG: AppendToFile - Appended to non-XML file");
             }
         }
         else
         {
+            System.Diagnostics.Debug.WriteLine($"DEBUG: AppendToFile - File doesn't exist, creating new: {path}");
             // File doesn't exist, create it normally
             Dump2File(path);
             return;
@@ -147,22 +158,18 @@ public class DumpXml : IDumpXml
         return res2 + ".dump";
     }
 
-    public void AddTestEvent(string text)
-    {
-        txt.Append("<NUnitTestEvent>\n");
-        txt.Append(text);
-        txt.Append("\n</NUnitTestEvent>\n");
-    }
+    public void AddTestEvent(string text) => AddXmlElement("NUnitTestEvent", $"\n{text}\n");
 
-    public void AddString(string text)
-    {
-        txt.Append(text);
-    }
+    public void AddString(string text) => txt.Append(text);
 
-    public void DumpVSInputFilter(TestFilter filter, string info)
-    {
-        AddString($"<TestFilter>\n {info}  {filter.Text}\n</TestFilter>\n\n");
-    }
+    /// <summary>
+    /// Adds a single linefeed
+    /// </summary>
+    public void AddLf() => txt.Append("\n");
+
+    public void AddXmlElement(string xmlElement, string content) => txt.Append($"<{xmlElement}>{content}</{xmlElement}>\n");
+
+    public void DumpVSInputFilter(TestFilter filter, string info) => AddXmlElement("TestFilter", $"\n {info}  {filter.Text}\n");
 
     public void DumpVSInput(IEnumerable<TestCase> testCases)
     {
@@ -197,19 +204,23 @@ public class DumpXml : IDumpXml
     public void StartDiscoveryInExecution(IGrouping<string, TestCase> testCases, TestFilter filter, TestPackage package)
     {
         DumpFromVSInput(testCases, filter, package);
-        AddString($"<NUnitDiscoveryInExecution>{assemblyPath}</NUnitDiscoveryInExecution>\n\n");
+        AddXmlElement("NUnitDiscoveryInExecution", assemblyPath);
+        AddLf();
     }
 
     public void StartExecution(TestFilter filter, string atExecution)
     {
         DumpVSInputFilter(filter, atExecution);
-        AddString($"\n\n<NUnitExecution>{assemblyPath}</NUnitExecution>\n\n");
+        AddLf();
+        AddXmlElement("NUnitExecution", assemblyPath);
+        AddLf();
+        AddLf();
     }
 
     public void AddCancellationMessage()
     {
-        AddString($"<CancellationTime>{DateTime.Now:yyyy-MM-dd HH:mm:ss}</CancellationTime>\n");
-        AddString("<Status>Execution was cancelled</Status>\n");
+        AddXmlElement("CancellationTime", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+        AddXmlElement("Status", "Execution was cancelled");
     }
 
     public static IDumpXml CreateDump(string path, IGrouping<string, TestCase> testCases, IAdapterSettings settings)
@@ -217,10 +228,17 @@ public class DumpXml : IDumpXml
         if (!settings.DumpXmlTestResults)
             return null;
         var executionDumpXml = new DumpXml(path);
-        string runningBy = testCases == null
-            ? "<RunningBy>Sources</RunningBy>"
-            : "<RunningBy>TestCases</RunningBy>";
-        executionDumpXml.AddString($"\n{runningBy}\n");
+        string runningByContent = testCases == null ? "Sources" : "TestCases";
+        executionDumpXml.AddLf();
+        executionDumpXml.AddXmlElement("RunningBy", runningByContent);
+        executionDumpXml.AddLf();
+
+        // IMMEDIATELY create the file with the initial structure
+        executionDumpXml.DumpForExecution();
+
+        // Reset the StringBuilder for subsequent additions
+        executionDumpXml.txt = new StringBuilder();
+
         return executionDumpXml;
     }
 }

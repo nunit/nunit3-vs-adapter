@@ -31,7 +31,7 @@ public class VsTestExecution(IExecutionContext ctx) : Execution(ctx)
                 : filterBuilder.ConvertMsFilterToNUnitFilter(vsTestFilter, discovery)
             : filterBuilder.ConvertMsFilterToNUnitFilter(vsTestFilter, discovery.LoadedTestCases);
 
-        Dump?.AddString($"\n\nMicrosoft Test Filter: {vsTestFilter.MsTestCaseFilterExpression?.TestCaseFilterValue}\n");
+        Dump?.AddXmlElement("MicrosoftTestFilter", $"{vsTestFilter.MsTestCaseFilterExpression?.TestCaseFilterValue}\n");
         Dump?.DumpVSInputFilter(filter, "(At Execution (Microsoft Test Filter)");
 
         return filter;

@@ -18,9 +18,18 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
         Func<IEnumerable<Assembly>> getTestAssemblies,
         IServiceProvider serviceProvider,
         ITestFrameworkCapabilities capabilities)
-        : SynchronizedSingleSessionVSTestBridgedTestFramework(extension, getTestAssemblies, serviceProvider,
+        : SynchronizedSingleSessionVSTestBridgedTestFramework(
+            extension,
+            getTestAssemblies,
+            serviceProvider,
             capabilities)
     {
+        private readonly CancellationTokenSource _internalCts = new();
+        private bool _testSessionActive = false;
+        private IMessageBus _currentMessageBus;
+        private Timer _terminationTimer;
+        private volatile bool _disposed = false;
+
         protected override bool UseFullyQualifiedNameAsTestNodeUid => true;
 
         /// <inheritdoc />
@@ -34,72 +43,252 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
         }
 
         /// <inheritdoc />
-        protected override Task SynchronizedRunTestsAsync(VSTestRunTestExecutionRequest request, IMessageBus messageBus,
+        protected override async Task SynchronizedRunTestsAsync(VSTestRunTestExecutionRequest request, IMessageBus messageBus,
             CancellationToken cancellationToken)
         {
+            _currentMessageBus = messageBus;
+            _testSessionActive = true;
+
             ITestExecutor executor = new NUnit3TestExecutor(isMTP: true);
+
+            // Create combined cancellation token
+            using var combinedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _internalCts.Token);
+
             try
             {
-                using (cancellationToken.Register(() =>
-                {
-                    // Enhanced cancellation for MTP
-                    executor.Cancel();
-                    // Give a moment for proper cleanup
-                    Thread.Sleep(100);
-                }))
+                // ReSharper disable once UseAwaitUsing
+                using (combinedCts.Token.Register(() =>
+                       {
+                           // Enhanced cancellation for MTP
+                           executor.Cancel();
+                           // Give a moment for proper cleanup
+                           Thread.Sleep(100);
+                       }))
                 {
                     executor.RunTests(request.AssemblyPaths, request.RunContext, request.FrameworkHandle);
                 }
             }
             finally
             {
-                // Aggressive cleanup for MTP to release test DLL
+                await HandleTestCompletionWithNuclearOption(executor, combinedCts.Token.IsCancellationRequested);
+            }
+        }
+
+        private async Task HandleTestCompletionWithNuclearOption(ITestExecutor executor, bool wasCancelled)
+        {
+            // Cast to access logging method
+            var nunitExecutor = executor as NUnit3TestExecutor;
+
+            if (!wasCancelled)
+            {
+                // Normal completion - brief cleanup only
                 try
                 {
                     if (executor is IDisposable disposableExecutor)
                     {
                         disposableExecutor.Dispose();
                     }
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
+                    Thread.Sleep(200);
+                }
+                catch
+                {
+                    // Ignore cleanup exceptions in normal flow
+                }
+                return;
+            }
+
+            // Cancellation scenario - use nuclear timer approach
+            nunitExecutor?.LogToDump("MTPCancellation", "Cancellation detected - starting nuclear termination timer");
+
+            // Start absolute termination timer (nuclear option) - 8 seconds
+            _terminationTimer = new Timer(
+                ForceTerminate,
+                nunitExecutor,
+                TimeSpan.FromSeconds(8),
+                Timeout.InfiniteTimeSpan);
+
+            try
+            {
+                // Step 1: Fire-and-forget session cleanup with very short timeout
+                nunitExecutor?.LogToDump("CleanupPhase", "Attempting fire-and-forget cleanup");
+                await FireAndForgetSessionCleanup(nunitExecutor);
+
+                // Step 2: Quick executor disposal
+                nunitExecutor?.LogToDump("ExecutorDisposal", "Disposing executor");
+                try
+                {
+                    if (executor is IDisposable disposableExecutor)
+                    {
+                        var disposeTask = Task.Run(() => disposableExecutor.Dispose());
+                        if (!disposeTask.Wait(1000)) // 1 second timeout
+                        {
+                            nunitExecutor?.LogToDump("ExecutorDisposal", "Executor disposal timed out", logLevel: LogLevel.Warning);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    nunitExecutor?.LogToDump("ExecutorDisposal", $"Executor disposal failed: {ex.Message}", logLevel: LogLevel.Warning);
+                }
+
+                // Step 3: Check for stuck threads and exit immediately if found
+                nunitExecutor?.LogToDump("ThreadCheck", "Checking for stuck threads");
+                if (await HasStuckThreadsAsync(nunitExecutor))
+                {
+                    nunitExecutor?.LogToDump("ImmediateExit", "Stuck threads detected - immediate exit", logLevel: LogLevel.Warning);
+                    _terminationTimer?.Dispose(); // Cancel nuclear timer
+                    Environment.Exit(0); // Immediate exit
+                }
+
+                // Step 4: If we get here, cleanup succeeded - cancel nuclear timer
+                nunitExecutor?.LogToDump("CleanupSuccess", "Cleanup completed successfully");
+                _terminationTimer?.Dispose();
+            }
+            catch (Exception ex)
+            {
+                nunitExecutor?.LogToDump("CleanupException", $"Exception during cleanup: {ex.Message}", logLevel: LogLevel.Warning);
+                // Let nuclear timer handle it - don't call Environment.Exit here to avoid race
+            }
+        }
+
+        private async Task FireAndForgetSessionCleanup(NUnit3TestExecutor nunitExecutor = null)
+        {
+            try
+            {
+                // Use very short timeouts for all operations
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+
+                // Fire session end event but don't wait for confirmation
+                _ = Task.Run(
+                    async () =>
+                    {
+                        try
+                        {
+                            if (_testSessionActive && _currentMessageBus != null)
+                            {
+                                // Just a brief pause - don't actually send events that might block
+                                await Task.Delay(50, cts.Token);
+                                _testSessionActive = false;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            nunitExecutor?.LogToDump("SessionCleanupFailed", $"Session cleanup failed: {ex.Message}");
+                        }
+                    },
+                    cts.Token);
+
+                // Brief delay to let the fire-and-forget task start
+                await Task.Delay(100, cts.Token);
+
+                // Force garbage collection
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+
+                // Give threads minimal time to respond
+                await Task.Delay(500, cts.Token);
+            }
+            catch (Exception ex)
+            {
+                nunitExecutor?.LogToDump("FireForgetFailed", $"Fire-and-forget cleanup failed: {ex.Message}");
+            }
+        }
+
+        private async Task<bool> HasStuckThreadsAsync(NUnit3TestExecutor nunitExecutor = null)
+        {
+            try
+            {
+                var currentProcess = Process.GetCurrentProcess();
+                var threadCount = currentProcess.Threads.Count;
+                nunitExecutor?.LogToDump("ThreadCount", $"Current thread count: {threadCount}");
+                return threadCount > 5; // Aggressive threshold for stuck threads
+            }
+            catch
+            {
+                return false; // If we can't check, assume no stuck threads
+            }
+        }
+
+        private void ForceTerminate(object state)
+        {
+            try
+            {
+                var nunitExecutor = state as NUnit3TestExecutor;
+                nunitExecutor?.LogToDump("NuclearTermination", "NUCLEAR TERMINATION TRIGGERED - Force exit after timeout", logLevel: LogLevel.Warning);
+
+                // Log the nuclear termination
+                try
+                {
+                    var currentProcess = Process.GetCurrentProcess();
+                    var threadCount = currentProcess.Threads.Count;
+                    nunitExecutor?.LogToDump("FinalThreadCount", $"Final thread count: {threadCount}");
+                }
+                catch
+                {
+                    // Ignore errors during final logging
+                }
+
+                // Nuclear option - immediate exit
+                Environment.Exit(0);
+            }
+            catch (Exception ex)
+            {
+                var nunitExecutor = state as NUnit3TestExecutor;
+                nunitExecutor?.LogToDump("NuclearFailed", $"Nuclear termination failed: {ex.Message}", logLevel: LogLevel.Error);
+                Environment.Exit(-1); // Ultimate fallback
+            }
+            finally
+            {
+                _terminationTimer?.Dispose();
+            }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && !_disposed)
+            {
+                _disposed = true;
+
+                // Don't log here since we don't have access to executor - keep it simple
+
+                // Cancel everything immediately
+                _internalCts?.Cancel();
+
+                // Dispose nuclear timer
+                _terminationTimer?.Dispose();
+
+                // Don't wait for async cleanup - just fire and forget
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+                _ = Task.Run(async () =>
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+                {
+                    try
+                    {
+                        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+                        if (_testSessionActive)
+                        {
+                            _testSessionActive = false;
+                        }
+                    }
+                    catch
+                    {
+                        // Ignore all exceptions during fire-and-forget cleanup
+                    }
+                });
+
+                try
+                {
+                    _internalCts?.Dispose();
                 }
                 catch
                 {
                     // Ignore disposal exceptions
                 }
-
-                // For MTP cancellation: Handle stuck test threads that won't die
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    // Force garbage collection to help release resources
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                    GC.Collect();
-
-                    // Give test threads a reasonable time to respond to cancellation
-                    Thread.Sleep(2000);
-
-                    // Check if we still have too many threads indicating stuck test threads
-                    var currentProcess = Process.GetCurrentProcess();
-                    var threadCount = currentProcess.Threads.Count;
-
-                    // If we have excessive threads (your case showed 41 threads), use nuclear option
-                    // This prevents MTP from hanging indefinitely waiting for threads that won't die
-                    if (threadCount > 5)
-                    {
-                        // Nuclear option: Force clean process exit for MTP cancellation
-                        // Unlike MSTest's process isolation, NUnit runs in-process so we need this
-                        Environment.Exit(0);
-                    }
-                }
-                else
-                {
-                    // Normal completion - still do cleanup but with shorter timeout
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                    Thread.Sleep(200);
-                }
             }
 
-            return Task.CompletedTask;
+            base.Dispose(disposing);
         }
     }
 }

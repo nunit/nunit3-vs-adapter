@@ -91,12 +91,10 @@ public class NUnitEngineAdapter : INUnitEngineAdapter, IDisposable
 
     public void CreateRunner(TestPackage testPackage)
     {
-        logger?.Debug("NUnitEngineAdapter.CreateRunner() - starting");
-        dump?.AddString("<EngineLog>NUnitEngineAdapter.CreateRunner() - starting</EngineLog>\n");
+        LogToDump("EngineLog", "NUnitEngineAdapter.CreateRunner() - starting");
         package = testPackage;
         Runner = TestEngine.GetRunner(package);
-        logger?.Debug("NUnitEngineAdapter.CreateRunner() - completed");
-        dump?.AddString("<EngineLog>NUnitEngineAdapter.CreateRunner() - completed</EngineLog>\n");
+        LogToDump("EngineLog", "NUnitEngineAdapter.CreateRunner() - completed");
     }
 
     public NUnitResults Explore()
@@ -104,23 +102,19 @@ public class NUnitEngineAdapter : INUnitEngineAdapter, IDisposable
 
     public NUnitResults Explore(TestFilter filter)
     {
-        logger?.Debug("NUnitEngineAdapter.Explore() - starting");
-        dump?.AddString("<EngineLog>NUnitEngineAdapter.Explore() - starting</EngineLog>\n");
+        LogToDump("EngineLog", "NUnitEngineAdapter.Explore() - starting");
         var timing = new TimingLogger(settings, logger);
         var results = new NUnitResults(Runner.Explore(filter));
-        logger?.Debug($"NUnitEngineAdapter.Explore() - completed, results: {(results.IsRunnable ? "runnable" : "not runnable")}");
-        dump?.AddString($"<EngineLog>NUnitEngineAdapter.Explore() - completed, results: {(results.IsRunnable ? "runnable" : "not runnable")}</EngineLog>\n");
+        LogToDump("EngineLog", $"NUnitEngineAdapter.Explore() - completed, results: {(results.IsRunnable ? "runnable" : "not runnable")}");
         return LogTiming(filter, timing, results);
     }
 
     public NUnitResults Run(ITestEventListener listener, TestFilter filter)
     {
-        logger?.Debug("NUnitEngineAdapter.Run() - starting");
-        dump?.AddString("<EngineLog>NUnitEngineAdapter.Run() - starting</EngineLog>\n");
+        LogToDump("EngineLog", "NUnitEngineAdapter.Run() - starting");
         var timing = new TimingLogger(settings, logger);
         var results = new NUnitResults(Runner.Run(listener, filter));
-        logger?.Debug("NUnitEngineAdapter.Run() - completed");
-        dump?.AddString("<EngineLog>NUnitEngineAdapter.Run() - completed</EngineLog>\n");
+        LogToDump("EngineLog", "NUnitEngineAdapter.Run() - completed");
         return LogTiming(filter, timing, results);
     }
 
@@ -145,78 +139,151 @@ public class NUnitEngineAdapter : INUnitEngineAdapter, IDisposable
 
     public void StopRun()
     {
-        var stopStartTime = DateTime.Now.ToString("HH:mm:ss.fff");
-        logger?.Debug($"NUnitEngineAdapter.StopRun() - starting at {stopStartTime}");
-        dump?.AddString($"<EngineLog>{stopStartTime} - NUnitEngineAdapter.StopRun() - starting</EngineLog>\n");
+        LogToDump("EngineLog", "NUnitEngineAdapter.StopRun() - starting");
 
         try
         {
-            // Use a timeout for StopRun to prevent indefinite hanging
+            // Enhanced graceful-then-force pattern for better reliability
             var stopTask = Task.Run(() => Runner?.StopRun(true));
-            var timeoutMs = 5000; // 5 second timeout
+            var gracefulTimeout = TimeSpan.FromSeconds(5);
 
-            if (stopTask.Wait(timeoutMs))
+            if (stopTask.Wait(gracefulTimeout))
             {
-                var stopEndTime = DateTime.Now.ToString("HH:mm:ss.fff");
-                logger?.Debug($"NUnitEngineAdapter.StopRun() - completed normally at {stopEndTime}");
-                dump?.AddString($"<EngineLog>{stopEndTime} - NUnitEngineAdapter.StopRun() - completed normally</EngineLog>\n");
+                LogToDump("EngineLog", "NUnitEngineAdapter.StopRun() - completed gracefully");
             }
             else
             {
-                var timeoutTime = DateTime.Now.ToString("HH:mm:ss.fff");
-                logger?.Warning($"NUnitEngineAdapter.StopRun() - TIMEOUT after {timeoutMs}ms at {timeoutTime}");
-                dump?.AddString($"<EngineLog>{timeoutTime} - NUnitEngineAdapter.StopRun() - TIMEOUT after {timeoutMs}ms, proceeding anyway</EngineLog>\n");
+                LogToDump("EngineLog", $"NUnitEngineAdapter.StopRun() - TIMEOUT after {gracefulTimeout.TotalSeconds}s, proceeding with force cleanup", LogLevel.Warning);
 
-                // Don't wait for the hanging StopRun - let it run in background
+                // Force cleanup - don't wait for hanging StopRun
                 // This allows the adapter to continue with cleanup
             }
         }
         catch (Exception ex)
         {
-            var errorTime = DateTime.Now.ToString("HH:mm:ss.fff");
-            logger?.Warning($"Exception in StopRun at {errorTime}: {ex.Message}");
-            dump?.AddString($"<EngineLog>{errorTime} - StopRun exception: {ex.Message}</EngineLog>\n");
+            LogToDump("EngineLog", $"StopRun exception: {ex}", LogLevel.Warning);
+
+            // Also log any inner exceptions separately for clarity
+            if (ex.InnerException != null)
+            {
+                LogToDump("EngineLog", $"StopRun inner exception: {ex.InnerException}", LogLevel.Warning);
+            }
         }
     }
 
     public void CloseRunner()
     {
-        logger?.Debug("NUnitEngineAdapter.CloseRunner() - starting");
-        dump?.AddString("<EngineLog>NUnitEngineAdapter.CloseRunner() - starting</EngineLog>\n");
+        LogToDump("EngineLog", "NUnitEngineAdapter.CloseRunner() - starting");
+
         if (Runner == null)
         {
-            logger?.Debug("NUnitEngineAdapter.CloseRunner() - runner is null, returning");
-            dump?.AddString("<EngineLog>NUnitEngineAdapter.CloseRunner() - runner is null, returning</EngineLog>\n");
+            LogToDump("EngineLog", "NUnitEngineAdapter.CloseRunner() - runner is null, returning");
             return;
-        }
-        if (Runner.IsTestRunning)
-        {
-            logger?.Debug("NUnitEngineAdapter.CloseRunner() - test is running, stopping first");
-            dump?.AddString("<EngineLog>NUnitEngineAdapter.CloseRunner() - test is running, stopping first</EngineLog>\n");
-            Runner.StopRun(true);
         }
 
         try
         {
-            logger?.Debug("NUnitEngineAdapter.CloseRunner() - unloading and disposing runner");
-            dump?.AddString("<EngineLog>NUnitEngineAdapter.CloseRunner() - unloading and disposing runner</EngineLog>\n");
-            Runner.Unload();
-            Runner.Dispose();
+            // Enhanced close with graceful-then-force pattern
+            if (Runner.IsTestRunning)
+            {
+                LogToDump("EngineLog", "NUnitEngineAdapter.CloseRunner() - test is running, stopping with timeout");
+
+                // Try graceful stop with timeout
+                var stopTask = Task.Run(() => Runner.StopRun(true));
+                if (!stopTask.Wait(TimeSpan.FromSeconds(3)))
+                {
+                    LogToDump("EngineLog", "NUnitEngineAdapter.CloseRunner() - StopRun timeout during close", LogLevel.Warning);
+                }
+            }
+
+            LogToDump("EngineLog", "NUnitEngineAdapter.CloseRunner() - unloading and disposing runner");
+
+            // Unload with timeout
+            var unloadTask = Task.Run(() => Runner.Unload());
+            if (!unloadTask.Wait(TimeSpan.FromSeconds(5)))
+            {
+                LogToDump("EngineLog", "NUnitEngineAdapter.CloseRunner() - Unload timeout", LogLevel.Warning);
+            }
+
+            // Dispose with timeout
+            var disposeTask = Task.Run(() => Runner.Dispose());
+            if (!disposeTask.Wait(TimeSpan.FromSeconds(2)))
+            {
+                LogToDump("EngineLog", "NUnitEngineAdapter.CloseRunner() - Dispose timeout", LogLevel.Warning);
+            }
         }
         catch (NUnitEngineUnloadException ex)
         {
-            logger?.Warning($"Engine encountered NUnitEngineUnloadException :  {ex.Message}");
-            dump?.AddString($"<EngineLog>Engine encountered NUnitEngineUnloadException: {ex.Message}</EngineLog>\n");
+            LogToDump("EngineLog", $"Engine encountered NUnitEngineUnloadException: {ex}", LogLevel.Warning);
+
+            if (ex.InnerException != null)
+            {
+                LogToDump("EngineLog", $"NUnitEngineUnloadException inner exception: {ex.InnerException}", LogLevel.Warning);
+            }
         }
-        Runner = null;
-        logger?.Debug("NUnitEngineAdapter.CloseRunner() - completed");
-        dump?.AddString("<EngineLog>NUnitEngineAdapter.CloseRunner() - completed</EngineLog>\n");
+        catch (Exception ex)
+        {
+            LogToDump("EngineLog", $"Unexpected exception during CloseRunner: {ex}", LogLevel.Warning);
+
+            if (ex.InnerException != null)
+            {
+                LogToDump("EngineLog", $"CloseRunner inner exception: {ex.InnerException}", LogLevel.Warning);
+            }
+        }
+        finally
+        {
+            Runner = null;
+            LogToDump("EngineLog", "NUnitEngineAdapter.CloseRunner() - completed");
+        }
     }
 
     public void Dispose()
     {
         CloseRunner();
         TestEngine?.Dispose();
+    }
+
+    /// <summary>
+    /// Helper method to log with XML element formatting - similar to NUnit3TestExecutor.LogToDump.
+    /// </summary>
+    /// <param name="elementName">Name of the XML element.</param>
+    /// <param name="message">Message to log.</param>
+    /// <param name="logLevel">TestLog level - Debug, Info, Warning, or Error.</param>
+    private void LogToDump(string elementName, string message, LogLevel logLevel = LogLevel.Debug)
+    {
+        try
+        {
+            var timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
+            var logMessage = $"<{elementName}>{timestamp} - {message}</{elementName}>\n";
+
+            // Log to TestLog based on specified level
+            switch (logLevel)
+            {
+                case LogLevel.Debug:
+                    logger?.Debug($"[{timestamp}] {elementName}: {message}");
+                    break;
+                case LogLevel.Info:
+                    logger?.Info($"[{timestamp}] {elementName}: {message}");
+                    break;
+                case LogLevel.Warning:
+                    logger?.Warning($"[{timestamp}] {elementName}: {message}");
+                    break;
+                case LogLevel.Error:
+                    logger?.Error($"[{timestamp}] {elementName}: {message}");
+                    break;
+                default:
+                    logger?.Debug($"[{timestamp}] {elementName}: {message}");
+                    break;
+            }
+
+            // Add to dump
+            dump?.AddString(logMessage);
+        }
+        catch (Exception ex)
+        {
+            // Fallback logging in case of issues with LogToDump itself
+            logger?.Warning($"LogToDump failed for {elementName}: {ex.Message}");
+        }
     }
 
     public void GenerateTestOutput(NUnitResults testResults, string assemblyPath, string testOutputXmlFolder)

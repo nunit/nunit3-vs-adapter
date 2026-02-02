@@ -47,8 +47,7 @@ public abstract class Execution(IExecutionContext ctx)
         }
 
         // CRITICAL: Dump immediately before engine call to see if we get stuck here
-        nUnit3TestExecutor.Dump?.AddString($"<AboutToCallEngineRun>{DateTime.Now:HH:mm:ss.fff}</AboutToCallEngineRun>\n");
-        nUnit3TestExecutor.Dump?.AppendToExistingDump();
+        nUnit3TestExecutor.LogToDump("AboutToCallEngineRun", "Engine.Run() about to be called");
         TestLog.Debug("About to call engine Run - dump written");
 
         try
@@ -58,34 +57,29 @@ public abstract class Execution(IExecutionContext ctx)
             TestLog.Debug("NUnitEngineAdapter.Run() completed");
 
             // If we get here, the engine returned - dump this fact
-            nUnit3TestExecutor.Dump?.AddString($"<EngineRunCompleted>{DateTime.Now:HH:mm:ss.fff}</EngineRunCompleted>\n");
-            nUnit3TestExecutor.Dump?.AppendToExistingDump();
+            nUnit3TestExecutor.LogToDump("EngineRunCompleted", "Engine.Run() completed successfully");
 
             if (nUnit3TestExecutor.IsCancelled)
             {
                 TestLog.Debug("Execution was cancelled, skipping test output generation");
-                nUnit3TestExecutor.Dump?.AddString($"<SkippedTestOutput>{DateTime.Now:HH:mm:ss.fff}</SkippedTestOutput>\n");
-                nUnit3TestExecutor.Dump?.AppendToExistingDump();
+                nUnit3TestExecutor.LogToDump("SkippedTestOutput", "Test output generation skipped due to cancellation");
             }
             else
             {
                 TestLog.Debug("About to generate test output");
-                nUnit3TestExecutor.Dump?.AddString($"<AboutToGenerateTestOutput>{DateTime.Now:HH:mm:ss.fff}</AboutToGenerateTestOutput>\n");
-                nUnit3TestExecutor.Dump?.AppendToExistingDump();
+                nUnit3TestExecutor.LogToDump("AboutToGenerateTestOutput", "Starting test output generation");
 
                 NUnitEngineAdapter.GenerateTestOutput(results, discovery.AssemblyPath, TestOutputXmlFolder);
 
                 TestLog.Debug("Test output generation completed");
-                nUnit3TestExecutor.Dump?.AddString($"<TestOutputCompleted>{DateTime.Now:HH:mm:ss.fff}</TestOutputCompleted>\n");
-                nUnit3TestExecutor.Dump?.AppendToExistingDump();
+                nUnit3TestExecutor.LogToDump("TestOutputCompleted", "Test output generation completed successfully");
             }
         }
         catch (NullReferenceException)
         {
             // this happens during the run when CancelRun is called.
             TestLog.Debug("   Null ref caught - likely due to cancellation");
-            nUnit3TestExecutor.Dump?.AddString($"<NullRefException>{DateTime.Now:HH:mm:ss.fff}</NullRefException>\n");
-            nUnit3TestExecutor.Dump?.AppendToExistingDump();
+            nUnit3TestExecutor.LogToDump("NullRefException", "Null reference exception caught - likely due to cancellation");
         }
 
         return true;

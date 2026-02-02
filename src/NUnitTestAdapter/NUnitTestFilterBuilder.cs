@@ -84,7 +84,7 @@ public class NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSe
     public TestFilter ConvertVsTestFilterToNUnitFilterForMTP(IVsTestFilter vsFilter)
     {
         var msFilter = vsFilter?.MsTestCaseFilterExpression?.TestCaseFilterValue;
-        dump?.AddString($@"\n\n<MsFilter>\n{msFilter}\n</MsFilter>\n");
+        dump?.AddXmlElement("MsFilter", $"\n{msFilter}\n");
         if (string.IsNullOrEmpty(msFilter))
             return null;
         if (FullyQualifiedNameFilterParser.CheckFullyQualifiedNameFilter(msFilter))
@@ -105,13 +105,14 @@ public class NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSe
         var parser = new TestFilterParser();
         var filter = parser.Parse(msFilter);
         var tf = new TestFilter(filter);
-        if (settings.ExplicitMode == ExplicitModeEnum.None)
+        if (settings.ExplicitMode != ExplicitModeEnum.None)
         {
-            var tfExplicitNone = new TestFilter("<not><prop name='Explicit'>true</prop></not>");
-            var combiner = new TestFilterCombiner(tf, tfExplicitNone);
-            return combiner.GetFilter();
+            return tf;
         }
-        return tf;
+
+        var tfExplicitNone = new TestFilter("<not><prop name='Explicit'>true</prop></not>");
+        var combiner = new TestFilterCombiner(tf, tfExplicitNone);
+        return combiner.GetFilter();
     }
 
 
