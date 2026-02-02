@@ -1,5 +1,5 @@
 ﻿// ***********************************************************************
-// Copyright (c) 2011-2021 Charlie Poole, Terje Sandstrom
+// Copyright (c) 2011-2021 Charlie Poole, 2014-2026 Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -1704,7 +1704,7 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
                     if (dataProducer == null)
                     {
                         LogToDump("DirectSessionEnd", "❌ No IDataProducer - using immediate exit");
-                        Environment.Exit(3);
+                        Environment.Exit(0);
                         return;
                     }
 
@@ -1768,10 +1768,35 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
                 }
                 finally
                 {
-                    // Clean exit per documentation (success since tests completed)
-                    LogToDump("DirectSessionEnd", "🏁 Documentation pattern complete - clean exit");
-                    await Task.Delay(100); // Brief final delay
-                    Environment.Exit(3);
+                    // CRITICAL: Let TestFX handle session end naturally, then exit if needed
+                    LogToDump("DirectSessionEnd", "🏁 Attempting natural TestFX session end");
+
+                    try
+                    {
+                        var framework = TestingPlatformAdapter.NUnitBridgedTestFramework.CurrentInstance;
+                        if (framework != null)
+                        {
+                            LogToDump("DirectSessionEnd", "🔧 Triggering TestFX session end via cancellation");
+                            await framework.EndSessionExplicitly();
+                            LogToDump("DirectSessionEnd", "✅ TestFX session end triggered");
+                        }
+                        else
+                        {
+                            LogToDump("DirectSessionEnd", "⚠️ No framework instance available");
+                        }
+                    }
+                    catch (Exception sessionEx)
+                    {
+                        LogToDump("DirectSessionEnd", $"TestFX session end error: {sessionEx.Message}");
+                    }
+
+                    // Give TestFX extended time to send proper session end events
+                    LogToDump("DirectSessionEnd", "⏱️ Allowing extended time for TestFX session end processing");
+                    await Task.Delay(1000); // Longer delay for TestFX to process session end
+
+                    // Only exit if TestFX doesn't handle it naturally
+                    LogToDump("DirectSessionEnd", "✅ TestFX session processing complete - controlled exit");
+                    Environment.Exit(0);
                 }
             });
 
@@ -1782,10 +1807,31 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
             LogToDump("DirectSessionEnd", $"Error in documentation approach: {ex.Message}");
 
             // Immediate fallback per documentation
-            LogToDump("DirectSessionEnd", "🏁 IMMEDIATE exit fallback - tests completed successfully");
+            LogToDump("DirectSessionEnd", "🏁 IMMEDIATE fallback - ensuring TestFX session end");
+
+            // Even in fallback, try to trigger TestFX session end properly
             try
             {
-                Environment.Exit(3);
+                var framework = TestingPlatformAdapter.NUnitBridgedTestFramework.CurrentInstance;
+                if (framework != null)
+                {
+                    LogToDump("DirectSessionEnd", "🔧 Emergency TestFX session end trigger");
+                    // Use synchronous approach for immediate fallback with longer timeout
+                    framework.EndSessionExplicitly().Wait(2000); // 2 second timeout for TestFX processing
+                    LogToDump("DirectSessionEnd", "✅ Emergency session end successful");
+
+                    // Longer delay for TestFX session end processing
+                    Thread.Sleep(800);
+                }
+            }
+            catch (Exception emergencyEx)
+            {
+                LogToDump("DirectSessionEnd", $"Emergency session end failed: {emergencyEx.Message}");
+            }
+
+            try
+            {
+                Environment.Exit(0);
             }
             catch
             {

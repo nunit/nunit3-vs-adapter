@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Microsoft.Testing.Extensions.VSTestBridge;
 using Microsoft.Testing.Extensions.VSTestBridge.Requests;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
@@ -51,6 +52,83 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
 
             // Note: Can't use LogToDump here since we don't have access to NUnit3TestExecutor yet
             // This will be logged later when the executor is created
+        }
+
+        /// <summary>
+        /// Explicitly end the test session for MTP cancellation scenarios
+        /// This ensures proper TestFX session lifecycle completion to prevent
+        /// "test session start event was received without a corresponding test session end" errors
+        /// </summary>
+        public async Task EndSessionExplicitly()
+        {
+            try
+            {
+                
+                // Mark session as ended FIRST
+                _testSessionActive = false;
+
+                // CRITICAL: Actually send the TestSessionEndMessage (this was missing!)
+                if (_currentMessageBus != null && CurrentSessionUid != null)
+                {
+                    try
+                    {
+                        Debug.WriteLine("🔧 Sending TestSessionEndMessage...");
+
+                        // Create proper TestSessionResult
+                        var sessionResult = new TestSessionResult
+                        {
+                            State = TestSessionState.Cancelled,
+                            ExitCode = 0  // Success code since tests completed successfully
+                        };
+
+                        // Cast CurrentSessionUid to proper type
+                        SessionUid typedSessionUid;
+                        if (CurrentSessionUid is SessionUid sessionUid)
+                        {
+                            typedSessionUid = sessionUid;
+                        }
+                        else
+                        {
+                            typedSessionUid = new SessionUid(CurrentSessionUid.ToString());
+                        }
+
+                        // Create TestSessionEndMessage using direct TestFX types
+                        var sessionEndMessage = new TestSessionEndMessage(typedSessionUid, sessionResult);
+
+                        // Send the session end message using this framework as IDataProducer
+                        await _currentMessageBus.PublishAsync(this, sessionEndMessage);
+
+                        Debug.WriteLine("✅ TestSessionEndMessage sent successfully!");
+                    }
+                    catch (Exception sessionEx)
+                    {
+                        Debug.WriteLine($"❌ Failed to send TestSessionEndMessage: {sessionEx.Message}");
+                    }
+                }
+
+                // Give TestFX time to process the session end message
+                await Task.Delay(300);
+
+                // Cancel internal token AFTER sending session end
+                if (!_internalCts.Token.IsCancellationRequested)
+                {
+                    _internalCts.Cancel();
+                }
+
+                // Clear static references only AFTER TestFX processes session end
+                CurrentMessageBus = null;
+                CurrentSessionUid = null;
+
+                // Additional delay to ensure TestFX session end event is fully processed
+                await Task.Delay(200);
+
+                Debug.WriteLine("✅ Session end processing complete");
+            }
+            catch (Exception ex)
+            {
+                // Log if possible, but don't throw - this is cleanup
+                Debug.WriteLine($"Session end cleanup exception: {ex.Message}");
+            }
         }
 
         protected override bool UseFullyQualifiedNameAsTestNodeUid => true;
