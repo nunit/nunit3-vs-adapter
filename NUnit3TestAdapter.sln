@@ -71,6 +71,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{3D1159
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{3DF0F2E6-C182-4717-A82B-D11380DFCE55}"
 	ProjectSection(SolutionItems) = preProject
+		docs\HowToCancelWithNUnit.md = docs\HowToCancelWithNUnit.md
 		docs\NUnitCancel.md = docs\NUnitCancel.md
 	EndProjectSection
 EndProject
