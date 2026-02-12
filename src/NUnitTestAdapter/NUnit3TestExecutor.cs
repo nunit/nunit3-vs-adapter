@@ -887,38 +887,6 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
                 }
             }
 
-            // Try to signal session completion using framework method
-            try
-            {
-                TestLog.Debug("Attempting to end session explicitly via framework");
-                var framework = TestingPlatformAdapter.NUnitBridgedTestFramework.CurrentInstance;
-                if (framework != null)
-                {
-                    // Use fire-and-forget to avoid making this method async
-                    _ = Task.Run(async () =>
-                    {
-                        try
-                        {
-                            await framework.EndSessionExplicitly();
-                            TestLog.Debug("Session ended explicitly via framework");
-                        }
-                        catch (Exception ex)
-                        {
-                            TestLog.Debug($"Fire-and-forget session end failed: {ex.Message}");
-                        }
-                    });
-                    TestLog.Debug("Session end initiated");
-                }
-                else
-                {
-                    TestLog.Debug("No framework instance available for session end");
-                }
-            }
-            catch (Exception sessionEx)
-            {
-                TestLog.Debug($"Failed to initiate session end: {sessionEx.Message}");
-            }
-
             TestLog.Debug("Completed reporting cancelled tests - session end attempted");
         }
         catch (Exception ex)

@@ -9,6 +9,7 @@ using Microsoft.Testing.Extensions.VSTestBridge;
 using Microsoft.Testing.Extensions.VSTestBridge.Requests;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Extensions.Messages;
+using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.TestHost;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
@@ -56,94 +57,116 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
         protected override bool UseFullyQualifiedNameAsTestNodeUid => true;
 
         /// <inheritdoc />
-        protected override Task SynchronizedDiscoverTestsAsync(VSTestDiscoverTestExecutionRequest request, IMessageBus messageBus,
+        protected override Task SynchronizedDiscoverTestsAsync(
+            VSTestDiscoverTestExecutionRequest request,
+            IMessageBus messageBus,
             CancellationToken cancellationToken)
         {
             new NUnit3TestDiscoverer()
-                .DiscoverTests(request.AssemblyPaths, request.DiscoveryContext, request.MessageLogger, request.DiscoverySink);
+                .DiscoverTests(request.AssemblyPaths, request.DiscoveryContext, request.MessageLogger,
+                    request.DiscoverySink);
 
             return Task.CompletedTask;
         }
 
-        /// <inheritdoc />
-        protected override async Task SynchronizedRunTestsAsync(VSTestRunTestExecutionRequest request, IMessageBus messageBus,
-            CancellationToken cancellationToken)
+        protected override async Task SynchronizedRunTestsAsync(
+        VSTestRunTestExecutionRequest request,
+        IMessageBus messageBus,
+        CancellationToken cancellationToken)
         {
+            // Can't use nunitExecutor logging yet, so use a temporary approach
+            LogMessage("SynchronizedRunTestsAsync: ENTRY");
+
             _currentMessageBus = messageBus;
             _testSessionActive = true;
-
-            // CRITICAL: Register session components for direct access (TestFX Copilot pattern)
-            // Store static references for clean access from NUnit3TestExecutor
             CurrentMessageBus = messageBus;
             CurrentSessionUid = request.Session?.SessionUid;
 
+            LogMessage("SynchronizedRunTestsAsync: Creating executor");
             ITestExecutor executor = new NUnit3TestExecutor(isMTP: true);
+            var nunitExecutor = executor as NUnit3TestExecutor;
 
-            // Create combined cancellation token
+            nunitExecutor?.LogToDump("SynchronizedRunTestsAsync", "Creating cancellation token");
             using var combinedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _internalCts.Token);
 
             try
             {
-                // ReSharper disable once UseAwaitUsing
+                nunitExecutor?.LogToDump("SynchronizedRunTestsAsync", "Registering cancellation callback");
                 using (combinedCts.Token.Register(() =>
-                       {
-                           // Enhanced cancellation for MTP
-                           executor.Cancel();
-                           // Give a moment for proper cleanup
-                           Thread.Sleep(100);
-                       }))
                 {
+                    nunitExecutor?.LogToDump("CANCELLATION CALLBACK", "Starting");
+                    executor.Cancel();
+                    Thread.Sleep(100);
+                    nunitExecutor?.LogToDump("CANCELLATION CALLBACK", "Completed");
+                }))
+                {
+                    nunitExecutor?.LogToDump("SynchronizedRunTestsAsync", "Calling executor.RunTests - START");
                     executor.RunTests(request.AssemblyPaths, request.RunContext, request.FrameworkHandle);
+                    nunitExecutor?.LogToDump("SynchronizedRunTestsAsync", "Calling executor.RunTests - COMPLETED");
                 }
+                nunitExecutor?.LogToDump("SynchronizedRunTestsAsync", "Exited using block");
             }
             finally
             {
+                nunitExecutor?.LogToDump("SynchronizedRunTestsAsync", "FINALLY block - calling HandleTestCompletion");
                 await HandleTestCompletion(executor, combinedCts.Token.IsCancellationRequested);
+                nunitExecutor?.LogToDump("SynchronizedRunTestsAsync", "FINALLY block - HandleTestCompletion completed");
+            }
+
+            nunitExecutor?.LogToDump("SynchronizedRunTestsAsync", "EXIT");
+        }
+
+        // Add this helper method to your bridge class for the initial logging before we have nunitExecutor
+        private void LogMessage(string message)
+        {
+            // You can replace this with your preferred logging mechanism
+            Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] {message}");
+            // Or if you have another logging method available in the bridge class, use that
+        }
+
+        private async Task HandleTestCompletion(ITestExecutor executor, bool wasCancelled)
+        {
+            _testSessionActive = false;
+
+            // Simple direct exit for cancelled runs to avoid platform session hang
+            if (wasCancelled)
+            {
+                // Give platform a moment to try session cleanup
+                await Task.Delay(1000);
+                Environment.Exit(0);
             }
         }
 
+
+        /*
         private async Task HandleTestCompletion(ITestExecutor executor, bool wasCancelled)
         {
             var nunitExecutor = executor as NUnit3TestExecutor;
             try
             {
                 nunitExecutor?.LogToDump("HandleTestCompletion", "Starting dispose...");
-                // Simple resource cleanup
+
+                // Only dispose the executor
                 if (executor is IDisposable disposable)
                 {
                     disposable.Dispose();
                 }
 
-                // Mark session as inactive (but don't send messages - platform handles it)
                 _testSessionActive = false;
 
-                nunitExecutor?.LogToDump("HandleTestCompletion", "Dispose completed, marking session inactive...");
-                nunitExecutor?.LogToDump("HandleTestCompletion", $"Test completion handled - wasCancelled: {wasCancelled}");
+                nunitExecutor?.LogToDump(
+                    "HandleTestCompletion",
+                    $"Test completion handled - wasCancelled: {wasCancelled}");
             }
             catch (Exception ex)
             {
                 nunitExecutor?.LogToDump("HandleTestCompletion", $"Error in test completion: {ex.Message}");
             }
-            finally
-            {
-                // CRITICAL: Add a small delay to let session end events be sent first
-                if (wasCancelled)
-                {
-                    await Task.Delay(200); // Give platform time to send session end events
-                }
-                nunitExecutor?.LogToDump("HandleTestCompletion", "FINALLY: Starting cleanup...");
 
-                // Clean up references - let platform handle session lifecycle
-
-                CurrentMessageBus = null;
-                // CurrentSessionUid = null;
-                _currentMessageBus = null;
-                nunitExecutor?.LogToDump("HandleTestCompletion", "FINALLY: Cleanup completed");
-            }
+            // NO finally block - NO cleanup - let Dispose() handle everything
             nunitExecutor?.LogToDump("HandleTestCompletion", "EXIT: HandleTestCompletion completed normally");
-
-            // CRITICAL: Return normally - let CloseTestSessionAsync handle session end
         }
+        */
 
         private async Task FireAndForgetSessionCleanup(NUnit3TestExecutor nunitExecutor = null)
         {
@@ -208,32 +231,6 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
             }
 
             base.Dispose(disposing);
-        }
-
-        /// <summary>
-        /// Explicitly end the current session - used when cancelling tests
-        /// </summary>
-        public async Task EndSessionExplicitly()
-        {
-            try
-            {
-                if (_testSessionActive)
-                {
-                    _testSessionActive = false;
-
-                    // Try to call the base class session end if available
-                    if (_currentMessageBus != null)
-                    {
-                        // Let the base class handle proper session termination
-                        await Task.CompletedTask;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                // Log but don't throw - this is best-effort cleanup
-                Debug.WriteLine($"EndSessionExplicitly failed: {ex.Message}");
-            }
         }
     }
 }
