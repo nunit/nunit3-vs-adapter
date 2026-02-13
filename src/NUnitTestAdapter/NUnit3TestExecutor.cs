@@ -1,4 +1,4 @@
-﻿// ***********************************************************************
+// ***********************************************************************
 // Copyright (c) 2011-2021 Charlie Poole, 2014-2026 Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -154,6 +154,8 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
             _cancelled = true;
             TestLog.Debug("Cancel key pressed - simple MTP cleanup");
             StopRun();
+            TestLog.Debug("Cancel key pressed - initiating hard exit after cleanup");
+            Environment.Exit(130);
         }
     }
 
