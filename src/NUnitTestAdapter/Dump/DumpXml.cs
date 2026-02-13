@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -162,7 +162,22 @@ public class DumpXml : IDumpXml
     /// </summary>
     public void AddLf() => txt.Append("\n");
 
-    public void AddXmlElement(string xmlElement, string content) => txt.Append($"<{xmlElement}>{content}</{xmlElement}>\n");
+    /// <summary>
+    /// Escapes content for safe use inside XML element text (e.g. &amp;, &lt;, &gt;, &quot;, &apos;).
+    /// </summary>
+    private static string EscapeXmlContent(string content)
+    {
+        if (string.IsNullOrEmpty(content))
+            return content;
+        return content
+            .Replace("&", "&amp;")
+            .Replace("<", "&lt;")
+            .Replace(">", "&gt;")
+            .Replace("\"", "&quot;")
+            .Replace("'", "&apos;");
+    }
+
+    public void AddXmlElement(string xmlElement, string content) => txt.Append($"<{xmlElement}>{EscapeXmlContent(content)}</{xmlElement}>\n");
 
     public void DumpVSInputFilter(TestFilter filter, string info) => AddXmlElement("TestFilter", $"\n {info}  {filter.Text}\n");
 
