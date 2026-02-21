@@ -14,10 +14,12 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
         public static void AddNUnit(this ITestApplicationBuilder testApplicationBuilder, Func<IEnumerable<Assembly>> getTestAssemblies)
         {
             NUnitExtension extension = new();
+
             testApplicationBuilder.AddRunSettingsService(extension);
             testApplicationBuilder.AddTestCaseFilterService(extension);
             testApplicationBuilder.AddTestRunParametersService(extension);
             testApplicationBuilder.AddRunSettingsEnvironmentVariableProvider(extension);
+
             testApplicationBuilder.RegisterTestFramework(
                 _ => new TestFrameworkCapabilities(new VSTestBridgeExtensionBaseCapabilities()),
                 (capabilities, serviceProvider) => new NUnitBridgedTestFramework(extension, getTestAssemblies, serviceProvider, capabilities));
