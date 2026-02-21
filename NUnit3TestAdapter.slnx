@@ -1,0 +1,49 @@
+<Solution>
+  <Folder Name="/nuget/">
+    <File Path="nuget/NUnit3TestAdapter.nuspec" />
+  </Folder>
+  <Folder Name="/nuget/net462/">
+    <File Path="nuget/net462/NUnit3TestAdapter.props" />
+    <File Path="nuget/net462/NUnit3TestAdapter.targets" />
+  </Folder>
+  <Folder Name="/nuget/net8/">
+    <File Path="nuget/net8.0/NUnit3TestAdapter.props" />
+    <File Path="nuget/net8.0/NUnit3TestAdapter.targets" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path=".runsettings" />
+    <File Path="build.cake" />
+    <File Path="build.cmd" />
+    <File Path="build.ps1" />
+    <File Path="Directory.Packages.props" />
+    <File Path="DisableAppDomain.runsettings" />
+    <File Path="images/nunit_256.png" />
+    <File Path="LICENSE" />
+    <File Path="NuGet.Config" />
+    <File Path="NUnit3TestAdapter.sln.DotSettings" />
+    <File Path="Osiris.Extended.ruleset" />
+    <File Path="README.md" />
+    <File Path="src/Directory.Build.props" />
+    <File Path="src/native-assembly/NativeTests.dll" />
+  </Folder>
+  <Folder Name="/Solution Items/github/">
+    <File Path=".github/dependabot.yml" />
+    <File Path=".github/ISSUE_TEMPLATE.md" />
+    <File Path=".github/workflows/sonarbuild.yml.UnderWork" />
+  </Folder>
+  <Folder Name="/Solution Items/github/workflows/">
+    <File Path=".github/workflows/NUnit3TestAdapter.CI.yml" />
+    <File Path=".github/workflows/NUnit3TestAdapter.Myget.Publish.yml" />
+  </Folder>
+  <Folder Name="/Solution Items/images/">
+    <File Path="images/nunit_256.png" />
+  </Folder>
+  <Project Path="src/empty-assembly/empty-assembly.csproj" />
+  <Project Path="src/mock-assembly/mock-assembly.csproj" />
+  <Project Path="src/NUnit.TestAdapter.Tests.Acceptance/NUnit.TestAdapter.Tests.Acceptance.csproj" />
+  <Project Path="src/NUnit3AdapterExternalTests/NUnit3AdapterExternalTests.csproj" />
+  <Project Path="src/NUnitTestAdapter/NUnit.TestAdapter.csproj" />
+  <Project Path="src/NUnitTestAdapterTests/NUnit.TestAdapter.Tests.csproj" />
+</Solution>
