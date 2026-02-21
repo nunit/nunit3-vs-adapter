@@ -50,7 +50,7 @@ var BIN_DIRS = new [] {
 };
 
 // Solution
-var ADAPTER_SOLUTION = PROJECT_DIR + "NUnit3TestAdapter.sln";
+var ADAPTER_SOLUTION = PROJECT_DIR + "NUnit3TestAdapter.slnx";
 
 //////////////////////////////////////////////////////////////////////
 // CLEAN
