@@ -227,9 +227,11 @@ public abstract class NUnitTestAdapter
         package.Settings[PackageSettings.SynchronousEvents] = Settings.SynchronousEvents;
         package.Settings[PackageSettings.UseDefaultAssemblyLoadContext] = Settings.UseDefaultAssemblyLoadContext;
 
+#if NET462
         int timeout = Settings.DefaultTimeout;
         if (timeout > 0)
             package.Settings[PackageSettings.DefaultTimeout] = timeout;
+#endif
 
         package.Settings[PackageSettings.InternalTraceLevel] = Settings.InternalTraceLevelEnum.ToString();
         package.Settings[PackageSettings.DebugAgent] = Settings.DebugEngine;
@@ -332,5 +334,5 @@ public abstract class NUnitTestAdapter
         NUnitEngineAdapter = null;
     }
 
-    #endregion
+#endregion
 }

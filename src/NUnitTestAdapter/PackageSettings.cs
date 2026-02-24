@@ -158,14 +158,17 @@ public static class PackageSettings
 
     #endregion
 
-    #region Framework Settings - Passed through and used by the 3.0 Framework
+#region Framework Settings - Passed through and used by the 3.0 Framework
 
+#if NET462
     /// <summary>
     /// Integer value in milliseconds for the default timeout value
     /// for test cases. If not specified, there is no timeout except
     /// as specified by attributes on the tests themselves.
     /// </summary>
     public const string DefaultTimeout = "DefaultTimeout";
+
+#endif
 
     /// <summary>
     /// A TextWriter to which the internal trace will be sent.
@@ -224,7 +227,7 @@ public static class PackageSettings
     /// </summary>
     public const string TestParametersDictionary = "TestParametersDictionary";
 
-    #endregion
+#endregion
 
     #region Internal Settings - Used only within the engine
 
