@@ -21,7 +21,7 @@
     <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="8.0.2" />
   </ItemGroup>
   <ItemGroup>
-    <GlobalPackageReference Include="NUnit.Analyzers" Version="4.11.2">
+    <GlobalPackageReference Include="NUnit.Analyzers" Version="4.12.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </GlobalPackageReference>
