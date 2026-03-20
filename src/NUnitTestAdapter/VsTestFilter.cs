@@ -214,9 +214,6 @@ public class VsTestFilterNonIde(IRunContext runContext) : VsTestFilter(runContex
     }
 }
 
-
-
-
 public class NTraitNameComparer : IEqualityComparer<NTrait>
 {
     public bool Equals(NTrait n, NTrait y)

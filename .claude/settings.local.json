@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet clean:*)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet test:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "Bash(dotnet run:*)",
+      "Bash(./nunit-test.exe:*)",
+      "Bash(dotnet nunit-test.dll:*)",
+      "Bash(echo:*)",
+      "Bash(dotnet exec:*)",
+      "Bash(cat:*)"
+    ]
+  }
+}
