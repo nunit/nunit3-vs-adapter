@@ -1,7 +1,7 @@
-#addin "nuget:?package=Cake.MinVer&version=4.0.0"
 #tool vswhere&version=3.1.7
 #tool Microsoft.TestPlatform&version=17.14.1
 #load "CakeScripts/VersionParsers.cs"
+#load "CakeScripts/MinVerTool.cs"
 
 //////////////////////////////////////////////////////////////////////
 // ARGUMENTS
@@ -14,10 +14,7 @@ var configuration = Argument("configuration", "Release");
 // SET PACKAGE VERSION
 //////////////////////////////////////////////////////////////////////
 
-var version = MinVer(settings => settings
-    .WithAutoIncrement(MinVerAutoIncrement.Minor)
-    .WithTagPrefix("v")
-);
+var version = MinVerTool.GetVersion(AutoIncrement.Minor, tagPrefix: "v");
 
 var dbgSuffix = configuration.ToLower() == "debug" ? "-dbg" : "";
 var packageVersion = version + dbgSuffix;

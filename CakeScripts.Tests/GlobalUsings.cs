@@ -1,5 +1,5 @@
 // ***********************************************************************
-// Copyright (c) 2011-2021 Charlie Poole, 2014-2026 Terje Sandstrom
+// Copyright (c) 2011-2021 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -21,16 +21,4 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-public static class VersionParsers
-{
-    public static string ParseAssemblyVersion(string version)
-    {
-        var dash = version.LastIndexOf('-');
-        if (dash > 0)
-        {
-            return string.Concat(version.AsSpan(0, dash), ".0");
-        }
-
-        return version + ".0";
-    }
-}
+global using NUnit.Framework;
