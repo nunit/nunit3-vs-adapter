@@ -36,6 +36,7 @@
   <Folder Name="/Solution Items/github/workflows/">
     <File Path=".github/workflows/NUnit3TestAdapter.CI.yml" />
     <File Path=".github/workflows/NUnit3TestAdapter.Myget.Publish.yml" />
+    <File Path=".github/workflows/NUnit3TestAdapter.NuGet.Publish.yml" />
   </Folder>
   <Folder Name="/Solution Items/images/">
     <File Path="images/nunit_256.png" />

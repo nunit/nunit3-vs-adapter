@@ -1,0 +1,39 @@
+name: NUnit3TestAdapter.NuGet.Publish
+
+on:
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: pwsh
+jobs:
+  build-windows:
+    name: Windows Build
+    runs-on: windows-latest
+
+    steps:
+    - name: ⤵Checkout Source
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        fetch-depth: 0
+
+    - name: 🛠️ Setup .NET
+      uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5
+      with:
+        dotnet-version: |
+          8.0.x
+
+    - name: Build
+      run: .\build.ps1 -t QuickRelease
+
+    - name: 💾 Upload build artifacts
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+      with:
+        name: Package
+        path: package
+
+    - name: Publish nupkg and snupkg to NuGet.org
+      run: |
+          foreach($file in (Get-ChildItem package -Recurse -Include *.nupkg)) {
+              dotnet nuget push $file --api-key "${{ secrets.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
+          }
