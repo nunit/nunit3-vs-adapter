@@ -1,5 +1,7 @@
+#addin "nuget:?package=Cake.MinVer&version=4.0.0"
 #tool vswhere&version=3.1.7
 #tool Microsoft.TestPlatform&version=17.14.1
+#load "CakeScripts/VersionParsers.cs"
 
 //////////////////////////////////////////////////////////////////////
 // ARGUMENTS
@@ -12,14 +14,16 @@ var configuration = Argument("configuration", "Release");
 // SET PACKAGE VERSION
 //////////////////////////////////////////////////////////////////////
 
-
-var version = "6.1.1";
-
-var modifier = "-alpha.49";
+var version = MinVer(settings => settings
+    .WithAutoIncrement(MinVerAutoIncrement.Minor)
+    .WithTagPrefix("v")
+);
 
 var dbgSuffix = configuration.ToLower() == "debug" ? "-dbg" : "";
-var packageVersion = version + modifier + dbgSuffix;
-Information("Packageversion: "+packageVersion);
+var packageVersion = version + dbgSuffix;
+var assemblyVersion = VersionParsers.ParseAssemblyVersion(version.ToString());
+Information("Package version: " + packageVersion);
+Information("Assembly version: " + assemblyVersion);
 
 var packageName = "NUnit3TestAdapter-" + packageVersion;
 
@@ -103,7 +107,9 @@ Task("Build")
                 ToolPath = msBuildPath,
                 EnvironmentVariables = new Dictionary<string, string>
                 {
-                    ["PackageVersion"] = packageVersion
+                    ["PackageVersion"] = packageVersion,
+                    ["AssemblyVersion"] = assemblyVersion,
+                    ["FileVersion"] = assemblyVersion
                 },
                 Verbosity = Verbosity.Minimal,
                 Restore = true
@@ -111,17 +117,19 @@ Task("Build")
         }
         else
         {
-            var settings = new DotNetCoreBuildSettings
+            var settings = new DotNetBuildSettings
             {
                 Configuration = configuration,
                 EnvironmentVariables = new Dictionary<string, string>
                 {
-                    ["PackageVersion"] = packageVersion
+                    ["PackageVersion"] = packageVersion,
+                    ["AssemblyVersion"] = assemblyVersion,
+                    ["FileVersion"] = assemblyVersion
                 }
             };
 
-            DotNetCoreBuild(@"src\NUnitTestAdapterTests", settings);
-            DotNetCoreBuild(@"src\NUnit.TestAdapter.Tests.Acceptance", settings);
+            DotNetBuild(@"src\NUnitTestAdapterTests", settings);
+            DotNetBuild(@"src\NUnit.TestAdapter.Tests.Acceptance", settings);
         }
     });
 
@@ -151,45 +159,25 @@ foreach (var (framework, vstestFramework, adapterDir) in new[] {
                 SettingsFile = File("DisableAppDomain.runsettings"),
                 Logger = $"trx;LogFileName=VSTest-{framework}.trx"
             });
-
-            PublishTestResults($"VSTest-{framework}.trx");
         });
-    
-
 
     Task($"DotnetTest-{framework}")
         .IsDependentOn("Build")
         .Does(() =>
         {
-            DotNetCoreTest(SRC_DIR + "NUnitTestAdapterTests/NUnit.TestAdapter.Tests.csproj", new DotNetCoreTestSettings
+            DotNetTest(SRC_DIR + "NUnitTestAdapterTests/NUnit.TestAdapter.Tests.csproj", new DotNetTestSettings
             {
                 Configuration = configuration,
                 Framework = framework,
                 NoBuild = true,
                 TestAdapterPath = adapterDir,
                 Settings = File("DisableAppDomain.runsettings"),
-                Logger = $"trx;LogFileName=DotnetTest-{framework}.trx",
+                Loggers = new[] { $"trx;LogFileName=DotnetTest-{framework}.trx" },
                 ResultsDirectory = MakeAbsolute(Directory("TestResults"))
             });
-
-            PublishTestResults($"DotnetTest-{framework}.trx");
         });
 }
 
-void PublishTestResults(string fileName)
-{
-    if (EnvironmentVariable("TF_BUILD", false))
-    {
-        TFBuild.Commands.PublishTestResults(new TFBuildPublishTestResultsData
-        {
-            TestResultsFiles = { @"TestResults\" + fileName },
-            TestRunTitle = fileName,
-            TestRunner = TFTestRunnerType.VSTest,
-            PublishRunAttachments = true,
-            Configuration = configuration
-        });
-    }
-}
 
 //////////////////////////////////////////////////////////////////////
 // PACKAGE
@@ -228,7 +216,7 @@ Task("CreateWorkingImage")
         CopyFileToDirectory("nuget/net462/NUnit3TestAdapter.targets", net462Dir);
 
         var netcoreDir = PACKAGE_IMAGE_DIR + "build/" + NET8_TFM;
-        DotNetCorePublish(ADAPTER_PROJECT, new DotNetCorePublishSettings
+        DotNetPublish(ADAPTER_PROJECT, new DotNetPublishSettings
         {
             Configuration = configuration,
             OutputDirectory = netcoreDir,
@@ -304,8 +292,6 @@ Task("Acceptance")
             SettingsFile = keepWorkspaces ? (FilePath)"KeepWorkspaces.runsettings" : null,
             Logger = "trx;LogFileName=Acceptance.trx"
         });
-
-        PublishTestResults("Acceptance.trx");
     });
 
 Task("CI")

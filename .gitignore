@@ -413,3 +413,9 @@ MigrationBackup/
 .ionide/
 /dupl.xml
 NDependOut/
+
+# AI Stuff
+.claude/settings.local.json
+.claude/history/
+
+
