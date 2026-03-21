@@ -413,6 +413,7 @@ MigrationBackup/
 .ionide/
 /dupl.xml
 NDependOut/
+.nuget/
 
 # AI Stuff
 .claude/settings.local.json

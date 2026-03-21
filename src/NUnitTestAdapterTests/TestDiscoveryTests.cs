@@ -167,7 +167,7 @@ public class FailuresInDiscovery : ITestCaseDiscoverySink
         var context = new FakeDiscoveryContext(null);
         var messageLoggerStub = new MessageLoggerStub();
         TestAdapterUtils.CreateDiscoverer().DiscoverTests(
-                new[] { "FileThatDoesntExist.dll" },
+                ["FileThatDoesntExist.dll"],
                 context,
                 messageLoggerStub,
                 this);

@@ -61,6 +61,9 @@ public sealed class NUnit3TestDiscoverer : NUnitTestAdapter, ITestDiscoverer
         // Ensure any channels registered by other adapters are unregistered
         CleanUpRegisteredChannels();
 
+        // Try to get filter for --list-tests scenario
+        var vsTestFilter = TryCreateDiscoveryFilter(discoveryContext);
+
         if (Settings.InProcDataCollectorsAvailable && sources.Count() > 1)
         {
             TestLog.Error("Unexpected to discover tests in multiple assemblies when InProcDataCollectors specified in run configuration.");
@@ -90,7 +93,7 @@ public sealed class NUnit3TestDiscoverer : NUnitTestAdapter, ITestDiscoverer
                     using (var testConverter = new TestConverterForXml(TestLog, sourceAssemblyPath, Settings))
                     {
                         var timing = new TimingLogger(Settings, TestLog);
-                        cases = ProcessTestCases(results, discoverySink, testConverter);
+                        cases = ProcessTestCases(results, discoverySink, testConverter, vsTestFilter);
                         timing.LogTime("Discovery/Processing/Converting:");
                     }
 
@@ -170,21 +173,47 @@ public sealed class NUnit3TestDiscoverer : NUnitTestAdapter, ITestDiscoverer
 
     #region Helper Methods
 
-    private int ProcessTestCases(NUnitResults results, ITestCaseDiscoverySink discoverySink, TestConverterForXml testConverterForXml)
+    private IVsTestFilter TryCreateDiscoveryFilter(IDiscoveryContext discoveryContext)
     {
-        int cases = 0;
+        if (discoveryContext == null)
+            return null;
+
+        // Use reflection-based filter that works with IDiscoveryContext
+        // (GetTestCaseFilter exists on concrete type but not exposed via interface).
+        // Exceptions from reflection are caught and logged inside VsTestFilterForDiscovery.
+        var filter = new VsTestFilterForDiscovery(discoveryContext, TestLog);
+        return filter.IsEmpty ? null : filter;
+    }
+
+    private int ProcessTestCases(NUnitResults results, ITestCaseDiscoverySink discoverySink, TestConverterForXml testConverterForXml, IVsTestFilter filter = null)
+    {
+        var testCases = new List<TestCase>();
+
+        // First, convert all test cases
         foreach (XmlNode testNode in results.TestCases())
         {
             try
             {
                 var testCase = testConverterForXml.ConvertTestCase(new NUnitEventTestCase(testNode));
-                discoverySink.SendTestCase(testCase);
-                cases += 1;
+                testCases.Add(testCase);
             }
             catch (Exception ex)
             {
                 TestLog.Warning("Exception converting " + testNode.GetAttribute("fullname"), ex);
             }
+        }
+
+        // Apply filter if present (for --list-tests --filter scenario)
+        IEnumerable<TestCase> filteredCases = filter != null && !filter.IsEmpty
+            ? filter.CheckFilter(testCases)
+            : testCases;
+
+        // Send filtered cases to sink
+        int cases = 0;
+        foreach (var testCase in filteredCases)
+        {
+            discoverySink.SendTestCase(testCase);
+            cases++;
         }
 
         return cases;
