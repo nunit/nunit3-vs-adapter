@@ -47,4 +47,6 @@
   <Project Path="src/NUnit3AdapterExternalTests/NUnit3AdapterExternalTests.csproj" />
   <Project Path="src/NUnitTestAdapter/NUnit.TestAdapter.csproj" />
   <Project Path="src/NUnitTestAdapterTests/NUnit.TestAdapter.Tests.csproj" />
+  <Project Path="CakeScripts/CakeScripts.csproj" />
+  <Project Path="CakeScripts.Tests/CakeScripts.Tests.csproj" />
 </Solution>

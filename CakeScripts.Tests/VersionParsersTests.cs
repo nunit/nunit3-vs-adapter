@@ -21,16 +21,32 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-public static class VersionParsers
-{
-    public static string ParseAssemblyVersion(string version)
-    {
-        var dash = version.LastIndexOf('-');
-        if (dash > 0)
-        {
-            return string.Concat(version.AsSpan(0, dash), ".0");
-        }
+namespace CakeScripts.Tests;
 
-        return version + ".0";
+public class VersionParsersTests
+{
+    [TestCase("1.0.0", ExpectedResult = "1.0.0.0")]
+    [TestCase("2.3.4", ExpectedResult = "2.3.4.0")]
+    [TestCase("1.0.0-alpha", ExpectedResult = "1.0.0.0")]
+    [TestCase("2.3.4-beta.1", ExpectedResult = "2.3.4.0")]
+    [TestCase("6.2.0-alpha.0.17", ExpectedResult = "6.2.0.0")]
+    [TestCase("1.2.3-rc.1.5", ExpectedResult = "1.2.3.0")]
+    public string ParseAssemblyVersion_ReturnsCorrectVersion(string version)
+    {
+        return VersionParsers.ParseAssemblyVersion(version);
+    }
+
+    [Test]
+    public void ParseAssemblyVersion_WithoutPreRelease_AppendsDotZero()
+    {
+        var result = VersionParsers.ParseAssemblyVersion("1.2.3");
+        Assert.That(result, Is.EqualTo("1.2.3.0"));
+    }
+
+    [Test]
+    public void ParseAssemblyVersion_WithPreRelease_StripsPreReleaseAndAppendsDotZero()
+    {
+        var result = VersionParsers.ParseAssemblyVersion("1.2.3-preview.5");
+        Assert.That(result, Is.EqualTo("1.2.3.0"));
     }
 }
