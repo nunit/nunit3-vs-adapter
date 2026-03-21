@@ -414,3 +414,9 @@ MigrationBackup/
 /dupl.xml
 NDependOut/
 .nuget/
+
+# AI Stuff
+.claude/settings.local.json
+.claude/history/
+
+
