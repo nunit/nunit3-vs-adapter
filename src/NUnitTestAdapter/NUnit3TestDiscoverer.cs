@@ -178,22 +178,11 @@ public sealed class NUnit3TestDiscoverer : NUnitTestAdapter, ITestDiscoverer
         if (discoveryContext == null)
             return null;
 
-        try
-        {
-            // Use reflection-based filter that works with IDiscoveryContext
-            // (GetTestCaseFilter exists on concrete type but not exposed via interface)
-            var filter = new VsTestFilterForDiscovery(discoveryContext);
-            if (!filter.IsEmpty)
-            {
-                return filter;
-            }
-        }
-        catch
-        {
-            // If filter creation fails, continue without filtering
-        }
-
-        return null;
+        // Use reflection-based filter that works with IDiscoveryContext
+        // (GetTestCaseFilter exists on concrete type but not exposed via interface).
+        // Exceptions from reflection are caught and logged inside VsTestFilterForDiscovery.
+        var filter = new VsTestFilterForDiscovery(discoveryContext, TestLog);
+        return filter.IsEmpty ? null : filter;
     }
 
     private int ProcessTestCases(NUnitResults results, ITestCaseDiscoverySink discoverySink, TestConverterForXml testConverterForXml, IVsTestFilter filter = null)
