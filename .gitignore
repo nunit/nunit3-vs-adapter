@@ -413,3 +413,4 @@ MigrationBackup/
 .ionide/
 /dupl.xml
 NDependOut/
+.nuget/
