@@ -31,7 +31,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
 /// <summary>
 /// A fake discovery context that exposes a GetTestCaseFilter method so that
-/// <see cref="VsTestFilterForDiscovery"/> can find it via reflection (mimicking
+/// <see cref="NUnit.VisualStudio.TestAdapter.VsTestFilterForDiscovery"/> can find it via reflection (mimicking
 /// the real DiscoveryContext used in --list-tests --filter scenarios).
 /// </summary>
 class FakeDiscoveryContextWithFilter(IRunSettings runSettings, ITestCaseFilterExpression filterExpression) : IDiscoveryContext
