@@ -121,7 +121,8 @@ Task("Build")
             }
             .WithProperty("PackageVersion", packageVersion)
             .WithProperty("AssemblyVersion", assemblyVersion)
-            .WithProperty("FileVersion", assemblyVersion));
+            .WithProperty("FileVersion", assemblyVersion)
+            .WithProperty("InformationalVersion", packageVersion));
         }
         else
         {
