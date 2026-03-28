@@ -25,6 +25,20 @@ Information("Assembly version: " + assemblyVersion);
 var packageName = "NUnit3TestAdapter-" + packageVersion;
 
 //////////////////////////////////////////////////////////////////////
+// VERSION SETTINGS HELPERS
+//////////////////////////////////////////////////////////////////////
+
+DotNetMSBuildSettings CreateDotNetMSBuildSettings()
+{
+    return new DotNetMSBuildSettings
+    {
+        AssemblyVersion = assemblyVersion,
+        FileVersion = assemblyVersion,
+        InformationalVersion = packageVersion
+    };
+}
+
+//////////////////////////////////////////////////////////////////////
 // DEFINE RUN CONSTANTS
 //////////////////////////////////////////////////////////////////////
 
@@ -102,27 +116,20 @@ Task("Build")
             {
                 Configuration = configuration,
                 ToolPath = msBuildPath,
-                EnvironmentVariables = new Dictionary<string, string>
-                {
-                    ["PackageVersion"] = packageVersion,
-                    ["AssemblyVersion"] = assemblyVersion,
-                    ["FileVersion"] = assemblyVersion
-                },
                 Verbosity = Verbosity.Minimal,
                 Restore = true
-            });
+            }
+            .WithProperty("PackageVersion", packageVersion)
+            .WithProperty("AssemblyVersion", assemblyVersion)
+            .WithProperty("FileVersion", assemblyVersion)
+            .WithProperty("InformationalVersion", packageVersion));
         }
         else
         {
             var settings = new DotNetBuildSettings
             {
                 Configuration = configuration,
-                EnvironmentVariables = new Dictionary<string, string>
-                {
-                    ["PackageVersion"] = packageVersion,
-                    ["AssemblyVersion"] = assemblyVersion,
-                    ["FileVersion"] = assemblyVersion
-                }
+                MSBuildSettings = CreateDotNetMSBuildSettings()
             };
 
             DotNetBuild(@"src\NUnitTestAdapterTests", settings);
@@ -217,7 +224,8 @@ Task("CreateWorkingImage")
         {
             Configuration = configuration,
             OutputDirectory = netcoreDir,
-            Framework = NET8_TFM
+            Framework = NET8_TFM,
+            MSBuildSettings = CreateDotNetMSBuildSettings()
         });
         CopyFileToDirectory($"nuget/{NET8_TFM}/NUnit3TestAdapter.props", netcoreDir);
         CopyFileToDirectory($"nuget/{NET8_TFM}/NUnit3TestAdapter.targets", netcoreDir);
