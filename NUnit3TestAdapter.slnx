@@ -11,6 +11,7 @@
     <File Path="nuget/net8.0/NUnit3TestAdapter.targets" />
   </Folder>
   <Folder Name="/Solution Items/">
+    <File Path=".config/dotnet-tools.json" />
     <File Path=".editorconfig" />
     <File Path=".gitignore" />
     <File Path=".runsettings" />
