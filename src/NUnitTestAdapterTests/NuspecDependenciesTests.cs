@@ -227,7 +227,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                         // Add dependencies to the respective framework group
                         if (!groupedDependencies.TryGetValue(framework, out List<PackageWithVersion>? versionedDependenciesForFramework))
                         {
-                            versionedDependenciesForFramework = new List<PackageWithVersion>();
+                            versionedDependenciesForFramework = [];
                             groupedDependencies[framework] = versionedDependenciesForFramework;
                         }
 
@@ -252,13 +252,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                     {
                         TestContext.Out.WriteLine("Checking for packages that should be in all frameworks in the .nuspec file");
                         // Check if the packages from the csproj are present in all nuspec framework
-                        Assert.Multiple(() =>
+                        using (Assert.EnterMultipleScope())
                         {
                             foreach (var framework in nuspecPackages.Keys)
                             {
                                 MatchForSingleFramework(framework, csprojPackages[csprojFramework], nuspecPackages[framework]);
                             }
-                        });
+                        }
                     }
                     else
                     {
@@ -266,7 +266,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                         // Handle specific framework case
                         var matchingNuspecFramework = nuspecPackages.Keys.FirstOrDefault(nuspecFramework =>
                             (csprojFramework == ".NETFramework" && nuspecFramework.StartsWith("net") &&
-                             int.TryParse(nuspecFramework.Substring(3), out var version) && version >= 462) ||
+                             int.TryParse(nuspecFramework.Substring(3), out int version) && version >= 462) ||
                             (csprojFramework != ".NETFramework" && nuspecFramework == csprojFramework));
 
                         // Assert that the matching framework was found
@@ -281,11 +281,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
             private static void MatchForSingleFramework(string framework, List<PackageWithVersion> csprojPackages,
                 List<PackageWithVersion> nuspecPackages)
             {
-                List<string> csProjPackagesForFramework = csprojPackages.Select(x => x.Package).ToList();
-                List<string> nuspecPackagesForFramework = nuspecPackages.Select(x => x.Package).ToList();
+                List<string> csProjPackagesForFramework = [.. csprojPackages.Select(x => x.Package)];
+                List<string> nuspecPackagesForFramework = [.. nuspecPackages.Select(x => x.Package)];
                 var missingPackages = csProjPackagesForFramework.Except(nuspecPackagesForFramework).ToList();
 
-                Assert.Multiple(() =>
+                using (Assert.EnterMultipleScope())
                 {
                     // Assert that there are no missing packages in any nuspec framework
                     Assert.That(missingPackages, Is.Empty,
@@ -296,7 +296,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests
                         var nuspecVersion = nuspecPackages.First(x => x.Package == pair.Package).Version;
                         Assert.That(nuspecVersion, Is.EqualTo(pair.Version), $"Package {pair.Package} in .csproj should have version '{pair.Version}' in .nuspec");
                     }
-                });
+                }
             }
 
             public static void CheckNuspecPackages(
