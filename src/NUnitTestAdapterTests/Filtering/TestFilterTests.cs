@@ -123,9 +123,12 @@ public class TestFilterTests
         tc.AddTrait("Category", "MyOwn");
         var obj = VsTestFilter.PropertyValueProvider(tc, "TestCategory") as string[];
         Assert.That(obj, Is.Not.Null);
-        Assert.That(obj.Length, Is.EqualTo(2));
-        Assert.That(obj[0], Is.SameAs("CI"));
-        Assert.That(obj[1], Is.SameAs("MyOwn"));
+        Assert.That(obj, Has.Length.EqualTo(2));
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(obj[0], Is.SameAs("CI"));
+            Assert.That(obj[1], Is.SameAs("MyOwn"));
+        }
     }
 
     [Test]
@@ -136,9 +139,12 @@ public class TestFilterTests
         tc.AddTrait("Category", "MyOwn");
         var obj = VsTestFilter.PropertyValueProvider(tc, "Category") as string[];
         Assert.That(obj, Is.Not.Null);
-        Assert.That(obj.Length, Is.EqualTo(2));
-        Assert.That(obj[0], Is.SameAs("CI"));
-        Assert.That(obj[1], Is.SameAs("MyOwn"));
+        Assert.That(obj, Has.Length.EqualTo(2));
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(obj[0], Is.SameAs("CI"));
+            Assert.That(obj[1], Is.SameAs("MyOwn"));
+        }
     }
 
     [Test]

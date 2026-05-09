@@ -24,8 +24,11 @@
 using System;
 using System.Collections.Generic;
 using System.Xml;
+
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+
 using NSubstitute;
+
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
@@ -41,30 +44,28 @@ internal static class TestCaseUtils
     /// </summary>
     public static IReadOnlyList<TestCase> ConvertTestCases(this TestConverterForXml testConverterForXml, string xml)
     {
-            if (testConverterForXml == null) throw new ArgumentNullException(nameof(testConverterForXml));
+        if (testConverterForXml == null) throw new ArgumentNullException(nameof(testConverterForXml));
 
-            var fragment = new XmlDocument().CreateDocumentFragment();
-            fragment.InnerXml = xml;
-            var testCaseNodes = fragment.SelectNodes("//test-case");
+        var fragment = new XmlDocument().CreateDocumentFragment();
+        fragment.InnerXml = xml;
+        var testCaseNodes = fragment.SelectNodes("//test-case");
 
-            var testCases = new TestCase[testCaseNodes.Count];
+        var testCases = new TestCase[testCaseNodes.Count];
 
-            for (var i = 0; i < testCases.Length; i++)
-                testCases[i] = testConverterForXml.ConvertTestCase(new NUnitEventTestCase(testCaseNodes[i]));
+        for (var i = 0; i < testCases.Length; i++)
+            testCases[i] = testConverterForXml.ConvertTestCase(new NUnitEventTestCase(testCaseNodes[i]));
 
-            return testCases;
-        }
+        return testCases;
+    }
 
     public static IReadOnlyCollection<TestCase> ConvertTestCases(string xml)
     {
-            var settings = Substitute.For<IAdapterSettings>();
-            settings.CollectSourceInformation.Returns(false);
-            using (var testConverter = new TestConverterForXml(
-                new TestLogger(new MessageLoggerStub()),
-                FakeTestData.AssemblyPath,
-                settings))
-            {
-                return testConverter.ConvertTestCases(xml);
-            }
-        }
+        var settings = Substitute.For<IAdapterSettings>();
+        settings.CollectSourceInformation.Returns(false);
+        using var testConverter = new TestConverterForXml(
+            new TestLogger(new MessageLoggerStub()),
+            FakeTestData.AssemblyPath,
+            settings);
+        return testConverter.ConvertTestCases(xml);
+    }
 }

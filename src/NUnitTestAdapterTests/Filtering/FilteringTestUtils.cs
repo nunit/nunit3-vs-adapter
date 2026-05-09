@@ -42,11 +42,11 @@ public static class FilteringTestUtils
 
         var filterExpressionWrapper =
             filterExpressionWrapperType.GetTypeInfo()
-                .GetConstructor(new[] { typeof(string) })
+                .GetConstructor([typeof(string)])
                 .Invoke([filter]);
 
         return (ITestCaseFilterExpression)Type.GetType("Microsoft.Testing.Extensions.VSTestBridge.ObjectModel.TestCaseFilterExpression, Microsoft.Testing.Extensions.VSTestBridge", throwOnError: true).GetTypeInfo()
-            .GetConstructor(new[] { filterExpressionWrapperType })
+            .GetConstructor([filterExpressionWrapperType])
             .Invoke([filterExpressionWrapper]);
     }
 
