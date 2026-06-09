@@ -63,7 +63,8 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
             var methodName = testCase.GetPropertyValue<string>(Seed.NUnitMethodName, null);
             if (className is null || methodName is null)
                 return;
-            var property = TestMethodIdentifierBuilder.Create(testCase.Source, className, methodName);
+            var property = TestMethodIdentifierBuilder.Create(
+                testCase.Source, testCase.FullyQualifiedName, className, methodName);
             testNode.Properties.Add(property);
         }
 
