@@ -12,6 +12,7 @@ using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Messages;
 using Microsoft.Testing.Platform.TestHost;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
@@ -55,6 +56,17 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
         }
 
         protected override bool UseFullyQualifiedNameAsTestNodeUid => true;
+
+        protected override void AddAdditionalProperties(TestNode testNode, TestCase testCase)
+        {
+            var className = testCase.GetPropertyValue<string>(Seed.NUnitClassName, null);
+            var methodName = testCase.GetPropertyValue<string>(Seed.NUnitMethodName, null);
+            if (className is null || methodName is null)
+                return;
+            var property = TestMethodIdentifierBuilder.Create(
+                testCase.Source, testCase.FullyQualifiedName, className, methodName);
+            testNode.Properties.Add(property);
+        }
 
         /// <inheritdoc />
         protected override Task SynchronizedDiscoverTestsAsync(

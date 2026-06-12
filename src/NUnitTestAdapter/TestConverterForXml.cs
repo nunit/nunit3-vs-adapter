@@ -246,6 +246,8 @@ public sealed class TestConverterForXml : IDisposable, ITestConverterXml
         }
 
         testCase.AddTraitsFromXmlTestNode(testNode, TraitsCache, _logger, adapterSettings);
+        testCase.SetPropertyValue(Seed.NUnitClassName, testNode.ClassName);
+        testCase.SetPropertyValue(Seed.NUnitMethodName, testNode.MethodName);
 
         return testCase;
 
