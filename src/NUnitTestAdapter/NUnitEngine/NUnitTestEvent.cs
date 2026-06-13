@@ -66,7 +66,8 @@ public abstract class NUnitTestEvent(XmlNode node) : NUnitTestNode(node), INUnit
         NoIdea,
         Test,
         Setup,
-        TearDown
+        TearDown,
+        Parent
     }
     public enum TestTypes
     {
@@ -108,6 +109,7 @@ public abstract class NUnitTestEvent(XmlNode node) : NUnitTestNode(node), INUnit
         {
             "SetUp" => SiteType.Setup,
             "TearDown" => SiteType.TearDown,
+            "Parent" => SiteType.Parent,
             _ => SiteType.NoIdea
         };
     }

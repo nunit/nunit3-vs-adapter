@@ -132,7 +132,12 @@ public sealed class TestConverterForXml : IDisposable, ITestConverterXml
                 case TestOutcome.NotFound:
                     {
                         testCaseResult.ErrorMessage = resultNode.Failure?.Message;
-                        testCaseResult.ErrorStackTrace = resultNode.FailureStackTrace;
+                        bool isParentFailure = resultNode.Site() == NUnitTestEvent.SiteType.Parent;
+                        bool includeStackTrace = isParentFailure
+                            ? adapterSettings.IncludeStackTraceForSuites
+                            : adapterSettings.IncludeStackTrace;
+                        if (includeStackTrace)
+                            testCaseResult.ErrorStackTrace = resultNode.FailureStackTrace;
 
                         break;
                     }
@@ -183,12 +188,12 @@ public sealed class TestConverterForXml : IDisposable, ITestConverterXml
         if (adapterSettings.UseParentFQNForParametrizedTests)
         {
             var parent = testNode.Parent;
-            if (parent != null && parent.IsParameterizedMethod)
+            if (parent is { IsParameterizedMethod: true })
             {
                 var parameterizedTestFullName = parent.FullName;
 
                 // VS expected FullyQualifiedName to be the actual class+type name,optionally with parameter types
-                // in parenthesis, but they must fit the pattern of a value returned by object.GetType().
+                // in parentheses, but they must fit the pattern of a value returned by object.GetType().
                 // It should _not_ include custom name or param values (just their types).
                 // However, the "fullname" from NUnit's file generation is the custom name of the test, so
                 // this code must convert from one to the other.
@@ -298,7 +303,12 @@ public sealed class TestConverterForXml : IDisposable, ITestConverterXml
         }
 
         ourResult.ErrorMessage = message;
-        ourResult.ErrorStackTrace = resultNode.Failure?.Stacktrace;
+        bool isParentFailure = resultNode.Site() == NUnitTestEvent.SiteType.Parent;
+        bool includeStackTrace = isParentFailure
+            ? adapterSettings.IncludeStackTraceForSuites
+            : adapterSettings.IncludeStackTrace;
+        if (includeStackTrace)
+            ourResult.ErrorStackTrace = resultNode.Failure?.Stacktrace;
 
         return ourResult;
     }
@@ -363,7 +373,7 @@ public sealed class TestConverterForXml : IDisposable, ITestConverterXml
 
     /// <summary>
     /// Looks for attachments in a results node and if any attachments are found they
-    /// are returned"/>.
+    /// are returned."/>.
     /// </summary>
     /// <param name="resultNode">xml node for test result.</param>
     /// <returns>attachments to be added to the test, it will be empty if no attachments are found.</returns>

@@ -172,6 +172,60 @@ public static class FakeTestData
                 </test-case>
             </test-suite>";
 
+    /// <summary>
+    /// Test result for a test that failed due to parent SetUpFixture failure (site="Parent").
+    /// </summary>
+    public const string ParentSiteFailedResultXml =
+        @"<test-suite
+                id='121'
+                name='FakeTestData'
+                fullname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData'
+                classname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData'>
+                <test-case
+                    id='123'
+                    name='FakeTestCase'
+                    fullname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData.FakeTestCase'
+                    methodname='FakeTestCase'
+                    classname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData'
+                    result='Failed'
+                    label='Error'
+                    site='Parent'
+                    start-time='2015-03-18 15:58:12Z'
+                    end-time='2015-03-18 15:58:13Z'
+                    duration='0.001'>
+                    <failure>
+                        <message><![CDATA[OneTimeSetUp: System.InvalidOperationException : Database connection failed]]></message>
+                        <stack-trace><![CDATA[   at SetUpFixture.OneTimeSetUp() in SetUpFixture.cs:line 14]]></stack-trace>
+                    </failure>
+                </test-case>
+            </test-suite>";
+
+    /// <summary>
+    /// Test result for a regular test failure (no site attribute).
+    /// </summary>
+    public const string RegularFailedResultXml =
+        @"<test-suite
+                id='121'
+                name='FakeTestData'
+                fullname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData'
+                classname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData'>
+                <test-case
+                    id='123'
+                    name='FakeTestCase'
+                    fullname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData.FakeTestCase'
+                    methodname='FakeTestCase'
+                    classname='NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData'
+                    result='Failed'
+                    start-time='2015-03-18 15:58:12Z'
+                    end-time='2015-03-18 15:58:13Z'
+                    duration='0.001'>
+                    <failure>
+                        <message><![CDATA[Assert.That failed]]></message>
+                        <stack-trace><![CDATA[   at TestClass.TestMethod() in TestClass.cs:line 25]]></stack-trace>
+                    </failure>
+                </test-case>
+            </test-suite>";
+
     public const string DisplayName = "FakeTestCase";
 
     public const string FullyQualifiedName = "NUnit.VisualStudio.TestAdapter.Tests.Fakes.FakeTestData.FakeTestCase";
@@ -198,5 +252,15 @@ public static class FakeTestData
     public static XmlNode GetResultNode()
     {
         return XmlHelper.CreateXmlNode(ResultXml).SelectSingleNode("test-case");
+    }
+
+    public static XmlNode GetParentSiteFailedResultNode()
+    {
+        return XmlHelper.CreateXmlNode(ParentSiteFailedResultXml).SelectSingleNode("test-case");
+    }
+
+    public static XmlNode GetRegularFailedResultNode()
+    {
+        return XmlHelper.CreateXmlNode(RegularFailedResultXml).SelectSingleNode("test-case");
     }
 }
