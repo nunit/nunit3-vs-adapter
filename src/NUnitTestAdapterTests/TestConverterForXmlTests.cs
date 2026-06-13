@@ -178,6 +178,89 @@ public class TestConverterForXmlTests
         Assert.That(actualMessages, Is.EqualTo(expectedMessages));
     }
 
+    #region IncludeStackTraceForSuites tests
+
+    [Test]
+    public void ParentSiteFailure_IncludeStackTraceForSuites_True_IncludesStackTrace()
+    {
+        // Arrange
+        var settings = Substitute.For<IAdapterSettings>();
+        settings.ConsoleOut.Returns(0);
+        settings.UseTestNameInConsoleOutput.Returns(false);
+        settings.CollectSourceInformation.Returns(false);
+        settings.IncludeStackTrace.Returns(true);
+        settings.IncludeStackTraceForSuites.Returns(true); // Default behavior
+
+        using var converter = new TestConverterForXml(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings);
+        converter.ConvertTestCase(fakeTestNode);
+
+        var fakeResultNode = new NUnitTestEventTestCase(FakeTestData.GetParentSiteFailedResultNode());
+
+        // Act
+        var testResults = converter.GetVsTestResults(fakeResultNode, Enumerable.Empty<INUnitTestEventTestOutput>().ToList());
+
+        // Assert
+        Assert.That(testResults.TestResults.Count, Is.EqualTo(1));
+        var testResult = testResults.TestResults[0];
+        Assert.That(testResult.Outcome, Is.EqualTo(TestOutcome.Failed));
+        Assert.That(testResult.ErrorStackTrace, Is.Not.Null.And.Contains("SetUpFixture.OneTimeSetUp"));
+    }
+
+    [Test]
+    public void ParentSiteFailure_IncludeStackTraceForSuites_False_ExcludesStackTrace()
+    {
+        // Arrange
+        var settings = Substitute.For<IAdapterSettings>();
+        settings.ConsoleOut.Returns(0);
+        settings.UseTestNameInConsoleOutput.Returns(false);
+        settings.CollectSourceInformation.Returns(false);
+        settings.IncludeStackTrace.Returns(true); // Regular failures should still include stack trace
+        settings.IncludeStackTraceForSuites.Returns(false); // But parent site failures should not
+
+        using var converter = new TestConverterForXml(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings);
+        converter.ConvertTestCase(fakeTestNode);
+
+        var fakeResultNode = new NUnitTestEventTestCase(FakeTestData.GetParentSiteFailedResultNode());
+
+        // Act
+        var testResults = converter.GetVsTestResults(fakeResultNode, Enumerable.Empty<INUnitTestEventTestOutput>().ToList());
+
+        // Assert
+        Assert.That(testResults.TestResults.Count, Is.EqualTo(1));
+        var testResult = testResults.TestResults[0];
+        Assert.That(testResult.Outcome, Is.EqualTo(TestOutcome.Failed));
+        Assert.That(testResult.ErrorStackTrace, Is.Null, "Stack trace should be excluded for parent site failures when IncludeStackTraceForSuites is false");
+    }
+
+    [Test]
+    public void RegularFailure_IncludeStackTraceForSuites_False_StillIncludesStackTrace()
+    {
+        // Arrange - IncludeStackTraceForSuites=false should NOT affect regular test failures
+        var settings = Substitute.For<IAdapterSettings>();
+        settings.ConsoleOut.Returns(0);
+        settings.UseTestNameInConsoleOutput.Returns(false);
+        settings.CollectSourceInformation.Returns(false);
+        settings.IncludeStackTrace.Returns(true);
+        settings.IncludeStackTraceForSuites.Returns(false);
+
+        using var converter = new TestConverterForXml(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings);
+        converter.ConvertTestCase(fakeTestNode);
+
+        var fakeResultNode = new NUnitTestEventTestCase(FakeTestData.GetRegularFailedResultNode());
+
+        // Act
+        var testResults = converter.GetVsTestResults(fakeResultNode, Enumerable.Empty<INUnitTestEventTestOutput>().ToList());
+
+        // Assert
+        Assert.That(testResults.TestResults.Count, Is.EqualTo(1));
+        var testResult = testResults.TestResults[0];
+        Assert.That(testResult.Outcome, Is.EqualTo(TestOutcome.Failed));
+        Assert.That(testResult.ErrorStackTrace, Is.Not.Null.And.Contains("TestClass.TestMethod"),
+            "Regular failures should still include stack trace even when IncludeStackTraceForSuites is false");
+    }
+
+    #endregion
+
     #region Attachment tests
 
     [Test]

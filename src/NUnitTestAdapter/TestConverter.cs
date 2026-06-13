@@ -111,7 +111,11 @@ public sealed class TestConverter : IDisposable, ITestConverter
                 case TestOutcome.NotFound:
                     {
                         testCaseResult.ErrorMessage = resultNode.Failure?.Message;
-                        if (adapterSettings.IncludeStackTrace)
+                        bool isParentFailure = resultNode.Site() == NUnitTestEvent.SiteType.Parent;
+                        bool includeStackTrace = isParentFailure
+                            ? adapterSettings.IncludeStackTraceForSuites
+                            : adapterSettings.IncludeStackTrace;
+                        if (includeStackTrace)
                             testCaseResult.ErrorStackTrace = resultNode.FailureStackTrace;
                         break;
                     }
@@ -272,7 +276,12 @@ public sealed class TestConverter : IDisposable, ITestConverter
         }
 
         ourResult.ErrorMessage = message;
-        ourResult.ErrorStackTrace = resultNode.Failure?.Stacktrace;
+        bool isParentFailure = resultNode.Site() == NUnitTestEvent.SiteType.Parent;
+        bool includeStackTrace = isParentFailure
+            ? adapterSettings.IncludeStackTraceForSuites
+            : adapterSettings.IncludeStackTrace;
+        if (includeStackTrace)
+            ourResult.ErrorStackTrace = resultNode.Failure?.Stacktrace;
 
         return ourResult;
     }

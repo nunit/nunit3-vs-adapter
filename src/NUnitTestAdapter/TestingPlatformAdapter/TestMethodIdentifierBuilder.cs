@@ -13,13 +13,13 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter;
 
 internal static class TestMethodIdentifierBuilder
 {
-    private static readonly ConcurrentDictionary<string, string> _assemblyNameCache
+    private static readonly ConcurrentDictionary<string, string> AssemblyNameCache
         = new(StringComparer.OrdinalIgnoreCase);
 
     // Caches only the parameter types, keyed by (assemblyPath, clrClassName, methodName).
     // The TestMethodIdentifierProperty itself is not cached because typeName varies per
     // fixture instance (e.g. Tests(One) vs Tests(Two)) while the CLR class is the same.
-    private static readonly ConcurrentDictionary<(string, string, string), string[]> _paramTypeCache
+    private static readonly ConcurrentDictionary<(string, string, string), string[]> ParamTypeCache
         = new();
 
     public static TestMethodIdentifierProperty Create(
@@ -28,7 +28,7 @@ internal static class TestMethodIdentifierBuilder
         string className,
         string methodName)
     {
-        var assemblyFullName = _assemblyNameCache.GetOrAdd(
+        var assemblyFullName = AssemblyNameCache.GetOrAdd(
             assemblyPath,
             path => AssemblyName.GetAssemblyName(path).FullName);
 
@@ -40,7 +40,7 @@ internal static class TestMethodIdentifierBuilder
         var ns = dot >= 0 ? classWithFixtureParams.Substring(0, dot) : string.Empty;
         var typeName = dot >= 0 ? classWithFixtureParams.Substring(dot + 1) : classWithFixtureParams;
 
-        var paramTypes = _paramTypeCache.GetOrAdd(
+        var paramTypes = ParamTypeCache.GetOrAdd(
             (assemblyPath, className, methodName),
             _ => GetMethodParameterTypes(assemblyPath, className, methodName));
 
@@ -69,12 +69,17 @@ internal static class TestMethodIdentifierBuilder
         int depth = 0;
         for (int i = s.Length - 1; i >= 0; i--)
         {
-            if (s[i] == ')')
-                depth++;
-            else if (s[i] == '(')
-                depth--;
-            else if (s[i] == '.' && depth == 0)
-                return i;
+            switch (s[i])
+            {
+                case ')':
+                    depth++;
+                    break;
+                case '(':
+                    depth--;
+                    break;
+                case '.' when depth == 0:
+                    return i;
+            }
         }
         return -1;
     }
