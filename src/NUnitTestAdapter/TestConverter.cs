@@ -218,6 +218,8 @@ public sealed class TestConverter : IDisposable, ITestConverter
 
         testCase.AddTraitsFromTestNode(testNode, TraitsCache, _logger, adapterSettings);
         testCase.SetPropertyValue(Seed.NUnitSeedProperty, testNode.Seed.ToString());
+        testCase.SetPropertyValue(Seed.NUnitClassName, testNode.ClassName);
+        testCase.SetPropertyValue(Seed.NUnitMethodName, testNode.MethodName);
 
         return testCase;
 
