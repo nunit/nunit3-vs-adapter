@@ -132,7 +132,12 @@ public sealed class TestConverterForXml : IDisposable, ITestConverterXml
                 case TestOutcome.NotFound:
                     {
                         testCaseResult.ErrorMessage = resultNode.Failure?.Message;
-                        testCaseResult.ErrorStackTrace = resultNode.FailureStackTrace;
+                        bool isParentFailure = resultNode.Site() == NUnitTestEvent.SiteType.Parent;
+                        bool includeStackTrace = isParentFailure
+                            ? adapterSettings.IncludeStackTraceForSuites
+                            : adapterSettings.IncludeStackTrace;
+                        if (includeStackTrace)
+                            testCaseResult.ErrorStackTrace = resultNode.FailureStackTrace;
 
                         break;
                     }
@@ -296,7 +301,12 @@ public sealed class TestConverterForXml : IDisposable, ITestConverterXml
         }
 
         ourResult.ErrorMessage = message;
-        ourResult.ErrorStackTrace = resultNode.Failure?.Stacktrace;
+        bool isParentFailure = resultNode.Site() == NUnitTestEvent.SiteType.Parent;
+        bool includeStackTrace = isParentFailure
+            ? adapterSettings.IncludeStackTraceForSuites
+            : adapterSettings.IncludeStackTrace;
+        if (includeStackTrace)
+            ourResult.ErrorStackTrace = resultNode.Failure?.Stacktrace;
 
         return ourResult;
     }
