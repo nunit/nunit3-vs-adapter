@@ -86,7 +86,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
             _currentMessageBus = messageBus;
             _testSessionActive = true;
             CurrentMessageBus = messageBus;
-            CurrentSessionUid = request.Session.SessionUid;
+            CurrentSessionUid = request.Session?.SessionUid;
 
             var nunitExecutor = new NUnit3TestExecutor(isMTP: true);
             ITestExecutor executor = nunitExecutor;
