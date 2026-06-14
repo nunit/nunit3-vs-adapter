@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,9 +8,7 @@ using Microsoft.Testing.Extensions.VSTestBridge;
 using Microsoft.Testing.Extensions.VSTestBridge.Requests;
 using Microsoft.Testing.Platform.Capabilities.TestFramework;
 using Microsoft.Testing.Platform.Extensions.Messages;
-using Microsoft.Testing.Platform.Extensions.TestFramework;
 using Microsoft.Testing.Platform.Messages;
-using Microsoft.Testing.Platform.TestHost;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
@@ -20,9 +17,9 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
     internal sealed class NUnitBridgedTestFramework : SynchronizedSingleSessionVSTestBridgedTestFramework
     {
         private readonly CancellationTokenSource _internalCts = new();
-        private bool _testSessionActive = false;
+        private bool _testSessionActive;
         private IMessageBus _currentMessageBus;
-        private volatile bool _disposed = false;
+        private volatile bool _disposed;
 
         /// <summary>
         /// Gets the current NUnit framework instance for cancellation scenarios.
@@ -86,57 +83,45 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
         IMessageBus messageBus,
         CancellationToken cancellationToken)
         {
-            // Can't use nunitExecutor logging yet, so use a temporary approach
-            LogMessage("SynchronizedRunTestsAsync: ENTRY");
-
             _currentMessageBus = messageBus;
             _testSessionActive = true;
             CurrentMessageBus = messageBus;
             CurrentSessionUid = request.Session?.SessionUid;
 
-            LogMessage("SynchronizedRunTestsAsync: Creating executor");
-            ITestExecutor executor = new NUnit3TestExecutor(isMTP: true);
-            var nunitExecutor = executor as NUnit3TestExecutor;
+            var nunitExecutor = new NUnit3TestExecutor(isMTP: true);
+            ITestExecutor executor = nunitExecutor;
 
-            nunitExecutor?.LogToDump("SynchronizedRunTestsAsync", "Creating cancellation token");
+            nunitExecutor.LogToDump("SynchronizedRunTestsAsync", "Creating cancellation token");
             using var combinedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _internalCts.Token);
 
             try
             {
-                nunitExecutor?.LogToDump("SynchronizedRunTestsAsync", "Registering cancellation callback");
+                nunitExecutor.LogToDump("SynchronizedRunTestsAsync", "Registering cancellation callback");
                 using (combinedCts.Token.Register(() =>
                 {
-                    nunitExecutor?.LogToDump("CANCELLATION CALLBACK", "Starting");
+                    nunitExecutor.LogToDump("CANCELLATION CALLBACK", "Starting");
                     executor.Cancel();
                     Thread.Sleep(100);
-                    nunitExecutor?.LogToDump("CANCELLATION CALLBACK", "Completed");
+                    nunitExecutor.LogToDump("CANCELLATION CALLBACK", "Completed");
                 }))
                 {
-                    nunitExecutor?.LogToDump("SynchronizedRunTestsAsync", "Calling executor.RunTests - START");
+                    nunitExecutor.LogToDump("SynchronizedRunTestsAsync", "Calling executor.RunTests - START");
                     executor.RunTests(request.AssemblyPaths, request.RunContext, request.FrameworkHandle);
-                    nunitExecutor?.LogToDump("SynchronizedRunTestsAsync", "Calling executor.RunTests - COMPLETED");
+                    nunitExecutor.LogToDump("SynchronizedRunTestsAsync", "Calling executor.RunTests - COMPLETED");
                 }
-                nunitExecutor?.LogToDump("SynchronizedRunTestsAsync", "Exited using block");
+                nunitExecutor.LogToDump("SynchronizedRunTestsAsync", "Exited using block");
             }
             finally
             {
-                nunitExecutor?.LogToDump("SynchronizedRunTestsAsync", "FINALLY block - calling HandleTestCompletion");
-                await HandleTestCompletion(executor, combinedCts.Token.IsCancellationRequested);
-                nunitExecutor?.LogToDump("SynchronizedRunTestsAsync", "FINALLY block - HandleTestCompletion completed");
+                nunitExecutor.LogToDump("SynchronizedRunTestsAsync", "FINALLY block - calling HandleTestCompletion");
+                await HandleTestCompletion(combinedCts.Token.IsCancellationRequested);
+                nunitExecutor.LogToDump("SynchronizedRunTestsAsync", "FINALLY block - HandleTestCompletion completed");
             }
 
-            nunitExecutor?.LogToDump("SynchronizedRunTestsAsync", "EXIT");
+            nunitExecutor.LogToDump("SynchronizedRunTestsAsync", "EXIT");
         }
 
-        // Add this helper method to your bridge class for the initial logging before we have nunitExecutor
-        private void LogMessage(string message)
-        {
-            // You can replace this with your preferred logging mechanism
-            Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] {message}");
-            // Or if you have another logging method available in the bridge class, use that
-        }
-
-        private async Task HandleTestCompletion(ITestExecutor executor, bool wasCancelled)
+        private async Task HandleTestCompletion(bool wasCancelled)
         {
             _testSessionActive = false;
 
