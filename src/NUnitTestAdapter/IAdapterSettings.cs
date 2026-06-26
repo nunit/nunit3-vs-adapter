@@ -20,6 +20,7 @@ public interface IAdapterSettings
     string WorkDirectory { get; }
     string Where { get; }
     int DefaultTimeout { get; }
+    int DefaultMaxTime { get; }
     int NumberOfTestWorkers { get; }
     bool ShadowCopyFiles { get; }
     int Verbosity { get; }

@@ -233,6 +233,10 @@ public abstract class NUnitTestAdapter
             package.Settings[PackageSettings.DefaultTimeout] = timeout;
 #endif
 
+        int maxTime = Settings.DefaultMaxTime;
+        if (maxTime > 0)
+            package.Settings[PackageSettings.DefaultMaxTime] = maxTime;
+
         package.Settings[PackageSettings.InternalTraceLevel] = Settings.InternalTraceLevelEnum.ToString();
         package.Settings[PackageSettings.DebugAgent] = Settings.DebugEngine;
 
