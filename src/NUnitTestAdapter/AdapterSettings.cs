@@ -121,6 +121,7 @@ public class AdapterSettings(ITestLogger logger) : IAdapterSettings
 
     public bool NewOutputXmlFileForEachRun { get; private set; }
     public int DefaultTimeout { get; private set; }
+    public int DefaultMaxTime { get; private set; }
 
     public int NumberOfTestWorkers { get; private set; }
 
@@ -241,6 +242,7 @@ public class AdapterSettings(ITestLogger logger) : IAdapterSettings
         WorkDirectory = GetInnerTextWithLog(nunitNode, nameof(WorkDirectory));
         Where = GetInnerTextWithLog(nunitNode, nameof(Where));
         DefaultTimeout = GetInnerTextAsInt(nunitNode, nameof(DefaultTimeout), 0);
+        DefaultMaxTime = GetInnerTextAsInt(nunitNode, nameof(DefaultMaxTime), 0);
         NumberOfTestWorkers = GetInnerTextAsInt(nunitNode, nameof(NumberOfTestWorkers), -1);
         ShadowCopyFiles = GetInnerTextAsBool(nunitNode, nameof(ShadowCopyFiles), false);
         UseVsKeepEngineRunning = GetInnerTextAsBool(nunitNode, nameof(UseVsKeepEngineRunning), false);

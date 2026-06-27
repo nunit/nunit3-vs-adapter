@@ -171,6 +171,13 @@ public static class PackageSettings
 #endif
 
     /// <summary>
+    /// Integer value in milliseconds for the default max time value
+    /// for test cases. Tests exceeding this time are reported as failures.
+    /// Unlike DefaultTimeout, this does not use Thread.Abort and works on all platforms.
+    /// </summary>
+    public const string DefaultMaxTime = "DefaultMaxTime";
+
+    /// <summary>
     /// A TextWriter to which the internal trace will be sent.
     /// </summary>
     public const string InternalTraceWriter = "InternalTraceWriter";

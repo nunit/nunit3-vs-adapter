@@ -71,6 +71,7 @@ public class AdapterSettingsTests
             Assert.That(_settings.WorkDirectory, Is.Null);
             Assert.That(_settings.NumberOfTestWorkers, Is.EqualTo(-1));
             Assert.That(_settings.DefaultTimeout, Is.EqualTo(0));
+            Assert.That(_settings.DefaultMaxTime, Is.EqualTo(0));
             Assert.That(_settings.Verbosity, Is.EqualTo(0));
             Assert.That(_settings.ShadowCopyFiles, Is.False);
             Assert.That(_settings.UseVsKeepEngineRunning, Is.False);
@@ -276,6 +277,13 @@ public class AdapterSettingsTests
     {
         _settings.Load("<RunSettings><NUnit><DefaultTimeout>5000</DefaultTimeout></NUnit></RunSettings>");
         Assert.That(_settings.DefaultTimeout, Is.EqualTo(5000));
+    }
+
+    [Test]
+    public void DefaultMaxTimeSetting()
+    {
+        _settings.Load("<RunSettings><NUnit><DefaultMaxTime>5000</DefaultMaxTime></NUnit></RunSettings>");
+        Assert.That(_settings.DefaultMaxTime, Is.EqualTo(5000));
     }
 
     [Test]
