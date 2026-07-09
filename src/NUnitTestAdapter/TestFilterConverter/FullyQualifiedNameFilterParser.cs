@@ -178,14 +178,17 @@ public static class FullyQualifiedNameFilterParser
 
     /// <summary>
     /// Splits on start or '|' only when followed by "FullyQualifiedName" and '='.
+    /// Escaped '|' (i.e. '\|') inside a value is preserved and never treated as a separator.
     /// </summary>
-    /// <returns>Returns the values after '=' up to the next '|' (or end), trimmed.</returns>
+    /// <returns>Returns the values after '=' up to the next unescaped '|' (or end), trimmed.</returns>
     public static List<string> SplitOnFullyQualifiedName(string input)
     {
         var result = new List<string>();
         if (string.IsNullOrEmpty(input)) return result;
 
-        var pattern = @"(?:^|\|)\s*FullyQualifiedName\s*=\s*([^|]*)";
+        // The value group '(?:\\.|[^|])*' consumes escaped pairs (e.g. '\|', '\)', '\"') as a
+        // unit, so only an unescaped '|' ends a value and starts the next clause.
+        var pattern = @"(?:^|\|)\s*FullyQualifiedName\s*=\s*((?:\\.|[^|])*)";
 
         foreach (Match m in Regex.Matches(input, pattern))
         {
