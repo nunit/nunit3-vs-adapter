@@ -16,8 +16,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageVersion>
     <PackageVersion Include="Castle.Core" Version="5.2.1" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.VSTestBridge" Version="2.2.3" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.2.3" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.VSTestBridge" Version="2.3.1" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.3.1" />
     <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="10.0.9" />
   </ItemGroup>
   <ItemGroup>
