@@ -9,6 +9,10 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
     <LangVersion>latest</LangVersion>
+    <!-- Microsoft.TestPlatform.Filter.Source compiles VSTest's filter types into this assembly. On net8.0
+         the same types are also present in the referenced Microsoft.VisualStudio.TestPlatform.Common
+         binary, which raises CS0436 (the source-compiled copy is the one used, which is what we want). -->
+    <NoWarn>$(NoWarn);CS0436</NoWarn>
   </PropertyGroup>
 
     <PropertyGroup>
@@ -19,6 +23,7 @@
     <PackageReference Include="NSubstitute" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <PackageReference Include="TestCentric.Metadata" />
+    <PackageReference Include="Microsoft.TestPlatform.Filter.Source" PrivateAssets="all" />
       <PackageReference Include="Microsoft.NET.Test.Sdk" />
 
   </ItemGroup>
