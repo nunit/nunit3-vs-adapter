@@ -24,7 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
+using Microsoft.VisualStudio.TestPlatform.Common.Filtering;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using NSubstitute;
@@ -36,18 +36,30 @@ public static class FilteringTestUtils
 {
     public static ITestCaseFilterExpression CreateVSTestFilterExpression(string filter)
     {
-        // Use reflection to create the FilterExpressionWrapper and TestCaseFilterExpression because
-        // they are internal types in a different assembly.
-        var filterExpressionWrapperType = Type.GetType("Microsoft.Testing.Extensions.VSTestBridge.ObjectModel.FilterExpressionWrapper, Microsoft.Testing.Extensions.VSTestBridge", throwOnError: true);
+        // FilterExpressionWrapper and TestCaseFilterExpression come from the source-only
+        // Microsoft.TestPlatform.Filter.Source package (compiled into this test assembly). This is the
+        // same package Microsoft.Testing.Extensions.VSTestBridge uses to parse filters, so the tests build
+        // the filter expression exactly as the product does.
+        //
+        // Outside the vstest repo that package compiles TestCaseFilterExpression as an internal type whose
+        // MatchTestCase takes only the property value provider and which does NOT implement the public
+        // ITestCaseFilterExpression. So we wrap it here, mirroring the adapter the bridge itself uses
+        // (VSTestBridge's BridgeFilterExpression / MSTest's MSTestFilterExpression).
+        var testCaseFilterExpression = new TestCaseFilterExpression(new FilterExpressionWrapper(filter));
+        return new BridgeFilterExpression(testCaseFilterExpression);
+    }
 
-        var filterExpressionWrapper =
-            filterExpressionWrapperType.GetTypeInfo()
-                .GetConstructor([typeof(string)])
-                .Invoke([filter]);
+    private sealed class BridgeFilterExpression : ITestCaseFilterExpression
+    {
+        private readonly TestCaseFilterExpression _testCaseFilterExpression;
 
-        return (ITestCaseFilterExpression)Type.GetType("Microsoft.Testing.Extensions.VSTestBridge.ObjectModel.TestCaseFilterExpression, Microsoft.Testing.Extensions.VSTestBridge", throwOnError: true).GetTypeInfo()
-            .GetConstructor([filterExpressionWrapperType])
-            .Invoke([filterExpressionWrapper]);
+        public BridgeFilterExpression(TestCaseFilterExpression testCaseFilterExpression)
+            => _testCaseFilterExpression = testCaseFilterExpression;
+
+        public string TestCaseFilterValue => _testCaseFilterExpression.TestCaseFilterValue;
+
+        public bool MatchTestCase(TestCase testCase, Func<string, object> propertyValueProvider)
+            => _testCaseFilterExpression.MatchTestCase(propertyValueProvider);
     }
 
     public static VsTestFilter CreateTestFilter(ITestCaseFilterExpression filterExpression)
