@@ -91,7 +91,17 @@ public sealed class IsolatedWorkspaceManager : IDisposable
         writer.WriteAttributeString("value", testNupkgDirectory);
         writer.WriteEndElement();
 
+        writer.WriteEndElement(); // packageSources
+
+        writer.WriteStartElement("packageSourceMapping");
+        writer.WriteStartElement("packageSource");
+        writer.WriteAttributeString("key", "Build script package output");
+        writer.WriteStartElement("package");
+        writer.WriteAttributeString("pattern", "NUnit3TestAdapter");
         writer.WriteEndElement();
         writer.WriteEndElement();
+        writer.WriteEndElement(); // packageSourceMapping
+
+        writer.WriteEndElement(); // configuration
     }
 }
