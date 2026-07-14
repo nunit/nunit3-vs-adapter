@@ -4,7 +4,7 @@
     <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.7.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.8.1" />
     <PackageVersion Include="NSubstitute" Version="6.0.0" />
     <PackageVersion Include="nunit" Version="5.0.0-beta.1" />
     <PackageVersion Include="nunit.engine" Version="3.22.0" />
@@ -16,13 +16,13 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageVersion>
     <PackageVersion Include="Castle.Core" Version="5.2.1" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.VSTestBridge" Version="2.3.1" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.3.1" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.VSTestBridge" Version="2.3.2" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.3.2" />
     <!-- Source-only package providing VSTest's filter-expression types (FilterExpressionWrapper /
          TestCaseFilterExpression), compiled directly into the test assembly. This is the same package the
          VSTestBridge uses internally, so the tests build the filter expression exactly as the product
          does. Only available on the dnceng test-tools feed (see nuget.config). -->
-    <PackageVersion Include="Microsoft.TestPlatform.Filter.Source" Version="18.8.0-release-26277-01" />
+    <PackageVersion Include="Microsoft.TestPlatform.Filter.Source" Version="18.8.1" />
     <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="10.0.9" />
   </ItemGroup>
   <ItemGroup>
