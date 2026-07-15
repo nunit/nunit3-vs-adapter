@@ -17,13 +17,13 @@
     </PackageVersion>
     <PackageVersion Include="Castle.Core" Version="5.2.1" />
     <PackageVersion Include="Microsoft.Testing.Extensions.VSTestBridge" Version="2.3.2" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.3.1" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.3.2" />
     <!-- Source-only package providing VSTest's filter-expression types (FilterExpressionWrapper /
          TestCaseFilterExpression), compiled directly into the test assembly. This is the same package the
          VSTestBridge uses internally, so the tests build the filter expression exactly as the product
          does. Only available on the dnceng test-tools feed (see nuget.config). -->
-    <PackageVersion Include="Microsoft.TestPlatform.Filter.Source" Version="18.10.0-preview-26364-05" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.TestPlatform.Filter.Source" Version="18.10.0-preview-26365-01" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="10.0.10" />
   </ItemGroup>
   <ItemGroup>
     <GlobalPackageReference Include="NUnit.Analyzers" Version="4.14.0">
