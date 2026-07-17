@@ -26,6 +26,7 @@ using System.Reflection;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
+using NUnit.VisualStudio.TestAdapter.Dump;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 
 namespace NUnit.VisualStudio.TestAdapter;
@@ -39,6 +40,8 @@ public interface ITestLogger
     void Info(string message);
     int Verbosity { get; set; }
     void Debug(string message);
+    void Debug(string elementName, string message);
+    void SetDump(IDumpXml dump);
 }
 
 /// <summary>
@@ -56,6 +59,7 @@ public class TestLogger(IMessageLogger messageLogger) : IMessageLogger, ITestLog
     private const string ExceptionFormat = "Exception {0}, {1}";
 
     private IMessageLogger MessageLogger { get; } = messageLogger;
+    private IDumpXml _dump;
 
     public int Verbosity { get; set; }
 
@@ -103,6 +107,17 @@ public class TestLogger(IMessageLogger messageLogger) : IMessageLogger, ITestLog
         if (adapterSettings?.Verbosity >= 5)
             SendMessage(TestMessageLevel.Informational, message);
     }
+
+    public void Debug(string elementName, string message)
+    {
+        if (adapterSettings?.Verbosity >= 5)
+        {
+            SendMessage(TestMessageLevel.Informational, $"{elementName}: {message}");
+            _dump?.AddXmlElement(elementName, message);
+        }
+    }
+
+    public void SetDump(IDumpXml dump) => _dump = dump;
 
     #endregion
 

@@ -46,32 +46,28 @@ public abstract class Execution(IExecutionContext ctx)
             return false;
         }
 
-        // CRITICAL: Dump immediately before engine call to see if we get stuck here
         nUnit3TestExecutor.LogToDump("AboutToCallEngineRun", "Engine.Run() about to be called");
-        TestLog.Debug("About to call engine Run - dump written");
+        TestLog.Debug("EngineRun", "starting");
 
         try
         {
-            TestLog.Debug("About to call NUnitEngineAdapter.Run()");
             var results = NUnitEngineAdapter.Run(listener, filter);
-            TestLog.Debug("NUnitEngineAdapter.Run() completed");
+            TestLog.Debug("EngineRun", "completed");
 
-            // If we get here, the engine returned - dump this fact
             nUnit3TestExecutor.LogToDump("EngineRunCompleted", "Engine.Run() completed successfully");
 
             if (nUnit3TestExecutor.IsCancelled)
             {
-                TestLog.Debug("Execution was cancelled, skipping test output generation");
                 nUnit3TestExecutor.LogToDump("SkippedTestOutput", "Test output generation skipped due to cancellation");
             }
             else
             {
-                TestLog.Debug("About to generate test output");
+                TestLog.Debug("TestOutput", "starting generation");
                 nUnit3TestExecutor.LogToDump("AboutToGenerateTestOutput", "Starting test output generation");
 
                 NUnitEngineAdapter.GenerateTestOutput(results, discovery.AssemblyPath, TestOutputXmlFolder);
 
-                TestLog.Debug("Test output generation completed");
+                TestLog.Debug("TestOutput", "completed");
                 nUnit3TestExecutor.LogToDump("TestOutputCompleted", "Test output generation completed successfully");
             }
         }
