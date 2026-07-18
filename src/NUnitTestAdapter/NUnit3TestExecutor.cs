@@ -715,9 +715,6 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
                 TestLog.Debug("Assembly processing completed normally");
             }
 
-            // Flush any accumulated elements that haven't been written yet
-            Dump?.AppendToExistingDump();
-
             try
             {
                 TestLog.Debug("CloseRunner", "starting");
@@ -732,6 +729,9 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
 
                 TestLog.Warning($"   Exception thrown unloading tests from {assemblyPath}", ex);
             }
+
+            // Flush after CloseRunner so its log entries are included in the dump
+            Dump?.AppendToExistingDump();
         }
     }
 

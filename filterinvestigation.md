@@ -3,11 +3,27 @@
 ## Scope
 
 Two entry points: `RunTests(IEnumerable<string> sources)` and `RunTests(IEnumerable<TestCase> tests)`.
-Three concrete scenarios (1 fixture, 3 tests):
+
+There are four distinct calling modes (2 callers × 2 filter states), each reaching the adapter differently:
+
+| Scenario | Caller       | Filter?      | Entry point            | Who builds the filter              |
+| -------- | ------------ | ------------ | ---------------------- | ---------------------------------- |
+| **A**    | cmd line     | No           | `RunTests(sources)`    | Adapter → `TestFilter.Empty`       |
+| **B**    | cmd line     | Yes          | `RunTests(sources)`    | Adapter → from VS filter expression |
+| **C**    | IDE          | No (run all) | `RunTests(testCases)`  | Adapter → `FilterByList(all cases)` |
+| **D**    | IDE          | Yes (subset) | `RunTests(testCases)`  | **VS pre-filters**, adapter → `FilterByList(subset)` |
+
+The critical distinction for the IDE path (C and D): VS Test Explorer handles the filtering itself and
+passes only the matching `TestCase` objects to the adapter. The adapter never sees a VS filter expression
+in this path. From the adapter's perspective, C and D are the same code path — the only difference is
+how many test cases arrive.
+
+Concrete examples (1 fixture, 3 tests — Test1, Test2, Test3):
 
 - **A**: `dotnet test` — no filter
 - **B**: `dotnet test --filter "FullyQualifiedName=MyNs.MyFixture.Test1"` — FQN filter, 1 test
-- **C**: IDE run — VS passes a specific set of TestCase objects
+- **C**: VS Test Explorer → Run All Tests — all 3 test cases passed to adapter
+- **D**: VS Test Explorer → right-click Test1 → Run — only Test1 passed to adapter
 
 ---
 
@@ -248,19 +264,20 @@ Filter is not Empty → `CheckFilter` is called. Filter is not a category or par
 <filter><test>MyNs.MyFixture.Test1</test></filter>
 ```
 
-### Scenario C: IDE run (TestCase overload, all 3 tests selected)
+### Scenario C: IDE run — no filter (TestCase overload, all 3 tests)
 
 ```
 RunType = Ide
 ExecutionFactory creates IdeExecution
 ```
 
+VS Test Explorer passes all 3 discovered test cases. The adapter never receives a VS filter expression.
+
 1. `FilterByList(assemblyGroup)` with 3 test cases → `<filter><or><test>T1</test><test>T2</test><test>T3</test></or></filter>`
 2. `Explore` is called with that filter → discovers all 3 tests
-3. `IdeExecution.CheckFilterInCurrentMode`:
-   - filter is not Empty → `CheckFilter(filter, discovery)` is called
+3. `IdeExecution.CheckFilterInCurrentMode` → `CheckFilter(filter, discovery)`:
    - `discovery.LoadedTestCases = [T1, T2, T3]`
-   - Rebuilds via `FilterByList([T1, T2, T3])` → same OR list
+   - Rebuilds via `FilterByList([T1, T2, T3])` → same OR list (no change)
 
 **Filter sent to `engine.Run`:**
 
@@ -268,8 +285,38 @@ ExecutionFactory creates IdeExecution
 <filter><or><test>T1</test><test>T2</test><test>T3</test></or></filter>
 ```
 
-If the number of test cases exceeds `AssemblySelectLimit` (default 1000):
-- `IdeExecution.CheckFilterInCurrentMode` → `CheckFilter` → `discovery.NoOfLoadedTestCasesAboveLimit=true` → returns `TestFilter.Empty` instead
+If the number of test cases exceeds `AssemblySelectLimit` (default 2000):
+- `CheckFilter` → `discovery.NoOfLoadedTestCasesAboveLimit=true` → returns `TestFilter.Empty` (run all)
+
+### Scenario D: IDE run — with filter (TestCase overload, subset)
+
+```
+RunType = Ide
+ExecutionFactory creates IdeExecution
+```
+
+VS Test Explorer applies its own filter (search box, category, right-click selection, etc.) and passes only
+the matching test cases to the adapter. In this example, the user selects Test1 only.
+
+1. Adapter receives `[Test1]` — no filter expression is provided.
+2. `FilterByList([Test1])` → `<filter><test>T1</test></filter>`
+3. `Explore` with that filter → `discovery.LoadedTestCases = [T1]`
+4. `CheckFilter` → `FilterByList([T1])` → same single-test filter
+
+**Filter sent to `engine.Run`:**
+
+```xml
+<filter><test>testcontextissues.Tests.Test1</test></filter>
+```
+
+This is structurally identical to Scenario C — the only difference is the number of test cases VS chose
+to pass in. The adapter code path is unchanged.
+
+**Important:** the filter is *always* a list of `<test>` elements in the IDE path, regardless of how the
+user filtered in Test Explorer (category box, search bar, trait panel, right-click). VS resolves the
+filter to a concrete set of `TestCase` objects before calling the adapter. The adapter never sees a
+`<cat>` or property expression in this path — that is only possible in Scenario B where the raw VS
+filter expression string is passed through and parsed into NUnit XML.
 
 ---
 
@@ -325,8 +372,9 @@ effect at all.
 | ------------------------------------------- | :-------------------------: | ----------------------------|
 | A: `dotnet test` (no filter)                | No                          | `TestFilter.Empty`          |
 | B: `dotnet test --filter FullyQualifiedName=...` | No                     | `<test>FQN</test>` XML      |
-| C: IDE TestCase overload                    | No                          | `<or><test>…</test>…</or>` XML built from FQNs |
-| C with PreFilter=true                       | No (but LOAD hint set)      | As above + type pre-load    |
+| C: IDE — run all (all cases passed in)      | No                          | `<or><test>…</test>…</or>` XML from all FQNs |
+| D: IDE — with filter (subset passed in)     | No                          | `<test>FQN</test>` or `<or>…</or>` from subset FQNs |
+| B/C/D with PreFilter=true                   | No (but LOAD hint set)      | As above + type pre-load hint on package |
 
 ---
 
@@ -360,8 +408,8 @@ RunTests(sources or testCases)
 | File                                                         | Role                                      |
 | ------------------------------------------------------------ | ------------------------------------------|
 | `src/NUnitTestAdapter/NUnit3TestExecutor.cs:173`             | `RunTests(sources)` entry point           |
-| `src/NUnitTestAdapter/NUnit3TestExecutor.cs:335`             | `RunTests(testCases)` entry point         |
-| `src/NUnitTestAdapter/NUnit3TestExecutor.cs:576`             | `RunAssembly` — orchestrates discovery+run|
+| `src/NUnitTestAdapter/NUnit3TestExecutor.cs:336`             | `RunTests(testCases)` entry point         |
+| `src/NUnitTestAdapter/NUnit3TestExecutor.cs:577`             | `RunAssembly` — orchestrates discovery+run|
 | `src/NUnitTestAdapter/NUnitTestAdapter.cs:191`               | `CreateTestPackage` — LOAD hint           |
 | `src/NUnitTestAdapter/NUnitTestFilterBuilder.cs`             | All filter construction methods           |
 | `src/NUnitTestAdapter/TestFilterConverter/TestFilterParser.cs`| VS filter → NUnit XML translation         |
@@ -369,3 +417,141 @@ RunTests(sources or testCases)
 | `src/NUnitTestAdapter/ExecutionProcesses/IdeExecution.cs`    | IDE `CheckFilterInCurrentMode`            |
 | `src/NUnitTestAdapter/ExecutionProcesses/VsTestExecution.cs` | VSTest `CheckVsTestFilter` + mode check   |
 | `src/NUnitTestAdapter/ExecutionProcesses/ExecutionFactory.cs`| Picks `IdeExecution` vs `VsTestExecution` |
+| `src/NUnitTestAdapter/Dump/DumpXml.cs`                       | Dump file writer                          |
+
+---
+
+## RunType and entry point selection
+
+`RunType` is an enum set at the top of each `RunTests` overload:
+
+```csharp
+// RunTests(IEnumerable<TestCase>) always sets:
+RunType = RunType.Ide;
+
+// RunTests(IEnumerable<string>) calls GetRunType():
+var runType = !Settings.DesignMode
+    ? Settings.DiscoveryMethod == DiscoveryMethod.Legacy
+        ? RunType.CommandLineLegacy
+        : Settings.UseNUnitFilter
+            ? RunType.CommandLineCurrentNUnit
+            : RunType.CommandLineCurrentVSTest
+    : RunType.Ide;
+```
+
+`DesignMode` is set by the test platform host. VS Test Explorer sets it to `true`; `dotnet test` and
+`vstest.console` set it to `false`. Because `RunTests(IEnumerable<TestCase>)` hard-codes `RunType.Ide`,
+it does not matter which host called it — the IDE path is always used when specific test cases are provided.
+
+### RunType → execution class mapping
+
+| RunType                  | Execution class    | `CheckFilterInCurrentMode` behaviour      |
+| ------------------------ | ------------------ | ----------------------------------------- |
+| `CommandLineCurrentNUnit`| `VsTestExecution`  | Calls `CheckVsTestFilter` then `CheckFilter` |
+| `CommandLineCurrentVSTest`| `VsTestExecution` | Same                                      |
+| `CommandLineLegacy`      | legacy path        | —                                         |
+| `Ide`                    | `IdeExecution`     | Calls `CheckFilter` directly              |
+
+`ExecutionFactory.Create(this)` reads `RunType` and the MTP flag to instantiate the right class.
+
+### What triggers each entry point in practice
+
+| Caller                                    | Entry point                    | RunType                    |
+| ----------------------------------------- | ------------------------------ | -------------------------- |
+| `dotnet test` (no filter)                 | `RunTests(sources)`            | `CommandLineCurrentNUnit`  |
+| `dotnet test --filter FQN=...`            | `RunTests(sources)`            | `CommandLineCurrentNUnit`  |
+| `dotnet test --filter TestCategory=...`   | `RunTests(sources)`            | `CommandLineCurrentNUnit`  |
+| `vstest.console assembly.dll`             | `RunTests(sources)`            | `CommandLineCurrentNUnit`  |
+| `vstest.console /Tests:Name1,Name2`       | `RunTests(testCases)` ¹        | `Ide`                      |
+| VS Test Explorer (run all / selected)     | `RunTests(testCases)`          | `Ide`                      |
+
+¹ vstest.console with `/Tests:` first runs discovery (separate process invocation), then passes the
+matched `TestCase` objects to the execution overload. Confirmed empirically via dump output showing
+`<RunningBy>TestCases</RunningBy>` and `RunTests: by TestCases` in console output.
+
+---
+
+## Execution sequence — as observed in the dump file
+
+Both entry points converge on `RunAssembly`, which produces the following ordered sequence of
+operations. Verified against `E_testcontextissues.dll.dump` for both the sources path
+(RunType=CommandLineCurrentNUnit) and the TestCase path (RunType=Ide).
+
+```
+CreateDump()          → initial file written: header + <RunningBy>Sources|TestCases</RunningBy> + footer
+                        txt buffer reset to empty
+
+CreateTestPackage     → Debug("CreateTestPackage", "starting")
+                        [LOAD hint added to package if PreFilter=true and testCases != null]
+
+CreateRunner          → Debug("CreateRunner", "starting")
+                        NUnitEngineAdapter.CreateRunner(package)
+                        LogToDump("EngineLog", "CreateRunner - starting")   → flush
+                        LogToDump("EngineLog", "CreateRunner - completed")  → flush
+
+StartDiscoveryInExecution  → writes VSTest input block to dump
+                             (VSTest input section, TestPackage, TestFilter)
+
+Explore               → Debug("Explore", "starting")
+                        NUnitEngineAdapter.Explore(filter)
+                        LogToDump("EngineLog", "Explore - starting")        → flush
+                        LogToDump("EngineLog", "Explore - completed")       → flush
+                      → Debug("Explore", "completed")
+                        Dump.AddString(discoveryResults XML)
+                        DiscoveryConverter.Convert(discoveryResults)
+                        → populates LoadedTestCases
+
+CheckFilterInCurrentMode  → CheckFilter(filter, discovery)
+                            may rebuild filter from LoadedTestCases
+
+Execution             → Debug("Execution", "starting")
+                        LogToDump("AboutToCallEngineRun")                   → flush
+                      → Debug("EngineRun", "starting")
+                        NUnitEngineAdapter.Run(listener, filter)
+                        [NUnitTestEvent entries written to dump during run]
+                      → Debug("EngineRun", "completed")
+                        LogToDump("EngineRunCompleted")                     → flush
+
+TestOutput            → Debug("TestOutput", "starting generation")
+                        LogToDump("AboutToGenerateTestOutput")              → flush
+                        NUnitEngineAdapter.GenerateTestOutput(...)
+                      → Debug("TestOutput", "completed")
+                        LogToDump("TestOutputCompleted")                    → flush
+                      → Debug("Execution", "completed")
+
+CloseRunner           → Debug("CloseRunner", "starting")
+                        NUnitEngineAdapter.CloseRunner()
+                        LogToDump("EngineLog", "CloseRunner - starting")    → flush
+                        LogToDump("EngineLog", "CloseRunner - completed")   → flush
+                      → Debug("CloseRunner", "completed")
+
+ExecutionResult       → LogToDump("ExecutionResult", "completed normally")  → flush
+                        AppendToExistingDump()   (final no-op flush)
+```
+
+### Flush mechanism
+
+Two mechanisms write to the dump file:
+
+- **`LogToDump(elementName, message)`** — adds a timestamped element to the in-memory `txt` buffer, then
+  calls `AppendToExistingDump()` which reads the existing file, removes the closing tag, appends `txt`,
+  re-adds the closing tag, and writes the file. Resets `txt` after each call.
+
+- **`TestLog.Debug(elementName, message)`** — at verbosity ≥ 5 only: sends to VS output AND calls
+  `dump.AddXmlElement(elementName, message)` which appends to the in-memory `txt` buffer. Does not flush.
+  These elements accumulate in `txt` and are written to the file on the next `AppendToExistingDump` call.
+
+`DumpXml.CreateDump()` writes the initial file immediately (header + `<RunningBy>` + closing tag) then
+resets `txt`. All subsequent writes go through the append mechanism, so the file is always valid XML
+throughout the run.
+
+### Sources path vs TestCase path
+
+The two paths are structurally identical inside `RunAssembly`. The only visible difference in the dump:
+
+| Element              | Sources path           | TestCase path                  |
+| -------------------- | ---------------------- | ------------------------------ |
+| `<RunningBy>`        | `Sources`              | `TestCases`                    |
+| VSTest input section | package only           | package + test case list       |
+| `<RunAssemblies>`    | present (outer wrapper)| absent                         |
+| `<MultipleAssemblies>`| present if >1 source  | present if >1 assembly group   |
