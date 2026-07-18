@@ -6,6 +6,8 @@
         <RootNamespace>NUnit.VisualStudio.TestAdapter</RootNamespace>
         <!-- For testing and debugging-->
         <TargetFrameworks>net462;net8.0</TargetFrameworks>
+        <!-- This is an adapter library, not a test host. Prevents VS from trying to run it as an MTP app. -->
+        <IsTestProject>false</IsTestProject>
         <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
         <SourceLinkOriginUrl>https://github.com/nunit/nunit3-vs-adapter</SourceLinkOriginUrl>
         <SourceLinkCreate>true</SourceLinkCreate>
