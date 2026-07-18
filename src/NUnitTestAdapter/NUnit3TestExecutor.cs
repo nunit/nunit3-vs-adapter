@@ -182,7 +182,7 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
 #pragma warning restore SYSLIB0012
 #endif
         InitializeForExecution(runContext, frameworkHandle);
-        TestLog.Debug($"RunTests by IEnumerable<string>,({sources.Count()} entries), called from {WhoIsCallingUsEntry}");
+        TestLog.Debug("RunTests", $"by sources ({sources.Count()} entries), called from {WhoIsCallingUsEntry}");
 
         if (Settings.InProcDataCollectorsAvailable && sources.Count() > 1)
         {
@@ -197,6 +197,7 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
         if (firstSource != null)
         {
             Dump = DumpXml.CreateDump(firstSource, null, Settings);
+            TestLog.SetDump(Dump);
             LogToDump("SetupPhase", $"Starting execution of {sources.Count()} sources", appendToDump: false);
         }
         else
@@ -249,9 +250,9 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
 
             if (shouldRunAssemblies)
             {
-                TestLog.Debug("About to call RunAssemblies");
+                TestLog.Debug("RunAssemblies", "starting");
                 RunAssemblies(sources, filter);
-                TestLog.Debug("RunAssemblies completed or stopped");
+                TestLog.Debug("RunAssemblies", "completed");
             }
         }
 
@@ -338,13 +339,13 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
         CheckIfDebug();
         InitializeForExecution(runContext, frameworkHandle);
         RunType = RunType.Ide;
-        TestLog.Debug($"RunTests by IEnumerable<TestCase>. RunType = Ide, called from {WhoIsCallingUsEntry}");
+        TestLog.Debug("RunTests", $"by TestCases, called from {WhoIsCallingUsEntry}");
         var timing = new TimingLogger(Settings, TestLog);
         Debug.Assert(NUnitEngineAdapter != null, "NUnitEngineAdapter is null");
         Debug.Assert(NUnitEngineAdapter.EngineEnabled, "NUnitEngineAdapter TestEngine is null");
         var assemblyGroups = tests.GroupBy(tc => tc.Source).ToList();
         if (assemblyGroups.Count > 1)
-            TestLog.Debug($"Multiple ({assemblyGroups.Count}) assemblies in one test");
+            TestLog.Debug("MultipleAssemblies", $"{assemblyGroups.Count} assemblies in one test run");
         if (IsInProcDataCollectorsSpecifiedWithMultipleAssemblies(assemblyGroups))
         {
             TestLog.Error(
@@ -400,7 +401,7 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
             DumpActiveThreads();
         }
 
-        Dump?.DumpForExecution();
+        Dump?.AppendToExistingDump();
         Unload();
     }
 
@@ -582,6 +583,7 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
             if (Dump == null)
             {
                 Dump = DumpXml.CreateDump(assemblyPath, testCases, Settings);
+                TestLog.SetDump(Dump);
             }
             else
             {
@@ -602,7 +604,7 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
 
         try
         {
-            TestLog.Debug("About to create test package");
+            TestLog.Debug("CreateTestPackage", "starting");
             var package = CreateTestPackage(assemblyPath, testCases);
 
             if (_cancelled)
@@ -612,7 +614,7 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
                 return;
             }
 
-            TestLog.Debug("About to create NUnit engine runner");
+            TestLog.Debug("CreateRunner", "starting");
             // Pass dump to engine adapter so it can log to dump files
             NUnitEngineAdapter.SetDump(Dump);
             NUnitEngineAdapter.CreateRunner(package);
@@ -628,9 +630,9 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
             Dump?.StartDiscoveryInExecution(testCases, filter, package);
             TestLog.DebugRunfrom();
 
-            TestLog.Debug("About to call NUnitEngineAdapter.Explore()");
+            TestLog.Debug("Explore", "starting");
             var discoveryResults = NUnitEngineAdapter.Explore(filter);
-            TestLog.Debug("NUnitEngineAdapter.Explore() completed");
+            TestLog.Debug("Explore", "completed");
             Dump?.AddString(discoveryResults.AsString());
 
             if (_cancelled)
@@ -654,10 +656,10 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
 
                 if (!Settings.SkipExecutionWhenNoTests || discovery.AllTestCases.Any())
                 {
-                    TestLog.Debug("About to start test execution");
+                    TestLog.Debug("Execution", "starting");
                     var ea = ExecutionFactory.Create(this);
                     ea.Run(filter, discovery, this);
-                    TestLog.Debug("Test execution completed or stopped");
+                    TestLog.Debug("Execution", "completed");
                 }
                 else
                 {
@@ -713,18 +715,11 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
                 TestLog.Debug("Assembly processing completed normally");
             }
 
-            // Only dump if this is a standalone assembly run (not part of sources run)
-            // For sources run, the main RunTests method handles the final dump
-            if (testCases != null) // This indicates it's a TestCase run, not a Sources run
-            {
-                Dump?.DumpForExecution();
-            }
-
             try
             {
-                TestLog.Debug("About to close NUnit engine runner");
+                TestLog.Debug("CloseRunner", "starting");
                 NUnitEngineAdapter?.CloseRunner();
-                TestLog.Debug("NUnit engine runner closed");
+                TestLog.Debug("CloseRunner", "completed");
             }
             catch (Exception ex)
             {
@@ -734,6 +729,9 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
 
                 TestLog.Warning($"   Exception thrown unloading tests from {assemblyPath}", ex);
             }
+
+            // Flush after CloseRunner so its log entries are included in the dump
+            Dump?.AppendToExistingDump();
         }
     }
 
