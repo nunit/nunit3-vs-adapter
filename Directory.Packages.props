@@ -22,7 +22,7 @@
          TestCaseFilterExpression), compiled directly into the test assembly. This is the same package the
          VSTestBridge uses internally, so the tests build the filter expression exactly as the product
          does. Only available on the dnceng test-tools feed (see nuget.config). -->
-    <PackageVersion Include="Microsoft.TestPlatform.Filter.Source" Version="18.10.0-preview-26365-03" />
+    <PackageVersion Include="Microsoft.TestPlatform.Filter.Source" Version="18.10.0-preview-26371-02" />
     <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="10.0.10" />
   </ItemGroup>
   <ItemGroup>
