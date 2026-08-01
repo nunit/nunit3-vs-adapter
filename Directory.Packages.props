@@ -16,7 +16,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageVersion>
     <PackageVersion Include="Castle.Core" Version="5.2.1" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.VSTestBridge" Version="2.3.2" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.VSTestBridge" Version="2.3.3" />
     <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.3.2" />
     <!-- Source-only package providing VSTest's filter-expression types (FilterExpressionWrapper /
          TestCaseFilterExpression), compiled directly into the test assembly. This is the same package the
