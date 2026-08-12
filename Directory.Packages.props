@@ -23,7 +23,7 @@
          VSTestBridge uses internally, so the tests build the filter expression exactly as the product
          does. Only available on the dnceng test-tools feed (see nuget.config). -->
     <PackageVersion Include="Microsoft.TestPlatform.Filter.Source" Version="18.10.0-release-26404-02" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="10.0.11" />
   </ItemGroup>
   <ItemGroup>
     <GlobalPackageReference Include="NUnit.Analyzers" Version="4.14.0">
