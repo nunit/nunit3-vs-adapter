@@ -89,6 +89,20 @@ public class TestFilterParserTests
         "FullyQualifiedName!~My.Test.Fixture.Method(42)",
         @"<not><test re='1'>My\.Test\.Fixture\.Method\(42\)</test></not>")]
 
+    // FQN - Escaped filter operators in method arguments
+    [TestCase(
+        @"FullyQualifiedName=My.Test.Fixture.Method(Case 1: X \= Y)",
+        "<test>My.Test.Fixture.Method(Case 1: X = Y)</test>")]
+    [TestCase(
+        @"FullyQualifiedName~My.Test.Fixture.Method(Case 1: X \= Y)",
+        @"<test re='1'>My\.Test\.Fixture\.Method\(Case 1: X = Y\)</test>")]
+    [TestCase(
+        @"FullyQualifiedName=My.Test.Fixture.Method(a \& b \| c \! d \~ e)",
+        "<test>My.Test.Fixture.Method(a &amp; b | c ! d ~ e)</test>")]
+    [TestCase(
+        @"FullyQualifiedName=My.Test.Fixture.Method(C:\\Temp)",
+        @"<test>My.Test.Fixture.Method(C:\Temp)</test>")]
+
     // FQN - String argument escaping
     [TestCase(
         "FullyQualifiedName=My.Test.Fixture.Method(\"xyz\")",

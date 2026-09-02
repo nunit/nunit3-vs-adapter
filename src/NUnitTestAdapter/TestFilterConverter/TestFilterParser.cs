@@ -26,6 +26,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
+
 // Missing XML Docs
 #pragma warning disable 1591
 
@@ -160,7 +162,7 @@ public class TestFilterParser
 
     private string UnEscape(string rhs)
     {
-            return rhs.Replace(@"\(", "(").Replace(@"\)", ")");
+            return FilterHelper.Unescape(rhs);
         }
 
     private static string EmitFullNameFilter(Token op, string value)
