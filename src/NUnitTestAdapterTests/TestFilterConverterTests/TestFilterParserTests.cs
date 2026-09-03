@@ -22,6 +22,7 @@
 // ***********************************************************************
 
 using System;
+using System.Threading.Tasks;
 using System.Xml;
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.TestFilterConverter;
@@ -88,6 +89,17 @@ public class TestFilterParserTests
     [TestCase(
         "FullyQualifiedName!~My.Test.Fixture.Method(42)",
         @"<not><test re='1'>My\.Test\.Fixture\.Method\(42\)</test></not>")]
+
+    // FQN - Whitespace between the method name and its argument list
+    [TestCase(
+        "FullyQualifiedName=My.Test.Fixture.Method (42)",
+        "<test>My.Test.Fixture.Method (42)</test>")]
+    [TestCase(
+        "FullyQualifiedName~My.Test.Fixture.Method (42)",
+        @"<test re='1'>My\.Test\.Fixture\.Method \(42\)</test>")]
+    [TestCase(
+        "FullyQualifiedName=My.Test.Fixture.Method  (Case 1)",
+        "<test>My.Test.Fixture.Method  (Case 1)</test>")]
 
     // FQN - String argument escaping
     [TestCase(
@@ -184,5 +196,16 @@ public class TestFilterParserTests
     public void TestParser_InvalidInput(string input, Type type)
     {
         Assert.That(() => _parser.Parse(input), Throws.TypeOf(type));
+    }
+
+    // Run off the test thread with a bounded wait: an unbalanced '(' must not hang the tokenizer forever.
+    [TestCase("FullyQualifiedName~My.Test.Fixture.Method(Case")]
+    [TestCase("FullyQualifiedName=My.Test.Fixture.Method(\"Case")]
+    public void TestParser_UnbalancedParenthesesDoesNotHang(string input)
+    {
+        var task = Task.Run(() => _parser.Parse(input));
+
+        Assert.That(task.Wait(TimeSpan.FromSeconds(2)), Is.True,
+            "Parse did not return - the tokenizer is likely stuck collecting an unbalanced '('.");
     }
 }
