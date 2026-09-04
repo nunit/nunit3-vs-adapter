@@ -568,7 +568,9 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
             if (!(enableShutdown &&
                   !runContext
                       .KeepAlive)) // Otherwise causes exception when run as commandline, illegal to enableshutdown when Keepalive is false, might be only VS2012
+#pragma warning disable CS0618 // Obsolete on newer hosts, but still respected by older VSTest hosts we support
                 frameworkHandle.EnableShutdownAfterTestRun = enableShutdown;
+#pragma warning restore CS0618
         }
 
         TestLog.Debug("EnableShutdown: " + enableShutdown);
