@@ -23,9 +23,8 @@
     <PackageReference Include="Microsoft.Testing.Extensions.VSTestBridge" />
     <PackageReference Include="NSubstitute" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
-    <PackageReference Include="TestCentric.Metadata" />
     <PackageReference Include="Microsoft.TestPlatform.Filter.Source" PrivateAssets="all" />
-      <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
 
   </ItemGroup>
 
