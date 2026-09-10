@@ -4,26 +4,25 @@
     <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.9.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.0" />
     <PackageVersion Include="NSubstitute" Version="6.2.0" />
     <PackageVersion Include="nunit" Version="5.0.0-beta.1" />
     <PackageVersion Include="nunit.engine" Version="3.22.0" />
     <PackageVersion Include="NUnit3TestAdapter" Version="6.3.0" />
     <PackageVersion Include="SourceLink.Create.CommandLine" Version="2.8.3" />
-    <PackageVersion Include="TestCentric.Metadata" Version="3.0.4" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageVersion>
     <PackageVersion Include="Castle.Core" Version="5.2.1" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.VSTestBridge" Version="2.3.3" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.3.3" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.VSTestBridge" Version="2.4.0" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.4.0" />
     <!-- Source-only package providing VSTest's filter-expression types (FilterExpressionWrapper /
          TestCaseFilterExpression), compiled directly into the test assembly. This is the same package the
          VSTestBridge uses internally, so the tests build the filter expression exactly as the product
          does. Only available on the dnceng test-tools feed (see nuget.config). -->
     <PackageVersion Include="Microsoft.TestPlatform.Filter.Source" Version="18.10.0-release-26404-02" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="10.0.11" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="10.0.12" />
   </ItemGroup>
   <ItemGroup>
     <GlobalPackageReference Include="NUnit.Analyzers" Version="4.14.0">
