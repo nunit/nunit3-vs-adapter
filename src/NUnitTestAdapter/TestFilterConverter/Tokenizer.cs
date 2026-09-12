@@ -234,9 +234,18 @@ public class Tokenizer
 
         CollectWordChars(sb);
 
-        if (NextChar != '(')
-            return new Token(TokenKind.Word, sb.ToString()) { Pos = pos };
+        int preWhitespaceIndex = index;
+        var whitespace = new StringBuilder();
+        while (char.IsWhiteSpace(NextChar))
+            whitespace.Append(GetChar());
 
+        if (NextChar != '(')
+        {
+            index = preWhitespaceIndex;
+            return new Token(TokenKind.Word, sb.ToString()) { Pos = pos };
+        }
+
+        sb.Append(whitespace);
         CollectBalancedParentheticalExpression(sb);
 
         while (NextChar == '+' || NextChar == '.')
@@ -272,7 +281,7 @@ public class Tokenizer
                 else if (c == '"')
                     CollectQuotedString(sb);
             }
-            while (depth > 0);
+            while (depth > 0 && NextChar != EOF_CHAR);
         }
     }
 
@@ -309,4 +318,3 @@ public class Tokenizer
             index++;
     }
 }
-
