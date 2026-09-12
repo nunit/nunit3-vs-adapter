@@ -12,7 +12,7 @@ partial class IsolatedWorkspace
         public string WorkingDirectory { get; }
         public string FileName { get; }
 
-        public string ArgumentsAsEscapedString => ProcessUtils.EscapeProcessArguments(Arguments);
+        public string ArgumentsAsString => string.Join(' ', Arguments);
 
         public RunSettings(string workingDirectory, string fileName)
         {

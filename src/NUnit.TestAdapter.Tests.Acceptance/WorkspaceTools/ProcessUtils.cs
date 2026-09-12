@@ -16,8 +16,6 @@ public static class ProcessUtils
         if (string.IsNullOrWhiteSpace(fileName))
             throw new ArgumentException(nameof(fileName), "File name must be specified.");
 
-        var escapedArguments = arguments is null ? null : EscapeProcessArguments(arguments, alwaysQuote: false);
-
         using var process = new Process
         {
             StartInfo =
@@ -25,11 +23,14 @@ public static class ProcessUtils
                 UseShellExecute = false,
                 WorkingDirectory = workingDirectory,
                 FileName = fileName,
-                Arguments = escapedArguments,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true
             }
         };
+        if (arguments is not null)
+            foreach (var argument in arguments)
+                process.StartInfo.ArgumentList.Add(argument);
+
         // This is inherited if the test runner was started by the Visual Studio process.
         // It breaks MSBuild 15’s targets when it tries to build legacy csprojs and vbprojs.
         process.StartInfo.EnvironmentVariables.Remove("VisualStudioVersion");
@@ -68,93 +69,9 @@ public static class ProcessUtils
 
         return new ProcessRunResult(
             fileName,
-            escapedArguments,
+            arguments is null ? null : string.Join(' ', arguments),
             process.ExitCode,
             stdout?.ToString(),
             stderr?.ToString());
-    }
-
-    private static readonly char[] CharsThatRequireQuoting = { ' ', '"' };
-    private static readonly char[] CharsThatRequireEscaping = { '\\', '"' };
-
-    /// <summary>
-    /// Escapes arbitrary values so that the process receives the exact string you intend and injection is impossible.
-    /// Spec: https://msdn.microsoft.com/en-us/library/bb776391.aspx.
-    /// </summary>
-    public static string EscapeProcessArguments(IEnumerable<string> literalValues, bool alwaysQuote = false)
-    {
-        if (literalValues is null) throw new ArgumentNullException(nameof(literalValues));
-
-        using var en = literalValues.GetEnumerator();
-        if (!en.MoveNext()) return string.Empty;
-
-        var builder = new StringBuilder();
-
-        while (true)
-        {
-            EscapeProcessArgument(builder, en.Current, alwaysQuote);
-            if (!en.MoveNext()) break;
-            builder.Append(' ');
-        }
-
-        return builder.ToString();
-    }
-
-    private static void EscapeProcessArgument(StringBuilder builder, string literalValue, bool alwaysQuote)
-    {
-        if (string.IsNullOrEmpty(literalValue))
-        {
-            builder.Append("\"\"");
-            return;
-        }
-
-        if (literalValue.IndexOfAny(CharsThatRequireQuoting) == -1) // Happy path
-        {
-            if (!alwaysQuote)
-            {
-                builder.Append(literalValue);
-                return;
-            }
-            if (literalValue[literalValue.Length - 1] != '\\')
-            {
-                builder.Append('"').Append(literalValue).Append('"');
-                return;
-            }
-        }
-
-        builder.Append('"');
-
-        var nextPosition = 0;
-        while (true)
-        {
-            var nextEscapeChar = literalValue.IndexOfAny(CharsThatRequireEscaping, nextPosition);
-            if (nextEscapeChar == -1) break;
-
-            builder.Append(literalValue, nextPosition, nextEscapeChar - nextPosition);
-            nextPosition = nextEscapeChar + 1;
-
-            switch (literalValue[nextEscapeChar])
-            {
-                case '"':
-                    builder.Append("\\\"");
-                    break;
-                case '\\':
-                    var numBackslashes = 1;
-                    while (nextPosition < literalValue.Length && literalValue[nextPosition] == '\\')
-                    {
-                        numBackslashes++;
-                        nextPosition++;
-                    }
-                    if (nextPosition == literalValue.Length || literalValue[nextPosition] == '"')
-                        numBackslashes <<= 1;
-
-                    for (; numBackslashes != 0; numBackslashes--)
-                        builder.Append('\\');
-                    break;
-            }
-        }
-
-        builder.Append(literalValue, nextPosition, literalValue.Length - nextPosition);
-        builder.Append('"');
     }
 }
