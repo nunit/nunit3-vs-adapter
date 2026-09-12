@@ -100,7 +100,7 @@ public sealed partial class IsolatedWorkspace(DirectoryMutex directoryMutex, Too
             dotnettest.Add($"NUnit.ExplicitMode={ExplicitMode}");
         }
 
-        log?.Invoke($"\n{dotnettest.ArgumentsAsString}");
+        log?.Invoke($"\n{dotnettest.ArgumentsAsEscapedString}");
         var result = dotnettest.Run(throwOnError: false);
 
         if (new FileInfo(tempTrxFile).Length == 0)
