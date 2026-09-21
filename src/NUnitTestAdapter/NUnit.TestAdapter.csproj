@@ -38,7 +38,6 @@
         <PackageReference Include="Microsoft.Testing.Extensions.VSTestBridge" />
         <PackageReference Include="SourceLink.Create.CommandLine" PrivateAssets="All" />
         <PackageReference Include="nunit.engine" />
-        <PackageReference Include="TestCentric.Metadata" Aliases="TestCentric" />
     </ItemGroup>
 
     <Target Name="PreventTestPlatformObjectModelCopyLocal" AfterTargets="ResolveReferences">
