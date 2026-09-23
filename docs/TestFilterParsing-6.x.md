@@ -155,6 +155,33 @@ reason and the change should be validated against the MTP acceptance tests befor
 that turns out to be load-bearing, defer the whole item to v7 and fold it into the single shared
 parser described there — it is not worth a risky fix in a patch release.
 
+## Item 5 — The emitted filter is not always well-formed XML
+
+The NUnit filter is an XML document, and `TestFilterParser.XmlEscape` escapes the five XML
+metacharacters. That is not sufficient, because a test name can contain a code point that is not
+a legal XML character at all, and no amount of entity escaping makes such a document parse.
+
+[#761](https://github.com/nunit/nunit3-vs-adapter/issues/761) is the reported case: a test case
+with a `￿` argument. The parser emits exactly the right string — the equality assertion in
+`FilterRoundTripConformanceTests.AdapterProducesTheSameSelection` passes — but
+`AdapterProducesLoadableXml` fails, because `XmlDocument.LoadXml` rejects the result. The test
+appears in Test Explorer and never runs.
+
+This was found by adding the XML-validity assertion, not by reading the code: without it the
+issue looked covered and green.
+
+**Fix:** decide what a name containing an illegal XML character should mean, and make the emitted
+document valid either way. The realistic options are to drop such characters from the value, to
+encode them in a way NUnit's filter reader understands, or to reject the filter with a
+`TestFilterParserException` naming the offending character. Dropping them silently changes which
+tests match, so rejecting is probably the honest default, with the caveat that the test then stays
+unrunnable and the real fix belongs on the discovery side — a name that cannot be expressed in the
+filter document arguably should not be reported as an identity in the first place.
+
+**Non-breaking:** the current behaviour is an exception from `XmlDocument` or an unusable filter,
+so there is nothing working to preserve. Whichever option is chosen should be settled before the
+fix, because it is a semantic decision rather than a mechanical one.
+
 ## Explicitly out of scope for 6.x
 
 - **[#1490](https://github.com/nunit/nunit3-vs-adapter/issues/1490), whitespace before `(`.** `GetWordOrFqn` only absorbs an argument list when `(`
@@ -172,7 +199,22 @@ parser described there — it is not worth a risky fix in a patch release.
 
 ## Verification
 
-The failing tests that specify these fixes already exist:
+The failing tests that specify these fixes already exist, and the split between what 6.x fixes
+and what has to wait for v7 is not a guess: each of the four fixes above was prototyped against
+this suite and the tests that went green were recorded. Those carry `Category=Fix6x`; the ones
+that stayed red carry `Category=FixV7`.
+
+While working on 6.x, run
+
+```
+--filter "Category=FilterParsing & Category!=FixV7"
+```
+
+and drive it to green. At the time of writing that selection is 90 tests with 10 failing, and the
+four prototyped fixes take it to 1 failing — the remaining one being item 5, which is why item 5
+is in this document.
+
+The tests:
 
 - `src/NUnitTestAdapterTests/TestFilterConverterTests/FilterRoundTripConformanceTests.cs` —
   the invariant, with every expectation derived from the test platform's own filter

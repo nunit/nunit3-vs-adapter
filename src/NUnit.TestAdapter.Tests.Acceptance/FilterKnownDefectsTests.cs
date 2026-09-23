@@ -86,11 +86,11 @@ public sealed class FilterKnownDefectsTests : CsProjAcceptanceTests
     /// </summary>
     [Test, Platform("Win")]
     [TestCase("FullyQualifiedName=KnownDefects.Foo.Sanity", TestName = "{m}_Sanity")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.SpaceBefore \(Case 1\)", TestName = "{m}_SpaceBeforeArguments_Issue1490")]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.SpaceBefore \(Case 1\)", TestName = "{m}_SpaceBeforeArguments_Issue1490", Category = FixIn.V7)]
     [TestCase(@"FullyQualifiedName=KnownDefects.Foo.QuotedBackslash\(""C:\\Temp""\)", TestName = "{m}_QuotedBackslash_Issue1489")]
     [TestCase(@"FullyQualifiedName=KnownDefects.Foo.QuotedPipe\(""This \| That""\)", TestName = "{m}_QuotedPipe_Issue1405")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B", TestName = "{m}_PipeOutsideArguments_Issue1488")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B", TestName = "{m}_AmpersandOutsideArguments_Issue1488")]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B", TestName = "{m}_PipeOutsideArguments_Issue1488", Category = FixIn.V7)]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B", TestName = "{m}_AmpersandOutsideArguments_Issue1488", Category = FixIn.V7)]
     public void VsTestSelectsTheTest(string filter)
     {
         var workspace = Build();
@@ -112,9 +112,9 @@ public sealed class FilterKnownDefectsTests : CsProjAcceptanceTests
     /// </summary>
     [Test, Platform("Win")]
     [TestCase("FullyQualifiedName=KnownDefects.Foo.Sanity", TestName = "{m}_Sanity")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.SpaceBefore \(Case 1\)", TestName = "{m}_SpaceBeforeArguments_Issue1490")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B", TestName = "{m}_PipeOutsideArguments_Issue1488")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B", TestName = "{m}_AmpersandOutsideArguments_Issue1488")]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.SpaceBefore \(Case 1\)", TestName = "{m}_SpaceBeforeArguments_Issue1490", Category = FixIn.V7)]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B", TestName = "{m}_PipeOutsideArguments_Issue1488", Category = FixIn.V7)]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B", TestName = "{m}_AmpersandOutsideArguments_Issue1488", Category = FixIn.V7)]
     public void DotNetTestSelectsTheTest(string filter)
     {
         var workspace = Build();
@@ -133,6 +133,7 @@ public sealed class FilterKnownDefectsTests : CsProjAcceptanceTests
     /// </summary>
     [Test, Platform("Win")]
     [Property("Issue", "1501")]
+    [Category(FixIn.SixX)]
     [Explicit("Exhausts memory in the child test host until the unbalanced-parenthesis loop is bounded.")]
     public void VsTestSelectsTheTestWithUnbalancedParenthesis()
     {
