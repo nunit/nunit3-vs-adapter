@@ -3,7 +3,7 @@
 **Status:** proposed
 **Scope:** NUnit3TestAdapter 6.x
 **Companion document:** [TestFilterParsing-v7.md](TestFilterParsing-v7.md) — the grammar rewrite
-**Related:** #505 (parent), #1405, #1488, #1489, #1490, #1491, #1501
+**Related:** [#505](https://github.com/nunit/nunit3-vs-adapter/issues/505) (parent), [#1405](https://github.com/nunit/nunit3-vs-adapter/issues/1405), [#1488](https://github.com/nunit/nunit3-vs-adapter/issues/1488), [#1489](https://github.com/nunit/nunit3-vs-adapter/pull/1489), [#1490](https://github.com/nunit/nunit3-vs-adapter/issues/1490), [#1491](https://github.com/nunit/nunit3-vs-adapter/pull/1491), [#1501](https://github.com/nunit/nunit3-vs-adapter/issues/1501)
 
 ## Purpose
 
@@ -21,9 +21,9 @@ does this (`src/NUnitTestAdapter/TestFilterConverter/Tokenizer.cs`) splits the f
 operator characters `= ~ ! ( ) & |` **without consulting a preceding backslash**, and then tries
 to repair the damage with a parenthesis-balancing heuristic that reassembles parameterised test
 names. That design is the root cause of the whole `FullyQualifiedName` family of issues under
-#505, and replacing it is a v7 task. The items below are the subset that can be fixed now.
+[#505](https://github.com/nunit/nunit3-vs-adapter/issues/505), and replacing it is a v7 task. The items below are the subset that can be fixed now.
 
-## Item 1 — Unbalanced `(` runs to OutOfMemory (#1501)
+## Item 1 — Unbalanced `(` runs to OutOfMemory ([#1501](https://github.com/nunit/nunit3-vs-adapter/issues/1501))
 
 `Tokenizer.CollectBalancedParentheticalExpression` loops `while (depth > 0)` and never checks for
 end of input, so `GetChar()` returns `EOF_CHAR` forever while the `StringBuilder` keeps growing.
@@ -62,7 +62,7 @@ else if (ch == '"')
 sb.Append(ch);
 ```
 
-Since #1489, `TestFilterParser.UnEscape` calls `FilterHelper.Unescape` on the finished token, so
+Since [#1489](https://github.com/nunit/nunit3-vs-adapter/pull/1489), `TestFilterParser.UnEscape` calls `FilterHelper.Unescape` on the finished token, so
 escape sequences inside a quoted argument are now unescaped **twice**. Verified against the
 current `main`:
 
@@ -83,7 +83,7 @@ actual   throws ArgumentException: Filter string 'A.B.C("C:\Temp")'
 These affect any test whose arguments are strings containing a backslash or a quote, which NUnit
 renders into the display name in escaped form.
 
-The acceptance tests added in #1489 do not catch this because they use the unquoted
+The acceptance tests added in [#1489](https://github.com/nunit/nunit3-vs-adapter/pull/1489) do not catch this because they use the unquoted
 `Backslash\(C:\\Temp\)` shape, where `CollectQuotedString` is never entered.
 
 **Fix:** stop interpreting escapes in `CollectQuotedString`. Collect characters verbatim and let
@@ -109,7 +109,7 @@ result  ArgumentException: Filter string 'A.B\' includes unrecognized escape seq
 
 The same happens for `\&`, and for a trailing `\)` that follows a completed argument list.
 
-This is new since #1489; before that commit `UnEscape` was a pair of `string.Replace` calls that
+This is new since [#1489](https://github.com/nunit/nunit3-vs-adapter/pull/1489); before that commit `UnEscape` was a pair of `string.Replace` calls that
 could not throw, and the same inputs produced a wrong-but-silent filter. Fixing the underlying
 split is a v7 change, but the exception type should not be left as it is in a 6.x release.
 
@@ -146,14 +146,14 @@ parser described there — it is not worth a risky fix in a patch release.
 
 ## Explicitly out of scope for 6.x
 
-- **#1490, whitespace before `(`.** `GetWordOrFqn` only absorbs an argument list when `(`
+- **[#1490](https://github.com/nunit/nunit3-vs-adapter/issues/1490), whitespace before `(`.** `GetWordOrFqn` only absorbs an argument list when `(`
   immediately follows the word characters, so `Fixture.Method (Case 1)` tokenises as two tokens.
-  PR #1491 proposed peeking past the whitespace. That patches one heuristic with another, and the
+  PR [#1491](https://github.com/nunit/nunit3-vs-adapter/pull/1491) proposed peeking past the whitespace. That patches one heuristic with another, and the
   author withdrew it on those grounds. The correct fix is the v7 grammar, where an unescaped `(`
   is always a grouping operator and whitespace inside a value is never significant.
 
 - **Accepting unescaped filters that VSTest itself rejects.** Some producers emit filters without
-  escaping — the Test Explorer filter in #1405 is one. No correct parser can resolve those; they
+  escaping — the Test Explorer filter in [#1405](https://github.com/nunit/nunit3-vs-adapter/issues/1405) is one. No correct parser can resolve those; they
   need either the producer fixed or the `ConvertMsFilterToNUnitFilter` fallback, which matches
   against the loaded test cases using the test platform's own matcher.
 

@@ -3,7 +3,7 @@
 **Status:** proposed
 **Scope:** NUnit3TestAdapter 7.0 — contains a breaking change
 **Companion document:** [TestFilterParsing-6.x.md](TestFilterParsing-6.x.md) — the non-breaking fixes
-**Related:** #505 (parent), #1405, #1488, #1489, #1490, #1491, #1501
+**Related:** [#505](https://github.com/nunit/nunit3-vs-adapter/issues/505) (parent), [#1405](https://github.com/nunit/nunit3-vs-adapter/issues/1405), [#1488](https://github.com/nunit/nunit3-vs-adapter/issues/1488), [#1489](https://github.com/nunit/nunit3-vs-adapter/pull/1489), [#1490](https://github.com/nunit/nunit3-vs-adapter/issues/1490), [#1491](https://github.com/nunit/nunit3-vs-adapter/pull/1491), [#1501](https://github.com/nunit/nunit3-vs-adapter/issues/1501)
 
 ## The goal, stated as an invariant
 
@@ -12,7 +12,7 @@
 
 The adapter does not satisfy this today. Discovery goes through the test platform's own filter
 implementation; execution goes through the adapter's parser. The two disagree, so tests are
-visible but unrunnable. Every issue in category A of #505 is an instance of that disagreement.
+visible but unrunnable. Every issue in category A of [#505](https://github.com/nunit/nunit3-vs-adapter/issues/505) is an instance of that disagreement.
 
 ## Why the current implementation is wrong
 
@@ -40,10 +40,10 @@ That is the defect. It is not a collection of edge cases; it is one wrong layeri
 symptoms all follow from it:
 
 - An escaped operator survives only when it happens to sit inside a balanced `(...)` group. This
-  is why #1488 appeared to be fixed by #1489, which changed only the unescape step.
-- An unbalanced `(` leaves the reassembly loop with no terminating condition (#1501).
+  is why [#1488](https://github.com/nunit/nunit3-vs-adapter/issues/1488) appeared to be fixed by [#1489](https://github.com/nunit/nunit3-vs-adapter/pull/1489), which changed only the unescape step.
+- An unbalanced `(` leaves the reassembly loop with no terminating condition ([#1501](https://github.com/nunit/nunit3-vs-adapter/issues/1501)).
 - Whitespace before `(` defeats the adjacency test that decides whether a `(` starts an argument
-  list or a grouping expression (#1490).
+  list or a grouping expression ([#1490](https://github.com/nunit/nunit3-vs-adapter/issues/1490)).
 - Whether `(` is an operator or a value character depends on what precedes it, not on whether it
   is escaped — so the same character means two different things depending on context.
 
@@ -150,7 +150,7 @@ Two things make this narrower than it first looks:
   be stated in one line of release notes.
 
 What genuinely cannot be fixed by a correct parser is a *producer* that emits unescaped filters.
-The Test Explorer filter in #1405 is an example:
+The Test Explorer filter in [#1405](https://github.com/nunit/nunit3-vs-adapter/issues/1405) is an example:
 
 ```
 NUnitIssue.TestIssue.TestLength("This | That",False)
@@ -163,10 +163,10 @@ parsing the filter, evaluate it against the loaded test cases with the platform'
 already falls back to this path, and v7 should keep it and make the fallback deliberate and
 logged rather than incidental.
 
-## What this does and does not fix in #505
+## What this does and does not fix in [#505](https://github.com/nunit/nunit3-vs-adapter/issues/505)
 
 - **Category A — FQN parsing and special characters (13 issues).** Fixed. This is the single root
-  cause, and #1405, #1488, #1490 and #1501 are all instances of it.
+  cause, and [#1405](https://github.com/nunit/nunit3-vs-adapter/issues/1405), [#1488](https://github.com/nunit/nunit3-vs-adapter/issues/1488), [#1490](https://github.com/nunit/nunit3-vs-adapter/issues/1490) and [#1501](https://github.com/nunit/nunit3-vs-adapter/issues/1501) are all instances of it.
 - **Category B — discovery/execution identity mismatch (5 issues).** Not fixed, and not related.
   Those are about the FQN string the adapter *reports* at discovery versus what NUnit's own filter
   engine matches — `SetName`, `TestFixtureSource`, phantom entries. A correct tokenizer does not
@@ -175,7 +175,7 @@ logged rather than incidental.
   `[Explicit]`, `AssemblySelectLimit` and `[Platform]` are policy questions about what a filter
   should select, not about how it is read.
 
-So this work closes roughly half of #505. Framing it as a fix for all of #505 would be wrong and
+So this work closes roughly half of [#505](https://github.com/nunit/nunit3-vs-adapter/issues/505). Framing it as a fix for all of [#505](https://github.com/nunit/nunit3-vs-adapter/issues/505) would be wrong and
 would leave the other two categories without an owner.
 
 ## Suggested sequence
@@ -193,5 +193,5 @@ would leave the other two categories without an owner.
 ## Acknowledgement
 
 The analysis of the escaping model, and the argument that the special characters should be split
-on before the blobs between them are unescaped, is due to @PanzerFowst in #1501, following the
-investigations in #1488, #1490 and the PRs #1489 and #1491.
+on before the blobs between them are unescaped, is due to @PanzerFowst in [#1501](https://github.com/nunit/nunit3-vs-adapter/issues/1501), following the
+investigations in [#1488](https://github.com/nunit/nunit3-vs-adapter/issues/1488), [#1490](https://github.com/nunit/nunit3-vs-adapter/issues/1490) and the PRs [#1489](https://github.com/nunit/nunit3-vs-adapter/pull/1489) and [#1491](https://github.com/nunit/nunit3-vs-adapter/pull/1491).
