@@ -35,7 +35,12 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.TestFilterConverterTests;
 /// <see cref="FilterRoundTripConformanceTests"/>, each pinned to the method that causes it.
 /// These are the tests to work against when fixing one item at a time; see
 /// <c>docs/TestFilterParsing-6.x.md</c> and <c>docs/TestFilterParsing-v7.md</c>.
+///
+/// Run the whole filter-parsing set with <c>--filter "Category=FilterParsing"</c>, one issue
+/// at a time with <c>--filter "Issue=1490"</c>, or one plan item with
+/// <c>--filter "DocItem=6.x item 2"</c>.
 /// </summary>
+[Category("FilterParsing")]
 public class FilterParsingDefectTests
 {
     /// <summary>
@@ -44,7 +49,10 @@ public class FilterParsingDefectTests
     /// in one token, still escaped — unescaping is the parser's job and happens later.
     ///
     /// Root cause: <c>Tokenizer.WORD_BREAK_CHARS</c> and <c>Tokenizer.IsWordChar</c>.
+    /// Issues 1488 and 1405; the grammar change is a v7 item.
     /// </summary>
+    [Property("Issue", "1488")]
+    [Property("DocItem", "v7 grammar")]
     [TestCase(@"a\|b", TestName = "{m}_EscapedPipe")]
     [TestCase(@"a\&b", TestName = "{m}_EscapedAmpersand")]
     [TestCase(@"a\=b", TestName = "{m}_EscapedEquals")]
@@ -70,6 +78,7 @@ public class FilterParsingDefectTests
     /// An unescaped operator is a real operator, wherever it appears. This is the other half
     /// of the rule above and already holds today — it is here so a fix cannot regress it.
     /// </summary>
+    [Property("DocItem", "v7 grammar")]
     [Test]
     public void UnescapedOperatorStillBreaksTheToken()
     {
@@ -90,8 +99,10 @@ public class FilterParsingDefectTests
     /// space before its argument list tokenizes as two tokens and the parse fails.
     ///
     /// Root cause: <c>Tokenizer.IsWordChar</c> rejecting whitespace, and the adjacency test in
-    /// <c>Tokenizer.GetWordOrFqn</c>. Issue 1490.
+    /// <c>Tokenizer.GetWordOrFqn</c>. Issue 1490, deferred to v7 rather than patched.
     /// </summary>
+    [Property("Issue", "1490")]
+    [Property("DocItem", "v7 grammar")]
     [Test]
     public void WhitespaceBeforeArgumentListDoesNotEndTheValue()
     {
@@ -114,7 +125,10 @@ public class FilterParsingDefectTests
     /// of escaping is lost.
     ///
     /// The token here should still carry the escaping exactly as it arrived.
+    /// Item 2 in the 6.x document.
     /// </summary>
+    [Property("Issue", "1489")]
+    [Property("DocItem", "6.x item 2")]
     [TestCase(@"(""C:\\Temp"")", TestName = "{m}_EscapedBackslash")]
     [TestCase(@"(""a\|b"")", TestName = "{m}_EscapedPipe")]
     [TestCase(@"(""a\=b"")", TestName = "{m}_EscapedEquals")]
@@ -137,6 +151,8 @@ public class FilterParsingDefectTests
     /// Whatever the eventual parse, a malformed filter should surface as
     /// <see cref="TestFilterParserException"/>. Item 3 in the 6.x document.
     /// </summary>
+    [Property("Issue", "1489")]
+    [Property("DocItem", "6.x item 3")]
     [TestCase(@"FullyQualifiedName=A.B\|C")]
     [TestCase(@"FullyQualifiedName=A.B\&C")]
     [TestCase(@"FullyQualifiedName=A.B.C(1)\)tail")]
@@ -151,10 +167,15 @@ public class FilterParsingDefectTests
     /// <summary>
     /// The MTP fast path has its own unescaping, built from <c>WebUtility.HtmlDecode</c> and
     /// <c>Regex.Unescape</c>. Neither implements the platform's escaping scheme, so escaping a
-    /// name and unescaping it again does not round-trip.
+    /// name and unescaping it again is not guaranteed to be lossless.
+    ///
+    /// Most shapes do survive, because <c>FilterHelper.Escape</c> doubles a backslash and
+    /// <c>Regex.Unescape</c> then collapses the pair correctly. The HTML entity is the case
+    /// that does not.
     ///
     /// Root cause: <c>FullyQualifiedNameFilterParser.Unescape</c>. Item 4 in the 6.x document.
     /// </summary>
+    [Property("DocItem", "6.x item 4")]
     [TestCase("My.Test.Fixture.Method", TestName = "{m}_Plain")]
     [TestCase("My.Test.Fixture.Method(42)", TestName = "{m}_SimpleArgument")]
     [TestCase(@"My.Test.Fixture.Method(""a\nb"")", TestName = "{m}_LiteralBackslashN")]
@@ -173,8 +194,9 @@ public class FilterParsingDefectTests
 
     /// <summary>
     /// End to end through the MTP fast path, which is the entry point the IDE uses under the
-    /// Microsoft Testing Platform.
+    /// Microsoft Testing Platform. Item 4 in the 6.x document.
     /// </summary>
+    [Property("DocItem", "6.x item 4")]
     [TestCase("My.Test.Fixture.Method(42)", TestName = "{m}_SimpleArgument")]
     [TestCase("My.Test.Fixture.Method(a | b)", TestName = "{m}_Pipe")]
     [TestCase(@"My.Test.Fixture.Method(""C:\Temp"")", TestName = "{m}_LiteralBackslash")]
@@ -191,7 +213,7 @@ public class FilterParsingDefectTests
 }
 
 /// <summary>
-/// The unbalanced-parenthesis defect, issue 1501.
+/// The unbalanced-parenthesis defect, issue 1501, item 1 in the 6.x document.
 ///
 /// <c>Tokenizer.CollectBalancedParentheticalExpression</c> loops <c>while (depth &gt; 0)</c>
 /// and never tests for end of input, so <c>GetChar</c> returns the EOF sentinel forever while
@@ -206,6 +228,9 @@ public class FilterParsingDefectTests
 ///
 /// Once the loop terminates at end of input, remove the Explicit attribute.
 /// </summary>
+[Category("FilterParsing")]
+[Property("Issue", "1501")]
+[Property("DocItem", "6.x item 1")]
 [Explicit("Exhausts memory until fixed; it will take the test host down with it. Covered safely by the acceptance tests.")]
 public class UnbalancedParenthesisDefectTests
 {
