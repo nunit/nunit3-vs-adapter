@@ -23,6 +23,7 @@
 
 using System;
 using System.Linq;
+using System.Xml;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
@@ -103,6 +104,34 @@ public class FilterRoundTripConformanceTests
 
         // A backslash outside a quoted argument.
         new TestCaseData("My.Test.Fixture.Method(C:\\Temp)").SetName("{m}_UnquotedBackslash"),
+
+        // Spaces in the name itself, with no argument list at all. The whitespace defect is
+        // not limited to the gap before '('.
+        new TestCaseData("My.Test.Fixture.Computing work in progress.No Workpackages exist")
+            .SetName("{m}_SpacesInName").SetProperty("Issue", "876"),
+        new TestCaseData("My.Test.Fixture.AddTwoNumbers(\"Spa ces\",null)")
+            .SetName("{m}_SpaceInQuotedArgument").SetProperty("Issue", "807"),
+
+        // A close parenthesis followed by a period inside a string argument, which looks to
+        // the lexer like the end of an argument list followed by more name.
+        new TestCaseData("My.Test.Fixture.Method(\"I am a good test case (the best, even).\")")
+            .SetName("{m}_CloseParenDotInsideArgument").SetProperty("Issue", "1097"),
+        new TestCaseData("My.Test.Fixture.NUnitTestTwo(\"TestAttribute).\")")
+            .SetName("{m}_CloseParenDotAtEndOfArgument").SetProperty("Issue", "654"),
+
+        // A string argument that itself ends with an escaped quote, the shape the MTP bridge
+        // reports as "includes unrecognized escape sequence".
+        new TestCaseData("My.Test.Fixture.Test(\"\\\"C:\\\\Path\\\\File.txt\\\"\")")
+            .SetName("{m}_QuotedPathWithTrailingQuote").SetProperty("Issue", "1349"),
+
+        // Collection arguments rendered with brackets.
+        new TestCaseData("My.Test.Fixture.Slice_IsCorrect([0,1,2,3],3,3,[3])")
+            .SetName("{m}_BracketArguments").SetProperty("Issue", "1437"),
+
+        // A non-character code point in an argument. This one is not about tokenizing at all:
+        // U+FFFF is not a legal XML character, and the NUnit filter is an XML document.
+        new TestCaseData("My.Test.Fixture.Test_01(\"\uffff\")")
+            .SetName("{m}_NonCharacterArgument").SetProperty("Issue", "761"),
     ];
 
     /// <summary>
@@ -136,6 +165,25 @@ public class FilterRoundTripConformanceTests
 
         Assert.That(() => new TestFilterParser().Parse(filter), Is.EqualTo(expected),
             $"Filter '{filter}' should select '{fullName}'.");
+    }
+
+    /// <summary>
+    /// The NUnit filter is an XML document, so whatever the parser emits has to be loadable
+    /// as one. Escaping the five XML metacharacters is not sufficient on its own: a name can
+    /// contain a code point that is not a legal XML character at all, and no amount of entity
+    /// escaping makes such a document parse.
+    /// </summary>
+    [TestCaseSource(nameof(FullNames))]
+    public void AdapterProducesLoadableXml(string fullName)
+    {
+        var filter = BuildFilter(fullName);
+
+        string produced = null;
+        Assert.That(() => produced = new TestFilterParser().Parse(filter), Throws.Nothing,
+            $"Filter '{filter}' should parse.");
+
+        Assert.That(() => new XmlDocument().LoadXml(produced), Throws.Nothing,
+            $"The filter emitted for '{fullName}' is not well-formed XML: {produced}");
     }
 
     /// <summary>
