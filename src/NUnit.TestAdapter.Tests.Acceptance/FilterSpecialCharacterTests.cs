@@ -3,7 +3,7 @@ using NUnit.VisualStudio.TestAdapter.Tests.Acceptance.WorkspaceTools;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance;
 
-public sealed class ParanthesisTests : CsProjAcceptanceTests
+public sealed class FilterSpecialCharacterTests : CsProjAcceptanceTests
 {
     protected override void AddTestsCs(IsolatedWorkspace workspace)
     {
