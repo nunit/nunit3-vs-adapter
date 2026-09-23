@@ -53,6 +53,7 @@ public class FilterParsingDefectTests
     /// </summary>
     [Property("Issue", "1488")]
     [Property("DocItem", "v7 grammar")]
+    [Category(FixIn.V7)]
     [TestCase(@"a\|b", TestName = "{m}_EscapedPipe")]
     [TestCase(@"a\&b", TestName = "{m}_EscapedAmpersand")]
     [TestCase(@"a\=b", TestName = "{m}_EscapedEquals")]
@@ -103,6 +104,7 @@ public class FilterParsingDefectTests
     /// </summary>
     [Property("Issue", "1490")]
     [Property("DocItem", "v7 grammar")]
+    [Category(FixIn.V7)]
     [Test]
     public void WhitespaceBeforeArgumentListDoesNotEndTheValue()
     {
@@ -129,6 +131,7 @@ public class FilterParsingDefectTests
     /// </summary>
     [Property("Issue", "1489")]
     [Property("DocItem", "6.x item 2")]
+    [Category(FixIn.SixX)]
     [TestCase(@"(""C:\\Temp"")", TestName = "{m}_EscapedBackslash")]
     [TestCase(@"(""a\|b"")", TestName = "{m}_EscapedPipe")]
     [TestCase(@"(""a\=b"")", TestName = "{m}_EscapedEquals")]
@@ -153,14 +156,27 @@ public class FilterParsingDefectTests
     /// </summary>
     [Property("Issue", "1489")]
     [Property("DocItem", "6.x item 3")]
+    [Category(FixIn.SixX)]
     [TestCase(@"FullyQualifiedName=A.B\|C")]
     [TestCase(@"FullyQualifiedName=A.B\&C")]
     [TestCase(@"FullyQualifiedName=A.B.C(1)\)tail")]
     public void MalformedFilterIsReportedAsAFilterError(string filter)
     {
-        Assert.That(
-            () => new TestFilterParser().Parse(filter),
-            Throws.Nothing.Or.TypeOf<TestFilterParserException>(),
+        // Written out rather than expressed with Throws.Nothing.Or.TypeOf<T>(): after .Or the
+        // constraint applies to the delegate's return value, not to the exception, so that form
+        // fails even when the right exception is thrown.
+        Exception caught = null;
+
+        try
+        {
+            new TestFilterParser().Parse(filter);
+        }
+        catch (Exception e)
+        {
+            caught = e;
+        }
+
+        Assert.That(caught, Is.Null.Or.TypeOf<TestFilterParserException>(),
             "A filter problem must not escape the adapter as a raw ArgumentException.");
     }
 
@@ -176,6 +192,7 @@ public class FilterParsingDefectTests
     /// Root cause: <c>FullyQualifiedNameFilterParser.Unescape</c>. Item 4 in the 6.x document.
     /// </summary>
     [Property("DocItem", "6.x item 4")]
+    [Category(FixIn.SixX)]
     [TestCase("My.Test.Fixture.Method", TestName = "{m}_Plain")]
     [TestCase("My.Test.Fixture.Method(42)", TestName = "{m}_SimpleArgument")]
     [TestCase(@"My.Test.Fixture.Method(""a\nb"")", TestName = "{m}_LiteralBackslashN")]
@@ -197,6 +214,7 @@ public class FilterParsingDefectTests
     /// Microsoft Testing Platform. Item 4 in the 6.x document.
     /// </summary>
     [Property("DocItem", "6.x item 4")]
+    [Category(FixIn.SixX)]
     [TestCase("My.Test.Fixture.Method(42)", TestName = "{m}_SimpleArgument")]
     [TestCase("My.Test.Fixture.Method(a | b)", TestName = "{m}_Pipe")]
     [TestCase(@"My.Test.Fixture.Method(""C:\Temp"")", TestName = "{m}_LiteralBackslash")]
@@ -231,6 +249,7 @@ public class FilterParsingDefectTests
 [Category("FilterParsing")]
 [Property("Issue", "1501")]
 [Property("DocItem", "6.x item 1")]
+[Category(FixIn.SixX)]
 [Explicit("Exhausts memory until fixed; it will take the test host down with it. Covered safely by the acceptance tests.")]
 public class UnbalancedParenthesisDefectTests
 {
