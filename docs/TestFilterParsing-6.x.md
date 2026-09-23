@@ -123,19 +123,30 @@ filter error rather than an adapter crash.
 
 The MTP path in `NUnitTestFilterBuilder.ConvertVsTestFilterToNUnitFilterForMTP` uses a third,
 independent unescape implementation built from `WebUtility.HtmlDecode` followed by
-`Regex.Unescape`. Neither is the VSTest escaping scheme. Verified against the current `main`:
+`Regex.Unescape`. Neither is the VSTest escaping scheme.
+
+The correct property is that escaping a name and unescaping it again is lossless, which
+`MtpFastPathUnescapeRoundTrips` asserts. Measured against the current `main`, that round trip
+**holds** for most shapes, including names containing a literal backslash-n or backslash-t —
+`FilterHelper.Escape` doubles the backslash, and `Regex.Unescape` then collapses the pair back
+correctly. The one round-trip failure is the HTML entity:
 
 ```
-Foo.Bar("a\nb")     -> Foo.Bar("a<real newline>b")     Regex.Unescape interprets \n
-Foo.Bar("a\tb")     -> Foo.Bar("a<real tab>b")         and \t, \uXXXX, ...
-Foo.Bar(\d)         -> throws RegexParseException      unrecognised regex escape
-Foo.Bar(a &amp; b)  -> Foo.Bar(a & b)                  HtmlDecode corrupts literal entities
+Foo.Bar(a &amp; b)  -> Foo.Bar(a & b)     HtmlDecode corrupts an entity that is part of the name
+```
+
+So the practical exposure is narrower than the implementation suggests, and the remaining
+hazards are all about input that is not perfectly escaped — which is exactly what some filter
+producers emit:
+
+```
+Foo.Bar("a\nb")     -> Foo.Bar("a<real newline>b")     a lone backslash-n is interpreted
+Foo.Bar(\d)         -> throws RegexParseException      rather than degrading gracefully
 Foo.Bar(x)\         -> Foo.Bar(x)                      trailing backslash silently dropped
 ```
 
-The first row is the one most likely to be hit in practice: a test case with a string argument
-containing a newline is rendered by NUnit as a literal backslash-n in the display name, and this
-code turns it into an actual newline, after which nothing matches.
+`Regex.Unescape` throwing is the worst of these, because it reaches the user as an adapter
+crash rather than as a filter that selects nothing.
 
 **Fix:** replace the body with `FilterHelper.Unescape`, guarded as in item 3.
 
@@ -161,12 +172,17 @@ parser described there — it is not worth a risky fix in a patch release.
 
 ## Verification
 
-Each item above should land with a regression test at the level where it actually fails:
+The failing tests that specify these fixes already exist:
 
-- Items 1–3: unit tests in `TestFilterConverterTests`, plus an acceptance test in
-  `src/NUnit.TestAdapter.Tests.Acceptance/FilterSpecialCharacterTests.cs` using the **quoted**
-  argument shapes, which the existing cases do not cover.
-- Item 4: an MTP acceptance test, since the fast path is only reached from that entry point.
+- `src/NUnitTestAdapterTests/TestFilterConverterTests/FilterRoundTripConformanceTests.cs` —
+  the invariant, with every expectation derived from the test platform's own filter
+  implementation rather than hand-written.
+- `src/NUnitTestAdapterTests/TestFilterConverterTests/FilterParsingDefectTests.cs` — narrow
+  demonstrations pinned to the method responsible for each defect.
+- `src/NUnit.TestAdapter.Tests.Acceptance/FilterKnownDefectsTests.cs` — the same failures end
+  to end, through a real `dotnet test` and `vstest` invocation.
+
+Work item by item and turn them green; do not weaken an expectation without saying why.
 
 For item 1, bound the test with a timeout — an assertion that never returns is not a useful
 failure.
