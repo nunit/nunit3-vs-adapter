@@ -14,16 +14,22 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance;
 ///
 /// These are expected to fail until the parser is fixed. They complement the unit-level
 /// tests in <c>FilterRoundTripConformanceTests</c> by proving the failure end to end,
-/// through a real <c>dotnet test</c> or <c>vstest</c> invocation, rather than only against
+/// through a real <c>vstest</c> or <c>dotnet test</c> invocation, rather than only against
 /// the parser in isolation.
 ///
 /// Display names are set with <c>TestName</c> rather than generated from arguments, so the
 /// fully qualified name each filter has to match is exact and does not depend on how NUnit
 /// happens to render a particular argument value.
+///
+/// Run the whole filter-parsing set with <c>--filter "Category=FilterParsing"</c>, or one
+/// issue at a time with, for example, <c>--filter "Issue=1490"</c>.
 /// </summary>
+[Category("FilterParsing")]
 public sealed class FilterKnownDefectsTests : CsProjAcceptanceTests
 {
     protected override string Framework => Frameworks.Net80;
+
+    private const int TotalTests = 7;
 
     protected override void AddTestsCs(IsolatedWorkspace workspace)
     {
@@ -66,8 +72,6 @@ public sealed class FilterKnownDefectsTests : CsProjAcceptanceTests
             """);
     }
 
-    private const int TotalTests = 7;
-
     [Test, Platform("Win")]
     public void NoFilterRunsEverything()
     {
@@ -76,13 +80,17 @@ public sealed class FilterKnownDefectsTests : CsProjAcceptanceTests
         Verify(TotalTests, TotalTests, results);
     }
 
+    /// <summary>
+    /// The <c>vstest</c> entry point, which takes the filter as a single
+    /// <c>/TestCaseFilter:</c> argument and so can carry any escaped value.
+    /// </summary>
     [Test, Platform("Win")]
     [TestCase("FullyQualifiedName=KnownDefects.Foo.Sanity", TestName = "{m}_Sanity")]
     [TestCase(@"FullyQualifiedName=KnownDefects.Foo.SpaceBefore \(Case 1\)", TestName = "{m}_SpaceBeforeArguments_Issue1490")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.QuotedBackslash\(""C:\\Temp""\)", TestName = "{m}_QuotedBackslash")]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.QuotedBackslash\(""C:\\Temp""\)", TestName = "{m}_QuotedBackslash_Issue1489")]
     [TestCase(@"FullyQualifiedName=KnownDefects.Foo.QuotedPipe\(""This \| That""\)", TestName = "{m}_QuotedPipe_Issue1405")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B", TestName = "{m}_PipeOutsideArguments")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B", TestName = "{m}_AmpersandOutsideArguments")]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B", TestName = "{m}_PipeOutsideArguments_Issue1488")]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B", TestName = "{m}_AmpersandOutsideArguments_Issue1488")]
     public void VsTestSelectsTheTest(string filter)
     {
         var workspace = Build();
@@ -91,13 +99,22 @@ public sealed class FilterKnownDefectsTests : CsProjAcceptanceTests
         Verify(1, 1, results);
     }
 
+    /// <summary>
+    /// The <c>dotnet test --filter</c> entry point.
+    ///
+    /// The cases here are a subset of the <c>vstest</c> ones: a filter value containing a
+    /// double quote cannot be carried through this CLI at all — <c>dotnet test</c> forwards
+    /// it to MSBuild as a property and the quoting is lost, so the run fails with
+    /// <c>MSB4177: Invalid property</c> before the adapter is ever reached. That is a
+    /// limitation of the command line rather than a defect in the adapter, so asserting on
+    /// it here would prove nothing. The quoted-argument shapes are covered by the
+    /// <c>vstest</c> cases above and by the unit-level conformance tests.
+    /// </summary>
     [Test, Platform("Win")]
     [TestCase("FullyQualifiedName=KnownDefects.Foo.Sanity", TestName = "{m}_Sanity")]
     [TestCase(@"FullyQualifiedName=KnownDefects.Foo.SpaceBefore \(Case 1\)", TestName = "{m}_SpaceBeforeArguments_Issue1490")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.QuotedBackslash\(""C:\\Temp""\)", TestName = "{m}_QuotedBackslash")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.QuotedPipe\(""This \| That""\)", TestName = "{m}_QuotedPipe_Issue1405")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B", TestName = "{m}_PipeOutsideArguments")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B", TestName = "{m}_AmpersandOutsideArguments")]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B", TestName = "{m}_PipeOutsideArguments_Issue1488")]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B", TestName = "{m}_AmpersandOutsideArguments_Issue1488")]
     public void DotNetTestSelectsTheTest(string filter)
     {
         var workspace = Build();
@@ -115,6 +132,7 @@ public sealed class FilterKnownDefectsTests : CsProjAcceptanceTests
     /// working on the fix, and remove the attribute once the loop terminates at end of input.
     /// </summary>
     [Test, Platform("Win")]
+    [Property("Issue", "1501")]
     [Explicit("Exhausts memory in the child test host until the unbalanced-parenthesis loop is bounded.")]
     public void VsTestSelectsTheTestWithUnbalancedParenthesis()
     {

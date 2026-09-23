@@ -56,6 +56,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.TestFilterConverterTests;
 /// it exhausts memory and takes the test host with it. See
 /// <see cref="FilterParsingDefectTests"/> for the bounded version.
 /// </summary>
+[Category("FilterParsing")]
 public class FilterRoundTripConformanceTests
 {
     private const string Source = "dummy.dll";
@@ -73,29 +74,30 @@ public class FilterRoundTripConformanceTests
         new TestCaseData("My.Test.Fixture+Nested.Method(1,2,3)").SetName("{m}_NestedFixture"),
         new TestCaseData("My.Test.Fixture(99).Method(42)").SetName("{m}_FixtureAndMethodArguments"),
 
-        // Filter operators appearing literally in the name. Issue 1488 / 1405.
-        new TestCaseData("My.Test.Fixture.Method(Case 1: X = Y)").SetName("{m}_Equals"),
-        new TestCaseData("My.Test.Fixture.Method(a & b)").SetName("{m}_Ampersand"),
-        new TestCaseData("My.Test.Fixture.Method(a | b)").SetName("{m}_Pipe"),
-        new TestCaseData("My.Test.Fixture.Method(a ! b)").SetName("{m}_Bang"),
-        new TestCaseData("My.Test.Fixture.Method(a ~ b)").SetName("{m}_Tilde"),
-        new TestCaseData("My.Test.Fixture.Method(a != b)").SetName("{m}_NotEquals"),
+        // Filter operators appearing literally in the name, inside an argument list. These
+        // were fixed by PR 1489 and are here as a regression guard.
+        new TestCaseData("My.Test.Fixture.Method(Case 1: X = Y)").SetName("{m}_Equals").SetProperty("Issue", "1488"),
+        new TestCaseData("My.Test.Fixture.Method(a & b)").SetName("{m}_Ampersand").SetProperty("Issue", "1488"),
+        new TestCaseData("My.Test.Fixture.Method(a | b)").SetName("{m}_Pipe").SetProperty("Issue", "1405"),
+        new TestCaseData("My.Test.Fixture.Method(a ! b)").SetName("{m}_Bang").SetProperty("Issue", "1488"),
+        new TestCaseData("My.Test.Fixture.Method(a ~ b)").SetName("{m}_Tilde").SetProperty("Issue", "1488"),
+        new TestCaseData("My.Test.Fixture.Method(a != b)").SetName("{m}_NotEquals").SetProperty("Issue", "1488"),
 
         // The same operators with no argument list to re-glue the token. The
-        // parenthesis-balancing heuristic cannot help here.
-        new TestCaseData("My.Test.Fixture.MethodWithEquals_X=Y").SetName("{m}_EqualsOutsideArguments"),
-        new TestCaseData("My.Test.Fixture.MethodWithPipe_A|B").SetName("{m}_PipeOutsideArguments"),
-        new TestCaseData("My.Test.Fixture.MethodWithAmpersand_A&B").SetName("{m}_AmpersandOutsideArguments"),
+        // parenthesis-balancing heuristic cannot help here, so these still fail.
+        new TestCaseData("My.Test.Fixture.MethodWithEquals_X=Y").SetName("{m}_EqualsOutsideArguments").SetProperty("Issue", "1488"),
+        new TestCaseData("My.Test.Fixture.MethodWithPipe_A|B").SetName("{m}_PipeOutsideArguments").SetProperty("Issue", "1488"),
+        new TestCaseData("My.Test.Fixture.MethodWithAmpersand_A&B").SetName("{m}_AmpersandOutsideArguments").SetProperty("Issue", "1488"),
 
-        // Whitespace between the name and the argument list. Issue 1490.
-        new TestCaseData("My.Test.Fixture.Method (Case 1)").SetName("{m}_SpaceBeforeArguments"),
+        // Whitespace between the name and the argument list.
+        new TestCaseData("My.Test.Fixture.Method (Case 1)").SetName("{m}_SpaceBeforeArguments").SetProperty("Issue", "1490"),
 
         // String arguments, which NUnit renders in quotes. The tokenizer has a second,
-        // independent unescaping pass for these.
+        // independent unescaping pass for these, so escaping is applied twice.
         new TestCaseData("My.Test.Fixture.Method(\"plain\")").SetName("{m}_QuotedArgument"),
-        new TestCaseData("My.Test.Fixture.Method(\"This | That\",False)").SetName("{m}_QuotedPipe_Issue1405"),
-        new TestCaseData("My.Test.Fixture.Method(\"C:\\\\Temp\")").SetName("{m}_QuotedBackslash"),
-        new TestCaseData("My.Test.Fixture.Method(\"a\\\"b\")").SetName("{m}_QuotedEscapedQuote"),
+        new TestCaseData("My.Test.Fixture.Method(\"This | That\",False)").SetName("{m}_QuotedPipe").SetProperty("Issue", "1405"),
+        new TestCaseData("My.Test.Fixture.Method(\"C:\\\\Temp\")").SetName("{m}_QuotedBackslash").SetProperty("Issue", "1489"),
+        new TestCaseData("My.Test.Fixture.Method(\"a\\\"b\")").SetName("{m}_QuotedEscapedQuote").SetProperty("Issue", "1489"),
         new TestCaseData("My.Test.Fixture.Method(\"a(b\")").SetName("{m}_QuotedOpenParen"),
         new TestCaseData("My.Test.Fixture.Method(\"a)b\")").SetName("{m}_QuotedCloseParen"),
 
@@ -143,7 +145,7 @@ public class FilterRoundTripConformanceTests
     [TestCase("Method")]
     [TestCase("Method(42)")]
     [TestCase("Method(a | b)")]
-    [TestCase("Method (Case 1)")]
+    [TestCase("Method (Case 1)")]   // Issue 1490
     [TestCase("Method_A|B")]
     public void NameFilterProducesTheSameSelection(string name)
     {
