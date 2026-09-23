@@ -170,3 +170,7 @@ Each item above should land with a regression test at the level where it actuall
 
 For item 1, bound the test with a timeout — an assertion that never returns is not a useful
 failure.
+
+## Acknowledgement
+
+Claude Opus 5 has been assisting in investigating and building these documents.

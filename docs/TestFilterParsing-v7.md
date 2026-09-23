@@ -195,3 +195,5 @@ would leave the other two categories without an owner.
 The analysis of the escaping model, and the argument that the special characters should be split
 on before the blobs between them are unescaped, is due to @PanzerFowst in [#1501](https://github.com/nunit/nunit3-vs-adapter/issues/1501), following the
 investigations in [#1488](https://github.com/nunit/nunit3-vs-adapter/issues/1488), [#1490](https://github.com/nunit/nunit3-vs-adapter/issues/1490) and the PRs [#1489](https://github.com/nunit/nunit3-vs-adapter/pull/1489) and [#1491](https://github.com/nunit/nunit3-vs-adapter/pull/1491).
+
+Claude Opus 5 has been assisting in investigating and building these documents.
