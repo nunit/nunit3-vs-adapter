@@ -163,20 +163,122 @@ parsing the filter, evaluate it against the loaded test cases with the platform'
 already falls back to this path, and v7 should keep it and make the fallback deliberate and
 logged rather than incidental.
 
+## The other half: the names we report have to be escapable
+
+Fixing the parser addresses filters on the way *in*. There is a second failure mode that it
+cannot touch, and [#1349](https://github.com/nunit/nunit3-vs-adapter/issues/1349) and
+[#1377](https://github.com/nunit/nunit3-vs-adapter/issues/1377) are both instances of it.
+
+Under the Microsoft Testing Platform the filter is unescaped by `FilterHelper.Unescape` inside
+the VSTest bridge, in `ContextAdapterBase.GetTestCaseFilter`. We reach that from
+`VsTestFilter.MsTestCaseFilterExpression`, which is a property that simply calls
+`runContext.GetTestCaseFilter(...)`. When the incoming filter contains a malformed escape
+sequence, the bridge throws `TestPlatformFormatException` there — **before `TestFilterParser`
+is ever constructed**. No change to the tokenizer or the parser can affect this.
+
+For [#1349](https://github.com/nunit/nunit3-vs-adapter/issues/1349) the test is:
+
+```csharp
+[TestCase("\"C:\\Path\\File.txt\"")]
+[TestCase("C:\\Path\\File.txt\"")]
+public void Test(string input) { }
+```
+
+and the filter that arrives is:
+
+```
+QuotesTests.Test\("C:\\\Path\\\File.txt\\""\)
+```
+
+That string is not a correct escaping of anything. `\\` consumes a pair, leaving `\P`, which is
+not one of the recognised escapes, so `Unescape` throws exactly the error the issue reports.
+
+The name itself is not the problem. Escaping NUnit's rendering of that test correctly gives:
+
+```
+QuotesTests.Test\("\\"C:\\\\Path\\\\File.txt\\""\)
+```
+
+which unescapes cleanly back to the original full name. So the defect is in the *construction*
+of the filter, upstream of us. That the issue only reproduces when both `[TestCase]` attributes
+are present points at the filter being built over a set of names rather than one, but the
+mechanism has not been confirmed and a captured repro is needed before blaming a specific
+component.
+
+Three things follow for v7, none of which the parser rewrite provides:
+
+1. **Treat round-trippability as a discovery-side invariant.** Every `FullyQualifiedName` we
+   report should satisfy `Unescape(Escape(name)) == name`. That is a property we own and can
+   test directly over the names discovery produces, rather than waiting for a filter to come
+   back and fail. `FilterRoundTripConformanceTests` already asserts it for a corpus; the
+   equivalent check belongs in discovery.
+
+2. **Do not let the bridge's exception escape as an adapter crash.** `MsTestCaseFilterExpression`
+   should catch `TestPlatformFormatException`, log the offending filter, and degrade — either to
+   running everything or to a clear "this filter could not be read" message. Today the user sees
+   a `StreamJsonRpc.RemoteInvocationException` stack with no indication that a filter is at
+   fault.
+
+3. **Establish where the malformed filter comes from.** Until that is known, the two issues
+   cannot be closed, only worked around. This needs a captured filter string from a live Test
+   Explorer session, not reasoning from the reports.
+
+This is the seam between category A and category B in
+[#505](https://github.com/nunit/nunit3-vs-adapter/issues/505): the name is mangled, but the
+mangling happens while the *identity* is being turned into a filter, not while the filter is
+being parsed.
+
 ## What this does and does not fix in [#505](https://github.com/nunit/nunit3-vs-adapter/issues/505)
 
-- **Category A — FQN parsing and special characters (13 issues).** Fixed. This is the single root
-  cause, and [#1405](https://github.com/nunit/nunit3-vs-adapter/issues/1405), [#1488](https://github.com/nunit/nunit3-vs-adapter/issues/1488), [#1490](https://github.com/nunit/nunit3-vs-adapter/issues/1490) and [#1501](https://github.com/nunit/nunit3-vs-adapter/issues/1501) are all instances of it.
-- **Category B — discovery/execution identity mismatch (5 issues).** Not fixed, and not related.
-  Those are about the FQN string the adapter *reports* at discovery versus what NUnit's own filter
-  engine matches — `SetName`, `TestFixtureSource`, phantom entries. A correct tokenizer does not
-  touch them, and they need their own analysis.
-- **Category C — filter semantics and selection rules (5 issues).** Not fixed, and not related.
-  `[Explicit]`, `AssemblySelectLimit` and `[Platform]` are policy questions about what a filter
-  should select, not about how it is read.
+An earlier draft of this document claimed the parser rewrite fixes category A outright. Writing
+the conformance corpus disproved that: several category A issues round-trip through the current
+parser perfectly well, so whatever is wrong with them is somewhere else. The breakdown below is
+what the tests actually show, and is the honest version.
 
-So this work closes roughly half of [#505](https://github.com/nunit/nunit3-vs-adapter/issues/505). Framing it as a fix for all of [#505](https://github.com/nunit/nunit3-vs-adapter/issues/505) would be wrong and
-would leave the other two categories without an owner.
+**Category A — FQN parsing and special characters (14 issues).**
+
+- Fixed by the rewrite: [#1488](https://github.com/nunit/nunit3-vs-adapter/issues/1488)
+  (escaped operators outside an argument list),
+  [#1490](https://github.com/nunit/nunit3-vs-adapter/issues/1490) (space before `(`),
+  [#876](https://github.com/nunit/nunit3-vs-adapter/issues/876) (spaces in a name with no
+  argument list at all — a distinct shape from 1490, and one the parenthesis heuristic cannot
+  even be blamed for).
+- Fixed by bounding the loop, a 6.x item:
+  [#1501](https://github.com/nunit/nunit3-vs-adapter/issues/1501).
+- Needs XML validity, not parsing: [#761](https://github.com/nunit/nunit3-vs-adapter/issues/761).
+  U+FFFF is not a legal XML character, so the emitted filter is a correct string that will not
+  load as a document. Escaping the five XML metacharacters does not help.
+- Not parser defects at all — these already round-trip correctly today, and now have passing
+  tests proving it: [#1405](https://github.com/nunit/nunit3-vs-adapter/issues/1405),
+  [#807](https://github.com/nunit/nunit3-vs-adapter/issues/807),
+  [#1097](https://github.com/nunit/nunit3-vs-adapter/issues/1097),
+  [#654](https://github.com/nunit/nunit3-vs-adapter/issues/654),
+  [#1437](https://github.com/nunit/nunit3-vs-adapter/issues/1437). For 1437 this matches the
+  issue's own dump, which shows a correctly built filter and zero tests discovered, so the defect
+  is downstream in NUnit's `<test>` matching. For 1097 and 654 the Test Explorer class name comes
+  from NUnit's `classname` attribute rather than from splitting the full name, so the `).`
+  grouping problem is in another layer again. Each needs its own analysis.
+- Thrown before the parser runs: [#1349](https://github.com/nunit/nunit3-vs-adapter/issues/1349)
+  and [#1377](https://github.com/nunit/nunit3-vs-adapter/issues/1377) — see the section above.
+- Unresolved here: [#782](https://github.com/nunit/nunit3-vs-adapter/issues/782) (tuple
+  `TestCaseSource`, an identity problem),
+  [#935](https://github.com/nunit/nunit3-vs-adapter/issues/935) (marked External), and
+  [#742](https://github.com/nunit/nunit3-vs-adapter/issues/742), whose repro is a gist that no
+  longer says which characters were involved.
+
+**Category B — discovery/execution identity mismatch (6 issues).** Not fixed, and mostly not
+related. These are about the full name the adapter *reports* at discovery versus what NUnit's own
+filter engine matches — `SetName`, `TestFixtureSource`, phantom entries, seed drift. A correct
+tokenizer does not touch them. The one point of contact is the round-trippability invariant
+described in the previous section, which sits on the discovery side.
+
+**Category C — filter semantics and selection rules (5 issues).** Not fixed, and not related.
+`[Explicit]`, `AssemblySelectLimit` and `[Platform]` are policy questions about what a filter
+should select, not about how it is read.
+
+So the parser rewrite closes four issues outright and clears the ground under several more by
+showing they are not parsing problems. That is less than "half of 505", and framing it as a fix
+for all of category A would leave real defects without an owner.
 
 ## Suggested sequence
 
@@ -187,7 +289,10 @@ would leave the other two categories without an owner.
 4. Point `FullyQualifiedNameFilterParser` at the same parser and delete its private unescape.
 5. Make the `ConvertMsFilterToNUnitFilter` fallback explicit and logged, so a filter the adapter
    declines to parse degrades to matching rather than to an error.
-6. Extend `FilterSpecialCharacterTests` with the quoted-argument and whitespace-before-`(` shapes,
+6. Guard `VsTestFilter.MsTestCaseFilterExpression` so a malformed incoming filter is reported as
+   a filter problem instead of an opaque RPC exception, and assert the round-trip invariant over
+   discovered names.
+7. Extend `FilterSpecialCharacterTests` with the quoted-argument and whitespace-before-`(` shapes,
    and note the `Name=Foo(1)` migration in the release notes.
 
 ## Acknowledgement
