@@ -88,25 +88,25 @@ public sealed class MtpFilterKnownDefectsTests : MtpCsProjAcceptanceTests
     /// which are different defects.
     /// </summary>
     [Test, Platform("Win")]
-    [TestCase("FullyQualifiedName=KnownDefects.Foo.Sanity", TestName = "{m}_Sanity")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.SpaceBefore \(Case 1\)", TestName = "{m}_SpaceBeforeArguments_Issue1490", Category = FixIn.V7)]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.QuotedBackslash\(""C:\\Temp""\)", TestName = "{m}_QuotedBackslash_Issue1489")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.QuotedPipe\(""This \| That""\)", TestName = "{m}_QuotedPipe_Issue1405")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B", TestName = "{m}_PipeOutsideArguments_Issue1488", Category = FixIn.V7)]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B", TestName = "{m}_AmpersandOutsideArguments_Issue1488", Category = FixIn.V7)]
-    public void DiscoveryAndExecutionAgree(string filter)
+    [TestCase("FullyQualifiedName=KnownDefects.Foo.Sanity", "Sanity", TestName = "{m}_Sanity")]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.SpaceBefore \(Case 1\)", "SpaceBefore (Case 1)", TestName = "{m}_SpaceBeforeArguments_Issue1490", Category = FixIn.V7)]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.QuotedBackslash\(""C:\\Temp""\)", @"QuotedBackslash(""C:\Temp"")", TestName = "{m}_QuotedBackslash_Issue1489")]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.QuotedPipe\(""This \| That""\)", @"QuotedPipe(""This | That"")", TestName = "{m}_QuotedPipe_Issue1405")]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B", "PipeOutside_A|B", TestName = "{m}_PipeOutsideArguments_Issue1488", Category = FixIn.V7)]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B", "AmpersandOutside_A&B", TestName = "{m}_AmpersandOutsideArguments_Issue1488", Category = FixIn.V7)]
+    public void DiscoveryAndExecutionAgree(string filter, string expectedTestName)
     {
         var workspace = Build();
         workspace.DumpTestExecution = true;
 
         var listed = workspace.MtpListTests(TestApplicationPath, filter, TestContext.WriteLine);
 
-        Assert.That(listed, Has.Count.EqualTo(1),
-            $"Discovery should list exactly one test for filter '{filter}'.");
+        Assert.That(listed, Is.EqualTo(new[] { expectedTestName }),
+            $"Discovery should list '{expectedTestName}' and nothing else for filter '{filter}'.");
 
         var results = workspace.MtpTest(TestApplicationPath, filter, TestContext.WriteLine);
 
-        Verify(1, 1, results);
+        VerifySelected(expectedTestName, results);
     }
 
     /// <summary>
@@ -125,9 +125,22 @@ public sealed class MtpFilterKnownDefectsTests : MtpCsProjAcceptanceTests
         const string filter = @"FullyQualifiedName=KnownDefects.Foo.NoClose\(";
 
         var listed = workspace.MtpListTests(TestApplicationPath, filter, TestContext.WriteLine);
-        Assert.That(listed, Has.Count.EqualTo(1));
+        Assert.That(listed, Is.EqualTo(new[] { "NoClose(" }));
 
         var results = workspace.MtpTest(TestApplicationPath, filter, TestContext.WriteLine);
+        VerifySelected("NoClose(", results);
+    }
+
+    /// <summary>
+    /// Asserts that exactly the requested test ran, and passed. Counters alone would accept a
+    /// filter that selected a different single test, since every generated test body is
+    /// <c>Assert.Pass()</c>.
+    /// </summary>
+    private void VerifySelected(string expectedTestName, VSTestResult results)
+    {
         Verify(1, 1, results);
+
+        Assert.That(results.ExecutedTestNames, Is.EqualTo(new[] { expectedTestName }),
+            $"The filter should have selected '{expectedTestName}' and nothing else.");
     }
 }

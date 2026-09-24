@@ -21,8 +21,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance;
 /// fully qualified name each filter has to match is exact and does not depend on how NUnit
 /// happens to render a particular argument value.
 ///
-/// Run the whole filter-parsing set with <c>--filter "Category=FilterParsing"</c>, or one
-/// issue at a time with, for example, <c>--filter "Issue=1490"</c>.
+/// Each case asserts which test ran, not just how many. Every generated test body is
+/// <c>Assert.Pass()</c>, so a filter that selected the wrong single test would satisfy a
+/// count-only assertion.
+///
+/// Run the whole filter-parsing set with <c>--filter "Category=FilterParsing"</c>, and the
+/// subset that 6.x is expected to fix with
+/// <c>--filter "Category=FilterParsing &amp; Category!=FixV7"</c>.
 /// </summary>
 [Category("FilterParsing")]
 public sealed class FilterKnownDefectsTests : CsProjAcceptanceTests
@@ -85,18 +90,19 @@ public sealed class FilterKnownDefectsTests : CsProjAcceptanceTests
     /// <c>/TestCaseFilter:</c> argument and so can carry any escaped value.
     /// </summary>
     [Test, Platform("Win")]
-    [TestCase("FullyQualifiedName=KnownDefects.Foo.Sanity", TestName = "{m}_Sanity")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.SpaceBefore \(Case 1\)", TestName = "{m}_SpaceBeforeArguments_Issue1490", Category = FixIn.V7)]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.QuotedBackslash\(""C:\\Temp""\)", TestName = "{m}_QuotedBackslash_Issue1489")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.QuotedPipe\(""This \| That""\)", TestName = "{m}_QuotedPipe_Issue1405")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B", TestName = "{m}_PipeOutsideArguments_Issue1488", Category = FixIn.V7)]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B", TestName = "{m}_AmpersandOutsideArguments_Issue1488", Category = FixIn.V7)]
-    public void VsTestSelectsTheTest(string filter)
+    [TestCase("FullyQualifiedName=KnownDefects.Foo.Sanity", "Sanity", TestName = "{m}_Sanity")]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.SpaceBefore \(Case 1\)", "SpaceBefore (Case 1)", TestName = "{m}_SpaceBeforeArguments_Issue1490", Category = FixIn.V7)]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.QuotedBackslash\(""C:\\Temp""\)", @"QuotedBackslash(""C:\Temp"")", TestName = "{m}_QuotedBackslash_Issue1489")]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.QuotedPipe\(""This \| That""\)", @"QuotedPipe(""This | That"")", TestName = "{m}_QuotedPipe_Issue1405")]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B", "PipeOutside_A|B", TestName = "{m}_PipeOutsideArguments_Issue1488", Category = FixIn.V7)]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B", "AmpersandOutside_A&B", TestName = "{m}_AmpersandOutsideArguments_Issue1488", Category = FixIn.V7)]
+    public void VsTestSelectsTheTest(string filter, string expectedTestName)
     {
         var workspace = Build();
         workspace.DumpTestExecution = true;
         var results = workspace.VSTest($@"bin\Debug\{Framework}\Test.dll", new VsTestTestCaseFilter(filter));
-        Verify(1, 1, results);
+
+        VerifySelected(expectedTestName, results);
     }
 
     /// <summary>
@@ -111,15 +117,16 @@ public sealed class FilterKnownDefectsTests : CsProjAcceptanceTests
     /// <c>vstest</c> cases above and by the unit-level conformance tests.
     /// </summary>
     [Test, Platform("Win")]
-    [TestCase("FullyQualifiedName=KnownDefects.Foo.Sanity", TestName = "{m}_Sanity")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.SpaceBefore \(Case 1\)", TestName = "{m}_SpaceBeforeArguments_Issue1490", Category = FixIn.V7)]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B", TestName = "{m}_PipeOutsideArguments_Issue1488", Category = FixIn.V7)]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B", TestName = "{m}_AmpersandOutsideArguments_Issue1488", Category = FixIn.V7)]
-    public void DotNetTestSelectsTheTest(string filter)
+    [TestCase("FullyQualifiedName=KnownDefects.Foo.Sanity", "Sanity", TestName = "{m}_Sanity")]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.SpaceBefore \(Case 1\)", "SpaceBefore (Case 1)", TestName = "{m}_SpaceBeforeArguments_Issue1490", Category = FixIn.V7)]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B", "PipeOutside_A|B", TestName = "{m}_PipeOutsideArguments_Issue1488", Category = FixIn.V7)]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B", "AmpersandOutside_A&B", TestName = "{m}_AmpersandOutsideArguments_Issue1488", Category = FixIn.V7)]
+    public void DotNetTestSelectsTheTest(string filter, string expectedTestName)
     {
         var workspace = Build();
         var results = workspace.DotNetTest(filter, true, true, TestContext.WriteLine);
-        Verify(1, 1, results);
+
+        VerifySelected(expectedTestName, results);
     }
 
     /// <summary>
@@ -142,6 +149,20 @@ public sealed class FilterKnownDefectsTests : CsProjAcceptanceTests
         var results = workspace.VSTest(
             $@"bin\Debug\{Framework}\Test.dll",
             new VsTestTestCaseFilter(@"FullyQualifiedName=KnownDefects.Foo.NoClose\("));
+
+        VerifySelected("NoClose(", results);
+    }
+
+    /// <summary>
+    /// Asserts that exactly the requested test ran, and passed. Counters alone would accept a
+    /// filter that selected a different single test, since every generated test body is
+    /// <c>Assert.Pass()</c>.
+    /// </summary>
+    private void VerifySelected(string expectedTestName, VSTestResult results)
+    {
         Verify(1, 1, results);
+
+        Assert.That(results.ExecutedTestNames, Is.EqualTo(new[] { expectedTestName }),
+            $"The filter should have selected '{expectedTestName}' and nothing else.");
     }
 }
