@@ -59,8 +59,11 @@ public class FilterParsingDefectTests
     [TestCase(@"a\=b", TestName = "{m}_EscapedEquals")]
     [TestCase(@"a\!b", TestName = "{m}_EscapedBang")]
     [TestCase(@"a\~b", TestName = "{m}_EscapedTilde")]
-    [TestCase(@"a\(b", TestName = "{m}_EscapedOpenParen")]
     [TestCase(@"a\)b", TestName = "{m}_EscapedCloseParen")]
+    // The escaped *open* parenthesis belongs here too, but until item 1 bounds the loop it is
+    // destructive rather than merely failing: the lexer treats the '(' as a real group opener,
+    // finds no ')', and allocates until StringBuilder hits its 2 GB cap. It lives in
+    // UnbalancedParenthesisDefectTests until then. See EscapedOpenParenStaysInsideOneToken.
     public void EscapedOperatorStaysInsideOneToken(string escapedValue)
     {
         var tokenizer = new Tokenizer(escapedValue);
@@ -165,6 +168,16 @@ public class FilterParsingDefectTests
         // Written out rather than expressed with Throws.Nothing.Or.TypeOf<T>(): after .Or the
         // constraint applies to the delegate's return value, not to the exception, so that form
         // fails even when the right exception is thrown.
+        //
+        // "Null or TestFilterParserException" is deliberately the contract, and it is the one
+        // assertion that holds across both releases. Today these filters raise a raw
+        // ArgumentException and this fails. After 6.x item 3 wraps it, they raise
+        // TestFilterParserException and this passes. After the v7 grammar lands they parse
+        // cleanly and nothing is thrown, which is the desired end state, not a regression.
+        //
+        // It does not verify that the resulting filter is *correct* when nothing is thrown —
+        // that is asserted by FilterRoundTripConformanceTests.AdapterProducesTheSameSelection
+        // for the same inputs, which is where a wrong-but-silent parse is caught.
         Exception caught = null;
 
         try
@@ -284,5 +297,35 @@ public class UnbalancedParenthesisDefectTests
 
         Assert.That(completed.Wait(TimeSpan.FromSeconds(5)), Is.True,
             "Tokenizing an unbalanced '(' must terminate at end of input.");
+    }
+
+    /// <summary>
+    /// An escaped open parenthesis is a value character, not a group opener, so this belongs with
+    /// the other escaped operators in <see cref="FilterParsingDefectTests"/>.
+    ///
+    /// It is here instead because the current lexer does treat it as a group opener, finds no
+    /// closing parenthesis, and allocates until <see cref="System.Text.StringBuilder"/> reaches
+    /// its 2 GB cap — about twelve seconds and two gigabytes per run. That is the same defect as
+    /// issue 1501 reached from a different input, and it is destructive rather than merely
+    /// failing, so it must not sit in the ordinary suite.
+    ///
+    /// Once item 1 bounds the loop, move this case back to
+    /// <see cref="FilterParsingDefectTests.EscapedOperatorStaysInsideOneToken"/>.
+    /// </summary>
+    [Test]
+    public void EscapedOpenParenStaysInsideOneToken()
+    {
+        const string escapedValue = @"a\(b";
+
+        var tokenizer = new Tokenizer(escapedValue);
+        var token = tokenizer.NextToken();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(token.Text, Is.EqualTo(escapedValue),
+                "An escaped operator must not break the value into several tokens.");
+            Assert.That(tokenizer.NextToken().Kind, Is.EqualTo(TokenKind.Eof),
+                "The whole value should have been consumed by the first token.");
+        });
     }
 }
