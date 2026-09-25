@@ -162,25 +162,32 @@ metacharacters. That is not sufficient, because a test name can contain a code p
 a legal XML character at all, and no amount of entity escaping makes such a document parse.
 
 [#761](https://github.com/nunit/nunit3-vs-adapter/issues/761) is the reported case: a test case
-with a `￿` argument. The parser emits exactly the right string — the equality assertion in
-`FilterRoundTripConformanceTests.AdapterProducesTheSameSelection` passes — but
-`AdapterProducesLoadableXml` fails, because `XmlDocument.LoadXml` rejects the result. The test
-appears in Test Explorer and never runs.
+with a `￿` argument. The parser emits exactly the right string, but `XmlDocument.LoadXml`
+rejects the result. The test appears in Test Explorer and never runs.
 
-This was found by adding the XML-validity assertion, not by reading the code: without it the
-issue looked covered and green.
+This was found by adding an XML-validity assertion, not by reading the code: without it the issue
+looked covered and green.
 
-**Fix:** decide what a name containing an illegal XML character should mean, and make the emitted
-document valid either way. The realistic options are to drop such characters from the value, to
-encode them in a way NUnit's filter reader understands, or to reject the filter with a
-`TestFilterParserException` naming the offending character. Dropping them silently changes which
-tests match, so rejecting is probably the honest default, with the caveat that the test then stays
-unrunnable and the real fix belongs on the discovery side — a name that cannot be expressed in the
-filter document arguably should not be reported as an identity in the first place.
+**Decision: drop the illegal characters.** The emitted value is the name with anything not legal
+in XML removed, so the document always parses.
+
+**What this does and does not achieve.** It removes the crash and the unparseable document, which
+is the point. It does not make [#761](https://github.com/nunit/nunit3-vs-adapter/issues/761)
+runnable: once a character is dropped, the emitted value no longer equals the test's full name, so
+the filter matches nothing. The test stays unrunnable — it fails cleanly instead of breaking the
+filter document. Making such a test selectable at all is a discovery-side problem, because a name
+that cannot be expressed in the filter document arguably should not be reported as an identity;
+see the escapability section of [TestFilterParsing-v7.md](TestFilterParsing-v7.md).
+
+The characters to drop are those outside XML 1.0's legal set: everything below `#x20` except tab,
+line feed and carriage return, plus `#xFFFE`, `#xFFFF` and unpaired surrogates.
+
+**Tests:** `FilterRoundTripConformanceTests.IllegalXmlCharactersAreDroppedFromTheValue`, covering
+`￿` and a C0 control. The name is deliberately absent from the shared corpus, because that
+corpus asserts the emitted value equals the name and this case is the one exception to it.
 
 **Non-breaking:** the current behaviour is an exception from `XmlDocument` or an unusable filter,
-so there is nothing working to preserve. Whichever option is chosen should be settled before the
-fix, because it is a semantic decision rather than a mechanical one.
+so there is nothing working to preserve.
 
 ## Explicitly out of scope for 6.x
 
@@ -207,11 +214,11 @@ An ordinary run is therefore red on exactly the 6.x work and nothing else:
 
 ```
 dotnet test --filter "Category=FilterParsing"
-  126 total, 10 failing, 36 skipped        (unit)
+  125 total, 11 failing, 36 skipped        (unit)
    21 total,  0 failing, 11 skipped        (acceptance)
 ```
 
-The 10 failures are items 2, 3, 4 and 5. Implementing all five items takes them to zero, which is
+The 11 failures are items 2, 3, 4 and 5. Implementing all five items takes them to zero, which is
 what a 6.x pull request has to show before it can merge.
 
 The skipped tests are ignored deliberately, each with a reason in the attribute:
