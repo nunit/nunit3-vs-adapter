@@ -16,7 +16,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance;
 /// than a proxy for it: give discovery and execution the same filter string, and require that
 /// they agree.
 ///
-/// Expected to fail until the parser is fixed.
+/// Cases needing the v7 grammar are ignored with <c>FixIn.V7Reason</c>; the rest are expected to
+/// fail until their 6.x item is implemented.
 /// </summary>
 [Category("FilterParsing")]
 public sealed class MtpFilterKnownDefectsTests : MtpCsProjAcceptanceTests
@@ -89,11 +90,11 @@ public sealed class MtpFilterKnownDefectsTests : MtpCsProjAcceptanceTests
     /// </summary>
     [Test, Platform("Win")]
     [TestCase("FullyQualifiedName=KnownDefects.Foo.Sanity", "Sanity", TestName = "{m}_Sanity")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.SpaceBefore \(Case 1\)", "SpaceBefore (Case 1)", TestName = "{m}_SpaceBeforeArguments_Issue1490", Category = FixIn.V7)]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.SpaceBefore \(Case 1\)", "SpaceBefore (Case 1)", TestName = "{m}_SpaceBeforeArguments_Issue1490", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
     [TestCase(@"FullyQualifiedName=KnownDefects.Foo.QuotedBackslash\(""C:\\Temp""\)", @"QuotedBackslash(""C:\Temp"")", TestName = "{m}_QuotedBackslash_Issue1489")]
     [TestCase(@"FullyQualifiedName=KnownDefects.Foo.QuotedPipe\(""This \| That""\)", @"QuotedPipe(""This | That"")", TestName = "{m}_QuotedPipe_Issue1405")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B", "PipeOutside_A|B", TestName = "{m}_PipeOutsideArguments_Issue1488", Category = FixIn.V7)]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B", "AmpersandOutside_A&B", TestName = "{m}_AmpersandOutsideArguments_Issue1488", Category = FixIn.V7)]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B", "PipeOutside_A|B", TestName = "{m}_PipeOutsideArguments_Issue1488", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B", "AmpersandOutside_A&B", TestName = "{m}_AmpersandOutsideArguments_Issue1488", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
     public void DiscoveryAndExecutionAgree(string filter, string expectedTestName)
     {
         var workspace = Build();
@@ -110,13 +111,14 @@ public sealed class MtpFilterKnownDefectsTests : MtpCsProjAcceptanceTests
     }
 
     /// <summary>
-    /// Issue 1501 under the platform. Explicit for the same reason as the VSTest version: the
-    /// tokenizer does not terminate, so the test application allocates until it is killed.
+    /// Issue 1501 under the platform. A 6.x test, ignored for the same reason as the VSTest
+    /// version: the tokenizer does not terminate, so the test application allocates until it is
+    /// killed. Bound the loop and remove the Ignore in the same change.
     /// </summary>
     [Test, Platform("Win")]
     [Property("Issue", "1501")]
     [Category(FixIn.SixX)]
-    [Explicit("Exhausts memory in the child test application until the unbalanced-parenthesis loop is bounded.")]
+    [Ignore(FixIn.Item1Reason)]
     public void DiscoveryAndExecutionAgreeWithUnbalancedParenthesis()
     {
         var workspace = Build();

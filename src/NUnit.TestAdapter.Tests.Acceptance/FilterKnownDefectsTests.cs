@@ -25,9 +25,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance;
 /// <c>Assert.Pass()</c>, so a filter that selected the wrong single test would satisfy a
 /// count-only assertion.
 ///
-/// Run the whole filter-parsing set with <c>--filter "Category=FilterParsing"</c>, and the
-/// subset that 6.x is expected to fix with
-/// <c>--filter "Category=FilterParsing &amp; Category!=FixV7"</c>.
+/// Tests that need the v7 grammar are ignored with <c>FixIn.V7Reason</c>, so an ordinary run is
+/// red on the 6.x work only.
 /// </summary>
 [Category("FilterParsing")]
 public sealed class FilterKnownDefectsTests : CsProjAcceptanceTests
@@ -91,11 +90,11 @@ public sealed class FilterKnownDefectsTests : CsProjAcceptanceTests
     /// </summary>
     [Test, Platform("Win")]
     [TestCase("FullyQualifiedName=KnownDefects.Foo.Sanity", "Sanity", TestName = "{m}_Sanity")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.SpaceBefore \(Case 1\)", "SpaceBefore (Case 1)", TestName = "{m}_SpaceBeforeArguments_Issue1490", Category = FixIn.V7)]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.SpaceBefore \(Case 1\)", "SpaceBefore (Case 1)", TestName = "{m}_SpaceBeforeArguments_Issue1490", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
     [TestCase(@"FullyQualifiedName=KnownDefects.Foo.QuotedBackslash\(""C:\\Temp""\)", @"QuotedBackslash(""C:\Temp"")", TestName = "{m}_QuotedBackslash_Issue1489")]
     [TestCase(@"FullyQualifiedName=KnownDefects.Foo.QuotedPipe\(""This \| That""\)", @"QuotedPipe(""This | That"")", TestName = "{m}_QuotedPipe_Issue1405")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B", "PipeOutside_A|B", TestName = "{m}_PipeOutsideArguments_Issue1488", Category = FixIn.V7)]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B", "AmpersandOutside_A&B", TestName = "{m}_AmpersandOutsideArguments_Issue1488", Category = FixIn.V7)]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B", "PipeOutside_A|B", TestName = "{m}_PipeOutsideArguments_Issue1488", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B", "AmpersandOutside_A&B", TestName = "{m}_AmpersandOutsideArguments_Issue1488", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
     public void VsTestSelectsTheTest(string filter, string expectedTestName)
     {
         var workspace = Build();
@@ -118,9 +117,9 @@ public sealed class FilterKnownDefectsTests : CsProjAcceptanceTests
     /// </summary>
     [Test, Platform("Win")]
     [TestCase("FullyQualifiedName=KnownDefects.Foo.Sanity", "Sanity", TestName = "{m}_Sanity")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.SpaceBefore \(Case 1\)", "SpaceBefore (Case 1)", TestName = "{m}_SpaceBeforeArguments_Issue1490", Category = FixIn.V7)]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B", "PipeOutside_A|B", TestName = "{m}_PipeOutsideArguments_Issue1488", Category = FixIn.V7)]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B", "AmpersandOutside_A&B", TestName = "{m}_AmpersandOutsideArguments_Issue1488", Category = FixIn.V7)]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.SpaceBefore \(Case 1\)", "SpaceBefore (Case 1)", TestName = "{m}_SpaceBeforeArguments_Issue1490", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B", "PipeOutside_A|B", TestName = "{m}_PipeOutsideArguments_Issue1488", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B", "AmpersandOutside_A&B", TestName = "{m}_AmpersandOutsideArguments_Issue1488", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
     public void DotNetTestSelectsTheTest(string filter, string expectedTestName)
     {
         var workspace = Build();
@@ -133,15 +132,14 @@ public sealed class FilterKnownDefectsTests : CsProjAcceptanceTests
     /// Issue 1501. The adapter's tokenizer never terminates on an argument list with no
     /// closing parenthesis, so the test host allocates until it runs out of memory.
     ///
-    /// Explicit on purpose: the failure mode is memory exhaustion rather than a normal
-    /// assertion failure, and although the damage is confined to the child process it is
-    /// still not something to run unattended on a build agent. Run it deliberately while
-    /// working on the fix, and remove the attribute once the loop terminates at end of input.
+    /// A 6.x test, ignored only because the failure mode is memory exhaustion rather than a
+    /// normal assertion failure. Bound the loop at end of input and remove the Ignore in the
+    /// same change.
     /// </summary>
     [Test, Platform("Win")]
     [Property("Issue", "1501")]
     [Category(FixIn.SixX)]
-    [Explicit("Exhausts memory in the child test host until the unbalanced-parenthesis loop is bounded.")]
+    [Ignore(FixIn.Item1Reason)]
     public void VsTestSelectsTheTestWithUnbalancedParenthesis()
     {
         var workspace = Build();
