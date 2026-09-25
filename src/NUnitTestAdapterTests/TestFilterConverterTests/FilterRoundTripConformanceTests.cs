@@ -128,10 +128,10 @@ public class FilterRoundTripConformanceTests
         new TestCaseData("My.Test.Fixture.Slice_IsCorrect([0,1,2,3],3,3,[3])")
             .SetName("{m}_BracketArguments").SetProperty("Issue", "1437"),
 
-        // A non-character code point in an argument. This one is not about tokenizing at all:
-        // U+FFFF is not a legal XML character, and the NUnit filter is an XML document.
-        new TestCaseData("My.Test.Fixture.Test_01(\"\uffff\")")
-            .SetName("{m}_NonCharacterArgument").SetCategory(FixIn.SixX).SetProperty("Issue", "761"),
+        // A name containing a character that is not legal in XML is deliberately not in this
+        // corpus: the agreed behaviour is to drop the character, so the emitted value is not
+        // equal to the name and the round-trip assertion below would not apply. See
+        // IllegalXmlCharactersAreDroppedFromTheValue.
     ];
 
     /// <summary>
@@ -238,6 +238,43 @@ public class FilterRoundTripConformanceTests
 
         Assert.That(() => new TestFilterParser().Parse(filter), Is.EqualTo(expected),
             $"Filter '{filter}' should select property {name}='{value}'.");
+    }
+
+    /// <summary>
+    /// A test name can contain a character that is not legal in XML at all, and the NUnit filter
+    /// is an XML document, so escaping the five metacharacters is not sufficient. Issue 761,
+    /// item 5 of the 6.x document.
+    ///
+    /// The agreed behaviour is to drop such characters. That makes the emitted document valid,
+    /// which is the point — today it either throws or produces something that will not load.
+    ///
+    /// Note what dropping does <em>not</em> achieve: the emitted value no longer equals the test's
+    /// full name, so the filter will not match the test. The test stays unrunnable; it just fails
+    /// cleanly instead of breaking the document. Making such a test runnable is a discovery-side
+    /// problem, covered in the v7 document.
+    /// </summary>
+    [Property("Issue", "761")]
+    [Property("DocItem", "6.x item 5")]
+    [Category(FixIn.SixX)]
+    [TestCase("￿", TestName = "{m}_NonCharacter")]
+    [TestCase("", TestName = "{m}_C0Control")]
+    public void IllegalXmlCharactersAreDroppedFromTheValue(string illegal)
+    {
+        var fullName = "My.Test.Fixture.Test_01(\"" + illegal + "\")";
+        var filter = BuildFilter(fullName);
+
+        var expected = $"<filter><test>{XmlEscape("My.Test.Fixture.Test_01(\"\")")}</test></filter>";
+
+        string produced = null;
+        Assert.That(() => produced = new TestFilterParser().Parse(filter), Throws.Nothing);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(produced, Is.EqualTo(expected),
+                "The illegal character should be dropped from the emitted value.");
+            Assert.That(() => new XmlDocument().LoadXml(produced), Throws.Nothing,
+                "The emitted filter must be a well-formed XML document.");
+        });
     }
 
     private static string BuildFilter(string fullName) => "FullyQualifiedName=" + Escape(fullName);
