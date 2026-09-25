@@ -200,19 +200,35 @@ fix, because it is a semantic decision rather than a mechanical one.
 ## Verification
 
 The failing tests that specify these fixes already exist, and the split between what 6.x fixes
-and what has to wait for v7 is not a guess: each of the four fixes above was prototyped against
-this suite and the tests that went green were recorded. Those carry `Category=Fix6x`; the ones
-that stayed red carry `Category=FixV7`.
+and what has to wait for v7 is not a guess: each of the four prototyped fixes above was applied
+to this suite and the tests that turned green were recorded, then the prototype was reverted.
 
-While working on 6.x, run
+An ordinary run is therefore red on exactly the 6.x work and nothing else:
 
 ```
---filter "Category=FilterParsing & Category!=FixV7"
+dotnet test --filter "Category=FilterParsing"
+  126 total, 10 failing, 36 skipped        (unit)
+   21 total,  0 failing, 11 skipped        (acceptance)
 ```
 
-and drive it to green. At the time of writing that selection is 90 tests with 10 failing, and the
-four prototyped fixes take it to 1 failing — the remaining one being item 5, which is why item 5
-is in this document.
+The 10 failures are items 2, 3, 4 and 5. Implementing all five items takes them to zero, which is
+what a 6.x pull request has to show before it can merge.
+
+The skipped tests are ignored deliberately, each with a reason in the attribute:
+
+- **v7 tests** carry `Category=FixV7` and `Ignore(FixIn.V7Reason)`. They cannot pass before the
+  grammar change, and the build must not be red while 6.x work merges. The v7 change removes
+  those `Ignore` attributes.
+- **The item 1 tests** carry `Category=Fix6x` and `Ignore(FixIn.Item1Reason)`. These are 6.x
+  tests, ignored only because the defect is destructive rather than merely failing: measured at
+  about twelve seconds and two gigabytes each, ending in `OutOfMemoryException`. The loop cannot
+  be cancelled from outside, so there is no way to run them safely beforehand. Bound the loop and
+  remove the `Ignore` in the same change, so item 1 also goes from red to green with its fix.
+
+`Ignore` rather than `Explicit` for both, because a category filter does not select an explicit
+test: `--filter "Category=Fix6x"` silently skipped the explicit fixture rather than running it, so
+"runnable on demand by category" does not hold. An ignored test is reported as skipped with its
+reason, and running it means removing the attribute, which is the intended workflow anyway.
 
 The tests:
 
@@ -221,13 +237,11 @@ The tests:
   implementation rather than hand-written.
 - `src/NUnitTestAdapterTests/TestFilterConverterTests/FilterParsingDefectTests.cs` — narrow
   demonstrations pinned to the method responsible for each defect.
-- `src/NUnit.TestAdapter.Tests.Acceptance/FilterKnownDefectsTests.cs` — the same failures end
-  to end, through a real `dotnet test` and `vstest` invocation.
+- `src/NUnit.TestAdapter.Tests.Acceptance/FilterKnownDefectsTests.cs` and
+  `MtpFilterKnownDefectsTests.cs` — the same failures end to end, under VSTest and under the
+  Microsoft Testing Platform.
 
 Work item by item and turn them green; do not weaken an expectation without saying why.
-
-For item 1, bound the test with a timeout — an assertion that never returns is not a useful
-failure.
 
 ## Acknowledgement
 

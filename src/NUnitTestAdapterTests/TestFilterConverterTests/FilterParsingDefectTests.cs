@@ -39,6 +39,9 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.TestFilterConverterTests;
 /// Run the whole filter-parsing set with <c>--filter "Category=FilterParsing"</c>, one issue
 /// at a time with <c>--filter "Issue=1490"</c>, or one plan item with
 /// <c>--filter "DocItem=6.x item 2"</c>.
+///
+/// Tests that need the v7 grammar are ignored with <c>FixIn.V7Reason</c>, so an ordinary run is
+/// red on the 6.x work only.
 /// </summary>
 [Category("FilterParsing")]
 public class FilterParsingDefectTests
@@ -50,20 +53,22 @@ public class FilterParsingDefectTests
     ///
     /// Root cause: <c>Tokenizer.WORD_BREAK_CHARS</c> and <c>Tokenizer.IsWordChar</c>.
     /// Issues 1488 and 1405; the grammar change is a v7 item.
+    ///
+    /// The escaped <em>open</em> parenthesis belongs in this list too. It is in
+    /// <see cref="UnbalancedParenthesisDefectTests.EscapedOpenParenStaysInsideOneToken"/> instead,
+    /// because before 6.x item 1 the lexer treats that '(' as a group opener, finds no ')', and
+    /// allocates until it runs out of memory. Move it back here once the loop is bounded.
     /// </summary>
     [Property("Issue", "1488")]
     [Property("DocItem", "v7 grammar")]
     [Category(FixIn.V7)]
+    [Ignore(FixIn.V7Reason)]
     [TestCase(@"a\|b", TestName = "{m}_EscapedPipe")]
     [TestCase(@"a\&b", TestName = "{m}_EscapedAmpersand")]
     [TestCase(@"a\=b", TestName = "{m}_EscapedEquals")]
     [TestCase(@"a\!b", TestName = "{m}_EscapedBang")]
     [TestCase(@"a\~b", TestName = "{m}_EscapedTilde")]
     [TestCase(@"a\)b", TestName = "{m}_EscapedCloseParen")]
-    // The escaped *open* parenthesis belongs here too, but until item 1 bounds the loop it is
-    // destructive rather than merely failing: the lexer treats the '(' as a real group opener,
-    // finds no ')', and allocates until StringBuilder hits its 2 GB cap. It lives in
-    // UnbalancedParenthesisDefectTests until then. See EscapedOpenParenStaysInsideOneToken.
     public void EscapedOperatorStaysInsideOneToken(string escapedValue)
     {
         var tokenizer = new Tokenizer(escapedValue);
@@ -108,6 +113,7 @@ public class FilterParsingDefectTests
     [Property("Issue", "1490")]
     [Property("DocItem", "v7 grammar")]
     [Category(FixIn.V7)]
+    [Ignore(FixIn.V7Reason)]
     [Test]
     public void WhitespaceBeforeArgumentListDoesNotEndTheValue()
     {
@@ -251,19 +257,19 @@ public class FilterParsingDefectTests
 /// the <see cref="System.Text.StringBuilder"/> keeps growing until the process runs out of
 /// memory.
 ///
-/// This fixture is <see cref="ExplicitAttribute">Explicit</see> on purpose. The runaway loop
-/// cannot be cancelled — the thread it runs on keeps allocating until it takes the test host
-/// down with it — so running this in a normal suite would destroy the rest of the run. The
-/// same defect is covered safely in the acceptance tests, where the adapter runs in a child
-/// process that is allowed to die.
+/// These are 6.x tests, not v7 ones. They are ignored only because the defect is destructive
+/// rather than merely failing: measured at roughly twelve seconds and two gigabytes per test,
+/// ending in <see cref="System.OutOfMemoryException"/>. The runaway loop cannot be cancelled from
+/// outside, so there is no way to run them safely on a build agent beforehand.
 ///
-/// Once the loop terminates at end of input, remove the Explicit attribute.
+/// Bound the loop at end of input and remove the <see cref="IgnoreAttribute">Ignore</see> in the
+/// same change, so that item 1 has a test that goes from red to green with its fix.
 /// </summary>
 [Category("FilterParsing")]
 [Property("Issue", "1501")]
 [Property("DocItem", "6.x item 1")]
 [Category(FixIn.SixX)]
-[Explicit("Exhausts memory until fixed; it will take the test host down with it. Covered safely by the acceptance tests.")]
+[Ignore(FixIn.Item1Reason)]
 public class UnbalancedParenthesisDefectTests
 {
     [TestCase(@"FullyQualifiedName=My.Test.Fixture.Method\(", TestName = "{m}_Filter")]

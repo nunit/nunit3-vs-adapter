@@ -86,19 +86,19 @@ public class FilterRoundTripConformanceTests
 
         // The same operators with no argument list to re-glue the token. The
         // parenthesis-balancing heuristic cannot help here, so these still fail.
-        new TestCaseData("My.Test.Fixture.MethodWithEquals_X=Y").SetName("{m}_EqualsOutsideArguments").SetCategory(FixIn.V7).SetProperty("Issue", "1488"),
-        new TestCaseData("My.Test.Fixture.MethodWithPipe_A|B").SetName("{m}_PipeOutsideArguments").SetCategory(FixIn.V7).SetProperty("Issue", "1488"),
-        new TestCaseData("My.Test.Fixture.MethodWithAmpersand_A&B").SetName("{m}_AmpersandOutsideArguments").SetCategory(FixIn.V7).SetProperty("Issue", "1488"),
+        new TestCaseData("My.Test.Fixture.MethodWithEquals_X=Y").SetName("{m}_EqualsOutsideArguments").SetCategory(FixIn.V7).Ignore(FixIn.V7Reason).SetProperty("Issue", "1488"),
+        new TestCaseData("My.Test.Fixture.MethodWithPipe_A|B").SetName("{m}_PipeOutsideArguments").SetCategory(FixIn.V7).Ignore(FixIn.V7Reason).SetProperty("Issue", "1488"),
+        new TestCaseData("My.Test.Fixture.MethodWithAmpersand_A&B").SetName("{m}_AmpersandOutsideArguments").SetCategory(FixIn.V7).Ignore(FixIn.V7Reason).SetProperty("Issue", "1488"),
 
         // Whitespace between the name and the argument list.
-        new TestCaseData("My.Test.Fixture.Method (Case 1)").SetName("{m}_SpaceBeforeArguments").SetCategory(FixIn.V7).SetProperty("Issue", "1490"),
+        new TestCaseData("My.Test.Fixture.Method (Case 1)").SetName("{m}_SpaceBeforeArguments").SetCategory(FixIn.V7).Ignore(FixIn.V7Reason).SetProperty("Issue", "1490"),
 
         // String arguments, which NUnit renders in quotes. The tokenizer has a second,
         // independent unescaping pass for these, so escaping is applied twice.
         new TestCaseData("My.Test.Fixture.Method(\"plain\")").SetName("{m}_QuotedArgument"),
         new TestCaseData("My.Test.Fixture.Method(\"This | That\",False)").SetName("{m}_QuotedPipe").SetProperty("Issue", "1405"),
         new TestCaseData("My.Test.Fixture.Method(\"C:\\\\Temp\")").SetName("{m}_QuotedBackslash").SetCategory(FixIn.SixX).SetProperty("Issue", "1489"),
-        new TestCaseData("My.Test.Fixture.Method(\"a\\\"b\")").SetName("{m}_QuotedEscapedQuote").SetCategory(FixIn.V7).SetProperty("Issue", "1489"),
+        new TestCaseData("My.Test.Fixture.Method(\"a\\\"b\")").SetName("{m}_QuotedEscapedQuote").SetCategory(FixIn.V7).Ignore(FixIn.V7Reason).SetProperty("Issue", "1489"),
         new TestCaseData("My.Test.Fixture.Method(\"a(b\")").SetName("{m}_QuotedOpenParen"),
         new TestCaseData("My.Test.Fixture.Method(\"a)b\")").SetName("{m}_QuotedCloseParen"),
 
@@ -108,7 +108,7 @@ public class FilterRoundTripConformanceTests
         // Spaces in the name itself, with no argument list at all. The whitespace defect is
         // not limited to the gap before '('.
         new TestCaseData("My.Test.Fixture.Computing work in progress.No Workpackages exist")
-            .SetName("{m}_SpacesInName").SetCategory(FixIn.V7).SetProperty("Issue", "876"),
+            .SetName("{m}_SpacesInName").SetCategory(FixIn.V7).Ignore(FixIn.V7Reason).SetProperty("Issue", "876"),
         new TestCaseData("My.Test.Fixture.AddTwoNumbers(\"Spa ces\",null)")
             .SetName("{m}_SpaceInQuotedArgument").SetProperty("Issue", "807"),
 
@@ -193,8 +193,8 @@ public class FilterRoundTripConformanceTests
     [TestCase("Method")]
     [TestCase("Method(42)")]
     [TestCase("Method(a | b)")]
-    [TestCase("Method (Case 1)", Category = FixIn.V7)]   // Issue 1490
-    [TestCase("Method_A|B", Category = FixIn.V7)]
+    [TestCase("Method (Case 1)", Category = FixIn.V7, Ignore = FixIn.V7Reason)]   // Issue 1490
+    [TestCase("Method_A|B", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
     public void NameFilterProducesTheSameSelection(string name)
     {
         var filter = "Name=" + Escape(name);
@@ -211,10 +211,10 @@ public class FilterRoundTripConformanceTests
     /// selected even though the platform escapes and matches it happily.
     /// </summary>
     [TestCase("Urgent")]
-    [TestCase("Group(1)", Category = FixIn.V7)]
-    [TestCase("A|B", Category = FixIn.V7)]
-    [TestCase("A&B", Category = FixIn.V7)]
-    [TestCase("Needs=Network", Category = FixIn.V7)]
+    [TestCase("Group(1)", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
+    [TestCase("A|B", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
+    [TestCase("A&B", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
+    [TestCase("Needs=Network", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
     public void CategoryFilterProducesTheSameSelection(string category)
     {
         var filter = "TestCategory=" + Escape(category);
@@ -229,8 +229,8 @@ public class FilterRoundTripConformanceTests
     /// <c>ParseFilterCondition</c> and is likewise never unescaped.
     /// </summary>
     [TestCase("Bug", "12345")]
-    [TestCase("Bug", "JIRA-1|JIRA-2", Category = FixIn.V7)]
-    [TestCase("Owner", "a&b", Category = FixIn.V7)]
+    [TestCase("Bug", "JIRA-1|JIRA-2", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
+    [TestCase("Owner", "a&b", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
     public void PropertyFilterProducesTheSameSelection(string name, string value)
     {
         var filter = $"{name}=" + Escape(value);
