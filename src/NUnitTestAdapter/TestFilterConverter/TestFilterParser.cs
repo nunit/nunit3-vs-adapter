@@ -162,8 +162,20 @@ public class TestFilterParser
 
     private string UnEscape(string rhs)
     {
-            return FilterHelper.Unescape(rhs);
-        }
+        // TODO: Switch to official and more performant MS-given function in V7.
+        // return FilterHelper.Unescape(rhs);
+
+        // Using string.Replace() to avoid exceptions from invalid test filter escape sequences inside the FilterHelper.Unescape().
+        return rhs
+            .Replace("\\\\", "\\")
+            .Replace("\\(", "(")
+            .Replace("\\)", ")")
+            .Replace("\\&", "&")
+            .Replace("\\|", "|")
+            .Replace("\\=", "=")
+            .Replace("\\!", "!")
+            .Replace("\\~", "~");
+    }
 
     private static string EmitFullNameFilter(Token op, string value)
     {
