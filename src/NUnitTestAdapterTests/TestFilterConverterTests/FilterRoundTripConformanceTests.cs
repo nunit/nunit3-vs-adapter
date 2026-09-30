@@ -271,26 +271,19 @@ public class FilterRoundTripConformanceTests
         }
     }
 
-    private static string BuildFilter(string fullName)
-    {
-        return "FullyQualifiedName=" + Escape(fullName);
-    }
+    private static string BuildFilter(string fullName) => "FullyQualifiedName=" + Escape(fullName);
 
     private static string Escape(string value)
-    {
-        return Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities.FilterHelper.Escape(value);
-    }
+        => Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities.FilterHelper.Escape(value);
 
     /// <summary>
     /// Mirrors the private <c>TestFilterParser.XmlEscape</c>, since the NUnit filter is XML.
     /// </summary>
     private static string XmlEscape(string text)
-    {
-        return text
-                .Replace("&", "&amp;")
-                .Replace("\"", "&quot;")
-                .Replace("<", "&lt;")
-                .Replace(">", "&gt;")
-                .Replace("'", "&apos;");
-    }
+        => text
+            .Replace("&", "&amp;")
+            .Replace("\"", "&quot;")
+            .Replace("<", "&lt;")
+            .Replace(">", "&gt;")
+            .Replace("'", "&apos;");
 }
