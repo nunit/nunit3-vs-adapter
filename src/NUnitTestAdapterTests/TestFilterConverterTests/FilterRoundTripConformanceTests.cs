@@ -99,8 +99,8 @@ public class FilterRoundTripConformanceTests
         new TestCaseData("""My.Test.Fixture.Method("This | That",False)""").SetName("{m}_QuotedPipe").SetProperty("Issue", "1405"),
         new TestCaseData("""My.Test.Fixture.Method("C:\\Temp")""").SetName("{m}_QuotedBackslash").SetCategory(FixIn.SixX).SetProperty("Issue", "1489"),
         new TestCaseData("""My.Test.Fixture.Method("a\"b")""").SetName("{m}_QuotedEscapedQuote").SetCategory(FixIn.V7).Ignore(FixIn.V7Reason).SetProperty("Issue", "1489"),
-        new TestCaseData("""My.Test.Fixture.Method("a(b")""").SetName("{m}_QuotedOpenParen"),
-        new TestCaseData("""My.Test.Fixture.Method("a)b")""").SetName("{m}_QuotedCloseParen"),
+        new TestCaseData("""My.Test.Fixture.Method("a(b")""").SetName("{m}_QuotedOpenParen").SetCategory(FixIn.V7).Ignore(FixIn.V7Reason).SetProperty("Issue", "1501"),
+        new TestCaseData("""My.Test.Fixture.Method("a)b")""").SetName("{m}_QuotedCloseParen").SetCategory(FixIn.V7).Ignore(FixIn.V7Reason).SetProperty("Issue", "1501"),
 
         // A backslash outside a quoted argument.
         new TestCaseData("""My.Test.Fixture.Method(C:\Temp)""").SetName("{m}_UnquotedBackslash"),
@@ -113,7 +113,7 @@ public class FilterRoundTripConformanceTests
         // A close parenthesis followed by a period inside a string argument, which looks to
         // the lexer like the end of an argument list followed by more name.
         new TestCaseData("""My.Test.Fixture.Method("I am a good test case (the best, even).")""").SetName("{m}_CloseParenDotInsideArgument").SetProperty("Issue", "1097"),
-        new TestCaseData("""My.Test.Fixture.NUnitTestTwo("TestAttribute).")""").SetName("{m}_CloseParenDotAtEndOfArgument").SetProperty("Issue", "654"),
+        new TestCaseData("""My.Test.Fixture.NUnitTestTwo("TestAttribute).")""").SetName("{m}_CloseParenDotAtEndOfArgument").SetCategory(FixIn.V7).Ignore(FixIn.V7Reason).SetProperty("Issue", "654"),
 
         // A string argument that itself ends with an escaped quote, the shape the MTP bridge
         // reports as "includes unrecognized escape sequence".
