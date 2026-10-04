@@ -95,38 +95,32 @@ public class FilterRoundTripConformanceTests
 
         // String arguments, which NUnit renders in quotes. The tokenizer has a second,
         // independent unescaping pass for these, so escaping is applied twice.
-        new TestCaseData("My.Test.Fixture.Method(\"plain\")").SetName("{m}_QuotedArgument"),
-        new TestCaseData("My.Test.Fixture.Method(\"This | That\",False)").SetName("{m}_QuotedPipe").SetProperty("Issue", "1405"),
-        new TestCaseData("My.Test.Fixture.Method(\"C:\\\\Temp\")").SetName("{m}_QuotedBackslash").SetCategory(FixIn.SixX).SetProperty("Issue", "1489"),
-        new TestCaseData("My.Test.Fixture.Method(\"a\\\"b\")").SetName("{m}_QuotedEscapedQuote").SetCategory(FixIn.V7).Ignore(FixIn.V7Reason).SetProperty("Issue", "1489"),
-        new TestCaseData("My.Test.Fixture.Method(\"a(b\")").SetName("{m}_QuotedOpenParen"),
-        new TestCaseData("My.Test.Fixture.Method(\"a)b\")").SetName("{m}_QuotedCloseParen"),
+        new TestCaseData("""My.Test.Fixture.Method("plain")""").SetName("{m}_QuotedArgument"),
+        new TestCaseData("""My.Test.Fixture.Method("This | That",False)""").SetName("{m}_QuotedPipe").SetProperty("Issue", "1405"),
+        new TestCaseData("""My.Test.Fixture.Method("C:\\Temp")""").SetName("{m}_QuotedBackslash").SetCategory(FixIn.SixX).SetProperty("Issue", "1489"),
+        new TestCaseData("""My.Test.Fixture.Method("a\"b")""").SetName("{m}_QuotedEscapedQuote").SetCategory(FixIn.V7).Ignore(FixIn.V7Reason).SetProperty("Issue", "1489"),
+        new TestCaseData("""My.Test.Fixture.Method("a(b")""").SetName("{m}_QuotedOpenParen").SetCategory(FixIn.V7).Ignore(FixIn.V7Reason).SetProperty("Issue", "1501"),
+        new TestCaseData("""My.Test.Fixture.Method("a)b")""").SetName("{m}_QuotedCloseParen").SetCategory(FixIn.V7).Ignore(FixIn.V7Reason).SetProperty("Issue", "1501"),
 
         // A backslash outside a quoted argument.
-        new TestCaseData("My.Test.Fixture.Method(C:\\Temp)").SetName("{m}_UnquotedBackslash"),
+        new TestCaseData("""My.Test.Fixture.Method(C:\Temp)""").SetName("{m}_UnquotedBackslash"),
 
         // Spaces in the name itself, with no argument list at all. The whitespace defect is
         // not limited to the gap before '('.
-        new TestCaseData("My.Test.Fixture.Computing work in progress.No Workpackages exist")
-            .SetName("{m}_SpacesInName").SetCategory(FixIn.V7).Ignore(FixIn.V7Reason).SetProperty("Issue", "876"),
-        new TestCaseData("My.Test.Fixture.AddTwoNumbers(\"Spa ces\",null)")
-            .SetName("{m}_SpaceInQuotedArgument").SetProperty("Issue", "807"),
+        new TestCaseData("""My.Test.Fixture.Computing work in progress.No Workpackages exist""").SetName("{m}_SpacesInName").SetCategory(FixIn.V7).Ignore(FixIn.V7Reason).SetProperty("Issue", "876"),
+        new TestCaseData("""My.Test.Fixture.AddTwoNumbers("Spa ces",null)""").SetName("{m}_SpaceInQuotedArgument").SetProperty("Issue", "807"),
 
         // A close parenthesis followed by a period inside a string argument, which looks to
         // the lexer like the end of an argument list followed by more name.
-        new TestCaseData("My.Test.Fixture.Method(\"I am a good test case (the best, even).\")")
-            .SetName("{m}_CloseParenDotInsideArgument").SetProperty("Issue", "1097"),
-        new TestCaseData("My.Test.Fixture.NUnitTestTwo(\"TestAttribute).\")")
-            .SetName("{m}_CloseParenDotAtEndOfArgument").SetProperty("Issue", "654"),
+        new TestCaseData("""My.Test.Fixture.Method("I am a good test case (the best, even).")""").SetName("{m}_CloseParenDotInsideArgument").SetProperty("Issue", "1097"),
+        new TestCaseData("""My.Test.Fixture.NUnitTestTwo("TestAttribute).")""").SetName("{m}_CloseParenDotAtEndOfArgument").SetCategory(FixIn.V7).Ignore(FixIn.V7Reason).SetProperty("Issue", "654"),
 
         // A string argument that itself ends with an escaped quote, the shape the MTP bridge
         // reports as "includes unrecognized escape sequence".
-        new TestCaseData("My.Test.Fixture.Test(\"\\\"C:\\\\Path\\\\File.txt\\\"\")")
-            .SetName("{m}_QuotedPathWithTrailingQuote").SetCategory(FixIn.SixX).SetProperty("Issue", "1349"),
+        new TestCaseData("""My.Test.Fixture.Test("\"C:\\Path\\File.txt\"")""").SetName("{m}_QuotedPathWithTrailingQuote").SetCategory(FixIn.SixX).SetProperty("Issue", "1349"),
 
         // Collection arguments rendered with brackets.
-        new TestCaseData("My.Test.Fixture.Slice_IsCorrect([0,1,2,3],3,3,[3])")
-            .SetName("{m}_BracketArguments").SetProperty("Issue", "1437"),
+        new TestCaseData("My.Test.Fixture.Slice_IsCorrect([0,1,2,3],3,3,[3])").SetName("{m}_BracketArguments").SetProperty("Issue", "1437"),
 
         // A name containing a character that is not legal in XML is deliberately not in this
         // corpus: the agreed behaviour is to drop the character, so the emitted value is not
@@ -142,15 +136,14 @@ public class FilterRoundTripConformanceTests
     [TestCaseSource(nameof(FullNames))]
     public void VStestAgreesTheFilterSelectsTheTest(string fullName)
     {
-        var filter = BuildFilter(fullName);
+        string filter = BuildFilter(fullName);
         var testCase = new TestCase(fullName, ExecutorUri, Source);
 
         var expression = FilteringTestUtils.CreateVSTestFilterExpression(filter);
         var selected = FilteringTestUtils.CreateTestFilter(expression).CheckFilter([testCase]);
 
-        Assert.That(selected.Select(t => t.FullyQualifiedName), Is.EqualTo(new[] { fullName }),
-            $"The test platform did not select the test for filter '{filter}'. " +
-            "Fix the corpus entry, not the adapter.");
+        Assert.That(selected.Select(t => t.FullyQualifiedName), Is.EqualTo([fullName]),
+            $"The test platform did not select the test for filter '{filter}'. Fix the corpus entry, not the adapter.");
     }
 
     /// <summary>
@@ -160,10 +153,10 @@ public class FilterRoundTripConformanceTests
     [TestCaseSource(nameof(FullNames))]
     public void AdapterProducesTheSameSelection(string fullName)
     {
-        var filter = BuildFilter(fullName);
-        var expected = $"<filter><test>{XmlEscape(fullName)}</test></filter>";
+        string filter = BuildFilter(fullName);
+        string expected = $"<filter><test>{XmlEscape(fullName)}</test></filter>";
 
-        Assert.That(() => new TestFilterParser().Parse(filter), Is.EqualTo(expected),
+        Assert.That(new TestFilterParser().Parse(filter), Is.EqualTo(expected),
             $"Filter '{filter}' should select '{fullName}'.");
     }
 
@@ -176,7 +169,7 @@ public class FilterRoundTripConformanceTests
     [TestCaseSource(nameof(FullNames))]
     public void AdapterProducesLoadableXml(string fullName)
     {
-        var filter = BuildFilter(fullName);
+        string filter = BuildFilter(fullName);
 
         string produced = null;
         Assert.That(() => produced = new TestFilterParser().Parse(filter), Throws.Nothing,
@@ -197,10 +190,10 @@ public class FilterRoundTripConformanceTests
     [TestCase("Method_A|B", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
     public void NameFilterProducesTheSameSelection(string name)
     {
-        var filter = "Name=" + Escape(name);
-        var expected = $"<filter><name>{XmlEscape(name)}</name></filter>";
+        string filter = "Name=" + Escape(name);
+        string expected = $"<filter><name>{XmlEscape(name)}</name></filter>";
 
-        Assert.That(() => new TestFilterParser().Parse(filter), Is.EqualTo(expected),
+        Assert.That(new TestFilterParser().Parse(filter), Is.EqualTo(expected),
             $"Filter '{filter}' should select the test named '{name}'.");
     }
 
@@ -217,10 +210,10 @@ public class FilterRoundTripConformanceTests
     [TestCase("Needs=Network", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
     public void CategoryFilterProducesTheSameSelection(string category)
     {
-        var filter = "TestCategory=" + Escape(category);
-        var expected = $"<filter><cat>{XmlEscape(category)}</cat></filter>";
+        string filter = "TestCategory=" + Escape(category);
+        string expected = $"<filter><cat>{XmlEscape(category)}</cat></filter>";
 
-        Assert.That(() => new TestFilterParser().Parse(filter), Is.EqualTo(expected),
+        Assert.That(new TestFilterParser().Parse(filter), Is.EqualTo(expected),
             $"Filter '{filter}' should select category '{category}'.");
     }
 
@@ -233,10 +226,10 @@ public class FilterRoundTripConformanceTests
     [TestCase("Owner", "a&b", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
     public void PropertyFilterProducesTheSameSelection(string name, string value)
     {
-        var filter = $"{name}=" + Escape(value);
-        var expected = $"<filter><prop name='{name}'>{XmlEscape(value)}</prop></filter>";
+        string filter = $"{name}=" + Escape(value);
+        string expected = $"<filter><prop name='{name}'>{XmlEscape(value)}</prop></filter>";
 
-        Assert.That(() => new TestFilterParser().Parse(filter), Is.EqualTo(expected),
+        Assert.That(new TestFilterParser().Parse(filter), Is.EqualTo(expected),
             $"Filter '{filter}' should select property {name}='{value}'.");
     }
 
@@ -260,21 +253,22 @@ public class FilterRoundTripConformanceTests
     [TestCase("", TestName = "{m}_C0Control")]
     public void IllegalXmlCharactersAreDroppedFromTheValue(string illegal)
     {
-        var fullName = "My.Test.Fixture.Test_01(\"" + illegal + "\")";
-        var filter = BuildFilter(fullName);
+        string fullName = "My.Test.Fixture.Test_01(\"" + illegal + "\")";
+        string filter = BuildFilter(fullName);
 
-        var expected = $"<filter><test>{XmlEscape("My.Test.Fixture.Test_01(\"\")")}</test></filter>";
+        string expected = $"<filter><test>{XmlEscape("My.Test.Fixture.Test_01(\"\")")}</test></filter>";
 
         string produced = null;
         Assert.That(() => produced = new TestFilterParser().Parse(filter), Throws.Nothing);
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(produced, Is.EqualTo(expected),
                 "The illegal character should be dropped from the emitted value.");
+
             Assert.That(() => new XmlDocument().LoadXml(produced), Throws.Nothing,
                 "The emitted filter must be a well-formed XML document.");
-        });
+        }
     }
 
     private static string BuildFilter(string fullName) => "FullyQualifiedName=" + Escape(fullName);
