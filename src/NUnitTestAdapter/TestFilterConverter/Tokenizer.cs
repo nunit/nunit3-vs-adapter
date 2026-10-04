@@ -269,27 +269,9 @@ public class Tokenizer
                     ++depth;
                 else if (c == ')')
                     --depth;
-                else if (c == '"')
-                    CollectQuotedString(sb);
             }
             while (depth > 0);
         }
-    }
-
-    private void CollectQuotedString(StringBuilder sb)
-    {
-        while (NextChar != EOF_CHAR)
-        {
-            var ch = GetChar();
-
-            if (ch == '\\')
-                ch = GetChar();
-            else if (ch == '"')
-                break;
-            sb.Append(ch);
-        }
-
-        sb.Append('"');
     }
 
     /// <summary>

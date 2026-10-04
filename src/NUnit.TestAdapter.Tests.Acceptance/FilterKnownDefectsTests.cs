@@ -37,7 +37,7 @@ public sealed class FilterKnownDefectsTests : CsProjAcceptanceTests
 
     protected override void AddTestsCs(IsolatedWorkspace workspace)
     {
-        workspace.AddFile("KnownDefects.cs", """
+        workspace.AddFile("KnownDefects.cs", """"
             using System;
             using NUnit.Framework;
 
@@ -46,34 +46,34 @@ public sealed class FilterKnownDefectsTests : CsProjAcceptanceTests
                 public class Foo
                 {
                     // Issue 1490: a space between the name and the argument list.
-                    [TestCase(1, TestName = @"SpaceBefore (Case 1)")]
+                    [TestCase(1, TestName = """SpaceBefore (Case 1)""")]
                     public void SpaceBeforeCase(int a) => Assert.Pass();
 
                     // A backslash inside a quoted string argument, which the lexer unescapes
                     // once on its own and the parser then unescapes again.
-                    [TestCase(1, TestName = @"QuotedBackslash(""C:\Temp"")")]
+                    [TestCase(1, TestName = """QuotedBackslash("C:\Temp")""")]
                     public void QuotedBackslashCase(int a) => Assert.Pass();
 
                     // Issue 1405: a pipe inside a quoted string argument.
-                    [TestCase(1, TestName = @"QuotedPipe(""This | That"")")]
+                    [TestCase(1, TestName = """QuotedPipe("This | That")""")]
                     public void QuotedPipeCase(int a) => Assert.Pass();
 
                     // An escaped operator with no argument list to re-glue the token.
-                    [TestCase(1, TestName = @"PipeOutside_A|B")]
+                    [TestCase(1, TestName = """PipeOutside_A|B""")]
                     public void PipeOutsideCase(int a) => Assert.Pass();
 
-                    [TestCase(1, TestName = @"AmpersandOutside_A&B")]
+                    [TestCase(1, TestName = """AmpersandOutside_A&B""")]
                     public void AmpersandOutsideCase(int a) => Assert.Pass();
 
                     // Issue 1501: an argument list with no closing parenthesis.
-                    [TestCase(1, TestName = @"NoClose(")]
+                    [TestCase(1, TestName = """NoClose(""")]
                     public void NoCloseCase(int a) => Assert.Pass();
 
                     [Test]
                     public void Sanity() => Assert.Pass();
                 }
             }
-            """);
+            """");
     }
 
     [Test, Platform("Win")]
@@ -89,12 +89,12 @@ public sealed class FilterKnownDefectsTests : CsProjAcceptanceTests
     /// <c>/TestCaseFilter:</c> argument and so can carry any escaped value.
     /// </summary>
     [Test, Platform("Win")]
-    [TestCase("FullyQualifiedName=KnownDefects.Foo.Sanity", "Sanity", TestName = "{m}_Sanity")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.SpaceBefore \(Case 1\)", "SpaceBefore (Case 1)", TestName = "{m}_SpaceBeforeArguments_Issue1490", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.QuotedBackslash\(""C:\\Temp""\)", @"QuotedBackslash(""C:\Temp"")", TestName = "{m}_QuotedBackslash_Issue1489")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.QuotedPipe\(""This \| That""\)", @"QuotedPipe(""This | That"")", TestName = "{m}_QuotedPipe_Issue1405")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B", "PipeOutside_A|B", TestName = "{m}_PipeOutsideArguments_Issue1488", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B", "AmpersandOutside_A&B", TestName = "{m}_AmpersandOutsideArguments_Issue1488", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
+    [TestCase("""FullyQualifiedName=KnownDefects.Foo.Sanity""", """Sanity""", TestName = "{m}_Sanity")]
+    [TestCase("""FullyQualifiedName=KnownDefects.Foo.SpaceBefore \(Case 1\)""", """SpaceBefore (Case 1)""", TestName = "{m}_SpaceBeforeArguments_Issue1490", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
+    [TestCase("""FullyQualifiedName=KnownDefects.Foo.QuotedBackslash\("C:\\Temp"\)""", """QuotedBackslash("C:\Temp")""", TestName = "{m}_QuotedBackslash_Issue1489")]
+    [TestCase("""FullyQualifiedName=KnownDefects.Foo.QuotedPipe\("This \| That"\)""", """QuotedPipe("This | That")""", TestName = "{m}_QuotedPipe_Issue1405")]
+    [TestCase("""FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B""", """PipeOutside_A|B""", TestName = "{m}_PipeOutsideArguments_Issue1488", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
+    [TestCase("""FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B""", """AmpersandOutside_A&B""", TestName = "{m}_AmpersandOutsideArguments_Issue1488", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
     public void VsTestSelectsTheTest(string filter, string expectedTestName)
     {
         var workspace = Build();
@@ -160,7 +160,7 @@ public sealed class FilterKnownDefectsTests : CsProjAcceptanceTests
     {
         Verify(1, 1, results);
 
-        Assert.That(results.ExecutedTestNames, Is.EqualTo(new[] { expectedTestName }),
+        Assert.That(results.ExecutedTestNames, Is.EqualTo([expectedTestName]),
             $"The filter should have selected '{expectedTestName}' and nothing else.");
     }
 }

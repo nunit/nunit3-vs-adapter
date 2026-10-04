@@ -63,24 +63,27 @@ public class FilterParsingDefectTests
     [Property("DocItem", "v7 grammar")]
     [Category(FixIn.V7)]
     [Ignore(FixIn.V7Reason)]
-    [TestCase(@"a\|b", TestName = "{m}_EscapedPipe")]
+    [TestCase(@"a\\b", TestName = "{m}_EscapedBackslash")]
+    [TestCase(@"a\(b", TestName = "{m}_EscapedOpenParen")]
+    [TestCase(@"a\)b", TestName = "{m}_EscapedCloseParen")]
     [TestCase(@"a\&b", TestName = "{m}_EscapedAmpersand")]
+    [TestCase(@"a\|b", TestName = "{m}_EscapedPipe")]
     [TestCase(@"a\=b", TestName = "{m}_EscapedEquals")]
     [TestCase(@"a\!b", TestName = "{m}_EscapedBang")]
     [TestCase(@"a\~b", TestName = "{m}_EscapedTilde")]
-    [TestCase(@"a\)b", TestName = "{m}_EscapedCloseParen")]
     public void EscapedOperatorStaysInsideOneToken(string escapedValue)
     {
         var tokenizer = new Tokenizer(escapedValue);
         var token = tokenizer.NextToken();
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(token.Text, Is.EqualTo(escapedValue),
                 "An escaped operator must not break the value into several tokens.");
+
             Assert.That(tokenizer.NextToken().Kind, Is.EqualTo(TokenKind.Eof),
                 "The whole value should have been consumed by the first token.");
-        });
+        }
     }
 
     /// <summary>
@@ -93,12 +96,12 @@ public class FilterParsingDefectTests
     {
         var tokenizer = new Tokenizer("a|b");
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(tokenizer.NextToken(), Is.EqualTo(new Token(TokenKind.Word, "a")));
             Assert.That(tokenizer.NextToken(), Is.EqualTo(new Token(TokenKind.Symbol, "|")));
             Assert.That(tokenizer.NextToken(), Is.EqualTo(new Token(TokenKind.Word, "b")));
-        });
+        }
     }
 
     /// <summary>
@@ -122,11 +125,12 @@ public class FilterParsingDefectTests
         var tokenizer = new Tokenizer(value);
         var token = tokenizer.NextToken();
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(token.Text, Is.EqualTo(value));
+
             Assert.That(tokenizer.NextToken().Kind, Is.EqualTo(TokenKind.Eof));
-        });
+        }
     }
 
     /// <summary>
@@ -141,16 +145,17 @@ public class FilterParsingDefectTests
     [Property("Issue", "1489")]
     [Property("DocItem", "6.x item 2")]
     [Category(FixIn.SixX)]
-    [TestCase(@"(""C:\\Temp"")", TestName = "{m}_EscapedBackslash")]
-    [TestCase(@"(""a\|b"")", TestName = "{m}_EscapedPipe")]
-    [TestCase(@"(""a\=b"")", TestName = "{m}_EscapedEquals")]
+    [TestCase("""("C:\\Temp")""", TestName = "{m}_EscapedBackslash")]
+    [TestCase("""("a\|b")""", TestName = "{m}_EscapedPipe")]
+    [TestCase("""("a\=b")""", TestName = "{m}_EscapedEquals")]
     public void QuotedArgumentIsNotUnescapedByTheLexer(string escapedArguments)
     {
         const string name = "My.Test.Fixture.Method";
+        string expected = name + escapedArguments;
 
-        var token = new Tokenizer(name + escapedArguments).NextToken();
+        var token = new Tokenizer(expected).NextToken();
 
-        Assert.That(token.Text, Is.EqualTo(name + escapedArguments),
+        Assert.That(token.Text, Is.EqualTo(expected),
             "The lexer must not interpret escape sequences; that is the parser's job.");
     }
 
@@ -212,19 +217,19 @@ public class FilterParsingDefectTests
     /// </summary>
     [Property("DocItem", "6.x item 4")]
     [Category(FixIn.SixX)]
-    [TestCase("My.Test.Fixture.Method", TestName = "{m}_Plain")]
-    [TestCase("My.Test.Fixture.Method(42)", TestName = "{m}_SimpleArgument")]
-    [TestCase(@"My.Test.Fixture.Method(""a\nb"")", TestName = "{m}_LiteralBackslashN")]
-    [TestCase(@"My.Test.Fixture.Method(""a\tb"")", TestName = "{m}_LiteralBackslashT")]
-    [TestCase(@"My.Test.Fixture.Method(""C:\Temp"")", TestName = "{m}_LiteralBackslash")]
-    [TestCase(@"My.Test.Fixture.Method(\d)", TestName = "{m}_LiteralRegexEscape")]
-    [TestCase("My.Test.Fixture.Method(a &amp; b)", TestName = "{m}_LiteralHtmlEntity")]
-    [TestCase(@"My.Test.Fixture.Method(a | b)", TestName = "{m}_Pipe")]
+    [TestCase("""My.Test.Fixture.Method""", TestName = "{m}_Plain")]
+    [TestCase("""My.Test.Fixture.Method(42)""", TestName = "{m}_SimpleArgument")]
+    [TestCase("""My.Test.Fixture.Method("a\nb")""", TestName = "{m}_LiteralBackslashN")]
+    [TestCase("""My.Test.Fixture.Method("a\tb")""", TestName = "{m}_LiteralBackslashT")]
+    [TestCase("""My.Test.Fixture.Method("C:\Temp")""", TestName = "{m}_LiteralBackslash")]
+    [TestCase("""My.Test.Fixture.Method(\d)""", TestName = "{m}_LiteralRegexEscape")]
+    [TestCase("""My.Test.Fixture.Method(a &amp; b)""", TestName = "{m}_LiteralHtmlEntity")]
+    [TestCase("""My.Test.Fixture.Method(a | b)""", TestName = "{m}_Pipe")]
     public void MtpFastPathUnescapeRoundTrips(string fullName)
     {
-        var escaped = Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities.FilterHelper.Escape(fullName);
+        string escaped = Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities.FilterHelper.Escape(fullName);
 
-        Assert.That(() => FullyQualifiedNameFilterParser.Unescape(escaped), Is.EqualTo(fullName),
+        Assert.That(FullyQualifiedNameFilterParser.Unescape(escaped), Is.EqualTo(fullName),
             $"Escaping and unescaping '{fullName}' must be lossless.");
     }
 
@@ -234,18 +239,16 @@ public class FilterParsingDefectTests
     /// </summary>
     [Property("DocItem", "6.x item 4")]
     [Category(FixIn.SixX)]
-    [TestCase("My.Test.Fixture.Method(42)", TestName = "{m}_SimpleArgument")]
-    [TestCase("My.Test.Fixture.Method(a | b)", TestName = "{m}_Pipe")]
-    [TestCase(@"My.Test.Fixture.Method(""C:\Temp"")", TestName = "{m}_LiteralBackslash")]
-    [TestCase("My.Test.Fixture.Method (Case 1)", TestName = "{m}_SpaceBeforeArguments")]
+    [TestCase("""My.Test.Fixture.Method(42)""", TestName = "{m}_SimpleArgument")]
+    [TestCase("""My.Test.Fixture.Method(a | b)""", TestName = "{m}_Pipe")]
+    [TestCase("""My.Test.Fixture.Method("C:\Temp")""", TestName = "{m}_LiteralBackslash")]
+    [TestCase("""My.Test.Fixture.Method (Case 1)""", TestName = "{m}_SpaceBeforeArguments")]
     public void MtpFastPathRecoversTheFullName(string fullName)
     {
-        var escaped = Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities.FilterHelper.Escape(fullName);
-        var filter = "FullyQualifiedName=" + escaped;
+        string escaped = Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities.FilterHelper.Escape(fullName);
+        string filter = $"FullyQualifiedName={escaped}";
 
-        Assert.That(
-            () => FullyQualifiedNameFilterParser.GetFullyQualifiedNames(filter),
-            Is.EqualTo(new List<string> { fullName }));
+        Assert.That(FullyQualifiedNameFilterParser.GetFullyQualifiedNames(filter), Is.EqualTo(new List<string> { fullName }));
     }
 }
 
@@ -326,12 +329,13 @@ public class UnbalancedParenthesisDefectTests
         var tokenizer = new Tokenizer(escapedValue);
         var token = tokenizer.NextToken();
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(token.Text, Is.EqualTo(escapedValue),
                 "An escaped operator must not break the value into several tokens.");
+
             Assert.That(tokenizer.NextToken().Kind, Is.EqualTo(TokenKind.Eof),
                 "The whole value should have been consumed by the first token.");
-        });
+        }
     }
 }
