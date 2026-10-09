@@ -39,7 +39,6 @@
         <PackageReference Include="Microsoft.TestPlatform.AdapterUtilities" />
         <PackageReference Include="SourceLink.Create.CommandLine" PrivateAssets="All" />
         <PackageReference Include="nunit.engine" />
-        <PackageReference Include="TestCentric.Metadata" Aliases="TestCentric" />
     </ItemGroup>
 
     <Target Name="PreventTestPlatformObjectModelCopyLocal" AfterTargets="ResolveReferences">
