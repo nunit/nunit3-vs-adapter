@@ -114,6 +114,7 @@ namespace Issue1504
 
         var result = ProcessUtils.Run(workspace.Directory, "dotnet", ["run", "--no-build"]);
         TestContext.Out.WriteLine(result.StdOut);
+        result.ThrowIfError();
 
         var dumpFile = Path.Combine(workspace.Directory, "bin", "Debug", source.Framework, "identifiers.txt");
         Assert.That(dumpFile, Does.Exist, "Data consumer saw no TestMethodIdentifierProperty");
