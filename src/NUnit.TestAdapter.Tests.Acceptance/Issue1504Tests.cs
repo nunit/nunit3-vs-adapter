@@ -84,8 +84,8 @@ namespace Issue1504
 }
 ";
 
-    [TestCaseSource(typeof(SingleFrameworkSource), nameof(SingleFrameworkSource.AllFrameworksExceptNetFx))]
-    public void ParameterTypesUseManagedNameEncoding(SingleFrameworkSource source)
+    [TestCaseSource(typeof(SingleFrameworkSource), nameof(SingleFrameworkSource.AllFrameworks))]
+    public void ManagedNames(SingleFrameworkSource source)
     {
         var workspace = CreateWorkspace()
             .AddProject("Test.csproj", $@"
