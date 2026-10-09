@@ -18,6 +18,15 @@ public readonly struct VSTestResult
     public IReadOnlyList<string> RunErrors { get; }
     public IReadOnlyList<string> RunWarnings { get; }
 
+    /// <summary>
+    /// Names of the tests that actually ran, as recorded in the TRX.
+    ///
+    /// Counters alone cannot tell a correct selection from a wrong one of the same size, which
+    /// matters for filter tests: a filter that selects one test is not necessarily a filter that
+    /// selected the <em>right</em> test.
+    /// </summary>
+    public IReadOnlyList<string> ExecutedTestNames { get; }
+
     public VSTestResult(ProcessRunResult processRunResult)
     {
         ProcessRunResult = processRunResult;
@@ -25,16 +34,18 @@ public readonly struct VSTestResult
         Counters = VSTestResultCounters.CreateEmptyCounters();
         RunErrors = Array.Empty<string>();
         RunWarnings = Array.Empty<string>();
+        ExecutedTestNames = Array.Empty<string>();
     }
 
 
-    public VSTestResult(ProcessRunResult processRunResult, string outcome, VSTestResultCounters counters, IReadOnlyList<string> runErrors = null, IReadOnlyList<string> runWarnings = null)
+    public VSTestResult(ProcessRunResult processRunResult, string outcome, VSTestResultCounters counters, IReadOnlyList<string> runErrors = null, IReadOnlyList<string> runWarnings = null, IReadOnlyList<string> executedTestNames = null)
     {
         ProcessRunResult = processRunResult;
         Outcome = outcome;
         Counters = counters;
         RunErrors = runErrors ?? Array.Empty<string>();
         RunWarnings = runWarnings ?? Array.Empty<string>();
+        ExecutedTestNames = executedTestNames ?? Array.Empty<string>();
     }
 
     public static VSTestResult Load(ProcessRunResult processRunResult, string trxFilePath)
@@ -73,7 +84,12 @@ public readonly struct VSTestResult
                 (int)counters.Attribute("inProgress"),
                 (int)counters.Attribute("pending")),
             runErrors: runInfos?.Where(i => i.Outcome == "Error").Select(i => i.Text).ToList(),
-            runWarnings: runInfos?.Where(i => i.Outcome == "Warning").Select(i => i.Text).ToList());
+            runWarnings: runInfos?.Where(i => i.Outcome == "Warning").Select(i => i.Text).ToList(),
+            executedTestNames: trx.Root.Element(ns + "Results")
+                ?.Elements(ns + "UnitTestResult")
+                .Select(r => (string)r.Attribute("testName"))
+                .Where(name => name != null)
+                .ToList());
     }
 
     public void AssertSinglePassingTest()

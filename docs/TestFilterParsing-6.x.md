@@ -155,6 +155,40 @@ reason and the change should be validated against the MTP acceptance tests befor
 that turns out to be load-bearing, defer the whole item to v7 and fold it into the single shared
 parser described there — it is not worth a risky fix in a patch release.
 
+## Item 5 — The emitted filter is not always well-formed XML
+
+The NUnit filter is an XML document, and `TestFilterParser.XmlEscape` escapes the five XML
+metacharacters. That is not sufficient, because a test name can contain a code point that is not
+a legal XML character at all, and no amount of entity escaping makes such a document parse.
+
+[#761](https://github.com/nunit/nunit3-vs-adapter/issues/761) is the reported case: a test case
+with a `￿` argument. The parser emits exactly the right string, but `XmlDocument.LoadXml`
+rejects the result. The test appears in Test Explorer and never runs.
+
+This was found by adding an XML-validity assertion, not by reading the code: without it the issue
+looked covered and green.
+
+**Decision: drop the illegal characters.** The emitted value is the name with anything not legal
+in XML removed, so the document always parses.
+
+**What this does and does not achieve.** It removes the crash and the unparseable document, which
+is the point. It does not make [#761](https://github.com/nunit/nunit3-vs-adapter/issues/761)
+runnable: once a character is dropped, the emitted value no longer equals the test's full name, so
+the filter matches nothing. The test stays unrunnable — it fails cleanly instead of breaking the
+filter document. Making such a test selectable at all is a discovery-side problem, because a name
+that cannot be expressed in the filter document arguably should not be reported as an identity;
+see the escapability section of [TestFilterParsing-v7.md](TestFilterParsing-v7.md).
+
+The characters to drop are those outside XML 1.0's legal set: everything below `#x20` except tab,
+line feed and carriage return, plus `#xFFFE`, `#xFFFF` and unpaired surrogates.
+
+**Tests:** `FilterRoundTripConformanceTests.IllegalXmlCharactersAreDroppedFromTheValue`, covering
+`￿` and a C0 control. The name is deliberately absent from the shared corpus, because that
+corpus asserts the emitted value equals the name and this case is the one exception to it.
+
+**Non-breaking:** the current behaviour is an exception from `XmlDocument` or an unusable filter,
+so there is nothing working to preserve.
+
 ## Explicitly out of scope for 6.x
 
 - **[#1490](https://github.com/nunit/nunit3-vs-adapter/issues/1490), whitespace before `(`.** `GetWordOrFqn` only absorbs an argument list when `(`
@@ -172,20 +206,49 @@ parser described there — it is not worth a risky fix in a patch release.
 
 ## Verification
 
-The failing tests that specify these fixes already exist:
+The failing tests that specify these fixes already exist, and the split between what 6.x fixes
+and what has to wait for v7 is not a guess: each of the four prototyped fixes above was applied
+to this suite and the tests that turned green were recorded, then the prototype was reverted.
+
+An ordinary run is therefore red on exactly the 6.x work and nothing else:
+
+```
+dotnet test --filter "Category=FilterParsing"
+  125 total, 11 failing, 36 skipped        (unit)
+   21 total,  0 failing, 11 skipped        (acceptance)
+```
+
+The 11 failures are items 2, 3, 4 and 5. Implementing all five items takes them to zero, which is
+what a 6.x pull request has to show before it can merge.
+
+The skipped tests are ignored deliberately, each with a reason in the attribute:
+
+- **v7 tests** carry `Category=FixV7` and `Ignore(FixIn.V7Reason)`. They cannot pass before the
+  grammar change, and the build must not be red while 6.x work merges. The v7 change removes
+  those `Ignore` attributes.
+- **The item 1 tests** carry `Category=Fix6x` and `Ignore(FixIn.Item1Reason)`. These are 6.x
+  tests, ignored only because the defect is destructive rather than merely failing: measured at
+  about twelve seconds and two gigabytes each, ending in `OutOfMemoryException`. The loop cannot
+  be cancelled from outside, so there is no way to run them safely beforehand. Bound the loop and
+  remove the `Ignore` in the same change, so item 1 also goes from red to green with its fix.
+
+`Ignore` rather than `Explicit` for both, because a category filter does not select an explicit
+test: `--filter "Category=Fix6x"` silently skipped the explicit fixture rather than running it, so
+"runnable on demand by category" does not hold. An ignored test is reported as skipped with its
+reason, and running it means removing the attribute, which is the intended workflow anyway.
+
+The tests:
 
 - `src/NUnitTestAdapterTests/TestFilterConverterTests/FilterRoundTripConformanceTests.cs` —
   the invariant, with every expectation derived from the test platform's own filter
   implementation rather than hand-written.
 - `src/NUnitTestAdapterTests/TestFilterConverterTests/FilterParsingDefectTests.cs` — narrow
   demonstrations pinned to the method responsible for each defect.
-- `src/NUnit.TestAdapter.Tests.Acceptance/FilterKnownDefectsTests.cs` — the same failures end
-  to end, through a real `dotnet test` and `vstest` invocation.
+- `src/NUnit.TestAdapter.Tests.Acceptance/FilterKnownDefectsTests.cs` and
+  `MtpFilterKnownDefectsTests.cs` — the same failures end to end, under VSTest and under the
+  Microsoft Testing Platform.
 
 Work item by item and turn them green; do not weaken an expectation without saying why.
-
-For item 1, bound the test with a timeout — an assertion that never returns is not a useful
-failure.
 
 ## Acknowledgement
 
