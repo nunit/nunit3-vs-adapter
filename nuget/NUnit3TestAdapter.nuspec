@@ -29,10 +29,12 @@
       <group targetFramework="net462">
         <dependency id="Microsoft.Testing.Extensions.VSTestBridge" version="2.5.0" />
         <dependency id="Microsoft.Testing.Platform.MSBuild" version="2.4.1" />
+        <dependency id="Microsoft.TestPlatform.AdapterUtilities" version="18.10.1" />
       </group>
       <group targetFramework="net8.0">
         <dependency id="Microsoft.Testing.Extensions.VSTestBridge" version="2.5.0" />
         <dependency id="Microsoft.Testing.Platform.MSBuild" version="2.4.1" />
+        <dependency id="Microsoft.TestPlatform.AdapterUtilities" version="18.10.1" />
         <dependency id="Microsoft.Extensions.DependencyModel" version="8.0.2" />
       </group>
 
