@@ -8,6 +8,7 @@ using System.Runtime.Loader;
 #endif
 
 using Microsoft.Testing.Platform.Extensions.Messages;
+using Microsoft.TestPlatform.AdapterUtilities.ManagedNameUtilities;
 
 namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter;
 
@@ -16,10 +17,10 @@ internal static class TestMethodIdentifierBuilder
     private static readonly ConcurrentDictionary<string, string> AssemblyNameCache
         = new(StringComparer.OrdinalIgnoreCase);
 
-    // Caches only the parameter types, keyed by (assemblyPath, clrClassName, methodName).
+    // Caches only the method signature, keyed by (assemblyPath, clrClassName, methodName).
     // The TestMethodIdentifierProperty itself is not cached because typeName varies per
     // fixture instance (e.g. Tests(One) vs Tests(Two)) while the CLR class is the same.
-    private static readonly ConcurrentDictionary<(string, string, string), string[]> ParamTypeCache
+    private static readonly ConcurrentDictionary<(string, string, string), (string MethodName, int Arity, string[] ParameterTypes)> SignatureCache
         = new();
 
     public static TestMethodIdentifierProperty Create(
@@ -40,17 +41,17 @@ internal static class TestMethodIdentifierBuilder
         var ns = dot >= 0 ? classWithFixtureParams.Substring(0, dot) : string.Empty;
         var typeName = dot >= 0 ? classWithFixtureParams.Substring(dot + 1) : classWithFixtureParams;
 
-        var paramTypes = ParamTypeCache.GetOrAdd(
+        var signature = SignatureCache.GetOrAdd(
             (assemblyPath, className, methodName),
-            _ => GetMethodParameterTypes(assemblyPath, className, methodName));
+            _ => GetMethodSignature(assemblyPath, className, methodName));
 
         return new TestMethodIdentifierProperty(
             assemblyFullName,
             ns,
             typeName,
-            methodName,
-            methodArity: 0,
-            parameterTypeFullNames: paramTypes,
+            signature.MethodName,
+            signature.Arity,
+            signature.ParameterTypes,
             returnTypeFullName: "System.Void");
     }
 
@@ -84,8 +85,11 @@ internal static class TestMethodIdentifierBuilder
         return -1;
     }
 
-    private static string[] GetMethodParameterTypes(string assemblyPath, string className, string methodName)
+    // Parameter types must use the managed-name encoding (e.g. System.Nullable`1<System.Decimal>),
+    // which is what VS real-time discovery produces, not reflection's Type.FullName (#1504).
+    private static (string MethodName, int Arity, string[] ParameterTypes) GetMethodSignature(string assemblyPath, string className, string methodName)
     {
+        var fallback = (methodName, 0, Array.Empty<string>());
         try
         {
 #if !NET462 && !NETSTANDARD
@@ -96,15 +100,14 @@ internal static class TestMethodIdentifierBuilder
             var type = assembly.GetType(className, throwOnError: false);
             var methods = type?.GetMethods().Where(m => m.Name == methodName).ToList();
             if (methods == null || methods.Count != 1)
-                return Array.Empty<string>();
-            return methods[0].GetParameters()
-                .Select(p => p.ParameterType.FullName ?? string.Empty)
-                .Where(n => n.Length > 0)
-                .ToArray();
+                return fallback;
+            ManagedNameHelper.GetManagedName(methods[0], out _, out var managedMethod);
+            ManagedNameParser.ParseManagedMethodName(managedMethod, out var name, out var arity, out var parameterTypes);
+            return (name, arity, parameterTypes ?? Array.Empty<string>());
         }
         catch
         {
-            return Array.Empty<string>();
+            return fallback;
         }
     }
 }
