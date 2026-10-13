@@ -4,7 +4,7 @@
     <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
     <PackageVersion Include="NSubstitute" Version="6.2.0" />
     <PackageVersion Include="nunit" Version="5.0.0" />
     <PackageVersion Include="nunit.engine" Version="3.22.0" />
@@ -16,7 +16,7 @@
     </PackageVersion>
     <PackageVersion Include="Castle.Core" Version="5.2.1" />
     <PackageVersion Include="Microsoft.Testing.Extensions.VSTestBridge" Version="2.5.1" />
-    <PackageVersion Include="Microsoft.TestPlatform.AdapterUtilities" Version="18.10.1" />
+    <PackageVersion Include="Microsoft.TestPlatform.AdapterUtilities" Version="18.11.0" />
     <!-- Source-only package providing VSTest's filter-expression types (FilterExpressionWrapper /
          TestCaseFilterExpression), compiled directly into the test assembly. This is the same package the
          VSTestBridge uses internally, so the tests build the filter expression exactly as the product
