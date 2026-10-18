@@ -418,5 +418,6 @@ NDependOut/
 # AI Stuff
 .claude/settings.local.json
 .claude/history/
+.claude/worktrees/
 
 
