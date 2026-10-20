@@ -17,6 +17,8 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
     internal sealed class NUnitBridgedTestFramework : SynchronizedSingleSessionVSTestBridgedTestFramework
     {
         private readonly CancellationTokenSource _internalCts = new();
+        private readonly TestApplicationBuilderExtensions.NUnitTestFrameworkCapabilities _nunitCapabilities;
+        private readonly FixtureDisplayName _fixtureDisplayName;
         private bool _testSessionActive;
         private IMessageBus _currentMessageBus;
         private volatile bool _disposed;
@@ -42,9 +44,12 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
             NUnitExtension extension,
             Func<IEnumerable<Assembly>> getTestAssemblies,
             IServiceProvider serviceProvider,
-            ITestFrameworkCapabilities capabilities)
+            ITestFrameworkCapabilities capabilities,
+            TestApplicationBuilderExtensions.NUnitTestFrameworkCapabilities nunitCapabilities)
             : base(extension, getTestAssemblies, serviceProvider, capabilities)
         {
+            _nunitCapabilities = nunitCapabilities;
+            _fixtureDisplayName = new FixtureDisplayName(nunitCapabilities);
             // Set the current instance for cancellation access (TestFX Copilot pattern)
             CurrentInstance = this;
 
@@ -60,8 +65,11 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
             var methodName = testCase.GetPropertyValue<string>(Seed.NUnitMethodName, null);
             if (className is null || methodName is null)
                 return;
+            // The bridge builds the trx className from TypeName, so keep the fixture arguments there for trx (#1351).
+            // Otherwise use the CLR type name, which VS real-time discovery needs to match the node (#1513).
             var property = TestMethodIdentifierBuilder.Create(
-                testCase.Source, testCase.FullyQualifiedName, className, methodName);
+                testCase.Source, testCase.FullyQualifiedName, className, methodName,
+                includeFixtureArguments: _nunitCapabilities.IsTrxReportEnabled);
             testNode.Properties.Add(property);
         }
 
@@ -73,7 +81,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
         {
             new NUnit3TestDiscoverer()
                 .DiscoverTests(request.AssemblyPaths, request.DiscoveryContext, request.MessageLogger,
-                    request.DiscoverySink);
+                    new FixtureDisplayNameDiscoverySink(request.DiscoverySink, _fixtureDisplayName));
 
             return Task.CompletedTask;
         }
@@ -106,7 +114,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
                 }))
                 {
                     nunitExecutor.LogToDump("SynchronizedRunTestsAsync", "Calling executor.RunTests - START");
-                    executor.RunTests(request.AssemblyPaths, request.RunContext, request.FrameworkHandle);
+                    executor.RunTests(request.AssemblyPaths, request.RunContext, new FixtureDisplayNameFrameworkHandle(request.FrameworkHandle, _fixtureDisplayName));
                     nunitExecutor.LogToDump("SynchronizedRunTestsAsync", "Calling executor.RunTests - COMPLETED");
                 }
                 nunitExecutor.LogToDump("SynchronizedRunTestsAsync", "Exited using block");

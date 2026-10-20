@@ -25,9 +25,35 @@ public class TestMethodIdentifierBuilderTests
             type.Assembly.Location,
             $"{type.FullName}.{methodName}(null)",
             type.FullName,
-            methodName);
+            methodName,
+            includeFixtureArguments: false);
 
         Assert.That(property.ParameterTypeFullNames, Is.EqualTo([expected]));
+    }
+
+    /// <summary>
+    /// Issue #1513: VS real-time discovery knows only the CLR type, so without trx the
+    /// type name must not contain the fixture arguments. With trx the bridge builds the
+    /// trx className from TypeName, so the fixture arguments are kept there (#1351).
+    /// </summary>
+    [TestCase(false, "Issue1513Fixture")]
+    [TestCase(true, "Issue1513Fixture(A)")]
+    public void TypeNameHasFixtureArgumentsOnlyForTrx(bool includeFixtureArguments, string expected)
+    {
+        var type = typeof(Issue1513Fixture);
+
+        var property = TestMethodIdentifierBuilder.Create(
+            type.Assembly.Location,
+            $"{type.FullName}(A).{nameof(Issue1513Fixture.Test)}",
+            type.FullName,
+            nameof(Issue1513Fixture.Test),
+            includeFixtureArguments);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(property.Namespace, Is.EqualTo(type.Namespace));
+            Assert.That(property.TypeName, Is.EqualTo(expected));
+        });
     }
 }
 
@@ -39,5 +65,10 @@ public class Issue1504Target
     public void NullableBool(bool? value) { }
     public void GenericList(List<int> value) { }
     public void NestedGeneric(Dictionary<string, List<int?>> value) { }
+}
+
+public class Issue1513Fixture
+{
+    public void Test() { }
 }
 #pragma warning restore SA1402

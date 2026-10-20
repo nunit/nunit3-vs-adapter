@@ -26,16 +26,19 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
         // https://github.com/microsoft/testfx/blob/main/src/Adapter/MSTest.TestAdapter/TestingPlatformAdapter/TestApplicationBuilderExtensions.cs
         // MSTest can implement the internal IInternalVSTestBridgeTrxReportCapability (it is on the bridge's
         // InternalsVisibleTo list); external adapters cannot, so we implement the public ITrxReportCapability here.
-        private sealed class NUnitTestFrameworkCapabilities : ITrxReportCapability
+        internal sealed class NUnitTestFrameworkCapabilities : ITrxReportCapability
         {
+            /// <summary>
+            /// True when a trx report was requested (e.g. --report-trx). The bridge always adds the trx properties,
+            /// so this only tells NUnitBridgedTestFramework which class name to put in TestMethodIdentifierProperty.
+            /// </summary>
+            public bool IsTrxReportEnabled { get; private set; }
+
             // Returning true advertises that NUnit can enrich nodes with the trx-report properties; the platform's
             // TrxDataConsumer checks IsSupported and then calls Enable() only when a trx report was requested.
             bool ITrxReportCapability.IsSupported => true;
 
-            void ITrxReportCapability.Enable()
-            {
-                // No-op: NUnitBridgedTestFramework always populates the trx-report properties for discovered/run nodes.
-            }
+            void ITrxReportCapability.Enable() => IsTrxReportEnabled = true;
         }
 
         public static void AddNUnit(this ITestApplicationBuilder testApplicationBuilder, Func<IEnumerable<Assembly>> getTestAssemblies)
@@ -47,9 +50,11 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
             testApplicationBuilder.AddTestRunParametersService(extension);
             testApplicationBuilder.AddRunSettingsEnvironmentVariableProvider(extension);
 
+            NUnitTestFrameworkCapabilities nunitCapabilities = new();
+
             testApplicationBuilder.RegisterTestFramework(
-                _ => new TestFrameworkCapabilities(new NUnitTestFrameworkCapabilities()),
-                (capabilities, serviceProvider) => new NUnitBridgedTestFramework(extension, getTestAssemblies, serviceProvider, capabilities));
+                _ => new TestFrameworkCapabilities(nunitCapabilities),
+                (capabilities, serviceProvider) => new NUnitBridgedTestFramework(extension, getTestAssemblies, serviceProvider, capabilities, nunitCapabilities));
         }
     }
 }

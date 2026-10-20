@@ -27,19 +27,20 @@ internal static class TestMethodIdentifierBuilder
         string assemblyPath,
         string fullyQualifiedName,
         string className,
-        string methodName)
+        string methodName,
+        bool includeFixtureArguments)
     {
         var assemblyFullName = AssemblyNameCache.GetOrAdd(
             assemblyPath,
             path => AssemblyName.GetAssemblyName(path).FullName);
 
-        var classWithFixtureParams = ExtractClassFromFullName(fullyQualifiedName);
-        if (string.IsNullOrEmpty(classWithFixtureParams))
-            classWithFixtureParams = className;
+        var fullTypeName = includeFixtureArguments ? ExtractClassFromFullName(fullyQualifiedName) : className;
+        if (string.IsNullOrEmpty(fullTypeName))
+            fullTypeName = className;
 
-        var dot = FindLastDotNotInParens(classWithFixtureParams);
-        var ns = dot >= 0 ? classWithFixtureParams.Substring(0, dot) : string.Empty;
-        var typeName = dot >= 0 ? classWithFixtureParams.Substring(dot + 1) : classWithFixtureParams;
+        var dot = FindLastDotNotInParens(fullTypeName);
+        var ns = dot >= 0 ? fullTypeName.Substring(0, dot) : string.Empty;
+        var typeName = dot >= 0 ? fullTypeName.Substring(dot + 1) : fullTypeName;
 
         var signature = SignatureCache.GetOrAdd(
             (assemblyPath, className, methodName),
@@ -59,13 +60,13 @@ internal static class TestMethodIdentifierBuilder
     // "Ns.Tests(One).Test1"    -> "Ns.Tests(One)"   (fixture-parameterized)
     // "Ns.Tests.Test1(1)"      -> "Ns.Tests"         (method-parameterized)
     // "Ns.Tests.Test1"         -> "Ns.Tests"         (plain)
-    private static string ExtractClassFromFullName(string fullName)
+    internal static string ExtractClassFromFullName(string fullName)
     {
         var dot = FindLastDotNotInParens(fullName);
         return dot >= 0 ? fullName.Substring(0, dot) : string.Empty;
     }
 
-    private static int FindLastDotNotInParens(string s)
+    internal static int FindLastDotNotInParens(string s)
     {
         int depth = 0;
         for (int i = s.Length - 1; i >= 0; i--)
