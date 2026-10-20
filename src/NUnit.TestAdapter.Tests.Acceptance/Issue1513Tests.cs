@@ -90,7 +90,7 @@ namespace Issue1513
 ";
 
     [TestCaseSource(typeof(SingleFrameworkSource), nameof(SingleFrameworkSource.AllFrameworks))]
-    public void WithoutTrxTypeNameIsClrTypeAndDisplayNameHasFixtureArguments(SingleFrameworkSource source)
+    public void WithoutTrx(SingleFrameworkSource source)
     {
         var workspace = CreateTestWorkspace(source);
 
@@ -106,7 +106,7 @@ namespace Issue1513
     }
 
     [TestCaseSource(typeof(SingleFrameworkSource), nameof(SingleFrameworkSource.AllFrameworks))]
-    public void TypeNameWithTrxKeepsFixtureArguments(SingleFrameworkSource source)
+    public void WithTrx(SingleFrameworkSource source)
     {
         var workspace = CreateTestWorkspace(source);
         var resultsDirectory = Path.Combine(workspace.Directory, "TestResults");
