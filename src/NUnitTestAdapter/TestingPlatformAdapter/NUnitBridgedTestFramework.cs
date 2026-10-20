@@ -68,7 +68,7 @@ namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter
             // The bridge builds the trx className from TypeName, so keep the fixture arguments there for trx (#1351).
             // Otherwise use the CLR type name, which VS real-time discovery needs to match the node (#1513).
             var property = TestMethodIdentifierBuilder.Create(
-                testCase.Source, testCase.FullyQualifiedName, className, methodName,
+                testCase.Source, className, testCase.GetPropertyValue<string>(Seed.NUnitFixtureName, null), methodName,
                 includeFixtureArguments: _nunitCapabilities.IsTrxReportEnabled);
             testNode.Properties.Add(property);
         }

@@ -25,8 +25,8 @@ internal static class TestMethodIdentifierBuilder
 
     public static TestMethodIdentifierProperty Create(
         string assemblyPath,
-        string fullyQualifiedName,
         string className,
+        string fixtureFullName,
         string methodName,
         bool includeFixtureArguments)
     {
@@ -34,13 +34,10 @@ internal static class TestMethodIdentifierBuilder
             assemblyPath,
             path => AssemblyName.GetAssemblyName(path).FullName);
 
-        var fullTypeName = includeFixtureArguments ? ExtractClassFromFullName(fullyQualifiedName) : className;
-        if (string.IsNullOrEmpty(fullTypeName))
-            fullTypeName = className;
-
-        var dot = FindLastDotNotInParens(fullTypeName);
-        var ns = dot >= 0 ? fullTypeName.Substring(0, dot) : string.Empty;
-        var typeName = dot >= 0 ? fullTypeName.Substring(dot + 1) : fullTypeName;
+        var ns = Namespace(className);
+        var typeName = includeFixtureArguments && fixtureFullName != null
+            ? FixtureTypeName(className, fixtureFullName)
+            : StripNamespace(className, ns);
 
         var signature = SignatureCache.GetOrAdd(
             (assemblyPath, className, methodName),
@@ -56,35 +53,24 @@ internal static class TestMethodIdentifierBuilder
             returnTypeFullName: "System.Void");
     }
 
-    // Returns everything before the last '.' that is not inside parentheses.
-    // "Ns.Tests(One).Test1"    -> "Ns.Tests(One)"   (fixture-parameterized)
-    // "Ns.Tests.Test1(1)"      -> "Ns.Tests"         (method-parameterized)
-    // "Ns.Tests.Test1"         -> "Ns.Tests"         (plain)
-    internal static string ExtractClassFromFullName(string fullName)
+    // The fixture name without its namespace, e.g. Fixture("A") for Ns.Fixture("A").
+    // Uses NUnit's fixture full name, not the test name, which can contain any text (#1513).
+    internal static string FixtureTypeName(string className, string fixtureFullName)
+        => StripNamespace(fixtureFullName, Namespace(className));
+
+    // The namespace comes from the CLR class name, which has no fixture arguments.
+    // Dots inside generic arguments ("Ns.Gen`1[[System.Int32, ...]]") are not namespace dots.
+    private static string Namespace(string className)
     {
-        var dot = FindLastDotNotInParens(fullName);
-        return dot >= 0 ? fullName.Substring(0, dot) : string.Empty;
+        var end = className.IndexOfAny(['[', '<', '(']);
+        var dot = end < 0 ? className.LastIndexOf('.') : className.LastIndexOf('.', end);
+        return dot >= 0 ? className.Substring(0, dot) : string.Empty;
     }
 
-    internal static int FindLastDotNotInParens(string s)
-    {
-        int depth = 0;
-        for (int i = s.Length - 1; i >= 0; i--)
-        {
-            switch (s[i])
-            {
-                case ')':
-                    depth++;
-                    break;
-                case '(':
-                    depth--;
-                    break;
-                case '.' when depth == 0:
-                    return i;
-            }
-        }
-        return -1;
-    }
+    private static string StripNamespace(string name, string ns)
+        => ns.Length > 0 && name.StartsWith(ns + ".", StringComparison.Ordinal)
+            ? name.Substring(ns.Length + 1)
+            : name;
 
     // Parameter types must use the managed-name encoding (e.g. System.Nullable`1<System.Decimal>),
     // which is what VS real-time discovery produces, not reflection's Type.FullName (#1504).

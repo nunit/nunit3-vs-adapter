@@ -18,6 +18,10 @@ public class Issue1513Tests : AcceptanceTests
     // Same MTP version as Microsoft.Testing.Extensions.VSTestBridge in Directory.Packages.props.
     private const string MicrosoftTestingPlatformVersion = "2.5.1";
 
+    private static readonly string[] Fixtures = ["Fixture(\"A\")", "Fixture(\"B\")", "Fixture(\")\")"];
+
+    private static readonly string[] PlainIdentifiers = ["Issue1513|Plain|Test|Test", "Issue1513|Plain|Versioned|case.version.1"];
+
     private const string TestCode = @"
 using NUnit.Framework;
 
@@ -25,6 +29,7 @@ namespace Issue1513
 {
     [TestFixture(""A"")]
     [TestFixture(""B"")]
+    [TestFixture("")"")]
     public class Fixture
     {
         private readonly string _arg;
@@ -35,12 +40,21 @@ namespace Issue1513
 
         [TestCase(1)]
         public void WithParameter(int value) => Assert.Pass();
+
+        [TestCase("")"")]
+        public void WithParen(string value) => Assert.Pass();
+
+        [TestCase(TestName = ""scenario.step"")]
+        public void Dotted() => Assert.Pass();
     }
 
     public class Plain
     {
         [Test]
         public void Test() => Assert.Pass();
+
+        [TestCase(TestName = ""case.version.1"")]
+        public void Versioned() => Assert.Pass();
     }
 }
 ";
@@ -96,13 +110,14 @@ namespace Issue1513
 
         var identifiers = Run(workspace, source);
 
-        Assert.That(identifiers, Is.EquivalentTo([
-            "Issue1513|Fixture|NoParameter|Fixture(\"A\").NoParameter",
-            "Issue1513|Fixture|NoParameter|Fixture(\"B\").NoParameter",
-            "Issue1513|Fixture|WithParameter|Fixture(\"A\").WithParameter(1)",
-            "Issue1513|Fixture|WithParameter|Fixture(\"B\").WithParameter(1)",
-            "Issue1513|Plain|Test|Test"
-        ]));
+        var expected = Fixtures.SelectMany(fixture => new[]
+        {
+            $"Issue1513|Fixture|NoParameter|{fixture}.NoParameter",
+            $"Issue1513|Fixture|WithParameter|{fixture}.WithParameter(1)",
+            $"Issue1513|Fixture|WithParen|{fixture}.WithParen(\")\")",
+            $"Issue1513|Fixture|Dotted|{fixture}.scenario.step"
+        }).Concat(PlainIdentifiers);
+        Assert.That(identifiers, Is.EquivalentTo(expected));
     }
 
     [TestCaseSource(typeof(SingleFrameworkSource), nameof(SingleFrameworkSource.AllFrameworks))]
@@ -113,13 +128,14 @@ namespace Issue1513
 
         var identifiers = Run(workspace, source, "--report-trx", "--results-directory", resultsDirectory);
 
-        Assert.That(identifiers, Is.EquivalentTo([
-            "Issue1513|Fixture(\"A\")|NoParameter|NoParameter",
-            "Issue1513|Fixture(\"A\")|WithParameter|WithParameter(1)",
-            "Issue1513|Fixture(\"B\")|NoParameter|NoParameter",
-            "Issue1513|Fixture(\"B\")|WithParameter|WithParameter(1)",
-            "Issue1513|Plain|Test|Test"
-        ]));
+        var expected = Fixtures.SelectMany(fixture => new[]
+        {
+            $"Issue1513|{fixture}|NoParameter|NoParameter",
+            $"Issue1513|{fixture}|WithParameter|WithParameter(1)",
+            $"Issue1513|{fixture}|WithParen|WithParen(\")\")",
+            $"Issue1513|{fixture}|Dotted|scenario.step"
+        }).Concat(PlainIdentifiers);
+        Assert.That(identifiers, Is.EquivalentTo(expected));
 
         var trxFile = Directory.GetFiles(resultsDirectory, "*.trx").Single();
         XNamespace ns = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010";
@@ -128,7 +144,7 @@ namespace Issue1513
             .Select(m => (string)m.Attribute("className"))
             .Distinct()
             .ToArray();
-        Assert.That(classNames, Is.EquivalentTo(["Issue1513.Fixture(\"A\")", "Issue1513.Fixture(\"B\")", "Issue1513.Plain"]));
+        Assert.That(classNames, Is.EquivalentTo(Fixtures.Select(f => "Issue1513." + f).Concat(["Issue1513.Plain"])));
     }
 
     private static IsolatedWorkspace CreateTestWorkspace(SingleFrameworkSource source)

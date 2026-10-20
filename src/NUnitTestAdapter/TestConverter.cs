@@ -148,6 +148,14 @@ public sealed class TestConverter : IDisposable, ITestConverter
 
     #region Helper Methods
 
+    private static INUnitDiscoverySuiteBase FindFixture(INUnitDiscoverySuiteBase testNode)
+    {
+        var node = testNode.Parent;
+        while (node != null && node is not NUnitDiscoveryTestFixture)
+            node = node.Parent;
+        return node;
+    }
+
     /// <summary>
     /// Makes a TestCase from an NUnit test, adding
     /// navigation data if it can be found.
@@ -220,6 +228,9 @@ public sealed class TestConverter : IDisposable, ITestConverter
         testCase.SetPropertyValue(Seed.NUnitSeedProperty, testNode.Seed.ToString());
         testCase.SetPropertyValue(Seed.NUnitClassName, testNode.ClassName);
         testCase.SetPropertyValue(Seed.NUnitMethodName, testNode.MethodName);
+        var fixture = FindFixture(testNode);
+        if (fixture != null)
+            testCase.SetPropertyValue(Seed.NUnitFixtureName, fixture.FullName);
 
         return testCase;
 

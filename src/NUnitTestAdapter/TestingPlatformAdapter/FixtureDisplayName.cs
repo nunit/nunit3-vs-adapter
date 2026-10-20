@@ -1,3 +1,5 @@
+using System;
+
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 namespace NUnit.VisualStudio.TestAdapter.TestingPlatformAdapter;
@@ -28,13 +30,13 @@ internal sealed class FixtureDisplayName(TestApplicationBuilderExtensions.NUnitT
             return displayName;
 
         var className = testCase.GetPropertyValue<string>(Seed.NUnitClassName, null);
-        var fixture = TestMethodIdentifierBuilder.ExtractClassFromFullName(testCase.FullyQualifiedName);
-        if (className is null || string.IsNullOrEmpty(fixture) || fixture == className)
+        var fixture = testCase.GetPropertyValue<string>(Seed.NUnitFixtureName, null);
+        if (className is null || fixture is null || fixture == className)
             return displayName;
 
-        var dot = TestMethodIdentifierBuilder.FindLastDotNotInParens(fixture);
-        var prefix = fixture.Substring(dot + 1) + ".";
-        return displayName.StartsWith(prefix) || displayName.StartsWith(fixture + ".")
+        // Apply runs more than once on the same test case, so skip names that already have the prefix.
+        var prefix = TestMethodIdentifierBuilder.FixtureTypeName(className, fixture) + ".";
+        return displayName.StartsWith(prefix, StringComparison.Ordinal) || displayName.StartsWith(fixture + ".", StringComparison.Ordinal)
             ? displayName
             : prefix + displayName;
     }

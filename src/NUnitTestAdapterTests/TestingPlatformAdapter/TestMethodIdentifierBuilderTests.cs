@@ -23,7 +23,7 @@ public class TestMethodIdentifierBuilderTests
 
         var property = TestMethodIdentifierBuilder.Create(
             type.Assembly.Location,
-            $"{type.FullName}.{methodName}(null)",
+            type.FullName,
             type.FullName,
             methodName,
             includeFixtureArguments: false);
@@ -36,16 +36,19 @@ public class TestMethodIdentifierBuilderTests
     /// type name must not contain the fixture arguments. With trx the bridge builds the
     /// trx className from TypeName, so the fixture arguments are kept there (#1351).
     /// </summary>
-    [TestCase(false, "Issue1513Fixture")]
-    [TestCase(true, "Issue1513Fixture(A)")]
-    public void TypeNameHasFixtureArgumentsOnlyForTrx(bool includeFixtureArguments, string expected)
+    [TestCase(false, "(A)", "Issue1513Fixture")]
+    [TestCase(true, "(A)", "Issue1513Fixture(A)")]
+    [TestCase(true, "(\")\")", "Issue1513Fixture(\")\")")]
+    [TestCase(true, "(\"x.y\")", "Issue1513Fixture(\"x.y\")")]
+    [TestCase(true, "", "Issue1513Fixture")]
+    public void TypeNameHasFixtureArgumentsOnlyForTrx(bool includeFixtureArguments, string fixtureArguments, string expected)
     {
         var type = typeof(Issue1513Fixture);
 
         var property = TestMethodIdentifierBuilder.Create(
             type.Assembly.Location,
-            $"{type.FullName}(A).{nameof(Issue1513Fixture.Test)}",
             type.FullName,
+            type.FullName + fixtureArguments,
             nameof(Issue1513Fixture.Test),
             includeFixtureArguments);
 
