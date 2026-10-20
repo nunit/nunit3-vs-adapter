@@ -136,8 +136,10 @@ public abstract class AcceptanceTests
     protected static IsolatedWorkspace CreateWorkspace()
     {
         var test = TestContext.CurrentContext?.Test ?? throw new InvalidOperationException("There is no current test.");
+        // Use the method name, not test.Name: the arguments add the full type name of the test source and push
+        // nested paths past MAX_PATH. CreateMutexDirectory adds a number suffix when the name is taken.
         const string chars = "=()!,~-";
-        string name = chars.Aggregate(test.Name, (current, ch) => current.Replace(ch, '_'));
+        string name = chars.Aggregate(test.MethodName ?? test.Name, (current, ch) => current.Replace(ch, '_'));
         var workspace = Initialization.Value.Manager.CreateWorkspace(name);
 
         lock (WorkspacesByTestId)
