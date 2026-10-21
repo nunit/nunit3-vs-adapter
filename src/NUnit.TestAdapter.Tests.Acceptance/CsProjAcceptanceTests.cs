@@ -9,7 +9,7 @@ public abstract class CsProjAcceptanceTests : AcceptanceTests
 
     protected abstract string Framework { get; }
     protected const string NoFilter = "";
-    protected IsolatedWorkspace CreateTestWorkspace(string framework)
+    protected virtual IsolatedWorkspace CreateTestWorkspace(string framework)
     {
         var workspace = CreateWorkspace()
             .AddProject("Test.csproj", $@"
