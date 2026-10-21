@@ -178,6 +178,14 @@ public sealed class TestConverterForXml : IDisposable, ITestConverterXml
 
     #region Helper Methods
 
+    private static NUnitEventTestCase FindFixture(NUnitEventTestCase testNode)
+    {
+        var node = testNode.Parent;
+        while (node is { IsNull: false } && node.Type != "TestFixture")
+            node = node.Parent;
+        return node is { IsNull: false } ? node : null;
+    }
+
     /// <summary>
     /// Makes a TestCase from an NUnit test, adding
     /// navigation data if it can be found.
@@ -253,6 +261,9 @@ public sealed class TestConverterForXml : IDisposable, ITestConverterXml
         testCase.AddTraitsFromXmlTestNode(testNode, TraitsCache, _logger, adapterSettings);
         testCase.SetPropertyValue(Seed.NUnitClassName, testNode.ClassName);
         testCase.SetPropertyValue(Seed.NUnitMethodName, testNode.MethodName);
+        var fixture = FindFixture(testNode);
+        if (fixture != null)
+            testCase.SetPropertyValue(Seed.NUnitFixtureName, fixture.FullName);
 
         return testCase;
 
