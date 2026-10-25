@@ -46,7 +46,7 @@ public class TestNameFilterTests
 
     [TestCase('\u001b')]
     [TestCase('\u0001')]
-    [TestCase('￿')]
+    [TestCase('\uffff')]
     [TestCase('\u0080')]
     public void ReportedNameSelectsTheTest(char character)
     {

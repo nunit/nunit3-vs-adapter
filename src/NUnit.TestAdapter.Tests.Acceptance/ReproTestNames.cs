@@ -58,7 +58,7 @@ internal static class ReproTestNames
         {
             [TestCase("a\u001bb")]
             [TestCase("a\u0001b")]
-            [TestCase("a￿b")]
+            [TestCase("a\uffffb")]
             public void Arg(string s) => Assert.Pass();
 
             [TestCase(1, TestName = "Named\u001bEsc")]
@@ -85,7 +85,7 @@ internal static class ReproTestNames
         Case("Issue1502.FilterEscapingTests", "Name with & and &amp;", "CustomNameWithSpaces_Issue876"),
         Case("ControlCharacterTests", """Arg("a\u001bb")""", "EscapeCharacter_Issue761"),
         Case("ControlCharacterTests", """Arg("a\u0001b")""", "C0Control_Issue761"),
-        Case("ControlCharacterTests", """Arg("a￿b")""", "NonCharacter_Issue761"),
+        Case("ControlCharacterTests", """Arg("a\uffffb")""", "NonCharacter_Issue761"),
         Case("ControlCharacterTests", """Named\u001bEsc""", "CustomNameWithEscapeCharacter_Issue761"),
     ];
 

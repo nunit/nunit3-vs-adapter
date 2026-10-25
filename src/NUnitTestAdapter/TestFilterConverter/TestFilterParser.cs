@@ -310,7 +310,7 @@ public class TestFilterParser
     // Since the NUnit filter is represented in XML
     // contents of each element must be escaped.
     // A value with a character that is illegal in XML is rejected (issue 761). Dropping
-    // the character could select a different test, for example Test("") for Test("￿").
+    // the character could select a different test, for example Test("") for Test("\uffff").
     private static string XmlEscape(string text)
     {
             EnsureLegalXml(text);
