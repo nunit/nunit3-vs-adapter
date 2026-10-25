@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Xml;
 
 // Missing XML Docs
 #pragma warning disable 1591
@@ -317,13 +318,27 @@ public class TestFilterParser
 
     // Since the NUnit filter is represented in XML
     // contents of each element must be escaped.
+    // Characters that are illegal in XML are dropped (issue 761).
     private static string XmlEscape(string text)
     {
-            return text
+            return DropIllegalXmlChars(text)
                 .Replace("&", "&amp;")
                 .Replace("\"", "&quot;")
                 .Replace("<", "&lt;")
                 .Replace(">", "&gt;")
                 .Replace("'", "&apos;");
         }
+
+    private static string DropIllegalXmlChars(string text)
+    {
+        var sb = new StringBuilder(text.Length);
+        for (int i = 0; i < text.Length; i++)
+        {
+            if (XmlConvert.IsXmlChar(text[i]))
+                sb.Append(text[i]);
+            else if (i + 1 < text.Length && XmlConvert.IsXmlSurrogatePair(text[i + 1], text[i]))
+                sb.Append(text[i]).Append(text[++i]);
+        }
+        return sb.Length == text.Length ? text : sb.ToString();
+    }
 }
