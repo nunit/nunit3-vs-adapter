@@ -62,12 +62,12 @@ public static class NavigationDataProviderTests
                         .AddReferences(MetadataReference.CreateFromFile(typeof(object).GetTypeInfo().Assembly.Location))
                         .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
-                    var dependencyAssemblyPath = Path.Combine(marshalled.outputDir, "AssemblyOutsideAdapterDir.dll");
+                    var dependencyAssemblyPath = Path.Combine(marshalled.OutputDir, "AssemblyOutsideAdapterDir.dll");
                     var dependencyBaseCompilation = baseCompilation
                         .WithAssemblyName("AssemblyOutsideAdapterDir")
                         .AddSyntaxTrees(CSharpSyntaxTree.ParseText("public sealed class AttributeDefinedOutsideAdapterDir : System.Attribute { }"));
 
-                    if (marshalled.withBindingRedirect)
+                    if (marshalled.WithBindingRedirect)
                     {
                         dependencyBaseCompilation = dependencyBaseCompilation
                             .WithOptions(baseCompilation.Options
@@ -77,23 +77,23 @@ public static class NavigationDataProviderTests
 
                     var dependencyAssembly = dependencyBaseCompilation
                         .AddSyntaxTrees(CSharpSyntaxTree.ParseText("[assembly: System.Reflection.AssemblyVersion(\"1.0.1.0\")]"))
-                        .Emit(Path.Combine(marshalled.outputDir, "AssemblyOutsideAdapterDir.dll"));
+                        .Emit(Path.Combine(marshalled.OutputDir, "AssemblyOutsideAdapterDir.dll"));
                     if (!dependencyAssembly.Success) Assert.Fail("Broken test");
 
-                    var reference = marshalled.withBindingRedirect
+                    var reference = marshalled.WithBindingRedirect
                         ? dependencyBaseCompilation
                             .AddSyntaxTrees(CSharpSyntaxTree.ParseText("[assembly: System.Reflection.AssemblyVersion(\"1.0.0.0\")]"))
                             .ToMetadataReference()
                         : (MetadataReference)MetadataReference.CreateFromFile(dependencyAssemblyPath);
-                    using var outputDll = File.Create(Path.Combine(marshalled.outputDir, "DependentAssembly.dll"));
-                    using var outputPdb = File.Create(Path.Combine(marshalled.outputDir, "DependentAssembly.pdb"));
+                    using var outputDll = File.Create(Path.Combine(marshalled.OutputDir, "DependentAssembly.dll"));
+                    using var outputPdb = File.Create(Path.Combine(marshalled.OutputDir, "DependentAssembly.pdb"));
                     var dependentAssembly = baseCompilation
                         .WithAssemblyName("DependentAssembly")
                         .AddReferences(reference)
                         .AddSyntaxTrees(CSharpSyntaxTree.ParseText("public class TestClass { [AttributeDefinedOutsideAdapterDir] public async System.Threading.Tasks.Task AsyncMethod() { } }"))
                         .Emit(outputDll, outputPdb, options: new EmitOptions(debugInformationFormat: DebugInformationFormat.PortablePdb));
                     if (!dependentAssembly.Success) Assert.Fail("Broken test");
-                }, (outputDir: dir.Path, withBindingRedirect));
+                }, (OutputDir: dir.Path, WithBindingRedirect: withBindingRedirect));
         }
 
         var assemblyPath = Path.Combine(dir, "DependentAssembly.dll");
