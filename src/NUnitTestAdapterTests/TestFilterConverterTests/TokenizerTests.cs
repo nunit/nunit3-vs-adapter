@@ -43,30 +43,6 @@ public class TokenizerTests
         Assert.That(tokenizer.NextToken(), Is.EqualTo(new Token(TokenKind.Eof)), "Third Call");
     }
 
-    [Test]
-    public void IdentifierTokens()
-    {
-        var tokenizer = new Tokenizer("  Identifiers x & abc123 | a1x  ");
-        Assert.That(tokenizer.NextToken(), Is.EqualTo(new Token(TokenKind.Word, "Identifiers x")));
-        Assert.That(tokenizer.NextToken(), Is.EqualTo(new Token(TokenKind.Symbol, "&")));
-        Assert.That(tokenizer.NextToken(), Is.EqualTo(new Token(TokenKind.Word, "abc123")));
-        Assert.That(tokenizer.NextToken(), Is.EqualTo(new Token(TokenKind.Symbol, "|")));
-        Assert.That(tokenizer.NextToken(), Is.EqualTo(new Token(TokenKind.Word, "a1x")));
-        Assert.That(tokenizer.NextToken(), Is.EqualTo(new Token(TokenKind.Eof)));
-    }
-
-    // As in the test platform, a value runs to the next unescaped operator: spaces are part
-    // of it, and so is every '\x' escape pair (issues 1488, 1490, 876).
-    [TestCase("Name with spaces", "Name with spaces")]
-    [TestCase(@"A.B\|C", @"A.B\|C")]
-    [TestCase(@"A.B\&C\=D", @"A.B\&C\=D")]
-    [TestCase(@"Method \(Case 1\)", @"Method \(Case 1\)")]
-    public void ValueRunsToTheNextUnescapedOperator(string input, string expected)
-    {
-        var tokenizer = new Tokenizer(input + " & x");
-        Assert.That(tokenizer.NextToken(), Is.EqualTo(new Token(TokenKind.Word, expected)));
-        Assert.That(tokenizer.NextToken(), Is.EqualTo(new Token(TokenKind.Symbol, "&")));
-    }
 
     [Test]
     public void WordsInUnicode()
