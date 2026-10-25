@@ -143,19 +143,19 @@ public class TestFilterParser
                     rhs = Expect(TokenKind.FQN, TokenKind.Word);
                     return EmitFullNameFilter(op, UnEscape(rhs.Text));
                 case "TestCategory":
-                    rhs = Expect(TokenKind.Word);
-                    return EmitCategoryFilter(op, rhs.Text);
+                    rhs = Expect(TokenKind.FQN, TokenKind.Word);
+                    return EmitCategoryFilter(op, UnEscape(rhs.Text));
                 case "Priority":
-                    rhs = Expect(TokenKind.Word);
-                    return EmitPropertyFilter(op, lhs.Text, rhs.Text);
+                    rhs = Expect(TokenKind.FQN, TokenKind.Word);
+                    return EmitPropertyFilter(op, lhs.Text, UnEscape(rhs.Text));
                 case "Name":
                     rhs = Expect(TokenKind.FQN, TokenKind.Word);
                     return EmitNameFilter(op, UnEscape(rhs.Text));
 
                 default:
                     // Assume it's a property name
-                    rhs = Expect(TokenKind.String, TokenKind.Word);
-                    return EmitPropertyFilter(op, lhs.Text, rhs.Text);
+                    rhs = Expect(TokenKind.String, TokenKind.FQN, TokenKind.Word);
+                    return EmitPropertyFilter(op, lhs.Text, UnEscape(rhs.Text));
             }
         }
 
