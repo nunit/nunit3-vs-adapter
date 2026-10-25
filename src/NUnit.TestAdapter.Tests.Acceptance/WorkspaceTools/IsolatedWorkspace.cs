@@ -239,8 +239,9 @@ public sealed partial class IsolatedWorkspace(DirectoryMutex directoryMutex, Too
             var line = rawLine.TrimEnd('\r');
 
             // Listed names are indented by exactly two spaces. The run summary uses the same
-            // indent for its own detail lines, so stop once the summary begins.
-            if (line.StartsWith("Test discovery summary:", StringComparison.Ordinal))
+            // indent for its own detail lines, so stop once the summary begins. Contains, not
+            // StartsWith: on a CI agent the summary line starts with an ANSI colour code.
+            if (line.Contains("Test discovery summary:"))
                 break;
 
             if (line.StartsWith("  ", StringComparison.Ordinal) && line.Length > 2 && line[2] != ' ')
@@ -272,9 +273,10 @@ public sealed partial class IsolatedWorkspace(DirectoryMutex directoryMutex, Too
         settings.AppendLine("  </NUnit>");
         settings.AppendLine("</RunSettings>");
 
-        const string fileName = "mtp.runsettings";
-        File.WriteAllText(Path.Combine(Directory, fileName), settings.ToString());
-        return fileName;
+        // Full path: the platform does not resolve --settings against the working directory.
+        var path = Path.Combine(Directory, "mtp.runsettings");
+        File.WriteAllText(path, settings.ToString());
+        return path;
     }
 
     private RunSettings ConfigureRun(string filename) => new(Directory, filename);

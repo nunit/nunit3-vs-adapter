@@ -111,14 +111,17 @@ public sealed class MtpFilterKnownDefectsTests : MtpCsProjAcceptanceTests
     }
 
     /// <summary>
-    /// Issue 1501 under the platform. A 6.x test, ignored for the same reason as the VSTest
-    /// version: the tokenizer does not terminate, so the test application allocates until it is
-    /// killed. Bound the loop and remove the Ignore in the same change.
+    /// Issue 1501 under the platform: the tokenizer used to not terminate, so the test
+    /// application allocated until it was killed. It terminates now, but the platform wraps the
+    /// filter in parentheses, (FullyQualifiedName=KnownDefects.Foo.NoClose\(), and the current
+    /// grammar takes the outer ')' as the close of the argument list. The parse error then ends
+    /// the test host, because the bridge does not handle an exception from the adapter. Selecting
+    /// the test needs the v7 grammar. Discovery already lists it.
     /// </summary>
     [Test, Platform("Win")]
     [Property("Issue", "1501")]
-    [Category(FixIn.SixX)]
-    [Ignore(FixIn.Item1Reason)]
+    [Category(FixIn.V7)]
+    [Ignore(FixIn.V7Reason)]
     public void DiscoveryAndExecutionAgreeWithUnbalancedParenthesis()
     {
         var workspace = Build();

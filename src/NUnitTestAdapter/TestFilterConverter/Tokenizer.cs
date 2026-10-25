@@ -94,6 +94,7 @@ public class Tokenizer
 
     private const char EOF_CHAR = '\0';
     private const string WORD_BREAK_CHARS = "=~!()&|";
+    private const string VSTEST_ESCAPED_CHARS = @"\()&|=!~";
     private readonly string[] doubleCharSymbols = { "!=", "!~" };
 
     private Token lookahead;
@@ -256,22 +257,68 @@ public class Tokenizer
             sb.Append(GetChar());
     }
 
+    /// <summary>
+    /// Collects an argument list. A '"' starts a string argument, so parentheses inside it do
+    /// not count. Not every '"' does: a char argument '"', or a custom test name with a single
+    /// quote, has no closing one. When a string runs to the end of input, the argument list is
+    /// collected again without string handling, so the rest of the filter keeps its conditions.
+    /// </summary>
     private void CollectBalancedParentheticalExpression(StringBuilder sb)
     {
-        int depth = 0;
-        if (NextChar == '(')
+        if (NextChar != '(')
+            return;
+
+        int start = index;
+        int length = sb.Length;
+        if (!TryCollectParenthetical(sb, withStrings: true))
         {
-            do
-            {
-                var c = GetChar();
-                sb.Append(c);
-                if (c == '(')
-                    ++depth;
-                else if (c == ')')
-                    --depth;
-            }
-            while (depth > 0);
+            index = start;
+            sb.Length = length;
+            TryCollectParenthetical(sb, withStrings: false);
         }
+    }
+
+    /// <returns>False if a string argument was not closed before end of input.</returns>
+    private bool TryCollectParenthetical(StringBuilder sb, bool withStrings)
+    {
+        int depth = 0;
+        do
+        {
+            var c = GetChar();
+            sb.Append(c);
+            if (c == '(')
+                ++depth;
+            else if (c == ')')
+                --depth;
+            else if (c == '"' && withStrings && !CollectQuotedString(sb))
+                return false;
+        }
+        while (depth > 0 && NextChar != EOF_CHAR);
+        return true;
+    }
+
+    /// <summary>
+    /// Copies a quoted argument as is.
+    /// The text is escaped twice: NUnit escapes '\' and '"' in string arguments,
+    /// then VSTest escapes '\' and the filter operators. VSTest pairs are read
+    /// as one char, and only an NUnit '\"' does not end the string.
+    /// </summary>
+    /// <returns>False if end of input came before the closing quote.</returns>
+    private bool CollectQuotedString(StringBuilder sb)
+    {
+        bool nunitEscape = false;
+        while (NextChar != EOF_CHAR)
+        {
+            char c = GetChar();
+            sb.Append(c);
+            if (c == '\\' && VSTEST_ESCAPED_CHARS.IndexOf(NextChar) >= 0)
+                sb.Append(c = GetChar());
+
+            if (c == '"' && !nunitEscape)
+                return true;
+            nunitEscape = c == '\\' && !nunitEscape;
+        }
+        return false;
     }
 
     /// <summary>

@@ -129,17 +129,12 @@ public sealed class FilterKnownDefectsTests : CsProjAcceptanceTests
     }
 
     /// <summary>
-    /// Issue 1501. The adapter's tokenizer never terminates on an argument list with no
-    /// closing parenthesis, so the test host allocates until it runs out of memory.
-    ///
-    /// A 6.x test, ignored only because the failure mode is memory exhaustion rather than a
-    /// normal assertion failure. Bound the loop at end of input and remove the Ignore in the
-    /// same change.
+    /// Issue 1501. The adapter's tokenizer used to never terminate on an argument list with
+    /// no closing parenthesis, so the test host allocated until it ran out of memory.
     /// </summary>
     [Test, Platform("Win")]
     [Property("Issue", "1501")]
     [Category(FixIn.SixX)]
-    [Ignore(FixIn.Item1Reason)]
     public void VsTestSelectsTheTestWithUnbalancedParenthesis()
     {
         var workspace = Build();

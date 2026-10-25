@@ -48,18 +48,4 @@ public static class FixIn
     public const string V7Reason =
         "Requires the escape-aware grammar in docs/TestFilterParsing-v7.md, which is a breaking " +
         "change scheduled for v7. Remove this Ignore as part of that change.";
-
-    /// <summary>
-    /// Reason for ignoring the unbalanced-parenthesis tests, 6.x item 1 / issue 1501.
-    ///
-    /// These are 6.x tests, not v7 ones, and they are ignored only because the defect they cover
-    /// is destructive rather than merely failing: the lexer never stops consuming input, so it
-    /// allocates until StringBuilder reaches its 2 GB cap and throws OutOfMemoryException. That
-    /// is roughly twelve seconds and two gigabytes per test, which must not run on a build agent.
-    /// </summary>
-    public const string Item1Reason =
-        "Ignored only because the defect is destructive before it is fixed: the lexer allocates " +
-        "2 GB and throws OutOfMemoryException rather than failing. Bound " +
-        "CollectBalancedParentheticalExpression at end of input (6.x item 1, issue 1501) and " +
-        "remove this Ignore in the same change.";
 }
