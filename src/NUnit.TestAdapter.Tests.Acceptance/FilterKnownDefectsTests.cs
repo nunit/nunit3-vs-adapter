@@ -25,8 +25,8 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance;
 /// <c>Assert.Pass()</c>, so a filter that selected the wrong single test would satisfy a
 /// count-only assertion.
 ///
-/// Tests that need the v7 grammar are ignored with <c>FixIn.V7Reason</c>, so an ordinary run is
-/// red on the 6.x work only.
+/// The cases first marked as needing a breaking v7 grammar pass with the non-breaking 6.4
+/// tokenizer, which reads a value up to the next unescaped operator.
 /// </summary>
 [Category("FilterParsing")]
 public sealed class FilterKnownDefectsTests : CsProjAcceptanceTests
@@ -90,11 +90,11 @@ public sealed class FilterKnownDefectsTests : CsProjAcceptanceTests
     /// </summary>
     [Test, Platform("Win")]
     [TestCase("""FullyQualifiedName=KnownDefects.Foo.Sanity""", """Sanity""", TestName = "{m}_Sanity")]
-    [TestCase("""FullyQualifiedName=KnownDefects.Foo.SpaceBefore \(Case 1\)""", """SpaceBefore (Case 1)""", TestName = "{m}_SpaceBeforeArguments_Issue1490", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
+    [TestCase("""FullyQualifiedName=KnownDefects.Foo.SpaceBefore \(Case 1\)""", """SpaceBefore (Case 1)""", TestName = "{m}_SpaceBeforeArguments_Issue1490", Category = FixIn.SixX)]
     [TestCase("""FullyQualifiedName=KnownDefects.Foo.QuotedBackslash\("C:\\Temp"\)""", """QuotedBackslash("C:\Temp")""", TestName = "{m}_QuotedBackslash_Issue1489")]
     [TestCase("""FullyQualifiedName=KnownDefects.Foo.QuotedPipe\("This \| That"\)""", """QuotedPipe("This | That")""", TestName = "{m}_QuotedPipe_Issue1405")]
-    [TestCase("""FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B""", """PipeOutside_A|B""", TestName = "{m}_PipeOutsideArguments_Issue1488", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
-    [TestCase("""FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B""", """AmpersandOutside_A&B""", TestName = "{m}_AmpersandOutsideArguments_Issue1488", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
+    [TestCase("""FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B""", """PipeOutside_A|B""", TestName = "{m}_PipeOutsideArguments_Issue1488", Category = FixIn.SixX)]
+    [TestCase("""FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B""", """AmpersandOutside_A&B""", TestName = "{m}_AmpersandOutsideArguments_Issue1488", Category = FixIn.SixX)]
     public void VsTestSelectsTheTest(string filter, string expectedTestName)
     {
         var workspace = Build();
@@ -117,9 +117,9 @@ public sealed class FilterKnownDefectsTests : CsProjAcceptanceTests
     /// </summary>
     [Test, Platform("Win")]
     [TestCase("FullyQualifiedName=KnownDefects.Foo.Sanity", "Sanity", TestName = "{m}_Sanity")]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.SpaceBefore \(Case 1\)", "SpaceBefore (Case 1)", TestName = "{m}_SpaceBeforeArguments_Issue1490", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B", "PipeOutside_A|B", TestName = "{m}_PipeOutsideArguments_Issue1488", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
-    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B", "AmpersandOutside_A&B", TestName = "{m}_AmpersandOutsideArguments_Issue1488", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.SpaceBefore \(Case 1\)", "SpaceBefore (Case 1)", TestName = "{m}_SpaceBeforeArguments_Issue1490", Category = FixIn.SixX)]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B", "PipeOutside_A|B", TestName = "{m}_PipeOutsideArguments_Issue1488", Category = FixIn.SixX)]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B", "AmpersandOutside_A&B", TestName = "{m}_AmpersandOutsideArguments_Issue1488", Category = FixIn.SixX)]
     public void DotNetTestSelectsTheTest(string filter, string expectedTestName)
     {
         var workspace = Build();

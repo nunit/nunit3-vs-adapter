@@ -40,169 +40,108 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.TestFilterConverterTests;
 /// at a time with <c>--filter "Issue=1490"</c>, or one plan item with
 /// <c>--filter "DocItem=6.x item 2"</c>.
 ///
-/// Tests that need the v7 grammar are ignored with <c>FixIn.V7Reason</c>, so an ordinary run is
-/// red on the 6.x work only.
+/// The tests first marked as needing a breaking v7 grammar pass with the non-breaking 6.4
+/// tokenizer, which reads a value up to the next unescaped operator. Each test gives a filter
+/// string and asserts the NUnit filter it becomes.
 /// </summary>
 [Category("FilterParsing")]
 public class FilterParsingDefectTests
 {
     /// <summary>
-    /// The lexer splits on the operator characters without consulting a preceding backslash,
-    /// so an escaped operator ends a token instead of being part of it. The value should stay
-    /// in one token, still escaped — unescaping is the parser's job and happens later.
-    ///
-    /// Root cause: <c>Tokenizer.WORD_BREAK_CHARS</c> and <c>Tokenizer.IsWordChar</c>.
-    /// Issues 1488 and 1405; the grammar change is a v7 item.
-    ///
-    /// The escaped <em>open</em> parenthesis belongs in this list too. It is in
-    /// <see cref="UnbalancedParenthesisDefectTests.EscapedOpenParenStaysInsideOneToken"/> instead,
-    /// because before 6.x item 1 the lexer treats that '(' as a group opener, finds no ')', and
-    /// allocates until it runs out of memory. Move it back here once the loop is bounded.
+    /// An escaped operator is part of the value, wherever it appears. Issues 1488 and 1405.
     /// </summary>
     [Property("Issue", "1488")]
-    [Property("DocItem", "v7 grammar")]
-    [Category(FixIn.V7)]
-    [Ignore(FixIn.V7Reason)]
-    [TestCase(@"a\\b", TestName = "{m}_EscapedBackslash")]
-    [TestCase(@"a\(b", TestName = "{m}_EscapedOpenParen")]
-    [TestCase(@"a\)b", TestName = "{m}_EscapedCloseParen")]
-    [TestCase(@"a\&b", TestName = "{m}_EscapedAmpersand")]
-    [TestCase(@"a\|b", TestName = "{m}_EscapedPipe")]
-    [TestCase(@"a\=b", TestName = "{m}_EscapedEquals")]
-    [TestCase(@"a\!b", TestName = "{m}_EscapedBang")]
-    [TestCase(@"a\~b", TestName = "{m}_EscapedTilde")]
-    public void EscapedOperatorStaysInsideOneToken(string escapedValue)
+    [Property("DocItem", "6.x item 6")]
+    [Category(FixIn.SixX)]
+    [TestCase(@"a\\b", @"a\b", TestName = "{m}_EscapedBackslash")]
+    [TestCase(@"a\(b", "a(b", TestName = "{m}_EscapedOpenParen")]
+    [TestCase(@"a\)b", "a)b", TestName = "{m}_EscapedCloseParen")]
+    [TestCase(@"a\&b", "a&amp;b", TestName = "{m}_EscapedAmpersand")]
+    [TestCase(@"a\|b", "a|b", TestName = "{m}_EscapedPipe")]
+    [TestCase(@"a\=b", "a=b", TestName = "{m}_EscapedEquals")]
+    [TestCase(@"a\!b", "a!b", TestName = "{m}_EscapedBang")]
+    [TestCase(@"a\~b", "a~b", TestName = "{m}_EscapedTilde")]
+    public void EscapedOperatorIsPartOfTheName(string escapedValue, string xmlName)
     {
-        var tokenizer = new Tokenizer(escapedValue);
-        var token = tokenizer.NextToken();
-
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(token.Text, Is.EqualTo(escapedValue),
-                "An escaped operator must not break the value into several tokens.");
-
-            Assert.That(tokenizer.NextToken().Kind, Is.EqualTo(TokenKind.Eof),
-                "The whole value should have been consumed by the first token.");
-        }
+        Assert.That(Parse("FullyQualifiedName=" + escapedValue), Is.EqualTo($"<filter><test>{xmlName}</test></filter>"));
     }
 
     /// <summary>
     /// An unescaped operator is a real operator, wherever it appears. This is the other half
-    /// of the rule above and already holds today — it is here so a fix cannot regress it.
+    /// of the rule above — it is here so a fix cannot regress it.
     /// </summary>
-    [Property("DocItem", "v7 grammar")]
+    [Property("DocItem", "6.x item 6")]
     [Test]
-    public void UnescapedOperatorStillBreaksTheToken()
+    public void UnescapedOperatorSeparatesConditions()
     {
-        var tokenizer = new Tokenizer("a|b");
-
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(tokenizer.NextToken(), Is.EqualTo(new Token(TokenKind.Word, "a")));
-            Assert.That(tokenizer.NextToken(), Is.EqualTo(new Token(TokenKind.Symbol, "|")));
-            Assert.That(tokenizer.NextToken(), Is.EqualTo(new Token(TokenKind.Word, "b")));
-        }
+        Assert.That(
+            Parse("FullyQualifiedName=a|FullyQualifiedName=b"),
+            Is.EqualTo("<filter><or><test>a</test><test>b</test></or></filter>"));
     }
 
     /// <summary>
     /// Whitespace inside a value is not significant to the test platform, which only trims at
-    /// token boundaries. The adapter ends a word at the first space, and then only treats a
-    /// following '(' as an argument list when it is immediately adjacent, so a name with a
-    /// space before its argument list tokenizes as two tokens and the parse fails.
-    ///
-    /// Root cause: <c>Tokenizer.IsWordChar</c> rejecting whitespace, and the adjacency test in
-    /// <c>Tokenizer.GetWordOrFqn</c>. Issue 1490, deferred to v7 rather than patched.
+    /// token boundaries. The adapter used to end a value at the first space, so a name with a
+    /// space before its argument list could not be selected. Issue 1490.
     /// </summary>
     [Property("Issue", "1490")]
-    [Property("DocItem", "v7 grammar")]
-    [Category(FixIn.V7)]
-    [Ignore(FixIn.V7Reason)]
-    [Test]
-    public void WhitespaceBeforeArgumentListDoesNotEndTheValue()
+    [Property("DocItem", "6.x item 6")]
+    [Category(FixIn.SixX)]
+    [TestCase(@"My.Test.Fixture.Method \(Case 1\)", TestName = "{m}_Escaped")]
+    [TestCase("My.Test.Fixture.Method (Case 1)", TestName = "{m}_Unescaped")]
+    public void WhitespaceBeforeArgumentListIsPartOfTheName(string value)
     {
-        const string value = @"My.Test.Fixture.Method \(Case 1\)";
-
-        var tokenizer = new Tokenizer(value);
-        var token = tokenizer.NextToken();
-
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(token.Text, Is.EqualTo(value));
-
-            Assert.That(tokenizer.NextToken().Kind, Is.EqualTo(TokenKind.Eof));
-        }
+        Assert.That(Parse("FullyQualifiedName=" + value), Is.EqualTo("<filter><test>My.Test.Fixture.Method (Case 1)</test></filter>"));
     }
 
     /// <summary>
-    /// <c>Tokenizer.CollectQuotedString</c> consumes a backslash at lex time, and since the
-    /// change in PR 1489 <c>TestFilterParser.UnEscape</c> unescapes the finished token again.
-    /// Escape sequences inside a quoted argument are therefore processed twice, so one level
-    /// of escaping is lost.
-    ///
-    /// The token here should still carry the escaping exactly as it arrived.
-    /// Item 2 in the 6.x document.
+    /// Escape sequences inside a quoted argument are unescaped once. Since PR 1489 the lexer
+    /// and the parser both unescaped them, so one level of escaping was lost. Item 2 in the 6.x
+    /// document.
     /// </summary>
     [Property("Issue", "1489")]
     [Property("DocItem", "6.x item 2")]
     [Category(FixIn.SixX)]
-    [TestCase("""("C:\\Temp")""", TestName = "{m}_EscapedBackslash")]
-    [TestCase("""("a\|b")""", TestName = "{m}_EscapedPipe")]
-    [TestCase("""("a\=b")""", TestName = "{m}_EscapedEquals")]
-    public void QuotedArgumentIsNotUnescapedByTheLexer(string escapedArguments)
+    [TestCase("""("C:\\Temp")""", @"(&quot;C:\Temp&quot;)", TestName = "{m}_EscapedBackslash")]
+    [TestCase("""("a\|b")""", "(&quot;a|b&quot;)", TestName = "{m}_EscapedPipe")]
+    [TestCase("""("a\=b")""", "(&quot;a=b&quot;)", TestName = "{m}_EscapedEquals")]
+    public void QuotedArgumentIsUnescapedOnce(string escapedArguments, string xmlArguments)
     {
-        const string name = "My.Test.Fixture.Method";
-        string expected = name + escapedArguments;
-
-        var token = new Tokenizer(expected).NextToken();
-
-        Assert.That(token.Text, Is.EqualTo(expected),
-            "The lexer must not interpret escape sequences; that is the parser's job.");
+        Assert.That(
+            Parse("FullyQualifiedName=My.Test.Fixture.Method" + escapedArguments),
+            Is.EqualTo($"<filter><test>My.Test.Fixture.Method{xmlArguments}</test></filter>"));
     }
 
     /// <summary>
-    /// A backslash that survives to <c>FilterHelper.Unescape</c> in a position the platform
-    /// considers invalid raises <see cref="ArgumentException"/>, which currently travels all
-    /// the way out of the adapter and is reported as an executor crash rather than as a
-    /// problem with the filter.
-    ///
-    /// Whatever the eventual parse, a malformed filter should surface as
-    /// <see cref="TestFilterParserException"/>. Item 3 in the 6.x document.
+    /// An escaped operator outside an argument list used to leave a dangling backslash, which
+    /// raised an <see cref="ArgumentException"/> (6.x item 3). It is part of the value now, so
+    /// these filters select the test they name.
     /// </summary>
     [Property("Issue", "1489")]
     [Property("DocItem", "6.x item 3")]
     [Category(FixIn.SixX)]
-    [TestCase(@"FullyQualifiedName=A.B\|C")]
-    [TestCase(@"FullyQualifiedName=A.B\&C")]
-    [TestCase(@"FullyQualifiedName=A.B.C(1)\)tail")]
-    public void MalformedFilterIsReportedAsAFilterError(string filter)
+    [TestCase(@"FullyQualifiedName=A.B\|C", "A.B|C")]
+    [TestCase(@"FullyQualifiedName=A.B\&C", "A.B&amp;C")]
+    [TestCase(@"FullyQualifiedName=A.B.C(1)\)tail", "A.B.C(1))tail")]
+    public void EscapedOperatorOutsideArgumentsSelectsTheTest(string filter, string xmlName)
     {
-        // Written out rather than expressed with Throws.Nothing.Or.TypeOf<T>(): after .Or the
-        // constraint applies to the delegate's return value, not to the exception, so that form
-        // fails even when the right exception is thrown.
-        //
-        // "Null or TestFilterParserException" is deliberately the contract, and it is the one
-        // assertion that holds across both releases. Today these filters raise a raw
-        // ArgumentException and this fails. After 6.x item 3 wraps it, they raise
-        // TestFilterParserException and this passes. After the v7 grammar lands they parse
-        // cleanly and nothing is thrown, which is the desired end state, not a regression.
-        //
-        // It does not verify that the resulting filter is *correct* when nothing is thrown —
-        // that is asserted by FilterRoundTripConformanceTests.AdapterProducesTheSameSelection
-        // for the same inputs, which is where a wrong-but-silent parse is caught.
-        Exception caught = null;
-
-        try
-        {
-            new TestFilterParser().Parse(filter);
-        }
-        catch (Exception e)
-        {
-            caught = e;
-        }
-
-        Assert.That(caught, Is.Null.Or.TypeOf<TestFilterParserException>(),
-            "A filter problem must not escape the adapter as a raw ArgumentException.");
+        Assert.That(Parse(filter), Is.EqualTo($"<filter><test>{xmlName}</test></filter>"));
     }
+
+    /// <summary>
+    /// A backslash that escapes nothing is a filter error, reported as
+    /// <see cref="TestFilterParserException"/>: not a raw exception, and not a wrong selection.
+    /// </summary>
+    [Property("DocItem", "6.x item 3")]
+    [Category(FixIn.SixX)]
+    [TestCase(@"FullyQualifiedName=A.B\")]
+    [TestCase(@"FullyQualifiedName=A.B\xC")]
+    public void BackslashThatEscapesNothingIsAFilterError(string filter)
+    {
+        Assert.That(() => Parse(filter), Throws.TypeOf<TestFilterParserException>());
+    }
+
+    private static string Parse(string filter) => new TestFilterParser().Parse(filter);
 
     /// <summary>
     /// The MTP fast path has its own unescaping, built from <c>WebUtility.HtmlDecode</c> and
