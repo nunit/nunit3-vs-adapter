@@ -178,6 +178,9 @@ public class TestFilterParser
 
     private static string EmitFilter(string lhs, Token op, string rhs)
     {
+            if ((lhs == "test" || lhs == "name") && TestNameFilter.NeedsRegex(rhs))
+                return EmitNameRegexFilter(lhs, op, TestNameFilter.ToRegex(rhs));
+
             rhs = EscapeRhsValue(op, rhs);
 
             if (op == EQ_OP)
@@ -190,6 +193,15 @@ public class TestFilterParser
                 return $"<not><{lhs} re='1'>{rhs}</{lhs}></not>";
 
             throw new TestFilterParserException($"Invalid operator {op.Text} at position {op.Pos}");
+        }
+
+    // A name with a character NUnit writes as \uXXXX is matched as a regex for either form
+    // (see TestNameFilter). '=' and '!=' are exact, so the regex is anchored.
+    private static string EmitNameRegexFilter(string lhs, Token op, string regex)
+    {
+            bool exact = op == EQ_OP || op == NE_OP;
+            string element = $"<{lhs} re='1'>{XmlEscape(exact ? "^" + regex + "$" : regex)}</{lhs}>";
+            return op == NE_OP || op == NOTCONTAINS_OP ? $"<not>{element}</not>" : element;
         }
 
     private static string EmitPropertyFilter(Token op, string name, string value)

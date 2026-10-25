@@ -11,7 +11,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance;
 /// </summary>
 internal static class ReproTestNames
 {
-    public const int TotalTests = 15;
+    public const int TotalTests = 19;
 
     public const string TestsCs = """"
         using NUnit.Framework;
@@ -52,11 +52,20 @@ internal static class ReproTestNames
             [Test]
             public void Test2([Values("\\")] string arg) => Assert.Pass();
         }
+
+        // NUnit writes these characters as \uXXXX text in its XML (nunit/nunit#4826)
+        public sealed class ControlCharacterTests
+        {
+            [TestCase("a\u001bb")]
+            [TestCase("a\u0001b")]
+            [TestCase("a￿b")]
+            public void Arg(string s) => Assert.Pass();
+
+            [TestCase(1, TestName = "Named\u001bEsc")]
+            public void Named(int i) => Assert.Pass();
+        }
         """";
 
-    // "Name with & and &amp;" is not here: the command line filter parser does not support
-    // spaces outside an argument list (issue 876). Test Explorer under MTP uses the fast path,
-    // which handles it, and the unit tests cover that.
     public static TestCaseData[] Cases =>
     [
         Case("Issue1502.FilterEscapingTests", """StringArgument("a & b")""", "Ampersand"),
@@ -73,6 +82,11 @@ internal static class ReproTestNames
         Case("UnitTest1", """Test("C:\\Path\\File.txt\"")""", "PathWithTrailingQuote_Issue1349"),
         Case("ValuesTests", """Test1("|")""", "ValuesPipe_Issue1349"),
         Case("ValuesTests", """Test2("\\")""", "ValuesBackslash_Issue1349"),
+        Case("Issue1502.FilterEscapingTests", "Name with & and &amp;", "CustomNameWithSpaces_Issue876"),
+        Case("ControlCharacterTests", """Arg("a\u001bb")""", "EscapeCharacter_Issue761"),
+        Case("ControlCharacterTests", """Arg("a\u0001b")""", "C0Control_Issue761"),
+        Case("ControlCharacterTests", """Arg("a￿b")""", "NonCharacter_Issue761"),
+        Case("ControlCharacterTests", """Named\u001bEsc""", "CustomNameWithEscapeCharacter_Issue761"),
     ];
 
     private static TestCaseData Case(string className, string testName, string label) =>
