@@ -111,14 +111,12 @@ public sealed class MtpFilterKnownDefectsTests : MtpCsProjAcceptanceTests
     }
 
     /// <summary>
-    /// Issue 1501 under the platform. A 6.x test, ignored for the same reason as the VSTest
-    /// version: the tokenizer does not terminate, so the test application allocates until it is
-    /// killed. Bound the loop and remove the Ignore in the same change.
+    /// Issue 1501 under the platform: the tokenizer used to not terminate, so the test
+    /// application allocated until it was killed.
     /// </summary>
     [Test, Platform("Win")]
     [Property("Issue", "1501")]
     [Category(FixIn.SixX)]
-    [Ignore(FixIn.Item1Reason)]
     public void DiscoveryAndExecutionAgreeWithUnbalancedParenthesis()
     {
         var workspace = Build();

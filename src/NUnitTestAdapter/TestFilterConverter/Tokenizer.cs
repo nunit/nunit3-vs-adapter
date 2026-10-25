@@ -94,6 +94,7 @@ public class Tokenizer
 
     private const char EOF_CHAR = '\0';
     private const string WORD_BREAK_CHARS = "=~!()&|";
+    private const string VSTEST_ESCAPED_CHARS = @"\()&|=!~";
     private readonly string[] doubleCharSymbols = { "!=", "!~" };
 
     private Token lookahead;
@@ -269,8 +270,32 @@ public class Tokenizer
                     ++depth;
                 else if (c == ')')
                     --depth;
+                else if (c == '"')
+                    CollectQuotedString(sb);
             }
-            while (depth > 0);
+            while (depth > 0 && NextChar != EOF_CHAR);
+        }
+    }
+
+    /// <summary>
+    /// Copies a quoted argument as is, so parentheses inside it do not count.
+    /// The text is escaped twice: NUnit escapes '\' and '"' in string arguments,
+    /// then VSTest escapes '\' and the filter operators. VSTest pairs are read
+    /// as one char, and only an NUnit '\"' does not end the string.
+    /// </summary>
+    private void CollectQuotedString(StringBuilder sb)
+    {
+        bool nunitEscape = false;
+        while (NextChar != EOF_CHAR)
+        {
+            char c = GetChar();
+            sb.Append(c);
+            if (c == '\\' && VSTEST_ESCAPED_CHARS.IndexOf(NextChar) >= 0)
+                sb.Append(c = GetChar());
+
+            if (c == '"' && !nunitEscape)
+                return;
+            nunitEscape = c == '\\' && !nunitEscape;
         }
     }
 

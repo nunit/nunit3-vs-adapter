@@ -103,6 +103,20 @@ public class TestFilterParserTests
         @"FullyQualifiedName=My.Test.Fixture.Method(C:\\Temp)",
         @"<test>My.Test.Fixture.Method(C:\Temp)</test>")]
 
+    // FQN - Backslash inside a quoted argument, which the tokenizer has already unescaped
+    [TestCase(
+        @"FullyQualifiedName=My.Test.Fixture.Method\(""C:\\Temp""\)",
+        "<test>My.Test.Fixture.Method(&quot;C:\\Temp&quot;)</test>")]
+    [TestCase(
+        @"FullyQualifiedName=My.Test.Fixture.Method\(""a\\nb""\)",
+        "<test>My.Test.Fixture.Method(&quot;a\\nb&quot;)</test>")]
+    [TestCase(
+        @"FullyQualifiedName=My.Test.Fixture.Method\(""a\=b""\)",
+        "<test>My.Test.Fixture.Method(&quot;a=b&quot;)</test>")]
+    [TestCase(
+        @"Name=Method\(C:\\\)",
+        @"<name>Method(C:\)</name>")]
+
     // FQN - String argument escaping
     [TestCase(
         "FullyQualifiedName=My.Test.Fixture.Method(\"xyz\")",

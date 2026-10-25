@@ -26,8 +26,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
-
 // Missing XML Docs
 #pragma warning disable 1591
 
@@ -160,22 +158,28 @@ public class TestFilterParser
             }
         }
 
-    private string UnEscape(string rhs)
+    /// <summary>
+    /// Reverses the VSTest filter escaping in one left-to-right pass.
+    /// A backslash before any other character is kept as is, for example in a
+    /// hand-written C:\Temp. FilterHelper.Unescape would throw on it.
+    /// </summary>
+    private static string UnEscape(string rhs)
     {
-        // TODO: Switch to official and more performant MS-given function in V7.
-        // return FilterHelper.Unescape(rhs);
+        if (rhs.IndexOf('\\') < 0)
+            return rhs;
 
-        // Using string.Replace() to avoid exceptions from invalid test filter escape sequences inside the FilterHelper.Unescape().
-        return rhs
-            .Replace("\\\\", "\\")
-            .Replace("\\(", "(")
-            .Replace("\\)", ")")
-            .Replace("\\&", "&")
-            .Replace("\\|", "|")
-            .Replace("\\=", "=")
-            .Replace("\\!", "!")
-            .Replace("\\~", "~");
+        var sb = new StringBuilder(rhs.Length);
+        for (int i = 0; i < rhs.Length; i++)
+        {
+            char c = rhs[i];
+            if (c == '\\' && i + 1 < rhs.Length && EscapedChars.IndexOf(rhs[i + 1]) >= 0)
+                c = rhs[++i];
+            sb.Append(c);
+        }
+        return sb.ToString();
     }
+
+    private const string EscapedChars = @"\()&|=!~";
 
     private static string EmitFullNameFilter(Token op, string value)
     {

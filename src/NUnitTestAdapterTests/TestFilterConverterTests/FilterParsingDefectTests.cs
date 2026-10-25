@@ -255,24 +255,15 @@ public class FilterParsingDefectTests
 /// <summary>
 /// The unbalanced-parenthesis defect, issue 1501, item 1 in the 6.x document.
 ///
-/// <c>Tokenizer.CollectBalancedParentheticalExpression</c> loops <c>while (depth &gt; 0)</c>
-/// and never tests for end of input, so <c>GetChar</c> returns the EOF sentinel forever while
-/// the <see cref="System.Text.StringBuilder"/> keeps growing until the process runs out of
-/// memory.
-///
-/// These are 6.x tests, not v7 ones. They are ignored only because the defect is destructive
-/// rather than merely failing: measured at roughly twelve seconds and two gigabytes per test,
-/// ending in <see cref="System.OutOfMemoryException"/>. The runaway loop cannot be cancelled from
-/// outside, so there is no way to run them safely on a build agent beforehand.
-///
-/// Bound the loop at end of input and remove the <see cref="IgnoreAttribute">Ignore</see> in the
-/// same change, so that item 1 has a test that goes from red to green with its fix.
+/// <c>Tokenizer.CollectBalancedParentheticalExpression</c> used to loop <c>while (depth &gt; 0)</c>
+/// without testing for end of input, so <c>GetChar</c> returned the EOF sentinel forever while
+/// the <see cref="System.Text.StringBuilder"/> kept growing until the process ran out of
+/// memory. The loop now stops at end of input.
 /// </summary>
 [Category("FilterParsing")]
 [Property("Issue", "1501")]
 [Property("DocItem", "6.x item 1")]
 [Category(FixIn.SixX)]
-[Ignore(FixIn.Item1Reason)]
 public class UnbalancedParenthesisDefectTests
 {
     [TestCase(@"FullyQualifiedName=My.Test.Fixture.Method\(", TestName = "{m}_Filter")]
