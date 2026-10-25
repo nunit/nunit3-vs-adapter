@@ -132,7 +132,7 @@ public class TestFilterParser
             var lhs = Expect(TokenKind.Word);
 
             if (!LookingAt(REL_OPS))
-                return EmitFullNameFilter(CONTAINS_OP, lhs.Text);
+                return EmitFullNameFilter(CONTAINS_OP, UnEscape(lhs.Text));
 
             var op = Expect(REL_OPS);
             Token rhs;

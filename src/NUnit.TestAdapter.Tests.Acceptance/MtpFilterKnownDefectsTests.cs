@@ -118,9 +118,8 @@ public sealed class MtpFilterKnownDefectsTests : MtpCsProjAcceptanceTests
 
     /// <summary>
     /// The same selection with <c>DesignMode</c> set, as in Visual Studio Test Explorer, so the
-    /// adapter takes the FullyQualifiedName fast path. The dump shows the path: only that path
-    /// writes <c>MsFilter</c>. The fast path does not split on whitespace, so the space case
-    /// passes here.
+    /// adapter takes the FullyQualifiedName fast path. The dump shows the path: only the fast
+    /// path writes <c>ParsedTestCases</c> (<c>MsFilter</c> is written before the choice).
     /// </summary>
     [Test, Platform("Win")]
     [TestCase("FullyQualifiedName=KnownDefects.Foo.Sanity", "Sanity", TestName = "{m}_Sanity")]
@@ -138,7 +137,7 @@ public sealed class MtpFilterKnownDefectsTests : MtpCsProjAcceptanceTests
 
         VerifySelected(expectedTestName, results);
         var dump = System.IO.File.ReadAllText(System.IO.Path.Combine(workspace.Directory, $@"bin\Debug\{Framework}\Dump\E_Test.dll.dump"));
-        Assert.That(dump, Does.Contain("<MsFilter>"), "The run did not take the Test Explorer (fast path) filter conversion.");
+        Assert.That(dump, Does.Contain("<ParsedTestCases>"), "The run did not take the Test Explorer (fast path) filter conversion.");
     }
 
     /// <summary>

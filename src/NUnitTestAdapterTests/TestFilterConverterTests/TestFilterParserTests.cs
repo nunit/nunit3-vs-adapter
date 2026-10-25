@@ -241,6 +241,11 @@ public class TestFilterParserTests
     [TestCase(
         @"(FullyQualifiedName=My.Fixture.NoClose\()",
         "<test>My.Fixture.NoClose(</test>")]
+
+    // A value without a property name means FullyQualifiedName~value, and is unescaped the same way
+    [TestCase(@"A\|B", @"<test re='1'>A\|B</test>")]
+    [TestCase(@"My.Test.NoClose\(", @"<test re='1'>My\.Test\.NoClose\(</test>")]
+    [TestCase(@"My.Test.SpaceBefore \(Case 1\)", @"<test re='1'>My\.Test\.SpaceBefore \(Case 1\)</test>")]
     public void TestParser(string input, string output)
     {
         Assert.That(_parser.Parse(input), Is.EqualTo($"<filter>{output}</filter>"));
