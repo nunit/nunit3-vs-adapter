@@ -123,9 +123,8 @@ public class FilterRoundTripConformanceTests
         new TestCaseData("My.Test.Fixture.Slice_IsCorrect([0,1,2,3],3,3,[3])").SetName("{m}_BracketArguments").SetProperty("Issue", "1437"),
 
         // A name containing a character that is not legal in XML is deliberately not in this
-        // corpus: the agreed behaviour is to drop the character, so the emitted value is not
-        // equal to the name and the round-trip assertion below would not apply. See
-        // IllegalXmlCharactersAreDroppedFromTheValue.
+        // corpus: such a filter is rejected, so the round-trip assertion below would not apply.
+        // See IllegalXmlCharactersAreRejected.
     ];
 
     /// <summary>
@@ -238,37 +237,35 @@ public class FilterRoundTripConformanceTests
     /// is an XML document, so escaping the five metacharacters is not sufficient. Issue 761,
     /// item 5 of the 6.x document.
     ///
-    /// The agreed behaviour is to drop such characters. That makes the emitted document valid,
-    /// which is the point — today it either throws or produces something that will not load.
-    ///
-    /// Note what dropping does <em>not</em> achieve: the emitted value no longer equals the test's
-    /// full name, so the filter will not match the test. The test stays unrunnable; it just fails
-    /// cleanly instead of breaking the document. Making such a test runnable is a discovery-side
-    /// problem, covered in the v7 document.
+    /// The filter is rejected with <see cref="TestFilterParserException"/>. Dropping the character
+    /// is not safe: <c>Test_01("￿")</c> would become <c>Test_01("")</c>, and run that test
+    /// instead if it exists (<see cref="DroppingTheCharacterWouldSelectAnotherTest"/>). Making such
+    /// a test runnable is a discovery-side problem, covered in the v7 document.
     /// </summary>
     [Property("Issue", "761")]
     [Property("DocItem", "6.x item 5")]
     [Category(FixIn.SixX)]
     [TestCase("￿", TestName = "{m}_NonCharacter")]
     [TestCase("", TestName = "{m}_C0Control")]
-    public void IllegalXmlCharactersAreDroppedFromTheValue(string illegal)
+    public void IllegalXmlCharactersAreRejected(string illegal)
     {
-        string fullName = "My.Test.Fixture.Test_01(\"" + illegal + "\")";
-        string filter = BuildFilter(fullName);
+        string filter = BuildFilter("My.Test.Fixture.Test_01(\"" + illegal + "\")");
 
-        string expected = $"<filter><test>{XmlEscape("My.Test.Fixture.Test_01(\"\")")}</test></filter>";
+        Assert.That(() => new TestFilterParser().Parse(filter), Throws.TypeOf<TestFilterParserException>());
+    }
 
-        string produced = null;
-        Assert.That(() => produced = new TestFilterParser().Parse(filter), Throws.Nothing);
+    /// <summary>
+    /// Why <see cref="IllegalXmlCharactersAreRejected"/> rejects: with the character dropped, the
+    /// filter is the one for <c>Test_01("")</c>, a different test.
+    /// </summary>
+    [Property("Issue", "761")]
+    [Category(FixIn.SixX)]
+    [Test]
+    public void DroppingTheCharacterWouldSelectAnotherTest()
+    {
+        string other = new TestFilterParser().Parse(BuildFilter("My.Test.Fixture.Test_01(\"\")"));
 
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(produced, Is.EqualTo(expected),
-                "The illegal character should be dropped from the emitted value.");
-
-            Assert.That(() => new XmlDocument().LoadXml(produced), Throws.Nothing,
-                "The emitted filter must be a well-formed XML document.");
-        }
+        Assert.That(other, Is.EqualTo($"<filter><test>{XmlEscape("My.Test.Fixture.Test_01(\"\")")}</test></filter>"));
     }
 
     private static string BuildFilter(string fullName) => "FullyQualifiedName=" + Escape(fullName);

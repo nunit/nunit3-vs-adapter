@@ -202,12 +202,21 @@ public static class FullyQualifiedNameFilterParser
 
     /// <summary>
     /// Reverses the VSTest filter escaping in one left-to-right pass.
-    /// A backslash before any other character is kept as is, for example in a
-    /// hand-written C:\Temp. FilterHelper.Unescape would throw on it.
     /// Test Explorer sends names with only this escaping, not HTML-encoded:
     /// a name with "&amp;" arrives as "\&amp;".
+    /// A backslash that escapes nothing is kept: older Test Explorer versions sent
+    /// NUnit's \" without escaping the backslash (issue 1332).
     /// </summary>
-    public static string Unescape(string input)
+    public static string Unescape(string input) => Unescape(input, strict: false);
+
+    /// <param name="input">The escaped filter value.</param>
+    /// <param name="strict">
+    /// Throw on a backslash that escapes nothing. TestFilterParser needs this: such a
+    /// backslash is what is left when the tokenizer cuts a value at an escaped operator,
+    /// as in A.B\|C, and accepting it would select other tests.
+    /// </param>
+    /// <exception cref="TestFilterParserException">Strict, and a backslash is not followed by an escaped character.</exception>
+    internal static string Unescape(string input, bool strict)
     {
         if (string.IsNullOrEmpty(input) || input.IndexOf('\\') < 0)
             return input;
@@ -218,6 +227,8 @@ public static class FullyQualifiedNameFilterParser
             char c = input[i];
             if (c == '\\' && i + 1 < input.Length && EscapedChars.IndexOf(input[i + 1]) >= 0)
                 c = input[++i];
+            else if (c == '\\' && strict)
+                throw new TestFilterParserException($"Filter value '{input}' has a '\\' at position {i} that does not escape any of {EscapedChars}.");
             sb.Append(c);
         }
         return sb.ToString();

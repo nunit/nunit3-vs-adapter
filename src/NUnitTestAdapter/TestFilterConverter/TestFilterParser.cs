@@ -159,7 +159,7 @@ public class TestFilterParser
             }
         }
 
-    private static string UnEscape(string rhs) => FullyQualifiedNameFilterParser.Unescape(rhs);
+    private static string UnEscape(string rhs) => FullyQualifiedNameFilterParser.Unescape(rhs, strict: true);
 
     private static string EmitFullNameFilter(Token op, string value)
     {
@@ -297,10 +297,12 @@ public class TestFilterParser
 
     // Since the NUnit filter is represented in XML
     // contents of each element must be escaped.
-    // Characters that are illegal in XML are dropped (issue 761).
+    // A value with a character that is illegal in XML is rejected (issue 761). Dropping
+    // the character could select a different test, for example Test("") for Test("￿").
     private static string XmlEscape(string text)
     {
-            return DropIllegalXmlChars(text)
+            EnsureLegalXml(text);
+            return text
                 .Replace("&", "&amp;")
                 .Replace("\"", "&quot;")
                 .Replace("<", "&lt;")
@@ -308,16 +310,18 @@ public class TestFilterParser
                 .Replace("'", "&apos;");
         }
 
-    private static string DropIllegalXmlChars(string text)
+    private static void EnsureLegalXml(string text)
     {
-        var sb = new StringBuilder(text.Length);
         for (int i = 0; i < text.Length; i++)
         {
             if (XmlConvert.IsXmlChar(text[i]))
-                sb.Append(text[i]);
-            else if (i + 1 < text.Length && XmlConvert.IsXmlSurrogatePair(text[i + 1], text[i]))
-                sb.Append(text[i]).Append(text[++i]);
+                continue;
+            if (i + 1 < text.Length && XmlConvert.IsXmlSurrogatePair(text[i + 1], text[i]))
+            {
+                i++;
+                continue;
+            }
+            throw new TestFilterParserException($"Filter value '{text}' has the character U+{(int)text[i]:X4} at position {i}, which cannot be used in an NUnit filter.");
         }
-        return sb.Length == text.Length ? text : sb.ToString();
     }
 }
