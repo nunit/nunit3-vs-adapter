@@ -6,10 +6,11 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance;
 /// <summary>
 /// The Microsoft Testing Platform counterpart of <see cref="FilterKnownDefectsTests"/>.
 ///
-/// This is the only acceptance coverage that reaches
-/// <c>NUnitTestFilterBuilder.ConvertVsTestFilterToNUnitFilterForMTP</c> and the bridge's own
-/// filter handling — item 4 of <c>docs/TestFilterParsing-6.x.md</c> and the escapability section
-/// of <c>docs/TestFilterParsing-v7.md</c> are both about code that only runs here.
+/// A plain command line run takes the command line filter path (<c>TestFilterParser</c>).
+/// <see cref="IdeModeSelectsTheTest"/> sets <c>DesignMode</c>, which is what Visual Studio Test
+/// Explorer does, and so reaches
+/// <c>NUnitTestFilterBuilder.ConvertVsTestFilterToNUnitFilterForMTP</c> and its fast path, item 4
+/// of <c>docs/TestFilterParsing-6.x.md</c>.
 ///
 /// The platform exposes <c>--list-tests</c> and <c>--filter</c> on the test application itself,
 /// which lets these tests assert the invariant from the v7 document in its original form rather
@@ -24,7 +25,7 @@ public sealed class MtpFilterKnownDefectsTests : MtpCsProjAcceptanceTests
 {
     protected override string Framework => Frameworks.Net80;
 
-    private const int TotalTests = 7;
+    private const int TotalTests = 8;
 
     protected override void AddTestsCs(IsolatedWorkspace workspace)
     {
@@ -58,6 +59,10 @@ public sealed class MtpFilterKnownDefectsTests : MtpCsProjAcceptanceTests
                     // Issue 1501: an argument list with no closing parenthesis.
                     [TestCase(1, TestName = @"NoClose(")]
                     public void NoCloseCase(int a) => Assert.Pass();
+
+                    // Item 4: an HTML entity that is part of the name.
+                    [TestCase(1, TestName = @"HtmlEntity(a &amp; b)")]
+                    public void HtmlEntityCase(int a) => Assert.Pass();
 
                     [Test]
                     public void Sanity() => Assert.Pass();
@@ -95,6 +100,7 @@ public sealed class MtpFilterKnownDefectsTests : MtpCsProjAcceptanceTests
     [TestCase(@"FullyQualifiedName=KnownDefects.Foo.QuotedPipe\(""This \| That""\)", @"QuotedPipe(""This | That"")", TestName = "{m}_QuotedPipe_Issue1405")]
     [TestCase(@"FullyQualifiedName=KnownDefects.Foo.PipeOutside_A\|B", "PipeOutside_A|B", TestName = "{m}_PipeOutsideArguments_Issue1488", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
     [TestCase(@"FullyQualifiedName=KnownDefects.Foo.AmpersandOutside_A\&B", "AmpersandOutside_A&B", TestName = "{m}_AmpersandOutsideArguments_Issue1488", Category = FixIn.V7, Ignore = FixIn.V7Reason)]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.HtmlEntity\(a \&amp; b\)", "HtmlEntity(a &amp; b)", TestName = "{m}_HtmlEntity")]
     public void DiscoveryAndExecutionAgree(string filter, string expectedTestName)
     {
         var workspace = Build();
@@ -108,6 +114,31 @@ public sealed class MtpFilterKnownDefectsTests : MtpCsProjAcceptanceTests
         var results = workspace.MtpTest(TestApplicationPath, filter, TestContext.WriteLine);
 
         VerifySelected(expectedTestName, results);
+    }
+
+    /// <summary>
+    /// The same selection with <c>DesignMode</c> set, as in Visual Studio Test Explorer, so the
+    /// adapter takes the FullyQualifiedName fast path. The dump shows the path: only that path
+    /// writes <c>MsFilter</c>. The fast path does not split on whitespace, so the space case
+    /// passes here.
+    /// </summary>
+    [Test, Platform("Win")]
+    [TestCase("FullyQualifiedName=KnownDefects.Foo.Sanity", "Sanity", TestName = "{m}_Sanity")]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.SpaceBefore \(Case 1\)", "SpaceBefore (Case 1)", TestName = "{m}_SpaceBeforeArguments_Issue1490")]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.QuotedBackslash\(""C:\\Temp""\)", @"QuotedBackslash(""C:\Temp"")", TestName = "{m}_QuotedBackslash_Issue1489")]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.QuotedPipe\(""This \| That""\)", @"QuotedPipe(""This | That"")", TestName = "{m}_QuotedPipe_Issue1405")]
+    [TestCase(@"FullyQualifiedName=KnownDefects.Foo.HtmlEntity\(a \&amp; b\)", "HtmlEntity(a &amp; b)", TestName = "{m}_HtmlEntity_Item4")]
+    public void IdeModeSelectsTheTest(string filter, string expectedTestName)
+    {
+        var workspace = Build();
+        workspace.DumpTestExecution = true;
+        workspace.DesignMode = true;
+
+        var results = workspace.MtpTest(TestApplicationPath, filter, TestContext.WriteLine);
+
+        VerifySelected(expectedTestName, results);
+        var dump = System.IO.File.ReadAllText(System.IO.Path.Combine(workspace.Directory, $@"bin\Debug\{Framework}\Dump\E_Test.dll.dump"));
+        Assert.That(dump, Does.Contain("<MsFilter>"), "The run did not take the Test Explorer (fast path) filter conversion.");
     }
 
     /// <summary>

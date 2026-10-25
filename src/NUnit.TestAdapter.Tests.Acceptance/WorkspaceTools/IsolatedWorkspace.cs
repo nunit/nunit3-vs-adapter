@@ -20,6 +20,12 @@ public sealed partial class IsolatedWorkspace(DirectoryMutex directoryMutex, Too
 
     public string ExplicitMode { get; set; } = string.Empty;  // Empty means we don't set it, but rely on default.
 
+    /// <summary>
+    /// MTP runs only: sets RunConfiguration/DesignMode, so the adapter takes the same path as
+    /// for Visual Studio Test Explorer (RunType.Ide), including the FullyQualifiedName fast path.
+    /// </summary>
+    public bool DesignMode { get; set; } = false;
+
     public string Directory => directoryMutex.DirectoryPath;
 
     public void Dispose() => directoryMutex.Dispose();
@@ -228,6 +234,10 @@ public sealed partial class IsolatedWorkspace(DirectoryMutex directoryMutex, Too
             .Add("--list-tests")
             .AddRangeIf(filterArgument.Length > 0, ["--filter", filterArgument]);
 
+        var settingsFile = WriteNUnitRunSettings();
+        if (settingsFile != null)
+            run.Add("--settings").Add(settingsFile);
+
         log?.Invoke($"\n{run.ArgumentsAsEscapedString}");
         var result = run.Run(throwOnError: false).ThrowIfError();
         log?.Invoke($"\n{result.StdOut}");
@@ -257,11 +267,15 @@ public sealed partial class IsolatedWorkspace(DirectoryMutex directoryMutex, Too
     /// </summary>
     private string WriteNUnitRunSettings()
     {
-        if (!DumpTestExecution && ExplicitMode == string.Empty)
+        if (!DumpTestExecution && ExplicitMode == string.Empty && !DesignMode)
             return null;
 
         var settings = new StringBuilder();
         settings.AppendLine("<RunSettings>");
+
+        if (DesignMode)
+            settings.AppendLine("  <RunConfiguration><DesignMode>true</DesignMode></RunConfiguration>");
+
         settings.AppendLine("  <NUnit>");
 
         if (DumpTestExecution)
