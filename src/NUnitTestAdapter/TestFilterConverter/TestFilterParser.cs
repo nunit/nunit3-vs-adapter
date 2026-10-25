@@ -159,28 +159,7 @@ public class TestFilterParser
             }
         }
 
-    /// <summary>
-    /// Reverses the VSTest filter escaping in one left-to-right pass.
-    /// A backslash before any other character is kept as is, for example in a
-    /// hand-written C:\Temp. FilterHelper.Unescape would throw on it.
-    /// </summary>
-    private static string UnEscape(string rhs)
-    {
-        if (rhs.IndexOf('\\') < 0)
-            return rhs;
-
-        var sb = new StringBuilder(rhs.Length);
-        for (int i = 0; i < rhs.Length; i++)
-        {
-            char c = rhs[i];
-            if (c == '\\' && i + 1 < rhs.Length && EscapedChars.IndexOf(rhs[i + 1]) >= 0)
-                c = rhs[++i];
-            sb.Append(c);
-        }
-        return sb.ToString();
-    }
-
-    private const string EscapedChars = @"\()&|=!~";
+    private static string UnEscape(string rhs) => FullyQualifiedNameFilterParser.Unescape(rhs);
 
     private static string EmitFullNameFilter(Token op, string value)
     {

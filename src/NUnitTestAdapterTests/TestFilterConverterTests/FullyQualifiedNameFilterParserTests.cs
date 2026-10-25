@@ -147,4 +147,19 @@ public class FullyQualifiedNameFilterParserTests
 
         Assert.That(result, Is.False);
     }
+
+    // Filters as Visual Studio Test Explorer sends them under MTP, captured from the
+    // adapter dump with the Issue1502 repro in nunit3-vs-adapter.issues.
+    [TestCase(@"(FullyQualifiedName=Issue1502.FilterEscapingTests.Name with \& and \&amp;)",
+        "Issue1502.FilterEscapingTests.Name with & and &amp;")]
+    [TestCase(@"(FullyQualifiedName=Issue1502.FilterEscapingTests.StringArgument\(""say \\""hi\\""""\))",
+        @"Issue1502.FilterEscapingTests.StringArgument(""say \""hi\"""")")]
+    [TestCase(@"(FullyQualifiedName=Issue1502.FilterEscapingTests.StringArgument\(""a\\nb""\))",
+        @"Issue1502.FilterEscapingTests.StringArgument(""a\nb"")")]
+    public void Should_unescape_test_explorer_filter_to_the_test_name(string filter, string expected)
+    {
+        var result = FullyQualifiedNameFilterParser.GetFullyQualifiedNames(filter);
+
+        Assert.That(result, Is.EqualTo(new[] { expected }));
+    }
 }

@@ -23,7 +23,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Net;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter;
@@ -200,21 +200,30 @@ public static class FullyQualifiedNameFilterParser
         return result;
     }
 
+    /// <summary>
+    /// Reverses the VSTest filter escaping in one left-to-right pass.
+    /// A backslash before any other character is kept as is, for example in a
+    /// hand-written C:\Temp. FilterHelper.Unescape would throw on it.
+    /// Test Explorer sends names with only this escaping, not HTML-encoded:
+    /// a name with "&amp;" arrives as "\&amp;".
+    /// </summary>
     public static string Unescape(string input)
     {
-        if (string.IsNullOrEmpty(input)) return input;
+        if (string.IsNullOrEmpty(input) || input.IndexOf('\\') < 0)
+            return input;
 
-        // 1) Decode &quot;, &amp;, etc.
-        var s = WebUtility.HtmlDecode(input);
-
-        // 2) Unescape C#-style sequences: \", \\, \n, \uXXXX, etc.
-        s = Regex.Unescape(s);
-
-        // 3) Clean up escaped parentheses often present in filter payloads
-        s = s.Replace(@"\(", "(").Replace(@"\)", ")");
-
-        return s;
+        var sb = new StringBuilder(input.Length);
+        for (int i = 0; i < input.Length; i++)
+        {
+            char c = input[i];
+            if (c == '\\' && i + 1 < input.Length && EscapedChars.IndexOf(input[i + 1]) >= 0)
+                c = input[++i];
+            sb.Append(c);
+        }
+        return sb.ToString();
     }
+
+    private const string EscapedChars = @"\()&|=!~";
 
     private static ReadOnlySpan<char> TrimWhitespace(ReadOnlySpan<char> span)
     {
