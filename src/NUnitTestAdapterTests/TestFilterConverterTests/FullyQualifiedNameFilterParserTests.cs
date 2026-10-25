@@ -147,4 +147,46 @@ public class FullyQualifiedNameFilterParserTests
 
         Assert.That(result, Is.False);
     }
+
+    // Filters as Visual Studio Test Explorer sends them under MTP, captured from the
+    // adapter dump with the Issue1502 repro in nunit3-vs-adapter.issues.
+    [TestCase(
+        """(FullyQualifiedName=Issue1502.FilterEscapingTests.Name with \& and \&amp;)""",
+        """Issue1502.FilterEscapingTests.Name with & and &amp;""")]
+    [TestCase(
+        """(FullyQualifiedName=Issue1502.FilterEscapingTests.StringArgument\("say \\"hi\\""\))""",
+        """Issue1502.FilterEscapingTests.StringArgument("say \"hi\"")""")]
+    [TestCase(
+        """(FullyQualifiedName=Issue1502.FilterEscapingTests.StringArgument\("a\\nb"\))""",
+        """Issue1502.FilterEscapingTests.StringArgument("a\nb")""")]
+    [TestCase(
+        """(FullyQualifiedName=ValuesTests.Test1\("\|"\))""",
+        """ValuesTests.Test1("|")""")]
+    [TestCase(
+        """(FullyQualifiedName=ValuesTests.Test2\("\\\\"\))""",
+        """ValuesTests.Test2("\\")""")]
+    public void Should_unescape_test_explorer_filter_to_the_test_name(string filter, string expected)
+    {
+        var result = FullyQualifiedNameFilterParser.GetFullyQualifiedNames(filter);
+
+        Assert.That(result, Is.EqualTo(new[] { expected }));
+    }
+
+    // "Run all" in Test Explorer under MTP, captured from the adapter dump with the Issue1349
+    // repro in nunit3-vs-adapter.issues.
+    [Test]
+    public void Should_unescape_test_explorer_run_all_filter_to_the_test_names()
+    {
+        const string filter = """(FullyQualifiedName=UnitTest1.Test\("\\"C:\\\\Path\\\\File.txt\\""\)|FullyQualifiedName=UnitTest1.Test\("C:\\\\Path\\\\File.txt\\""\)|FullyQualifiedName=ValuesTests.Test1\("\|"\)|FullyQualifiedName=ValuesTests.Test2\("\\\\"\))""";
+
+        var result = FullyQualifiedNameFilterParser.GetFullyQualifiedNames(filter);
+
+        Assert.That(result, Is.EqualTo(new[]
+        {
+            """UnitTest1.Test("\"C:\\Path\\File.txt\"")""",
+            """UnitTest1.Test("C:\\Path\\File.txt\"")""",
+            """ValuesTests.Test1("|")""",
+            """ValuesTests.Test2("\\")""",
+        }));
+    }
 }
