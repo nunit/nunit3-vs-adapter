@@ -94,6 +94,10 @@ early — it just must not be removed from the collected text.
 **Non-breaking:** the current output for these inputs is either a filter that matches nothing or
 an unhandled exception. There is no working behaviour to preserve.
 
+**As implemented:** `CollectQuotedString` copies the text verbatim. It reads a VSTest escape pair
+as one character and tracks NUnit's own `\"` so that only an unescaped quote ends the string. The
+single unescaping step is the strict unescape described under item 3.
+
 ## Item 3 — `ArgumentException` from `FilterHelper.Unescape` escapes the adapter
 
 `FilterHelper.Unescape` throws `ArgumentException` when it meets a backslash that is not followed
@@ -118,6 +122,11 @@ split is a v7 change, but the exception type should not be left as it is in a 6.
 filter error rather than an adapter crash.
 
 **Non-breaking:** only the exception type and message change. Both cases already fail.
+
+**As implemented:** `FilterHelper.Unescape` is not used. `TestFilterParser` calls the single-pass
+`FullyQualifiedNameFilterParser.Unescape(value, strict: true)`, which throws
+`TestFilterParserException` for a backslash that escapes nothing, so `A.B\|C` is reported as a
+filter error and never becomes an OR that selects every name containing `C`.
 
 ## Item 4 — `FullyQualifiedNameFilterParser.Unescape` does not implement VSTest escaping
 
@@ -155,6 +164,53 @@ reason and the change should be validated against the MTP acceptance tests befor
 that turns out to be load-bearing, defer the whole item to v7 and fold it into the single shared
 parser described there — it is not worth a risky fix in a patch release.
 
+**As implemented:** checked with the adapter dump in Visual Studio Test Explorer under MTP
+(the `Issue1502` and `Issue1349` repros in nunit3-vs-adapter.issues). Test Explorer sends only
+VSTest escaping, not HTML-encoded names, so `HtmlDecode` is not load-bearing; with it, a test named
+`Name with & and &amp;` did not run in 6.3.1. `HtmlDecode` and `Regex.Unescape` are replaced by a
+single-pass VSTest unescape that keeps a backslash escaping nothing, because older Test Explorer
+versions sent NUnit's `\"` without escaping the backslash
+([#1332](https://github.com/nunit/nunit3-vs-adapter/issues/1332)). `FilterHelper.Unescape` would
+throw on that.
+
+## Item 5 — The emitted filter is not always well-formed XML
+
+The NUnit filter is an XML document, and `TestFilterParser.XmlEscape` escapes the five XML
+metacharacters. That is not sufficient, because a test name can contain a code point that is not
+a legal XML character at all, and no amount of entity escaping makes such a document parse.
+
+[#761](https://github.com/nunit/nunit3-vs-adapter/issues/761) is the reported case: a test case
+with a `￿` argument. The parser emits exactly the right string, but `XmlDocument.LoadXml`
+rejects the result. The test appears in Test Explorer and never runs.
+
+This was found by adding an XML-validity assertion, not by reading the code: without it the issue
+looked covered and green.
+
+**Decision: reject the filter.** A value with a character that is not legal in XML makes
+`TestFilterParser` throw `TestFilterParserException`, naming the character and its position.
+
+Dropping the character was the first decision, and it is not safe: the shortened value is the
+full name of another possible test. `Test_01("￿")` becomes `Test_01("")`, so the filter would
+run `Test_01("")` instead if that test exists, rather than match nothing.
+
+This does not make [#761](https://github.com/nunit/nunit3-vs-adapter/issues/761) runnable: the
+test stays unrunnable through a filter, but it fails with a filter error instead of breaking the
+filter document or selecting another test. Making such a test selectable at all is a
+discovery-side problem, because a name that cannot be expressed in the filter document arguably
+should not be reported as an identity; see the escapability section of
+[TestFilterParsing-v7.md](TestFilterParsing-v7.md).
+
+The illegal characters are those outside XML 1.0's legal set: everything below `#x20` except tab,
+line feed and carriage return, plus `#xFFFE`, `#xFFFF` and unpaired surrogates.
+
+**Tests:** `FilterRoundTripConformanceTests.IllegalXmlCharactersAreRejected`, covering `￿` and a
+C0 control, and `DroppingTheCharacterWouldSelectAnotherTest`, which shows the collision. The name
+is deliberately absent from the shared corpus, because that corpus asserts the emitted value
+equals the name.
+
+**Non-breaking:** the previous behaviour is an exception from `XmlDocument` or an unusable filter,
+so there is nothing working to preserve.
+
 ## Explicitly out of scope for 6.x
 
 - **[#1490](https://github.com/nunit/nunit3-vs-adapter/issues/1490), whitespace before `(`.** `GetWordOrFqn` only absorbs an argument list when `(`
@@ -172,20 +228,47 @@ parser described there — it is not worth a risky fix in a patch release.
 
 ## Verification
 
-The failing tests that specify these fixes already exist:
+The failing tests that specify these fixes already exist, and the split between what 6.x fixes
+and what has to wait for v7 is not a guess: each of the four prototyped fixes above was applied
+to this suite and the tests that turned green were recorded, then the prototype was reverted.
+
+An ordinary run is therefore red on exactly the 6.x work and nothing else:
+
+```
+dotnet test --filter "Category=FilterParsing"
+  125 total, 11 failing, 36 skipped        (unit)
+   21 total,  0 failing, 11 skipped        (acceptance)
+```
+
+The 11 failures are items 2, 3, 4 and 5. Implementing all five items takes them to zero, which is
+what a 6.x pull request has to show before it can merge.
+
+The skipped tests are ignored deliberately, each with a reason in the attribute:
+
+- **v7 tests** carry `Category=FixV7` and `Ignore(FixIn.V7Reason)`. They cannot pass before the
+  grammar change, and the build must not be red while 6.x work merges. The v7 change removes
+  those `Ignore` attributes.
+- **The item 1 tests** were ignored with `FixIn.Item1Reason` until item 1 was fixed, because the
+  defect was destructive rather than merely failing: about twelve seconds and two gigabytes each,
+  ending in `OutOfMemoryException`. The loop is now bounded and the `Ignore` is removed.
+
+`Ignore` rather than `Explicit` for both, because a category filter does not select an explicit
+test: `--filter "Category=Fix6x"` silently skipped the explicit fixture rather than running it, so
+"runnable on demand by category" does not hold. An ignored test is reported as skipped with its
+reason, and running it means removing the attribute, which is the intended workflow anyway.
+
+The tests:
 
 - `src/NUnitTestAdapterTests/TestFilterConverterTests/FilterRoundTripConformanceTests.cs` —
   the invariant, with every expectation derived from the test platform's own filter
   implementation rather than hand-written.
 - `src/NUnitTestAdapterTests/TestFilterConverterTests/FilterParsingDefectTests.cs` — narrow
   demonstrations pinned to the method responsible for each defect.
-- `src/NUnit.TestAdapter.Tests.Acceptance/FilterKnownDefectsTests.cs` — the same failures end
-  to end, through a real `dotnet test` and `vstest` invocation.
+- `src/NUnit.TestAdapter.Tests.Acceptance/FilterKnownDefectsTests.cs` and
+  `MtpFilterKnownDefectsTests.cs` — the same failures end to end, under VSTest and under the
+  Microsoft Testing Platform.
 
 Work item by item and turn them green; do not weaken an expectation without saying why.
-
-For item 1, bound the test with a timeout — an assertion that never returns is not a useful
-failure.
 
 ## Acknowledgement
 
