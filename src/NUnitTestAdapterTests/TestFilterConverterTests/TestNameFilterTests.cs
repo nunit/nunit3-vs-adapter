@@ -67,6 +67,60 @@ public class TestNameFilterTests
     }
 
     [Test]
+    public void ExactFilterDoesNotSelectANameWithAnExtraNewline()
+    {
+        string name = "A.B(\"x\u001by\")";
+
+        var regex = SingleRegex(name);
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(regex.IsMatch(name), Is.True);
+            Assert.That(regex.IsMatch(name + "\n"), Is.False);
+        }
+    }
+
+    [Test]
+    public void ReportedNameWithUppercaseHexSelectsItself()
+    {
+        // A custom name can hold the text itself; NUnit only writes lowercase hex.
+        string name = "A.B(\"x" + Backslash + "uFFFFy\")";
+
+        Assert.That(SingleRegex(name).IsMatch(name), Is.True);
+    }
+
+    [Test]
+    public void UnpairedSurrogateSelectsTheTest()
+    {
+        char surrogate = (char)0xD800;
+        string frameworkName = "A.B(\"x" + surrogate + "y\")";
+        string reportedName = "A.B(\"x" + Backslash + "ud800y\")";
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(SingleRegex(reportedName).IsMatch(frameworkName), Is.True, "From the reported name.");
+            Assert.That(SingleRegex(frameworkName).IsMatch(frameworkName), Is.True, "From the raw name.");
+        }
+    }
+
+    [Test]
+    public void SurrogatePairIsAnOrdinaryCharacter()
+    {
+        string name = "A.B(\"x" + char.ConvertFromUtf32(0x1F600) + "y\")";
+
+        Assert.That(TestNameFilter.NeedsRegex(name), Is.False);
+    }
+
+    private const string Backslash = "\\";
+
+    private static Regex SingleRegex(string name)
+    {
+        var test = XElement.Parse(TestNameFilter.ForNames([name])).Descendants("test").Single();
+        Assert.That(test.Attribute("re")?.Value, Is.EqualTo("1"));
+        return new Regex(test.Value);
+    }
+
+    [Test]
     public void EscapedBackslashBeforeUIsNotACharacter()
     {
         // NUnit writes a real backslash as \\, so A\\u0041 is a backslash followed by u0041.

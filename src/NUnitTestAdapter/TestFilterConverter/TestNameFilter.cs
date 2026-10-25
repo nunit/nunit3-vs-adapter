@@ -60,17 +60,23 @@ public static class TestNameFilter
     /// The element that matches the name exactly, for example &lt;test&gt;A.B&lt;/test&gt;.
     /// </summary>
     public static string Element(string tag, string name) => NeedsRegex(name)
-        ? $"<{tag} re='1'>{XmlEscape("^" + ToRegex(name) + "$")}</{tag}>"
+        ? $"<{tag} re='1'>{XmlEscape(Exact(ToRegex(name)))}</{tag}>"
         : $"<{tag}>{XmlEscape(name)}</{tag}>";
+
+    /// <summary>
+    /// Anchors a regular expression to the whole name. It uses \z, not $, because $ also matches
+    /// before a final newline.
+    /// </summary>
+    public static string Exact(string regex) => @"\A" + regex + @"\z";
 
     /// <summary>
     /// True when the name holds a character NUnit does not allow in its XML, raw or as \uXXXX text.
     /// </summary>
     public static bool NeedsRegex(string name)
     {
-        foreach (char c in name)
+        for (int i = 0; i < name.Length; i++)
         {
-            if (IsReplacedByNUnit(c))
+            if (IsReplacedByNUnit(name, i))
                 return true;
         }
 
@@ -94,12 +100,16 @@ public static class TestNameFilter
         {
             Match m = EscapedCharacter.Match(name, i);
             bool isEscaped = m.Success && m.Index == i && IsReplacedByNUnit(ToChar(m));
-            if (!isEscaped && !IsReplacedByNUnit(name[i]))
+            if (!isEscaped && !IsReplacedByNUnit(name, i))
                 continue;
 
             regex.Append(Regex.Escape(name.Substring(start, i - start)));
             char c = isEscaped ? ToChar(m) : name[i];
-            regex.Append($@"(?:\u{(int)c:x4}|\\u{(int)c:x4})");
+
+            // Reported text is kept as written, so a literal escape with uppercase hex in a custom
+            // name still matches itself. NUnit itself writes lowercase hex.
+            string text = isEscaped ? Regex.Escape(m.Value) : $@"\\u{(int)c:x4}";
+            regex.Append($@"(?:\u{(int)c:x4}|{text})");
             i += isEscaped ? m.Length - 1 : 0;
             start = i + 1;
         }
@@ -109,12 +119,23 @@ public static class TestNameFilter
 
     private static char ToChar(Match m) => (char)int.Parse(m.Groups[1].Value, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
 
-    // The characters NUnit's XmlExtensions.EscapeInvalidXmlCharacters writes as \uXXXX. Surrogates
-    // count only when unpaired, which a single char cannot tell, so they are left to the framework.
+    // The characters NUnit's XmlExtensions.EscapeInvalidXmlCharacters writes as \uXXXX.
+    // In a raw name a surrogate counts only when it is not part of a pair.
+    private static bool IsReplacedByNUnit(string name, int i)
+    {
+        char c = name[i];
+        if (char.IsHighSurrogate(c))
+            return i + 1 >= name.Length || !char.IsLowSurrogate(name[i + 1]);
+        if (char.IsLowSurrogate(c))
+            return i == 0 || !char.IsHighSurrogate(name[i - 1]);
+        return IsReplacedByNUnit(c);
+    }
+
+    // As \uXXXX text, any surrogate is one NUnit replaced, because NUnit keeps a valid pair raw.
     private static bool IsReplacedByNUnit(char c) =>
         c <= 0x8 || c == 0xB || c == 0xC || (c >= 0xE && c <= 0x1F)
         || (c >= 0x7F && c <= 0x84) || (c >= 0x86 && c <= 0x9F)
-        || c == 0xFFFE || c == 0xFFFF;
+        || char.IsSurrogate(c) || c == 0xFFFE || c == 0xFFFF;
 
     private static string XmlEscape(string text) => text
         .Replace("&", "&amp;")

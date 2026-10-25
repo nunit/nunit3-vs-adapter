@@ -200,7 +200,7 @@ public class TestFilterParser
     private static string EmitNameRegexFilter(string lhs, Token op, string regex)
     {
             bool exact = op == EQ_OP || op == NE_OP;
-            string element = $"<{lhs} re='1'>{XmlEscape(exact ? "^" + regex + "$" : regex)}</{lhs}>";
+            string element = $"<{lhs} re='1'>{XmlEscape(exact ? TestNameFilter.Exact(regex) : regex)}</{lhs}>";
             return op == NE_OP || op == NOTCONTAINS_OP ? $"<not>{element}</not>" : element;
         }
 
