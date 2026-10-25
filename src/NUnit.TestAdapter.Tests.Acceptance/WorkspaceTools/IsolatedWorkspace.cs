@@ -272,9 +272,10 @@ public sealed partial class IsolatedWorkspace(DirectoryMutex directoryMutex, Too
         settings.AppendLine("  </NUnit>");
         settings.AppendLine("</RunSettings>");
 
-        const string fileName = "mtp.runsettings";
-        File.WriteAllText(Path.Combine(Directory, fileName), settings.ToString());
-        return fileName;
+        // Full path: the platform does not resolve --settings against the working directory.
+        var path = Path.Combine(Directory, "mtp.runsettings");
+        File.WriteAllText(path, settings.ToString());
+        return path;
     }
 
     private RunSettings ConfigureRun(string filename) => new(Directory, filename);
