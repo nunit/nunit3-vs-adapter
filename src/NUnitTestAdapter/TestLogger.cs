@@ -166,9 +166,9 @@ public class TestLogger(IMessageLogger messageLogger) : IMessageLogger, ITestLog
     public void InfoNoRunnableTests(NUnitResults results, string assemblyPath)
     {
         string reason = results.SkipReason() ?? "Failed to load";
-        Info(results.TestCaseCount > 0 ?
-            $"   NUnit couldn't run the {results.TestCaseCount} discovered tests: {reason}" :
-            $"   NUnit couldn't find any tests in {assemblyPath}");
+        Info(results.TestCaseCount > 0
+            ? $"   NUnit couldn't run the {results.TestCaseCount} discovered tests: {reason}"
+            : $"   NUnit couldn't find any tests in {assemblyPath}");
     }
 
     public void InfoNoTests(string assemblyPath)

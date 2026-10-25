@@ -180,8 +180,8 @@ public static class VsTestFilterFactory
 {
     public static VsTestFilter CreateVsTestFilter(IAdapterSettings settings, IRunContext context) =>
         settings.DiscoveryMethod == DiscoveryMethod.Legacy
-            ? new VsTestFilterLegacy(context) :
-            settings.DesignMode
+            ? new VsTestFilterLegacy(context)
+            : settings.DesignMode
                 ? new VsTestFilterIde(context)
                 : new VsTestFilterNonIde(context);
 }
@@ -216,9 +216,9 @@ public class VsTestFilterNonIde(IRunContext runContext) : VsTestFilter(runContex
 
 public class NTraitNameComparer : IEqualityComparer<NTrait>
 {
-    public bool Equals(NTrait n, NTrait y)
+    public bool Equals(NTrait x, NTrait y)
     {
-        return n.Name == y.Name;
+        return x.Name == y.Name;
     }
 
     public int GetHashCode(NTrait obj)
