@@ -91,18 +91,18 @@ public sealed class TestConverterForXml : IDisposable, ITestConverterXml
     /// using the best method available according to the exact
     /// type passed and caching results for efficiency.
     /// </summary>
-    public TestCase ConvertTestCase(NUnitEventTestCase testNode)
+    public TestCase ConvertTestCase(NUnitEventTestCase nUnitEventTestCase)
     {
-        if (!testNode.IsTestCase)
-            throw new ArgumentException("The argument must be a test case", nameof(testNode));
+        if (!nUnitEventTestCase.IsTestCase)
+            throw new ArgumentException("The argument must be a test case", nameof(nUnitEventTestCase));
 
         // Return cached value if we have one
-        string id = testNode.Id;
+        string id = nUnitEventTestCase.Id;
         if (_vsTestCaseMap.ContainsKey(id))
             return _vsTestCaseMap[id];
 
         // Convert to VS TestCase and cache the result
-        var testCase = MakeTestCaseFromXmlNode(testNode);
+        var testCase = MakeTestCaseFromXmlNode(nUnitEventTestCase);
         _vsTestCaseMap.Add(id, testCase);
         return testCase;
     }

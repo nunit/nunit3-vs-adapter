@@ -85,10 +85,12 @@ public sealed class TestSourceWithCustomNames : AcceptanceTests
     [TestCaseSource(typeof(SingleFrameworkSource), nameof(SingleFrameworkSource.AllFrameworks))]
     public static void Single_target_csproj(SingleFrameworkSource source)
     {
-        var valuetupleItemgroup = source.Framework is "netcoreapp3.1" or "net5.0" ? @"
+        var valuetupleItemgroup = source.Framework is "netcoreapp3.1" or "net5.0"
+            ? @"
                       <ItemGroup>
                         <Reference Include=""System.ValueTuple"" />
-                      </ItemGroup>" : "";
+                      </ItemGroup>"
+            : "";
         TestContext.Out.WriteLine($"Testing {source.Framework}");
         var workspace = CreateWorkspace()
             .AddProject("Test.csproj", $@"
