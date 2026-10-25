@@ -116,13 +116,15 @@ public sealed class NavigationDataProvider : IDisposable
 
         var data = session?.GetNavigationData(declaringTypeName, methodName);
 
-        return string.IsNullOrEmpty(data?.FileName) ? null :
-            new NavigationData(data.FileName, data.MinLineNumber);
+        return string.IsNullOrEmpty(data?.FileName)
+            ? null
+            : new NavigationData(data.FileName, data.MinLineNumber);
     }
 
     private NavigationData TryGetSessionData(TypeInfo? declaringType, string methodName)
     {
-        return declaringType == null ? null :
-            TryGetSessionData(declaringType.Value.AssemblyPath, declaringType.Value.FullName, methodName);
+        return declaringType == null
+            ? null
+            : TryGetSessionData(declaringType.Value.AssemblyPath, declaringType.Value.FullName, methodName);
     }
 }

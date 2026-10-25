@@ -65,8 +65,9 @@ public static class VSTestFilterStringTestsLegacy
 
     private static IEnumerable<TestCase> ApplyFilter(string vsTestFilterString, string testCasesXml)
     {
-        var filter = FilteringTestUtils.CreateTestFilter(string.IsNullOrEmpty(vsTestFilterString) ? null :
-            FilteringTestUtils.CreateVSTestFilterExpression(vsTestFilterString));
+        var filter = FilteringTestUtils.CreateTestFilter(string.IsNullOrEmpty(vsTestFilterString)
+            ? null
+            : FilteringTestUtils.CreateVSTestFilterExpression(vsTestFilterString));
 
         return filter.CheckFilter(TestCaseUtils.ConvertTestCases(testCasesXml));
     }

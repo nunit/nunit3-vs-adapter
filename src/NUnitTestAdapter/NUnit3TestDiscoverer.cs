@@ -52,9 +52,9 @@ public sealed class NUnit3TestDiscoverer : NUnitTestAdapter, ITestDiscoverer
 
     #region ITestDiscoverer Members
 
-    public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger messageLogger, ITestCaseDiscoverySink discoverySink)
+    public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)
     {
-        Initialize(discoveryContext, messageLogger);
+        Initialize(discoveryContext, logger);
         CheckIfDebug();
         TestLog.Info($"NUnit Adapter {AdapterVersion}: Test discovery starting");
 
@@ -107,7 +107,7 @@ public sealed class NUnit3TestDiscoverer : NUnitTestAdapter, ITestDiscoverer
                 else
                 {
                     if (Settings.Verbosity > 0)
-                        messageLogger.SendMessage(TestMessageLevel.Warning, $"Skip reason: {results.SkipReason()}");
+                        logger.SendMessage(TestMessageLevel.Warning, $"Skip reason: {results.SkipReason()}");
                     TestLog.InfoNoRunnableTests(results, sourceAssembly);
                 }
             }
