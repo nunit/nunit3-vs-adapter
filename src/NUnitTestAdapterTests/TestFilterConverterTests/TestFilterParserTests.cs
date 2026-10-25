@@ -197,6 +197,23 @@ public class TestFilterParserTests
         "TestCategory=Urgent & !(FullyQualifiedName=My.Tests | TestCategory = high)",
         "<and><cat>Urgent</cat><not><or><test>My.Tests</test><cat>high</cat></or></not></and>")]
     [TestCase("Bug = 12345", "<prop name='Bug'>12345</prop>")]
+
+    // A '"' that does not start a closed string must not absorb the rest of the filter
+    [TestCase(
+        """Name=Method\(a"b\)&TestCategory=Fast""",
+        "<and><name>Method(a&quot;b)</name><cat>Fast</cat></and>")]
+    [TestCase(
+        """(Name=Method\(a"b\))&TestCategory=Fast""",
+        "<and><name>Method(a&quot;b)</name><cat>Fast</cat></and>")]
+    [TestCase(
+        """Name=Method\("C:\\"\)&TestCategory=Fast""",
+        """<and><name>Method(&quot;C:\&quot;)</name><cat>Fast</cat></and>""")]
+    [TestCase(
+        """FullyQualifiedName=My.Test.Fixture.Method\('"'\)&TestCategory=Fast""",
+        "<and><test>My.Test.Fixture.Method(&apos;&quot;&apos;)</test><cat>Fast</cat></and>")]
+    [TestCase(
+        """(FullyQualifiedName=My.Test.Fixture.Method\('"'\))&TestCategory=Fast""",
+        "<and><test>My.Test.Fixture.Method(&apos;&quot;&apos;)</test><cat>Fast</cat></and>")]
     public void TestParser(string input, string output)
     {
         Assert.That(_parser.Parse(input), Is.EqualTo($"<filter>{output}</filter>"));
