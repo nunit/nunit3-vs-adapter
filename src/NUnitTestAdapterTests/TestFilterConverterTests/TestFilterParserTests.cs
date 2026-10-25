@@ -103,6 +103,20 @@ public class TestFilterParserTests
         @"FullyQualifiedName=My.Test.Fixture.Method(C:\\Temp)",
         @"<test>My.Test.Fixture.Method(C:\Temp)</test>")]
 
+    // FQN - Backslash inside a quoted argument, which the tokenizer has already unescaped
+    [TestCase(
+        @"FullyQualifiedName=My.Test.Fixture.Method\(""C:\\Temp""\)",
+        "<test>My.Test.Fixture.Method(&quot;C:\\Temp&quot;)</test>")]
+    [TestCase(
+        @"FullyQualifiedName=My.Test.Fixture.Method\(""a\\nb""\)",
+        "<test>My.Test.Fixture.Method(&quot;a\\nb&quot;)</test>")]
+    [TestCase(
+        @"FullyQualifiedName=My.Test.Fixture.Method\(""a\=b""\)",
+        "<test>My.Test.Fixture.Method(&quot;a=b&quot;)</test>")]
+    [TestCase(
+        @"Name=Method\(C:\\\)",
+        @"<name>Method(C:\)</name>")]
+
     // FQN - String argument escaping
     [TestCase(
         "FullyQualifiedName=My.Test.Fixture.Method(\"xyz\")",
@@ -183,6 +197,23 @@ public class TestFilterParserTests
         "TestCategory=Urgent & !(FullyQualifiedName=My.Tests | TestCategory = high)",
         "<and><cat>Urgent</cat><not><or><test>My.Tests</test><cat>high</cat></or></not></and>")]
     [TestCase("Bug = 12345", "<prop name='Bug'>12345</prop>")]
+
+    // A '"' that does not start a closed string must not absorb the rest of the filter
+    [TestCase(
+        """Name=Method\(a"b\)&TestCategory=Fast""",
+        "<and><name>Method(a&quot;b)</name><cat>Fast</cat></and>")]
+    [TestCase(
+        """(Name=Method\(a"b\))&TestCategory=Fast""",
+        "<and><name>Method(a&quot;b)</name><cat>Fast</cat></and>")]
+    [TestCase(
+        """Name=Method\("C:\\"\)&TestCategory=Fast""",
+        """<and><name>Method(&quot;C:\&quot;)</name><cat>Fast</cat></and>""")]
+    [TestCase(
+        """FullyQualifiedName=My.Test.Fixture.Method\('"'\)&TestCategory=Fast""",
+        "<and><test>My.Test.Fixture.Method(&apos;&quot;&apos;)</test><cat>Fast</cat></and>")]
+    [TestCase(
+        """(FullyQualifiedName=My.Test.Fixture.Method\('"'\))&TestCategory=Fast""",
+        "<and><test>My.Test.Fixture.Method(&apos;&quot;&apos;)</test><cat>Fast</cat></and>")]
     public void TestParser(string input, string output)
     {
         Assert.That(_parser.Parse(input), Is.EqualTo($"<filter>{output}</filter>"));

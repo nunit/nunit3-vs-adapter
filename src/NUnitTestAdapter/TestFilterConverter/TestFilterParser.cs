@@ -25,8 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
+using System.Xml;
 
 // Missing XML Docs
 #pragma warning disable 1591
@@ -160,10 +159,7 @@ public class TestFilterParser
             }
         }
 
-    private string UnEscape(string rhs)
-    {
-            return FilterHelper.Unescape(rhs);
-        }
+    private static string UnEscape(string rhs) => FullyQualifiedNameFilterParser.Unescape(rhs, strict: true);
 
     private static string EmitFullNameFilter(Token op, string value)
     {
@@ -301,8 +297,11 @@ public class TestFilterParser
 
     // Since the NUnit filter is represented in XML
     // contents of each element must be escaped.
+    // A value with a character that is illegal in XML is rejected (issue 761). Dropping
+    // the character could select a different test, for example Test("") for Test("￿").
     private static string XmlEscape(string text)
     {
+            EnsureLegalXml(text);
             return text
                 .Replace("&", "&amp;")
                 .Replace("\"", "&quot;")
@@ -310,4 +309,19 @@ public class TestFilterParser
                 .Replace(">", "&gt;")
                 .Replace("'", "&apos;");
         }
+
+    private static void EnsureLegalXml(string text)
+    {
+        for (int i = 0; i < text.Length; i++)
+        {
+            if (XmlConvert.IsXmlChar(text[i]))
+                continue;
+            if (i + 1 < text.Length && XmlConvert.IsXmlSurrogatePair(text[i + 1], text[i]))
+            {
+                i++;
+                continue;
+            }
+            throw new TestFilterParserException($"Filter value '{text}' has the character U+{(int)text[i]:X4} at position {i}, which cannot be used in an NUnit filter.");
+        }
+    }
 }
