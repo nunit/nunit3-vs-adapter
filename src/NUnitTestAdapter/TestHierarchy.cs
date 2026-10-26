@@ -78,5 +78,6 @@ public static class TestHierarchy
         var hierarchy = Create(testCase.Source, className, fixtureName, methodName);
         if (hierarchy != null)
             testCase.SetPropertyValue(HierarchyProperty, hierarchy);
+        ManagedNames.Set(testCase, className, methodName);
     }
 }

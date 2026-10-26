@@ -88,6 +88,33 @@ public class TestHierarchyTests
             Is.EqualTo(new[] { "NUnit.VisualStudio.TestAdapter.Tests", "Ns", "Derived", "Inherited" }));
     }
 
+    // A real method in this assembly, so the managed names can be found by reflection.
+    private const string ManagedXml =
+        @"<test-suite type='TestFixture' id='1' name='TestHierarchyTests' fullname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests' classname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests'>
+            <test-case id='2' name='Levels(&quot;a.b&quot;)' fullname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests.Levels(&quot;a.b&quot;)'
+                methodname='Levels' classname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests' />
+          </test-suite>";
+
+    [Test]
+    public void ManagedNamesDescribeTheMethodAsTheCompilerSeesIt()
+    {
+        var testCase = Convert(ManagedXml, useHierarchy: true);
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(testCase.GetPropertyValue(ManagedNames.ManagedTypeProperty), Is.EqualTo("NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests"));
+            Assert.That(testCase.GetPropertyValue(ManagedNames.ManagedMethodProperty), Is.EqualTo("Levels(System.String,System.String,System.String,System.String)"));
+        }
+    }
+
+    [Test]
+    public void NoManagedNamesWhenTheSettingIsOff()
+    {
+        var testCase = Convert(ManagedXml, useHierarchy: false);
+
+        Assert.That(testCase.GetPropertyValue(ManagedNames.ManagedMethodProperty), Is.Null);
+    }
+
     [Test]
     public void NoHierarchyWhenTheSettingIsOff()
     {
