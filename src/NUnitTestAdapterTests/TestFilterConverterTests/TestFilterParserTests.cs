@@ -214,6 +214,38 @@ public class TestFilterParserTests
     [TestCase(
         """(FullyQualifiedName=My.Test.Fixture.Method\('"'\))&TestCategory=Fast""",
         "<and><test>My.Test.Fixture.Method(&apos;&quot;&apos;)</test><cat>Fast</cat></and>")]
+
+    // As in the test platform, a value runs to the next unescaped operator: spaces are part
+    // of it (issues 1490, 876), and so is every escaped operator (issue 1488)
+    [TestCase(
+        "FullyQualifiedName=My.Fixture.Name with spaces & TestCategory=Fast",
+        "<and><test>My.Fixture.Name with spaces</test><cat>Fast</cat></and>")]
+    [TestCase(
+        @"FullyQualifiedName=My.Fixture.SpaceBefore \(Case 1\)",
+        "<test>My.Fixture.SpaceBefore (Case 1)</test>")]
+    [TestCase(
+        @"FullyQualifiedName=My.Fixture.A\|B | FullyQualifiedName=My.Fixture.C",
+        "<or><test>My.Fixture.A|B</test><test>My.Fixture.C</test></or>")]
+    [TestCase(
+        @"FullyQualifiedName=My.Fixture.A\&B\=C\!D\~E",
+        "<test>My.Fixture.A&amp;B=C!D~E</test>")]
+    [TestCase(
+        @"TestCategory=Needs\=Network",
+        "<cat>Needs=Network</cat>")]
+
+    // Unescaped argument lists keep working, also with a space before them
+    [TestCase("Name=Foo(1)", "<name>Foo(1)</name>")]
+    [TestCase("FullyQualifiedName=My.Fixture.SpaceBefore (Case 1)", "<test>My.Fixture.SpaceBefore (Case 1)</test>")]
+
+    // The MTP bridge wraps the filter in parentheses; an escaped '(' is part of the name (issue 1501)
+    [TestCase(
+        @"(FullyQualifiedName=My.Fixture.NoClose\()",
+        "<test>My.Fixture.NoClose(</test>")]
+
+    // A value without a property name means FullyQualifiedName~value, and is unescaped the same way
+    [TestCase(@"A\|B", @"<test re='1'>A\|B</test>")]
+    [TestCase(@"My.Test.NoClose\(", @"<test re='1'>My\.Test\.NoClose\(</test>")]
+    [TestCase(@"My.Test.SpaceBefore \(Case 1\)", @"<test re='1'>My\.Test\.SpaceBefore \(Case 1\)</test>")]
     public void TestParser(string input, string output)
     {
         Assert.That(_parser.Parse(input), Is.EqualTo($"<filter>{output}</filter>"));

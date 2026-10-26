@@ -45,6 +45,7 @@ using NUnit.VisualStudio.TestAdapter.Dump;
 using NUnit.VisualStudio.TestAdapter.ExecutionProcesses;
 using NUnit.VisualStudio.TestAdapter.Internal;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
+using NUnit.VisualStudio.TestAdapter.TestFilterConverter;
 
 namespace NUnit.VisualStudio.TestAdapter;
 
@@ -229,14 +230,24 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
         {
             var builder = CreateTestFilterBuilder(Dump);
             TestFilter filter = null;
-            if (RunType == RunType.CommandLineCurrentNUnit)
+            try
             {
-                var vsTestFilter = VsTestFilterFactory.CreateVsTestFilter(Settings, runContext);
-                filter = builder.ConvertVsTestFilterToNUnitFilter(vsTestFilter);
+                if (RunType == RunType.CommandLineCurrentNUnit)
+                {
+                    var vsTestFilter = VsTestFilterFactory.CreateVsTestFilter(Settings, runContext);
+                    filter = builder.ConvertVsTestFilterToNUnitFilter(vsTestFilter);
+                }
+                else if (RunType == RunType.Ide && IsMTP)
+                {
+                    filter = builder.ConvertVsTestFilterToNUnitFilterForMTP(VsTestFilter);
+                }
             }
-            else if (RunType == RunType.Ide && IsMTP)
+            catch (TestFilterParserException ex) when (IsMTP)
             {
-                filter = builder.ConvertVsTestFilterToNUnitFilterForMTP(VsTestFilter);
+                // The MTP bridge does not handle an exception from the adapter: the test host
+                // crashes and the report is empty. VSTest reports it as an executor error.
+                TestLog.Error($"Invalid test filter, no tests are run: {ex.Message}");
+                shouldRunAssemblies = false;
             }
 
             filter ??= builder.FilterByWhere(Settings.Where);
