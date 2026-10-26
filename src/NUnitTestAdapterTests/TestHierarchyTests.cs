@@ -107,6 +107,72 @@ public class TestHierarchyTests
         }
     }
 
+    // Issue 489: Visual Studio kept only one of the tests that share the managed names.
+    [Test]
+    public void ManagedNamesAreRemovedWhenTestsShareThem()
+    {
+        var first = WithManagedNames("Ns.Fixture.NamedTestCase with a 1", "Ns.Fixture", "NamedTestCase(System.Int32)");
+        var second = WithManagedNames("Ns.Fixture.an overriden test name with a 2", "Ns.Fixture", "NamedTestCase(System.Int32)");
+        var single = WithManagedNames("Ns.Fixture.SimpleTest", "Ns.Fixture", "SimpleTest");
+
+        ManagedNames.KeepOnlyUnique([first, second, single]);
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(first.GetPropertyValue(ManagedNames.ManagedTypeProperty), Is.Null);
+            Assert.That(first.GetPropertyValue(ManagedNames.ManagedMethodProperty), Is.Null);
+            Assert.That(second.GetPropertyValue(ManagedNames.ManagedMethodProperty), Is.Null);
+            Assert.That(single.GetPropertyValue(ManagedNames.ManagedMethodProperty), Is.EqualTo("SimpleTest"));
+        }
+    }
+
+    // Execution sees only the selected tests, so one of two test cases would look like it has the names alone.
+    [Test]
+    public void ExecutionDoesNotSetManagedNames()
+    {
+        const string xml =
+            @"<test-run id='2' name='Tests.dll' fullname='Tests.dll' testcasecount='1'>
+                <test-suite type='Assembly' id='0-1' name='Tests.dll' fullname='Tests.dll' runstate='Runnable' testcasecount='1'>
+                  <test-suite type='TestSuite' id='0-2' name='Tests' fullname='NUnit.VisualStudio.TestAdapter.Tests' runstate='Runnable' testcasecount='1'>
+                    <test-suite type='TestFixture' id='0-3' name='TestHierarchyTests' fullname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests' classname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests' runstate='Runnable' testcasecount='1'>
+                      <test-case id='0-4' name='NoHierarchyWithoutAMethod' fullname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests.NoHierarchyWithoutAMethod'
+                          methodname='NoHierarchyWithoutAMethod' classname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests' runstate='Runnable' seed='1' />
+                    </test-suite>
+                  </test-suite>
+                </test-suite>
+              </test-run>";
+        var settings = Substitute.For<IAdapterSettings>();
+        settings.UseHierarchyProperty.Returns(true);
+        var converter = new DiscoveryConverter(new TestLogger(new MessageLoggerStub()), settings);
+
+        var testCase = converter.Convert(new NUnitResults(XmlHelper.CreateXmlNode(xml)), FakeTestData.AssemblyPath).Single();
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(testCase.GetPropertyValue(TestHierarchy.HierarchyProperty), Is.Not.Null);
+            Assert.That(testCase.GetPropertyValue(ManagedNames.ManagedMethodProperty), Is.Null);
+        }
+    }
+
+    [Test]
+    public void TestsWithoutManagedNamesAreNotChanged()
+    {
+        var withoutNames = new TestCase("Ns.Fixture.Other", new System.Uri("executor://test"), "test.dll");
+        var single = WithManagedNames("Ns.Fixture.SimpleTest", "Ns.Fixture", "SimpleTest");
+
+        ManagedNames.KeepOnlyUnique([withoutNames, single]);
+
+        Assert.That(single.GetPropertyValue(ManagedNames.ManagedMethodProperty), Is.EqualTo("SimpleTest"));
+    }
+
+    private static TestCase WithManagedNames(string fullyQualifiedName, string managedType, string managedMethod)
+    {
+        var testCase = new TestCase(fullyQualifiedName, new System.Uri("executor://test"), "test.dll");
+        testCase.SetPropertyValue(ManagedNames.ManagedTypeProperty, managedType);
+        testCase.SetPropertyValue(ManagedNames.ManagedMethodProperty, managedMethod);
+        return testCase;
+    }
+
     [Test]
     public void NoManagedNamesWhenTheSettingIsOff()
     {

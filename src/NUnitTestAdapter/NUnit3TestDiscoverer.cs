@@ -221,6 +221,8 @@ public sealed class NUnit3TestDiscoverer : NUnitTestAdapter, ITestDiscoverer
             }
         }
 
+        ManagedNames.KeepOnlyUnique(testCases);
+
         // Apply filter if present (for --list-tests --filter scenario)
         IEnumerable<TestCase> filteredCases = filter != null && !filter.IsEmpty
             ? filter.CheckFilter(testCases)
