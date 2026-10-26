@@ -43,16 +43,6 @@ public class TokenizerTests
         Assert.That(tokenizer.NextToken(), Is.EqualTo(new Token(TokenKind.Eof)), "Third Call");
     }
 
-    [Test]
-    public void IdentifierTokens()
-    {
-        var tokenizer = new Tokenizer("  Identifiers x abc123 a1x  ");
-        Assert.That(tokenizer.NextToken(), Is.EqualTo(new Token(TokenKind.Word, "Identifiers")));
-        Assert.That(tokenizer.NextToken(), Is.EqualTo(new Token(TokenKind.Word, "x")));
-        Assert.That(tokenizer.NextToken(), Is.EqualTo(new Token(TokenKind.Word, "abc123")));
-        Assert.That(tokenizer.NextToken(), Is.EqualTo(new Token(TokenKind.Word, "a1x")));
-        Assert.That(tokenizer.NextToken(), Is.EqualTo(new Token(TokenKind.Eof)));
-    }
 
     [Test]
     public void WordsInUnicode()

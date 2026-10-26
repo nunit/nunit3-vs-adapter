@@ -168,13 +168,6 @@ public class Tokenizer
 
                 return new Token(TokenKind.Symbol, ch);
 
-#if UNUSED
-                case '"':
-                case '\'':
-                case '/':
-                    return GetString();
-#endif
-
             default:
                 // This is the only place in the tokenizer where
                 // we don't know what we are getting at the start
@@ -187,74 +180,44 @@ public class Tokenizer
         }
     }
 
-    private bool IsWordChar(char c)
-    {
-        if (char.IsWhiteSpace(c) || c == EOF_CHAR)
-            return false;
-
-        return WORD_BREAK_CHARS.IndexOf(c) < 0;
-    }
-
-#if UNUSED
-        private Token GetWord()
-        {
-            var sb = new StringBuilder();
-            int pos = _index;
-
-            CollectWordChars(sb);
-
-            return new Token(TokenKind.Word, sb.ToString()) { Pos = pos };
-        }
-
-        private Token GetFQN()
-        {
-            var sb = new StringBuilder();
-            int pos = _index;
-
-            CollectWordChars(sb);
-            CollectBalancedParentheticalExpression(sb);
-
-            return new Token(TokenKind.FQN, sb.ToString()) { Pos = pos };
-        }
-
-        private Token GetString()
-        {
-            var sb = new StringBuilder();
-            int pos = _index;
-
-            CollectQuotedString(sb);
-
-            return new Token(TokenKind.String, sb.ToString()) { Pos = pos };
-        }
-#endif
-
+    /// <summary>
+    /// Collects a value up to the next unescaped operator, as the test platform does:
+    /// a '\x' escape pair is always part of the value, and spaces are too. The value is
+    /// trimmed. An unescaped '(' inside a value starts an argument list that is balanced
+    /// as before, so unescaped filters such as Name=Foo(1) keep working. The result is an
+    /// FQN token when it has such an argument list, otherwise a Word.
+    /// </summary>
     private Token GetWordOrFqn()
     {
         var sb = new StringBuilder();
         int pos = index;
+        bool hasArgumentList = false;
 
-        CollectWordChars(sb);
-
-        if (NextChar != '(')
-            return new Token(TokenKind.Word, sb.ToString()) { Pos = pos };
-
-        CollectBalancedParentheticalExpression(sb);
-
-        while (NextChar == '+' || NextChar == '.')
+        while (NextChar != EOF_CHAR)
         {
-            sb.Append(GetChar());
-            CollectWordChars(sb);
-            if (NextChar == '(')
+            char c = NextChar;
+            if (c == '\\')
+            {
+                sb.Append(GetChar());
+                if (NextChar != EOF_CHAR)
+                    sb.Append(GetChar());
+            }
+            else if (c == '(')
+            {
+                hasArgumentList = true;
                 CollectBalancedParentheticalExpression(sb);
+            }
+            else if (WORD_BREAK_CHARS.IndexOf(c) >= 0)
+            {
+                break;
+            }
+            else
+            {
+                sb.Append(GetChar());
+            }
         }
 
-        return new Token(TokenKind.FQN, sb.ToString()) { Pos = pos };
-    }
-
-    private void CollectWordChars(StringBuilder sb)
-    {
-        while (IsWordChar(NextChar))
-            sb.Append(GetChar());
+        return new Token(hasArgumentList ? TokenKind.FQN : TokenKind.Word, sb.ToString().TrimEnd()) { Pos = pos };
     }
 
     /// <summary>
@@ -286,7 +249,9 @@ public class Tokenizer
         {
             var c = GetChar();
             sb.Append(c);
-            if (c == '(')
+            if (c == '\\' && NextChar != EOF_CHAR)
+                sb.Append(GetChar());
+            else if (c == '(')
                 ++depth;
             else if (c == ')')
                 --depth;
