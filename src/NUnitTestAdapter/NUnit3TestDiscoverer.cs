@@ -37,6 +37,7 @@ using NUnit.Engine;
 using NUnit.VisualStudio.TestAdapter.Dump;
 using NUnit.VisualStudio.TestAdapter.Internal;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
+using NUnit.VisualStudio.TestAdapter.TestFilterConverter;
 
 namespace NUnit.VisualStudio.TestAdapter;
 #if !NET462
@@ -64,6 +65,23 @@ public sealed class NUnit3TestDiscoverer : NUnitTestAdapter, ITestDiscoverer
         // Try to get filter for --list-tests scenario
         var vsTestFilter = TryCreateDiscoveryFilter(discoveryContext);
 
+        // A filter VSTest could not parse is read by the adapter's parser, and NUnit applies it (issue 1527).
+        var nunitFilter = TestFilter.Empty;
+        if (vsTestFilter?.MsTestCaseFilterExpression is UnparsedFilterExpression unparsed)
+        {
+            try
+            {
+                nunitFilter = new TestFilter(new TestFilterParser().Parse(unparsed.TestCaseFilterValue));
+            }
+            catch (TestFilterParserException ex)
+            {
+                TestLog.Error($"Invalid test filter, no tests are discovered: {ex.Message}");
+                Unload();
+                return;
+            }
+            vsTestFilter = null;
+        }
+
         if (Settings.InProcDataCollectorsAvailable && sources.Count() > 1)
         {
             TestLog.Error("Unexpected to discover tests in multiple assemblies when InProcDataCollectors specified in run configuration.");
@@ -84,7 +102,7 @@ public sealed class NUnit3TestDiscoverer : NUnitTestAdapter, ITestDiscoverer
             {
                 var package = CreateTestPackage(sourceAssemblyPath, null);
                 NUnitEngineAdapter.CreateRunner(package);
-                var results = NUnitEngineAdapter.Explore();
+                var results = NUnitEngineAdapter.Explore(nunitFilter);
                 dumpXml?.AddString(results.AsString());
 
                 if (results.IsRunnable)

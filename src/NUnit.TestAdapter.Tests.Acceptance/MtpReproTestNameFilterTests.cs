@@ -24,13 +24,13 @@ public sealed class MtpReproTestNameFilterTests : MtpCsProjAcceptanceTests
 
     [Test, Platform("Win")]
     [TestCaseSource(typeof(ReproTestNames), nameof(ReproTestNames.Cases))]
-    public void DiscoveryAndExecutionSelectTheTest(string filter, string expectedTestName)
+    public void DiscoveryAndExecutionSelectTheTest(string filter, string expectedTestName, string listedTestName)
     {
         var workspace = Build();
         workspace.DumpTestExecution = true;
 
         var listed = workspace.MtpListTests(TestApplicationPath, filter, TestContext.WriteLine);
-        Assert.That(listed, Is.EqualTo(new[] { expectedTestName }), $"Discovery, filter: {filter}");
+        Assert.That(listed, Is.EqualTo(new[] { listedTestName }), $"Discovery, filter: {filter}");
 
         var results = workspace.MtpTest(TestApplicationPath, filter, TestContext.WriteLine);
         Verify(1, 1, results);

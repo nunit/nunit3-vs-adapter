@@ -21,6 +21,8 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
+using System;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestPlatform.Common.Filtering;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
@@ -61,7 +63,7 @@ public class UnparsedFilterTests
     {
         var vsFilter = CreateFilterRejectedByVSTest("FullyQualifiedName=Ns.Fixture.Method(1)");
 
-        var testCase = new TestCase("Ns.Fixture.Method(1)", new System.Uri("executor://test"), "test.dll");
+        var testCase = new TestCase("Ns.Fixture.Method(1)", new Uri("executor://test"), "test.dll");
 
         Assert.That(() => vsFilter.CheckFilter([testCase]), Throws.TypeOf<TestPlatformFormatException>());
     }
@@ -76,6 +78,17 @@ public class UnparsedFilterTests
         Assert.That(() => vsFilter.IsEmpty, Throws.TypeOf<TestPlatformFormatException>());
     }
 
+    [Test]
+    public void DiscoveryKeepsTheFilterRejectedByVSTest()
+    {
+        const string filter = "FullyQualifiedName=TestFixtureSourceError.TestsBroken(Windows Edgium).Test1";
+
+        var vsFilter = new VsTestFilterForDiscovery(new DiscoveryContextRejectingTheFilter(filter), null);
+
+        Assert.That(vsFilter.MsTestCaseFilterExpression, Is.TypeOf<UnparsedFilterExpression>());
+        Assert.That(vsFilter.MsTestCaseFilterExpression.TestCaseFilterValue, Is.EqualTo(filter));
+    }
+
     /// <summary>
     /// A run context that throws as VSTest and the MTP bridge do when their parser rejects the filter.
     /// </summary>
@@ -86,5 +99,19 @@ public class UnparsedFilterTests
         var context = Substitute.For<IRunContext>();
         context.GetTestCaseFilter(null, null).ReturnsForAnyArgs(_ => throw new TestPlatformFormatException(wrapper.ParseError, wrapper.FilterString));
         return VsTestFilterFactory.CreateVsTestFilter(Substitute.For<IAdapterSettings>(), context);
+    }
+
+    /// <summary>
+    /// A discovery context like VSTest's: GetTestCaseFilter is found by reflection, and throws for this filter.
+    /// </summary>
+    private sealed class DiscoveryContextRejectingTheFilter(string filter) : IDiscoveryContext
+    {
+        public IRunSettings RunSettings => null;
+
+        public ITestCaseFilterExpression GetTestCaseFilter(IEnumerable<string> supportedProperties, Func<string, TestProperty> propertyProvider)
+        {
+            var wrapper = new FilterExpressionWrapper(filter);
+            throw new TestPlatformFormatException(wrapper.ParseError, wrapper.FilterString);
+        }
     }
 }
