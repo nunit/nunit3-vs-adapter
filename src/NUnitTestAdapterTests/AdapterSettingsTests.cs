@@ -86,6 +86,7 @@ public class AdapterSettingsTests
             Assert.That(_settings.DesignMode, Is.False);
             Assert.That(_settings.UseTestOutputXml, Is.False);
             Assert.That(_settings.NewOutputXmlFileForEachRun, Is.False);
+            Assert.That(_settings.UseHierarchyProperty, Is.False);
         });
     }
 
@@ -313,6 +314,13 @@ public class AdapterSettingsTests
     {
         _settings.Load("<RunSettings><NUnit><UseVsKeepEngineRunning>true</UseVsKeepEngineRunning></NUnit></RunSettings>");
         Assert.That(_settings.UseVsKeepEngineRunning, Is.True);
+    }
+
+    [Test]
+    public void UseHierarchyPropertyCanBeSet()
+    {
+        _settings.Load("<RunSettings><NUnit><UseHierarchyProperty>true</UseHierarchyProperty></NUnit></RunSettings>");
+        Assert.That(_settings.UseHierarchyProperty);
     }
 
     [Test]

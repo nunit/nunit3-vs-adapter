@@ -151,6 +151,7 @@ public class AdapterSettings(ITestLogger logger) : IAdapterSettings
     public bool ShowInternalProperties { get; private set; }
     public bool UseParentFQNForParametrizedTests { get; private set; }  // Default is false.  True can fix certain test name patterns, but may have side effects.
     public bool UseNUnitIdforTestCaseId { get; private set; }  // default is false.
+    public bool UseHierarchyProperty { get; private set; }  // default is false.
     public int ConsoleOut { get; private set; }
     public bool StopOnError { get; private set; }
     public bool ThrowOnEachFailureUnderDebugger { get; private set; }
@@ -261,6 +262,7 @@ public class AdapterSettings(ITestLogger logger) : IAdapterSettings
         ShowInternalProperties = GetInnerTextAsBool(nunitNode, nameof(ShowInternalProperties), false);
         UseParentFQNForParametrizedTests = GetInnerTextAsBool(nunitNode, nameof(UseParentFQNForParametrizedTests), false);
         UseNUnitIdforTestCaseId = GetInnerTextAsBool(nunitNode, nameof(UseNUnitIdforTestCaseId), false);
+        UseHierarchyProperty = GetInnerTextAsBool(nunitNode, nameof(UseHierarchyProperty), false);
         ConsoleOut = GetInnerTextAsInt(nunitNode, nameof(ConsoleOut), 1);  // 0 no output to console, 1 : output to console, 2: output to console as warnings
         StopOnError = GetInnerTextAsBool(nunitNode, nameof(StopOnError), false);
         UseNUnitFilter = GetInnerTextAsBool(nunitNode, nameof(UseNUnitFilter), true);
