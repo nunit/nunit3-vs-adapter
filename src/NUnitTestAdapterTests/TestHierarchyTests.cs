@@ -126,6 +126,34 @@ public class TestHierarchyTests
         }
     }
 
+    // Execution sees only the selected tests, so one of two test cases would look like it has the names alone.
+    [Test]
+    public void ExecutionDoesNotSetManagedNames()
+    {
+        const string xml =
+            @"<test-run id='2' name='Tests.dll' fullname='Tests.dll' testcasecount='1'>
+                <test-suite type='Assembly' id='0-1' name='Tests.dll' fullname='Tests.dll' runstate='Runnable' testcasecount='1'>
+                  <test-suite type='TestSuite' id='0-2' name='Tests' fullname='NUnit.VisualStudio.TestAdapter.Tests' runstate='Runnable' testcasecount='1'>
+                    <test-suite type='TestFixture' id='0-3' name='TestHierarchyTests' fullname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests' classname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests' runstate='Runnable' testcasecount='1'>
+                      <test-case id='0-4' name='NoHierarchyWithoutAMethod' fullname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests.NoHierarchyWithoutAMethod'
+                          methodname='NoHierarchyWithoutAMethod' classname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests' runstate='Runnable' seed='1' />
+                    </test-suite>
+                  </test-suite>
+                </test-suite>
+              </test-run>";
+        var settings = Substitute.For<IAdapterSettings>();
+        settings.UseHierarchyProperty.Returns(true);
+        var converter = new DiscoveryConverter(new TestLogger(new MessageLoggerStub()), settings);
+
+        var testCase = converter.Convert(new NUnitResults(XmlHelper.CreateXmlNode(xml)), FakeTestData.AssemblyPath).Single();
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(testCase.GetPropertyValue(TestHierarchy.HierarchyProperty), Is.Not.Null);
+            Assert.That(testCase.GetPropertyValue(ManagedNames.ManagedMethodProperty), Is.Null);
+        }
+    }
+
     [Test]
     public void TestsWithoutManagedNamesAreNotChanged()
     {

@@ -52,7 +52,7 @@ public static class ManagedNames
 
     /// <summary>
     /// Sets both properties, when the method can be found by reflection and has no overloads.
-    /// Call <see cref="KeepOnlyUnique"/> when all tests of the assembly are converted.
+    /// In discovery, call <see cref="KeepOnlyUnique"/> when all tests of the assembly are converted.
     /// </summary>
     public static void Set(TestCase testCase, string className, string methodName)
     {
@@ -73,12 +73,20 @@ public static class ManagedNames
     /// </summary>
     public static void KeepOnlyUnique(IEnumerable<TestCase> testCases)
     {
-        var shared = testCases
+        Remove(testCases
             .Where(tc => tc.GetPropertyValue(ManagedMethodProperty) != null)
             .GroupBy(tc => (tc.GetPropertyValue(ManagedTypeProperty) as string, tc.GetPropertyValue(ManagedMethodProperty) as string))
             .Where(g => g.Skip(1).Any())
-            .SelectMany(g => g);
-        foreach (var testCase in shared)
+            .SelectMany(g => g)
+            .ToList());
+    }
+
+    /// <summary>
+    /// Removes both properties from the tests.
+    /// </summary>
+    public static void Remove(IEnumerable<TestCase> testCases)
+    {
+        foreach (var testCase in testCases)
         {
             testCase.RemovePropertyValue(ManagedTypeProperty);
             testCase.RemovePropertyValue(ManagedMethodProperty);
