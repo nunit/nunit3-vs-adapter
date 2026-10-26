@@ -80,6 +80,12 @@ public abstract class NUnitDiscoverySuiteBase : INUnitDiscoverySuiteBase
     public NUnitDiscoveryProperties NUnitDiscoveryProperties { get; } = new();
 
     public abstract bool IsExplicit { get; }
+
+    /// <summary>
+    /// An ignored or skipped test never runs, so it does not decide whether a run is explicit.
+    /// </summary>
+    public bool IsExplicitOrNotRun => RunState is RunStateEnum.Ignored or RunStateEnum.Skipped || IsExplicit;
+
     public virtual bool IsExplicitReverse => RunState == RunStateEnum.Explicit || (Parent?.IsExplicitReverse ?? RunState == RunStateEnum.Explicit);
     public virtual bool IsParameterizedMethod => false;
     public IEnumerable<NUnitProperty> Properties => NUnitDiscoveryProperties.Properties;
@@ -177,7 +183,7 @@ public sealed class NUnitDiscoveryTestFixture(BaseProperties theBase, string cla
             all.AddRange(parameterizedMethods);
             all.AddRange(theories);
             all.AddRange(genericMethods);
-            return all.All(o => o.IsExplicit);
+            return all.All(o => o.IsExplicitOrNotRun);
         }
     }
 
@@ -263,7 +269,7 @@ public abstract class NUnitDiscoveryCanHaveTestCases(
     public virtual int NoOfActualTestCases => testCases.Count;
 
     public override bool IsExplicit =>
-        RunState == RunStateEnum.Explicit || testCases.AllWithEmptyFalse(o => o.IsExplicit);
+        RunState == RunStateEnum.Explicit || testCases.AllWithEmptyFalse(o => o.IsExplicitOrNotRun);
 
     public string ClassName { get; } = classname;
 
@@ -319,7 +325,7 @@ public abstract class NUnitDiscoveryCanHaveTestFixture(BaseProperties theBase, I
             fullList.AddRange(GenericFixtures);
             fullList.AddRange(SetUpFixtures);
             fullList.AddRange(ParameterizedFixtures);
-            return fullList.All(o => o.IsExplicit);
+            return fullList.All(o => o.IsExplicitOrNotRun);
         }
     }
 
