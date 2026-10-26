@@ -1,0 +1,86 @@
+// ***********************************************************************
+// Copyright (c) 2026 Charlie Poole, Terje Sandstrom
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+//
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// ***********************************************************************
+
+using System;
+using System.Collections.Concurrent;
+using System.Linq;
+using System.Reflection;
+#if !NET462 && !NETSTANDARD
+using System.Runtime.Loader;
+#endif
+using Microsoft.TestPlatform.AdapterUtilities.ManagedNameUtilities;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+
+namespace NUnit.VisualStudio.TestAdapter;
+
+/// <summary>
+/// The TestCase.ManagedType and TestCase.ManagedMethod properties (VSTest RFC 0017): the test
+/// method as the compiler sees it, for example ProgramTests and
+/// TupleTests(System.Collections.Generic.IEnumerable`1&lt;System.ValueTuple`2&lt;System.Object,System.Object&gt;&gt;).
+/// Visual Studio can use them to match a test to the method it finds in the source.
+/// </summary>
+public static class ManagedNames
+{
+    internal static readonly TestProperty ManagedTypeProperty = TestProperty.Register(
+        "TestCase.ManagedType", "ManagedType", typeof(string), TestPropertyAttributes.Hidden, typeof(TestCase));
+
+    internal static readonly TestProperty ManagedMethodProperty = TestProperty.Register(
+        "TestCase.ManagedMethod", "ManagedMethod", typeof(string), TestPropertyAttributes.Hidden, typeof(TestCase));
+
+    private static readonly ConcurrentDictionary<(string, string, string), (string Type, string Method)?> Cache = new();
+
+    /// <summary>
+    /// Sets both properties, when the method can be found by reflection and has no overloads.
+    /// </summary>
+    public static void Set(TestCase testCase, string className, string methodName)
+    {
+        if (string.IsNullOrEmpty(className) || string.IsNullOrEmpty(methodName))
+            return;
+        var names = Cache.GetOrAdd((testCase.Source, className, methodName), key => Find(key.Item1, key.Item2, key.Item3));
+        if (names == null)
+            return;
+        testCase.SetPropertyValue(ManagedTypeProperty, names.Value.Type);
+        testCase.SetPropertyValue(ManagedMethodProperty, names.Value.Method);
+    }
+
+    private static (string Type, string Method)? Find(string assemblyPath, string className, string methodName)
+    {
+        try
+        {
+#if !NET462 && !NETSTANDARD
+            var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyPath);
+#else
+            var assembly = Assembly.LoadFrom(assemblyPath);
+#endif
+            var methods = assembly.GetType(className, throwOnError: false)?.GetMethods().Where(m => m.Name == methodName).ToList();
+            if (methods is not { Count: 1 })
+                return null;
+            ManagedNameHelper.GetManagedName(methods[0], out var managedType, out var managedMethod);
+            return (managedType, managedMethod);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+}
