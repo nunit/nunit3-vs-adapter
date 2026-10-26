@@ -198,6 +198,7 @@ public class DiscoveryConverter(ITestLogger logger, IAdapterSettings settings) :
                 $"   NUnit3TestExecutor discovered {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases using Current Discovery mode, {msg}");
         }
 
+        ManagedNames.KeepOnlyUnique(loadedTestCases);
         timing.LogTime("Converting test cases ");
         return loadedTestCases;
 

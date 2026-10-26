@@ -107,6 +107,44 @@ public class TestHierarchyTests
         }
     }
 
+    // Issue 489: Visual Studio kept only one of the tests that share the managed names.
+    [Test]
+    public void ManagedNamesAreRemovedWhenTestsShareThem()
+    {
+        var first = WithManagedNames("Ns.Fixture.NamedTestCase with a 1", "Ns.Fixture", "NamedTestCase(System.Int32)");
+        var second = WithManagedNames("Ns.Fixture.an overriden test name with a 2", "Ns.Fixture", "NamedTestCase(System.Int32)");
+        var single = WithManagedNames("Ns.Fixture.SimpleTest", "Ns.Fixture", "SimpleTest");
+
+        ManagedNames.KeepOnlyUnique([first, second, single]);
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(first.GetPropertyValue(ManagedNames.ManagedTypeProperty), Is.Null);
+            Assert.That(first.GetPropertyValue(ManagedNames.ManagedMethodProperty), Is.Null);
+            Assert.That(second.GetPropertyValue(ManagedNames.ManagedMethodProperty), Is.Null);
+            Assert.That(single.GetPropertyValue(ManagedNames.ManagedMethodProperty), Is.EqualTo("SimpleTest"));
+        }
+    }
+
+    [Test]
+    public void TestsWithoutManagedNamesAreNotChanged()
+    {
+        var withoutNames = new TestCase("Ns.Fixture.Other", new System.Uri("executor://test"), "test.dll");
+        var single = WithManagedNames("Ns.Fixture.SimpleTest", "Ns.Fixture", "SimpleTest");
+
+        ManagedNames.KeepOnlyUnique([withoutNames, single]);
+
+        Assert.That(single.GetPropertyValue(ManagedNames.ManagedMethodProperty), Is.EqualTo("SimpleTest"));
+    }
+
+    private static TestCase WithManagedNames(string fullyQualifiedName, string managedType, string managedMethod)
+    {
+        var testCase = new TestCase(fullyQualifiedName, new System.Uri("executor://test"), "test.dll");
+        testCase.SetPropertyValue(ManagedNames.ManagedTypeProperty, managedType);
+        testCase.SetPropertyValue(ManagedNames.ManagedMethodProperty, managedMethod);
+        return testCase;
+    }
+
     [Test]
     public void NoManagedNamesWhenTheSettingIsOff()
     {

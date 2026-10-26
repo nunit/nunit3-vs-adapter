@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 #if !NET462 && !NETSTANDARD
@@ -51,6 +52,7 @@ public static class ManagedNames
 
     /// <summary>
     /// Sets both properties, when the method can be found by reflection and has no overloads.
+    /// Call <see cref="KeepOnlyUnique"/> when all tests of the assembly are converted.
     /// </summary>
     public static void Set(TestCase testCase, string className, string methodName)
     {
@@ -61,6 +63,26 @@ public static class ManagedNames
             return;
         testCase.SetPropertyValue(ManagedTypeProperty, names.Value.Type);
         testCase.SetPropertyValue(ManagedMethodProperty, names.Value.Method);
+    }
+
+    /// <summary>
+    /// Removes both properties from tests that share them with another test of the assembly: the test
+    /// cases of a parameterized method, or the same method in each instance of a parameterized fixture.
+    /// Visual Studio merges each of them into the one method it finds in the source, and keeps only
+    /// the last one, so the others are lost from Test Explorer (issue 489).
+    /// </summary>
+    public static void KeepOnlyUnique(IEnumerable<TestCase> testCases)
+    {
+        var shared = testCases
+            .Where(tc => tc.GetPropertyValue(ManagedMethodProperty) != null)
+            .GroupBy(tc => (tc.GetPropertyValue(ManagedTypeProperty) as string, tc.GetPropertyValue(ManagedMethodProperty) as string))
+            .Where(g => g.Skip(1).Any())
+            .SelectMany(g => g);
+        foreach (var testCase in shared)
+        {
+            testCase.RemovePropertyValue(ManagedTypeProperty);
+            testCase.RemovePropertyValue(ManagedMethodProperty);
+        }
     }
 
     private static (string Type, string Method)? Find(string assemblyPath, string className, string methodName)
