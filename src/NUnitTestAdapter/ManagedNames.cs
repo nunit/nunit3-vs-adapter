@@ -116,17 +116,17 @@ public static class ManagedNames
         (testCase.GetPropertyValue(ManagedTypeProperty) as string, testCase.GetPropertyValue(ManagedMethodProperty) as string);
 
     /// <summary>
-    /// The class of the fixture a test case is in, as the converters use it: for an inherited test, the
-    /// test case's own class name is the base class.
+    /// The class of the fixture a test case is in, as <see cref="TestHierarchy.Set"/> uses it: for an
+    /// inherited test, the test case's own class name is the base class. Without a fixture class name,
+    /// the test case's class name.
     /// </summary>
     private static string FixtureClassName(XmlNode testCase)
     {
-        for (var node = testCase.ParentNode; node != null; node = node.ParentNode)
-        {
-            if (node.GetAttribute("type") == "TestFixture")
-                return node.GetAttribute("classname");
-        }
-        return testCase.GetAttribute("classname");
+        var node = testCase.ParentNode;
+        while (node != null && node.GetAttribute("type") != "TestFixture")
+            node = node.ParentNode;
+        var fixtureClassName = node?.GetAttribute("classname");
+        return string.IsNullOrEmpty(fixtureClassName) ? testCase.GetAttribute("classname") : fixtureClassName;
     }
 
     private static (string Type, string Method)? Find(string assemblyPath, string className, string methodName)

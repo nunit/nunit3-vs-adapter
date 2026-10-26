@@ -137,11 +137,22 @@ public class TestHierarchyTests
             <test-case id='5' name='NoHierarchyWithoutAMethod' fullname='C' methodname='NoHierarchyWithoutAMethod' classname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests' />
           </test-suite>";
 
-    [Test]
-    public void ExecutionRemovesTheNamesTheWholeAssemblyShares()
+    // A fixture without a class name: the test case's class name is used, as discovery does.
+    private const string AllTestsWithoutFixtureClassNameXml =
+        @"<test-suite type='TestFixture' id='1' name='TestHierarchyTests' fullname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests'>
+            <test-suite type='ParameterizedMethod' id='2' name='Levels' fullname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests.Levels' classname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests'>
+              <test-case id='3' name='A' fullname='A' methodname='Levels' classname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests' />
+              <test-case id='4' name='B' fullname='B' methodname='Levels' classname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests' />
+            </test-suite>
+            <test-case id='5' name='NoHierarchyWithoutAMethod' fullname='C' methodname='NoHierarchyWithoutAMethod' classname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests' />
+          </test-suite>";
+
+    [TestCase(AllTestsXml, TestName = "ExecutionRemovesTheNamesTheWholeAssemblyShares")]
+    [TestCase(AllTestsWithoutFixtureClassNameXml, TestName = "ExecutionRemovesTheNamesTheWholeAssemblySharesWithoutFixtureClassName")]
+    public void ExecutionRemovesTheNamesTheWholeAssemblyShares(string xml)
     {
         var doc = new XmlDocument();
-        doc.LoadXml(AllTestsXml);
+        doc.LoadXml(xml);
         var shared = ManagedNames.FindShared(FakeTestData.AssemblyPath, doc.SelectNodes("//test-case").Cast<XmlNode>());
         var selected = WithManagedNames("A", "NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests", "Levels(System.String,System.String,System.String,System.String)");
         var alone = WithManagedNames("C", "NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests", "NoHierarchyWithoutAMethod");
