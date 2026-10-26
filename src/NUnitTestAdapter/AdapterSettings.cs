@@ -189,6 +189,8 @@ public class AdapterSettings(ITestLogger logger) : IAdapterSettings
 
     public bool DumpXmlTestResults { get; private set; }
 
+    public bool DumpNumberedFiles { get; private set; }
+
     public bool DumpVsInput { get; private set; }
 
     public bool FreakMode { get; private set; }
@@ -373,6 +375,7 @@ public class AdapterSettings(ITestLogger logger) : IAdapterSettings
     {
         DumpXmlTestDiscovery = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestDiscovery), false);
         DumpXmlTestResults = GetInnerTextAsBool(nunitNode, nameof(DumpXmlTestResults), false);
+        DumpNumberedFiles = GetInnerTextAsBool(nunitNode, nameof(DumpNumberedFiles), false);
         DumpVsInput = GetInnerTextAsBool(nunitNode, nameof(DumpVsInput), false);
         FreakMode = GetInnerTextAsBool(nunitNode, nameof(FreakMode), false);
         InternalTraceLevel = GetInnerTextWithLog(nunitNode, nameof(InternalTraceLevel), "Off", "Error", "Warning", "Info", "Verbose", "Debug") ??

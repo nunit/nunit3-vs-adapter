@@ -21,6 +21,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using NSubstitute;
 using NUnit.Framework;
@@ -238,6 +239,28 @@ public class DumpXmlTests
         Assert.That(System.IO.File.Exists(dumpPath), Is.True);
         var content = System.IO.File.ReadAllText(dumpPath);
         Assert.That(content, Does.Contain("RunningBy"));
+    }
+
+    [TestCase(false, new[] { "E_test.dll.dump" })]
+    [TestCase(true, new[] { "E_test.dll(1).dump", "E_test.dll(2).dump", "E_test.dll.dump" })]
+    public void ThatNumberedSettingKeepsTheDumpOfEveryRun(bool numbered, string[] expectedFiles)
+    {
+        using var tempDir = new TempDirectory();
+        var assemblyPath = System.IO.Path.Combine(tempDir.Path, "test.dll");
+        var settings = Substitute.For<IAdapterSettings>();
+        settings.DumpXmlTestResults.Returns(true);
+        settings.DumpNumberedFiles.Returns(numbered);
+
+        for (int run = 0; run < 3; run++)
+        {
+            var dump = DumpXml.CreateDump(assemblyPath, null, settings);
+            dump.AddString($"<run>{run}</run>");
+            dump.AppendToExistingDump();
+        }
+
+        var files = System.IO.Directory.GetFiles(System.IO.Path.Combine(tempDir.Path, "Dump"))
+            .Select(System.IO.Path.GetFileName).OrderBy(f => f, StringComparer.Ordinal);
+        Assert.That(files, Is.EqualTo(expectedFiles));
     }
 
     [Test]

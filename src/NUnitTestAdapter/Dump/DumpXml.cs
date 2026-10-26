@@ -66,13 +66,16 @@ public class DumpXml : IDumpXml
     private readonly string filename;
     private StringBuilder txt;
     private static string assemblyPath;
+    private readonly bool numbered;
+    private string executionPath;
 
-    public DumpXml(string path, IFile file = null)
+    public DumpXml(string path, IFile file = null, bool numbered = false)
     {
         assemblyPath = path;
         directory = Path.GetDirectoryName(path);
         filename = Path.GetFileName(path);
         this.file = file ?? new File();
+        this.numbered = numbered;
         txt = new StringBuilder();
         txt.Append(Header);
         txt.Append(Rootstart);
@@ -100,18 +103,24 @@ public class DumpXml : IDumpXml
         Dump2File(path);
     }
 
-    public void DumpForExecution()
-    {
-        var dumpfolder = Path.Combine(directory, "Dump");
-        var path = Path.Combine(dumpfolder, $"E_{filename}.dump");
-        Dump2File(path);
-    }
+    public void DumpForExecution() => Dump2File(ExecutionPath());
 
-    public void AppendToExistingDump()
+    public void AppendToExistingDump() => AppendToFile(ExecutionPath());
+
+    /// <summary>
+    /// Chosen once per instance, so all writes of one run go to the same file.
+    /// When numbered, an existing file is kept and the first free (n) is used.
+    /// </summary>
+    private string ExecutionPath()
     {
-        var dumpfolder = Path.Combine(directory, "Dump");
-        var path = Path.Combine(dumpfolder, $"E_{filename}.dump");
-        AppendToFile(path);
+        if (executionPath != null)
+            return executionPath;
+
+        var basePath = Path.Combine(directory, "Dump", $"E_{filename}");
+        executionPath = basePath + ".dump";
+        for (int n = 1; numbered && System.IO.File.Exists(executionPath); n++)
+            executionPath = $"{basePath}({n}).dump";
+        return executionPath;
     }
 
     private void AppendToFile(string path)
@@ -237,7 +246,7 @@ public class DumpXml : IDumpXml
     {
         if (!settings.DumpXmlTestResults)
             return null;
-        var executionDumpXml = new DumpXml(path);
+        var executionDumpXml = new DumpXml(path, numbered: settings.DumpNumberedFiles);
         string runningByContent = testCases == null ? "Sources" : "TestCases";
         executionDumpXml.AddLf();
         executionDumpXml.AddXmlElement("RunningBy", runningByContent);
