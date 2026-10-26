@@ -26,6 +26,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Xml;
 #if !NET462 && !NETSTANDARD
 using System.Runtime.Loader;
 #endif
@@ -52,7 +53,8 @@ public static class ManagedNames
 
     /// <summary>
     /// Sets both properties, when the method can be found by reflection and has no overloads.
-    /// In discovery, call <see cref="KeepOnlyUnique"/> when all tests of the assembly are converted.
+    /// Discovery calls <see cref="KeepOnlyUnique"/> when all tests of the assembly are converted;
+    /// execution calls <see cref="RemoveShared"/> with <see cref="FindShared"/> of the whole assembly.
     /// </summary>
     public static void Set(TestCase testCase, string className, string methodName)
     {
@@ -73,24 +75,58 @@ public static class ManagedNames
     /// </summary>
     public static void KeepOnlyUnique(IEnumerable<TestCase> testCases)
     {
-        Remove(testCases
-            .Where(tc => tc.GetPropertyValue(ManagedMethodProperty) != null)
-            .GroupBy(tc => (tc.GetPropertyValue(ManagedTypeProperty) as string, tc.GetPropertyValue(ManagedMethodProperty) as string))
+        var list = testCases.ToList();
+        var shared = list
+            .Select(NamesOf)
+            .Where(n => n.Method != null)
+            .GroupBy(n => n)
             .Where(g => g.Skip(1).Any())
-            .SelectMany(g => g)
-            .ToList());
+            .Select(g => g.Key);
+        RemoveShared(list, new HashSet<(string, string)>(shared));
     }
 
     /// <summary>
-    /// Removes both properties from the tests.
+    /// The managed names that more than one test of the assembly has, from an explore of the whole
+    /// assembly. Execution needs this: it converts only the selected tests, so one test case of a
+    /// method with two looks like it has the names alone, and Visual Studio then does not show its
+    /// result, because discovery gave that test no managed names.
     /// </summary>
-    public static void Remove(IEnumerable<TestCase> testCases)
+    public static ISet<(string Type, string Method)> FindShared(string assemblyPath, IEnumerable<XmlNode> testCaseNodes)
     {
-        foreach (var testCase in testCases)
+        var names = testCaseNodes
+            .Select(node => Cache.GetOrAdd((assemblyPath, FixtureClassName(node), node.GetAttribute("methodname")), key => Find(key.Item1, key.Item2, key.Item3)))
+            .Where(n => n != null)
+            .Select(n => n.Value);
+        return new HashSet<(string, string)>(names.GroupBy(n => n).Where(g => g.Skip(1).Any()).Select(g => g.Key));
+    }
+
+    /// <summary>
+    /// Removes both properties from the tests that have one of the shared names.
+    /// </summary>
+    public static void RemoveShared(IEnumerable<TestCase> testCases, ISet<(string Type, string Method)> shared)
+    {
+        foreach (var testCase in testCases.Where(tc => shared.Contains(NamesOf(tc))))
         {
             testCase.RemovePropertyValue(ManagedTypeProperty);
             testCase.RemovePropertyValue(ManagedMethodProperty);
         }
+    }
+
+    private static (string Type, string Method) NamesOf(TestCase testCase) =>
+        (testCase.GetPropertyValue(ManagedTypeProperty) as string, testCase.GetPropertyValue(ManagedMethodProperty) as string);
+
+    /// <summary>
+    /// The class of the fixture a test case is in, as the converters use it: for an inherited test, the
+    /// test case's own class name is the base class.
+    /// </summary>
+    private static string FixtureClassName(XmlNode testCase)
+    {
+        for (var node = testCase.ParentNode; node != null; node = node.ParentNode)
+        {
+            if (node.GetAttribute("type") == "TestFixture")
+                return node.GetAttribute("classname");
+        }
+        return testCase.GetAttribute("classname");
     }
 
     private static (string Type, string Method)? Find(string assemblyPath, string className, string methodName)

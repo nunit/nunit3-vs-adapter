@@ -198,9 +198,6 @@ public class DiscoveryConverter(ITestLogger logger, IAdapterSettings settings) :
                 $"   NUnit3TestExecutor discovered {loadedTestCases.Count} of {nunitTestCases.Count} NUnit test cases using Current Discovery mode, {msg}");
         }
 
-        // Execution sees only the selected tests, so it cannot tell which tests share the managed names.
-        // Visual Studio matches tests to the source from discovery, so execution does not need them.
-        ManagedNames.Remove(loadedTestCases);
         timing.LogTime("Converting test cases ");
         return loadedTestCases;
 

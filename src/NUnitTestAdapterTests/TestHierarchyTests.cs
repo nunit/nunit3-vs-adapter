@@ -126,31 +126,32 @@ public class TestHierarchyTests
         }
     }
 
-    // Execution sees only the selected tests, so one of two test cases would look like it has the names alone.
-    [Test]
-    public void ExecutionDoesNotSetManagedNames()
-    {
-        const string xml =
-            @"<test-run id='2' name='Tests.dll' fullname='Tests.dll' testcasecount='1'>
-                <test-suite type='Assembly' id='0-1' name='Tests.dll' fullname='Tests.dll' runstate='Runnable' testcasecount='1'>
-                  <test-suite type='TestSuite' id='0-2' name='Tests' fullname='NUnit.VisualStudio.TestAdapter.Tests' runstate='Runnable' testcasecount='1'>
-                    <test-suite type='TestFixture' id='0-3' name='TestHierarchyTests' fullname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests' classname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests' runstate='Runnable' testcasecount='1'>
-                      <test-case id='0-4' name='NoHierarchyWithoutAMethod' fullname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests.NoHierarchyWithoutAMethod'
-                          methodname='NoHierarchyWithoutAMethod' classname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests' runstate='Runnable' seed='1' />
-                    </test-suite>
-                  </test-suite>
-                </test-suite>
-              </test-run>";
-        var settings = Substitute.For<IAdapterSettings>();
-        settings.UseHierarchyProperty.Returns(true);
-        var converter = new DiscoveryConverter(new TestLogger(new MessageLoggerStub()), settings);
+    // Execution sees only the selected tests, so one of two test cases would look like it has the names
+    // alone. The names it keeps must be the ones discovery keeps, found from the whole assembly.
+    private const string AllTestsXml =
+        @"<test-suite type='TestFixture' id='1' name='TestHierarchyTests' fullname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests' classname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests'>
+            <test-suite type='ParameterizedMethod' id='2' name='Levels' fullname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests.Levels' classname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests'>
+              <test-case id='3' name='A' fullname='A' methodname='Levels' classname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests' />
+              <test-case id='4' name='B' fullname='B' methodname='Levels' classname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests' />
+            </test-suite>
+            <test-case id='5' name='NoHierarchyWithoutAMethod' fullname='C' methodname='NoHierarchyWithoutAMethod' classname='NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests' />
+          </test-suite>";
 
-        var testCase = converter.Convert(new NUnitResults(XmlHelper.CreateXmlNode(xml)), FakeTestData.AssemblyPath).Single();
+    [Test]
+    public void ExecutionRemovesTheNamesTheWholeAssemblyShares()
+    {
+        var doc = new XmlDocument();
+        doc.LoadXml(AllTestsXml);
+        var shared = ManagedNames.FindShared(FakeTestData.AssemblyPath, doc.SelectNodes("//test-case").Cast<XmlNode>());
+        var selected = WithManagedNames("A", "NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests", "Levels(System.String,System.String,System.String,System.String)");
+        var alone = WithManagedNames("C", "NUnit.VisualStudio.TestAdapter.Tests.TestHierarchyTests", "NoHierarchyWithoutAMethod");
+
+        ManagedNames.RemoveShared([selected, alone], shared);
 
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(testCase.GetPropertyValue(TestHierarchy.HierarchyProperty), Is.Not.Null);
-            Assert.That(testCase.GetPropertyValue(ManagedNames.ManagedMethodProperty), Is.Null);
+            Assert.That(selected.GetPropertyValue(ManagedNames.ManagedMethodProperty), Is.Null);
+            Assert.That(alone.GetPropertyValue(ManagedNames.ManagedMethodProperty), Is.EqualTo("NoHierarchyWithoutAMethod"));
         }
     }
 
