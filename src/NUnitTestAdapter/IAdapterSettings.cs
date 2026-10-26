@@ -40,6 +40,11 @@ public interface IAdapterSettings
     bool DumpXmlTestDiscovery { get; }
     bool DumpXmlTestResults { get; }
 
+    /// <summary>
+    /// Keep the execution dump of every run: E_x.dll.dump, then E_x.dll(1).dump, E_x.dll(2).dump, and so on.
+    /// </summary>
+    bool DumpNumberedFiles { get; }
+
     bool DumpVsInput { get; }
 
     bool PreFilter { get; }
