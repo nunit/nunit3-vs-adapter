@@ -23,7 +23,9 @@
 
 using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml;
+using System.Xml.Linq;
 
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
@@ -122,9 +124,9 @@ public class FilterRoundTripConformanceTests
         // Collection arguments rendered with brackets.
         new TestCaseData("My.Test.Fixture.Slice_IsCorrect([0,1,2,3],3,3,[3])").SetName("{m}_BracketArguments").SetProperty("Issue", "1437"),
 
-        // A name containing a character that is not legal in XML is deliberately not in this
-        // corpus: such a filter is rejected, so the round-trip assertion below would not apply.
-        // See IllegalXmlCharactersAreRejected.
+        // A name containing a character NUnit writes as \uXXXX is deliberately not in this corpus:
+        // its filter is a regular expression, so the round-trip assertion below does not apply.
+        // See NameWithCharacterNUnitEscapesSelectsTheTest.
     ];
 
     /// <summary>
@@ -233,39 +235,43 @@ public class FilterRoundTripConformanceTests
     }
 
     /// <summary>
-    /// A test name can contain a character that is not legal in XML at all, and the NUnit filter
-    /// is an XML document, so escaping the five metacharacters is not sufficient. Issue 761,
-    /// item 5 of the 6.x document.
-    ///
-    /// The filter is rejected with <see cref="TestFilterParserException"/>. Dropping the character
-    /// is not safe: <c>Test_01("￿")</c> would become <c>Test_01("")</c>, and run that test
-    /// instead if it exists (<see cref="DroppingTheCharacterWouldSelectAnotherTest"/>). Making such
-    /// a test runnable is a discovery-side problem, covered in the v7 document.
+    /// NUnit writes a character it does not allow in its XML as the text \uXXXX, so that is the
+    /// name the test platform reports, while the framework's FullName keeps the character
+    /// (issue 761, nunit/nunit#4826). The filter is a regular expression that accepts both forms,
+    /// for the reported name and for a raw character typed on the command line. Item 5 of the 6.x
+    /// document.
     /// </summary>
     [Property("Issue", "761")]
     [Property("DocItem", "6.x item 5")]
     [Category(FixIn.SixX)]
-    [TestCase("￿", TestName = "{m}_NonCharacter")]
-    [TestCase("", TestName = "{m}_C0Control")]
-    public void IllegalXmlCharactersAreRejected(string illegal)
+    [TestCase("\uffff", TestName = "{m}_NonCharacter")]
+    [TestCase("\u001b", TestName = "{m}_Escape")]
+    [TestCase("\u0001", TestName = "{m}_C0Control")]
+    public void NameWithCharacterNUnitEscapesSelectsTheTest(string character)
     {
-        string filter = BuildFilter("My.Test.Fixture.Test_01(\"" + illegal + "\")");
+        string frameworkName = "My.Test.Fixture.Test_01(\"a" + character + "b\")";
+        string reportedName = "My.Test.Fixture.Test_01(\"a" + $"\\u{(int)character[0]:x4}" + "b\")";
 
-        Assert.That(() => new TestFilterParser().Parse(filter), Throws.TypeOf<TestFilterParserException>());
+        foreach (string filterName in new[] { reportedName, frameworkName })
+        {
+            var regex = new Regex(SingleRegex(new TestFilterParser().Parse(BuildFilter(filterName))));
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(regex.IsMatch(frameworkName), Is.True, "The filter must select the test.");
+                Assert.That(regex.IsMatch(reportedName), Is.True, "The filter must also select the name as reported.");
+                Assert.That(regex.IsMatch("My.Test.Fixture.Test_01(\"ab\")"), Is.False, "The filter must not select the name without the character.");
+                Assert.That(regex.IsMatch(frameworkName + "x"), Is.False, "The filter must be exact.");
+            }
+        }
     }
 
-    /// <summary>
-    /// Why <see cref="IllegalXmlCharactersAreRejected"/> rejects: with the character dropped, the
-    /// filter is the one for <c>Test_01("")</c>, a different test.
-    /// </summary>
-    [Property("Issue", "761")]
-    [Category(FixIn.SixX)]
-    [Test]
-    public void DroppingTheCharacterWouldSelectAnotherTest()
+    // The value of the single <test re='1'> element in a filter.
+    private static string SingleRegex(string filterXml)
     {
-        string other = new TestFilterParser().Parse(BuildFilter("My.Test.Fixture.Test_01(\"\")"));
-
-        Assert.That(other, Is.EqualTo($"<filter><test>{XmlEscape("My.Test.Fixture.Test_01(\"\")")}</test></filter>"));
+        var element = XElement.Parse(filterXml).Element("test");
+        Assert.That(element?.Attribute("re")?.Value, Is.EqualTo("1"), filterXml);
+        return element.Value;
     }
 
     private static string BuildFilter(string fullName) => "FullyQualifiedName=" + Escape(fullName);

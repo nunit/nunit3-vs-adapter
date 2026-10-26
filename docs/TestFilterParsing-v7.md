@@ -1,7 +1,7 @@
 # Test filter parsing — v7 plan (grammar alignment)
 
-**Status:** proposed
-**Scope:** NUnit3TestAdapter 7.0 — contains a breaking change
+**Status:** the breaking grammar change is rejected; the escaping fixes shipped in 6.4 without it
+**Scope:** NUnit3TestAdapter 6.4 and later
 **Companion document:** [TestFilterParsing-6.x.md](TestFilterParsing-6.x.md) — the non-breaking fixes
 **Related:** [#505](https://github.com/nunit/nunit3-vs-adapter/issues/505) (parent), [#1405](https://github.com/nunit/nunit3-vs-adapter/issues/1405), [#1488](https://github.com/nunit/nunit3-vs-adapter/issues/1488), [#1489](https://github.com/nunit/nunit3-vs-adapter/pull/1489), [#1490](https://github.com/nunit/nunit3-vs-adapter/issues/1490), [#1491](https://github.com/nunit/nunit3-vs-adapter/pull/1491), [#1501](https://github.com/nunit/nunit3-vs-adapter/issues/1501)
 
@@ -135,19 +135,27 @@ In v7 the first two should share one escape-aware parser. The third is not a par
 against the already-discovered test cases using the platform's own matcher — and should be kept
 deliberately, as the compatibility fallback described below.
 
-## The breaking change, and how to bound it
+## The breaking change was rejected
 
-Making the grammar correct means the adapter stops accepting filters that the test platform
-itself rejects. In particular, `--filter "Name=Foo(1)"` with unescaped parentheses currently
-works by accident and would have to be written `--filter "Name=Foo\(1\)"`.
+Making the grammar strict would mean the adapter stops accepting filters that the test platform
+itself rejects. In particular, `--filter "Name=Foo(1)"` with unescaped parentheses would have to be
+written `--filter "Name=Foo\(1\)"`.
 
-Two things make this narrower than it first looks:
+**Decision (6.4): no breaking change.** Users should not have to escape something they would find
+strange, and `Name=Foo(1)` works today. PR [#1523](https://github.com/nunit/nunit3-vs-adapter/pull/1523)
+fixes the escaping bugs without it:
 
-- Anything routed through `Condition.Parse` — that is, discovery — **already** rejects the
-  unescaped form. Users hitting this are relying on execution being more lenient than discovery,
-  which is precisely the inconsistency this work removes.
-- The escaped form is the documented one and already works today, so a migration exists and can
-  be stated in one line of release notes.
+- Every `\x` pair is read as part of the value, so an escaped operator never splits a value.
+- A value runs to the next unescaped operator, spaces included.
+- Unescaped parentheses after a name are still balanced and kept as an argument list, so
+  `Name=Foo(1)` keeps working.
+- A backslash that escapes nothing is a filter error, as in VSTest.
+
+Two things made the strict grammar less necessary than it first looked:
+
+- Anything routed through `Condition.Parse` — that is, discovery — already rejects the
+  unescaped form, so only execution is more lenient. That leniency is kept on purpose.
+- The escaped form is the documented one and works, both before and after 6.4.
 
 What genuinely cannot be fixed by a correct parser is a *producer* that emits unescaped filters.
 The Test Explorer filter in [#1405](https://github.com/nunit/nunit3-vs-adapter/issues/1405) is an example:
@@ -293,7 +301,7 @@ for all of category A would leave real defects without an owner.
    a filter problem instead of an opaque RPC exception, and assert the round-trip invariant over
    discovered names.
 7. Extend `FilterSpecialCharacterTests` with the quoted-argument and whitespace-before-`(` shapes,
-   and note the `Name=Foo(1)` migration in the release notes.
+   and keep `Name=Foo(1)` working (no migration, see above).
 
 ## Acknowledgement
 

@@ -173,51 +173,60 @@ versions sent NUnit's `\"` without escaping the backslash
 ([#1332](https://github.com/nunit/nunit3-vs-adapter/issues/1332)). `FilterHelper.Unescape` would
 throw on that.
 
-## Item 5 — The emitted filter is not always well-formed XML
+## Item 5 — Names with characters NUnit writes as `\uXXXX`
 
 The NUnit filter is an XML document, and `TestFilterParser.XmlEscape` escapes the five XML
 metacharacters. That is not sufficient, because a test name can contain a code point that is not
 a legal XML character at all, and no amount of entity escaping makes such a document parse.
 
-[#761](https://github.com/nunit/nunit3-vs-adapter/issues/761) is the reported case: a test case
-with a `￿` argument. The parser emits exactly the right string, but `XmlDocument.LoadXml`
-rejects the result. The test appears in Test Explorer and never runs.
+[#761](https://github.com/nunit/nunit3-vs-adapter/issues/761) and
+[#742](https://github.com/nunit/nunit3-vs-adapter/issues/742) are the reported cases: test cases
+with a U+FFFF or a control character in an argument. The test appears in Test Explorer and never runs.
 
-This was found by adding an XML-validity assertion, not by reading the code: without it the issue
-looked covered and green.
+There are two names for such a test. NUnit writes each of these characters as the text `\uXXXX`
+in its XML (`XmlExtensions.EscapeInvalidXmlCharacters`, see
+[nunit/nunit#4826](https://github.com/nunit/nunit/issues/4826)), so the test platform reports
+`Test("a\u001bb")` with a literal backslash. The framework's `FullName`, which the filter is
+matched against, keeps the raw character. An exact `<test>` element can therefore match neither:
+the reported text is not the framework name, and the raw character cannot be written in XML.
 
-**Decision: reject the filter.** A value with a character that is not legal in XML makes
-`TestFilterParser` throw `TestFilterParserException`, naming the character and its position.
+**Decision: select with a regex.** `TestNameFilter` turns such a name into an anchored
+`<test re='1'>` element (or `<name re='1'>`), where each such character matches either the raw
+character or its `\uXXXX` text: `(?:\u001b|\\u001b)`. The rest of the name is `Regex.Escape`d.
+For `=` and `!=` the regex is anchored with `^` and `$`; `~` and `!~` stay contains-matches.
+Names without such characters get exactly the filter they got before.
 
-Dropping the character was the first decision, and it is not safe: the shortened value is the
-full name of another possible test. `Test_01("￿")` becomes `Test_01("")`, so the filter would
-run `Test_01("")` instead if that test exists, rather than match nothing.
+It is used on every path that builds a name filter: `TestFilterParser` (`FullyQualifiedName` and
+`Name`), `FilterByList` (VSTest Test Explorer) and the MTP fast path.
 
-This does not make [#761](https://github.com/nunit/nunit3-vs-adapter/issues/761) runnable: the
-test stays unrunnable through a filter, but it fails with a filter error instead of breaking the
-filter document or selecting another test. Making such a test selectable at all is a
-discovery-side problem, because a name that cannot be expressed in the filter document arguably
-should not be reported as an identity; see the escapability section of
-[TestFilterParsing-v7.md](TestFilterParsing-v7.md).
+Two earlier decisions were dropped:
 
-The illegal characters are those outside XML 1.0's legal set: everything below `#x20` except tab,
-line feed and carriage return, plus `#xFFFE`, `#xFFFF` and unpaired surrogates.
+- **Dropping the character** is not safe: the shortened value is the full name of another
+  possible test. `Test_01("\uffff")` becomes `Test_01("")`, so the filter could run another test.
+- **Rejecting the filter** with a `TestFilterParserException` kept the test unrunnable. Testers do
+  use these characters in test case arguments (nunit/nunit#4826), and the names are used in
+  filters, so they have to be selectable.
 
-**Tests:** `FilterRoundTripConformanceTests.IllegalXmlCharactersAreRejected`, covering `￿` and a
-C0 control, and `DroppingTheCharacterWouldSelectAnotherTest`, which shows the collision. The name
-is deliberately absent from the shared corpus, because that corpus asserts the emitted value
-equals the name.
+The characters are the ones NUnit replaces, which is a wider set than XML 1.0 forbids: U+0000 to
+U+0008, U+000B, U+000C, U+000E to U+001F, U+007F to U+0084, U+0086 to U+009F, unpaired
+surrogates, U+FFFE and U+FFFF. A real backslash is written by NUnit as `\\`, so `\\u0041` is a
+backslash followed by `u0041`, not a character.
+
+**Tests:** `TestNameFilterTests`, `FilterRoundTripConformanceTests.NameWithCharacterNUnitEscapesSelectsTheTest`
+(the regex matches the framework name and the reported name, and not the name without the
+character), and the acceptance cases in `ControlCharacterTests` for VSTest and MTP. The Issue711
+repro in nunit3-vs-adapter.issues selects all 62 of its tests with one escaped filter each.
 
 **Non-breaking:** the previous behaviour is an exception from `XmlDocument` or an unusable filter,
 so there is nothing working to preserve.
 
 ## Explicitly out of scope for 6.x
 
-- **[#1490](https://github.com/nunit/nunit3-vs-adapter/issues/1490), whitespace before `(`.** `GetWordOrFqn` only absorbs an argument list when `(`
-  immediately follows the word characters, so `Fixture.Method (Case 1)` tokenises as two tokens.
-  PR [#1491](https://github.com/nunit/nunit3-vs-adapter/pull/1491) proposed peeking past the whitespace. That patches one heuristic with another, and the
-  author withdrew it on those grounds. The correct fix is the v7 grammar, where an unescaped `(`
-  is always a grouping operator and whitespace inside a value is never significant.
+- **[#1490](https://github.com/nunit/nunit3-vs-adapter/issues/1490), whitespace before `(`.** Fixed in 6.4 by
+  PR [#1523](https://github.com/nunit/nunit3-vs-adapter/pull/1523), without a grammar change: a value
+  runs to the next unescaped operator, spaces included, so `Fixture.Method (Case 1)` is one value.
+  PR [#1491](https://github.com/nunit/nunit3-vs-adapter/pull/1491) proposed peeking past the whitespace,
+  which patches one heuristic with another, and the author withdrew it on those grounds.
 
 - **Accepting unescaped filters that VSTest itself rejects.** Some producers emit filters without
   escaping — the Test Explorer filter in [#1405](https://github.com/nunit/nunit3-vs-adapter/issues/1405) is one. No correct parser can resolve those; they
@@ -245,9 +254,9 @@ what a 6.x pull request has to show before it can merge.
 
 The skipped tests are ignored deliberately, each with a reason in the attribute:
 
-- **v7 tests** carry `Category=FixV7` and `Ignore(FixIn.V7Reason)`. They cannot pass before the
-  grammar change, and the build must not be red while 6.x work merges. The v7 change removes
-  those `Ignore` attributes.
+- **Tests for later fixes** carry `Category=Fix6x` and an `Ignore` with the reason. The v7
+  category is gone: the grammar change it waited for was rejected (see
+  [TestFilterParsing-v7.md](TestFilterParsing-v7.md)), and its tests now pass in 6.4.
 - **The item 1 tests** were ignored with `FixIn.Item1Reason` until item 1 was fixed, because the
   defect was destructive rather than merely failing: about twelve seconds and two gigabytes each,
   ending in `OutOfMemoryException`. The loop is now bounded and the `Ignore` is removed.

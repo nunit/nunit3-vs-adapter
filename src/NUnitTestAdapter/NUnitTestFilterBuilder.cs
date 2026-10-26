@@ -90,15 +90,11 @@ public class NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSe
         if (FullyQualifiedNameFilterParser.CheckFullyQualifiedNameFilter(msFilter))
         {
             var testCases = FullyQualifiedNameFilterParser.GetFullyQualifiedNames(msFilter);
-            var filterBuilder = _filterService.GetTestFilterBuilder();
             dump?.AddString($@"\n\n<ParsedTestCases>\n");
             foreach (var testCase in testCases)
-            {
                 dump?.AddString($@"{testCase}\n");
-                filterBuilder.AddTest(testCase);
-            }
             dump?.AddString($@"\n\n</ParsedTestCases>\n");
-            return filterBuilder.GetFilter();
+            return FilterByNames(testCases);
         }
         // When we are here, we should have a valid MSTest filter that is not just FullyQualifiedName based.
         // From here we use the standard parser and expect real FQN names, categories , etc.
@@ -159,12 +155,21 @@ public class NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSe
             return TestFilter.Empty;
         }
 
-        var filterBuilder = _filterService.GetTestFilterBuilder();
-        foreach (var testCase in testCases)
-        {
-            filterBuilder.AddTest(testCase.FullyQualifiedName);
-        }
+        return FilterByNames(testCases.Select(t => t.FullyQualifiedName).ToList());
+    }
 
+    /// <summary>
+    /// A filter for these test full names. A name with a character NUnit writes as \uXXXX needs a
+    /// regular expression (see <see cref="TestNameFilter"/>); otherwise the engine builds it.
+    /// </summary>
+    private TestFilter FilterByNames(IReadOnlyCollection<string> fullNames)
+    {
+        if (fullNames.Any(TestNameFilter.NeedsRegex))
+            return new TestFilter(TestNameFilter.ForNames(fullNames));
+
+        var filterBuilder = _filterService.GetTestFilterBuilder();
+        foreach (var fullName in fullNames)
+            filterBuilder.AddTest(fullName);
         return filterBuilder.GetFilter();
     }
 }
