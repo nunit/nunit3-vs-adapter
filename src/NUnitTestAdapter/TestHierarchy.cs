@@ -67,11 +67,14 @@ public static class TestHierarchy
 
     /// <summary>
     /// Sets the hierarchy on the test case, when the UseHierarchyProperty setting is on.
+    /// The fixture's class comes first: for an inherited test, the test's own class name is the
+    /// base class, which can be in another namespace.
     /// </summary>
-    public static void Set(TestCase testCase, IAdapterSettings settings, string className, string fixtureName, string methodName)
+    public static void Set(TestCase testCase, IAdapterSettings settings, string fixtureClassName, string testClassName, string fixtureName, string methodName)
     {
         if (!settings.UseHierarchyProperty)
             return;
+        string className = string.IsNullOrEmpty(fixtureClassName) ? testClassName : fixtureClassName;
         var hierarchy = Create(testCase.Source, className, fixtureName, methodName);
         if (hierarchy != null)
             testCase.SetPropertyValue(HierarchyProperty, hierarchy);

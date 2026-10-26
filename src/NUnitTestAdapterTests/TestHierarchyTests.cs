@@ -21,7 +21,9 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
+using System.IO;
 using System.Linq;
+using System.Xml;
 using System.Xml.Linq;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NSubstitute;
@@ -54,6 +56,38 @@ public class TestHierarchyTests
             Is.EqualTo(new[] { "NUnit.VisualStudio.TestAdapter.Tests", "Issue1097", "Tests", "Test1097" }));
     }
 
+    // An inherited test: NUnit gives the test the base class name, in another namespace.
+    private const string InheritedXml =
+        @"<test-suite type='TestFixture' id='1' name='Derived' fullname='Ns.Derived' classname='Ns.Derived'>
+            <test-case id='2' name='Inherited' fullname='Ns.Derived.Inherited' methodname='Inherited' classname='Other.Base' />
+          </test-suite>";
+
+    [Test]
+    public void InheritedTestIsUnderItsFixture()
+    {
+        var testCase = Convert(InheritedXml, useHierarchy: true);
+
+        Assert.That(
+            testCase.GetPropertyValue(TestHierarchy.HierarchyProperty),
+            Is.EqualTo(new[] { "NUnit.VisualStudio.TestAdapter.Tests", "Ns", "Derived", "Inherited" }));
+    }
+
+    [Test]
+    public void InheritedTestIsUnderItsFixtureInLegacyDiscovery()
+    {
+        var doc = new XmlDocument();
+        doc.LoadXml(InheritedXml);
+        var settings = Substitute.For<IAdapterSettings>();
+        settings.UseHierarchyProperty.Returns(true);
+        using var converter = new TestConverterForXml(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings);
+
+        var testCase = converter.ConvertTestCase(new NUnitEventTestCase(doc.SelectSingleNode("//test-case")));
+
+        Assert.That(
+            testCase.GetPropertyValue(TestHierarchy.HierarchyProperty),
+            Is.EqualTo(new[] { "NUnit.VisualStudio.TestAdapter.Tests", "Ns", "Derived", "Inherited" }));
+    }
+
     [Test]
     public void NoHierarchyWhenTheSettingIsOff()
     {
@@ -69,7 +103,7 @@ public class TestHierarchyTests
     [TestCase("Ns.Fixture", null, "Ns", "Fixture", TestName = "ClassNameWhenNoFixtureIsFound")]
     public void Levels(string className, string fixtureName, string expectedNamespace, string expectedClass)
     {
-        var hierarchy = TestHierarchy.Create(@"C:\bin\My.Tests.dll", className, fixtureName, "Method");
+        var hierarchy = TestHierarchy.Create(Path.Combine("bin", "My.Tests.dll"), className, fixtureName, "Method");
 
         Assert.That(hierarchy, Is.EqualTo(new[] { "My.Tests", expectedNamespace, expectedClass, "Method" }));
     }
@@ -77,7 +111,7 @@ public class TestHierarchyTests
     [Test]
     public void NoHierarchyWithoutAMethod()
     {
-        Assert.That(TestHierarchy.Create(@"C:\bin\My.Tests.dll", "Ns.Fixture", "Fixture", null), Is.Null);
+        Assert.That(TestHierarchy.Create(Path.Combine("bin", "My.Tests.dll"), "Ns.Fixture", "Fixture", null), Is.Null);
     }
 
     private static TestCase Convert(string xml, bool useHierarchy)

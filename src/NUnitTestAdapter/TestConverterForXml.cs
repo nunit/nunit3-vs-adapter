@@ -264,7 +264,7 @@ public sealed class TestConverterForXml : IDisposable, ITestConverterXml
         var fixture = FindFixture(testNode);
         if (fixture != null)
             testCase.SetPropertyValue(Seed.NUnitFixtureName, fixture.FullName);
-        TestHierarchy.Set(testCase, adapterSettings, testNode.ClassName, fixture?.Name, testNode.MethodName);
+        TestHierarchy.Set(testCase, adapterSettings, fixture?.ClassName, testNode.ClassName, fixture?.Name, testNode.MethodName);
 
         return testCase;
 
