@@ -47,6 +47,10 @@ public class UnparsedFilterTests
         "<filter><test>TestFixtureSourceError.TestsBroken(Windows Edgium).Test1</test></filter>",
         TestName = "Issue677")]
     [TestCase(
+        """FullyQualifiedName=TestNunit.StupidTest.Check("v1"\,True\,"C2")""",
+        "<filter><test>TestNunit.StupidTest.Check(&quot;v1&quot;,True,&quot;C2&quot;)</test></filter>",
+        TestName = "Issue817_AzureDevOpsRerunEscapesCommas")]
+    [TestCase(
         "FullyQualifiedName=Ns.Fixture.Method(1)|FullyQualifiedName=Ns.Fixture.Method(2)",
         "<filter><or><test>Ns.Fixture.Method(1)</test><test>Ns.Fixture.Method(2)</test></or></filter>",
         TestName = "TwoTestCases")]

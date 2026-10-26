@@ -11,7 +11,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance;
 /// </summary>
 internal static class ReproTestNames
 {
-    public const int TotalTests = 21;
+    public const int TotalTests = 22;
 
     public const string TestsCs = """"
         using NUnit.Framework;
@@ -88,6 +88,12 @@ internal static class ReproTestNames
             [Test]
             public void Test1() => Assert.That(definition, Is.Not.Null);
         }
+
+        public sealed class Rerun
+        {
+            [TestCase("v1", true, "C2")]
+            public void Check(string version, bool flag, string code) => Assert.Pass();
+        }
         """";
 
     public static TestCaseData[] Cases =>
@@ -118,6 +124,10 @@ internal static class ReproTestNames
         // Not escaped: VSTest rejects these, and the adapter reads them itself (issue 1527)
         UnescapedCase("""Marketplace("Chrome")""", "Submit", "UnescapedFixtureArgument_Issue623", """Marketplace("Chrome").Submit"""),
         UnescapedCase("Broken(Windows Edgium)", "Test1", "UnescapedFixtureArgumentWithSpace_Issue677", "Broken(Windows Edgium).Test1"),
+
+        // The Azure DevOps rerun of failed tests escapes the commas between the arguments (issue 817)
+        new TestCaseData("""FullyQualifiedName=Rerun.Check("v1"\,True\,"C2")""", """Check("v1",True,"C2")""", """Check("v1",True,"C2")""")
+            .SetName("{m}_AzureDevOpsRerunEscapesCommas_Issue817"),
     ];
 
     private static TestCaseData Case(string className, string testName, string label, string listedTestName = null) =>
