@@ -92,6 +92,12 @@ public interface IAdapterSettings
 
     bool UseNUnitIdforTestCaseId { get; }
 
+    /// <summary>
+    /// Set the TestCase.Hierarchy property (assembly, namespace, fixture, method), so Test Explorer
+    /// builds its tree from NUnit's structure instead of splitting the FullyQualifiedName at dots.
+    /// </summary>
+    bool UseHierarchyProperty { get; }
+
     int ConsoleOut { get; }
     bool StopOnError { get; }
     TestOutcome MapWarningTo { get; }

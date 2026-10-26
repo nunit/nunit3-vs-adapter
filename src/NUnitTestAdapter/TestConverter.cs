@@ -231,6 +231,7 @@ public sealed class TestConverter : IDisposable, ITestConverter
         var fixture = FindFixture(testNode);
         if (fixture != null)
             testCase.SetPropertyValue(Seed.NUnitFixtureName, fixture.FullName);
+        TestHierarchy.Set(testCase, adapterSettings, (fixture as NUnitDiscoveryCanHaveTestCases)?.ClassName, testNode.ClassName, fixture?.Name, testNode.MethodName);
 
         return testCase;
 
