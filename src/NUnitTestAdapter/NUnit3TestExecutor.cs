@@ -32,6 +32,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
 
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Messages;
@@ -660,6 +661,12 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
             {
                 var discovery = new DiscoveryConverter(TestLog, Settings);
                 discovery.Convert(discoveryResults, assemblyPath);
+                if (Settings.UseHierarchyProperty)
+                {
+                    // Make the same choice as discovery, which sees the whole assembly (issue 1529).
+                    var allTests = NUnitEngineAdapter.Explore().TestCases().Cast<XmlNode>();
+                    ManagedNames.RemoveShared(discovery.LoadedTestCases, ManagedNames.FindShared(assemblyPath, allTests));
+                }
 
                 if (_cancelled)
                 {
