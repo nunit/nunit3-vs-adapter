@@ -11,7 +11,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance;
 /// </summary>
 internal static class ReproTestNames
 {
-    public const int TotalTests = 19;
+    public const int TotalTests = 22;
 
     public const string TestsCs = """"
         using NUnit.Framework;
@@ -64,6 +64,36 @@ internal static class ReproTestNames
             [TestCase(1, TestName = "Named\u001bEsc")]
             public void Named(int i) => Assert.Pass();
         }
+
+        // Fixture arguments in the name: issue 623 (Azure DevOps rerun) and issue 677 (dotnet test --filter)
+        [TestFixtureSource(nameof(Browsers))]
+        public sealed class Marketplace(string browser)
+        {
+            public static readonly string[] Browsers = ["Chrome"];
+
+            [Test]
+            public void Submit() => Assert.That(browser, Is.Not.Empty);
+        }
+
+        public sealed class Definition
+        {
+            public override string ToString() => "Windows Edgium";
+        }
+
+        [TestFixtureSource(nameof(Definitions))]
+        public sealed class Broken(Definition definition)
+        {
+            public static readonly object[] Definitions = [new Definition()];
+
+            [Test]
+            public void Test1() => Assert.That(definition, Is.Not.Null);
+        }
+
+        public sealed class Rerun
+        {
+            [TestCase("v1", true, "C2")]
+            public void Check(string version, bool flag, string code) => Assert.Pass();
+        }
         """";
 
     public static TestCaseData[] Cases =>
@@ -87,9 +117,24 @@ internal static class ReproTestNames
         Case("ControlCharacterTests", """Arg("a\u0001b")""", "C0Control_Issue761"),
         Case("ControlCharacterTests", """Arg("a\uffffb")""", "NonCharacter_Issue761"),
         Case("ControlCharacterTests", """Named\u001bEsc""", "CustomNameWithEscapeCharacter_Issue761"),
+        // MTP --list-tests shows a test in a parameterized fixture with the fixture name first
+        Case("""Marketplace("Chrome")""", "Submit", "FixtureArgument_Issue623", """Marketplace("Chrome").Submit"""),
+        Case("Broken(Windows Edgium)", "Test1", "FixtureArgumentWithSpace_Issue677", "Broken(Windows Edgium).Test1"),
+
+        // Not escaped: VSTest rejects these, and the adapter reads them itself (issue 1527)
+        UnescapedCase("""Marketplace("Chrome")""", "Submit", "UnescapedFixtureArgument_Issue623", """Marketplace("Chrome").Submit"""),
+        UnescapedCase("Broken(Windows Edgium)", "Test1", "UnescapedFixtureArgumentWithSpace_Issue677", "Broken(Windows Edgium).Test1"),
+
+        // The Azure DevOps rerun of failed tests escapes the commas between the arguments (issue 817)
+        new TestCaseData("""FullyQualifiedName=Rerun.Check("v1"\,True\,"C2")""", """Check("v1",True,"C2")""", """Check("v1",True,"C2")""")
+            .SetName("{m}_AzureDevOpsRerunEscapesCommas_Issue817"),
     ];
 
-    private static TestCaseData Case(string className, string testName, string label) =>
-        new TestCaseData("FullyQualifiedName=" + FilterHelper.Escape($"{className}.{testName}"), testName)
+    private static TestCaseData Case(string className, string testName, string label, string listedTestName = null) =>
+        new TestCaseData("FullyQualifiedName=" + FilterHelper.Escape($"{className}.{testName}"), testName, listedTestName ?? testName)
+            .SetName($"{{m}}_{label}");
+
+    private static TestCaseData UnescapedCase(string className, string testName, string label, string listedTestName) =>
+        new TestCaseData($"FullyQualifiedName={className}.{testName}", testName, listedTestName)
             .SetName($"{{m}}_{label}");
 }

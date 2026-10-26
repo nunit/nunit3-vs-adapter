@@ -89,7 +89,24 @@ public abstract class VsTestFilter(IRunContext runContext) : IVsTestFilter
 
     private ITestCaseFilterExpression testCaseFilterExpression;
     public ITestCaseFilterExpression MsTestCaseFilterExpression =>
-        testCaseFilterExpression ??= runContext.GetTestCaseFilter(SupportedProperties, PropertyProvider);
+        testCaseFilterExpression ??= GetTestCaseFilter();
+
+    /// <summary>
+    /// VSTest and the MTP bridge reject a value with unescaped parentheses, for example
+    /// FullyQualifiedName=Ns.Fixture("a").Test (issues 623, 677 and 1527). The adapter's own parser
+    /// reads it, so keep the filter string for that parser.
+    /// </summary>
+    private ITestCaseFilterExpression GetTestCaseFilter()
+    {
+        try
+        {
+            return runContext.GetTestCaseFilter(SupportedProperties, PropertyProvider);
+        }
+        catch (TestPlatformFormatException ex) when (!string.IsNullOrEmpty(ex.FilterValue))
+        {
+            return new UnparsedFilterExpression(ex);
+        }
+    }
 
     public bool IsEmpty => MsTestCaseFilterExpression == null || MsTestCaseFilterExpression.TestCaseFilterValue == string.Empty;
 
