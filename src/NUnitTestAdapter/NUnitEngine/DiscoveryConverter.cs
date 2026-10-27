@@ -470,6 +470,8 @@ public class DiscoveryConverter(ITestLogger logger, IAdapterSettings settings) :
             "Runnable" => RunStateEnum.Runnable,
             "Explicit" => RunStateEnum.Explicit,
             "NotRunnable" => RunStateEnum.NotRunnable,
+            "Ignored" => RunStateEnum.Ignored,
+            "Skipped" => RunStateEnum.Skipped,
             _ => RunStateEnum.NA
         };
         return runState;
