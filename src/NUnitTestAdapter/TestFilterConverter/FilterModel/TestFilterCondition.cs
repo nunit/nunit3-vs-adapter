@@ -30,8 +30,8 @@ public sealed class TestFilterCondition : ITestFilterCondition
         string elementName = Property switch
         {
             "FullyQualifiedName" => "test",
-            "TestCategory" => "cat",
             "Name" => "name",
+            "Category" or "TestCategory" => "cat",
             _ => "prop"
         };
         string escapedValue = Operation.IsRegex
