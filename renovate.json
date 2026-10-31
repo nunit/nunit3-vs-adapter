@@ -22,6 +22,63 @@
       ],
       "matchCurrentVersion": "17.13.0",
       "allowedVersions": "17.13.0"
+    },
+    {
+      "description": "The net8.0 group in the nuspec stays on DependencyModel 8.x",
+      "matchManagers": [
+        "custom.regex"
+      ],
+      "matchFileNames": [
+        "nuget/NUnit3TestAdapter.nuspec"
+      ],
+      "matchPackageNames": [
+        "Microsoft.Extensions.DependencyModel"
+      ],
+      "allowedVersions": "<9.0.0"
+    },
+    {
+      "description": "Put nuspec updates in the same PR as the props updates",
+      "groupName": "NuGet minor updates",
+      "matchManagers": [
+        "custom.regex"
+      ],
+      "matchDatasources": [
+        "nuget"
+      ],
+      "matchUpdateTypes": [
+        "minor"
+      ]
+    },
+    {
+      "groupName": "NuGet patch updates",
+      "matchManagers": [
+        "custom.regex"
+      ],
+      "matchDatasources": [
+        "nuget"
+      ],
+      "matchUpdateTypes": [
+        "patch",
+        "digest",
+        "pin",
+        "rollback"
+      ],
+      "schedule": [
+        "* 0-8 * * *"
+      ]
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "NuGet dependencies in the nuspec",
+      "managerFilePatterns": [
+        "/^nuget/NUnit3TestAdapter\\.nuspec$/"
+      ],
+      "matchStrings": [
+        "<dependency id=\"(?<depName>[^\"]+)\" version=\"(?<currentValue>[^\"]+)\""
+      ],
+      "datasourceTemplate": "nuget"
     }
   ]
 }

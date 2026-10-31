@@ -234,7 +234,9 @@ public static class FullyQualifiedNameFilterParser
         return sb.ToString();
     }
 
-    private const string EscapedChars = @"\()&|=!~";
+    // VSTest escapes only \()&|=!~. The Azure DevOps rerun of failed tests also escapes the commas between
+    // arguments, as in Check("v1"\,True\,"C2") (issue 817), so \, is read as a comma.
+    private const string EscapedChars = @"\()&|=!~,";
 
     private static ReadOnlySpan<char> TrimWhitespace(ReadOnlySpan<char> span)
     {

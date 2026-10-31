@@ -25,7 +25,7 @@ public sealed class ReproTestNameFilterTests : CsProjAcceptanceTests
 
     [Test, Platform("Win")]
     [TestCaseSource(typeof(ReproTestNames), nameof(ReproTestNames.Cases))]
-    public void VsTestSelectsTheTest(string filter, string expectedTestName)
+    public void VsTestSelectsTheTest(string filter, string expectedTestName, string listedTestName)
     {
         var workspace = Build();
         workspace.DumpTestExecution = true;

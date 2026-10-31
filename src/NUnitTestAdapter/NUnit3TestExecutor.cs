@@ -1,4 +1,4 @@
-// ***********************************************************************
+﻿// ***********************************************************************
 // Copyright (c) 2011-2021 Charlie Poole, 2014-2026 Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -32,6 +32,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
 
 using Microsoft.Testing.Platform.Extensions.Messages;
 using Microsoft.Testing.Platform.Messages;
@@ -242,10 +243,11 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
                     filter = builder.ConvertVsTestFilterToNUnitFilterForMTP(VsTestFilter);
                 }
             }
-            catch (TestFilterParserException ex) when (IsMTP)
+            catch (Exception ex) when (IsMTP && ex is TestFilterParserException or TestPlatformFormatException)
             {
                 // The MTP bridge does not handle an exception from the adapter: the test host
                 // crashes and the report is empty. VSTest reports it as an executor error.
+                // TestPlatformFormatException comes from a filter neither VSTest nor the adapter can read.
                 TestLog.Error($"Invalid test filter, no tests are run: {ex.Message}");
                 shouldRunAssemblies = false;
             }
@@ -659,6 +661,12 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
             {
                 var discovery = new DiscoveryConverter(TestLog, Settings);
                 discovery.Convert(discoveryResults, assemblyPath);
+                if (Settings.UseHierarchyProperty)
+                {
+                    // Make the same choice as discovery, which sees the whole assembly (issue 1529).
+                    var allTests = NUnitEngineAdapter.Explore().TestCases().Cast<XmlNode>();
+                    ManagedNames.RemoveShared(discovery.LoadedTestCases, ManagedNames.FindShared(assemblyPath, allTests));
+                }
 
                 if (_cancelled)
                 {

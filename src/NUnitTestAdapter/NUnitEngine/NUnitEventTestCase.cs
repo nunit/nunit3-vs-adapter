@@ -42,7 +42,9 @@ public enum RunStateEnum
     NA,
     Runnable,
     Explicit,
-    NotRunnable
+    NotRunnable,
+    Ignored,
+    Skipped
 }
 
 public interface INUnitTestCasePropertyInfo
@@ -72,6 +74,8 @@ public class NUnitEventTestCase : NUnitTestNode, INUnitTestCase, INUnitTestCaseP
                     "Runnable" => RunStateEnum.Runnable,
                     "Explicit" => RunStateEnum.Explicit,
                     "NotRunnable" => RunStateEnum.NotRunnable,
+                    "Ignored" => RunStateEnum.Ignored,
+                    "Skipped" => RunStateEnum.Skipped,
                     _ => runState
                 };
             }

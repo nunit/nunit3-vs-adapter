@@ -57,6 +57,12 @@ public class VsTestFilterForDiscovery(IDiscoveryContext discoveryContext, ITestL
             logger?.Debug($"VsTestFilterForDiscovery: Ambiguous match for GetTestCaseFilter on {discoveryContext.GetType().FullName}. Filter will be disabled. {ex.Message}");
             return null;
         }
+        catch (TargetInvocationException ex) when (ex.InnerException is TestPlatformFormatException { FilterValue.Length: > 0 } parseError)
+        {
+            // VSTest could not parse the filter, for example one with unescaped parentheses (issue 1527).
+            logger?.Debug($"VsTestFilterForDiscovery: VSTest could not parse the filter, the adapter parses it. {parseError.Message}");
+            return new UnparsedFilterExpression(parseError);
+        }
         catch (TargetInvocationException ex)
         {
             logger?.Debug($"VsTestFilterForDiscovery: GetTestCaseFilter invocation failed on {discoveryContext.GetType().FullName}. Filter will be disabled. {ex.InnerException?.Message ?? ex.Message}");

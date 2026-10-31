@@ -1061,6 +1061,48 @@ public class NUnitDiscoveryTests
         });
     }
 
+    /// <summary>
+    /// Issue 1197: an explicit fixture and an ignored fixture, both selected by their category.
+    /// NUnit writes the ignored fixture as runstate Ignored, not Explicit.
+    /// </summary>
+    private const string ExplicitAndIgnoredFixturesXml =
+        @"<test-run id='0' name='Issue1197.dll' fullname='C:\Issue1197\bin\Debug\net10.0\Issue1197.dll' runstate='Runnable' testcasecount='2'>
+   <test-suite type='Assembly' id='0-1006' name='Issue1197.dll' fullname='C:\Issue1197\bin\Debug\net10.0\Issue1197.dll' runstate='Runnable' testcasecount='2'>
+      <test-suite type='TestSuite' id='0-1007' name='Issue1197' fullname='Issue1197' runstate='Runnable' testcasecount='2'>
+         <test-suite type='TestFixture' id='0-1008' name='AnotherTestClass' fullname='Issue1197.AnotherTestClass' classname='Issue1197.AnotherTestClass' runstate='Explicit' testcasecount='1'>
+            <test-case id='0-1003' name='AnotherTest' fullname='Issue1197.AnotherTestClass.AnotherTest' methodname='AnotherTest' classname='Issue1197.AnotherTestClass' runstate='Runnable' seed='50170131' />
+         </test-suite>
+         <test-suite type='TestFixture' id='0-1009' name='MyTestClass' fullname='Issue1197.MyTestClass' classname='Issue1197.MyTestClass' runstate='Ignored' testcasecount='1'>
+            <test-case id='0-1001' name='MyTest' fullname='Issue1197.MyTestClass.MyTest' methodname='MyTest' classname='Issue1197.MyTestClass' runstate='Runnable' seed='1658314777' />
+         </test-suite>
+         %EXTRA%
+      </test-suite>
+   </test-suite>
+</test-run>";
+
+    private const string RunnableFixtureXml =
+        @"<test-suite type='TestFixture' id='0-1010' name='PlainTestClass' fullname='Issue1197.PlainTestClass' classname='Issue1197.PlainTestClass' runstate='Runnable' testcasecount='1'>
+            <test-case id='0-1002' name='PlainTest' fullname='Issue1197.PlainTestClass.PlainTest' methodname='PlainTest' classname='Issue1197.PlainTestClass' runstate='Runnable' seed='12345' />
+         </test-suite>";
+
+    [Test]
+    public void ThatAnIgnoredFixtureDoesNotStopAnExplicitRun()
+    {
+        var sut = new DiscoveryConverter(logger, settings);
+        var ndr = sut.ConvertXml(
+            new NUnitResults(XmlHelper.CreateXmlNode(ExplicitAndIgnoredFixturesXml.Replace("%EXTRA%", ""))));
+        Assert.That(ndr.IsExplicit, Is.True);
+    }
+
+    [Test]
+    public void ThatARunnableFixtureStillStopsAnExplicitRun()
+    {
+        var sut = new DiscoveryConverter(logger, settings);
+        var ndr = sut.ConvertXml(
+            new NUnitResults(XmlHelper.CreateXmlNode(ExplicitAndIgnoredFixturesXml.Replace("%EXTRA%", RunnableFixtureXml))));
+        Assert.That(ndr.IsExplicit, Is.False);
+    }
+
     private const string ExplicitRun =
         @"<test-run id='0' name='Issue545.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter.issues\Issue545\Issue545\bin\Debug\Issue545.dll' runstate='Runnable' testcasecount='2'>
    <test-suite type='Assembly' id='0-1007' name='Issue545.dll' fullname='D:\repos\NUnit\nunit3-vs-adapter.issues\Issue545\Issue545\bin\Debug\Issue545.dll' runstate='Runnable' testcasecount='2'>
