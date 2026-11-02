@@ -24,16 +24,6 @@
       "allowedVersions": "17.13.0"
     },
     {
-      "description": "A bare version in a nuspec is a minimum version. Bump it instead of treating the newer version as already allowed",
-      "matchManagers": [
-        "custom.regex"
-      ],
-      "matchFileNames": [
-        "nuget/NUnit3TestAdapter.nuspec"
-      ],
-      "rangeStrategy": "bump"
-    },
-    {
       "description": "The net8.0 group in the nuspec stays on DependencyModel 8.x",
       "matchManagers": [
         "custom.regex"
@@ -81,14 +71,15 @@
   "customManagers": [
     {
       "customType": "regex",
-      "description": "NuGet dependencies in the nuspec",
+      "description": "NuGet dependencies in the nuspec. With nuget versioning a bare 2.5.1 is a range (2.5.1 or higher), and a custom manager gets no rangeStrategy, so Renovate never bumps it. loose versioning reads it as one version",
       "managerFilePatterns": [
         "/^nuget/NUnit3TestAdapter\\.nuspec$/"
       ],
       "matchStrings": [
         "<dependency id=\"(?<depName>[^\"]+)\" version=\"(?<currentValue>[^\"]+)\""
       ],
-      "datasourceTemplate": "nuget"
+      "datasourceTemplate": "nuget",
+      "versioningTemplate": "loose"
     }
   ]
 }
