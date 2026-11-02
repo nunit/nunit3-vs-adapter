@@ -24,6 +24,16 @@
       "allowedVersions": "17.13.0"
     },
     {
+      "description": "A bare version in a nuspec is a minimum version. Bump it instead of treating the newer version as already allowed",
+      "matchManagers": [
+        "custom.regex"
+      ],
+      "matchFileNames": [
+        "nuget/NUnit3TestAdapter.nuspec"
+      ],
+      "rangeStrategy": "bump"
+    },
+    {
       "description": "The net8.0 group in the nuspec stays on DependencyModel 8.x",
       "matchManagers": [
         "custom.regex"
