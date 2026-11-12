@@ -16,7 +16,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance;
 public class Issue1513Tests : AcceptanceTests
 {
     // Same MTP version as Microsoft.Testing.Extensions.VSTestBridge in Directory.Packages.props.
-    private const string MicrosoftTestingPlatformVersion = "2.5.1";
+    private const string MicrosoftTestingPlatformVersion = "3.0.0-preview.26560.14";
 
     private static readonly string[] Fixtures = ["Fixture(\"A\")", "Fixture(\"B\")", "Fixture(\")\")"];
 
