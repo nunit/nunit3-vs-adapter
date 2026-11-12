@@ -24,7 +24,7 @@ public abstract class MtpCsProjAcceptanceTests : CsProjAcceptanceTests
     /// step with the Microsoft.Testing.* versions in <c>Directory.Packages.props</c> and the
     /// dependency versions in <c>nuget/NUnit3TestAdapter.nuspec</c>.
     /// </summary>
-    protected const string TestingPlatformTrxReportVersion = "2.4.1";
+    protected const string TestingPlatformTrxReportVersion = "3.0.0-preview.26560.14";
 
     /// <summary>
     /// Path of the built test application, relative to the workspace.
