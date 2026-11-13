@@ -85,6 +85,7 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
     private readonly object _dumpLock = new object();
     private readonly HashSet<TestCase> _runningTests = new HashSet<TestCase>();
     private readonly object _runningTestsLock = new object();
+    private readonly bool _cancelKeyPressSubscribed;
     private bool IsMTP { get; }
     private volatile bool _cancelled = false;
     private volatile bool _disposed = false;
@@ -127,7 +128,24 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
         if (isMTP)
         {
             AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
-            Console.CancelKeyPress += OnCancelKeyPress;
+            _cancelKeyPressSubscribed = TrySubscribeToCancelKeyPress(() => Console.CancelKeyPress += OnCancelKeyPress);
+        }
+    }
+
+    /// <summary>
+    /// Console.CancelKeyPress throws PlatformNotSupportedException on Android, iOS, tvOS and browser,
+    /// where there is no console to press Ctrl+C in. Skip the handler there instead of failing the run.
+    /// </summary>
+    internal static bool TrySubscribeToCancelKeyPress(Action subscribe)
+    {
+        try
+        {
+            subscribe();
+            return true;
+        }
+        catch (PlatformNotSupportedException)
+        {
+            return false;
         }
     }
 
@@ -469,7 +487,8 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
                 try
                 {
                     AppDomain.CurrentDomain.ProcessExit -= OnProcessExit;
-                    Console.CancelKeyPress -= OnCancelKeyPress;
+                    if (_cancelKeyPressSubscribed)
+                        Console.CancelKeyPress -= OnCancelKeyPress;
                 }
                 catch (Exception ex)
                 {
