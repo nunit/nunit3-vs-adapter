@@ -71,7 +71,7 @@ public sealed class NUnit3TestDiscoverer : NUnitTestAdapter, ITestDiscoverer
         {
             try
             {
-                nunitFilter = new TestFilter(new TestFilterParser().Parse(unparsed.TestCaseFilterValue));
+                nunitFilter = new TestFilter(new LegacyTestFilterParser().Parse(unparsed.TestCaseFilterValue));
             }
             catch (TestFilterParserException ex)
             {

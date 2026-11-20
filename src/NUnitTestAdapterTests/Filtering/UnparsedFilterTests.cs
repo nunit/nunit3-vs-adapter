@@ -59,7 +59,7 @@ public class UnparsedFilterTests
         var vsFilter = CreateFilterRejectedByVSTest(filter);
 
         Assert.That(vsFilter.IsEmpty, Is.False);
-        Assert.That(new TestFilterParser().Parse(vsFilter.MsTestCaseFilterExpression.TestCaseFilterValue), Is.EqualTo(expected));
+        Assert.That(new LegacyTestFilterParser().Parse(vsFilter.MsTestCaseFilterExpression.TestCaseFilterValue), Is.EqualTo(expected));
     }
 
     [Test]

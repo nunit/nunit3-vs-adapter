@@ -32,7 +32,7 @@ using System.Xml;
 
 namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter;
 
-public class TestFilterParser
+public class LegacyTestFilterParser
 {
     private Tokenizer _tokenizer;
 

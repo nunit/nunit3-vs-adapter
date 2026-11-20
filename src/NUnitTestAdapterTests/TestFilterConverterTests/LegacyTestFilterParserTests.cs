@@ -28,14 +28,14 @@ using NUnit.VisualStudio.TestAdapter.TestFilterConverter;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.TestFilterConverterTests;
 
-public class TestFilterParserTests
+public class LegacyTestFilterParserTests
 {
-    private TestFilterParser _parser;
+    private LegacyTestFilterParser _parser;
 
     [SetUp]
     public void CreateParser()
     {
-        _parser = new TestFilterParser();
+        _parser = new LegacyTestFilterParser();
     }
 
     // Default

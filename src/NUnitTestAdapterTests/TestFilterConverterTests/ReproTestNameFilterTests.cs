@@ -52,7 +52,7 @@ public class ReproTestNameFilterTests
         """ValuesTests.Test2("\\")""",
     ];
 
-    // "Name with & and &amp;" from Issue1502 is only in the fast path test: TestFilterParser
+    // "Name with & and &amp;" from Issue1502 is only in the fast path test: LegacyTestFilterParser
     // does not support spaces outside an argument list (issue 876).
     private static readonly string[] FastPathOnlyNames =
     [
@@ -66,7 +66,7 @@ public class ReproTestNameFilterTests
     {
         string filter = "FullyQualifiedName=" + FilterHelper.Escape(fullName);
 
-        Assert.That(new TestFilterParser().Parse(filter), Is.EqualTo($"<filter><test>{XmlEscape(fullName)}</test></filter>"));
+        Assert.That(new LegacyTestFilterParser().Parse(filter), Is.EqualTo($"<filter><test>{XmlEscape(fullName)}</test></filter>"));
     }
 
     [TestCaseSource(nameof(AllNames))]

@@ -141,7 +141,7 @@ public class FilterParsingDefectTests
         Assert.That(() => Parse(filter), Throws.TypeOf<TestFilterParserException>());
     }
 
-    private static string Parse(string filter) => new TestFilterParser().Parse(filter);
+    private static string Parse(string filter) => new LegacyTestFilterParser().Parse(filter);
 
     /// <summary>
     /// The MTP fast path has its own unescaping, built from <c>WebUtility.HtmlDecode</c> and

@@ -44,7 +44,7 @@ public class TestFilterParserConformanceTests
     [TestCaseSource(nameof(SharedCases))]
     public void SharedCasesProduceSameExpectedXml((string Filter, string Xml) testCase)
     {
-        string oldXml = new TestFilterParser().Parse(testCase.Filter);
+        string oldXml = new LegacyTestFilterParser().Parse(testCase.Filter);
         string newXml = new VSTestFilterParser().Parse(testCase.Filter).ToXml();
 
         using (Assert.EnterMultipleScope())
@@ -62,7 +62,7 @@ public class TestFilterParserConformanceTests
     {
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(new TestFilterParser().Parse(filter), Is.EqualTo(oldXml));
+            Assert.That(new LegacyTestFilterParser().Parse(filter), Is.EqualTo(oldXml));
             Assert.That(new VSTestFilterParser().Parse(filter).ToXml(), Is.EqualTo(newXml));
         }
     }
@@ -155,7 +155,7 @@ public class TestFilterParserConformanceTests
     [TestCase("FullyQualifiedName=Ns.Fixture.Method", "Ns.Fixture.Method", true)]
     public void LegacyParserXmlSelectsSimpleNames(string filter, string name, bool expectedSelected)
     {
-        string xml = new TestFilterParser().Parse(filter);
+        string xml = new LegacyTestFilterParser().Parse(filter);
         var element = XElement.Parse(xml).Element("name") ?? XElement.Parse(xml).Element("test");
         Assert.That(element, Is.Not.Null, xml);
         bool selected = element!.Attribute("re")?.Value == "1"

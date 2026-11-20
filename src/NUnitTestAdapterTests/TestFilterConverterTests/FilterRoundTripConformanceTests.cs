@@ -157,7 +157,7 @@ public class FilterRoundTripConformanceTests
         string filter = BuildFilter(fullName);
         string expected = $"<filter><test>{XmlEscape(fullName)}</test></filter>";
 
-        Assert.That(new TestFilterParser().Parse(filter), Is.EqualTo(expected),
+        Assert.That(new LegacyTestFilterParser().Parse(filter), Is.EqualTo(expected),
             $"Filter '{filter}' should select '{fullName}'.");
     }
 
@@ -173,7 +173,7 @@ public class FilterRoundTripConformanceTests
         string filter = BuildFilter(fullName);
 
         string produced = null;
-        Assert.That(() => produced = new TestFilterParser().Parse(filter), Throws.Nothing,
+        Assert.That(() => produced = new LegacyTestFilterParser().Parse(filter), Throws.Nothing,
             $"Filter '{filter}' should parse.");
 
         Assert.That(() => new XmlDocument().LoadXml(produced), Throws.Nothing,
@@ -194,7 +194,7 @@ public class FilterRoundTripConformanceTests
         string filter = "Name=" + Escape(name);
         string expected = $"<filter><name>{XmlEscape(name)}</name></filter>";
 
-        Assert.That(new TestFilterParser().Parse(filter), Is.EqualTo(expected),
+        Assert.That(new LegacyTestFilterParser().Parse(filter), Is.EqualTo(expected),
             $"Filter '{filter}' should select the test named '{name}'.");
     }
 
@@ -214,7 +214,7 @@ public class FilterRoundTripConformanceTests
         string filter = "TestCategory=" + Escape(category);
         string expected = $"<filter><cat>{XmlEscape(category)}</cat></filter>";
 
-        Assert.That(new TestFilterParser().Parse(filter), Is.EqualTo(expected),
+        Assert.That(new LegacyTestFilterParser().Parse(filter), Is.EqualTo(expected),
             $"Filter '{filter}' should select category '{category}'.");
     }
 
@@ -230,7 +230,7 @@ public class FilterRoundTripConformanceTests
         string filter = $"{name}=" + Escape(value);
         string expected = $"<filter><prop name='{name}'>{XmlEscape(value)}</prop></filter>";
 
-        Assert.That(new TestFilterParser().Parse(filter), Is.EqualTo(expected),
+        Assert.That(new LegacyTestFilterParser().Parse(filter), Is.EqualTo(expected),
             $"Filter '{filter}' should select property {name}='{value}'.");
     }
 
@@ -254,7 +254,7 @@ public class FilterRoundTripConformanceTests
 
         foreach (string filterName in new[] { reportedName, frameworkName })
         {
-            var regex = new Regex(SingleRegex(new TestFilterParser().Parse(BuildFilter(filterName))));
+            var regex = new Regex(SingleRegex(new LegacyTestFilterParser().Parse(BuildFilter(filterName))));
 
             using (Assert.EnterMultipleScope())
             {
@@ -280,7 +280,7 @@ public class FilterRoundTripConformanceTests
         => Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities.FilterHelper.Escape(value);
 
     /// <summary>
-    /// Mirrors the private <c>TestFilterParser.XmlEscape</c>, since the NUnit filter is XML.
+    /// Mirrors the private <c>LegacyTestFilterParser.XmlEscape</c>, since the NUnit filter is XML.
     /// </summary>
     private static string XmlEscape(string text)
         => text

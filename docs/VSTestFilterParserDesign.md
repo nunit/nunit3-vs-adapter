@@ -6,9 +6,10 @@ This document describes the filter parser and NUnit XML model implemented on
 `feature/v7-test-filter-parser`. It is intended to make the design and its integration boundary
 clear during review.
 
-The parser is currently isolated: adapter production code does not call it. The existing
-`TestFilterParser` remains unchanged and continues to determine product behavior. This branch adds
-a candidate parser and its tests; it does not switch users to the stricter grammar.
+`VSTestFilterParser` remains isolated from adapter production code. The legacy implementation is
+now named `LegacyTestFilterParser`. It retains the existing XML-string API and legacy behavior.
+Production call sites continue to use it, so the VSTest-conformant grammar is not yet exposed to
+users.
 
 This design follows the escape-aware parsing approach described in
 [TestFilterParsing-v7.md](./TestFilterParsing-v7.md), but does not implement that document's
@@ -126,7 +127,10 @@ Output: <filter><and><or><name>First</name><name>Second</name></or><prop name='P
 This parser intentionally treats unescaped parentheses as grouping, so filters accepted by the
 legacy parser as literal names may need escaping or may now be rejected. It also rejects malformed
 structure rather than relying on permissive or ambiguous interpretation. That behavior is not
-currently exposed to adapter users because no production call site selects this parser.
+currently exposed to adapter users because no production call site selects this parser. The
+production call sites continue to use `LegacyTestFilterParser`, which returns NUnit filter XML
+and preserves legacy-specific behavior, including `Category` as a generic property and
+`!(...)` group negation.
 
 `Microsoft.TestPlatform.Filter.Source` is used by tests as a VSTest reference; it is not added as
 a product dependency. The parser owns tokenization and conversion to NUnit XML. The NUnit engine
@@ -138,12 +142,14 @@ exclusion and assembly selection limits remain outside this API.
 [`FilterModelTests`](../src/NUnitTestAdapterTests/TestFilterConverterTests/FilterModelTests.cs)
 cover model serialization and escaping.
 [`TestFilterParserConformanceTests`](../src/NUnitTestAdapterTests/TestFilterConverterTests/TestFilterParserConformanceTests.cs)
-cover shared behavior against the legacy parser,
+cover shared behavior against `LegacyTestFilterParser`,
 intentional differences, malformed input and error positions, VSTest matching of representative
 escaped filters, and selection of the round-trip full-name corpus from NUnit XML. The intended
 comparison is not that the legacy parser and VSTest are universal oracles: compatibility cases
 and deliberate grammar differences are kept separate.
 
-Eventually in v7, the old `TestFilterParser` and tests will be converted to this new parser and its associated model.
+The eventual integration decision is still open: route production through the VSTest parser,
+possibly using the legacy parser as a compatibility fallback, only after the grammar and
+selection behavior are validated.
 
 🤖 Made by @PanzerFowst with [GitHub Copilot](https://github.com/features/copilot)
