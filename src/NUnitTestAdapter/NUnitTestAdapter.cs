@@ -162,12 +162,15 @@ public abstract class NUnitTestAdapter
 
     public void InitializeForbiddenFolders()
     {
-        ForbiddenFolders = [.. new[]
-        {
-            Environment.GetEnvironmentVariable("ProgramW6432"),
-            Environment.GetEnvironmentVariable("ProgramFiles(x86)"),
-            Environment.GetEnvironmentVariable("windir"),
-        }.Where(o => !string.IsNullOrEmpty(o)).Select(o => o.ToLower() + @"\")];
+        ForbiddenFolders =
+        [
+            .. new[]
+            {
+                Environment.GetEnvironmentVariable("ProgramW6432"),
+                Environment.GetEnvironmentVariable("ProgramFiles(x86)"),
+                Environment.GetEnvironmentVariable("windir"),
+            }.Where(o => !string.IsNullOrEmpty(o)).Select(o => o.ToLower() + @"\")
+        ];
     }
 
     private void SetCurrentWorkingDirectory()

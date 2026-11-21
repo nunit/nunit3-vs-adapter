@@ -108,7 +108,10 @@ public class TestConverterForXmlTests
 
         // Checking Class level attributes base class & dervied class
         CheckNodeProperties(traitsCache, "0-1000", [new KeyValuePair<string, string>("Category", "BaseClass")]);
-        CheckNodeProperties(traitsCache, "0-1002", [new KeyValuePair<string, string>("Category", "DerivedClass"), new KeyValuePair<string, string>("Category", "BaseClass")
+        CheckNodeProperties(traitsCache, "0-1002",
+        [
+            new KeyValuePair<string, string>("Category", "DerivedClass"),
+            new KeyValuePair<string, string>("Category", "BaseClass")
         ]);
 
         // Checking Nested class attributes.
