@@ -37,6 +37,17 @@
       "allowedVersions": "<9.0.0"
     },
     {
+      "description": "Match nuspec versioning for shared package references",
+      "matchManagers": [
+        "nuget"
+      ],
+      "matchPackageNames": [
+        "Microsoft.Testing.Extensions.VSTestBridge",
+        "Microsoft.TestPlatform.AdapterUtilities"
+      ],
+      "versioning": "loose"
+    },
+    {
       "description": "Put nuspec updates in the same PR as the props updates",
       "groupName": "NuGet minor updates",
       "matchManagers": [
