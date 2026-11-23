@@ -159,7 +159,7 @@ public class VSTestFilterParser : ITestFilterParser
             {
                 return new TestFilterCondition(
                     property: "FullyQualifiedName",
-                    operation: TestFilterOperations.Contains,
+                    comparison: TestFilterComparison.Contains,
                     value: Unescape(parts[0]));
             }
 
@@ -178,7 +178,7 @@ public class VSTestFilterParser : ITestFilterParser
                 throw Error("A condition is missing its value", parts[1].Position + parts[1].Text.Length);
             }
 
-            return TestFilterOperations.CreateCondition(
+            return VSTestFilterOperators.CreateCondition(
                 property: Unescape(parts[0]),
                 symbol: parts[1].Text,
                 value: Unescape(parts[2]));

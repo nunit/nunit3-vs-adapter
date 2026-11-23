@@ -41,8 +41,8 @@ The supporting model is in
 [`ITestFilterGroup`](../src/NUnitTestAdapter/TestFilterConverter/FilterModel/ITestFilterGroup.cs),
 [`ITestFilterNegation`](../src/NUnitTestAdapter/TestFilterConverter/FilterModel/ITestFilterNegation.cs),
 [`ITestFilterCondition`](../src/NUnitTestAdapter/TestFilterConverter/FilterModel/ITestFilterCondition.cs),
-and
-[`ITestFilterOperation`](../src/NUnitTestAdapter/TestFilterConverter/FilterModel/ITestFilterOperation.cs).
+and the
+[`TestFilterComparison`](../src/NUnitTestAdapter/TestFilterConverter/FilterModel/TestFilterComparison.cs) enum.
 Together they represent the filter as an expression, terms, factors and conditions:
 
 ```text
@@ -52,14 +52,15 @@ ITestFilter
               └── ITestFilterFactor
                     ├── ITestFilterGroup (nested expression)
                     ├── ITestFilterNegation (negated factor)
-                    └── ITestFilterCondition (property, operation, value)
+                    └── ITestFilterCondition (property, comparison, value)
 ```
 
 The concrete model types take their contents in their constructors and expose read-only
-properties. There are two shared operation instances, for `=` and `~`, described by their symbol
-and whether they use regex matching. The `!=` and `!~` operators are represented as a condition
-wrapped in an `ITestFilterNegation`. `TestFilterOperations.CreateCondition` builds the right
-factor from an operator symbol.
+properties. A condition's `TestFilterComparison` is `Exact` for `=` or `Contains` for `~`. The `!=`
+and `!~` operators are represented as a condition wrapped in an `ITestFilterNegation`. The model
+holds no operator syntax. Operators belong to a filter syntax, so each parser maps its own
+symbols to the model. The VSTest and legacy parsers share the same syntax, and the internal
+`VSTestFilterOperators.CreateCondition` builds the right factor from an operator symbol.
 
 ## Grammar and parsing
 
@@ -103,7 +104,8 @@ Each model node serializes its own part of the filter:
 | Expression | A single term is emitted directly; multiple terms use `<or>`. |
 | Term | A single factor is emitted directly; multiple factors use `<and>`. |
 | Group | Emits its nested expression without an additional wrapper. |
-| Condition | Emits the property element, optional regex attribute, and optional negation. |
+| Negation | Wraps its operand in `<not>`. |
+| Condition | Emits the property element, with the regex attribute for a contains comparison. |
 
 Condition property names map as follows:
 
@@ -114,8 +116,8 @@ Condition property names map as follows:
 | `Category` or `TestCategory` | `<cat>` |
 | Any other property, including `Priority` and `Property` | `<prop name='…'>` |
 
-`~` and `!~` set `re='1'` and escape regex metacharacters in the value. `!=` and `!~` wrap the
-property element in `<not>`. The value and generic property name are XML-escaped by
+`~` and `!~` (a `Contains` comparison) set `re='1'` and escape regex metacharacters in the value,
+because NUnit XML has no contains element. `!=` and `!~` wrap the property element in `<not>`. The value and generic property name are XML-escaped by
 [`XmlEscaperHelper`](../src/NUnitTestAdapter/TestFilterConverter/FilterModel/XmlEscaperHelper.cs);
 VSTest escape processing belongs to the parser, not the model.
 

@@ -13,9 +13,9 @@ public interface ITestFilterCondition : ITestFilterFactor
     string Property { get; }
 
     /// <summary>
-    /// Gets the comparison operation.
+    /// Gets how the property is compared with the value.
     /// </summary>
-    ITestFilterOperation Operation { get; }
+    TestFilterComparison Comparison { get; }
 
     /// <summary>
     /// Gets the comparison value.

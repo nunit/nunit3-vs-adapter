@@ -1,6 +1,7 @@
 #nullable enable
 
 using NUnit.Framework;
+using NUnit.VisualStudio.TestAdapter.TestFilterConverter;
 using NUnit.VisualStudio.TestAdapter.TestFilterConverter.FilterModel;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.TestFilterConverterTests;
@@ -11,7 +12,7 @@ public class FilterModelTests
     public void FilterWritesRootElement()
     {
         var expression = new TestFilterExpression(
-            [new TestFilterTerm([Condition("FullyQualifiedName", TestFilterOperations.Equal, "Ns.Fixture.Test")])]);
+            [new TestFilterTerm([Condition("FullyQualifiedName", TestFilterComparison.Exact, "Ns.Fixture.Test")])]);
 
         Assert.That(
             new TestFilter(expression).ToXml(),
@@ -22,7 +23,7 @@ public class FilterModelTests
     public void ExpressionWritesSingleTermWithoutOrWrapper()
     {
         var expression = new TestFilterExpression(
-            [new TestFilterTerm([Condition("Name", TestFilterOperations.Equal, "Test")])]);
+            [new TestFilterTerm([Condition("Name", TestFilterComparison.Exact, "Test")])]);
 
         Assert.That(expression.ToXml(), Is.EqualTo("<name>Test</name>"));
     }
@@ -32,8 +33,8 @@ public class FilterModelTests
     {
         var expression = new TestFilterExpression(
         [
-            new TestFilterTerm([Condition("Name", TestFilterOperations.Equal, "First")]),
-            new TestFilterTerm([Condition("Name", TestFilterOperations.Equal, "Second")]),
+            new TestFilterTerm([Condition("Name", TestFilterComparison.Exact, "First")]),
+            new TestFilterTerm([Condition("Name", TestFilterComparison.Exact, "Second")]),
         ]);
 
         Assert.That(
@@ -44,7 +45,7 @@ public class FilterModelTests
     [Test]
     public void TermWritesSingleFactorWithoutAndWrapper()
     {
-        var term = new TestFilterTerm([Condition("Name", TestFilterOperations.Equal, "Test")]);
+        var term = new TestFilterTerm([Condition("Name", TestFilterComparison.Exact, "Test")]);
 
         Assert.That(term.ToXml(), Is.EqualTo("<name>Test</name>"));
     }
@@ -54,8 +55,8 @@ public class FilterModelTests
     {
         var term = new TestFilterTerm(
         [
-            Condition("Name", TestFilterOperations.Equal, "Test"),
-            Condition("Priority", TestFilterOperations.Equal, "High")
+            Condition("Name", TestFilterComparison.Exact, "Test"),
+            Condition("Priority", TestFilterComparison.Exact, "High")
         ]);
 
         Assert.That(
@@ -68,8 +69,8 @@ public class FilterModelTests
     {
         var expression = new TestFilterExpression(
         [
-            new TestFilterTerm([Condition("Name", TestFilterOperations.Equal, "First")]),
-            new TestFilterTerm([Condition("Name", TestFilterOperations.Equal, "Second")]),
+            new TestFilterTerm([Condition("Name", TestFilterComparison.Exact, "First")]),
+            new TestFilterTerm([Condition("Name", TestFilterComparison.Exact, "Second")]),
         ]);
 
         Assert.That(
@@ -82,8 +83,8 @@ public class FilterModelTests
     {
         var expression = new TestFilterExpression(
         [
-            new TestFilterTerm([Condition("Name", TestFilterOperations.Equal, "First")]),
-            new TestFilterTerm([Condition("Name", TestFilterOperations.Equal, "Second")]),
+            new TestFilterTerm([Condition("Name", TestFilterComparison.Exact, "First")]),
+            new TestFilterTerm([Condition("Name", TestFilterComparison.Exact, "Second")]),
         ]);
 
         Assert.That(
@@ -101,7 +102,7 @@ public class FilterModelTests
     public void ConditionMapsPropertiesToNUnitElements(string property, string expected)
     {
         Assert.That(
-            Condition(property, TestFilterOperations.Equal, "value").ToXml(),
+            Condition(property, TestFilterComparison.Exact, "value").ToXml(),
             Is.EqualTo(expected));
     }
 
@@ -112,7 +113,7 @@ public class FilterModelTests
     public void CreateConditionWritesEachOperator(string symbol, string expected)
     {
         Assert.That(
-            TestFilterOperations.CreateCondition("Priority", symbol, "a.b(c)").ToXml(),
+            VSTestFilterOperators.CreateCondition("Priority", symbol, "a.b(c)").ToXml(),
             Is.EqualTo(expected));
     }
 
@@ -120,14 +121,22 @@ public class FilterModelTests
     public void CreateConditionRejectsUnknownOperator()
     {
         Assert.That(
-            () => TestFilterOperations.CreateCondition("Priority", "!", "value"),
+            () => VSTestFilterOperators.CreateCondition("Priority", "!", "value"),
             Throws.ArgumentException);
+    }
+
+    [Test]
+    public void ConditionRejectsUndefinedComparison()
+    {
+        Assert.That(
+            () => Condition("Name", (TestFilterComparison)99, "value"),
+            Throws.InstanceOf<System.ArgumentOutOfRangeException>());
     }
 
     [Test]
     public void ConditionEscapesPropertyNamesAndValuesForXml()
     {
-        var condition = Condition("Custom&'Property", TestFilterOperations.Equal, "\"<value>&'");
+        var condition = Condition("Custom&'Property", TestFilterComparison.Exact, "\"<value>&'");
 
         Assert.That(
             condition.ToXml(),
@@ -144,6 +153,6 @@ public class FilterModelTests
             Is.EqualTo(value));
     }
 
-    private static TestFilterCondition Condition(string property, ITestFilterOperation operation, string value)
-        => new(property, operation, value);
+    private static TestFilterCondition Condition(string property, TestFilterComparison comparison, string value)
+        => new(property, comparison, value);
 }

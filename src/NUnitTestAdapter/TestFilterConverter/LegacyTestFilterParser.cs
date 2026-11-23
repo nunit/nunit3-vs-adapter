@@ -1,4 +1,4 @@
-﻿// ***********************************************************************
+// ***********************************************************************
 // Copyright (c) 2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -113,7 +113,7 @@ public class LegacyTestFilterParser : ITestFilterParser
             {
                 return new TestFilterCondition(
                     "FullyQualifiedName",
-                    TestFilterOperations.Contains,
+                    TestFilterComparison.Contains,
                     UnEscape(lhs.Text));
             }
 
@@ -128,7 +128,7 @@ public class LegacyTestFilterParser : ITestFilterParser
                 rhs = Expect(TokenKind.String, TokenKind.FQN, TokenKind.Word);
             }
 
-            return TestFilterOperations.CreateCondition(
+            return VSTestFilterOperators.CreateCondition(
                 lhs.Text,
                 op.Text,
                 UnEscape(rhs.Text));
