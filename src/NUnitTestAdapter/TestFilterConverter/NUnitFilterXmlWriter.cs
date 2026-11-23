@@ -71,12 +71,12 @@ public sealed class NUnitFilterXmlWriter : ITestFilterVisitor<string>
             _ => throw new InvalidOperationException($"Unknown comparison '{condition.Comparison}'."),
         };
 
-        if ((elementName is "test" or "name") && TestNameFilter.NeedsRegex(value))
+        if ((elementName is "test" or "name") && TestNameRegex.NeedsRegex(value))
         {
-            string regex = TestNameFilter.ToRegex(value);
+            string regex = TestNameRegex.ToRegex(value);
             if (!isContains)
             {
-                regex = TestNameFilter.Exact(regex);
+                regex = TestNameRegex.Exact(regex);
             }
 
             return $"<{elementName} re='1'>{EscapeXml(regex)}</{elementName}>";

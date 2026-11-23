@@ -30,6 +30,7 @@ using NUnit.Engine;
 using NUnit.VisualStudio.TestAdapter.Dump;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 using NUnit.VisualStudio.TestAdapter.TestFilterConverter;
+using FilterModel = NUnit.VisualStudio.TestAdapter.TestFilterConverter.FilterModel;
 
 namespace NUnit.VisualStudio.TestAdapter;
 
@@ -158,18 +159,19 @@ public class NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSe
         return FilterByNames(testCases.Select(t => t.FullyQualifiedName).ToList());
     }
 
-    /// <summary>
-    /// A filter for these test full names. A name with a character NUnit writes as \uXXXX needs a
-    /// regular expression (see <see cref="TestNameFilter"/>); otherwise the engine builds it.
-    /// </summary>
-    private TestFilter FilterByNames(IReadOnlyCollection<string> fullNames)
+    private static TestFilter FilterByNames(IReadOnlyCollection<string> fullNames)
     {
-        if (fullNames.Any(TestNameFilter.NeedsRegex))
-            return new TestFilter(TestNameFilter.ForNames(fullNames));
+        return fullNames.Count == 0
+            ? TestFilter.Empty
+            : new TestFilter(NameFilter(fullNames).ToNUnitXml());
+    }
 
-        var filterBuilder = _filterService.GetTestFilterBuilder();
-        foreach (var fullName in fullNames)
-            filterBuilder.AddTest(fullName);
-        return filterBuilder.GetFilter();
+    /// <summary>
+    /// The filter model that selects each of these test full names exactly.
+    /// </summary>
+    internal static FilterModel.ITestFilter NameFilter(IEnumerable<string> fullNames)
+    {
+        return new FilterModel.TestFilter(new FilterModel.TestFilterExpression(fullNames.Select(fullName =>
+            new FilterModel.TestFilterTerm([new FilterModel.TestFilterCondition("FullyQualifiedName", FilterModel.TestFilterComparison.Exact, fullName)]))));
     }
 }
