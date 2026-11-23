@@ -87,6 +87,7 @@ public class AdapterSettingsTests
             Assert.That(_settings.UseTestOutputXml, Is.False);
             Assert.That(_settings.NewOutputXmlFileForEachRun, Is.False);
             Assert.That(_settings.UseHierarchyProperty, Is.False);
+            Assert.That(_settings.FilterParser, Is.EqualTo(FilterParserType.Default));
         });
     }
 
@@ -388,6 +389,15 @@ public class AdapterSettingsTests
     {
         _settings.Load($"<RunSettings><NUnit><ExplicitMode>{explicitMode}</ExplicitMode></NUnit></RunSettings>");
         Assert.That(_settings.ExplicitMode, Is.EqualTo(expected));
+    }
+
+    [TestCase("Default", FilterParserType.Default)]
+    [TestCase("VSTest", FilterParserType.VSTest)]
+    [TestCase("Legacy", FilterParserType.Legacy)]
+    public void FilterParser(string filterParser, FilterParserType expected)
+    {
+        _settings.Load($"<RunSettings><NUnit><FilterParser>{filterParser}</FilterParser></NUnit></RunSettings>");
+        Assert.That(_settings.FilterParser, Is.EqualTo(expected));
     }
 
     [Test]

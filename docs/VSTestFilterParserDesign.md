@@ -6,14 +6,16 @@ This document describes the filter parser and NUnit XML model implemented on
 `feature/v7-test-filter-parser`. It is intended to make the design and its integration boundary
 clear during review.
 
-`VSTestFilterParser` remains isolated from adapter production code. The legacy implementation is
-now named `LegacyTestFilterParser`. It retains the existing XML-string API and legacy behavior.
-Production call sites continue to use it, so the VSTest-conformant grammar is not yet exposed to
-users.
+The legacy implementation is now named `LegacyTestFilterParser`. It implements the same
+`ITestFilterParser` interface and keeps its legacy behavior. By default the adapter uses
+`DefaultTestFilterParser`, which tries `VSTestFilterParser` first and uses `LegacyTestFilterParser`
+for a filter the VSTest parser rejects, so existing filters keep working. The `FilterParser` run
+setting selects one parser on its own (see [Selecting the parser](#selecting-the-parser)).
 
 This design follows the escape-aware parsing approach described in
-[TestFilterParsing-v7.md](./TestFilterParsing-v7.md), but does not implement that document's
-proposed adapter-wide routing or MTP changes.
+[TestFilterParsing-v7.md](./TestFilterParsing-v7.md). The adapter's general filter path uses it by
+default, but the MTP fast path (`FullyQualifiedNameFilterParser`) is not yet routed through it,
+and that document's other MTP changes are not implemented.
 
 ## Public API
 
@@ -141,11 +143,48 @@ Output: <filter><and><or><name>First</name><name>Second</name></or><prop name='P
 
 This parser intentionally treats unescaped parentheses as grouping, so filters accepted by the
 legacy parser as literal names may need escaping or may now be rejected. It also rejects malformed
-structure rather than relying on permissive or ambiguous interpretation. That behavior is not
-currently exposed to adapter users because no production call site selects this parser. The
-production call sites continue to use `LegacyTestFilterParser`, which returns NUnit filter XML
-and preserves legacy-specific behavior, including `Category` as a generic property and
-`!(...)` group negation.
+structure rather than relying on permissive or ambiguous interpretation, and it has no `!(...)`
+group negation. With the default `DefaultTestFilterParser`, such a filter goes to
+`LegacyTestFilterParser` and gets the filter it got before. A filter both parsers accept gives the
+same NUnit XML from either parser, as far as the conformance tests and the round-trip corpus show,
+so the default is not expected to change which tests a filter selects.
+
+The production call sites (`NUnit3TestDiscoverer` and `NUnitTestFilterBuilder`) take their parser
+from `NUnitTestAdapter.FilterParser`. The test platform creates the discoverer and executor, so
+that property, set in `Initialize` from the run settings, is the one place where the parser is
+chosen; `NUnitTestFilterBuilder` receives it through its constructor.
+
+### Selecting the parser
+
+The `FilterParser` run setting selects the parser:
+
+| Value | Parser |
+|-------|--------|
+| `Default` (the default) | `DefaultTestFilterParser`: `VSTestFilterParser`, then `LegacyTestFilterParser` for a filter it rejects |
+| `VSTest` | `VSTestFilterParser` only; a filter it rejects is an error |
+| `Legacy` | `LegacyTestFilterParser` only, the 6.x behavior |
+
+In a `.runsettings` file:
+
+```xml
+<RunSettings>
+  <NUnit>
+    <FilterParser>VSTest</FilterParser>
+  </NUnit>
+</RunSettings>
+```
+
+With VSTest it can also be given on the command line, like any NUnit run setting:
+
+```text
+dotnet test --filter "FullyQualifiedName=A.B" -- NUnit.FilterParser=VSTest
+```
+
+`DefaultTestFilterParser` takes an ordered list of parsers, so another parser can be added to the
+chain. Each parser that rejects the filter with a `TestFilterParserException` is logged at Info
+level, with the filter and the reason, and the next parser is tried. When every parser rejects
+the filter, the last parser's exception is thrown, so with the default order the error is the
+legacy parser's, as before. Other exceptions are not caught.
 
 `Microsoft.TestPlatform.Filter.Source` is used by tests as a VSTest reference; it is not added as
 a product dependency. The parser owns tokenization and conversion to NUnit XML. The NUnit engine
@@ -164,8 +203,13 @@ escaped filters, and selection of the round-trip full-name corpus from NUnit XML
 comparison is not that the legacy parser and VSTest are universal oracles: compatibility cases
 and deliberate grammar differences are kept separate.
 
-The eventual integration decision is still open: route production through the VSTest parser,
-possibly using the legacy parser as a compatibility fallback, only after the grammar and
-selection behavior are validated.
+[`DefaultTestFilterParserTests`](../src/NUnitTestAdapterTests/TestFilterConverterTests/DefaultTestFilterParserTests.cs)
+cover the fallback order, the logging, which error is thrown, and which parser each `FilterParser`
+value selects.
+
+Making `VSTest` the default, without the legacy fallback, is still open. It would break filters
+that only the legacy parser accepts, such as `FullyQualifiedName=A.B(1,2)` and `!(Name=A)`, so
+it belongs in a major version, after the Info messages from the fallback show which filters people
+use.
 
 🤖 Made by @PanzerFowst with [GitHub Copilot](https://github.com/features/copilot)

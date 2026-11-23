@@ -111,6 +111,7 @@ public interface IAdapterSettings
     int AssemblySelectLimit { get; }
 
     bool UseNUnitFilter { get; }
+    FilterParserType FilterParser { get; }
     bool IncludeStackTraceForSuites { get; }
     bool IncludeStackTrace { get;  }
     void Load(IDiscoveryContext context, TestLogger testLogger = null);

@@ -21,6 +21,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -34,9 +35,10 @@ using FilterModel = NUnit.VisualStudio.TestAdapter.TestFilterConverter.FilterMod
 
 namespace NUnit.VisualStudio.TestAdapter;
 
-public class NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSettings settings, IDumpXml dump = null)
+public class NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSettings settings, ITestFilterParser filterParser, IDumpXml dump = null)
 {
     private readonly ITestFilterService _filterService = filterService ?? throw new NUnitEngineException("TestFilterService is not available. Engine in use is incorrect version.");
+    private readonly ITestFilterParser _filterParser = filterParser ?? throw new ArgumentNullException(nameof(filterParser));
 
     // ReSharper disable once StringLiteralTypo
     public static readonly TestFilter NoTestsFound = new("<notestsfound/>");
@@ -67,8 +69,7 @@ public class NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSe
     {
         if (string.IsNullOrEmpty(vsFilter?.MsTestCaseFilterExpression?.TestCaseFilterValue))
             return null;
-        var parser = new LegacyTestFilterParser();
-        var filter = parser.Parse(vsFilter.MsTestCaseFilterExpression.TestCaseFilterValue).ToNUnitXml();
+        var filter = _filterParser.Parse(vsFilter.MsTestCaseFilterExpression.TestCaseFilterValue).ToNUnitXml();
         var tf = new TestFilter(filter);
         if (settings.ExplicitMode == ExplicitModeEnum.None)
         {
@@ -99,8 +100,7 @@ public class NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSe
         }
         // When we are here, we should have a valid MSTest filter that is not just FullyQualifiedName based.
         // From here we use the standard parser and expect real FQN names, categories , etc.
-        var parser = new LegacyTestFilterParser();
-        var filter = parser.Parse(msFilter).ToNUnitXml();
+        var filter = _filterParser.Parse(msFilter).ToNUnitXml();
         var tf = new TestFilter(filter);
         if (settings.ExplicitMode != ExplicitModeEnum.None)
         {
