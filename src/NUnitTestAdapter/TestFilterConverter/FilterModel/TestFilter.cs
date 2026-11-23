@@ -16,8 +16,8 @@ public sealed class TestFilter : ITestFilter
     public ITestFilterExpression Expression { get; }
 
     /// <inheritdoc/>
-    public string ToXml()
+    public T Accept<T>(ITestFilterVisitor<T> visitor)
     {
-        return $"<filter>{Expression.ToXml()}</filter>";
+        return visitor.VisitFilter(this);
     }
 }

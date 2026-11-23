@@ -66,7 +66,7 @@ public class ReproTestNameFilterTests
     {
         string filter = "FullyQualifiedName=" + FilterHelper.Escape(fullName);
 
-        Assert.That(new LegacyTestFilterParser().Parse(filter).ToXml(), Is.EqualTo($"<filter><test>{XmlEscape(fullName)}</test></filter>"));
+        Assert.That(new LegacyTestFilterParser().Parse(filter).ToNUnitXml(), Is.EqualTo($"<filter><test>{XmlEscape(fullName)}</test></filter>"));
     }
 
     [TestCaseSource(nameof(AllNames))]

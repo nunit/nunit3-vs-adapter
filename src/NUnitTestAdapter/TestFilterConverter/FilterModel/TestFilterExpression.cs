@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter.FilterModel;
 
@@ -18,9 +17,9 @@ public sealed class TestFilterExpression : ITestFilterExpression
     public IReadOnlyList<ITestFilterTerm> Terms { get; }
 
     /// <inheritdoc/>
-    public string ToXml()
+    public T Accept<T>(ITestFilterVisitor<T> visitor)
     {
-        return Join("or", Terms);
+        return visitor.VisitExpression(this);
     }
 
     private static IReadOnlyList<T> CopyNonEmpty<T>(IEnumerable<T> source, string parameterName)
@@ -47,22 +46,5 @@ public sealed class TestFilterExpression : ITestFilterExpression
         }
 
         return [.. items];
-    }
-
-    private static string Join<T>(string elementName, IReadOnlyList<T> items)
-        where T : class
-    {
-        if (items.Count is 1)
-        {
-            return ((dynamic)items[0]).ToXml();
-        }
-
-        var xml = new StringBuilder("<").Append(elementName).Append('>');
-        foreach (var item in items)
-        {
-            xml.Append(((dynamic)item).ToXml());
-        }
-
-        return xml.Append("</").Append(elementName).Append('>').ToString();
     }
 }

@@ -16,8 +16,8 @@ public sealed class TestFilterNegation : ITestFilterNegation
     public ITestFilterFactor Operand { get; }
 
     /// <inheritdoc/>
-    public string ToXml()
+    public T Accept<T>(ITestFilterVisitor<T> visitor)
     {
-        return $"<not>{Operand.ToXml()}</not>";
+        return visitor.VisitNegation(this);
     }
 }

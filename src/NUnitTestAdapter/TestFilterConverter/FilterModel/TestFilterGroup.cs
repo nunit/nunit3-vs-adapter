@@ -16,8 +16,8 @@ public sealed class TestFilterGroup : ITestFilterGroup
     public ITestFilterExpression Expression { get; }
 
     /// <inheritdoc/>
-    public string ToXml()
+    public T Accept<T>(ITestFilterVisitor<T> visitor)
     {
-        return Expression.ToXml();
+        return visitor.VisitGroup(this);
     }
 }

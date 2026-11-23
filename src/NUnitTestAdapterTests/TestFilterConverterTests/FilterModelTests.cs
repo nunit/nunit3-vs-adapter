@@ -15,7 +15,7 @@ public class FilterModelTests
             [new TestFilterTerm([Condition("FullyQualifiedName", TestFilterComparison.Exact, "Ns.Fixture.Test")])]);
 
         Assert.That(
-            new TestFilter(expression).ToXml(),
+            new TestFilter(expression).ToNUnitXml(),
             Is.EqualTo("<filter><test>Ns.Fixture.Test</test></filter>"));
     }
 
@@ -25,7 +25,7 @@ public class FilterModelTests
         var expression = new TestFilterExpression(
             [new TestFilterTerm([Condition("Name", TestFilterComparison.Exact, "Test")])]);
 
-        Assert.That(expression.ToXml(), Is.EqualTo("<name>Test</name>"));
+        Assert.That(expression.ToNUnitXml(), Is.EqualTo("<name>Test</name>"));
     }
 
     [Test]
@@ -38,7 +38,7 @@ public class FilterModelTests
         ]);
 
         Assert.That(
-            expression.ToXml(),
+            expression.ToNUnitXml(),
             Is.EqualTo("<or><name>First</name><name>Second</name></or>"));
     }
 
@@ -47,7 +47,7 @@ public class FilterModelTests
     {
         var term = new TestFilterTerm([Condition("Name", TestFilterComparison.Exact, "Test")]);
 
-        Assert.That(term.ToXml(), Is.EqualTo("<name>Test</name>"));
+        Assert.That(term.ToNUnitXml(), Is.EqualTo("<name>Test</name>"));
     }
 
     [Test]
@@ -60,7 +60,7 @@ public class FilterModelTests
         ]);
 
         Assert.That(
-            term.ToXml(),
+            term.ToNUnitXml(),
             Is.EqualTo("<and><name>Test</name><prop name='Priority'>High</prop></and>"));
     }
 
@@ -74,7 +74,7 @@ public class FilterModelTests
         ]);
 
         Assert.That(
-            new TestFilterGroup(expression).ToXml(),
+            new TestFilterGroup(expression).ToNUnitXml(),
             Is.EqualTo("<or><name>First</name><name>Second</name></or>"));
     }
 
@@ -88,7 +88,7 @@ public class FilterModelTests
         ]);
 
         Assert.That(
-            new TestFilterNegation(new TestFilterGroup(expression)).ToXml(),
+            new TestFilterNegation(new TestFilterGroup(expression)).ToNUnitXml(),
             Is.EqualTo("<not><or><name>First</name><name>Second</name></or></not>"));
     }
 
@@ -102,7 +102,7 @@ public class FilterModelTests
     public void ConditionMapsPropertiesToNUnitElements(string property, string expected)
     {
         Assert.That(
-            Condition(property, TestFilterComparison.Exact, "value").ToXml(),
+            Condition(property, TestFilterComparison.Exact, "value").ToNUnitXml(),
             Is.EqualTo(expected));
     }
 
@@ -113,7 +113,7 @@ public class FilterModelTests
     public void CreateConditionWritesEachOperator(string symbol, string expected)
     {
         Assert.That(
-            VSTestFilterOperators.CreateCondition("Priority", symbol, "a.b(c)").ToXml(),
+            VSTestFilterOperators.CreateCondition("Priority", symbol, "a.b(c)").ToNUnitXml(),
             Is.EqualTo(expected));
     }
 
@@ -134,23 +134,19 @@ public class FilterModelTests
     }
 
     [Test]
+    public void XmlWriterHandlesEveryComparison([Values] TestFilterComparison comparison)
+    {
+        Assert.That(() => Condition("Priority", comparison, "value").ToNUnitXml(), Throws.Nothing);
+    }
+
+    [Test]
     public void ConditionEscapesPropertyNamesAndValuesForXml()
     {
         var condition = Condition("Custom&'Property", TestFilterComparison.Exact, "\"<value>&'");
 
         Assert.That(
-            condition.ToXml(),
+            condition.ToNUnitXml(),
             Is.EqualTo("<prop name='Custom&amp;&apos;Property'>&quot;&lt;value&gt;&amp;&apos;</prop>"));
-    }
-
-    [Test]
-    public void XmlEscaperUnescapeReversesEscape()
-    {
-        const string value = "A & B < C > D \"quoted\" and 'apostrophe' &amp;";
-
-        Assert.That(
-            XmlEscaperHelper.Unescape(XmlEscaperHelper.Escape(value)),
-            Is.EqualTo(value));
     }
 
     private static TestFilterCondition Condition(string property, TestFilterComparison comparison, string value)

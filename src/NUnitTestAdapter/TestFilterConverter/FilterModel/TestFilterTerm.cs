@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter.FilterModel;
 
@@ -18,20 +17,9 @@ public sealed class TestFilterTerm : ITestFilterTerm
     public IReadOnlyList<ITestFilterFactor> Factors { get; }
 
     /// <inheritdoc/>
-    public string ToXml()
+    public T Accept<T>(ITestFilterVisitor<T> visitor)
     {
-        if (Factors.Count is 1)
-        {
-            return Factors[0].ToXml();
-        }
-
-        var xml = new StringBuilder("<and>");
-        foreach (var factor in Factors)
-        {
-            xml.Append(factor.ToXml());
-        }
-
-        return xml.Append("</and>").ToString();
+        return visitor.VisitTerm(this);
     }
 
     private static IReadOnlyList<ITestFilterFactor> CopyNonEmpty(IEnumerable<ITestFilterFactor> source, string parameterName)

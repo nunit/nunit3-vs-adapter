@@ -27,7 +27,9 @@ public interface ITestFilterParser
 }
 ```
 
-`Parse` returns an `ITestFilter`, whose `ToXml()` method produces the NUnit filter XML. The parser
+`Parse` returns an `ITestFilter`. The `ToNUnitXml()` extension method, backed by
+[`NUnitFilterXmlWriter`](../src/NUnitTestAdapter/TestFilterConverter/NUnitFilterXmlWriter.cs),
+produces the NUnit filter XML. The parser
 does not return an NUnit engine `TestFilter`, invoke the engine, or change the adapter's filter
 selection path. A null input or invalid filter throws `TestFilterParserException`; syntax errors
 include a position in the input.
@@ -61,6 +63,13 @@ and `!~` operators are represented as a condition wrapped in an `ITestFilterNega
 holds no operator syntax. Operators belong to a filter syntax, so each parser maps its own
 symbols to the model. The VSTest and legacy parsers share the same syntax, and the internal
 `VSTestFilterOperators.CreateCondition` builds the right factor from an operator symbol.
+
+The model also holds no output format. Every node implements
+[`ITestFilterNode`](../src/NUnitTestAdapter/TestFilterConverter/FilterModel/ITestFilterNode.cs),
+whose `Accept` method calls the matching method of an
+[`ITestFilterVisitor<T>`](../src/NUnitTestAdapter/TestFilterConverter/FilterModel/ITestFilterVisitor.cs).
+A visitor gives the filter a meaning for one target, such as NUnit XML today or NUnit JSON or an
+MTP evaluator later, and must handle every node type.
 
 ## Grammar and parsing
 
@@ -96,7 +105,7 @@ reported input position.
 
 ## NUnit XML mapping
 
-Each model node serializes its own part of the filter:
+`NUnitFilterXmlWriter` writes each model node as follows:
 
 | Model node | XML behavior |
 |---|---|
@@ -117,9 +126,9 @@ Condition property names map as follows:
 | Any other property, including `Priority` and `Property` | `<prop name='…'>` |
 
 `~` and `!~` (a `Contains` comparison) set `re='1'` and escape regex metacharacters in the value,
-because NUnit XML has no contains element. `!=` and `!~` wrap the property element in `<not>`. The value and generic property name are XML-escaped by
-[`XmlEscaperHelper`](../src/NUnitTestAdapter/TestFilterConverter/FilterModel/XmlEscaperHelper.cs);
-VSTest escape processing belongs to the parser, not the model.
+because NUnit XML has no contains element. `!=` and `!~` wrap the property element in `<not>`.
+The writer XML-escapes the value and generic property name; VSTest escape processing belongs to
+the parser, not the writer.
 
 For example:
 
@@ -146,7 +155,8 @@ exclusion and assembly selection limits remain outside this API.
 ## Verification in this branch
 
 [`FilterModelTests`](../src/NUnitTestAdapterTests/TestFilterConverterTests/FilterModelTests.cs)
-cover model serialization and escaping.
+cover the model, the operator mapping and NUnit XML writing, including that the writer handles
+every `TestFilterComparison`.
 [`TestFilterParserConformanceTests`](../src/NUnitTestAdapterTests/TestFilterConverterTests/TestFilterParserConformanceTests.cs)
 cover shared behavior against `LegacyTestFilterParser`,
 intentional differences, malformed input and error positions, VSTest matching of representative

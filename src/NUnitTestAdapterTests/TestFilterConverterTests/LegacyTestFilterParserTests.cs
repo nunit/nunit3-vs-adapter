@@ -1,4 +1,4 @@
-﻿// ***********************************************************************
+// ***********************************************************************
 // Copyright (c) 2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -248,7 +248,7 @@ public class LegacyTestFilterParserTests
     [TestCase(@"My.Test.SpaceBefore \(Case 1\)", @"<test re='1'>My\.Test\.SpaceBefore \(Case 1\)</test>")]
     public void TestParser(string input, string output)
     {
-        Assert.That(_parser.Parse(input).ToXml(), Is.EqualTo($"<filter>{output}</filter>"));
+        Assert.That(_parser.Parse(input).ToNUnitXml(), Is.EqualTo($"<filter>{output}</filter>"));
 
         XmlDocument doc = new ();
         Assert.DoesNotThrow(() => doc.LoadXml(output));

@@ -1,4 +1,4 @@
-﻿// ***********************************************************************
+// ***********************************************************************
 // Copyright (c) 2011-2021 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -71,7 +71,7 @@ public sealed class NUnit3TestDiscoverer : NUnitTestAdapter, ITestDiscoverer
         {
             try
             {
-                nunitFilter = new TestFilter(new LegacyTestFilterParser().Parse(unparsed.TestCaseFilterValue).ToXml());
+                nunitFilter = new TestFilter(new LegacyTestFilterParser().Parse(unparsed.TestCaseFilterValue).ToNUnitXml());
             }
             catch (TestFilterParserException ex)
             {

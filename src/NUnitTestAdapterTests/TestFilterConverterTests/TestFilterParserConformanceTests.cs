@@ -44,8 +44,8 @@ public class TestFilterParserConformanceTests
     [TestCaseSource(nameof(SharedCases))]
     public void SharedCasesProduceSameExpectedXml((string Filter, string Xml) testCase)
     {
-        string oldXml = new LegacyTestFilterParser().Parse(testCase.Filter).ToXml();
-        string newXml = new VSTestFilterParser().Parse(testCase.Filter).ToXml();
+        string oldXml = new LegacyTestFilterParser().Parse(testCase.Filter).ToNUnitXml();
+        string newXml = new VSTestFilterParser().Parse(testCase.Filter).ToNUnitXml();
 
         using (Assert.EnterMultipleScope())
         {
@@ -61,8 +61,8 @@ public class TestFilterParserConformanceTests
     {
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(new LegacyTestFilterParser().Parse(filter).ToXml(), Is.EqualTo(expected));
-            Assert.That(new VSTestFilterParser().Parse(filter).ToXml(), Is.EqualTo(expected));
+            Assert.That(new LegacyTestFilterParser().Parse(filter).ToNUnitXml(), Is.EqualTo(expected));
+            Assert.That(new VSTestFilterParser().Parse(filter).ToNUnitXml(), Is.EqualTo(expected));
         }
     }
 
@@ -133,7 +133,7 @@ public class TestFilterParserConformanceTests
         var testCase = new TestCase(fullName, ExecutorUri, Source);
         var vstestExpression = FilteringTestUtils.CreateVSTestFilterExpression(filter);
         var vstestSelected = FilteringTestUtils.CreateTestFilter(vstestExpression).CheckFilter([testCase]);
-        string xml = new VSTestFilterParser().Parse(filter).ToXml();
+        string xml = new VSTestFilterParser().Parse(filter).ToNUnitXml();
 
         Assert.That(
             vstestSelected.Select(test => test.FullyQualifiedName),
@@ -154,7 +154,7 @@ public class TestFilterParserConformanceTests
     [TestCase("FullyQualifiedName=Ns.Fixture.Method", "Ns.Fixture.Method", true)]
     public void LegacyParserXmlSelectsSimpleNames(string filter, string name, bool expectedSelected)
     {
-        string xml = new LegacyTestFilterParser().Parse(filter).ToXml();
+        string xml = new LegacyTestFilterParser().Parse(filter).ToNUnitXml();
         var element = XElement.Parse(xml).Element("name") ?? XElement.Parse(xml).Element("test");
         Assert.That(element, Is.Not.Null, xml);
         bool selected = element!.Attribute("re")?.Value == "1"
