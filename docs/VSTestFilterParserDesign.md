@@ -2,9 +2,8 @@
 
 ## Purpose and status
 
-This document describes the filter parser and NUnit XML model implemented on
-`feature/v7-test-filter-parser`. It is intended to make the design and its integration boundary
-clear during review.
+This document describes the filter parser and the filter model, and how they are used for NUnit
+XML. It is intended to make the design and its integration boundary clear during review.
 
 The legacy implementation is now named `LegacyTestFilterParser`. It implements the same
 `ITestFilterParser` interface and keeps its legacy behavior. By default the adapter uses
