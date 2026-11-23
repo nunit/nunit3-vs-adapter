@@ -34,6 +34,23 @@ public sealed class TestFilterCondition : ITestFilterCondition
             "Category" or "TestCategory" => "cat",
             _ => "prop"
         };
+
+        if ((elementName is "test" or "name") && TestNameFilter.NeedsRegex(Value))
+        {
+            string regex = TestNameFilter.ToRegex(Value);
+            if (Operation.IsNegated is false && Operation.IsRegex is false)
+            {
+                regex = TestNameFilter.Exact(regex);
+            }
+            else if (Operation is { IsNegated: true, IsRegex: false })
+            {
+                regex = TestNameFilter.Exact(regex);
+            }
+
+            string regexElement = $"<{elementName} re='1'>{XmlEscaperHelper.Escape(regex)}</{elementName}>";
+            return Operation.IsNegated ? $"<not>{regexElement}</not>" : regexElement;
+        }
+
         string escapedValue = Operation.IsRegex
             ? EscapeRegexChars(Value)
             : Value;

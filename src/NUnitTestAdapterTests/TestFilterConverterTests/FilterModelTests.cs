@@ -77,6 +77,20 @@ public class FilterModelTests
             Is.EqualTo("<or><name>First</name><name>Second</name></or>"));
     }
 
+    [Test]
+    public void NegationWritesExpressionInsideNotElement()
+    {
+        var expression = new TestFilterExpression(
+        [
+            new TestFilterTerm([Condition("Name", TestFilterOperations.Equal, "First")]),
+            new TestFilterTerm([Condition("Name", TestFilterOperations.Equal, "Second")]),
+        ]);
+
+        Assert.That(
+            new TestFilterNegation(expression).ToXml(),
+            Is.EqualTo("<not><or><name>First</name><name>Second</name></or></not>"));
+    }
+
     [TestCase("FullyQualifiedName", "<test>value</test>")]
     [TestCase("Name", "<name>value</name>")]
     [TestCase("TestCategory", "<cat>value</cat>")]

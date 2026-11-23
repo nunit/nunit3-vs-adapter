@@ -24,15 +24,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Xml;
+using NUnit.VisualStudio.TestAdapter.TestFilterConverter.FilterModel;
 
 // Missing XML Docs
 #pragma warning disable 1591
 
 namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter;
 
-public class LegacyTestFilterParser
+public class LegacyTestFilterParser : ITestFilterParser
 {
     private Tokenizer _tokenizer;
 
@@ -54,26 +53,25 @@ public class LegacyTestFilterParser
 
     private static readonly Token EOF = new(TokenKind.Eof);
 
-    public string Parse(string input)
+    public ITestFilter Parse(string filter)
     {
-            _tokenizer = new Tokenizer(input);
+            _tokenizer = new Tokenizer(filter);
 
             if (_tokenizer.LookAhead == EOF)
                 throw new TestFilterParserException("No input provided for test selection.");
 
-            var result = ParseFilterExpression();
+            var expression = ParseFilterExpression();
 
             Expect(EOF);
-            result = $"<filter>{result}</filter>";
-            return result;
+            return new TestFilter(expression);
         }
 
     /// <summary>
     /// Parse a single term or an or expression, returning the xml.
     /// </summary>
-    public string ParseFilterExpression()
+    public ITestFilterExpression ParseFilterExpression()
     {
-            var terms = new List<string> { ParseFilterTerm() };
+            var terms = new List<ITestFilterTerm> { ParseFilterTerm() };
 
             while (LookingAt(OR_OPS))
             {
@@ -81,50 +79,30 @@ public class LegacyTestFilterParser
                 terms.Add(ParseFilterTerm());
             }
 
-            if (terms.Count == 1)
-                return terms[0];
-
-            var sb = new StringBuilder("<or>");
-
-            foreach (var term in terms)
-                sb.Append(term);
-
-            sb.Append("</or>");
-
-            return sb.ToString();
+            return new TestFilterExpression(terms);
         }
 
     /// <summary>
     /// Parse a single element or an and expression and return the xml.
     /// </summary>
-    public string ParseFilterTerm()
+    public ITestFilterTerm ParseFilterTerm()
     {
-            var elements = new List<string> { ParseFilterCondition() };
+            var factors = new List<ITestFilterFactor> { ParseFilterCondition() };
 
             while (LookingAt(AND_OPS))
             {
                 NextToken();
-                elements.Add(ParseFilterCondition());
+                factors.Add(ParseFilterCondition());
             }
 
-            if (elements.Count == 1)
-                return elements[0];
-
-            var sb = new StringBuilder("<and>");
-
-            foreach (var element in elements)
-                sb.Append(element);
-
-            sb.Append("</and>");
-
-            return sb.ToString();
+            return new TestFilterTerm(factors);
         }
 
     /// <summary>
     /// Parse a single filter element such as a category expression
     /// and return the xml representation of the filter.
     /// </summary>
-    public string ParseFilterCondition()
+    public ITestFilterFactor ParseFilterCondition()
     {
             if (LookingAt(LPAREN, NOT_OP))
                 return ParseExpressionInParentheses();
@@ -132,116 +110,58 @@ public class LegacyTestFilterParser
             var lhs = Expect(TokenKind.Word);
 
             if (!LookingAt(REL_OPS))
-                return EmitFullNameFilter(CONTAINS_OP, UnEscape(lhs.Text));
+            {
+                return new TestFilterCondition(
+                    "FullyQualifiedName",
+                    TestFilterOperations.Contains,
+                    UnEscape(lhs.Text));
+            }
 
             var op = Expect(REL_OPS);
             Token rhs;
-
-            switch (lhs.Text)
+            if (lhs.Text is "FullyQualifiedName" or "TestCategory" or "Priority" or "Name")
             {
-                case "FullyQualifiedName":
-                    rhs = Expect(TokenKind.FQN, TokenKind.Word);
-                    return EmitFullNameFilter(op, UnEscape(rhs.Text));
-                case "TestCategory":
-                    rhs = Expect(TokenKind.FQN, TokenKind.Word);
-                    return EmitCategoryFilter(op, UnEscape(rhs.Text));
-                case "Priority":
-                    rhs = Expect(TokenKind.FQN, TokenKind.Word);
-                    return EmitPropertyFilter(op, lhs.Text, UnEscape(rhs.Text));
-                case "Name":
-                    rhs = Expect(TokenKind.FQN, TokenKind.Word);
-                    return EmitNameFilter(op, UnEscape(rhs.Text));
-
-                default:
-                    // Assume it's a property name
-                    rhs = Expect(TokenKind.String, TokenKind.FQN, TokenKind.Word);
-                    return EmitPropertyFilter(op, lhs.Text, UnEscape(rhs.Text));
+                rhs = Expect(TokenKind.FQN, TokenKind.Word);
             }
-        }
+            else
+            {
+                rhs = Expect(TokenKind.String, TokenKind.FQN, TokenKind.Word);
+            }
 
+            return new TestFilterCondition(
+                lhs.Text,
+                GetOperation(op),
+                UnEscape(rhs.Text));
+        }
     private static string UnEscape(string rhs) => FullyQualifiedNameFilterParser.Unescape(rhs, strict: true);
 
-    private static string EmitFullNameFilter(Token op, string value)
+    private static ITestFilterOperation GetOperation(Token op)
     {
-            return EmitFilter("test", op, value);
-        }
-
-    private static string EmitCategoryFilter(Token op, string value)
-    {
-            return EmitFilter("cat", op, value);
-        }
-
-    private static string EmitNameFilter(Token op, string value)
-    {
-            return EmitFilter("name", op, value);
-        }
-
-    private static string EmitFilter(string lhs, Token op, string rhs)
-    {
-            if ((lhs == "test" || lhs == "name") && TestNameFilter.NeedsRegex(rhs))
-                return EmitNameRegexFilter(lhs, op, TestNameFilter.ToRegex(rhs));
-
-            rhs = EscapeRhsValue(op, rhs);
-
             if (op == EQ_OP)
-                return $"<{lhs}>{rhs}</{lhs}>";
+                return TestFilterOperations.Equal;
             if (op == NE_OP)
-                return $"<not><{lhs}>{rhs}</{lhs}></not>";
+                return TestFilterOperations.NotEqual;
             if (op == CONTAINS_OP)
-                return $"<{lhs} re='1'>{rhs}</{lhs}>";
+                return TestFilterOperations.Contains;
             if (op == NOTCONTAINS_OP)
-                return $"<not><{lhs} re='1'>{rhs}</{lhs}></not>";
+                return TestFilterOperations.NotContains;
 
             throw new TestFilterParserException($"Invalid operator {op.Text} at position {op.Pos}");
         }
 
-    // A name with a character NUnit writes as \uXXXX is matched as a regex for either form
-    // (see TestNameFilter). '=' and '!=' are exact, so the regex is anchored.
-    private static string EmitNameRegexFilter(string lhs, Token op, string regex)
-    {
-            bool exact = op == EQ_OP || op == NE_OP;
-            string element = $"<{lhs} re='1'>{XmlEscape(exact ? TestNameFilter.Exact(regex) : regex)}</{lhs}>";
-            return op == NE_OP || op == NOTCONTAINS_OP ? $"<not>{element}</not>" : element;
-        }
-
-    private static string EmitPropertyFilter(Token op, string name, string value)
-    {
-            value = EscapeRhsValue(op, value);
-
-            if (op == EQ_OP)
-                return $"<prop name='{name}'>{value}</prop>";
-            if (op == NE_OP)
-                return $"<not><prop name='{name}'>{value}</prop></not>";
-            if (op == CONTAINS_OP)
-                return $"<prop name='{name}' re='1'>{value}</prop>";
-            if (op == NOTCONTAINS_OP)
-                return $"<not><prop name='{name}' re='1'>{value}</prop></not>";
-
-            throw new TestFilterParserException($"Invalid operator {op.Text} at position {op.Pos}");
-        }
-
-    private static string EscapeRhsValue(Token op, string rhs)
-    {
-            if (op == CONTAINS_OP || op == NOTCONTAINS_OP)
-                rhs = EscapeRegexChars(rhs);
-
-            return XmlEscape(rhs);
-        }
-
-    private string ParseExpressionInParentheses()
+    private ITestFilterFactor ParseExpressionInParentheses()
     {
             var op = Expect(LPAREN, NOT_OP);
 
             if (op == NOT_OP) Expect(LPAREN);
 
-            var result = ParseFilterExpression();
+            var expression = ParseFilterExpression();
 
             Expect(RPAREN);
 
-            if (op == NOT_OP)
-                result = "<not>" + result + "</not>";
-
-            return result;
+            return op == NOT_OP
+                ? new TestFilterNegation(expression)
+                : new TestFilterGroup(expression);
         }
 
     // Require a token of one or more kinds
@@ -287,53 +207,4 @@ public class LegacyTestFilterParser
     {
             return _tokenizer.NextToken();
         }
-
-    // Since we use a regular expression to implement
-    // the contains operator, we must escape all chars
-    // that have a special meaning in a regex.
-    private const string REGEX_CHARS = @".[]{}()*+?|^$\";
-
-    private static string EscapeRegexChars(string input)
-    {
-            var sb = new StringBuilder();
-
-            foreach (var c in input)
-            {
-                if (REGEX_CHARS.Contains(c))
-                    sb.Append('\\');
-                sb.Append(c);
-            }
-
-            return sb.ToString();
-        }
-
-    // Since the NUnit filter is represented in XML
-    // contents of each element must be escaped.
-    // A value with a character that is illegal in XML is rejected (issue 761). Dropping
-    // the character could select a different test, for example Test("") for Test("\uffff").
-    private static string XmlEscape(string text)
-    {
-            EnsureLegalXml(text);
-            return text
-                .Replace("&", "&amp;")
-                .Replace("\"", "&quot;")
-                .Replace("<", "&lt;")
-                .Replace(">", "&gt;")
-                .Replace("'", "&apos;");
-        }
-
-    private static void EnsureLegalXml(string text)
-    {
-        for (int i = 0; i < text.Length; i++)
-        {
-            if (XmlConvert.IsXmlChar(text[i]))
-                continue;
-            if (i + 1 < text.Length && XmlConvert.IsXmlSurrogatePair(text[i + 1], text[i]))
-            {
-                i++;
-                continue;
-            }
-            throw new TestFilterParserException($"Filter value '{text}' has the character U+{(int)text[i]:X4} at position {i}, which cannot be used in an NUnit filter.");
-        }
-    }
 }
