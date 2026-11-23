@@ -55,3 +55,22 @@ public class ExecutionTests
         ctx.EngineAdapter.CloseRunner();
     }
 }
+
+public class VsTestExecutionTests
+{
+    [Test]
+    public void WithTheNUnitFilterTheFilterFromRunTestsIsNotParsedAgain()
+    {
+        var ctx = Substitute.For<IExecutionContext>();
+        ctx.Settings.DiscoveryMethod.Returns(DiscoveryMethod.Current);
+        ctx.Settings.UseNUnitFilter.Returns(true);
+        var vsTestFilter = Substitute.For<IVsTestFilter>();
+        vsTestFilter.MsTestCaseFilterExpression.TestCaseFilterValue.Returns("Name=A");
+        var filter = new TestFilter("<filter><name>A</name></filter>");
+
+        var result = new VsTestExecution(ctx).CheckVsTestFilter(filter, Substitute.For<IDiscoveryConverter>(), vsTestFilter);
+
+        Assert.That(result, Is.SameAs(filter));
+        ctx.FilterParser.DidNotReceiveWithAnyArgs().Parse(default);
+    }
+}
