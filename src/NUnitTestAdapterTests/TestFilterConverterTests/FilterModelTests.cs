@@ -78,7 +78,7 @@ public class FilterModelTests
     }
 
     [Test]
-    public void NegationWritesExpressionInsideNotElement()
+    public void NegationWritesOperandInsideNotElement()
     {
         var expression = new TestFilterExpression(
         [
@@ -87,7 +87,7 @@ public class FilterModelTests
         ]);
 
         Assert.That(
-            new TestFilterNegation(expression).ToXml(),
+            new TestFilterNegation(new TestFilterGroup(expression)).ToXml(),
             Is.EqualTo("<not><or><name>First</name><name>Second</name></or></not>"));
     }
 
@@ -105,15 +105,23 @@ public class FilterModelTests
             Is.EqualTo(expected));
     }
 
-    [TestCase("=", false, false, "<prop name='Priority'>a.b(c)</prop>")]
-    [TestCase("!=", true, false, "<not><prop name='Priority'>a.b(c)</prop></not>")]
-    [TestCase("~", false, true, "<prop name='Priority' re='1'>a\\.b\\(c\\)</prop>")]
-    [TestCase("!~", true, true, "<not><prop name='Priority' re='1'>a\\.b\\(c\\)</prop></not>")]
-    public void ConditionWritesEachOperation(string symbol, bool negated, bool regex, string expected)
+    [TestCase("=", "<prop name='Priority'>a.b(c)</prop>")]
+    [TestCase("!=", "<not><prop name='Priority'>a.b(c)</prop></not>")]
+    [TestCase("~", "<prop name='Priority' re='1'>a\\.b\\(c\\)</prop>")]
+    [TestCase("!~", "<not><prop name='Priority' re='1'>a\\.b\\(c\\)</prop></not>")]
+    public void CreateConditionWritesEachOperator(string symbol, string expected)
     {
-        var operation = Operation(symbol, negated, regex);
+        Assert.That(
+            TestFilterOperations.CreateCondition("Priority", symbol, "a.b(c)").ToXml(),
+            Is.EqualTo(expected));
+    }
 
-        Assert.That(Condition("Priority", operation, "a.b(c)").ToXml(), Is.EqualTo(expected));
+    [Test]
+    public void CreateConditionRejectsUnknownOperator()
+    {
+        Assert.That(
+            () => TestFilterOperations.CreateCondition("Priority", "!", "value"),
+            Throws.ArgumentException);
     }
 
     [Test]
@@ -138,14 +146,4 @@ public class FilterModelTests
 
     private static TestFilterCondition Condition(string property, ITestFilterOperation operation, string value)
         => new(property, operation, value);
-
-    private static ITestFilterOperation Operation(string symbol, bool negated, bool regex)
-        => new TestOperation(symbol, negated, regex);
-
-    private sealed class TestOperation(string symbol, bool negated, bool regex) : ITestFilterOperation
-    {
-        public string Symbol { get; } = symbol;
-        public bool IsNegated { get; } = negated;
-        public bool IsRegex { get; } = regex;
-    }
 }

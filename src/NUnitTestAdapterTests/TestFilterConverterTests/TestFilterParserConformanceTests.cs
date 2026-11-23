@@ -44,7 +44,7 @@ public class TestFilterParserConformanceTests
     [TestCaseSource(nameof(SharedCases))]
     public void SharedCasesProduceSameExpectedXml((string Filter, string Xml) testCase)
     {
-        string oldXml = new LegacyTestFilterParser().Parse(testCase.Filter);
+        string oldXml = new LegacyTestFilterParser().Parse(testCase.Filter).ToXml();
         string newXml = new VSTestFilterParser().Parse(testCase.Filter).ToXml();
 
         using (Assert.EnterMultipleScope())
@@ -56,14 +56,13 @@ public class TestFilterParserConformanceTests
 
     [TestCase(
         "Category=Urgent",
-        "<filter><prop name='Category'>Urgent</prop></filter>",
         "<filter><cat>Urgent</cat></filter>")]
-    public void CategoryMappingIsAnExplicitParserDifference(string filter, string oldXml, string newXml)
+    public void CategoryMappingIsSharedByBothParsers(string filter, string expected)
     {
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(new LegacyTestFilterParser().Parse(filter), Is.EqualTo(oldXml));
-            Assert.That(new VSTestFilterParser().Parse(filter).ToXml(), Is.EqualTo(newXml));
+            Assert.That(new LegacyTestFilterParser().Parse(filter).ToXml(), Is.EqualTo(expected));
+            Assert.That(new VSTestFilterParser().Parse(filter).ToXml(), Is.EqualTo(expected));
         }
     }
 
@@ -155,7 +154,7 @@ public class TestFilterParserConformanceTests
     [TestCase("FullyQualifiedName=Ns.Fixture.Method", "Ns.Fixture.Method", true)]
     public void LegacyParserXmlSelectsSimpleNames(string filter, string name, bool expectedSelected)
     {
-        string xml = new LegacyTestFilterParser().Parse(filter);
+        string xml = new LegacyTestFilterParser().Parse(filter).ToXml();
         var element = XElement.Parse(xml).Element("name") ?? XElement.Parse(xml).Element("test");
         Assert.That(element, Is.Not.Null, xml);
         bool selected = element!.Attribute("re")?.Value == "1"

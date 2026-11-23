@@ -39,6 +39,7 @@ The supporting model is in
 [`ITestFilterTerm`](../src/NUnitTestAdapter/TestFilterConverter/FilterModel/ITestFilterTerm.cs),
 [`ITestFilterFactor`](../src/NUnitTestAdapter/TestFilterConverter/FilterModel/ITestFilterFactor.cs),
 [`ITestFilterGroup`](../src/NUnitTestAdapter/TestFilterConverter/FilterModel/ITestFilterGroup.cs),
+[`ITestFilterNegation`](../src/NUnitTestAdapter/TestFilterConverter/FilterModel/ITestFilterNegation.cs),
 [`ITestFilterCondition`](../src/NUnitTestAdapter/TestFilterConverter/FilterModel/ITestFilterCondition.cs),
 and
 [`ITestFilterOperation`](../src/NUnitTestAdapter/TestFilterConverter/FilterModel/ITestFilterOperation.cs).
@@ -50,12 +51,15 @@ ITestFilter
         └── ITestFilterTerm (AND of factors)
               └── ITestFilterFactor
                     ├── ITestFilterGroup (nested expression)
+                    ├── ITestFilterNegation (negated factor)
                     └── ITestFilterCondition (property, operation, value)
 ```
 
 The concrete model types take their contents in their constructors and expose read-only
-properties. The operation definitions are shared instances for `=`, `!=`, `~` and `!~`, described
-by their symbol, whether they negate the result, and whether they use regex matching.
+properties. There are two shared operation instances, for `=` and `~`, described by their symbol
+and whether they use regex matching. The `!=` and `!~` operators are represented as a condition
+wrapped in an `ITestFilterNegation`. `TestFilterOperations.CreateCondition` builds the right
+factor from an operator symbol.
 
 ## Grammar and parsing
 

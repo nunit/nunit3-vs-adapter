@@ -67,7 +67,7 @@ public class NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSe
         if (string.IsNullOrEmpty(vsFilter?.MsTestCaseFilterExpression?.TestCaseFilterValue))
             return null;
         var parser = new LegacyTestFilterParser();
-        var filter = parser.Parse(vsFilter.MsTestCaseFilterExpression.TestCaseFilterValue);
+        var filter = parser.Parse(vsFilter.MsTestCaseFilterExpression.TestCaseFilterValue).ToXml();
         var tf = new TestFilter(filter);
         if (settings.ExplicitMode == ExplicitModeEnum.None)
         {
@@ -99,7 +99,7 @@ public class NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSe
         // When we are here, we should have a valid MSTest filter that is not just FullyQualifiedName based.
         // From here we use the standard parser and expect real FQN names, categories , etc.
         var parser = new LegacyTestFilterParser();
-        var filter = parser.Parse(msFilter);
+        var filter = parser.Parse(msFilter).ToXml();
         var tf = new TestFilter(filter);
         if (settings.ExplicitMode != ExplicitModeEnum.None)
         {

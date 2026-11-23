@@ -3,12 +3,12 @@
 namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter.FilterModel;
 
 /// <summary>
-/// Represents a negated filter expression.
+/// Represents a negated filter factor.
 /// </summary>
 public interface ITestFilterNegation : ITestFilterFactor
 {
     /// <summary>
-    /// Gets the expression being negated.
+    /// Gets the factor being negated.
     /// </summary>
-    ITestFilterExpression Expression { get; }
+    ITestFilterFactor Operand { get; }
 }

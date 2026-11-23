@@ -128,26 +128,12 @@ public class LegacyTestFilterParser : ITestFilterParser
                 rhs = Expect(TokenKind.String, TokenKind.FQN, TokenKind.Word);
             }
 
-            return new TestFilterCondition(
+            return TestFilterOperations.CreateCondition(
                 lhs.Text,
-                GetOperation(op),
+                op.Text,
                 UnEscape(rhs.Text));
         }
     private static string UnEscape(string rhs) => FullyQualifiedNameFilterParser.Unescape(rhs, strict: true);
-
-    private static ITestFilterOperation GetOperation(Token op)
-    {
-            if (op == EQ_OP)
-                return TestFilterOperations.Equal;
-            if (op == NE_OP)
-                return TestFilterOperations.NotEqual;
-            if (op == CONTAINS_OP)
-                return TestFilterOperations.Contains;
-            if (op == NOTCONTAINS_OP)
-                return TestFilterOperations.NotContains;
-
-            throw new TestFilterParserException($"Invalid operator {op.Text} at position {op.Pos}");
-        }
 
     private ITestFilterFactor ParseExpressionInParentheses()
     {
@@ -160,7 +146,7 @@ public class LegacyTestFilterParser : ITestFilterParser
             Expect(RPAREN);
 
             return op == NOT_OP
-                ? new TestFilterNegation(expression)
+                ? new TestFilterNegation(new TestFilterGroup(expression))
                 : new TestFilterGroup(expression);
         }
 

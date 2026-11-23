@@ -7,17 +7,17 @@ namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter.FilterModel;
 /// <inheritdoc cref="ITestFilterNegation"/>
 public sealed class TestFilterNegation : ITestFilterNegation
 {
-    public TestFilterNegation(ITestFilterExpression expression)
+    public TestFilterNegation(ITestFilterFactor operand)
     {
-        Expression = expression ?? throw new ArgumentNullException(nameof(expression));
+        Operand = operand ?? throw new ArgumentNullException(nameof(operand));
     }
 
     /// <inheritdoc/>
-    public ITestFilterExpression Expression { get; }
+    public ITestFilterFactor Operand { get; }
 
     /// <inheritdoc/>
     public string ToXml()
     {
-        return $"<not>{Expression.ToXml()}</not>";
+        return $"<not>{Operand.ToXml()}</not>";
     }
 }

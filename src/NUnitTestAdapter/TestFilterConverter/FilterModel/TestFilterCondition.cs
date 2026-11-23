@@ -38,17 +38,12 @@ public sealed class TestFilterCondition : ITestFilterCondition
         if ((elementName is "test" or "name") && TestNameFilter.NeedsRegex(Value))
         {
             string regex = TestNameFilter.ToRegex(Value);
-            if (Operation.IsNegated is false && Operation.IsRegex is false)
-            {
-                regex = TestNameFilter.Exact(regex);
-            }
-            else if (Operation is { IsNegated: true, IsRegex: false })
+            if (!Operation.IsRegex)
             {
                 regex = TestNameFilter.Exact(regex);
             }
 
-            string regexElement = $"<{elementName} re='1'>{XmlEscaperHelper.Escape(regex)}</{elementName}>";
-            return Operation.IsNegated ? $"<not>{regexElement}</not>" : regexElement;
+            return $"<{elementName} re='1'>{XmlEscaperHelper.Escape(regex)}</{elementName}>";
         }
 
         string escapedValue = Operation.IsRegex
@@ -57,11 +52,9 @@ public sealed class TestFilterCondition : ITestFilterCondition
         escapedValue = XmlEscaperHelper.Escape(escapedValue);
 
         string regexAttribute = Operation.IsRegex ? " re='1'" : string.Empty;
-        string element = elementName == "prop"
+        return elementName == "prop"
             ? $"<prop name='{XmlEscaperHelper.Escape(Property)}'{regexAttribute}>{escapedValue}</prop>"
             : $"<{elementName}{regexAttribute}>{escapedValue}</{elementName}>";
-
-        return Operation.IsNegated ? $"<not>{element}</not>" : element;
     }
 
     private const string RegexChars = @".[]{}()*+?|^$\";

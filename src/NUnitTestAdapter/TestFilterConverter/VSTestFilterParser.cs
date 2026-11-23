@@ -152,7 +152,7 @@ public class VSTestFilterParser : ITestFilterParser
             return ParseCondition(condition);
         }
 
-        private static ITestFilterCondition ParseCondition(Part condition)
+        private static ITestFilterFactor ParseCondition(Part condition)
         {
             var parts = SplitCondition(condition.Text, condition.Position);
             if (parts.Count is 1)
@@ -178,9 +178,9 @@ public class VSTestFilterParser : ITestFilterParser
                 throw Error("A condition is missing its value", parts[1].Position + parts[1].Text.Length);
             }
 
-            return new TestFilterCondition(
+            return TestFilterOperations.CreateCondition(
                 property: Unescape(parts[0]),
-                operation: GetOperation(parts[1]),
+                symbol: parts[1].Text,
                 value: Unescape(parts[2]));
         }
 
@@ -272,18 +272,6 @@ public class VSTestFilterParser : ITestFilterParser
             }
 
             return value.ToString();
-        }
-
-        private static ITestFilterOperation GetOperation(Part part)
-        {
-            return part.Text switch
-            {
-                "=" => TestFilterOperations.Equal,
-                "!=" => TestFilterOperations.NotEqual,
-                "~" => TestFilterOperations.Contains,
-                "!~" => TestFilterOperations.NotContains,
-                _ => throw Error($"Invalid operator '{part.Text}'", part.Position),
-            };
         }
 
         private bool HasPartsToConsume => _index < _parts.Count;

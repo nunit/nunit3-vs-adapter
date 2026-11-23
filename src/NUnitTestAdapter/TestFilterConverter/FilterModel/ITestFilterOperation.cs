@@ -13,11 +13,6 @@ public interface ITestFilterOperation
     string Symbol { get; }
 
     /// <summary>
-    /// Gets whether the operation negates the comparison.
-    /// </summary>
-    bool IsNegated { get; }
-
-    /// <summary>
     /// Gets whether the operation performs a regex match.
     /// </summary>
     bool IsRegex { get; }
