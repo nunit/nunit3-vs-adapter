@@ -140,6 +140,22 @@ public class NUnitEventListenerOutputTests
         converter.Received().GetVsTestResults(Arg.Any<NUnitTestEventTestCase>(), Arg.Is<ICollection<INUnitTestEventTestOutput>>(x => x.Count == 2));
     }
 
+    /// <summary>
+    /// Output from a failing OneTimeSetUp is buffered under the fixture id, and has no test result to go to.
+    /// </summary>
+    [Test]
+    public void ThatAgentModeSendsBufferedOutputOfFailedSuite()
+    {
+        UseRealSettings("<AgentMode>On</AgentMode>");
+        var sut = new NUnitEventListener(converter, executor);
+
+        sut.OnTestEvent("<test-output stream='Error' testid='0-1000' testname='UnitTests'><![CDATA[Setup diagnostics\n]]></test-output>");
+        recorder.DidNotReceive().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Any<string>());
+
+        sut.OnTestEvent("<test-suite type='TestFixture' id='0-1000' name='UnitTests' fullname='UnitTests' result='Failed' site='SetUp'><failure><message><![CDATA[Boom]]></message></failure></test-suite>");
+        recorder.Received().SendMessage(TestMessageLevel.Warning, "Setup diagnostics");
+    }
+
     private void ConverterReturns(TestOutcome outcome, string consoleOutput)
     {
         var testCase = new TestCase("UnitTests.Test1", new Uri(NUnit3TestExecutor.ExecutorUri), "UnitTests.dll");

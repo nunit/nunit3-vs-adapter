@@ -1,3 +1,4 @@
+using System;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Framework;
@@ -104,6 +105,19 @@ public class TestOutputPolicyTests
                at NUnit.Framework.Internal.Commands.TestMethodCommand.Execute(TestExecutionContext context)
             """;
         Assert.That(PolicyFor(On).StackTraceFor(trace, isParentFailure: false), Is.EqualTo("   at Noise.Level2() in Noise.cs:line 25"));
+    }
+
+    [Test]
+    public void FilterKeepsMoveNextFrames()
+    {
+        const string trace = """
+               at MyTests.<TestAsync>d__0.MoveNext() in Tests.cs:line 12
+               at System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)
+               at App.CustomEnumerator.MoveNext() in CustomEnumerator.cs:line 42
+            """;
+        Assert.That(StackTraceFilter.Apply(trace), Is.EqualTo(
+            "   at MyTests.<TestAsync>d__0.MoveNext() in Tests.cs:line 12" + Environment.NewLine +
+            "   at App.CustomEnumerator.MoveNext() in CustomEnumerator.cs:line 42"));
     }
 
     [TestCase("Full", false, "trace")]

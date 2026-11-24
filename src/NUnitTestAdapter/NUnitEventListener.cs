@@ -209,6 +209,10 @@ public class NUnitEventListener(ITestConverterCommon testConverter, INUnit3TestE
             return;
         }
 
+        // Output from OneTimeSetUp/OneTimeTearDown is buffered under the suite id
+        OutputNodes.TryGetValue(resultNode.Id, out var outputNodes);
+        OutputNodes.Remove(resultNode.Id);
+
         if (!resultNode.IsFailed)
             return;
         var site = resultNode.Site();
@@ -223,6 +227,13 @@ public class NUnitEventListener(ITestConverterCommon testConverter, INUnit3TestE
             if (!string.IsNullOrEmpty(stackTrace))
                 msg += $"\nStackTrace: {stackTrace}";
             Recorder.SendMessage(TestMessageLevel.Error, msg);
+        }
+
+        // Output not sent live is lost otherwise, since the suite has no test result to attach it to
+        foreach (var output in outputNodes ?? EmptyNodes)
+        {
+            if (!OutputPolicy.ShowsLiveOutput(output.IsErrorStream))
+                Recorder.SendMessage(TestMessageLevel.Warning, output.Content.TrimEnd());
         }
     }
 

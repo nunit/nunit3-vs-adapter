@@ -18,10 +18,10 @@ internal static class StackTraceFilter
         using var reader = new StringReader(stackTrace);
         while (reader.ReadLine() is { } line)
         {
+            // MoveNext frames stay: on .NET Framework the throw location in an async method
+            // is shown as <Method>d__0.MoveNext(), and handwritten enumerators have them too.
             if (line.Contains("System.Runtime.", StringComparison.Ordinal) ||
-                line.Contains("NUnit.Framework.Internal.", StringComparison.Ordinal) ||
-                line.Contains(".MoveNext()", StringComparison.Ordinal) ||
-                line.Contains("<>d__", StringComparison.Ordinal))
+                line.Contains("NUnit.Framework.Internal.", StringComparison.Ordinal))
                 continue;
             result.AppendLine(line);
         }
