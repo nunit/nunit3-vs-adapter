@@ -124,8 +124,7 @@ public sealed class TestConverter : IDisposable, ITestConverter
                     break;
                 default:
                     {
-                        if (adapterSettings.AgentMode == AgentMode.Off &&
-                            adapterSettings.ConsoleOut > 0 &&
+                        if (outputPolicy.ShowsReason(testCaseResult.Outcome) &&
                             !string.IsNullOrEmpty(resultNode.ReasonMessage))
                             testCaseResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, resultNode.ReasonMessage));
                         break;
