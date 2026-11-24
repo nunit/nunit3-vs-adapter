@@ -23,13 +23,16 @@ public class VsTestExecution(IExecutionContext ctx) : Execution(ctx)
         if (vsTestFilter == null || vsTestFilter.IsEmpty)
             return filter;
         TestLog.Debug($"Microsoft Test Filter used, length: {vsTestFilter.MsTestCaseFilterExpression?.TestCaseFilterValue.Length}");
-        // NOTE This overwrites filter used in call
-        var filterBuilder = CreateTestFilterBuilder();
-        filter = Settings.DiscoveryMethod == DiscoveryMethod.Current
-            ? Settings.UseNUnitFilter
-                ? filterBuilder.ConvertVsTestFilterToNUnitFilter(vsTestFilter)
-                : filterBuilder.ConvertMsFilterToNUnitFilter(vsTestFilter, discovery)
-            : filterBuilder.ConvertMsFilterToNUnitFilter(vsTestFilter, discovery.LoadedTestCases);
+        // With the NUnit filter, RunTests has already converted this filter and passed it in, so it
+        // is parsed once per run. The other modes overwrite the filter with one built from this
+        // assembly's test cases.
+        if (Settings.DiscoveryMethod == DiscoveryMethod.Legacy || !Settings.UseNUnitFilter)
+        {
+            var filterBuilder = CreateTestFilterBuilder();
+            filter = Settings.DiscoveryMethod == DiscoveryMethod.Current
+                ? filterBuilder.ConvertMsFilterToNUnitFilter(vsTestFilter, discovery)
+                : filterBuilder.ConvertMsFilterToNUnitFilter(vsTestFilter, discovery.LoadedTestCases);
+        }
 
         Dump?.AddXmlElement("MicrosoftTestFilter", $"{vsTestFilter.MsTestCaseFilterExpression?.TestCaseFilterValue}");
         Dump?.DumpVSInputFilter(filter, "(At Execution (Microsoft Test Filter)");

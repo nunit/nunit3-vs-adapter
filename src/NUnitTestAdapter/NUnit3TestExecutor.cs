@@ -772,7 +772,7 @@ public sealed class NUnit3TestExecutor : NUnitTestAdapter, ITestExecutor, IDispo
     }
 
 
-    private NUnitTestFilterBuilder CreateTestFilterBuilder(IDumpXml dump = null) => new(NUnitEngineAdapter.GetService<ITestFilterService>(), Settings, dump);
+    private NUnitTestFilterBuilder CreateTestFilterBuilder(IDumpXml dump = null) => new(NUnitEngineAdapter.GetService<ITestFilterService>(), Settings, FilterParser, dump);
 
     /// <summary>
     /// Must be called after WorkDir have been set.

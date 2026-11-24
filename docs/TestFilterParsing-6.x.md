@@ -190,14 +190,15 @@ in its XML (`XmlExtensions.EscapeInvalidXmlCharacters`, see
 matched against, keeps the raw character. An exact `<test>` element can therefore match neither:
 the reported text is not the framework name, and the raw character cannot be written in XML.
 
-**Decision: select with a regex.** `TestNameFilter` turns such a name into an anchored
-`<test re='1'>` element (or `<name re='1'>`), where each such character matches either the raw
-character or its `\uXXXX` text: `(?:\u001b|\\u001b)`. The rest of the name is `Regex.Escape`d.
-For `=` and `!=` the regex is anchored with `^` and `$`; `~` and `!~` stay contains-matches.
-Names without such characters get exactly the filter they got before.
+**Decision: select with a regex.** `NUnitFilterXmlWriter` writes such a name as an anchored
+`<test re='1'>` element (or `<name re='1'>`), using `TestNameRegex`, where each such character
+matches either the raw character or its `\uXXXX` text: `(?:\u001b|\\u001b)`. The rest of the name
+is `Regex.Escape`d. For `=` and `!=` the regex is anchored with `\A` and `\z`; `~` and `!~` stay
+contains-matches. Names without such characters get exactly the filter they got before.
 
-It is used on every path that builds a name filter: `TestFilterParser` (`FullyQualifiedName` and
-`Name`), `FilterByList` (VSTest Test Explorer) and the MTP fast path.
+It is used on every path that builds a name filter, because they all go through the filter model
+and the writer: the filter parsers (`FullyQualifiedName` and `Name`), and `FilterByList` (VSTest
+Test Explorer) and the MTP fast path, which build a `FullyQualifiedName` condition for each name.
 
 Two earlier decisions were dropped:
 
@@ -212,7 +213,7 @@ U+0008, U+000B, U+000C, U+000E to U+001F, U+007F to U+0084, U+0086 to U+009F, un
 surrogates, U+FFFE and U+FFFF. A real backslash is written by NUnit as `\\`, so `\\u0041` is a
 backslash followed by `u0041`, not a character.
 
-**Tests:** `TestNameFilterTests`, `FilterRoundTripConformanceTests.NameWithCharacterNUnitEscapesSelectsTheTest`
+**Tests:** `TestNameRegexTests`, `FilterRoundTripConformanceTests.NameWithCharacterNUnitEscapesSelectsTheTest`
 (the regex matches the framework name and the reported name, and not the name without the
 character), and the acceptance cases in `ControlCharacterTests` for VSTest and MTP. The Issue711
 repro in nunit3-vs-adapter.issues selects all 62 of its tests with one escaped filter each.

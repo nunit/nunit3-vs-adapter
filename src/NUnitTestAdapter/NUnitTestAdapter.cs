@@ -37,6 +37,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NUnit.Common;
 using NUnit.Engine;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
+using NUnit.VisualStudio.TestAdapter.TestFilterConverter;
 
 
 namespace NUnit.VisualStudio.TestAdapter;
@@ -75,6 +76,12 @@ public abstract class NUnitTestAdapter
     #region Properties
 
     public IAdapterSettings Settings { get; private set; }
+
+    /// <summary>
+    /// The parser for the test case filter text, chosen by the FilterParser setting. The test
+    /// platform creates the discoverer and executor, so this is where the parser is chosen.
+    /// </summary>
+    public ITestFilterParser FilterParser { get; private set; } = new DefaultTestFilterParser();
 
     // The adapter version
     protected string AdapterVersion { get; set; }
@@ -154,11 +161,19 @@ public abstract class NUnitTestAdapter
             TestLog.DebugRunfrom();
         }
         TestLog.Verbosity = Settings.Verbosity;
+        FilterParser = CreateFilterParser(Settings.FilterParser, TestLog);
         NUnitEngineAdapter.Initialize(Settings);
         NUnitEngineAdapter.InitializeSettingsAndLogging(Settings, TestLog);
         InitializeForbiddenFolders();
         SetCurrentWorkingDirectory();
     }
+
+    internal static ITestFilterParser CreateFilterParser(FilterParserType filterParser, ITestLogger log) => filterParser switch
+    {
+        FilterParserType.VSTest => new VSTestFilterParser(),
+        FilterParserType.Legacy => new LegacyTestFilterParser(),
+        _ => new DefaultTestFilterParser(log),
+    };
 
     public void InitializeForbiddenFolders()
     {

@@ -6,7 +6,7 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.Acceptance;
 /// <summary>
 /// The Microsoft Testing Platform counterpart of <see cref="FilterKnownDefectsTests"/>.
 ///
-/// A plain command line run takes the command line filter path (<c>TestFilterParser</c>).
+/// A plain command line run takes the command line filter path (<c>LegacyTestFilterParser</c>).
 /// <see cref="IdeModeSelectsTheTest"/> sets <c>DesignMode</c>, which is what Visual Studio Test
 /// Explorer does, and so reaches
 /// <c>NUnitTestFilterBuilder.ConvertVsTestFilterToNUnitFilterForMTP</c> and its fast path, item 4

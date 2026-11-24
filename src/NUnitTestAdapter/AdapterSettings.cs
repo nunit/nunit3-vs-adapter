@@ -52,6 +52,17 @@ public enum DiscoveryMethod
     Current
 }
 
+/// <summary>
+/// The parser for a test case filter, set with the FilterParser run setting.
+/// </summary>
+public enum FilterParserType
+{
+    /// <summary>The VSTest parser, falling back to the legacy parser for a filter it rejects.</summary>
+    Default,
+    VSTest,
+    Legacy
+}
+
 public class AdapterSettings(ITestLogger logger) : IAdapterSettings
 {
     private const string RandomSeedFile = "nunit_random_seed.tmp";
@@ -160,6 +171,7 @@ public class AdapterSettings(ITestLogger logger) : IAdapterSettings
     public bool SkipNonTestAssemblies { get; private set; }
     public int AssemblySelectLimit { get; private set; }
     public bool UseNUnitFilter { get; private set; }
+    public FilterParserType FilterParser { get; private set; } = FilterParserType.Default;
     public bool IncludeStackTraceForSuites { get; private set; }
 
     public bool IncludeStackTrace { get; private set; }
@@ -266,6 +278,7 @@ public class AdapterSettings(ITestLogger logger) : IAdapterSettings
         ConsoleOut = GetInnerTextAsInt(nunitNode, nameof(ConsoleOut), 1);  // 0 no output to console, 1 : output to console, 2: output to console as warnings
         StopOnError = GetInnerTextAsBool(nunitNode, nameof(StopOnError), false);
         UseNUnitFilter = GetInnerTextAsBool(nunitNode, nameof(UseNUnitFilter), true);
+        FilterParser = MapEnum(GetInnerText(nunitNode, nameof(FilterParser), Verbosity > 0), FilterParserType.Default);
         IncludeStackTraceForSuites = GetInnerTextAsBool(nunitNode, nameof(IncludeStackTraceForSuites), true);
         IncludeStackTrace = GetInnerTextAsBool(nunitNode, nameof(IncludeStackTrace), true);
         EnsureAttachmentFileScheme = GetInnerTextAsBool(nunitNode, nameof(EnsureAttachmentFileScheme), false);

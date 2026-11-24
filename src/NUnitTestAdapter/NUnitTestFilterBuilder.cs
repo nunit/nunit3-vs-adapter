@@ -1,4 +1,4 @@
-﻿// ***********************************************************************
+// ***********************************************************************
 // Copyright (c) 2011-2021 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -21,6 +21,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -30,12 +31,14 @@ using NUnit.Engine;
 using NUnit.VisualStudio.TestAdapter.Dump;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
 using NUnit.VisualStudio.TestAdapter.TestFilterConverter;
+using FilterModel = NUnit.VisualStudio.TestAdapter.TestFilterConverter.FilterModel;
 
 namespace NUnit.VisualStudio.TestAdapter;
 
-public class NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSettings settings, IDumpXml dump = null)
+public class NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSettings settings, ITestFilterParser filterParser, IDumpXml dump = null)
 {
     private readonly ITestFilterService _filterService = filterService ?? throw new NUnitEngineException("TestFilterService is not available. Engine in use is incorrect version.");
+    private readonly ITestFilterParser _filterParser = filterParser ?? throw new ArgumentNullException(nameof(filterParser));
 
     // ReSharper disable once StringLiteralTypo
     public static readonly TestFilter NoTestsFound = new("<notestsfound/>");
@@ -66,8 +69,7 @@ public class NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSe
     {
         if (string.IsNullOrEmpty(vsFilter?.MsTestCaseFilterExpression?.TestCaseFilterValue))
             return null;
-        var parser = new TestFilterParser();
-        var filter = parser.Parse(vsFilter.MsTestCaseFilterExpression.TestCaseFilterValue);
+        var filter = _filterParser.Parse(vsFilter.MsTestCaseFilterExpression.TestCaseFilterValue).ToNUnitXml();
         var tf = new TestFilter(filter);
         if (settings.ExplicitMode == ExplicitModeEnum.None)
         {
@@ -98,8 +100,7 @@ public class NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSe
         }
         // When we are here, we should have a valid MSTest filter that is not just FullyQualifiedName based.
         // From here we use the standard parser and expect real FQN names, categories , etc.
-        var parser = new TestFilterParser();
-        var filter = parser.Parse(msFilter);
+        var filter = _filterParser.Parse(msFilter).ToNUnitXml();
         var tf = new TestFilter(filter);
         if (settings.ExplicitMode != ExplicitModeEnum.None)
         {
@@ -158,18 +159,19 @@ public class NUnitTestFilterBuilder(ITestFilterService filterService, IAdapterSe
         return FilterByNames(testCases.Select(t => t.FullyQualifiedName).ToList());
     }
 
-    /// <summary>
-    /// A filter for these test full names. A name with a character NUnit writes as \uXXXX needs a
-    /// regular expression (see <see cref="TestNameFilter"/>); otherwise the engine builds it.
-    /// </summary>
-    private TestFilter FilterByNames(IReadOnlyCollection<string> fullNames)
+    private static TestFilter FilterByNames(IReadOnlyCollection<string> fullNames)
     {
-        if (fullNames.Any(TestNameFilter.NeedsRegex))
-            return new TestFilter(TestNameFilter.ForNames(fullNames));
+        return fullNames.Count == 0
+            ? TestFilter.Empty
+            : new TestFilter(NameFilter(fullNames).ToNUnitXml());
+    }
 
-        var filterBuilder = _filterService.GetTestFilterBuilder();
-        foreach (var fullName in fullNames)
-            filterBuilder.AddTest(fullName);
-        return filterBuilder.GetFilter();
+    /// <summary>
+    /// The filter model that selects each of these test full names exactly.
+    /// </summary>
+    internal static FilterModel.ITestFilter NameFilter(IEnumerable<string> fullNames)
+    {
+        return new FilterModel.TestFilter(new FilterModel.TestFilterExpression(fullNames.Select(fullName =>
+            new FilterModel.TestFilterTerm([new FilterModel.TestFilterCondition("FullyQualifiedName", FilterModel.TestFilterComparison.Exact, fullName)]))));
     }
 }

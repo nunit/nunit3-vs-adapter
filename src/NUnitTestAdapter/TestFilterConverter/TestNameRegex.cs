@@ -21,7 +21,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
-using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -29,39 +28,17 @@ using System.Text.RegularExpressions;
 namespace NUnit.VisualStudio.TestAdapter.TestFilterConverter;
 
 /// <summary>
-/// Builds the NUnit filter elements for test names.
+/// The regular expression for a test name that NUnit cannot match by its exact text.
 ///
 /// NUnit writes a character that it does not allow in its XML (control characters, U+FFFF and
 /// others) as the text \uXXXX, so that is the name the adapter and the test platform see. The
 /// framework's own FullName keeps the character, so an exact match on the reported name selects
-/// nothing (nunit/nunit#4826). Such a name is selected with an anchored regular expression that
-/// accepts both the character and the text.
+/// nothing (nunit/nunit#4826). Such a name is selected with a regular expression that accepts
+/// both the character and the text.
 /// </summary>
-public static class TestNameFilter
+internal static class TestNameRegex
 {
     private static readonly Regex EscapedCharacter = new(@"\\u([0-9a-fA-F]{4})", RegexOptions.Compiled);
-
-    /// <summary>
-    /// The filter for a list of test names, in the format of the engine's TestFilterBuilder.
-    /// </summary>
-    public static string ForNames(IReadOnlyCollection<string> fullNames)
-    {
-        var filter = new StringBuilder("<filter>");
-        if (fullNames.Count > 1)
-            filter.Append("<or>");
-        foreach (var fullName in fullNames)
-            filter.Append(Element("test", fullName));
-        if (fullNames.Count > 1)
-            filter.Append("</or>");
-        return filter.Append("</filter>").ToString();
-    }
-
-    /// <summary>
-    /// The element that matches the name exactly, for example &lt;test&gt;A.B&lt;/test&gt;.
-    /// </summary>
-    public static string Element(string tag, string name) => NeedsRegex(name)
-        ? $"<{tag} re='1'>{XmlEscape(Exact(ToRegex(name)))}</{tag}>"
-        : $"<{tag}>{XmlEscape(name)}</{tag}>";
 
     /// <summary>
     /// Anchors a regular expression to the whole name. It uses \z, not $, because $ also matches
@@ -136,11 +113,4 @@ public static class TestNameFilter
         c <= 0x8 || c == 0xB || c == 0xC || (c >= 0xE && c <= 0x1F)
         || (c >= 0x7F && c <= 0x84) || (c >= 0x86 && c <= 0x9F)
         || char.IsSurrogate(c) || c == 0xFFFE || c == 0xFFFF;
-
-    private static string XmlEscape(string text) => text
-        .Replace("&", "&amp;")
-        .Replace("\"", "&quot;")
-        .Replace("<", "&lt;")
-        .Replace(">", "&gt;")
-        .Replace("'", "&apos;");
 }

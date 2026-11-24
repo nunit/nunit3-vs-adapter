@@ -26,6 +26,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using NSubstitute;
 using NUnit.Engine;
 using NUnit.Framework;
+using NUnit.VisualStudio.TestAdapter.TestFilterConverter;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.Filtering;
 
@@ -37,7 +38,7 @@ public class NUnitTestFilterBuilderTests
             var filterService = Substitute.For<ITestFilterService>();
             var settings = Substitute.For<IAdapterSettings>();
             settings.AssemblySelectLimit.Returns(2000);
-            var sut = new NUnitTestFilterBuilder(filterService, settings);
+            var sut = new NUnitTestFilterBuilder(filterService, settings, new LegacyTestFilterParser());
             var loadedTestCases = new List<TestCase>();
             var msFilter = Substitute.For<IVsTestFilter>();
             var results = sut.ConvertMsFilterToNUnitFilter(msFilter, loadedTestCases);
@@ -50,11 +51,27 @@ public class NUnitTestFilterBuilderTests
             var filterService = Substitute.For<ITestFilterService>();
             var settings = Substitute.For<IAdapterSettings>();
             settings.AssemblySelectLimit.Returns(2000);
-            var sut = new NUnitTestFilterBuilder(filterService, settings);
+            var sut = new NUnitTestFilterBuilder(filterService, settings, new LegacyTestFilterParser());
             string where = "name='abc'";
             var testFilterBuilder = Substitute.For<ITestFilterBuilder>();
             filterService.GetTestFilterBuilder().Returns(testFilterBuilder);
             sut.FilterByWhere(where);
             testFilterBuilder.Received().SelectWhere(Arg.Is<string>(x => x == where));
         }
+
+    [Test]
+    public void ThatTheGivenParserReadsTheFilter()
+    {
+        var settings = Substitute.For<IAdapterSettings>();
+        settings.ExplicitMode.Returns(ExplicitModeEnum.Strict);
+        var parser = Substitute.For<ITestFilterParser>();
+        parser.Parse("Custom").Returns(NUnitTestFilterBuilder.NameFilter(["A.B"]));
+        var vsFilter = Substitute.For<IVsTestFilter>();
+        vsFilter.MsTestCaseFilterExpression.TestCaseFilterValue.Returns("Custom");
+        var sut = new NUnitTestFilterBuilder(Substitute.For<ITestFilterService>(), settings, parser);
+
+        var result = sut.ConvertVsTestFilterToNUnitFilter(vsFilter);
+
+        Assert.That(result.Text, Is.EqualTo("<filter><test>A.B</test></filter>"));
+    }
 }

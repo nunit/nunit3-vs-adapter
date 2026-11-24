@@ -84,7 +84,7 @@ public abstract class Execution(IExecutionContext ctx)
     public abstract TestFilter CheckFilterInCurrentMode(TestFilter filter, IDiscoveryConverter discovery);
 
     protected NUnitTestFilterBuilder CreateTestFilterBuilder()
-        => new(NUnitEngineAdapter.GetService<ITestFilterService>(), Settings);
+        => new(NUnitEngineAdapter.GetService<ITestFilterService>(), Settings, ctx.FilterParser);
     protected ITestConverterCommon CreateConverter(DiscoveryConverter discovery) => Settings.DiscoveryMethod == DiscoveryMethod.Current ? discovery.TestConverter : discovery.TestConverterForXml;
 
     protected TestFilter CheckFilter(TestFilter testFilter, IDiscoveryConverter discovery)

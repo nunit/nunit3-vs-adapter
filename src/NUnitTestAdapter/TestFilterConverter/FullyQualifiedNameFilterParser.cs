@@ -211,7 +211,7 @@ public static class FullyQualifiedNameFilterParser
 
     /// <param name="input">The escaped filter value.</param>
     /// <param name="strict">
-    /// Throw on a backslash that escapes nothing. TestFilterParser needs this: such a
+    /// Throw on a backslash that escapes nothing. LegacyTestFilterParser needs this: such a
     /// backslash is what is left when the tokenizer cuts a value at an escaped operator,
     /// as in A.B\|C, and accepting it would select other tests.
     /// </param>

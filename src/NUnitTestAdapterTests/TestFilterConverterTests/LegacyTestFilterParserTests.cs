@@ -1,4 +1,4 @@
-﻿// ***********************************************************************
+// ***********************************************************************
 // Copyright (c) 2020 Charlie Poole, Terje Sandstrom
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -28,14 +28,14 @@ using NUnit.VisualStudio.TestAdapter.TestFilterConverter;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests.TestFilterConverterTests;
 
-public class TestFilterParserTests
+public class LegacyTestFilterParserTests
 {
-    private TestFilterParser _parser;
+    private LegacyTestFilterParser _parser;
 
     [SetUp]
     public void CreateParser()
     {
-        _parser = new TestFilterParser();
+        _parser = new LegacyTestFilterParser();
     }
 
     // Default
@@ -248,7 +248,7 @@ public class TestFilterParserTests
     [TestCase(@"My.Test.SpaceBefore \(Case 1\)", @"<test re='1'>My\.Test\.SpaceBefore \(Case 1\)</test>")]
     public void TestParser(string input, string output)
     {
-        Assert.That(_parser.Parse(input), Is.EqualTo($"<filter>{output}</filter>"));
+        Assert.That(_parser.Parse(input).ToNUnitXml(), Is.EqualTo($"<filter>{output}</filter>"));
 
         XmlDocument doc = new ();
         Assert.DoesNotThrow(() => doc.LoadXml(output));

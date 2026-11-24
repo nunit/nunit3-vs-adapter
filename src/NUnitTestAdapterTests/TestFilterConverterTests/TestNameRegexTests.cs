@@ -34,13 +34,13 @@ namespace NUnit.VisualStudio.TestAdapter.Tests.TestFilterConverterTests;
 /// character it does not allow in its XML as the text \uXXXX, so that is the name the test
 /// platform reports; the framework's FullName keeps the character (nunit/nunit#4826).
 /// </summary>
-public class TestNameFilterTests
+public class TestNameRegexTests
 {
     [Test]
     public void OrdinaryNamesGiveTheSameFilterAsTheEngine()
     {
         Assert.That(
-            TestNameFilter.ForNames(["A.B(\"x&y\")", "A.C"]),
+            ForNames(["A.B(\"x&y\")", "A.C"]),
             Is.EqualTo("<filter><or><test>A.B(&quot;x&amp;y&quot;)</test><test>A.C</test></or></filter>"));
     }
 
@@ -53,7 +53,7 @@ public class TestNameFilterTests
         string frameworkName = $"A.B(\"x{character}y\")";
         string reportedName = $"A.B(\"x\\u{(int)character:x4}y\")";
 
-        var tests = XElement.Parse(TestNameFilter.ForNames([reportedName, "A.C"])).Descendants("test").ToList();
+        var tests = XElement.Parse(ForNames([reportedName, "A.C"])).Descendants("test").ToList();
         var regex = new Regex(tests[0].Value);
 
         using (Assert.EnterMultipleScope())
@@ -108,14 +108,16 @@ public class TestNameFilterTests
     {
         string name = "A.B(\"x" + char.ConvertFromUtf32(0x1F600) + "y\")";
 
-        Assert.That(TestNameFilter.NeedsRegex(name), Is.False);
+        Assert.That(TestNameRegex.NeedsRegex(name), Is.False);
     }
 
     private const string Backslash = "\\";
 
+    private static string ForNames(string[] names) => NUnitTestFilterBuilder.NameFilter(names).ToNUnitXml();
+
     private static Regex SingleRegex(string name)
     {
-        var test = XElement.Parse(TestNameFilter.ForNames([name])).Descendants("test").Single();
+        var test = XElement.Parse(ForNames([name])).Descendants("test").Single();
         Assert.That(test.Attribute("re")?.Value, Is.EqualTo("1"));
         return new Regex(test.Value);
     }
@@ -124,6 +126,6 @@ public class TestNameFilterTests
     public void EscapedBackslashBeforeUIsNotACharacter()
     {
         // NUnit writes a real backslash as \\, so A\\u0041 is a backslash followed by u0041.
-        Assert.That(TestNameFilter.NeedsRegex(@"A.B(""\\u0041"")"), Is.False);
+        Assert.That(TestNameRegex.NeedsRegex(@"A.B(""\\u0041"")"), Is.False);
     }
 }
