@@ -164,7 +164,7 @@ public class FailuresInDiscovery : ITestCaseDiscoverySink
     public void WhenAssemblyDontExist()
     {
         int noOfMessagesFound = 3; // Start + end, + info
-        var context = new FakeDiscoveryContext(null);
+        var context = new FakeDiscoveryContext(new FakeRunSettingsForVerbosity(0));
         var messageLoggerStub = new MessageLoggerStub();
         TestAdapterUtils.CreateDiscoverer().DiscoverTests(
                 ["FileThatDoesntExist.dll"],

@@ -40,13 +40,15 @@ public class TestConverterForXmlTests
 {
     private NUnitEventTestCase fakeTestNode;
     private TestConverterForXml testConverterForXml;
+    private IAdapterSettings settings;
 
     [SetUp]
     public void SetUp()
     {
         fakeTestNode = new NUnitEventTestCase(FakeTestData.GetTestNode());
-        var settings = Substitute.For<IAdapterSettings>();
+        settings = Substitute.For<IAdapterSettings>();
         settings.ConsoleOut.Returns(0);
+        settings.ShowStdout.Returns(CapturedOutputMode.None); // What ConsoleOut=0 maps to
         settings.UseTestNameInConsoleOutput.Returns(false);
         settings.CollectSourceInformation.Returns(true);
         testConverterForXml = new TestConverterForXml(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings);
@@ -179,6 +181,20 @@ public class TestConverterForXmlTests
         var actualMessages = string.Join(";", testResult.Messages.Select(i => i.Category + ":" + i.Text));
 
         Assert.That(actualMessages, Is.EqualTo(expectedMessages));
+    }
+
+    [Test]
+    public void ProgressOutputIsKeptInResultWhenLiveOutputIsOff()
+    {
+        settings.ShowStdout.Returns(CapturedOutputMode.Failed);
+        testConverterForXml.ConvertTestCase(fakeTestNode);
+        var fakeResultNode = new NUnitTestEventTestCase(FakeTestData.GetResultNode());
+        var progress = new NUnitTestEventTestOutput(XmlHelper.CreateXmlNode(
+            "<test-output stream=\"Progress\" testid=\"0-1001\" testname=\"UnitTests.Test1\"><![CDATA[some text]]></test-output>"));
+
+        var testResult = testConverterForXml.GetVsTestResults(fakeResultNode, [progress]).TestResults[0];
+
+        Assert.That(testResult.Messages.Select(i => i.Category + ":" + i.Text), Is.EqualTo(new[] { "StdOutMsgs:some text" }));
     }
 
     #region IncludeStackTraceForSuites tests

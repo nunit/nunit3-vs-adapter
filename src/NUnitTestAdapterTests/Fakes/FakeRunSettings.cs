@@ -33,7 +33,7 @@ class FakeRunSettings : IRunSettings
         throw new NotImplementedException();
     }
 
-    public virtual string SettingsXml => "<RunSettings><NUnit><SkipNonTestAssemblies>false</SkipNonTestAssemblies><Verbosity>5</Verbosity></NUnit></RunSettings>";
+    public virtual string SettingsXml => "<RunSettings><NUnit><AgentMode>Off</AgentMode><SkipNonTestAssemblies>false</SkipNonTestAssemblies><Verbosity>5</Verbosity></NUnit></RunSettings>";
 }
 
 class FakeRunSettingsForTestOutput : FakeRunSettings
@@ -67,5 +67,5 @@ class FakeRunSettingsForWhere : FakeRunSettings
 
 internal class FakeRunSettingsForVerbosity(int verbosity) : FakeRunSettings
 {
-    public override string SettingsXml => $"<RunSettings><NUnit><Verbosity>{verbosity}</Verbosity><SkipNonTestAssemblies>false</SkipNonTestAssemblies></NUnit></RunSettings>";
+    public override string SettingsXml => $"<RunSettings><NUnit><AgentMode>Off</AgentMode><Verbosity>{verbosity}</Verbosity><SkipNonTestAssemblies>false</SkipNonTestAssemblies></NUnit></RunSettings>";
 }

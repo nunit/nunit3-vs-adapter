@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 using NSubstitute;
 using NUnit.Framework;
 using NUnit.VisualStudio.TestAdapter.NUnitEngine;
+using NUnit.VisualStudio.TestAdapter.Tests.Fakes;
 
 namespace NUnit.VisualStudio.TestAdapter.Tests;
 
@@ -54,6 +57,13 @@ public class NUnitEventListenerOutputTests
         executor.FrameworkHandle.Returns(recorder);
     }
 
+    private void UseRealSettings(string nunitSettings)
+    {
+        var realSettings = new AdapterSettings(new TestLogger(new MessageLoggerStub()));
+        realSettings.Load($"<RunSettings><NUnit>{nunitSettings}</NUnit></RunSettings>");
+        executor.Settings.Returns(realSettings);
+    }
+
     [Test]
     public void ThatNormalTestOutputIsOutput()
     {
@@ -90,7 +100,7 @@ public class NUnitEventListenerOutputTests
     [Test]
     public void ThatConsoleOutCanStopAllTestOutput()
     {
-        settings.ConsoleOut.Returns(0);
+        UseRealSettings("<AgentMode>Off</AgentMode><ConsoleOut>0</ConsoleOut>");
         var sut = new NUnitEventListener(converter, executor);
         sut.OnTestEvent(TestOutputOut);
         sut.OnTestEvent(TestOutputProgress);
@@ -108,6 +118,54 @@ public class NUnitEventListenerOutputTests
         sut.OnTestEvent(BlankTestOutput);
 
         recorder.DidNotReceive().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Any<string>());
+    }
+
+    /// <summary>
+    /// Issue 1515: in agent mode the output is not sent to the console, but it is attached to the test result.
+    /// The VSTest console logger prints it from there for failed tests.
+    /// </summary>
+    [TestCase(TestOutcome.Failed)]
+    [TestCase(TestOutcome.Passed)]
+    public void ThatAgentModeLeavesOutputToTheTestResult(TestOutcome outcome)
+    {
+        UseRealSettings("<AgentMode>On</AgentMode>");
+        ConverterReturns(outcome, consoleOutput: "Whatever");
+        var sut = new NUnitEventListener(converter, executor);
+
+        sut.OnTestEvent(TestOutputOut);
+        sut.OnTestEvent(TestOutputError);
+        sut.OnTestEvent(TestFinish);
+
+        recorder.DidNotReceive().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Any<string>());
+        converter.Received().GetVsTestResults(Arg.Any<NUnitTestEventTestCase>(), Arg.Is<ICollection<INUnitTestEventTestOutput>>(x => x.Count == 2));
+    }
+
+    /// <summary>
+    /// Output from a failing OneTimeSetUp is buffered under the fixture id, and has no test result to go to.
+    /// </summary>
+    [Test]
+    public void ThatAgentModeSendsBufferedOutputOfFailedSuite()
+    {
+        UseRealSettings("<AgentMode>On</AgentMode>");
+        var sut = new NUnitEventListener(converter, executor);
+
+        sut.OnTestEvent("<test-output stream='Error' testid='0-1000' testname='UnitTests'><![CDATA[Setup diagnostics\n]]></test-output>");
+        recorder.DidNotReceive().SendMessage(Arg.Any<TestMessageLevel>(), Arg.Any<string>());
+
+        sut.OnTestEvent("<test-suite type='TestFixture' id='0-1000' name='UnitTests' fullname='UnitTests' result='Failed' site='SetUp'><failure><message><![CDATA[Boom]]></message></failure></test-suite>");
+        recorder.Received().SendMessage(TestMessageLevel.Warning, "Setup diagnostics");
+    }
+
+    private void ConverterReturns(TestOutcome outcome, string consoleOutput)
+    {
+        var testCase = new TestCase("UnitTests.Test1", new Uri(NUnit3TestExecutor.ExecutorUri), "UnitTests.dll");
+        converter.GetVsTestResults(Arg.Any<INUnitTestEventTestCase>(), Arg.Any<ICollection<INUnitTestEventTestOutput>>())
+            .Returns(new TestResultSet
+            {
+                TestCaseResult = new TestResult(testCase) { Outcome = outcome },
+                TestResults = [],
+                ConsoleOutput = consoleOutput
+            });
     }
 
     /// <summary>

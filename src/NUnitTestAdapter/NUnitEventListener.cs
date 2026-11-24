@@ -52,6 +52,7 @@ public class NUnitEventListener(ITestConverterCommon testConverter, INUnit3TestE
     private ITestExecutionRecorder Recorder { get; } = executor.FrameworkHandle;
     private ITestConverterCommon TestConverter { get; } = testConverter;
     private IAdapterSettings Settings { get; } = executor.Settings;
+    private TestOutputPolicy OutputPolicy { get; } = new(executor.Settings);
     private Dictionary<string, ICollection<INUnitTestEventTestOutput>> OutputNodes { get; } = [];
 
 #if NET462
@@ -173,23 +174,18 @@ public class NUnitEventListener(ITestConverterCommon testConverter, INUnit3TestE
         }
 
         var result = TestConverter.GetVsTestResults(resultNode, outputNodes ?? EmptyNodes);
-        if (Settings.ConsoleOut >= 1)
+        var outcome = result.TestCaseResult?.Outcome;
+        if (OutputPolicy.ShowsConsoleOutput &&
+            !result.ConsoleOutput.IsNullOrWhiteSpace() && result.ConsoleOutput != Nl)
         {
-            if (!result.ConsoleOutput.IsNullOrWhiteSpace() && result.ConsoleOutput != Nl)
-            {
-                string msg = result.ConsoleOutput;
-                if (Settings.UseTestNameInConsoleOutput)
-                    msg = $"{resultNode.Name}: {msg}";
-                var messageLevel = Settings.ConsoleOut == 1
-                    ? TestMessageLevel.Informational
-                    : TestMessageLevel.Warning;
-                Recorder.SendMessage(messageLevel, msg);
-            }
-            if (!resultNode.ReasonMessage.IsNullOrWhiteSpace())
-            {
-                Recorder.SendMessage(TestMessageLevel.Informational, $"{resultNode.Name}: {resultNode.ReasonMessage}");
-            }
+            string msg = Settings.UseTestNameInConsoleOutput
+                ? $"{resultNode.Name}: {result.ConsoleOutput}"
+                : result.ConsoleOutput;
+            Recorder.SendMessage(OutputPolicy.ConsoleOutputLevel, msg);
         }
+
+        if (OutputPolicy.ShowsReason(outcome) && !resultNode.ReasonMessage.IsNullOrWhiteSpace())
+            Recorder.SendMessage(TestMessageLevel.Informational, $"{resultNode.Name}: {resultNode.ReasonMessage}");
 
         if (result.TestCaseResult != null)
         {
@@ -213,6 +209,10 @@ public class NUnitEventListener(ITestConverterCommon testConverter, INUnit3TestE
             return;
         }
 
+        // Output from OneTimeSetUp/OneTimeTearDown is buffered under the suite id
+        OutputNodes.TryGetValue(resultNode.Id, out var outputNodes);
+        OutputNodes.Remove(resultNode.Id);
+
         if (!resultNode.IsFailed)
             return;
         var site = resultNode.Site();
@@ -223,10 +223,17 @@ public class NUnitEventListener(ITestConverterCommon testConverter, INUnit3TestE
         if (resultNode.HasFailure)
         {
             string msg = resultNode.FailureMessage;
-            var stackNode = resultNode.StackTrace;
-            if (!string.IsNullOrEmpty(stackNode) && Settings.IncludeStackTraceForSuites)
-                msg += $"\nStackTrace: {stackNode}";
+            var stackTrace = OutputPolicy.StackTraceFor(resultNode.StackTrace, isParentFailure: true);
+            if (!string.IsNullOrEmpty(stackTrace))
+                msg += $"\nStackTrace: {stackTrace}";
             Recorder.SendMessage(TestMessageLevel.Error, msg);
+        }
+
+        // Output not sent live is lost otherwise, since the suite has no test result to attach it to
+        foreach (var output in outputNodes ?? EmptyNodes)
+        {
+            if (!OutputPolicy.ShowsLiveOutput(output.IsErrorStream))
+                Recorder.SendMessage(TestMessageLevel.Warning, output.Content.TrimEnd());
         }
     }
 
@@ -245,7 +252,7 @@ public class NUnitEventListener(ITestConverterCommon testConverter, INUnit3TestE
             return;
         }
 
-        if (Settings.ConsoleOut == 0)
+        if (!OutputPolicy.CollectsOutput(outputNodeEvent.IsErrorStream))
             return;
         string text = outputNodeEvent.Content;
 
@@ -269,6 +276,9 @@ public class NUnitEventListener(ITestConverterCommon testConverter, INUnit3TestE
 
             outputNodes.Add(outputNodeEvent);
         }
+
+        if (!OutputPolicy.ShowsLiveOutput(outputNodeEvent.IsErrorStream))
+            return;
 
         var testMessageLevel = outputNodeEvent.IsErrorStream
             ? TestMessageLevel.Warning

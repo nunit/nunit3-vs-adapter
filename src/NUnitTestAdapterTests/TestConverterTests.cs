@@ -41,6 +41,7 @@ public class TestConverterTests
 {
     private NUnitDiscoveryTestCase fakeTestNode;
     private TestConverter testConverter;
+    private IAdapterSettings settings;
 
     [SetUp]
     public void SetUp()
@@ -53,8 +54,9 @@ public class TestConverterTests
         var tcs = DiscoveryConverter.ExtractTestCases(tf, xDoc.Root);
         Assert.That(tcs.Count(), Is.EqualTo(1), "Setup: More than one test case in fake data");
         fakeTestNode = tcs.Single();
-        var settings = Substitute.For<IAdapterSettings>();
+        settings = Substitute.For<IAdapterSettings>();
         settings.ConsoleOut.Returns(0);
+        settings.ShowStdout.Returns(CapturedOutputMode.None); // What ConsoleOut=0 maps to
         settings.UseTestNameInConsoleOutput.Returns(false);
         settings.CollectSourceInformation.Returns(true);
         var discoveryConverter = Substitute.For<IDiscoveryConverter>();
@@ -196,6 +198,20 @@ public class TestConverterTests
         var actualMessages = string.Join(";", testResult.Messages.Select(i => i.Category + ":" + i.Text));
 
         Assert.That(actualMessages, Is.EqualTo(expectedMessages));
+    }
+
+    [Test]
+    public void ProgressOutputIsKeptInResultWhenLiveOutputIsOff()
+    {
+        settings.ShowStdout.Returns(CapturedOutputMode.Failed);
+        testConverter.ConvertTestCase(fakeTestNode);
+        var fakeResultNode = new NUnitTestEventTestCase(FakeTestData.GetResultNode());
+        var progress = new NUnitTestEventTestOutput(XmlHelper.CreateXmlNode(
+            "<test-output stream=\"Progress\" testid=\"0-1001\" testname=\"UnitTests.Test1\"><![CDATA[some text]]></test-output>"));
+
+        var testResult = testConverter.GetVsTestResults(fakeResultNode, [progress]).TestResults[0];
+
+        Assert.That(testResult.Messages.Select(i => i.Category + ":" + i.Text), Is.EqualTo(new[] { "StdOutMsgs:some text" }));
     }
 
     #region IncludeStackTraceForSuites tests

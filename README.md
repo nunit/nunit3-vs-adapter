@@ -41,6 +41,22 @@ Use `.\build -t acceptance` at the command line to build and run acceptance test
 
 Use `.\build -t package` to create a package.
 
+## Agent output
+
+`AgentMode` accepts `Off`, `Auto` (default) and `On`. `Auto` turns agent mode on when it detects an AI coding agent from its environment variables. `Off` keeps the traditional output.
+
+Agent mode only changes defaults: `ShowStdout` and `ShowStderr` become `Failed`, `StackTrace` becomes `Filtered`, and `Verbosity` becomes `-1`. A setting you set explicitly always wins.
+
+- `ShowStdout`/`ShowStderr`: `All` sends test output to the console as it arrives. `Failed` keeps it only in the test result, where the VSTest console logger shows it for failed tests. `None` drops the output events, but the output NUnit captures in the test result itself stays in the result, as with `ConsoleOut=0`. With `Failed`, `TestContext.Progress` output also goes to the test result instead of the console.
+- `StackTrace`: `Full`, `Filtered` (removes NUnit-internal and async state-machine frames) or `None`.
+
+Command-line settings do not require a runsettings file:
+
+```
+dotnet test -- NUnit.AgentMode=On
+dotnet test -- NUnit.ShowStdout=Failed NUnit.StackTrace=Filtered
+```
+
 To run and debug tests on .NET Framework, load `DisableAppDomain.runsettings`.
 
 From Visual Studio 2019 version 16.2 preview 4 it is possible to run tests against a selected target framework in the test project, so one can use this to run .NET Core tests.

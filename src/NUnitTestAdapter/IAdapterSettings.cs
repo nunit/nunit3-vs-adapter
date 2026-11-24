@@ -99,6 +99,10 @@ public interface IAdapterSettings
     bool UseHierarchyProperty { get; }
 
     int ConsoleOut { get; }
+    AgentMode AgentMode { get; }
+    CapturedOutputMode ShowStdout { get; }
+    CapturedOutputMode ShowStderr { get; }
+    StackTraceMode StackTrace { get; }
     bool StopOnError { get; }
     TestOutcome MapWarningTo { get; }
     bool UseTestNameInConsoleOutput { get; }
