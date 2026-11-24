@@ -72,7 +72,7 @@ public class AdapterSettingsTests
             Assert.That(_settings.NumberOfTestWorkers, Is.EqualTo(-1));
             Assert.That(_settings.DefaultTimeout, Is.EqualTo(0));
             Assert.That(_settings.DefaultMaxTime, Is.EqualTo(0));
-            Assert.That(_settings.Verbosity, Is.EqualTo(0));
+            Assert.That(_settings.Verbosity, Is.EqualTo(_settings.AgentMode == AgentMode.Off ? 0 : -1));
             Assert.That(_settings.ShadowCopyFiles, Is.False);
             Assert.That(_settings.UseVsKeepEngineRunning, Is.False);
             Assert.That(_settings.BasePath, Is.Null);
@@ -307,6 +307,53 @@ public class AdapterSettingsTests
     {
         _settings.Load("<RunSettings><NUnit><Verbosity>1</Verbosity></NUnit></RunSettings>");
         Assert.That(_settings.Verbosity, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void AgentModeCanBeSet()
+    {
+        _settings.Load("<RunSettings><NUnit><AgentMode>On</AgentMode></NUnit></RunSettings>");
+        Assert.Multiple(() =>
+        {
+            Assert.That(_settings.AgentMode, Is.EqualTo(AgentMode.On));
+            Assert.That(_settings.Verbosity, Is.EqualTo(-1));
+            Assert.That(_settings.ShowStdout, Is.EqualTo(CapturedOutputMode.Failed));
+            Assert.That(_settings.ShowStderr, Is.EqualTo(CapturedOutputMode.Failed));
+            Assert.That(_settings.StackTrace, Is.EqualTo(StackTraceMode.Filtered));
+        });
+    }
+
+    [Test]
+    public void ExplicitOutputSettingsOverrideAgentPreset()
+    {
+        _settings.Load("<RunSettings><NUnit><AgentMode>On</AgentMode><ShowStdout>All</ShowStdout><StackTrace>Full</StackTrace><Verbosity>2</Verbosity></NUnit></RunSettings>");
+        Assert.Multiple(() =>
+        {
+            Assert.That(_settings.ShowStdout, Is.EqualTo(CapturedOutputMode.All));
+            Assert.That(_settings.StackTrace, Is.EqualTo(StackTraceMode.Full));
+            Assert.That(_settings.Verbosity, Is.EqualTo(2));
+        });
+    }
+
+    [Test]
+    public void ConsoleOutAliasMapsToCapturedOutput()
+    {
+        _settings.Load("<RunSettings><NUnit><ConsoleOut>0</ConsoleOut></NUnit></RunSettings>");
+        Assert.That(_settings.ShowStdout, Is.EqualTo(CapturedOutputMode.None));
+    }
+
+    [Test]
+    public void StackTraceSettingCanBeFiltered()
+    {
+        _settings.Load("<RunSettings><NUnit><StackTrace>Filtered</StackTrace></NUnit></RunSettings>");
+        Assert.That(_settings.StackTrace, Is.EqualTo(StackTraceMode.Filtered));
+    }
+
+    [Test]
+    public void LegacyStackTraceBooleansCanDisableStackTrace()
+    {
+        _settings.Load("<RunSettings><NUnit><IncludeStackTrace>false</IncludeStackTrace><IncludeStackTraceForSuites>false</IncludeStackTraceForSuites></NUnit></RunSettings>");
+        Assert.That(_settings.StackTrace, Is.EqualTo(StackTraceMode.None));
     }
 
     [Test]

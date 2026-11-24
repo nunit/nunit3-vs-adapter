@@ -57,6 +57,7 @@ public class NUnitEventListenerTests
         executor.Settings.Returns(settings);
         executor.FrameworkHandle.Returns(testLog);
         settings.CollectSourceInformation.Returns(true);
+        settings.ShowStdout.Returns(CapturedOutputMode.None); // Matches the substitute's ConsoleOut = 0
         using var testConverter = new TestConverterForXml(new TestLogger(new MessageLoggerStub()), FakeTestData.AssemblyPath, settings);
         fakeTestNode = new NUnitEventTestCase(FakeTestData.GetTestNode());
 
@@ -126,6 +127,7 @@ public class NUnitEventListenerTests
         testcase.FullName.Returns($"Issue516.Tests.Test1({data})");
         testcase.Output.Returns($"{data}");
         settings.ConsoleOut.Returns(1);
+        settings.ShowStdout.Returns(CapturedOutputMode.All);
         listener.TestFinished(testcase);
         Assert.That(testLog.Events, Is.Empty);
     }

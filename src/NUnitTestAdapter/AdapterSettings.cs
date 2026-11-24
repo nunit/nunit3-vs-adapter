@@ -153,6 +153,10 @@ public class AdapterSettings(ITestLogger logger) : IAdapterSettings
     public bool UseNUnitIdforTestCaseId { get; private set; }  // default is false.
     public bool UseHierarchyProperty { get; private set; }  // default is false.
     public int ConsoleOut { get; private set; }
+    public AgentMode AgentMode { get; private set; } = AgentMode.Auto;
+    public CapturedOutputMode ShowStdout { get; private set; } = CapturedOutputMode.All;
+    public CapturedOutputMode ShowStderr { get; private set; } = CapturedOutputMode.All;
+    public StackTraceMode StackTrace { get; private set; } = StackTraceMode.Full;
     public bool StopOnError { get; private set; }
     public bool ThrowOnEachFailureUnderDebugger { get; private set; }
 
@@ -234,7 +238,11 @@ public class AdapterSettings(ITestLogger logger) : IAdapterSettings
         doc.LoadXml(settingsXml);
 
         var nunitNode = doc.SelectSingleNode("RunSettings/NUnit");
+        var verbosityNode = nunitNode?.SelectSingleNode(nameof(Verbosity));
         Verbosity = GetInnerTextAsInt(nunitNode, nameof(Verbosity), 0);
+        AgentMode = ResolveAgentMode(nunitNode);
+        if (AgentMode != AgentMode.Off && verbosityNode == null)
+            Verbosity = -1;
         logger.Verbosity = Verbosity;
 
         ExtractRunConfiguration(doc);
@@ -263,11 +271,12 @@ public class AdapterSettings(ITestLogger logger) : IAdapterSettings
         UseParentFQNForParametrizedTests = GetInnerTextAsBool(nunitNode, nameof(UseParentFQNForParametrizedTests), false);
         UseNUnitIdforTestCaseId = GetInnerTextAsBool(nunitNode, nameof(UseNUnitIdforTestCaseId), false);
         UseHierarchyProperty = GetInnerTextAsBool(nunitNode, nameof(UseHierarchyProperty), false);
-        ConsoleOut = GetInnerTextAsInt(nunitNode, nameof(ConsoleOut), 1);  // 0 no output to console, 1 : output to console, 2: output to console as warnings
+        ApplyOutputSettings(nunitNode);
         StopOnError = GetInnerTextAsBool(nunitNode, nameof(StopOnError), false);
         UseNUnitFilter = GetInnerTextAsBool(nunitNode, nameof(UseNUnitFilter), true);
         IncludeStackTraceForSuites = GetInnerTextAsBool(nunitNode, nameof(IncludeStackTraceForSuites), true);
         IncludeStackTrace = GetInnerTextAsBool(nunitNode, nameof(IncludeStackTrace), true);
+        StackTrace = ResolveStackTrace(nunitNode);
         EnsureAttachmentFileScheme = GetInnerTextAsBool(nunitNode, nameof(EnsureAttachmentFileScheme), false);
         SkipExecutionWhenNoTests = GetInnerTextAsBool(nunitNode, nameof(SkipExecutionWhenNoTests), false);
         ThrowOnEachFailureUnderDebugger = GetInnerTextAsBool(nunitNode, nameof(ThrowOnEachFailureUnderDebugger), false);
@@ -495,6 +504,45 @@ public class AdapterSettings(ITestLogger logger) : IAdapterSettings
 
     #region Helper Methods
 
+    private AgentMode ResolveAgentMode(XmlNode nunitNode)
+    {
+        var value = GetInnerText(nunitNode, nameof(AgentMode), false);
+        if (string.IsNullOrEmpty(value))
+            return LlmEnvironmentDetector.IsAgentEnvironment() ? AgentMode.On : AgentMode.Off;
+
+        var mode = MapEnum(value, AgentMode.Auto);
+        return mode == AgentMode.Auto
+            ? LlmEnvironmentDetector.IsAgentEnvironment() ? AgentMode.On : AgentMode.Off
+            : mode;
+    }
+
+    /// <summary>
+    /// Default for ShowStdout/ShowStderr: an explicit ConsoleOut (deprecated alias, 0 = None, 1 and 2 = All),
+    /// else the AgentMode preset. An explicit ShowStdout/ShowStderr always wins.
+    /// ConsoleOut keeps its value (2 = output as warnings) unless ShowStdout turns the output off.
+    /// </summary>
+    private void ApplyOutputSettings(XmlNode nunitNode)
+    {
+        int consoleOut = GetInnerTextAsInt(nunitNode, nameof(ConsoleOut), 1);
+        var defaultOutput = nunitNode?.SelectSingleNode(nameof(ConsoleOut)) != null
+            ? consoleOut == 0 ? CapturedOutputMode.None : CapturedOutputMode.All
+            : AgentMode == AgentMode.Off ? CapturedOutputMode.All : CapturedOutputMode.Failed;
+
+        ShowStdout = MapEnum(GetInnerText(nunitNode, nameof(ShowStdout), false), defaultOutput);
+        ShowStderr = MapEnum(GetInnerText(nunitNode, nameof(ShowStderr), false), defaultOutput);
+        ConsoleOut = ShowStdout == CapturedOutputMode.None ? 0 : Math.Max(consoleOut, 1);
+    }
+
+    private StackTraceMode ResolveStackTrace(XmlNode nunitNode)
+    {
+        var value = GetInnerText(nunitNode, nameof(StackTrace), false);
+        if (!string.IsNullOrEmpty(value))
+            return MapEnum(value, StackTraceMode.Full);
+        if (!IncludeStackTrace && !IncludeStackTraceForSuites)
+            return StackTraceMode.None;
+        return AgentMode == AgentMode.Off ? StackTraceMode.Full : StackTraceMode.Filtered;
+    }
+
     private void UpdateNumberOfTestWorkers()
     {
         // Overriding the NumberOfTestWorkers if DisableParallelization is true.
@@ -630,4 +678,25 @@ public enum OutputXmlFolderMode
     RelativeToResultDirectory,
     RelativeToWorkFolder,
     AsSpecified
+}
+
+public enum AgentMode
+{
+    Off,
+    Auto,
+    On
+}
+
+public enum CapturedOutputMode
+{
+    All,
+    Failed,
+    None
+}
+
+public enum StackTraceMode
+{
+    Full,
+    Filtered,
+    None
 }

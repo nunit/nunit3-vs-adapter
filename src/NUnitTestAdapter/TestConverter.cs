@@ -43,6 +43,7 @@ public sealed class TestConverter : IDisposable, ITestConverter
     private readonly NavigationDataProvider _navigationDataProvider;
     private bool CollectSourceInformation => adapterSettings.CollectSourceInformation;
     private readonly IAdapterSettings adapterSettings;
+    private readonly TestOutputPolicy outputPolicy;
     private static readonly string NL = Environment.NewLine;
     private readonly IDiscoveryConverter discoveryConverter;
 
@@ -50,6 +51,7 @@ public sealed class TestConverter : IDisposable, ITestConverter
     {
         this.discoveryConverter = discoveryConverter;
         adapterSettings = settings;
+        outputPolicy = new TestOutputPolicy(settings);
         _logger = logger;
         _sourceAssembly = sourceAssembly;
         _vsTestCaseMap = [];
@@ -97,7 +99,7 @@ public sealed class TestConverter : IDisposable, ITestConverter
         return null;
     }
 
-    public TestConverterForXml.TestResultSet GetVsTestResults(INUnitTestEventTestCase resultNode, ICollection<INUnitTestEventTestOutput> outputNodes)
+    public TestResultSet GetVsTestResults(INUnitTestEventTestCase resultNode, ICollection<INUnitTestEventTestOutput> outputNodes)
     {
         var results = new List<VSTestResult>();
 
@@ -112,11 +114,7 @@ public sealed class TestConverter : IDisposable, ITestConverter
                     {
                         testCaseResult.ErrorMessage = resultNode.Failure?.Message;
                         bool isParentFailure = resultNode.Site() == NUnitTestEvent.SiteType.Parent;
-                        bool includeStackTrace = isParentFailure
-                            ? adapterSettings.IncludeStackTraceForSuites
-                            : adapterSettings.IncludeStackTrace;
-                        if (includeStackTrace)
-                            testCaseResult.ErrorStackTrace = resultNode.FailureStackTrace;
+                        testCaseResult.ErrorStackTrace = outputPolicy.StackTraceFor(resultNode.FailureStackTrace, isParentFailure);
                         break;
                     }
                 case TestOutcome.Skipped:
@@ -126,7 +124,9 @@ public sealed class TestConverter : IDisposable, ITestConverter
                     break;
                 default:
                     {
-                        if (adapterSettings.ConsoleOut > 0 && !string.IsNullOrEmpty(resultNode.ReasonMessage))
+                        if (adapterSettings.AgentMode == AgentMode.Off &&
+                            adapterSettings.ConsoleOut > 0 &&
+                            !string.IsNullOrEmpty(resultNode.ReasonMessage))
                             testCaseResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, resultNode.ReasonMessage));
                         break;
                     }
@@ -141,7 +141,7 @@ public sealed class TestConverter : IDisposable, ITestConverter
             if (result != null)
                 results.Add(result);
         }
-        return new TestConverterForXml.TestResultSet { TestCaseResult = testCaseResult, TestResults = results, ConsoleOutput = resultNode.Output };
+        return new TestResultSet { TestCaseResult = testCaseResult, TestResults = results, ConsoleOutput = resultNode.Output };
     }
 
     #endregion
@@ -289,11 +289,7 @@ public sealed class TestConverter : IDisposable, ITestConverter
 
         ourResult.ErrorMessage = message;
         bool isParentFailure = resultNode.Site() == NUnitTestEvent.SiteType.Parent;
-        bool includeStackTrace = isParentFailure
-            ? adapterSettings.IncludeStackTraceForSuites
-            : adapterSettings.IncludeStackTrace;
-        if (includeStackTrace)
-            ourResult.ErrorStackTrace = resultNode.Failure?.Stacktrace;
+        ourResult.ErrorStackTrace = outputPolicy.StackTraceFor(resultNode.Failure?.Stacktrace, isParentFailure);
 
         return ourResult;
     }
