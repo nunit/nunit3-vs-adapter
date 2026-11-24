@@ -33,10 +33,17 @@ public sealed class TestOutputPolicy(IAdapterSettings settings)
         ModeFor(isErrorStream) == CapturedOutputMode.All;
 
     /// <summary>
-    /// Output is buffered per test, and attached to its result, unless it is turned off.
+    /// Output events are buffered per test, and attached to its result, unless they are turned off.
+    /// None only drops these events. The output NUnit puts in the test result itself
+    /// is always attached, as before (ConsoleOut=0 maps to None).
     /// </summary>
     public bool CollectsOutput(bool isErrorStream) =>
         ModeFor(isErrorStream) != CapturedOutputMode.None;
+
+    /// <summary>
+    /// Progress output normally goes live to the console only. With Failed it is kept in the result instead.
+    /// </summary>
+    public bool KeepsProgressInResult => settings.ShowStdout == CapturedOutputMode.Failed;
 
     public TestMessageLevel ConsoleOutputLevel =>
         settings.ConsoleOut >= 2 ? TestMessageLevel.Warning : TestMessageLevel.Informational;

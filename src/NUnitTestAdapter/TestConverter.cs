@@ -349,11 +349,12 @@ public sealed class TestConverter : IDisposable, ITestConverter
         return vsResult;
     }
 
-    private static void FillResultFromOutputNodes(IEnumerable<INUnitTestEventTestOutput> outputNodes, VSTestResult vsResult)
+    private void FillResultFromOutputNodes(IEnumerable<INUnitTestEventTestOutput> outputNodes, VSTestResult vsResult)
     {
         foreach (var output in outputNodes)
         {
-            if (output.IsNullOrEmptyStream || output.IsProgressStream)  // Don't add progress streams as output
+            // Progress goes live to the console, unless the policy keeps it in the result
+            if (output.IsNullOrEmptyStream || (output.IsProgressStream && !outputPolicy.KeepsProgressInResult))
             {
                 continue;
             }

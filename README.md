@@ -47,7 +47,7 @@ Use `.\build -t package` to create a package.
 
 Agent mode only changes defaults: `ShowStdout` and `ShowStderr` become `Failed`, `StackTrace` becomes `Filtered`, and `Verbosity` becomes `-1`. A setting you set explicitly always wins.
 
-- `ShowStdout`/`ShowStderr`: `All` sends test output to the console as it arrives. `Failed` keeps it only in the test result, where the VSTest console logger shows it for failed tests. `None` drops it.
+- `ShowStdout`/`ShowStderr`: `All` sends test output to the console as it arrives. `Failed` keeps it only in the test result, where the VSTest console logger shows it for failed tests. `None` drops the output events, but the output NUnit captures in the test result itself stays in the result, as with `ConsoleOut=0`. With `Failed`, `TestContext.Progress` output also goes to the test result instead of the console.
 - `StackTrace`: `Full`, `Filtered` (removes NUnit-internal and async state-machine frames) or `None`.
 
 Command-line settings do not require a runsettings file:

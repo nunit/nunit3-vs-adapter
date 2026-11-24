@@ -146,8 +146,7 @@ public sealed class TestConverterForXml : IDisposable, ITestConverterXml
                     break;
                 default:
                     {
-                        if (adapterSettings.AgentMode == AgentMode.Off &&
-                            adapterSettings.ConsoleOut > 0 &&
+                        if (outputPolicy.ShowsReason(testCaseResult.Outcome) &&
                             !string.IsNullOrEmpty(resultNode.ReasonMessage))
                             testCaseResult.Messages.Add(new TestResultMessage(TestResultMessage.StandardOutCategory, resultNode.ReasonMessage));
                         break;
@@ -355,11 +354,12 @@ public sealed class TestConverterForXml : IDisposable, ITestConverterXml
         return vsResult;
     }
 
-    private static void FillResultFromOutputNodes(IEnumerable<INUnitTestEventTestOutput> outputNodes, VSTestResult vsResult)
+    private void FillResultFromOutputNodes(IEnumerable<INUnitTestEventTestOutput> outputNodes, VSTestResult vsResult)
     {
         foreach (var output in outputNodes)
         {
-            if (output.IsNullOrEmptyStream || output.IsProgressStream)  // Don't add progress streams as output
+            // Progress goes live to the console, unless the policy keeps it in the result
+            if (output.IsNullOrEmptyStream || (output.IsProgressStream && !outputPolicy.KeepsProgressInResult))
             {
                 continue;
             }
